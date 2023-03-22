@@ -1,0 +1,14 @@
+.buckconfig
+.gitignore
+.ruby-version
+.watchmanconfig
+Gemfile
+package-lock.json
+yarn.lock
+
+.bundle/**
+.vscode/**
+android/**
+assets/**
+ios/**
+node_modules/**

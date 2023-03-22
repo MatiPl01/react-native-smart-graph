@@ -1,0 +1,198 @@
+{
+  "root": true,
+  "extends": [
+    "@react-native-community",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "plugins": ["@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "projectRoot": ".",
+    "project": "./tsconfig.json",
+    "ecmaFeatures": {}
+  },
+  "rules": {
+    "prettier/prettier": "off",
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "camelcase": [
+      "error",
+      {
+        "ignoreDestructuring": false,
+        "ignoreImports": false,
+        "ignoreGlobals": false,
+        "properties": "always",
+        "allow": []
+      }
+    ],
+    "comma-dangle": ["off"],
+    "consistent-this": ["error", "self"],
+    "dot-notation": [
+      "error",
+      {
+        "allowKeywords": true,
+        "allowPattern": ""
+      }
+    ],
+    "eol-last": ["error", "always"],
+    "eqeqeq": ["error"],
+    "jsx-quotes": ["error", "prefer-single"],
+    "lines-around-comment": ["error"],
+    "new-cap": ["error"],
+    "new-parens": ["off"],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ],
+    "no-constant-condition": [
+      "error",
+      {
+        "checkLoops": true
+      }
+    ],
+    "no-control-regex": ["error"],
+    "no-empty": [
+      "error",
+      {
+        "allowEmptyCatch": false
+      }
+    ],
+    "no-else-return": [
+      "error",
+      {
+        "allowElseIf": true
+      }
+    ],
+    "no-empty-character-class": ["error"],
+    "no-empty-function": ["error"],
+    "no-eq-null": ["error"],
+    "no-ex-assign": ["error"],
+    "no-extend-native": ["error"],
+    "no-extra-bind": ["error"],
+    "no-extra-boolean-cast": [
+      "error",
+      {
+        "enforceForLogicalOperands": false
+      }
+    ],
+    "no-fallthrough": [
+      "error",
+      {
+        "commentPattern": ""
+      }
+    ],
+    "no-func-assign": ["error"],
+    "no-implied-eval": ["error"],
+    "no-inner-declarations": ["error", "both"],
+    "no-invalid-regexp": ["error"],
+    "no-iterator": ["error"],
+    "no-label-var": ["error"],
+    "no-labels": ["error"],
+    "no-lone-blocks": ["error"],
+    "no-lonely-if": ["error"],
+    "no-loop-func": ["error"],
+    "no-new": ["error"],
+    "no-new-object": ["error"],
+    "no-new-wrappers": ["error"],
+    "no-obj-calls": ["error"],
+    "no-octal": ["error"],
+    "no-octal-escape": ["error"],
+    "no-proto": ["error"],
+    "no-redeclare": [
+      "error",
+      {
+        "builtinGlobals": true
+      }
+    ],
+    "no-regex-spaces": ["error"],
+    "no-return-assign": ["error", "except-parens"],
+    "no-script-url": ["error"],
+    "no-self-compare": ["error"],
+    "no-sequences": ["error"],
+    "no-shadow": [
+      "error",
+      {
+        "builtinGlobals": true,
+        "hoist": "functions"
+      }
+    ],
+    "no-shadow-restricted-names": ["error"],
+    "no-sparse-arrays": ["error"],
+    "no-undef-init": ["error"],
+    "no-undefined": ["error"],
+    "no-underscore-dangle": ["error"],
+    "no-unexpected-multiline": ["error"],
+    "no-unused-expressions": [
+      "error",
+      {
+        "allowShortCircuit": true,
+        "allowTernary": true
+      }
+    ],
+    "no-unused-vars": ["error"],
+    "no-useless-escape": ["error"],
+    "no-void": [
+      "error",
+      {
+        "allowAsStatement": true
+      }
+    ],
+    "no-with": ["error"],
+    "nonblock-statement-body-position": ["error"],
+    "radix": ["error", "as-needed"],
+    "require-await": ["error"],
+    "sort-vars": [
+      "error",
+      {
+        "ignoreCase": false
+      }
+    ],
+    "use-isnan": ["error"],
+    "valid-typeof": [
+      "error",
+      {
+        "requireStringLiterals": false
+      }
+    ],
+    "strict": ["error", "never"],
+    "getter-return": [
+      "error",
+      {
+        "allowImplicit": false
+      }
+    ],
+    "no-async-promise-executor": ["error"],
+    "no-await-in-loop": ["error"],
+    "no-compare-neg-zero": ["error"],
+    "no-cond-assign": ["error"],
+    "no-dupe-args": ["error"],
+    "no-dupe-else-if": ["error"],
+    "no-duplicate-case": ["error"],
+    "no-import-assign": ["error"],
+    "no-promise-executor-return": ["error"],
+    "no-setter-return": ["error"],
+    "no-template-curly-in-string": ["error"],
+    "no-unreachable-loop": [
+      "error",
+      {
+        "ignore": ["DoWhileStatement"]
+      }
+    ],
+    "no-unsafe-finally": ["error"],
+    "require-atomic-updates": ["error"],
+    "no-catch-shadow": ["error"],
+    "no-delete-var": ["error"],
+    "@typescript-eslint/no-floating-promises": [
+      "error",
+      {
+        "ignoreVoid": true
+      }
+    ],
+    "react/react-in-jsx-scope": "off"
+  },
+  "env": {
+    "es2020": true
+  }
+}
