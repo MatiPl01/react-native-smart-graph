@@ -3,14 +3,27 @@
   "extends": [
     "@react-native-community",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:import/recommended",
+    "plugin:import/typescript"
   ],
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["react", "@typescript-eslint", "prettier", "import"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "projectRoot": ".",
     "project": "./tsconfig.json",
     "ecmaFeatures": {}
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      }
+    }
   },
   "rules": {
     "prettier/prettier": "off",
@@ -38,7 +51,10 @@
     "eqeqeq": ["error"],
     "jsx-quotes": ["error", "prefer-single"],
     "lines-around-comment": ["error"],
-    "new-cap": ["error"],
+    "new-cap": [
+      "error",
+      { "newIsCap": true, "capIsNewExceptionPattern": "^Gesture\\." }
+    ],
     "new-parens": ["off"],
     "no-console": [
       "warn",
@@ -131,7 +147,6 @@
         "allowTernary": true
       }
     ],
-    "no-unused-vars": ["error"],
     "no-useless-escape": ["error"],
     "no-void": [
       "error",
