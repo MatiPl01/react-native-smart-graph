@@ -1,5 +1,11 @@
 import { styled } from 'nativewind';
-import { Children, PropsWithChildren, cloneElement, useCallback } from 'react';
+import {
+  Children,
+  PropsWithChildren,
+  cloneElement,
+  useCallback,
+  useRef
+} from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
@@ -18,7 +24,11 @@ import {
   TestGraphPrivateProps
 } from '@/components/graphs/TestGraph';
 import { Dimensions, ObjectFit } from '@/types/views.types';
-import { getCenterInParent, getScaleInParent } from '@/utils/views.utils';
+import {
+  clamp,
+  getCenterInParent,
+  getScaleInParent
+} from '@/utils/views.utils';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
@@ -31,13 +41,17 @@ type PannableScalableViewProps = PropsWithChildren<{
 }>;
 
 export default function PannableScalableView({
-  minScale = 0.25, // TODO
-  maxScale = 10, // TODO
+  minScale = 0.25,
+  maxScale = 10,
   objectFit = 'none',
   className,
   children,
   controls = false
 }: PannableScalableViewProps) {
+  const isRenderedRef = useRef({ canvas: false, content: false });
+  const minScaleRef = useRef(minScale);
+  const maxScaleRef = useRef(maxScale);
+
   const canvasDimensions = useSharedValue({ width: 0, height: 0 });
   const contentDimensions = useSharedValue({ width: 0, height: 0 });
   const initialScale = useSharedValue(0);
@@ -63,20 +77,27 @@ export default function PannableScalableView({
       }
     }: LayoutChangeEvent) => {
       canvasDimensions.value = { width, height };
-      updateContentPosition(contentDimensions.value, { width, height });
+      isRenderedRef.current.canvas = true;
+
+      if (isRenderedRef.current.content) {
+        updateContentPosition(contentDimensions.value, { width, height });
+      }
     },
     []
   );
 
   const handleContentMeasure = useCallback(
     ({ layout: { width, height } }: MeasureEvent) => {
+      isRenderedRef.current.content = true;
       contentDimensions.value = { width, height };
-      updateContentPosition({ width, height }, canvasDimensions.value);
+
+      if (isRenderedRef.current.canvas) {
+        updateContentPosition({ width, height }, canvasDimensions.value);
+      }
     },
     []
   );
 
-  // TODO - fx centering not always working (race condition?)
   const updateContentPosition = useCallback(
     (contentDims: Dimensions, canvasDims: Dimensions, animated?: boolean) => {
       const { scale: renderedScale, dimensions: renderedDimensions } =
@@ -102,11 +123,6 @@ export default function PannableScalableView({
     );
   }, []);
 
-  const clamp = (value: number, bounds: [number, number]) => {
-    'worklet';
-    return Math.min(Math.max(value, bounds[0]), bounds[1]);
-  };
-
   const translateContentTo = (
     translate: { x: number; y: number },
     clampTo?: { x?: [number, number]; y?: [number, number] },
@@ -131,14 +147,39 @@ export default function PannableScalableView({
     }
   };
 
+  const translateWithDecay = (
+    velocity: number,
+    position: number,
+    clampSize: number
+  ) => {
+    'worklet';
+    let newVelocity = velocity;
+    if (position < Math.min(0, clampSize) && velocity > 0) {
+      newVelocity = -0.01;
+    } else if (position > Math.max(0, clampSize) && velocity < 0) {
+      newVelocity = 0.01;
+    }
+
+    return withDecay({
+      velocity: newVelocity,
+      clamp: [Math.min(0, clampSize), Math.max(0, clampSize)],
+      rubberBandEffect: true,
+      deceleration: 0.98,
+      rubberBandFactor: 3
+    });
+  };
+
   const scaleContentTo = (
     newScale: number,
     origin?: { x: number; y: number },
-    animated = true
+    animated = false
   ) => {
     'worklet';
     const timingConfig = { duration: 150, easing: Easing.ease };
-    const clampedScale = clamp(newScale, [minScale, maxScale]);
+    const clampedScale = clamp(newScale, [
+      minScaleRef.current,
+      maxScaleRef.current
+    ]);
 
     if (origin) {
       const relativeScale = clampedScale / scale.value;
@@ -179,24 +220,19 @@ export default function PannableScalableView({
       translateX.value += e.changeX;
       translateY.value += e.changeY;
     })
-    .onEnd(e => {
-      const clampWidth =
+    .onEnd(({ velocityX, velocityY }) => {
+      translateX.value = translateWithDecay(
+        velocityX,
+        translateX.value,
         canvasDimensions.value.width -
-        contentDimensions.value.width * scale.value;
-      const clampHeight =
+          contentDimensions.value.width * scale.value
+      );
+      translateY.value = translateWithDecay(
+        velocityY,
+        translateY.value,
         canvasDimensions.value.height -
-        contentDimensions.value.height * scale.value;
-
-      translateX.value = withDecay({
-        velocity: e.velocityX,
-        clamp: [Math.min(0, clampWidth), Math.max(0, clampWidth)],
-        rubberBandEffect: true
-      });
-      translateY.value = withDecay({
-        velocity: e.velocityY,
-        clamp: [Math.min(0, clampHeight), Math.max(0, clampHeight)],
-        rubberBandEffect: true
-      });
+          contentDimensions.value.height * scale.value
+      );
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -204,16 +240,12 @@ export default function PannableScalableView({
       startScale.value = scale.value;
     })
     .onChange(e => {
-      scaleContentTo(
-        startScale.value * e.scale,
-        { x: e.focalX, y: e.focalY },
-        false
-      );
+      scaleContentTo(startScale.value * e.scale, { x: e.focalX, y: e.focalY });
     })
     .onEnd(e => {
       scale.value = withDecay({
         velocity: e.velocity,
-        clamp: [minScale, maxScale],
+        clamp: [minScaleRef.current, maxScaleRef.current],
         rubberBandEffect: true
       });
     });
@@ -222,21 +254,21 @@ export default function PannableScalableView({
     .numberOfTaps(2)
     .onEnd(({ x, y }) => {
       const origin = { x, y };
-      const halfScale = (maxScale + minScale) / 2;
+      const halfScale = (maxScaleRef.current + minScaleRef.current) / 2;
 
       if (scale.value < initialScale.value) {
-        scaleContentTo(initialScale.value, origin);
+        scaleContentTo(initialScale.value, origin, true);
       } else if (scale.value < halfScale) {
-        scaleContentTo(halfScale, origin);
-      } else if (scale.value < maxScale) {
-        scaleContentTo(maxScale, origin);
+        scaleContentTo(halfScale, origin, true);
+      } else if (scale.value < maxScaleRef.current) {
+        scaleContentTo(maxScaleRef.current, origin, true);
       } else {
-        scaleContentTo(initialScale.value, origin);
+        scaleContentTo(initialScale.value, origin, true);
       }
     });
 
   return (
-    <View className='grow relative'>
+    <View className='grow relative overflow-hidden'>
       <GestureDetector
         gesture={Gesture.Race(
           Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),

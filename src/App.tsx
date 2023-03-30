@@ -1,18 +1,16 @@
 import React from 'react';
-import { SafeAreaView, View, useWindowDimensions } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import TestGraph from './components/graphs/TestGraph';
 import PannableScalableView from './views/PannableScalableView';
 
 function App() {
-  const { height } = useWindowDimensions();
-
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
-        <View style={{ height: height / 2 }} className='bg-slate-600'>
-          <PannableScalableView className='w-20' controls>
+        <View className='h-3/5 bg-gray-500'>
+          <PannableScalableView objectFit='none' controls>
             <TestGraph />
           </PannableScalableView>
         </View>
