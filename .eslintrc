@@ -137,7 +137,6 @@
     "no-shadow-restricted-names": ["error"],
     "no-sparse-arrays": ["error"],
     "no-undef-init": ["error"],
-    "no-undefined": ["error"],
     "no-underscore-dangle": ["error"],
     "no-unexpected-multiline": ["error"],
     "no-unused-expressions": [

@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
-import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Group, Rect } from '@shopify/react-native-skia';
 
-export type RenderEvent = {
+export type MeasureEvent = {
   layout: {
-    width: SharedValue<number>;
-    height: SharedValue<number>;
+    width: number;
+    height: number;
   };
 };
 
@@ -14,46 +13,31 @@ type TestGraphPublicProps = {
   // TODO
 };
 
-type TestGraphPrivateProps = {
-  onRender?: (event: RenderEvent) => void;
+export type TestGraphPrivateProps = {
+  onMeasure: (event: MeasureEvent) => void;
 };
 
-type TestGraphProps = TestGraphPublicProps & TestGraphPrivateProps;
+export type TestGraphProps = TestGraphPublicProps & TestGraphPrivateProps;
 
-function TestGraph({ onRender }: TestGraphProps) {
-  // TODO - calculate dimensions dynamically based on rendered graph content
-  const width = useSharedValue(100);
-  const height = useSharedValue(100);
-
+function TestGraph({ onMeasure }: TestGraphProps) {
   useEffect(() => {
-    onRender?.({
+    // TODO - calculate dimensions dynamically based on rendered graph content
+    onMeasure?.({
       layout: {
-        width,
-        height
+        width: 100,
+        height: 100
       }
     });
   }, []);
 
   return (
     <Group>
-      <Rect
-        x={0}
-        y={0}
-        width={width.value / 2}
-        height={height.value / 2}
-        color='red'
-      />
-      <Rect
-        x={width.value / 2}
-        y={height.value / 2}
-        width={width.value / 2}
-        height={height.value / 2}
-        color='blue'
-      />
+      <Rect x={0} y={0} width={50} height={50} color='red' />
+      <Rect x={50} y={50} width={50} height={50} color='blue' />
     </Group>
   );
 }
 
 export default (props: TestGraphPublicProps) => {
-  return <TestGraph {...props} />;
+  return <TestGraph {...(props as TestGraphProps)} />;
 };

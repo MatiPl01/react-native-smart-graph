@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import TestGraph from './components/graphs/TestGraph';
@@ -9,9 +9,11 @@ function App() {
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
-        <PannableScalableView>
-          <TestGraph />
-        </PannableScalableView>
+        <View className='h-3/5 bg-gray-500'>
+          <PannableScalableView objectFit='none' controls>
+            <TestGraph />
+          </PannableScalableView>
+        </View>
       </GestureHandlerRootView>
     </SafeAreaView>
   );
