@@ -1,16 +1,15 @@
-import DirectedEdge from '@/models/edges/DirectedEdge.model';
-import DigraphVertex from '@/models/vertices/DigraphVertex.model';
-
+import DirectedEdge from '../edges/DirectedEdge.model';
+import DirectedGraphVertex from '../vertices/DirectedGraphVertex.model';
 import Graph from './Graph.model';
 
-export default class Digraph<V, E> extends Graph<
+export default class DirectedGraph<V, E> extends Graph<
   V,
   E,
-  DigraphVertex<V, E>,
+  DirectedGraphVertex<V, E>,
   DirectedEdge<E, V>
 > {
-  insertVertex(key: string, value: V): DigraphVertex<V, E> {
-    return this.insertVertexObject(new DigraphVertex<V, E>(key, value));
+  insertVertex(key: string, value: V): DirectedGraphVertex<V, E> {
+    return this.insertVertexObject(new DirectedGraphVertex<V, E>(key, value));
   }
 
   insertEdge(

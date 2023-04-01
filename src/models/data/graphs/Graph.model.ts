@@ -1,4 +1,4 @@
-import { Edge, Graph as IGraph, Vertex } from '@/types/graphs';
+import { Edge, Graph as IGraph, Vertex } from '@/types/models';
 
 export default abstract class Graph<
   V,
