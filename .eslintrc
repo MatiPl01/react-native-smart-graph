@@ -82,7 +82,7 @@
       }
     ],
     "no-empty-character-class": ["error"],
-    "no-empty-function": ["error"],
+    "no-empty-function": ["error", { "allow": ["constructors"] }],
     "no-eq-null": ["error"],
     "no-ex-assign": ["error"],
     "no-extend-native": ["error"],
