@@ -26,6 +26,6 @@ export interface Graph<V, E> {
     edgeKey: string,
     value: E
   ): Edge<E>;
-  removeVertex(key: string): Vertex<V, E>;
-  removeEdge(key: string): Edge<E>;
+  removeVertex(key: string): V;
+  removeEdge(key: string): E;
 }

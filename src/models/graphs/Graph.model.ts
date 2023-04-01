@@ -49,7 +49,7 @@ export default abstract class Graph<
     value: E
   ): GE;
 
-  removeVertex(key: string): GV {
+  removeVertex(key: string): V {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
     }
@@ -60,10 +60,10 @@ export default abstract class Graph<
     });
     delete this.vertices$[key];
 
-    return vertex;
+    return vertex.value;
   }
 
-  abstract removeEdge(key: string): GE;
+  abstract removeEdge(key: string): E;
 
   protected insertVertexObject(vertex: GV): GV {
     if (this.vertices$[vertex.key]) {

@@ -19,21 +19,29 @@ export default class UndirectedGraph<V, E> extends Graph<
     edgeKey: string,
     value: E
   ): UndirectedEdge<E, V> {
-    return this.insertEdgeObject(
-      new UndirectedEdge<E, V>(edgeKey, value, [
-        this.vertex(vertex1key),
-        this.vertex(vertex2key)
-      ])
-    );
+    const vertex1 = this.vertex(vertex1key);
+    const vertex2 = this.vertex(vertex2key);
+
+    const edge = new UndirectedEdge<E, V>(edgeKey, value, [vertex1, vertex2]);
+    this.insertEdgeObject(edge);
+
+    vertex1.addEdge(edge);
+    if (vertex1key !== vertex2key) {
+      vertex2.addEdge(edge);
+    }
+
+    return edge;
   }
 
-  override removeEdge(key: string): UndirectedEdge<E, V> {
+  override removeEdge(key: string): E {
     const edge = this.edge(key);
 
     edge.vertices[0].removeEdge(key);
-    edge.vertices[1].removeEdge(key);
+    if (!edge.isLoop) {
+      edge.vertices[1].removeEdge(key);
+    }
     delete this.edges$[key];
 
-    return edge;
+    return edge.value;
   }
 }

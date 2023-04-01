@@ -18,11 +18,17 @@ export default class DigraphVertex<V, E>
   }
 
   get edges(): Array<DirectedEdge<E, V>> {
-    return [...this.inEdges, ...this.outEdges];
+    const result = Object.values(this.inEdges$);
+    for (const edge of Object.values(this.outEdges$)) {
+      if (!(edge.key in this.inEdges$)) {
+        result.push(edge);
+      }
+    }
+    return result;
   }
 
   get degree(): number {
-    return this.edges.length;
+    return this.inDegree + this.outDegree;
   }
 
   get inDegree(): number {
@@ -47,7 +53,7 @@ export default class DigraphVertex<V, E>
     this.outEdges$[edge.key] = edge;
   }
 
-  removeInEdge(key: string): DirectedEdge<E, V> {
+  removeInEdge(key: string) {
     if (!(key in this.inEdges$)) {
       throw new Error(`Edge with key ${key} does not exist.`);
     }
@@ -56,7 +62,7 @@ export default class DigraphVertex<V, E>
     return edge as DirectedEdge<E, V>;
   }
 
-  removeOutEdge(key: string): DirectedEdge<E, V> {
+  removeOutEdge(key: string) {
     if (!(key in this.outEdges$)) {
       throw new Error(`Edge with key ${key} does not exist.`);
     }

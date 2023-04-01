@@ -10,7 +10,7 @@ export default class UndirectedGraphVertex<V, E> extends Vertex<V, E> {
   }
 
   get degree(): number {
-    return this.edges.length;
+    return this.edges.reduce((acc, edge) => acc + (edge.isLoop ? 2 : 1), 0);
   }
 
   addEdge(edge: UndirectedEdge<E, V>): void {

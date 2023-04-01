@@ -14,28 +14,30 @@ export default class Digraph<V, E> extends Graph<
   }
 
   insertEdge(
-    vertex1key: string,
-    vertex2key: string,
+    sourceKey: string,
+    targetKey: string,
     edgeKey: string,
     value: E
   ): DirectedEdge<E, V> {
-    return this.insertEdgeObject(
-      new DirectedEdge<E, V>(
-        edgeKey,
-        value,
-        this.vertex(vertex1key),
-        this.vertex(vertex2key)
-      )
-    );
+    const source = this.vertex(sourceKey);
+    const target = this.vertex(targetKey);
+
+    const edge = new DirectedEdge<E, V>(edgeKey, value, source, target);
+    this.insertEdgeObject(edge);
+
+    source.addOutEdge(edge);
+    target.addInEdge(edge);
+
+    return edge;
   }
 
-  removeEdge(key: string): DirectedEdge<E, V> {
+  removeEdge(key: string): E {
     const edge = this.edge(key);
 
     edge.source.removeOutEdge(key);
     edge.target.removeInEdge(key);
     delete this.edges$[key];
 
-    return edge;
+    return edge.value;
   }
 }
