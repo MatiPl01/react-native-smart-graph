@@ -1,18 +1,13 @@
 import { DirectedEdge, DigraphVertex as IDigraphVertex } from '@/types/graphs';
 
-export default class DigraphVertex<V, E> implements IDigraphVertex<V, E> {
+import Vertex from './Vertex.model';
+
+export default class DigraphVertex<V, E>
+  extends Vertex<V, E>
+  implements IDigraphVertex<V, E>
+{
   private readonly inEdges$: Record<string, DirectedEdge<E, V>> = {};
   private readonly outEdges$: Record<string, DirectedEdge<E, V>> = {};
-
-  constructor(private readonly key$: string, private readonly value$: V) {}
-
-  get key(): string {
-    return this.key$;
-  }
-
-  get value(): V {
-    return this.value$;
-  }
 
   get inEdges(): Array<DirectedEdge<E, V>> {
     return Object.values(this.inEdges$);
