@@ -1,6 +1,6 @@
 import UndirectedGraph from '@/models/graphs/UndirectedGraph.model';
 import { useMemo } from 'react';
-import { SharedValue } from 'react-native-reanimated';
+import {placeVertices} from '@/utils/placement.utils';
 
 type UndirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
@@ -23,12 +23,13 @@ export default function UndirectedGraphComponent<V, E>({vertices, edges}: Undire
     return g;
   }, [vertices, edges]);
 
-  const verticesPositions: Record<string, {x: SharedValue<number>; y: SharedValue<number>}> = {};
 
-  graph.vertices.forEach((v) => {
-    // TODO - use placementStrategy
-  });
+  const positions = useMemo(
+    () => placeVertices(graph, 200, 200, 'random'),
+    [graph]
+  );
 
+  console.log(positions);
 
   return null;
 }

@@ -1,8 +1,7 @@
-import { Graph, Vertex } from '@/types/graphs';
+import {Graph, Vertex} from '@/types/graphs';
 import {PlacementStrategy} from '@/types/placement';
 import {DirectedGraph} from '@/models/graphs';
-import {isGraphDirected} from '@/utils/graphs.utils';
-import {useSharedValue} from 'react-native-reanimated';
+import {isGraphConnected, isGraphDirected} from '@/utils/graphs.utils';
 
 export const placeVertices = <V, E>(
     graph: Graph<V, E>,
@@ -13,12 +12,13 @@ export const placeVertices = <V, E>(
   switch (placementStrategy) {
     case 'random':
       return placeVerticesRandomly(graph, width, height);
-    case 'circular':
-      return placeVerticesCircular(graph, width, height);
+    // case 'circular':
+    //   return placeVerticesCircular(graph, width, height);
     case 'rings':
-      return placeVerticesOnRings()
+    default: // TODO - add more strategies
+      return placeVerticesOnRings(graph, width, height);
   }
-}
+};
 
 const placeVerticesRandomly = <V, E>(
   graph: Graph<V, E>,
@@ -38,7 +38,16 @@ const placeVerticesRandomly = <V, E>(
 };
 
 const findRootVertex = <V, E>(graph: DirectedGraph<V, E>): Vertex<V, E> | undefined => {
-    return graph.vertices.find(v => v.inDegree === 0);
+  const rootVertices = graph.vertices.filter(v => v.inDegree === 0);
+
+  if (rootVertices.length > 1) {
+    throw new Error('Multiple root vertices found');
+  }
+  if (rootVertices.length === 0) {
+    throw new Error('No root vertices found');
+  }
+
+  return rootVertices[0];
 };
 
 /**
@@ -54,53 +63,69 @@ const placeVerticesOnRings = <V, E>(
   graph: Graph<V, E>,
   width: number,
   height: number
-) => {
+): Record<string, { x: number, y: number }> => {
   if (!isGraphDirected(graph)) {
     throw new Error('Cannot place vertices on rings for undirected graph');
   }
+  if (!isGraphConnected(graph)) {
+    throw new Error('Cannot place vertices on rings for disconnected graph');
+  }
 
-  const radius = Math.min(width, height) / 2;
+  const verticesPositionCoordinates: Record<
+    string,
+    { layer: number; angle: number }
+  > = {};
+
+  const rootVertex = findRootVertex(graph) as Vertex<V, E>;
+
+  placeChildrenOnRingSection(
+    rootVertex,
+    0,
+    0,
+    2 * Math.PI,
+    verticesPositionCoordinates
+  );
+
+  const totalLayers = Math.max(...Object.values(verticesPositionCoordinates).map(
+    ({ layer }) => layer
+  ));
+  const maxRadius = Math.min(width, height) / 2;
   const center = {
     x: width / 2,
     y: height / 2
   };
 
-  const rootVertex = findRootVertex(graph);
-  if (!rootVertex) {
-    throw new Error('Cannot find root vertex');
-  }
-
-  const sections = rootVertex?.edges.length || 0;
-  const angle = (2 * Math.PI) / sections;
-
-  const verticesPositions: Record<string, { layer: number, angle: number }> = {};
-  let totalLayers = 0;
-
-  rootVertex.neighbours.forEach((v, i) => {
-    // put v in the middle of i-th section
-    verticesPositions[v.key] = {
-        layer: 1,
-        angle: angle * i + angle / 2
-    };
-    // place its children in the section using bfs
-    placeChildrenOnRingSection(v, i, 2, angle, verticesPositions);
+  const verticesPositions: Record<string, { x: number; y: number }> = {};
+  Object.entries(verticesPositionCoordinates).forEach(([key, {layer, angle}]) => {
+      const r = (layer / totalLayers) * maxRadius;
+      verticesPositions[key] = {
+          x: center.x + r * Math.cos(angle),
+          y: center.y + r * Math.sin(angle)
+      };
   });
-
-
 
   return verticesPositions;
 };
 
-const placeChildrenOnRingSection = <V, E>(v: Vertex<V, E>, section: number, layer: number, angle: number, verticesPositions: Record<string, { layer: number, angle: number }>) => {
-    const children = v.neighbours.filter(c => !verticesPositions[c.key]);
-    const childrenCount = children.length;
-    const childrenAngle = angle / childrenCount;
-    children.forEach((c, i) => {
-        verticesPositions[c.key] = {
-            layer: layer,
-            angle: section * angle + childrenAngle * i + childrenAngle / 2
-        };
-    });
+const placeChildrenOnRingSection = <V, E>(
+  parent: Vertex<V, E>,
+  parentLayer: number,
+  parentAngle: number,
+  sectionAngle: number,
+  verticesPositionCoordinates: Record<string, { layer: number; angle: number }>
+) => {
+  verticesPositionCoordinates[parent.key] = {
+    layer: parentLayer,
+    angle: parentAngle
+  };
 
-    children.forEach(c => placeChildrenOnRingSection(c, section, layer + 1, angle, verticesPositions));
-}
+  parent.neighbours.forEach((child, i) => {
+    placeChildrenOnRingSection(
+      child,
+      parentLayer + 1,
+      parentAngle + (sectionAngle / (parent.neighbours.length + 1)) * (i + 1),
+      sectionAngle / parent.neighbours.length,
+      verticesPositionCoordinates
+    );
+  });
+};
