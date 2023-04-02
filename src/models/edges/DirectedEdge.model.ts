@@ -19,6 +19,10 @@ export default class DirectedEdge<E, V> implements IDirectedEdge<E, V> {
     return this.target$;
   }
 
+  get vertices(): [DirectedGraphVertex<V, E>, DirectedGraphVertex<V, E> ] {
+    return [this.source, this.target];
+  }
+
   get key(): string {
     return this.key$;
   }

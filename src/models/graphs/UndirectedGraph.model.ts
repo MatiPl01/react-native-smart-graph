@@ -8,6 +8,10 @@ export default class UndirectedGraph<V, E> extends Graph<
   UndirectedGraphVertex<V, E>,
   UndirectedEdge<E, V>
 > {
+  isDirected() {
+    return false;
+  }
+
   insertVertex(key: string, value: V): UndirectedGraphVertex<V, E> {
     return this.insertVertexObject(new UndirectedGraphVertex<V, E>(key, value));
   }

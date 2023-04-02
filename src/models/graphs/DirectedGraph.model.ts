@@ -8,6 +8,10 @@ export default class DirectedGraph<V, E> extends Graph<
   DirectedGraphVertex<V, E>,
   DirectedEdge<E, V>
 > {
+  isDirected(): this is DirectedGraph<V, E> {
+    return true;
+  }
+
   insertVertex(key: string, value: V): DirectedGraphVertex<V, E> {
     return this.insertVertexObject(new DirectedGraphVertex<V, E>(key, value));
   }
