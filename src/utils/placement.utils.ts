@@ -1,13 +1,13 @@
-import {Graph, Vertex} from '@/types/graphs';
-import {PlacementStrategy} from '@/types/placement';
-import {DirectedGraph} from '@/models/graphs';
-import {isGraphConnected, isGraphDirected} from '@/utils/graphs.utils';
+import { DirectedGraph } from '@/models/graphs';
+import { Graph, Vertex } from '@/types/graphs';
+import { PlacementStrategy } from '@/types/placement';
+import { isGraphConnected, isGraphDirected } from '@/utils/graphs.utils';
 
 export const placeVertices = <V, E>(
-    graph: Graph<V, E>,
-    width: number,
-    height: number,
-    placementStrategy: PlacementStrategy
+  graph: Graph<V, E>,
+  width: number,
+  height: number,
+  placementStrategy: PlacementStrategy
 ): Record<string, { x: number; y: number }> => {
   switch (placementStrategy) {
     case 'random':
@@ -37,7 +37,9 @@ const placeVerticesRandomly = <V, E>(
   return verticesPositions;
 };
 
-const findRootVertex = <V, E>(graph: DirectedGraph<V, E>): Vertex<V, E> | undefined => {
+const findRootVertex = <V, E>(
+  graph: DirectedGraph<V, E>
+): Vertex<V, E> | undefined => {
   const rootVertices = graph.vertices.filter(v => v.inDegree === 0);
 
   if (rootVertices.length > 1) {
@@ -63,7 +65,7 @@ const placeVerticesOnRings = <V, E>(
   graph: Graph<V, E>,
   width: number,
   height: number
-): Record<string, { x: number, y: number }> => {
+): Record<string, { x: number; y: number }> => {
   if (!isGraphDirected(graph)) {
     throw new Error('Cannot place vertices on rings for undirected graph');
   }
@@ -86,9 +88,9 @@ const placeVerticesOnRings = <V, E>(
     verticesPositionCoordinates
   );
 
-  const totalLayers = Math.max(...Object.values(verticesPositionCoordinates).map(
-    ({ layer }) => layer
-  ));
+  const totalLayers = Math.max(
+    ...Object.values(verticesPositionCoordinates).map(({ layer }) => layer)
+  );
   const maxRadius = Math.min(width, height) / 2;
   const center = {
     x: width / 2,
@@ -96,13 +98,15 @@ const placeVerticesOnRings = <V, E>(
   };
 
   const verticesPositions: Record<string, { x: number; y: number }> = {};
-  Object.entries(verticesPositionCoordinates).forEach(([key, {layer, angle}]) => {
+  Object.entries(verticesPositionCoordinates).forEach(
+    ([key, { layer, angle }]) => {
       const r = (layer / totalLayers) * maxRadius;
       verticesPositions[key] = {
-          x: center.x + r * Math.cos(angle),
-          y: center.y + r * Math.sin(angle)
+        x: center.x + r * Math.cos(angle),
+        y: center.y + r * Math.sin(angle)
       };
-  });
+    }
+  );
 
   return verticesPositions;
 };
@@ -123,7 +127,9 @@ const placeChildrenOnRingSection = <V, E>(
     placeChildrenOnRingSection(
       child,
       parentLayer + 1,
-      parentAngle + (sectionAngle / (parent.neighbours.length + 1)) * (i + 1),
+      parentAngle -
+        sectionAngle / 2 +
+        (sectionAngle / parent.neighbours.length) * (i + 0.5),
       sectionAngle / parent.neighbours.length,
       verticesPositionCoordinates
     );
