@@ -1,6 +1,6 @@
 import { Edge, Vertex } from './shared.types';
 
-export interface DirectedGraphVertex<V, E> extends Vertex<V, E> {
+export interface DigraphVertex<V, E> extends Vertex<V, E> {
   get inEdges(): Array<DirectedEdge<E, V>>;
   get outEdges(): Array<DirectedEdge<E, V>>;
   get inDegree(): number;
@@ -11,7 +11,7 @@ export interface DirectedGraphVertex<V, E> extends Vertex<V, E> {
   removeOutEdge(key: string): DirectedEdge<E, V>;
 }
 
-export interface DirectedEdge<E, V> extends Edge<E, V> {
-  get source(): DirectedGraphVertex<V, E>;
-  get target(): DirectedGraphVertex<V, E>;
+export interface DirectedEdge<E, V> extends Edge<E> {
+  get source(): DigraphVertex<V, E>;
+  get target(): DigraphVertex<V, E>;
 }
