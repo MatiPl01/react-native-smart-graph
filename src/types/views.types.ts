@@ -1,3 +1,8 @@
+export type Point2D = {
+  x: number;
+  y: number;
+};
+
 export type Dimensions = {
   width: number;
   height: number;

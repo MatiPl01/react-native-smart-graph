@@ -1,12 +1,9 @@
-import { UndirectedGraphVertex as IUndirectedGraphVertex, UndirectedEdge } from '@/types/graphs';
+import UndirectedEdge from '@/models/edges/UndirectedEdge.model';
+
 import Vertex from './Vertex.model';
 
 export default class UndirectedGraphVertex<V, E> extends Vertex<V, E> {
   private readonly edges$: Record<string, UndirectedEdge<E, V>> = {};
-
-  get neighbours(): Array<IUndirectedGraphVertex<V, E>> {
-    return Object.values(this.edges).map(({ vertices }) => vertices[0].key === this.key ? vertices[1] : vertices[0]);
-  }
 
   get edges(): Array<UndirectedEdge<E, V>> {
     return Object.values(this.edges$);
