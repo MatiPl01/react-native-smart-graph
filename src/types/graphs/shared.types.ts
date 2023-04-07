@@ -4,14 +4,14 @@ export interface Vertex<V, E> {
   get key(): string;
   get value(): V;
   get edges(): Array<Edge<E, V>>;
-  get neighbours(): Array<Vertex<V, E>>;
+  get neighbors(): Array<Vertex<V, E>>;
   get degree(): number;
 }
 
 export interface Edge<E, V> {
   get key(): string;
   get value(): E;
-  get vertices(): [Vertex<V, E>, Vertex<V, E>]
+  get vertices(): [Vertex<V, E>, Vertex<V, E>];
 }
 
 export interface Graph<V, E> {

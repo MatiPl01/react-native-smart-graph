@@ -15,5 +15,5 @@ export default abstract class Vertex<V, E> implements IVertex<V, E> {
 
   abstract get edges(): Array<Edge<E, V>>;
 
-  abstract get neighbours(): Array<IVertex<V, E>>;
+  abstract get neighbors(): Array<IVertex<V, E>>;
 }

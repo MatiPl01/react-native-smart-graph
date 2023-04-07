@@ -2,10 +2,10 @@ import { useEffect, useMemo } from 'react';
 
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
 
-import rubikFont from '@/assets/Rubik-Regular.ttf';
+import rubikFont from '@/assets/fonts/Rubik-Regular.ttf';
 import { DirectedGraph } from '@/models/graphs';
-import { PlacementStrategy } from '@/types/placement';
-import { placeVertices } from '@/utils/placement.utils';
+import { PlacementSettings } from '@/types/placement';
+import { placeVertices } from '@/utils/placement';
 
 type MeasureEvent = {
   // TODO - remove this
@@ -18,7 +18,7 @@ type MeasureEvent = {
 type DirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; from: string; to: string; data: E }>;
-  placementStrategy?: PlacementStrategy;
+  placementSettings?: PlacementSettings<V, E>;
 };
 
 export type TestProps = {
@@ -29,6 +29,7 @@ export type TestProps = {
 function DirectedGraphComponent<V, E>({
   vertices,
   edges,
+  placementSettings,
   onMeasure
 }: DirectedGraphComponentProps<V, E> & TestProps) {
   const graph = useMemo(() => {
@@ -54,7 +55,7 @@ function DirectedGraphComponent<V, E>({
   }, []);
 
   const positions = useMemo(
-    () => placeVertices(graph, 200, 200, 'rings'),
+    () => placeVertices(graph, 200, 200, 5, placementSettings),
     [graph]
   );
 

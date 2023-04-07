@@ -12,7 +12,7 @@ export default class DirectedGraphVertex<V, E>
   private readonly inEdges$: Record<string, DirectedEdge<E, V>> = {};
   private readonly outEdges$: Record<string, DirectedEdge<E, V>> = {};
 
-  get neighbours(): Array<IDirectedGraphVertex<V, E>> {
+  get neighbors(): Array<IDirectedGraphVertex<V, E>> {
     return Object.values(this.outEdges$).map(edge => edge.target);
   }
 

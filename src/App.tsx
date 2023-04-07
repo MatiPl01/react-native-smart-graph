@@ -13,13 +13,16 @@ function App() {
         <View className='h-4/5 bg-gray-500'>
           <PannableScalableView objectFit='none' controls>
             <DirectedGraphComponent
+              placementSettings={{
+                strategy: 'orbits'
+              }}
               vertices={[
                 { key: 'A', data: [] },
                 { key: 'B', data: [] },
                 { key: 'C', data: [] },
-                { key: 'D', data: [] },
                 { key: 'E', data: [] },
                 { key: 'F', data: [] },
+                { key: 'D', data: [] },
                 { key: 'G', data: [] },
                 { key: 'H', data: [] },
                 { key: 'I', data: [] },
