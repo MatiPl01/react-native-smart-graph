@@ -6,7 +6,7 @@ import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 
 import PannableScalableView from './views/PannableScalableView';
 
-function App() {
+export default function App() {
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
@@ -56,5 +56,3 @@ function App() {
     </SafeAreaView>
   );
 }
-
-export default App;

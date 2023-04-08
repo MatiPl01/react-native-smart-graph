@@ -4,27 +4,32 @@ import {
   PlacedVerticesPositions,
   RandomPlacementSettings
 } from '@/types/placement';
+import { zipArrays } from '@/utils/arrays';
 import random from '@/utils/random';
 
 import { RANDOM_PLACEMENT, SHARED } from '../constants';
 
 const placeVerticesRandomly = <V, E>(
   graph: Graph<V, E>,
-  {
-    density = RANDOM_PLACEMENT.density,
-    layoutType = RANDOM_PLACEMENT.layoutType,
-    vertexRadius = SHARED.vertexRadius,
-    minVertexDistance = SHARED.minVertexDistance
-  }: RandomPlacementSettings = {} as RandomPlacementSettings
+  settings: RandomPlacementSettings = {} as RandomPlacementSettings
 ): GraphLayout => {
+  if (settings.layoutType === 'random') {
+    return calcVerticesRandomPositions(
+      graph.vertices,
+      settings.vertexRadius,
+      settings.containerWidth,
+      settings.containerHeight
+    );
+  }
+
   const props: CalcVerticesPositionsProps<V, E> = {
-    vertices: random.shuffle(graph.vertices),
-    density,
-    vertexRadius,
-    minVertexDistance
+    vertices: graph.vertices,
+    density: settings.density || RANDOM_PLACEMENT.density,
+    vertexRadius: settings.vertexRadius || SHARED.vertexRadius,
+    minVertexDistance: settings.minVertexDistance || SHARED.minVertexDistance
   };
 
-  switch (layoutType) {
+  switch (settings.layoutType) {
     case 'grid':
       return calcVerticesGridPositions(props);
     case 'honeycomb':
@@ -74,6 +79,93 @@ const calcVerticesGridPositions = <V, E>(
 
 const calcVerticesHoneycombPositions = <V, E>(
   props: CalcVerticesPositionsProps<V, E>
-): GraphLayout => {};
+): GraphLayout => {
+  const { vertices, density, vertexRadius, minVertexDistance } = props;
+  const verticesCount = vertices.length;
+  const vertexDistance = 2 * vertexRadius + minVertexDistance;
+  const triangleHeight = (vertexDistance * Math.sqrt(3)) / 2;
+
+  const availablePositionsCount = Math.ceil(verticesCount / density);
+  const availablePositions: { x: number; y: number }[] = [];
+
+  let lineNumber = 1;
+  let currentVertexIndex = 0;
+
+  let maxX = 0;
+  let maxY = 0;
+
+  for (let i = 0; i < availablePositionsCount; i++) {
+    const numberOfVerticesInLine = Math.ceil(lineNumber / 2);
+    let x, y;
+
+    if (lineNumber % 2 === 1) {
+      // Vertical line
+      x =
+        vertexRadius +
+        (currentVertexIndex % 2 === 1 ? vertexDistance / 2 : 0) +
+        vertexDistance * Math.floor(lineNumber / 2);
+      y = vertexRadius + currentVertexIndex * triangleHeight;
+    } else {
+      // Horizontal line
+      x =
+        vertexRadius +
+        ((lineNumber - 2) % 4 === 0 ? vertexDistance / 2 : 0) +
+        currentVertexIndex * vertexDistance;
+      y = vertexRadius + Math.floor(lineNumber / 2) * triangleHeight;
+    }
+
+    currentVertexIndex++;
+    if (currentVertexIndex === numberOfVerticesInLine) {
+      currentVertexIndex = 0;
+      lineNumber++;
+    }
+
+    maxX = Math.max(maxX, x);
+    maxY = Math.max(maxY, y);
+
+    availablePositions.push({ x, y });
+  }
+
+  const verticesAndPositions = zipArrays(
+    vertices,
+    random.sample(availablePositions, verticesCount)
+  );
+
+  return {
+    width: maxX + vertexRadius,
+    height: maxY + vertexRadius,
+    verticesPositions: verticesAndPositions.reduce(
+      (acc, [vertex, position]) => {
+        acc[vertex.key] = position as { x: number; y: number };
+        return acc;
+      },
+      {} as PlacedVerticesPositions
+    )
+  };
+};
+
+const calcVerticesRandomPositions = <V, E>(
+  vertices: Vertex<V, E>[],
+  vertexRadius: number = SHARED.vertexRadius,
+  width: number,
+  height: number
+): GraphLayout => {
+  const innerWidth = width - 2 * vertexRadius;
+  const innerHeight = height - 2 * vertexRadius;
+
+  const verticesPositions = vertices.reduce((acc, { key }) => {
+    acc[key] = {
+      x: vertexRadius + Math.random() * innerWidth,
+      y: vertexRadius + Math.random() * innerHeight
+    };
+    return acc;
+  }, {} as PlacedVerticesPositions);
+
+  return {
+    width,
+    height,
+    verticesPositions
+  };
+};
 
 export default placeVerticesRandomly;

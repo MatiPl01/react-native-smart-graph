@@ -13,13 +13,23 @@ type SharedPlacementSettings = {
   minVertexDistance?: number;
 };
 
-export type RandomLayoutType = 'grid' | 'honeycomb';
+export type RandomLayoutType = 'grid' | 'honeycomb' | 'random';
 
-export type RandomPlacementSettings = SharedPlacementSettings & {
+export type RandomPlacementSettings = {
   strategy: 'random';
-  layoutType?: RandomLayoutType;
-  density?: number;
-};
+  vertexRadius?: number;
+} & (
+  | {
+      layoutType: Exclude<RandomLayoutType, 'random'>;
+      density?: number;
+      minVertexDistance?: number;
+    }
+  | {
+      layoutType: 'random';
+      containerWidth: number;
+      containerHeight: number;
+    }
+);
 
 export type OrbitsPlacementSettings = SharedPlacementSettings & {
   strategy: 'orbits';
