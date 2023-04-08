@@ -14,7 +14,7 @@ function App() {
           <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               placementSettings={{
-                strategy: 'orbits'
+                strategy: 'tree'
               }}
               vertices={[
                 { key: 'A', data: [] },
@@ -28,20 +28,26 @@ function App() {
                 { key: 'I', data: [] },
                 { key: 'J', data: [] },
                 { key: 'K', data: [] },
-                { key: 'L', data: [] }
+                { key: 'L', data: [] },
+                { key: 'M', data: [] },
+                { key: 'N', data: [] },
+                { key: 'O', data: [] }
               ]}
               edges={[
                 { key: 'AB', from: 'A', to: 'B', data: [] },
-                { key: 'AC', from: 'A', to: 'C', data: [] },
-                { key: 'AD', from: 'A', to: 'D', data: [] },
-                { key: 'BE', from: 'B', to: 'E', data: [] },
-                { key: 'BF', from: 'B', to: 'F', data: [] },
-                { key: 'BG', from: 'B', to: 'G', data: [] },
-                { key: 'AH', from: 'A', to: 'H', data: [] },
-                { key: 'AI', from: 'A', to: 'I', data: [] },
+                { key: 'BC', from: 'B', to: 'C', data: [] },
+                { key: 'CD', from: 'C', to: 'D', data: [] },
+                { key: 'CE', from: 'C', to: 'E', data: [] },
+                { key: 'CM', from: 'C', to: 'M', data: [] },
+                { key: 'EF', from: 'E', to: 'F', data: [] },
+                { key: 'FG', from: 'F', to: 'G', data: [] },
+                { key: 'FH', from: 'F', to: 'H', data: [] },
+                { key: 'BI', from: 'B', to: 'I', data: [] },
                 { key: 'IJ', from: 'I', to: 'J', data: [] },
-                { key: 'IK', from: 'I', to: 'K', data: [] },
-                { key: 'IL', from: 'I', to: 'L', data: [] }
+                { key: 'JK', from: 'J', to: 'K', data: [] },
+                { key: 'JL', from: 'J', to: 'L', data: [] },
+                { key: 'KN', from: 'K', to: 'N', data: [] },
+                { key: 'KO', from: 'K', to: 'O', data: [] }
               ]}
             />
           </PannableScalableView>
