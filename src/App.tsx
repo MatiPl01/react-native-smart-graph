@@ -14,7 +14,9 @@ function App() {
           <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               placementSettings={{
-                strategy: 'orbits'
+                strategy: 'random',
+                layoutType: 'grid',
+                density: 0.35
               }}
               vertices={[
                 { key: 'A', data: [] },
@@ -28,7 +30,11 @@ function App() {
                 { key: 'I', data: [] },
                 { key: 'J', data: [] },
                 { key: 'K', data: [] },
-                { key: 'L', data: [] }
+                { key: 'L', data: [] },
+                { key: 'M', data: [] },
+                { key: 'N', data: [] },
+                { key: 'O', data: [] },
+                { key: 'P', data: [] }
               ]}
               edges={[
                 { key: 'AB', from: 'A', to: 'B', data: [] },
