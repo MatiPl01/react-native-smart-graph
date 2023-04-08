@@ -1,0 +1,43 @@
+import DirectedEdge from '@/models/edges/DirectedEdge.model';
+import DigraphVertex from '@/models/vertices/DigraphVertex.model';
+
+import Graph from './Graph.model';
+
+export default class Digraph<V, E> extends Graph<
+  V,
+  E,
+  DigraphVertex<V, E>,
+  DirectedEdge<E, V>
+> {
+  insertVertex(key: string, value: V): DigraphVertex<V, E> {
+    return this.insertVertexObject(new DigraphVertex<V, E>(key, value));
+  }
+
+  insertEdge(
+    sourceKey: string,
+    targetKey: string,
+    edgeKey: string,
+    value: E
+  ): DirectedEdge<E, V> {
+    const source = this.vertex(sourceKey);
+    const target = this.vertex(targetKey);
+
+    const edge = new DirectedEdge<E, V>(edgeKey, value, source, target);
+    this.insertEdgeObject(edge);
+
+    source.addOutEdge(edge);
+    target.addInEdge(edge);
+
+    return edge;
+  }
+
+  removeEdge(key: string): E {
+    const edge = this.edge(key);
+
+    edge.source.removeOutEdge(key);
+    edge.target.removeInEdge(key);
+    delete this.edges$[key];
+
+    return edge.value;
+  }
+}
