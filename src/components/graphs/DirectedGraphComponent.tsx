@@ -45,28 +45,29 @@ function DirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  useEffect(() => {
-    onMeasure({
-      layout: {
-        width: 200,
-        height: 200
-      }
-    });
-  }, []);
-
-  const positions = useMemo(
-    () => placeVertices(graph, 200, 200, 5, placementSettings),
+  const graphLayout = useMemo(
+    () => placeVertices(graph, placementSettings),
     [graph]
   );
 
   const font = useFont(rubikFont, 10);
+
+  useEffect(() => {
+    onMeasure({
+      layout: {
+        width: graphLayout.width,
+        height: graphLayout.height
+      }
+    });
+  }, [graphLayout]);
+
   if (font === null) {
     return null;
   }
 
   return (
     <Group>
-      {Object.entries(positions).map(([key, { x, y }]) => (
+      {Object.entries(graphLayout.verticesPositions).map(([key, { x, y }]) => (
         <Group key={key}>
           <Circle key={key} cx={x} cy={y} r={5} color='lightblue' />
           <Text x={x} y={y} text={key} font={font} />

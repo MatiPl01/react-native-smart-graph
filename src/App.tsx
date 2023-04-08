@@ -11,7 +11,7 @@ function App() {
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='h-4/5 bg-gray-500'>
-          <PannableScalableView objectFit='none' controls>
+          <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               placementSettings={{
                 strategy: 'orbits'

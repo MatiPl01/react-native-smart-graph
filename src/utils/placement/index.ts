@@ -1,36 +1,24 @@
 import { Graph } from '@/types/graphs';
-import { PlacedVerticesPositions, PlacementSettings } from '@/types/placement';
+import { GraphLayout, PlacementSettings } from '@/types/placement';
 
-import placeVerticesCircular from './circular.placement';
-import placeVerticesOnOrbits from './orbits.placement';
-import placeVerticesRandomly from './random.placement';
-import placeVerticesOnTree from './tree.placement';
+import placeVerticesCircular from './strategies/circular.placement';
+import placeVerticesOnOrbits from './strategies/orbits.placement';
+import placeVerticesRandomly from './strategies/random.placement';
+import placeVerticesOnTree from './strategies/tree.placement';
 
 export const placeVertices = <V, E>(
   graph: Graph<V, E>,
-  containerWidth: number,
-  containerHeight: number,
-  vertexRadius: number,
   placementSettings?: PlacementSettings<V, E>
-): PlacedVerticesPositions => {
-  const { strategy, ...settings } =
-    placementSettings || ({} as PlacementSettings<V, E>);
-  const placementProps = {
-    graph,
-    containerWidth,
-    containerHeight,
-    vertexRadius
-  };
-
-  switch (strategy) {
+): GraphLayout => {
+  switch (placementSettings?.strategy) {
     case 'circular':
-      return placeVerticesCircular(placementProps, settings);
+      return placeVerticesCircular(graph, placementSettings);
     case 'orbits':
-      return placeVerticesOnOrbits(placementProps);
+      return placeVerticesOnOrbits(graph, placementSettings);
     case 'tree':
-      return placeVerticesOnTree(placementProps, settings);
+      return placeVerticesOnTree(graph, placementSettings);
     default:
     case 'random':
-      return placeVerticesRandomly(placementProps);
+      return placeVerticesRandomly(graph, placementSettings);
   }
 };

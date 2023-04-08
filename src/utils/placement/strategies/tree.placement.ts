@@ -3,12 +3,12 @@ import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphVertex, Vertex } from '@/types/graphs';
 import {
   PlacedVerticesPositions,
-  PlacementProps,
   TreePlacementSettings
 } from '@/types/placement';
 
-import { findRootVertex, isGraphATree, isGraphDirected } from '../graphs.utils';
+import { findRootVertex, isGraphATree, isGraphDirected } from '../../graphs';
 
+// TODO
 const placeVerticesOnTree = <V, E>(
   props: PlacementProps<V, E>,
   settings: TreePlacementSettings<V, E>
@@ -56,8 +56,6 @@ const createOrderGrid = <V, E>(
       queue.enqueue({ row: row + 1, vertex: edge.target });
     });
   }
-
-
 };
 
 export default placeVerticesOnTree;

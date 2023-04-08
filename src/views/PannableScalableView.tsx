@@ -28,7 +28,7 @@ import {
   clamp,
   getCenterInParent,
   getScaleInParent
-} from '@/utils/views.utils';
+} from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
