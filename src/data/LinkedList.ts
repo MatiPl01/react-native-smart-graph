@@ -7,8 +7,10 @@ class Node<V> {
 export default class LinkedList<V> {
   public head: Node<V> | null = null;
   public tail: Node<V> | null = null;
+  public length = 0;
 
   public append(value: V): void {
+    this.length++;
     const node = new Node(value);
 
     if (!this.tail) {
@@ -22,6 +24,7 @@ export default class LinkedList<V> {
   }
 
   public prepend(value: V): void {
+    this.length++;
     const node = new Node(value);
 
     if (!this.head) {
@@ -35,6 +38,7 @@ export default class LinkedList<V> {
   }
 
   public popLeft(): V | null {
+    this.length--;
     if (!this.head) {
       return null;
     }
