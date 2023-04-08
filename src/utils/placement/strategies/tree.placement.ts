@@ -7,7 +7,7 @@ import {
 } from '@/types/placement';
 
 import { findRootVertex, isGraphATree, isGraphDirected } from '../../graphs';
-import { DEFAULTS } from '../constants';
+import { SHARED } from '../constants';
 import { defaultSortComparator } from '../shared';
 
 const placeVerticesOnTree = <V, E>(
@@ -15,8 +15,8 @@ const placeVerticesOnTree = <V, E>(
   {
     sortComparator = defaultSortComparator,
     sortChildren = false,
-    vertexRadius = DEFAULTS.vertexRadius,
-    minVertexDistance = DEFAULTS.minVertexDistance
+    vertexRadius = SHARED.vertexRadius,
+    minVertexDistance = SHARED.minVertexDistance
   }: TreePlacementSettings<V, E>
 ): GraphLayout => {
   const vertices = sortChildren
