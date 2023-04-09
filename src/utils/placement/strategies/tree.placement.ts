@@ -5,24 +5,17 @@ import {
   PlacedVerticesPositions,
   TreePlacementSettings
 } from '@/types/placement';
+import { findRootVertex, isGraphATree, isGraphDirected } from '@/utils/graphs';
 
-import { findRootVertex, isGraphATree, isGraphDirected } from '../../graphs';
 import { SHARED } from '../constants';
-import { defaultSortComparator } from '../shared';
 
 const placeVerticesOnTree = <V, E>(
   graph: Graph<V, E>,
   {
-    sortComparator = defaultSortComparator,
-    sortChildren = false,
     vertexRadius = SHARED.vertexRadius,
-    minVertexDistance = SHARED.minVertexDistance
-  }: TreePlacementSettings<V, E>
+    minVertexSpacing = SHARED.minVertexSpacing
+  }: TreePlacementSettings
 ): GraphLayout => {
-  const vertices = sortChildren
-    ? graph.vertices.sort(sortComparator)
-    : graph.vertices;
-
   // TODO - maybe add undirected graph support, there is a problem finding root vertex
   if (!isGraphDirected(graph)) {
     throw new Error('Cannot place vertices on tree for undirected graph');
@@ -31,15 +24,15 @@ const placeVerticesOnTree = <V, E>(
     throw new Error('Cannot place vertices on tree for non-tree graph');
   }
 
-  const { width, height } = getLayout(vertexRadius, minVertexDistance, graph);
+  const { width, height } = getLayout(vertexRadius, minVertexSpacing, graph);
 
   const orderGrid = getOrderGrid(graph);
-  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
   return {
     width,
     height,
-    verticesPositions: vertices.reduce((acc, { key }) => {
+    verticesPositions: graph.vertices.reduce((acc, { key }) => {
       if (orderGrid[key] === undefined) {
         return acc;
       }
@@ -103,7 +96,7 @@ const placeVertices = <V, E>(
 
 const getLayout = <V, E>(
   vertexRadius: number,
-  minVertexDistance: number,
+  minVertexSpacing: number,
   graph: DirectedGraph<V, E>
 ) => {
   const rootVertex = findRootVertex(graph) as DirectedGraphVertex<V, E>;
@@ -111,7 +104,7 @@ const getLayout = <V, E>(
     getMaxTreeDimensions(rootVertex);
 
   const padding = 2 * vertexRadius;
-  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
   const containerWidth = padding + (maxTreeWidth - 1) * minVertexCenterDistance;
   const containerHeight =
     padding + (maxTreeDepth - 1) * minVertexCenterDistance;

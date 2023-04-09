@@ -1,7 +1,9 @@
 // TODO - improve docs later
 import { Graph, Vertex } from '@/types/graphs';
 import {
+  GetLayerRadiusFunction,
   GraphLayout,
+  OrbitsLayerSizingSettings,
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/placement';
@@ -20,10 +22,7 @@ import { SHARED } from '../constants';
  */
 const placeVerticesOnOrbits = <V, E>(
   graph: Graph<V, E>,
-  {
-    vertexRadius = SHARED.vertexRadius,
-    minVertexDistance = SHARED.minVertexDistance
-  }: OrbitsPlacementSettings
+  settings: OrbitsPlacementSettings
 ): GraphLayout => {
   // TODO - maybe add undirected graph support
   if (!isGraphDirected(graph)) {
@@ -33,6 +32,12 @@ const placeVerticesOnOrbits = <V, E>(
     throw new Error('Cannot place vertices on rings for non-tree graph');
   }
 
+  const {
+    vertexRadius = SHARED.vertexRadius,
+    minVertexSpacing = SHARED.minVertexSpacing,
+    ...layerSizingSettings
+  } = settings;
+
   const verticesLayerPositions: Record<
     string,
     { layer: number; angle: number }
@@ -40,7 +45,7 @@ const placeVerticesOnOrbits = <V, E>(
   const minLayersRadius: Record<string, number> = {};
 
   const rootVertex = findRootVertex(graph) as Vertex<V, E>;
-  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
   placeChildrenOnRingSection(
     rootVertex,
@@ -54,8 +59,9 @@ const placeVerticesOnOrbits = <V, E>(
 
   const { width, height, center, layersRadius } = getLayout(
     minLayersRadius,
-    minVertexDistance,
-    vertexRadius
+    minVertexSpacing,
+    vertexRadius,
+    layerSizingSettings
   );
 
   return {
@@ -119,21 +125,155 @@ const placeChildrenOnRingSection = <V, E>(
   });
 };
 
-const getLayout = (
+const getEqualLayersRadius = (
+  minLayersRadius: Record<string, number>
+): number[] => {
+  const layersCount = Object.keys(minLayersRadius).length;
+
+  const lastLayerRadius = Object.entries(minLayersRadius).reduce(
+    (acc, [layerNumber, minLayerRadius]) => {
+      if (layerNumber === '0') {
+        return 0;
+      }
+      return Math.max(acc, (minLayerRadius / +layerNumber) * layersCount);
+    },
+    0
+  );
+
+  const layersRadius = [];
+
+  for (let i = 0; i < layersCount; i++) {
+    layersRadius.push((lastLayerRadius / layersCount) * i);
+  }
+
+  return layersRadius;
+};
+
+const getQuadIncreasingLayersRadius = (
+  minLayersRadius: Record<string, number>
+): number[] => {
+  const maxCoefficient = Object.entries(minLayersRadius).reduce(
+    (acc, [layerNumber, minLayerRadius]) => {
+      if (layerNumber === '0') {
+        return 0;
+      }
+      return Math.max(acc, minLayerRadius / (+layerNumber) ** 2);
+    },
+    0
+  );
+
+  return Object.keys(minLayersRadius).map(
+    layerNumber => maxCoefficient * (+layerNumber) ** 2
+  );
+};
+
+const getNonDecreasingLayersRadius = (
   minLayersRadius: Record<string, number>,
-  minVertexDistance: number,
+  minVertexSpacing: number,
   vertexRadius: number
-) => {
+): number[] => {
+  const layersRadius = [0];
+  let maxDistanceBetweenLayers = minVertexSpacing + 2 * vertexRadius;
+
+  for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
+    layersRadius.push(
+      Math.max(
+        (layersRadius[i - 1] as number) + maxDistanceBetweenLayers,
+        minLayersRadius[i] as number
+      )
+    );
+
+    maxDistanceBetweenLayers = Math.max(
+      maxDistanceBetweenLayers,
+      (layersRadius[i] as number) - (layersRadius[i - 1] as number)
+    );
+  }
+
+  return layersRadius;
+};
+
+const getCustomLayersRadius = (
+  layersCount: number,
+  getLayerRadius: GetLayerRadiusFunction
+): number[] => {
+  const layersRadius = [0];
+
+  for (let i = 1; i < layersCount; i++) {
+    layersRadius.push(
+      getLayerRadius({
+        layerIndex: i,
+        layersCount,
+        previousLayerRadius: layersRadius[i - 1] as number
+      })
+    );
+  }
+
+  return layersRadius;
+};
+
+const getAutoLayersRadius = (
+  minLayersRadius: Record<string, number>,
+  minVertexSpacing: number,
+  vertexRadius: number
+): number[] => {
   const layersRadius = [0];
 
   for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
     layersRadius.push(
       Math.max(
         minLayersRadius[i] as number,
-        (layersRadius[i - 1] as number) + minVertexDistance + 2 * vertexRadius
+        (layersRadius[i - 1] as number) + minVertexSpacing + 2 * vertexRadius
       )
     );
   }
+
+  return layersRadius;
+};
+
+const getLayersRadius = (
+  minLayersRadius: Record<string, number>,
+  minVertexSpacing: number,
+  vertexRadius: number,
+  layerSizingSettings: OrbitsLayerSizingSettings
+): number[] => {
+  switch (layerSizingSettings.layerSizing) {
+    case 'equal':
+      return getEqualLayersRadius(minLayersRadius);
+    case 'quad-increasing':
+      return getQuadIncreasingLayersRadius(minLayersRadius);
+    case 'non-decreasing':
+      return getNonDecreasingLayersRadius(
+        minLayersRadius,
+        minVertexSpacing,
+        vertexRadius
+      );
+    case 'custom':
+      return getCustomLayersRadius(
+        Object.keys(minLayersRadius).length,
+        layerSizingSettings.getLayerRadius
+      );
+    case 'auto':
+    default:
+      return getAutoLayersRadius(
+        minLayersRadius,
+        minVertexSpacing,
+        vertexRadius
+      );
+  }
+};
+
+const getLayout = (
+  minLayersRadius: Record<string, number>,
+  minVertexSpacing: number,
+  vertexRadius: number,
+  layerSizingSettings: OrbitsLayerSizingSettings
+) => {
+  const layersRadius = getLayersRadius(
+    minLayersRadius,
+    minVertexSpacing,
+    vertexRadius,
+    layerSizingSettings
+  );
 
   const containerSize =
     2 * ((layersRadius[layersRadius.length - 1] as number) + vertexRadius);

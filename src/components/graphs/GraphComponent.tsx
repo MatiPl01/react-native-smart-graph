@@ -50,8 +50,8 @@ export default function GraphComponent<V, E>({
     <Group>
       {Object.entries(graphLayout.verticesPositions).map(([key, { x, y }]) => (
         <Group key={key}>
-          <Circle key={key} cx={x} cy={y} r={5} color='lightblue' />
-          <Text x={x} y={y} text={key} font={font} />
+          <Circle key={key} cx={x} cy={y} r={5} color='brown' />
+          <Text x={x} y={y} text={key} font={font} color='white' />
         </Group>
       ))}
     </Group>

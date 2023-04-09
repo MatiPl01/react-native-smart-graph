@@ -6,7 +6,7 @@ export type DirectedGraphPlacementSettings<V, E> =
   | RandomPlacementSettings
   | CircularPlacementSettings<V, E>
   | OrbitsPlacementSettings
-  | TreePlacementSettings<V, E>;
+  | TreePlacementSettings;
 
 export type UndirectedGraphPlacementSettings<V, E> =
   | RandomPlacementSettings
@@ -18,7 +18,12 @@ export type PlacementSettings<V, E> =
 
 type SharedPlacementSettings = {
   vertexRadius?: number;
-  minVertexDistance?: number;
+  minVertexSpacing?: number;
+};
+
+type SortablePlacementSettings<V, E> = {
+  sortVertices?: boolean;
+  sortComparator?: (u: Vertex<V, E>, v: Vertex<V, E>) => number;
 };
 
 export type RandomLayoutType = 'grid' | 'honeycomb' | 'random';
@@ -30,7 +35,7 @@ export type RandomPlacementSettings = {
   | {
       layoutType: Exclude<RandomLayoutType, 'random'>;
       density?: number;
-      minVertexDistance?: number;
+      minVertexSpacing?: number;
     }
   | {
       layoutType: 'random';
@@ -39,20 +44,45 @@ export type RandomPlacementSettings = {
     }
 );
 
-export type OrbitsPlacementSettings = SharedPlacementSettings & {
+export type OrbitsLayerSizing =
+  | 'auto'
+  | 'equal'
+  | 'quad-increasing'
+  | 'non-decreasing'
+  | 'custom';
+
+export type GetLayerRadiusFunction = (props: {
+  layerIndex: number;
+  layersCount: number;
+  previousLayerRadius: number;
+}) => number;
+
+export type OrbitsSharedLayerSizingSettings = {
+  layerSizing?: Exclude<OrbitsLayerSizing, 'custom'>;
+};
+
+export type OrbitsCustomLayerSizingSettings = {
+  layerSizing: 'custom';
+  getLayerRadius: GetLayerRadiusFunction;
+};
+
+export type OrbitsLayerSizingSettings =
+  | OrbitsSharedLayerSizingSettings
+  | OrbitsCustomLayerSizingSettings;
+
+// TODO - maybe add orbits vertices sorting
+export type OrbitsPlacementSettings = (SharedPlacementSettings & {
   strategy: 'orbits';
-};
+}) &
+  OrbitsLayerSizingSettings;
 
-export type CircularPlacementSettings<V, E> = SharedPlacementSettings & {
-  strategy: 'circular';
-  sortVertices?: boolean;
-  sortComparator?: (u: Vertex<V, E>, v: Vertex<V, E>) => number;
-};
+export type CircularPlacementSettings<V, E> = SharedPlacementSettings &
+  SortablePlacementSettings<V, E> & {
+    strategy: 'circular';
+  };
 
-export type TreePlacementSettings<V, E> = SharedPlacementSettings & {
+export type TreePlacementSettings = SharedPlacementSettings & {
   strategy: 'tree';
-  sortChildren?: boolean; // TODO
-  sortComparator?: (u: Vertex<V, E>, v: Vertex<V, E>) => number;
 };
 
 export type PlacedVerticesPositions = Record<string, { x: number; y: number }>;

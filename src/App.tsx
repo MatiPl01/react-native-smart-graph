@@ -10,12 +10,14 @@ export default function App() {
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
-        <View className='h-4/5 bg-gray-500'>
+        <View className='h-4/5 bg-black'>
           <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               placementSettings={{
                 strategy: 'orbits',
-                vertexRadius: 5
+                vertexRadius: 5,
+                minVertexSpacing: 10,
+                layerSizing: 'equal'
               }}
               vertices={[
                 { key: 'A', data: [] },
@@ -33,7 +35,11 @@ export default function App() {
                 { key: 'M', data: [] },
                 { key: 'N', data: [] },
                 { key: 'O', data: [] },
-                { key: 'P', data: [] }
+                { key: 'P', data: [] },
+                { key: 'Q', data: [] },
+                { key: 'R', data: [] },
+                { key: 'S', data: [] },
+                { key: 'T', data: [] }
               ]}
               edges={[
                 { key: 'AB', from: 'A', to: 'B', data: [] },
@@ -50,7 +56,11 @@ export default function App() {
                 { key: 'IM', from: 'I', to: 'M', data: [] },
                 { key: 'IN', from: 'I', to: 'N', data: [] },
                 { key: 'NO', from: 'N', to: 'O', data: [] },
-                { key: 'JP', from: 'J', to: 'P', data: [] }
+                { key: 'JP', from: 'J', to: 'P', data: [] },
+                { key: 'OQ', from: 'O', to: 'Q', data: [] },
+                { key: 'OR', from: 'O', to: 'R', data: [] },
+                { key: 'OS', from: 'O', to: 'S', data: [] },
+                { key: 'ST', from: 'S', to: 'T', data: [] }
               ]}
             />
           </PannableScalableView>

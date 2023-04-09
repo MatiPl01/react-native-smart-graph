@@ -26,7 +26,7 @@ const placeVerticesRandomly = <V, E>(
     vertices: graph.vertices,
     density: settings.density || RANDOM_PLACEMENT.density,
     vertexRadius: settings.vertexRadius || SHARED.vertexRadius,
-    minVertexDistance: settings.minVertexDistance || SHARED.minVertexDistance
+    minVertexSpacing: settings.minVertexSpacing || SHARED.minVertexSpacing
   };
 
   switch (settings.layoutType) {
@@ -41,13 +41,13 @@ type CalcVerticesPositionsProps<V, E> = {
   vertices: Vertex<V, E>[];
   density: number;
   vertexRadius: number;
-  minVertexDistance: number;
+  minVertexSpacing: number;
 };
 
 const calcVerticesGridPositions = <V, E>(
   props: CalcVerticesPositionsProps<V, E>
 ): GraphLayout => {
-  const { vertices, density, vertexRadius, minVertexDistance } = props;
+  const { vertices, density, vertexRadius, minVertexSpacing } = props;
   const verticesCount = vertices.length;
 
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
@@ -56,15 +56,15 @@ const calcVerticesGridPositions = <V, E>(
   for (let i = 0; i < maxPointsInLine; i++) {
     for (let j = 0; j < maxPointsInLine; j++) {
       availablePositions.push({
-        x: vertexRadius + i * (2 * vertexRadius + minVertexDistance),
-        y: vertexRadius + j * (2 * vertexRadius + minVertexDistance)
+        x: vertexRadius + i * (2 * vertexRadius + minVertexSpacing),
+        y: vertexRadius + j * (2 * vertexRadius + minVertexSpacing)
       });
     }
   }
 
   const containerSize =
     2 * vertexRadius +
-    (minVertexDistance + 2 * vertexRadius) * (maxPointsInLine - 1);
+    (minVertexSpacing + 2 * vertexRadius) * (maxPointsInLine - 1);
   const selectedPositions = random.sample(availablePositions, verticesCount);
 
   return {
@@ -80,9 +80,9 @@ const calcVerticesGridPositions = <V, E>(
 const calcVerticesHoneycombPositions = <V, E>(
   props: CalcVerticesPositionsProps<V, E>
 ): GraphLayout => {
-  const { vertices, density, vertexRadius, minVertexDistance } = props;
+  const { vertices, density, vertexRadius, minVertexSpacing } = props;
   const verticesCount = vertices.length;
-  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
   const triangleHeight = (minVertexCenterDistance * Math.sqrt(3)) / 2;
 
   const availablePositionsCount = Math.ceil(verticesCount / density);

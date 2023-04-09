@@ -14,7 +14,7 @@ const placeVerticesCircular = <V, E>(
     sortComparator = defaultSortComparator,
     sortVertices = false,
     vertexRadius = SHARED.vertexRadius,
-    minVertexDistance = SHARED.minVertexDistance
+    minVertexSpacing = SHARED.minVertexSpacing
   }: CircularPlacementSettings<V, E>
 ): GraphLayout => {
   const vertices = sortVertices
@@ -25,7 +25,7 @@ const placeVerticesCircular = <V, E>(
   const { radius, center, angleStep, width, height } = getLayout(
     vertices.length,
     vertexRadius,
-    minVertexDistance
+    minVertexSpacing
   );
 
   return {
@@ -44,7 +44,7 @@ const placeVerticesCircular = <V, E>(
 const getLayout = (
   verticesCount: number,
   vertexRadius: number,
-  minVertexDistance: number
+  minVertexSpacing: number
 ) => {
   let angleStep, radius;
 
@@ -54,7 +54,7 @@ const getLayout = (
   } else {
     angleStep = (2 * Math.PI) / verticesCount;
     radius =
-      (2 * vertexRadius + minVertexDistance) / (2 * Math.sin(angleStep / 2));
+      (2 * vertexRadius + minVertexSpacing) / (2 * Math.sin(angleStep / 2));
   }
 
   const containerSize = 2 * radius + 2 * vertexRadius;
