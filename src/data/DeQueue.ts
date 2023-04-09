@@ -1,18 +1,18 @@
 import Queue from './Queue';
 
 /**
- * DeQueue is an implementation of double-ended queue.\
+ * DeQueue is an implementation of double-ended queue.
  */
-export default class DeQueue<V> extends Queue<V> {
-  public enqueueFront(value: V): void {
+export default class DeQueue<T> extends Queue<T> {
+  public enqueueFront(value: T): void {
     this.linkedList.prepend(value);
   }
 
-  public enqueueFrontMany(values: V[]): void {
+  public enqueueFrontMany(values: T[]): void {
     values.forEach(value => this.enqueueFront(value));
   }
 
-  public peekBack(): V | null {
+  public peekBack(): T | null {
     if (!this.linkedList.tail) {
       return null;
     }
