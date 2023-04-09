@@ -82,8 +82,8 @@ const calcVerticesHoneycombPositions = <V, E>(
 ): GraphLayout => {
   const { vertices, density, vertexRadius, minVertexDistance } = props;
   const verticesCount = vertices.length;
-  const vertexDistance = 2 * vertexRadius + minVertexDistance;
-  const triangleHeight = (vertexDistance * Math.sqrt(3)) / 2;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
+  const triangleHeight = (minVertexCenterDistance * Math.sqrt(3)) / 2;
 
   const availablePositionsCount = Math.ceil(verticesCount / density);
   const availablePositions: { x: number; y: number }[] = [];
@@ -102,15 +102,15 @@ const calcVerticesHoneycombPositions = <V, E>(
       // Vertical line
       x =
         vertexRadius +
-        (currentVertexIndex % 2 === 1 ? vertexDistance / 2 : 0) +
-        vertexDistance * Math.floor(lineNumber / 2);
+        (currentVertexIndex % 2 === 1 ? minVertexCenterDistance / 2 : 0) +
+        minVertexCenterDistance * Math.floor(lineNumber / 2);
       y = vertexRadius + currentVertexIndex * triangleHeight;
     } else {
       // Horizontal line
       x =
         vertexRadius +
-        ((lineNumber - 2) % 4 === 0 ? vertexDistance / 2 : 0) +
-        currentVertexIndex * vertexDistance;
+        ((lineNumber - 2) % 4 === 0 ? minVertexCenterDistance / 2 : 0) +
+        currentVertexIndex * minVertexCenterDistance;
       y = vertexRadius + Math.floor(lineNumber / 2) * triangleHeight;
     }
 

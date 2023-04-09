@@ -1,20 +1,22 @@
 import { useMemo } from 'react';
 
 import { UndirectedGraph } from '@/models/graphs';
-import { PlacementSettings } from '@/types/placement';
-import { placeVertices } from '@/utils/placement';
+import { UndirectedGraphPlacementSettings } from '@/types/placement';
+
+import GraphComponent, { TempProps } from './GraphComponent';
 
 type UndirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; vertices: [string, string]; data: E }>;
-  placementSettings?: PlacementSettings<V, E>;
+  placementSettings?: UndirectedGraphPlacementSettings<V, E>;
 };
 
-export default function UndirectedGraphComponent<V, E>({
+function UndirectedGraphComponent<V, E>({
   vertices,
   edges,
-  placementSettings
-}: UndirectedGraphComponentProps<V, E>) {
+  placementSettings,
+  onMeasure
+}: UndirectedGraphComponentProps<V, E> & TempProps) {
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
 
@@ -29,10 +31,19 @@ export default function UndirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  const positions = useMemo(
-    () => placeVertices(graph, 200, 200, 5, placementSettings),
-    [graph]
+  return (
+    <GraphComponent
+      graph={graph}
+      onMeasure={onMeasure}
+      placementSettings={placementSettings}
+    />
   );
-
-  return null;
 }
+
+export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
+  return (
+    <UndirectedGraphComponent
+      {...(props as UndirectedGraphComponentProps<V, E> & TempProps)}
+    />
+  );
+};

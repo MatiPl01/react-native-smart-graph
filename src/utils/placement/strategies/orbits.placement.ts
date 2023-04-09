@@ -7,9 +7,7 @@ import {
 } from '@/types/placement';
 import { findRootVertex, isGraphATree, isGraphDirected } from '@/utils/graphs';
 
-import { DEFAULTS } from '../constants';
-
-// TODO - improve orbits radius calculation (based on the number of vertices placed on each orbit and angles between them)
+import { SHARED } from '../constants';
 
 /**
  * The graph must be a tree!
@@ -23,8 +21,8 @@ import { DEFAULTS } from '../constants';
 const placeVerticesOnOrbits = <V, E>(
   graph: Graph<V, E>,
   {
-    vertexRadius = DEFAULTS.vertexRadius,
-    minVertexDistance = DEFAULTS.minVertexDistance
+    vertexRadius = SHARED.vertexRadius,
+    minVertexDistance = SHARED.minVertexDistance
   }: OrbitsPlacementSettings
 ): GraphLayout => {
   // TODO - maybe add undirected graph support
@@ -39,25 +37,25 @@ const placeVerticesOnOrbits = <V, E>(
     string,
     { layer: number; angle: number }
   > = {};
+  const minLayersRadius: Record<string, number> = {};
 
   const rootVertex = findRootVertex(graph) as Vertex<V, E>;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
 
   placeChildrenOnRingSection(
     rootVertex,
     0,
     0,
     2 * Math.PI,
+    minVertexCenterDistance,
+    minLayersRadius,
     verticesLayerPositions
   );
 
-  const totalLayers = Math.max(
-    ...Object.values(verticesLayerPositions).map(({ layer }) => layer)
-  );
-
-  const { center, maxRadius, width, height } = getLayout(
-    vertexRadius,
+  const { width, height, center, layersRadius } = getLayout(
+    minLayersRadius,
     minVertexDistance,
-    totalLayers
+    vertexRadius
   );
 
   return {
@@ -65,7 +63,7 @@ const placeVerticesOnOrbits = <V, E>(
     height,
     verticesPositions: Object.entries(verticesLayerPositions).reduce(
       (acc, [key, { layer, angle }]) => {
-        const r = (layer / totalLayers) * maxRadius;
+        const r = layersRadius[layer] as number;
         acc[key] = {
           x: center.x + r * Math.cos(angle),
           y: center.y + r * Math.sin(angle)
@@ -82,8 +80,25 @@ const placeChildrenOnRingSection = <V, E>(
   parentLayer: number,
   parentAngle: number,
   sectionAngle: number,
+  minVertexCenterDistance: number,
+  minLayersRadius: Record<string, number>,
   verticesLayerPositions: Record<string, { layer: number; angle: number }>
 ) => {
+  if (parentLayer > 0) {
+    const denominator = 2 * Math.sin(sectionAngle / 2);
+    const sectionRadius =
+      denominator > 1e-10
+        ? minVertexCenterDistance / denominator
+        : minVertexCenterDistance;
+
+    minLayersRadius[parentLayer] = Math.max(
+      minLayersRadius[parentLayer] || 0,
+      sectionRadius
+    );
+  } else {
+    minLayersRadius[parentLayer] = 0;
+  }
+
   verticesLayerPositions[parent.key] = {
     layer: parentLayer,
     angle: parentAngle
@@ -97,34 +112,40 @@ const placeChildrenOnRingSection = <V, E>(
         sectionAngle / 2 +
         (sectionAngle / parent.neighbors.length) * (i + 0.5),
       sectionAngle / parent.neighbors.length,
+      minVertexCenterDistance,
+      minLayersRadius,
       verticesLayerPositions
     );
   });
 };
 
 const getLayout = (
-  vertexRadius: number,
+  minLayersRadius: Record<string, number>,
   minVertexDistance: number,
-  layersCount: number
+  vertexRadius: number
 ) => {
-  let height, maxRadius, width;
+  const layersRadius = [0];
 
-  if (layersCount === 0) {
-    width = height = vertexRadius * 2;
-    maxRadius = 0;
-  } else {
-    width = height = 2 * layersCount * (2 * vertexRadius + minVertexDistance);
-    maxRadius = Math.min(width, height) / 2 - vertexRadius;
+  for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
+    layersRadius.push(
+      Math.max(
+        minLayersRadius[i] as number,
+        (layersRadius[i - 1] as number) + minVertexDistance + 2 * vertexRadius
+      )
+    );
   }
 
+  const containerSize =
+    2 * ((layersRadius[layersRadius.length - 1] as number) + vertexRadius);
+
   return {
-    width,
-    height,
-    maxRadius,
+    width: containerSize,
+    height: containerSize,
     center: {
-      x: width / 2,
-      y: height / 2
-    }
+      x: containerSize / 2,
+      y: containerSize / 2
+    },
+    layersRadius
   };
 };
 

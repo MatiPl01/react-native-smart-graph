@@ -34,7 +34,7 @@ const placeVerticesOnTree = <V, E>(
   const { width, height } = getLayout(vertexRadius, minVertexDistance, graph);
 
   const orderGrid = getOrderGrid(graph);
-  const vertexDistance = 2 * vertexRadius + minVertexDistance;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
 
   return {
     width,
@@ -47,8 +47,8 @@ const placeVerticesOnTree = <V, E>(
       const gridPosition = orderGrid[key]!;
 
       acc[key] = {
-        x: vertexRadius + gridPosition.col * vertexDistance,
-        y: vertexRadius + gridPosition.row * vertexDistance
+        x: vertexRadius + gridPosition.col * minVertexCenterDistance,
+        y: vertexRadius + gridPosition.row * minVertexCenterDistance
       };
       return acc;
     }, {} as PlacedVerticesPositions)
@@ -111,9 +111,10 @@ const getLayout = <V, E>(
     getMaxTreeDimensions(rootVertex);
 
   const padding = 2 * vertexRadius;
-  const vertexDistance = padding + minVertexDistance;
-  const containerWidth = padding + (maxTreeWidth - 1) * vertexDistance;
-  const containerHeight = padding + (maxTreeDepth - 1) * vertexDistance;
+  const minVertexCenterDistance = 2 * vertexRadius + minVertexDistance;
+  const containerWidth = padding + (maxTreeWidth - 1) * minVertexCenterDistance;
+  const containerHeight =
+    padding + (maxTreeDepth - 1) * minVertexCenterDistance;
 
   return {
     width: containerWidth,

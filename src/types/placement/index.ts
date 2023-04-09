@@ -2,11 +2,19 @@ import { Vertex } from '../graphs';
 
 export type PlacementStrategy = 'random' | 'circular' | 'orbits' | 'tree';
 
-export type PlacementSettings<V, E> =
+export type DirectedGraphPlacementSettings<V, E> =
   | RandomPlacementSettings
   | CircularPlacementSettings<V, E>
   | OrbitsPlacementSettings
   | TreePlacementSettings<V, E>;
+
+export type UndirectedGraphPlacementSettings<V, E> =
+  | RandomPlacementSettings
+  | CircularPlacementSettings<V, E>;
+
+export type PlacementSettings<V, E> =
+  | DirectedGraphPlacementSettings<V, E>
+  | UndirectedGraphPlacementSettings<V, E>;
 
 type SharedPlacementSettings = {
   vertexRadius?: number;
