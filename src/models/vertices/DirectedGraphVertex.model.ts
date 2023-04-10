@@ -1,13 +1,20 @@
-import { DirectedEdge, DigraphVertex as IDigraphVertex } from '@/types/graphs';
+import {
+  DirectedEdge,
+  DirectedGraphVertex as IDirectedGraphVertex
+} from '@/types/graphs';
 
 import Vertex from './Vertex.model';
 
-export default class DigraphVertex<V, E>
+export default class DirectedGraphVertex<V, E>
   extends Vertex<V, E>
-  implements IDigraphVertex<V, E>
+  implements IDirectedGraphVertex<V, E>
 {
   private readonly inEdges$: Record<string, DirectedEdge<E, V>> = {};
   private readonly outEdges$: Record<string, DirectedEdge<E, V>> = {};
+
+  get neighbors(): Array<IDirectedGraphVertex<V, E>> {
+    return Object.values(this.outEdges$).map(edge => edge.target);
+  }
 
   get inEdges(): Array<DirectedEdge<E, V>> {
     return Object.values(this.inEdges$);

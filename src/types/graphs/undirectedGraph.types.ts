@@ -5,7 +5,7 @@ export interface UndirectedGraphVertex<V, E> extends Vertex<V, E> {
   removeEdge(key: string): UndirectedEdge<E, V>;
 }
 
-export interface UndirectedEdge<E, V> extends Edge<E> {
-  get vertices(): [Vertex<V, E>, Vertex<V, E>];
+export interface UndirectedEdge<E, V> extends Edge<E, V> {
+  get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>];
   get isLoop(): boolean;
 }

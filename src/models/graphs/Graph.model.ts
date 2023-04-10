@@ -4,7 +4,7 @@ export default abstract class Graph<
   V,
   E,
   GV extends Vertex<V, E>,
-  GE extends Edge<E>
+  GE extends Edge<E, V>
 > implements IGraph<V, E>
 {
   protected readonly vertices$: Record<string, GV> = {};
@@ -17,6 +17,19 @@ export default abstract class Graph<
   get edges(): Array<GE> {
     return Object.values(this.edges$);
   }
+
+  abstract isDirected(): boolean;
+
+  abstract insertVertex(key: string, value: V): GV;
+
+  abstract insertEdge(
+      sourceKey: string,
+      targetKey: string,
+      edgeKey: string,
+      value: E
+  ): GE;
+
+  abstract removeEdge(key: string): E;
 
   hasVertex(key: string): boolean {
     return !!this.vertices$[key];
@@ -40,15 +53,6 @@ export default abstract class Graph<
     return this.edges$[key] as GE;
   }
 
-  abstract insertVertex(key: string, value: V): GV;
-
-  abstract insertEdge(
-    sourceKey: string,
-    targetKey: string,
-    edgeKey: string,
-    value: E
-  ): GE;
-
   removeVertex(key: string): V {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
@@ -62,8 +66,6 @@ export default abstract class Graph<
 
     return vertex.value;
   }
-
-  abstract removeEdge(key: string): E;
 
   protected insertVertexObject(vertex: GV): GV {
     if (this.vertices$[vertex.key]) {

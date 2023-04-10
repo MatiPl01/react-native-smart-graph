@@ -1,4 +1,4 @@
-import { Dimensions, ObjectFit } from '@/types/views.types';
+import { Dimensions, ObjectFit } from '@/types/views';
 
 export const getScaleInParent = (
   objectFit: ObjectFit,

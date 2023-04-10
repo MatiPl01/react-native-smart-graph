@@ -1,19 +1,26 @@
-import { DigraphVertex, DirectedEdge as IDirectedEdge } from '@/types/graphs';
+import {
+  DirectedGraphVertex,
+  DirectedEdge as IDirectedEdge
+} from '@/types/graphs';
 
 export default class DirectedEdge<E, V> implements IDirectedEdge<E, V> {
   constructor(
     private readonly key$: string,
     private readonly value$: E,
-    private readonly source$: DigraphVertex<V, E>,
-    private readonly target$: DigraphVertex<V, E>
+    private readonly source$: DirectedGraphVertex<V, E>,
+    private readonly target$: DirectedGraphVertex<V, E>
   ) {}
 
-  get source(): DigraphVertex<V, E> {
+  get source(): DirectedGraphVertex<V, E> {
     return this.source$;
   }
 
-  get target(): DigraphVertex<V, E> {
+  get target(): DirectedGraphVertex<V, E> {
     return this.target$;
+  }
+
+  get vertices(): [DirectedGraphVertex<V, E>, DirectedGraphVertex<V, E> ] {
+    return [this.source, this.target];
   }
 
   get key(): string {

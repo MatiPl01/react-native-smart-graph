@@ -23,12 +23,12 @@ import {
   MeasureEvent,
   TestGraphPrivateProps
 } from '@/components/graphs/TestGraph';
-import { Dimensions, ObjectFit } from '@/types/views.types';
+import { Dimensions, ObjectFit } from '@/types/views';
 import {
   clamp,
   getCenterInParent,
   getScaleInParent
-} from '@/utils/views.utils';
+} from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
