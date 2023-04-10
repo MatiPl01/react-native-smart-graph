@@ -15,7 +15,6 @@ type VertexComponentProps<V, E> = {
   vertexRenderer: (props: VertexRendererProps<V>) => JSX.Element;
 };
 
-// TODO - check if memoization works
 function VertexComponent<V, E>({
   vertex,
   radius,
