@@ -4,8 +4,8 @@ import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphPlacementSettings } from '@/types/placement';
 
 import GraphComponent, {
-  SharedGraphComponentProps,
-  TempProps
+  PrivateSharedGraphComponentProps,
+  SharedGraphComponentProps
 } from './GraphComponent';
 
 type DirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
@@ -18,9 +18,9 @@ function DirectedGraphComponent<V, E>({
   vertices,
   edges,
   placementSettings,
-  onMeasure,
-  vertexRenderer
-}: DirectedGraphComponentProps<V, E> & TempProps) {
+  vertexRenderer,
+  setAnimatedContentDimensions
+}: DirectedGraphComponentProps<V, E> & PrivateSharedGraphComponentProps) {
   const graph = useMemo(() => {
     const g = new DirectedGraph<V, E>();
 
@@ -37,9 +37,9 @@ function DirectedGraphComponent<V, E>({
   return (
     <GraphComponent
       graph={graph}
-      onMeasure={onMeasure}
       placementSettings={placementSettings}
       vertexRenderer={vertexRenderer}
+      setAnimatedContentDimensions={setAnimatedContentDimensions}
     />
   );
 }
@@ -47,7 +47,8 @@ function DirectedGraphComponent<V, E>({
 export default <V, E>(props: DirectedGraphComponentProps<V, E>) => {
   return (
     <DirectedGraphComponent
-      {...(props as DirectedGraphComponentProps<V, E> & TempProps)}
+      {...(props as DirectedGraphComponentProps<V, E> &
+        PrivateSharedGraphComponentProps)}
     />
   );
 };

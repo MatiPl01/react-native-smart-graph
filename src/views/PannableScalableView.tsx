@@ -4,12 +4,15 @@ import {
   PropsWithChildren,
   cloneElement,
   useCallback,
-  useRef
+  useEffect,
+  useRef,
+  useState
 } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   Easing,
+  SharedValue,
   useDerivedValue,
   useSharedValue,
   withDecay,
@@ -19,16 +22,9 @@ import {
 import { Canvas, Group } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
-import {
-  MeasureEvent,
-  TestGraphPrivateProps
-} from '@/components/graphs/TestGraph';
+import { PrivateSharedGraphComponentProps } from '@/components/graphs/GraphComponent';
 import { Dimensions, ObjectFit } from '@/types/views';
-import {
-  clamp,
-  getCenterInParent,
-  getScaleInParent
-} from '@/utils/views';
+import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
@@ -48,12 +44,16 @@ export default function PannableScalableView({
   children,
   controls = false
 }: PannableScalableViewProps) {
+  const [animatedContentDimensions, setAnimatedContentDimensions] = useState<{
+    width: SharedValue<number>;
+    height: SharedValue<number>;
+  }>();
+
   const isRenderedRef = useRef({ canvas: false, content: false });
   const minScaleRef = useRef(minScale);
   const maxScaleRef = useRef(maxScale);
 
   const canvasDimensions = useSharedValue({ width: 0, height: 0 });
-  const contentDimensions = useSharedValue({ width: 0, height: 0 });
   const initialScale = useSharedValue(0);
 
   const startScale = useSharedValue(0);
@@ -70,6 +70,19 @@ export default function PannableScalableView({
     [translateX, translateY, scale]
   );
 
+  useEffect(() => {
+    isRenderedRef.current.content = true;
+    if (isRenderedRef.current.canvas) {
+      updateContentPosition(
+        {
+          width: animatedContentDimensions?.width.value || 0,
+          height: animatedContentDimensions?.height.value || 0
+        },
+        canvasDimensions.value
+      );
+    }
+  }, [animatedContentDimensions]);
+
   const handleCanvasRender = useCallback(
     ({
       nativeEvent: {
@@ -80,19 +93,13 @@ export default function PannableScalableView({
       isRenderedRef.current.canvas = true;
 
       if (isRenderedRef.current.content) {
-        updateContentPosition(contentDimensions.value, { width, height });
-      }
-    },
-    []
-  );
-
-  const handleContentMeasure = useCallback(
-    ({ layout: { width, height } }: MeasureEvent) => {
-      isRenderedRef.current.content = true;
-      contentDimensions.value = { width, height };
-
-      if (isRenderedRef.current.canvas) {
-        updateContentPosition({ width, height }, canvasDimensions.value);
+        updateContentPosition(
+          {
+            width: animatedContentDimensions?.width.value || 0,
+            height: animatedContentDimensions?.height.value || 0
+          },
+          { width, height }
+        );
       }
     },
     []
@@ -117,7 +124,10 @@ export default function PannableScalableView({
 
   const handleReset = useCallback(() => {
     updateContentPosition(
-      contentDimensions.value,
+      {
+        width: animatedContentDimensions?.width.value || 0,
+        height: animatedContentDimensions?.height.value || 0
+      },
       canvasDimensions.value,
       true
     );
@@ -183,13 +193,15 @@ export default function PannableScalableView({
 
     if (origin) {
       const relativeScale = clampedScale / scale.value;
-      const { width: contentWidth, height: contentHeight } =
-        contentDimensions.value;
       const { width: canvasWidth, height: canvasHeight } =
         canvasDimensions.value;
 
-      const clampWidth = canvasWidth - contentWidth * clampedScale;
-      const clampHeight = canvasHeight - contentHeight * clampedScale;
+      const clampWidth =
+        canvasWidth -
+        (animatedContentDimensions?.width.value || 0) * clampedScale;
+      const clampHeight =
+        canvasHeight -
+        (animatedContentDimensions?.height.value || 0) * clampedScale;
 
       translateContentTo(
         {
@@ -225,13 +237,13 @@ export default function PannableScalableView({
         velocityX,
         translateX.value,
         canvasDimensions.value.width -
-          contentDimensions.value.width * scale.value
+          (animatedContentDimensions?.width.value || 0) * scale.value
       );
       translateY.value = translateWithDecay(
         velocityY,
         translateY.value,
         canvasDimensions.value.height -
-          contentDimensions.value.height * scale.value
+          (animatedContentDimensions?.height.value || 0) * scale.value
       );
     });
 
@@ -278,9 +290,9 @@ export default function PannableScalableView({
           <Group transform={transform}>
             {Children.map(children, child => {
               const childElement =
-                child as React.ReactElement<TestGraphPrivateProps>;
+                child as React.ReactElement<PrivateSharedGraphComponentProps>;
               return cloneElement(childElement, {
-                onMeasure: handleContentMeasure
+                setAnimatedContentDimensions
               });
             })}
           </Group>

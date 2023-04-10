@@ -173,9 +173,10 @@ const getNonDecreasingLayersRadius = (
   vertexRadius: number
 ): number[] => {
   const layersRadius = [0];
+  const layersCount = Object.keys(minLayersRadius).length;
   let maxDistanceBetweenLayers = minVertexSpacing + 2 * vertexRadius;
 
-  for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
+  for (let i = 1; i < layersCount; i++) {
     layersRadius.push(
       Math.max(
         (layersRadius[i - 1] as number) + maxDistanceBetweenLayers,
@@ -217,8 +218,9 @@ const getAutoLayersRadius = (
   vertexRadius: number
 ): number[] => {
   const layersRadius = [0];
+  const layersCount = Object.keys(minLayersRadius).length;
 
-  for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
+  for (let i = 1; i < layersCount; i++) {
     layersRadius.push(
       Math.max(
         minLayersRadius[i] as number,

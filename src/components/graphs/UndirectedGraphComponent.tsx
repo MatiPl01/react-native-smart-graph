@@ -4,8 +4,8 @@ import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphPlacementSettings } from '@/types/placement';
 
 import GraphComponent, {
-  SharedGraphComponentProps,
-  TempProps
+  PrivateSharedGraphComponentProps,
+  SharedGraphComponentProps
 } from './GraphComponent';
 
 type UndirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
@@ -17,10 +17,10 @@ type UndirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
 function UndirectedGraphComponent<V, E>({
   vertices,
   edges,
-  onMeasure,
   placementSettings,
-  vertexRenderer
-}: UndirectedGraphComponentProps<V, E> & TempProps) {
+  vertexRenderer,
+  setAnimatedContentDimensions
+}: UndirectedGraphComponentProps<V, E> & PrivateSharedGraphComponentProps) {
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
 
@@ -38,9 +38,9 @@ function UndirectedGraphComponent<V, E>({
   return (
     <GraphComponent
       graph={graph}
-      onMeasure={onMeasure}
       placementSettings={placementSettings}
       vertexRenderer={vertexRenderer}
+      setAnimatedContentDimensions={setAnimatedContentDimensions}
     />
   );
 }
@@ -48,7 +48,8 @@ function UndirectedGraphComponent<V, E>({
 export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
   return (
     <UndirectedGraphComponent
-      {...(props as UndirectedGraphComponentProps<V, E> & TempProps)}
+      {...(props as UndirectedGraphComponentProps<V, E> &
+        PrivateSharedGraphComponentProps)}
     />
   );
 };

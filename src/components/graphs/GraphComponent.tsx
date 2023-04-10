@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SharedValue } from 'react-native-reanimated';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  SharedValue,
+  useSharedValue,
+  withRepeat,
+  withTiming
+} from 'react-native-reanimated';
 
 import { Group } from '@shopify/react-native-skia';
 
@@ -11,34 +16,33 @@ import { SHARED as SHARED_PLACEMENT_SETTINGS } from '@/utils/placement/constants
 
 import VertexComponent from './vertices/VertexComponent';
 
-export type MeasureEvent = {
-  // TODO - remove this
-  layout: {
-    width: number;
-    height: number;
-  };
-};
-
-export type TempProps = {
-  // TODO - remove this
-  onMeasure: (event: MeasureEvent) => void;
+export type PrivateSharedGraphComponentProps = {
+  setAnimatedContentDimensions: (dimensions: {
+    width: SharedValue<number>;
+    height: SharedValue<number>;
+  }) => void;
 };
 
 export type SharedGraphComponentProps<V> = {
   vertexRenderer: (props: VertexRendererProps<V>) => JSX.Element;
 };
 
-type GraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
-  graph: Graph<V, E>;
-  placementSettings?: PlacementSettings<V, E>;
-};
+type GraphComponentProps<V, E> = PrivateSharedGraphComponentProps &
+  SharedGraphComponentProps<V> & {
+    graph: Graph<V, E>;
+    placementSettings?: PlacementSettings<V, E>;
+  };
 
 export default function GraphComponent<V, E>({
   graph,
-  onMeasure,
   placementSettings,
-  vertexRenderer
-}: GraphComponentProps<V, E> & TempProps) {
+  vertexRenderer,
+  setAnimatedContentDimensions
+}: GraphComponentProps<V, E>) {
+  const containerWidth = useSharedValue(200); // TODO - update container size based on these dimensions
+  const containerHeight = useSharedValue(200);
+
+  const renderedVerticesCountRef = useRef(0);
   const verticesPositionsRef = useRef<
     Record<string, { x: SharedValue<number>; y: SharedValue<number> }>
   >({});
@@ -52,22 +56,31 @@ export default function GraphComponent<V, E>({
     [placementSettings]
   );
 
-  const graphLayout = useMemo(
-    () => placeVertices(graph, memoPlacementSettings),
-    [graph]
-  );
+  const graphLayout = useMemo(() => {
+    // Reset the number of rendered vertices
+    renderedVerticesCountRef.current = 0;
 
-  const memoVertexRenderer = useCallback(vertexRenderer, [vertexRenderer]);
+    // Calculate the new graph placement
+    const result = placeVertices(graph, memoPlacementSettings);
+
+    // Update the canvas dimensions
+    containerWidth.value = result.width;
+    containerHeight.value = result.height;
+
+    return {
+      ...result,
+      verticesCount: Object.keys(result.verticesPositions).length
+    };
+  }, [graph, memoPlacementSettings]);
 
   useEffect(() => {
-    // TODO - improve this
-    onMeasure({
-      layout: {
-        width: graphLayout.width,
-        height: graphLayout.height
-      }
+    setAnimatedContentDimensions({
+      width: containerWidth,
+      height: containerHeight
     });
-  }, [graphLayout]);
+  }, []);
+
+  const memoVertexRenderer = useCallback(vertexRenderer, [vertexRenderer]);
 
   const setAnimatedVertexPosition = useCallback(
     (
@@ -75,6 +88,31 @@ export default function GraphComponent<V, E>({
       position: { x: SharedValue<number>; y: SharedValue<number> }
     ) => {
       verticesPositionsRef.current[key] = position;
+      renderedVerticesCountRef.current++;
+
+      if (renderedVerticesCountRef.current === graphLayout.verticesCount) {
+        const center = {
+          x: graphLayout.width / 2,
+          y: graphLayout.height / 2
+        };
+
+        Object.values(verticesPositionsRef.current).forEach(({ x, y }) => {
+          x.value = withRepeat(
+            withTiming(x.value + 1.25 * (x.value - center.x), {
+              duration: 1000
+            }),
+            Infinity,
+            true
+          );
+          y.value = withRepeat(
+            withTiming(y.value + 1.25 * (y.value - center.y), {
+              duration: 1000
+            }),
+            Infinity,
+            true
+          );
+        });
+      }
     },
     [verticesPositionsRef.current]
   );
