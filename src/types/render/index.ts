@@ -1,28 +1,29 @@
 import { SharedValue } from 'react-native-reanimated';
 
-export type AnimatedPosition = {
-  x: SharedValue<number>;
-  y: SharedValue<number>;
-};
-
 export type VertexRendererProps<V> = {
   key: string;
   data: V;
   radius: number;
-  position: AnimatedPosition;
+  position: {
+    x: SharedValue<number>;
+    y: SharedValue<number>;
+  };
 };
 
 export type DirectedEdgeRendererProps<E, V> = {
   key: string;
   data: E;
-  from: { x: number; y: number }; // TODO - use AnimatedPosition
-  to: { x: number; y: number };
+  from: SharedValue<{ x: number; y: number }>;
+  to: SharedValue<{ x: number; y: number }>;
 };
 
 export type UndirectedEdgeRendererProps<E, V> = {
   key: string;
   data: E;
-  vertices: [{ x: number; y: number }, { x: number; y: number }];
+  points: [
+    SharedValue<{ x: number; y: number }>,
+    SharedValue<{ x: number; y: number }>
+  ];
 };
 
 export type EdgeRendererProps<E, V> =

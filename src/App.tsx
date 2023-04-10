@@ -2,14 +2,7 @@ import React from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import {
-  Circle,
-  Group,
-  Line,
-  Text,
-  useFont,
-  vec
-} from '@shopify/react-native-skia';
+import { Circle, Group, Line, Text, useFont } from '@shopify/react-native-skia';
 
 import FONTS from '@/assets/fonts';
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
@@ -17,7 +10,7 @@ import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import PannableScalableView from './views/PannableScalableView';
 
 export default function App() {
-  const font = useFont(FONTS.rubikFont, 10);
+  const font = useFont(FONTS.rubikFont, 25);
 
   if (font === null) {
     return null;
@@ -26,15 +19,9 @@ export default function App() {
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
-        <View className='h-4/5 bg-black'>
+        <View className='grow bg-black'>
           <PannableScalableView objectFit='cover' controls>
             <DirectedGraphComponent
-              placementSettings={{
-                strategy: 'orbits',
-                vertexRadius: 5,
-                minVertexSpacing: 10,
-                layerSizing: 'equal'
-              }}
               vertices={[
                 { key: 'A', data: [] },
                 { key: 'B', data: [] },
@@ -78,24 +65,25 @@ export default function App() {
                 { key: 'OS', from: 'O', to: 'S', data: [] },
                 { key: 'ST', from: 'S', to: 'T', data: [] }
               ]}
+              placementSettings={{
+                strategy: 'orbits',
+                vertexRadius: 15,
+                minVertexSpacing: 10,
+                layerSizing: 'equal'
+              }}
               // eslint-disable-next-line react/no-unstable-nested-components
               vertexRenderer={({ key, radius, position: { x, y } }) => (
                 <Group>
-                  <Circle cx={x} cy={y} r={radius} color='brown' />
-                  <Circle cx={x} cy={y} r={radius * 0.75} color='green' />
+                  <Circle cx={x} cy={y} r={radius} color='gold' />
+                  <Circle cx={x} cy={y} r={radius * 0.75} color='black' />
                   <Text x={x} y={y} text={key} font={font} color='white' />
                 </Group>
               )}
               // eslint-disable-next-line react/no-unstable-nested-components
-              edgeRenderer={({
-                key,
-                from: { x: x1, y: y1 },
-                to: { x: x2, y: y2 }
-              }) => (
+              edgeRenderer={({ from, to }) => (
                 <Line
-                  key={key}
-                  p1={vec(x1, y1)}
-                  p2={vec(x2, y2)}
+                  p1={from}
+                  p2={to}
                   color='lightblue'
                   style='stroke'
                   strokeWidth={1}

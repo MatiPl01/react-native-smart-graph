@@ -1,7 +1,7 @@
 import { memo } from 'react';
+import { SharedValue, useDerivedValue } from 'react-native-reanimated';
 
 import { Edge } from '@/types/graphs';
-import { PlacedVerticesPositions } from '@/types/placement';
 import {
   DirectedEdgeRendererProps,
   EdgeRendererProps,
@@ -14,7 +14,10 @@ import UndirectedEdgeComponent from './UndirectedEdgeComponent';
 
 type EdgeComponentProps<E, V, R extends EdgeRendererProps<E, V>> = {
   edge: Edge<E, V>;
-  verticesPositions: PlacedVerticesPositions; // TODO - use animated positions instead of static ones
+  verticesPositions: Record<
+    string,
+    { x: SharedValue<number>; y: SharedValue<number> }
+  >;
   edgeRenderer: (props: R) => JSX.Element;
 };
 
@@ -24,12 +27,26 @@ function EdgeComponent<E, V, R extends EdgeRendererProps<E, V>>({
   verticesPositions,
   edgeRenderer
 }: EdgeComponentProps<E, V, R>) {
+  const [v1, v2] = edge.vertices;
+  const v1Position = verticesPositions[v1.key];
+  const v2Position = verticesPositions[v2.key];
+
+  const p1 = useDerivedValue(
+    () => ({ x: v1Position?.x.value || 0, y: v1Position?.y.value || 0 }),
+    [v1Position?.x, v1Position?.y]
+  );
+
+  const p2 = useDerivedValue(
+    () => ({ x: v2Position?.x.value || 0, y: v2Position?.y.value || 0 }),
+    [v2Position?.x, v2Position?.y]
+  );
+
   if (isEdgeDirected(edge)) {
     return (
-      <DirectedEdgeComponent
+      <DirectedEdgeComponent<E, V>
         edge={edge}
-        source={verticesPositions[edge.source.key] as { x: number; y: number }}
-        target={verticesPositions[edge.target.key] as { x: number; y: number }}
+        from={p1}
+        to={p2}
         edgeRenderer={
           edgeRenderer as (
             props: DirectedEdgeRendererProps<E, V>
@@ -40,12 +57,9 @@ function EdgeComponent<E, V, R extends EdgeRendererProps<E, V>>({
   }
   if (isUndirectedEdge(edge)) {
     return (
-      <UndirectedEdgeComponent
+      <UndirectedEdgeComponent<E, V>
         edge={edge}
-        vertices={[
-          verticesPositions[edge.vertices[0].key] as { x: number; y: number },
-          verticesPositions[edge.vertices[1].key] as { x: number; y: number }
-        ]}
+        points={[p1, p2]}
         edgeRenderer={
           edgeRenderer as (
             props: UndirectedEdgeRendererProps<E, V>
