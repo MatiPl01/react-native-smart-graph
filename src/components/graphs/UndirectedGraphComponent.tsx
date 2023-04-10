@@ -3,9 +3,12 @@ import { useMemo } from 'react';
 import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphPlacementSettings } from '@/types/placement';
 
-import GraphComponent, { TempProps } from './GraphComponent';
+import GraphComponent, {
+  SharedGraphComponentProps,
+  TempProps
+} from './GraphComponent';
 
-type UndirectedGraphComponentProps<V, E> = {
+type UndirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; vertices: [string, string]; data: E }>;
   placementSettings?: UndirectedGraphPlacementSettings<V, E>;
@@ -14,8 +17,9 @@ type UndirectedGraphComponentProps<V, E> = {
 function UndirectedGraphComponent<V, E>({
   vertices,
   edges,
+  onMeasure,
   placementSettings,
-  onMeasure
+  vertexRenderer
 }: UndirectedGraphComponentProps<V, E> & TempProps) {
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
@@ -36,6 +40,7 @@ function UndirectedGraphComponent<V, E>({
       graph={graph}
       onMeasure={onMeasure}
       placementSettings={placementSettings}
+      vertexRenderer={vertexRenderer}
     />
   );
 }
