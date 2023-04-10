@@ -1,5 +1,11 @@
 import { DirectedGraph } from '@/models/graphs';
-import { Graph, Vertex } from '@/types/graphs';
+import {
+  DirectedEdge,
+  Edge,
+  Graph,
+  UndirectedEdge,
+  Vertex
+} from '@/types/graphs';
 
 export const findRootVertex = <V, E>(
   graph: DirectedGraph<V, E>
@@ -66,3 +72,11 @@ export const isGraphAcyclic = <V, E>(graph: Graph<V, E>): boolean => {
 export const isGraphATree = <V, E>(graph: Graph<V, E>): boolean => {
   return isGraphConnected(graph) && isGraphAcyclic(graph);
 };
+
+export const isEdgeDirected = <V, E>(
+  edge: Edge<E, V>
+): edge is DirectedEdge<E, V> => edge.isDirected();
+
+export const isUndirectedEdge = <V, E>(
+  edge: Edge<E, V>
+): edge is UndirectedEdge<E, V> => !isEdgeDirected(edge);

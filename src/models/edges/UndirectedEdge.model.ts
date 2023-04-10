@@ -28,4 +28,8 @@ export default class UndirectedEdge<E, V> implements IUndirectedEdge<E, V> {
   get isLoop(): boolean {
     return this.vertices[0].key === this.vertices[1].key;
   }
+
+  isDirected(): boolean {
+    return false;
+  }
 }

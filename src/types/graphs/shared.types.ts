@@ -12,6 +12,7 @@ export interface Edge<E, V> {
   get key(): string;
   get value(): E;
   get vertices(): [Vertex<V, E>, Vertex<V, E>];
+  isDirected(): boolean;
 }
 
 export interface Graph<V, E> {

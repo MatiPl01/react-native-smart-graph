@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
 import { Group } from '@shopify/react-native-skia';
 
 import { Graph } from '@/types/graphs';
 import { PlacementSettings } from '@/types/placement';
-import { VertexRendererProps } from '@/types/render';
+import { EdgeRendererProps, VertexRendererProps } from '@/types/render';
 import { placeVertices } from '@/utils/placement';
 import { SHARED as SHARED_PLACEMENT_SETTINGS } from '@/utils/placement/constants';
 
+import EdgeComponent from './edges/EdgeComponent';
 import VertexComponent from './vertices/VertexComponent';
 
 export type MeasureEvent = {
@@ -28,17 +29,27 @@ export type SharedGraphComponentProps<V> = {
   vertexRenderer: (props: VertexRendererProps<V>) => JSX.Element;
 };
 
-type GraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
+type GraphComponentProps<
+  V,
+  E,
+  R extends EdgeRendererProps<E, V>
+> = SharedGraphComponentProps<V> & {
   graph: Graph<V, E>;
   placementSettings?: PlacementSettings<V, E>;
+  edgeRenderer: (props: R) => JSX.Element;
 };
 
-export default function GraphComponent<V, E>({
+export default function GraphComponent<
+  V,
+  E,
+  R extends EdgeRendererProps<E, V>
+>({
   graph,
   onMeasure,
   placementSettings,
-  vertexRenderer
-}: GraphComponentProps<V, E> & TempProps) {
+  vertexRenderer,
+  edgeRenderer
+}: GraphComponentProps<V, E, R> & TempProps) {
   const verticesPositionsRef = useRef<
     Record<string, { x: SharedValue<number>; y: SharedValue<number> }>
   >({});
@@ -58,6 +69,7 @@ export default function GraphComponent<V, E>({
   );
 
   const memoVertexRenderer = useCallback(vertexRenderer, [vertexRenderer]);
+  const memoEdgeRenderer = useCallback(edgeRenderer, [edgeRenderer]);
 
   useEffect(() => {
     // TODO - improve this
@@ -81,9 +93,18 @@ export default function GraphComponent<V, E>({
 
   return (
     <Group>
+      {graph.edges.map(edge => (
+        <EdgeComponent
+          key={edge.key}
+          edge={edge}
+          // TODO - use animated positions instead of static ones
+          verticesPositions={graphLayout.verticesPositions}
+          edgeRenderer={memoEdgeRenderer}
+        />
+      ))}
       {Object.entries(graphLayout.verticesPositions).map(
         ([key, placementPosition]) => (
-          <VertexComponent<V, E>
+          <VertexComponent
             key={key}
             vertex={graph.vertex(key)}
             radius={memoPlacementSettings.vertexRadius}

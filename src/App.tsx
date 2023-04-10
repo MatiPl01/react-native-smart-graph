@@ -2,7 +2,14 @@ import React from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
+import {
+  Circle,
+  Group,
+  Line,
+  Text,
+  useFont,
+  vec
+} from '@shopify/react-native-skia';
 
 import FONTS from '@/assets/fonts';
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
@@ -78,6 +85,21 @@ export default function App() {
                   <Circle cx={x} cy={y} r={radius * 0.75} color='green' />
                   <Text x={x} y={y} text={key} font={font} color='white' />
                 </Group>
+              )}
+              // eslint-disable-next-line react/no-unstable-nested-components
+              edgeRenderer={({
+                key,
+                from: { x: x1, y: y1 },
+                to: { x: x2, y: y2 }
+              }) => (
+                <Line
+                  key={key}
+                  p1={vec(x1, y1)}
+                  p2={vec(x2, y2)}
+                  color='lightblue'
+                  style='stroke'
+                  strokeWidth={1}
+                />
               )}
             />
           </PannableScalableView>

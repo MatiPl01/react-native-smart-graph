@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphPlacementSettings } from '@/types/placement';
+import { DirectedEdgeRendererProps } from '@/types/render';
 
 import GraphComponent, {
   SharedGraphComponentProps,
@@ -12,6 +13,7 @@ type DirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; from: string; to: string; data: E }>;
   placementSettings?: DirectedGraphPlacementSettings<V, E>;
+  edgeRenderer: (props: DirectedEdgeRendererProps<E, V>) => JSX.Element;
 };
 
 function DirectedGraphComponent<V, E>({
@@ -19,7 +21,8 @@ function DirectedGraphComponent<V, E>({
   edges,
   placementSettings,
   onMeasure,
-  vertexRenderer
+  vertexRenderer,
+  edgeRenderer
 }: DirectedGraphComponentProps<V, E> & TempProps) {
   const graph = useMemo(() => {
     const g = new DirectedGraph<V, E>();
@@ -40,6 +43,7 @@ function DirectedGraphComponent<V, E>({
       onMeasure={onMeasure}
       placementSettings={placementSettings}
       vertexRenderer={vertexRenderer}
+      edgeRenderer={edgeRenderer}
     />
   );
 }
