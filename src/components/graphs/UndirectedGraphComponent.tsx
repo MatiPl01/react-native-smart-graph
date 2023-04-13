@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphPlacementSettings } from '@/types/placement';
-import { UndirectedEdgeRendererProps } from '@/types/render';
+import { UndirectedEdgeRenderFunction } from '@/types/render';
 
 import GraphComponent, {
   SharedGraphComponentProps,
@@ -13,7 +13,7 @@ type UndirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; vertices: [string, string]; data: E }>;
   placementSettings?: UndirectedGraphPlacementSettings<V, E>;
-  edgeRenderer: (props: UndirectedEdgeRendererProps<E, V>) => JSX.Element;
+  edgeRenderer: UndirectedEdgeRenderFunction<E>;
 };
 
 function UndirectedGraphComponent<V, E>({

@@ -3,7 +3,7 @@ import { SharedValue, useDerivedValue } from 'react-native-reanimated';
 
 import { Edge } from '@/types/graphs';
 import {
-  DirectedEdgeRendererProps,
+  DirectedEdgeRenderFunction,
   EdgeRendererProps,
   UndirectedEdgeRendererProps
 } from '@/types/render';
@@ -12,20 +12,22 @@ import { isEdgeDirected, isUndirectedEdge } from '@/utils/graphs';
 import DirectedEdgeComponent from './DirectedEdgeComponent';
 import UndirectedEdgeComponent from './UndirectedEdgeComponent';
 
-type EdgeComponentProps<E, V, R extends EdgeRendererProps<E, V>> = {
+type EdgeComponentProps<E, V, R extends EdgeRendererProps<E>> = {
   edge: Edge<E, V>;
   verticesPositions: Record<
     string,
     { x: SharedValue<number>; y: SharedValue<number> }
   >;
-  edgeRenderer: (props: R) => JSX.Element;
+  edgeRenderer: (props: R) => JSX.Element | null;
+  edgeArrowRenderer?: DirectedEdgeRenderFunction<E>;
 };
 
 // TODO - check if memoization works
-function EdgeComponent<E, V, R extends EdgeRendererProps<E, V>>({
+function EdgeComponent<E, V, R extends EdgeRendererProps<E>>({
   edge,
   verticesPositions,
-  edgeRenderer
+  edgeRenderer,
+  edgeArrowRenderer
 }: EdgeComponentProps<E, V, R>) {
   const [v1, v2] = edge.vertices;
   const v1Position = verticesPositions[v1.key];
@@ -47,11 +49,8 @@ function EdgeComponent<E, V, R extends EdgeRendererProps<E, V>>({
         edge={edge}
         from={p1}
         to={p2}
-        edgeRenderer={
-          edgeRenderer as (
-            props: DirectedEdgeRendererProps<E, V>
-          ) => JSX.Element
-        }
+        edgeRenderer={edgeRenderer as DirectedEdgeRenderFunction<E>}
+        edgeArrowRenderer={edgeArrowRenderer as DirectedEdgeRenderFunction<E>}
       />
     );
   }
@@ -61,9 +60,7 @@ function EdgeComponent<E, V, R extends EdgeRendererProps<E, V>>({
         edge={edge}
         points={[p1, p2]}
         edgeRenderer={
-          edgeRenderer as (
-            props: UndirectedEdgeRendererProps<E, V>
-          ) => JSX.Element
+          edgeRenderer as (props: UndirectedEdgeRendererProps<E>) => JSX.Element
         }
       />
     );
@@ -72,6 +69,6 @@ function EdgeComponent<E, V, R extends EdgeRendererProps<E, V>>({
   return null;
 }
 
-export default memo(EdgeComponent) as <E, V, R extends EdgeRendererProps<E, V>>(
+export default memo(EdgeComponent) as <E, V, R extends EdgeRendererProps<E>>(
   props: EdgeComponentProps<E, V, R>
 ) => JSX.Element;

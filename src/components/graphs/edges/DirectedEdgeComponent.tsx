@@ -1,26 +1,35 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedEdge } from '@/types/graphs';
-import { DirectedEdgeRendererProps } from '@/types/render';
+import { DirectedEdgeRenderFunction } from '@/types/render';
 
-// TODO - add edge arrow renderer and edge label renderer
+// TODO - add edge label renderer
 type DirectedEdgeComponentProps<E, V> = {
   edge: DirectedEdge<E, V>;
   from: SharedValue<{ x: number; y: number }>;
   to: SharedValue<{ x: number; y: number }>;
-  edgeRenderer: (props: DirectedEdgeRendererProps<E, V>) => JSX.Element;
+  edgeRenderer: DirectedEdgeRenderFunction<E>;
+  edgeArrowRenderer: DirectedEdgeRenderFunction<E>;
 };
 
 export default function DirectedEdgeComponent<E, V>({
   edge,
   from,
   to,
-  edgeRenderer
+  edgeRenderer,
+  edgeArrowRenderer
 }: DirectedEdgeComponentProps<E, V>) {
-  return edgeRenderer({
+  const props = {
     key: edge.key,
     data: edge.value,
     from,
     to
-  });
+  };
+
+  return (
+    <>
+      {edgeRenderer(props)}
+      {edgeArrowRenderer(props)}
+    </>
+  );
 }

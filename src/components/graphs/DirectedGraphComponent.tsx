@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphPlacementSettings } from '@/types/placement';
-import { DirectedEdgeRendererProps } from '@/types/render';
+import { DirectedEdgeRenderFunction } from '@/types/render';
 
 import GraphComponent, {
   SharedGraphComponentProps,
@@ -13,16 +13,15 @@ type DirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; from: string; to: string; data: E }>;
   placementSettings?: DirectedGraphPlacementSettings<V, E>;
-  edgeRenderer: (props: DirectedEdgeRendererProps<E, V>) => JSX.Element;
+  edgeRenderer?: DirectedEdgeRenderFunction<E>;
+  edgeArrowRenderer?: DirectedEdgeRenderFunction<E>;
+  edgeLabelRenderer?: DirectedEdgeRenderFunction<E>;
 };
 
 function DirectedGraphComponent<V, E>({
   vertices,
   edges,
-  placementSettings,
-  onMeasure,
-  vertexRenderer,
-  edgeRenderer
+  ...restProps
 }: DirectedGraphComponentProps<V, E> & TempProps) {
   const graph = useMemo(() => {
     const g = new DirectedGraph<V, E>();
@@ -37,15 +36,7 @@ function DirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  return (
-    <GraphComponent
-      graph={graph}
-      onMeasure={onMeasure}
-      placementSettings={placementSettings}
-      vertexRenderer={vertexRenderer}
-      edgeRenderer={edgeRenderer}
-    />
-  );
+  return <GraphComponent graph={graph} {...restProps} />;
 }
 
 export default <V, E>(props: DirectedGraphComponentProps<V, E>) => {

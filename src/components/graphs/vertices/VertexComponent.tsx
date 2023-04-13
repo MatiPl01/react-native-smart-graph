@@ -2,7 +2,7 @@ import { memo, useEffect } from 'react';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Vertex } from '@/types/graphs';
-import { VertexRendererProps } from '@/types/render';
+import { VertexRenderFunction } from '@/types/render';
 
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
@@ -12,7 +12,7 @@ type VertexComponentProps<V, E> = {
     key: string,
     position: { x: SharedValue<number>; y: SharedValue<number> }
   ) => void;
-  vertexRenderer: (props: VertexRendererProps<V>) => JSX.Element;
+  vertexRenderer: VertexRenderFunction<V>;
 };
 
 // TODO - check if memoization works

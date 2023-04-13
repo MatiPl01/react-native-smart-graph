@@ -2,7 +2,7 @@ import React from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { Circle, Group, Line, Text, useFont } from '@shopify/react-native-skia';
+import { Line, useFont } from '@shopify/react-native-skia';
 
 import FONTS from '@/assets/fonts';
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
@@ -20,7 +20,7 @@ export default function App() {
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <PannableScalableView objectFit='cover' controls>
+          <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               vertices={[
                 { key: 'A', data: [] },
@@ -67,28 +67,8 @@ export default function App() {
               ]}
               placementSettings={{
                 strategy: 'orbits',
-                vertexRadius: 15,
-                minVertexSpacing: 10,
                 layerSizing: 'equal'
               }}
-              // eslint-disable-next-line react/no-unstable-nested-components
-              vertexRenderer={({ key, radius, position: { x, y } }) => (
-                <Group>
-                  <Circle cx={x} cy={y} r={radius} color='gold' />
-                  <Circle cx={x} cy={y} r={radius * 0.75} color='black' />
-                  <Text x={x} y={y} text={key} font={font} color='white' />
-                </Group>
-              )}
-              // eslint-disable-next-line react/no-unstable-nested-components
-              edgeRenderer={({ from, to }) => (
-                <Line
-                  p1={from}
-                  p2={to}
-                  color='lightblue'
-                  style='stroke'
-                  strokeWidth={1}
-                />
-              )}
             />
           </PannableScalableView>
         </View>
