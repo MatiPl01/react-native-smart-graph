@@ -1,4 +1,4 @@
-import { Edge, Vertex } from './shared.types';
+import { Edge, Vertex } from './shared.';
 
 export interface UndirectedGraphVertex<V, E> extends Vertex<V, E> {
   addEdge(edge: UndirectedEdge<E, V>): void;

@@ -77,6 +77,6 @@ export const isEdgeDirected = <V, E>(
   edge: Edge<E, V>
 ): edge is DirectedEdge<E, V> => edge.isDirected();
 
-export const isUndirectedEdge = <V, E>(
+export const isEdgeUndirected = <V, E>(
   edge: Edge<E, V>
 ): edge is UndirectedEdge<E, V> => !isEdgeDirected(edge);

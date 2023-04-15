@@ -2,26 +2,26 @@ import { memo, useEffect } from 'react';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Vertex } from '@/types/graphs';
-import { VertexRenderFunction } from '@/types/render';
+import { VertexRenderFunction } from '@/types/renderer';
+import { GraphVertexSettings } from '@/types/settings';
 
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
-  radius: number;
+  settings: Required<GraphVertexSettings>;
   placementPosition: { x: number; y: number };
   setAnimatedPosition: (
     key: string,
     position: { x: SharedValue<number>; y: SharedValue<number> }
   ) => void;
-  vertexRenderer: VertexRenderFunction<V>;
+  renderer: VertexRenderFunction<V>;
 };
 
-// TODO - check if memoization works
 function VertexComponent<V, E>({
   vertex,
-  radius,
+  settings,
   placementPosition,
   setAnimatedPosition,
-  vertexRenderer
+  renderer
 }: VertexComponentProps<V, E>) {
   const x = useSharedValue(placementPosition.x);
   const y = useSharedValue(placementPosition.y);
@@ -33,10 +33,10 @@ function VertexComponent<V, E>({
     setAnimatedPosition(vertex.key, { x, y });
   }, [vertex.key, placementPosition]);
 
-  return vertexRenderer({
+  return renderer({
     key: vertex.key,
     data: vertex.value,
-    radius,
+    radius: settings.radius,
     position: { x, y }
   });
 }

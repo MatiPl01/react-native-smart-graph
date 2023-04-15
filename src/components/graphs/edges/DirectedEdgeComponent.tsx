@@ -1,38 +1,45 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedEdge } from '@/types/graphs';
-import {
-  DirectedEdgeRenderFunction,
-  EdgeArrowRenderFunction
-} from '@/types/render';
+import { DirectedEdgeRenderers } from '@/types/renderer';
+import { DirectedEdgeSettings } from '@/types/settings';
 
-// TODO - add edge label renderer
+import EdgeArrowComponent from '../arrows/EdgeArrowComponent';
+
 type DirectedEdgeComponentProps<E, V> = {
   edge: DirectedEdge<E, V>;
   from: SharedValue<{ x: number; y: number }>;
   to: SharedValue<{ x: number; y: number }>;
-  edgeRenderer: DirectedEdgeRenderFunction<E>;
-  edgeArrowRenderer: EdgeArrowRenderFunction<E>;
+  renderers: DirectedEdgeRenderers<E>;
+  settings?: DirectedEdgeSettings;
 };
 
 export default function DirectedEdgeComponent<E, V>({
   edge,
   from,
   to,
-  edgeRenderer,
-  edgeArrowRenderer
+  renderers: {
+    edge: edgeRenderer,
+    arrow: edgeArrowRenderer,
+    label: edgeLabelRenderer
+  },
+  settings
 }: DirectedEdgeComponentProps<E, V>) {
-  const props = {
-    key: edge.key,
-    data: edge.value,
-    from,
-    to
-  };
-
   return (
     <>
-      {edgeRenderer(props)}
-      {edgeArrowRenderer({ ...props, vertexRadius: edge.source.radius })}
+      {edgeRenderer({
+        key: edge.key,
+        data: edge.value,
+        from,
+        to
+      })}
+      <EdgeArrowComponent
+        from={from}
+        to={to}
+        vertexRadius={edge.target.radius}
+        renderer={edgeArrowRenderer}
+        settings={settings?.arrow}
+      />
     </>
   );
 }

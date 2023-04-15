@@ -1,19 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import { SharedValue } from 'react-native-reanimated';
 
 import { Group } from '@shopify/react-native-skia';
 
+import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { Graph } from '@/types/graphs';
-import { PlacementSettings } from '@/types/placement';
-import {
-  EdgeArrowRenderFunction,
-  EdgeRendererProps,
-  VertexRenderFunction
-} from '@/types/render';
+import { GraphRenderers } from '@/types/renderer';
+import { GraphSettings } from '@/types/settings';
 import { placeVertices } from '@/utils/placement';
-import { SHARED as SHARED_PLACEMENT_SETTINGS } from '@/utils/placement/constants';
 
-import EdgeComponent from './edges/EdgeComponent';
+import EdgeComponent, { EdgeComponentProps } from './edges/EdgeComponent';
 import DefaultEdgeArrowRenderer from './renderers/DefaultEdgeArrowRenderer';
 import DefaultEdgeRenderer from './renderers/DefaultEdgeRenderer';
 import DefaultVertexRenderer from './renderers/DefaultVertexRenderer';
@@ -32,31 +28,28 @@ export type TempProps = {
   onMeasure: (event: MeasureEvent) => void;
 };
 
-export type SharedGraphComponentProps<V> = {
-  vertexRenderer?: VertexRenderFunction<V>;
-};
-
 type GraphComponentProps<
   V,
   E,
-  R extends EdgeRendererProps<E>
-> = SharedGraphComponentProps<V> & {
+  S extends GraphSettings<V, E>,
+  R extends GraphRenderers<V, E>
+> = {
   graph: Graph<V, E>;
-  placementSettings?: PlacementSettings<V, E>;
-  edgeRenderer?: (props: R) => JSX.Element | null;
-  edgeLabelRenderer?: (props: R) => JSX.Element | null;
-  edgeArrowRenderer?: EdgeArrowRenderFunction<E>;
+  settings?: S;
+  renderers?: R;
 };
 
-export default function GraphComponent<V, E, R extends EdgeRendererProps<E>>({
+export default function GraphComponent<
+  V,
+  E,
+  S extends GraphSettings<V, E>,
+  R extends GraphRenderers<V, E>
+>({
   graph,
-  onMeasure,
-  placementSettings,
-  vertexRenderer = DefaultVertexRenderer,
-  edgeRenderer = DefaultEdgeRenderer,
-  edgeLabelRenderer,
-  edgeArrowRenderer = DefaultEdgeArrowRenderer
-}: GraphComponentProps<V, E, R> & TempProps) {
+  settings,
+  renderers,
+  onMeasure
+}: GraphComponentProps<V, E, S, R> & TempProps) {
   const [areAllVerticesRendered, setAreAllVerticesRendered] = useState(false);
 
   const renderedVerticesCountRef = useRef(0);
@@ -70,26 +63,51 @@ export default function GraphComponent<V, E, R extends EdgeRendererProps<E>>({
     >
   >({});
 
-  const memoPlacementSettings = useMemo(
-    () =>
-      ({
-        ...SHARED_PLACEMENT_SETTINGS,
-        ...placementSettings
-      } as Required<PlacementSettings<V, E>>),
-    [placementSettings]
+  const memoSettings = useMemo(
+    () => ({
+      ...settings,
+      components: {
+        ...settings?.components,
+        vertex: {
+          ...VERTEX_COMPONENT_SETTINGS,
+          ...settings?.components?.vertex
+        },
+        edge: {
+          ...settings?.components?.edge
+        }
+      }
+    }),
+    [settings]
   );
+
+  const memoRenderers = useMemo(() => {
+    const defaultRenderers = {
+      vertex: DefaultVertexRenderer,
+      edge: {
+        arrow: graph.isDirected() ? DefaultEdgeArrowRenderer : undefined,
+        edge: DefaultEdgeRenderer
+        // label: null // TODO
+      }
+    };
+
+    return {
+      ...defaultRenderers,
+      ...renderers
+    };
+  }, [renderers]);
 
   const graphLayout = useMemo(() => {
     renderedVerticesCountRef.current = 0;
 
     return {
-      ...placeVertices(graph, memoPlacementSettings),
+      ...placeVertices(
+        graph,
+        memoSettings.components.vertex.radius,
+        memoSettings.placement
+      ),
       verticesCount: graph.vertices.length
     };
   }, [graph]);
-
-  const memoVertexRenderer = useCallback(vertexRenderer, [vertexRenderer]);
-  const memoEdgeRenderer = useCallback(edgeRenderer, [edgeRenderer]);
 
   useEffect(() => {
     // TODO - improve this
@@ -137,30 +155,41 @@ export default function GraphComponent<V, E, R extends EdgeRendererProps<E>>({
     [verticesPositionsRef.current]
   );
 
-  return (
-    <Group>
-      {areAllVerticesRendered &&
-        graph.edges.map(edge => (
-          <EdgeComponent
-            key={edge.key}
-            edge={edge}
-            verticesPositions={verticesPositionsRef.current}
-            edgeRenderer={memoEdgeRenderer}
-            edgeArrowRenderer={edgeArrowRenderer}
-          />
-        ))}
-      {Object.entries(graphLayout.verticesPositions).map(
+  const renderEdges = useCallback(() => {
+    return graph.edges.map(edge => (
+      <EdgeComponent
+        key={edge.key}
+        {...({
+          edge,
+          verticesPositions: verticesPositionsRef.current,
+          renderers: memoRenderers.edge,
+          settings: memoSettings.components.edge
+        } as EdgeComponentProps<E, V>)}
+      />
+    ));
+  }, [graph]);
+
+  const renderVertices = useCallback(
+    () =>
+      Object.entries(graphLayout.verticesPositions).map(
         ([key, placementPosition]) => (
-          <VertexComponent
+          <VertexComponent<V, E>
             key={key}
             vertex={graph.vertex(key)}
-            radius={memoPlacementSettings.vertexRadius}
+            settings={memoSettings.components.vertex}
             placementPosition={placementPosition}
             setAnimatedPosition={setAnimatedVertexPosition}
-            vertexRenderer={memoVertexRenderer}
+            renderer={memoRenderers.vertex}
           />
         )
-      )}
+      ),
+    [graphLayout, graph]
+  );
+
+  return (
+    <Group>
+      {areAllVerticesRendered && renderEdges()}
+      {renderVertices()}
     </Group>
   );
 }

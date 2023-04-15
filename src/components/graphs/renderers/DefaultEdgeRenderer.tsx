@@ -2,7 +2,8 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { Line } from '@shopify/react-native-skia';
 
-import { EdgeRendererProps } from '@/types/render';
+import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
+import { EdgeRendererProps } from '@/types/renderer';
 import { areDirectedEdgeRendererProps } from '@/utils/renderer';
 
 export default function DefaultEdgeRenderer<E, R extends EdgeRendererProps<E>>(
@@ -17,6 +18,12 @@ export default function DefaultEdgeRenderer<E, R extends EdgeRendererProps<E>>(
   }
 
   return (
-    <Line p1={p1} p2={p2} color='lightblue' style='stroke' strokeWidth={1} />
+    <Line
+      p1={p1}
+      p2={p2}
+      color={DEFAULT_EDGE_RENDERER_SETTINGS.color}
+      style='stroke'
+      strokeWidth={1}
+    />
   );
 }

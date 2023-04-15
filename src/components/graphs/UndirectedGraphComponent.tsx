@@ -1,33 +1,30 @@
 import { useMemo } from 'react';
 
+import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { UndirectedGraph } from '@/models/graphs';
-import { UndirectedGraphPlacementSettings } from '@/types/placement';
-import { UndirectedEdgeRenderFunction } from '@/types/render';
-import { SHARED as SHARED_PLACEMENT_SETTINGS } from '@/utils/placement/constants';
+import { UndirectedGraphRenderers } from '@/types/renderer';
+import { UndirectedGraphSettings } from '@/types/settings';
 
-import GraphComponent, {
-  SharedGraphComponentProps,
-  TempProps
-} from './GraphComponent';
+import GraphComponent, { TempProps } from './GraphComponent';
 
-type UndirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
+type UndirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; vertices: [string, string]; data: E }>;
-  placementSettings?: UndirectedGraphPlacementSettings<V, E>;
-  edgeRenderer: UndirectedEdgeRenderFunction<E>;
+  settings?: UndirectedGraphSettings<V, E>;
+  renderers?: UndirectedGraphRenderers<V, E>;
 };
 
 function UndirectedGraphComponent<V, E>({
   vertices,
   edges,
-  ...restProps
+  settings,
+  renderers,
+  onMeasure
 }: UndirectedGraphComponentProps<V, E> & TempProps) {
-  const vertexRadius =
-    restProps.placementSettings?.vertexRadius ??
-    SHARED_PLACEMENT_SETTINGS.vertexRadius;
-
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
+    const vertexRadius =
+      settings?.components?.vertex?.radius ?? VERTEX_COMPONENT_SETTINGS.radius;
 
     vertices.forEach(({ key, data }) => {
       g.insertVertex(key, data, vertexRadius);
@@ -40,7 +37,14 @@ function UndirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  return <GraphComponent graph={graph} {...restProps} />;
+  return (
+    <GraphComponent
+      graph={graph}
+      settings={settings}
+      renderers={renderers}
+      onMeasure={onMeasure}
+    />
+  );
 }
 
 export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {

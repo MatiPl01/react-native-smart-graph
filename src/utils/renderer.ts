@@ -1,4 +1,4 @@
-import { DirectedEdgeRendererProps, EdgeRendererProps } from '@/types/render';
+import { DirectedEdgeRendererProps, EdgeRendererProps } from '@/types/renderer';
 
 export function areDirectedEdgeRendererProps<E>(
   props: EdgeRendererProps<E>
@@ -19,14 +19,6 @@ export const calcUnitVector = (
   return { x: dx / mag, y: dy / mag };
 };
 
-export const translateByVector = (
-  point: { x: number; y: number },
-  vector: { x: number; y: number }
-): { x: number; y: number } => {
-  'worklet';
-  return { x: point.x + vector.x, y: point.y + vector.y };
-};
-
 export const translateAlongVector = (
   point: { x: number; y: number },
   unitVector: { x: number; y: number },
@@ -37,12 +29,4 @@ export const translateAlongVector = (
     x: point.x + unitVector.x * distance,
     y: point.y + unitVector.y * distance
   };
-};
-
-export const calcOrthogonalVector = (vector: {
-  x: number;
-  y: number;
-}): { x: number; y: number } => {
-  'worklet';
-  return { x: -vector.y, y: vector.x };
 };

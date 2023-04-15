@@ -19,16 +19,9 @@ import {
 import { Canvas, Group } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
-import {
-  MeasureEvent,
-  TestGraphPrivateProps
-} from '@/components/graphs/TestGraph';
+import { MeasureEvent, TempProps } from '@/components/graphs/GraphComponent';
 import { Dimensions, ObjectFit } from '@/types/views';
-import {
-  clamp,
-  getCenterInParent,
-  getScaleInParent
-} from '@/utils/views';
+import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
@@ -277,8 +270,7 @@ export default function PannableScalableView({
         <StyledCanvas className={className} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
-              const childElement =
-                child as React.ReactElement<TestGraphPrivateProps>;
+              const childElement = child as React.ReactElement<TempProps>;
               return cloneElement(childElement, {
                 onMeasure: handleContentMeasure
               });

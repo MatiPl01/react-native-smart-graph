@@ -65,9 +65,11 @@ export default function App() {
                 { key: 'OS', from: 'O', to: 'S', data: [] },
                 { key: 'ST', from: 'S', to: 'T', data: [] }
               ]}
-              placementSettings={{
-                strategy: 'orbits',
-                layerSizing: 'equal'
+              settings={{
+                placement: {
+                  strategy: 'orbits',
+                  layerSizing: 'equal'
+                }
               }}
             />
           </PannableScalableView>

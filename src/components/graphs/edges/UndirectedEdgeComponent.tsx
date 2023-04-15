@@ -1,22 +1,23 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { UndirectedEdge } from '@/types/graphs';
-import { UndirectedEdgeRenderFunction } from '@/types/render';
+import { UndirectedEdgeRenderers } from '@/types/renderer';
+import { UndirectedEdgeSettings } from '@/types/settings';
 
-// TODO - add edge label renderer
 type UndirectedEdgeComponentProps<E, V> = {
   edge: UndirectedEdge<E, V>;
   points: [
     SharedValue<{ x: number; y: number }>,
     SharedValue<{ x: number; y: number }>
   ];
-  edgeRenderer: UndirectedEdgeRenderFunction<E>;
+  renderers: UndirectedEdgeRenderers<E>;
+  settings?: UndirectedEdgeSettings;
 };
 
 export default function UndirectedEdgeComponent<E, V>({
   edge,
   points,
-  edgeRenderer
+  renderers: { edge: edgeRenderer, label: edgeLabelRenderer }
 }: UndirectedEdgeComponentProps<E, V>) {
   return edgeRenderer({
     key: edge.key,

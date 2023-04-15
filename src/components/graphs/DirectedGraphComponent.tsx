@@ -1,38 +1,30 @@
 import { useMemo } from 'react';
 
+import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { DirectedGraph } from '@/models/graphs';
-import { DirectedGraphPlacementSettings } from '@/types/placement';
-import {
-  DirectedEdgeRenderFunction,
-  EdgeArrowRenderFunction
-} from '@/types/render';
-import { SHARED as SHARED_PLACEMENT_SETTINGS } from '@/utils/placement/constants';
+import { DirectedGraphRenderers } from '@/types/renderer';
+import { DirectedGraphSettings } from '@/types/settings';
 
-import GraphComponent, {
-  SharedGraphComponentProps,
-  TempProps
-} from './GraphComponent';
+import GraphComponent, { TempProps } from './GraphComponent';
 
-type DirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
+type DirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
   edges: Array<{ key: string; from: string; to: string; data: E }>;
-  placementSettings?: DirectedGraphPlacementSettings<V, E>;
-  edgeRenderer?: DirectedEdgeRenderFunction<E>;
-  edgeArrowRenderer?: EdgeArrowRenderFunction<E>;
-  edgeLabelRenderer?: DirectedEdgeRenderFunction<E>;
+  settings?: DirectedGraphSettings<V, E>;
+  renderers?: DirectedGraphRenderers<V, E>;
 };
 
 function DirectedGraphComponent<V, E>({
   vertices,
   edges,
-  ...restProps
+  settings,
+  renderers,
+  onMeasure
 }: DirectedGraphComponentProps<V, E> & TempProps) {
-  const vertexRadius =
-    restProps.placementSettings?.vertexRadius ??
-    SHARED_PLACEMENT_SETTINGS.vertexRadius;
-
   const graph = useMemo(() => {
     const g = new DirectedGraph<V, E>();
+    const vertexRadius =
+      settings?.components?.vertex?.radius ?? VERTEX_COMPONENT_SETTINGS.radius;
 
     vertices.forEach(({ key, data }) => {
       g.insertVertex(key, data, vertexRadius);
@@ -44,7 +36,14 @@ function DirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  return <GraphComponent graph={graph} {...restProps} />;
+  return (
+    <GraphComponent
+      graph={graph}
+      renderers={renderers}
+      settings={settings}
+      onMeasure={onMeasure}
+    />
+  );
 }
 
 export default <V, E>(props: DirectedGraphComponentProps<V, E>) => {

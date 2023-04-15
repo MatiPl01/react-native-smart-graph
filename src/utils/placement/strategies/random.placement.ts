@@ -1,22 +1,25 @@
+import {
+  RANDOM_PLACEMENT_SETTING,
+  SHARED_PLACEMENT_SETTINGS
+} from '@/constants/placement';
 import { Graph, Vertex } from '@/types/graphs';
 import {
   GraphLayout,
   PlacedVerticesPositions,
   RandomPlacementSettings
-} from '@/types/placement';
+} from '@/types/settings';
 import { zipArrays } from '@/utils/arrays';
 import random from '@/utils/random';
 
-import { RANDOM_PLACEMENT, SHARED } from '../constants';
-
 const placeVerticesRandomly = <V, E>(
   graph: Graph<V, E>,
+  vertexRadius: number,
   settings: RandomPlacementSettings = {} as RandomPlacementSettings
 ): GraphLayout => {
   if (settings.layoutType === 'random') {
     return calcVerticesRandomPositions(
       graph.vertices,
-      settings.vertexRadius,
+      vertexRadius,
       settings.containerWidth,
       settings.containerHeight
     );
@@ -24,9 +27,10 @@ const placeVerticesRandomly = <V, E>(
 
   const props: CalcVerticesPositionsProps<V, E> = {
     vertices: graph.vertices,
-    density: settings.density || RANDOM_PLACEMENT.density,
-    vertexRadius: settings.vertexRadius || SHARED.vertexRadius,
-    minVertexSpacing: settings.minVertexSpacing || SHARED.minVertexSpacing
+    density: settings.density || RANDOM_PLACEMENT_SETTING.density,
+    minVertexSpacing:
+      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+    vertexRadius
   };
 
   switch (settings.layoutType) {
@@ -146,7 +150,7 @@ const calcVerticesHoneycombPositions = <V, E>(
 
 const calcVerticesRandomPositions = <V, E>(
   vertices: Vertex<V, E>[],
-  vertexRadius: number = SHARED.vertexRadius,
+  vertexRadius: number,
   width: number,
   height: number
 ): GraphLayout => {

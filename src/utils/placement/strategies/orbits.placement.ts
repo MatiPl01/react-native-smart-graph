@@ -1,4 +1,5 @@
 // TODO - improve docs later
+import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { Graph, Vertex } from '@/types/graphs';
 import {
   GetLayerRadiusFunction,
@@ -6,10 +7,8 @@ import {
   OrbitsLayerSizingSettings,
   OrbitsPlacementSettings,
   PlacedVerticesPositions
-} from '@/types/placement';
+} from '@/types/settings';
 import { findRootVertex, isGraphATree, isGraphDirected } from '@/utils/graphs';
-
-import { SHARED } from '../constants';
 
 /**
  * The graph must be a tree!
@@ -22,6 +21,7 @@ import { SHARED } from '../constants';
  */
 const placeVerticesOnOrbits = <V, E>(
   graph: Graph<V, E>,
+  vertexRadius: number,
   settings: OrbitsPlacementSettings
 ): GraphLayout => {
   // TODO - maybe add undirected graph support
@@ -33,8 +33,7 @@ const placeVerticesOnOrbits = <V, E>(
   }
 
   const {
-    vertexRadius = SHARED.vertexRadius,
-    minVertexSpacing = SHARED.minVertexSpacing,
+    minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
     ...layerSizingSettings
   } = settings;
 
