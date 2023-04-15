@@ -1,7 +1,8 @@
 import { memo } from 'react';
-import { SharedValue, useDerivedValue } from 'react-native-reanimated';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
+import { AnimatedPositionCoordinates } from '@/types/layout';
 import {
   DirectedEdgeRenderers,
   UndirectedEdgeRenderers
@@ -11,6 +12,7 @@ import {
   UndirectedGraphComponentsSettings
 } from '@/types/settings';
 
+import EdgeLabelComponent from '../labels/EdgeLabelComponent';
 import DirectedEdgeComponent from './DirectedEdgeComponent';
 import UndirectedEdgeComponent from './UndirectedEdgeComponent';
 
@@ -21,10 +23,7 @@ const areDirectedEdgeComponentProps = <E, V>(
 };
 
 type SharedEdgeComponentProps = {
-  verticesPositions: Record<
-    string,
-    { x: SharedValue<number>; y: SharedValue<number> }
-  >;
+  verticesPositions: Record<string, AnimatedPositionCoordinates>;
 };
 
 type UndirectedEdgeComponentProps<E, V> = SharedEdgeComponentProps & {
@@ -59,8 +58,8 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
     [v2Position?.x, v2Position?.y]
   );
 
-  if (areDirectedEdgeComponentProps(props)) {
-    return (
+  const renderEdge = () =>
+    areDirectedEdgeComponentProps(props) ? (
       <DirectedEdgeComponent<E, V>
         edge={props.edge}
         from={p1}
@@ -68,16 +67,27 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         renderers={props.renderers}
         settings={props.settings.edge}
       />
+    ) : (
+      <UndirectedEdgeComponent<E, V>
+        edge={props.edge}
+        points={[p1, p2]}
+        renderers={props.renderers}
+        settings={props.settings.edge}
+      />
     );
-  }
 
   return (
-    <UndirectedEdgeComponent<E, V>
-      edge={props.edge}
-      points={[p1, p2]}
-      renderers={props.renderers}
-      settings={props.settings.edge}
-    />
+    <>
+      {renderEdge()}
+      {props.renderers.label && (
+        <EdgeLabelComponent
+          edge={edge}
+          vertexRadius={edge.vertices[0].radius}
+          verticesPositions={verticesPositions}
+          renderer={props.renderers.label}
+        />
+      )}
+    </>
   );
 }
 
