@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphPlacementSettings } from '@/types/placement';
 import { UndirectedEdgeRenderFunction } from '@/types/render';
+import { SHARED as SHARED_PLACEMENT_SETTINGS } from '@/utils/placement/constants';
 
 import GraphComponent, {
   SharedGraphComponentProps,
@@ -19,16 +20,17 @@ type UndirectedGraphComponentProps<V, E> = SharedGraphComponentProps<V> & {
 function UndirectedGraphComponent<V, E>({
   vertices,
   edges,
-  onMeasure,
-  placementSettings,
-  vertexRenderer,
-  edgeRenderer
+  ...restProps
 }: UndirectedGraphComponentProps<V, E> & TempProps) {
+  const vertexRadius =
+    restProps.placementSettings?.vertexRadius ??
+    SHARED_PLACEMENT_SETTINGS.vertexRadius;
+
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
 
     vertices.forEach(({ key, data }) => {
-      g.insertVertex(key, data);
+      g.insertVertex(key, data, vertexRadius);
     });
 
     edges.forEach(({ key, vertices: [v1, v2], data }) => {
@@ -38,15 +40,7 @@ function UndirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  return (
-    <GraphComponent
-      graph={graph}
-      onMeasure={onMeasure}
-      placementSettings={placementSettings}
-      vertexRenderer={vertexRenderer}
-      edgeRenderer={edgeRenderer}
-    />
-  );
+  return <GraphComponent graph={graph} {...restProps} />;
 }
 
 export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {

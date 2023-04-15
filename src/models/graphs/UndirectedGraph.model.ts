@@ -12,8 +12,14 @@ export default class UndirectedGraph<V, E> extends Graph<
     return false;
   }
 
-  insertVertex(key: string, value: V): UndirectedGraphVertex<V, E> {
-    return this.insertVertexObject(new UndirectedGraphVertex<V, E>(key, value));
+  insertVertex(
+    key: string,
+    value: V,
+    radius: number
+  ): UndirectedGraphVertex<V, E> {
+    return this.insertVertexObject(
+      new UndirectedGraphVertex<V, E>(key, value, radius)
+    );
   }
 
   override insertEdge(

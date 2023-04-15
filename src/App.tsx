@@ -2,7 +2,7 @@ import React from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { Line, useFont } from '@shopify/react-native-skia';
+import { useFont } from '@shopify/react-native-skia';
 
 import FONTS from '@/assets/fonts';
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
@@ -20,7 +20,7 @@ export default function App() {
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <PannableScalableView objectFit='contain' controls>
+          <PannableScalableView objectFit='cover' controls>
             <DirectedGraphComponent
               vertices={[
                 { key: 'A', data: [] },

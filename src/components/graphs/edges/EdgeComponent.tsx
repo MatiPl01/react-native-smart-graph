@@ -4,6 +4,7 @@ import { SharedValue, useDerivedValue } from 'react-native-reanimated';
 import { Edge } from '@/types/graphs';
 import {
   DirectedEdgeRenderFunction,
+  EdgeArrowRenderFunction,
   EdgeRendererProps,
   UndirectedEdgeRendererProps
 } from '@/types/render';
@@ -19,7 +20,7 @@ type EdgeComponentProps<E, V, R extends EdgeRendererProps<E>> = {
     { x: SharedValue<number>; y: SharedValue<number> }
   >;
   edgeRenderer: (props: R) => JSX.Element | null;
-  edgeArrowRenderer?: DirectedEdgeRenderFunction<E>;
+  edgeArrowRenderer?: EdgeArrowRenderFunction<E>;
 };
 
 // TODO - check if memoization works
@@ -50,7 +51,7 @@ function EdgeComponent<E, V, R extends EdgeRendererProps<E>>({
         from={p1}
         to={p2}
         edgeRenderer={edgeRenderer as DirectedEdgeRenderFunction<E>}
-        edgeArrowRenderer={edgeArrowRenderer as DirectedEdgeRenderFunction<E>}
+        edgeArrowRenderer={edgeArrowRenderer as EdgeArrowRenderFunction<E>}
       />
     );
   }

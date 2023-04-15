@@ -1,7 +1,10 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedEdge } from '@/types/graphs';
-import { DirectedEdgeRenderFunction } from '@/types/render';
+import {
+  DirectedEdgeRenderFunction,
+  EdgeArrowRenderFunction
+} from '@/types/render';
 
 // TODO - add edge label renderer
 type DirectedEdgeComponentProps<E, V> = {
@@ -9,7 +12,7 @@ type DirectedEdgeComponentProps<E, V> = {
   from: SharedValue<{ x: number; y: number }>;
   to: SharedValue<{ x: number; y: number }>;
   edgeRenderer: DirectedEdgeRenderFunction<E>;
-  edgeArrowRenderer: DirectedEdgeRenderFunction<E>;
+  edgeArrowRenderer: EdgeArrowRenderFunction<E>;
 };
 
 export default function DirectedEdgeComponent<E, V>({
@@ -29,7 +32,7 @@ export default function DirectedEdgeComponent<E, V>({
   return (
     <>
       {edgeRenderer(props)}
-      {edgeArrowRenderer(props)}
+      {edgeArrowRenderer({ ...props, vertexRadius: edge.source.radius })}
     </>
   );
 }

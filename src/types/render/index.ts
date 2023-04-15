@@ -30,6 +30,10 @@ export type EdgeRendererProps<E> =
   | DirectedEdgeRendererProps<E>
   | UndirectedEdgeRendererProps<E>;
 
+export type EdgeArrowRendererProps<E> = EdgeRendererProps<E> & {
+  vertexRadius: number;
+};
+
 export type VertexRenderFunction<V> = (
   props: VertexRendererProps<V>
 ) => JSX.Element | null;
@@ -44,4 +48,8 @@ export type DirectedEdgeRenderFunction<E> = (
 
 export type UndirectedEdgeRenderFunction<E> = (
   props: UndirectedEdgeRendererProps<E>
+) => JSX.Element | null;
+
+export type EdgeArrowRenderFunction<E> = (
+  props: EdgeArrowRendererProps<E>
 ) => JSX.Element | null;
