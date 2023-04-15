@@ -5,7 +5,7 @@ import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 
-import GraphComponent, { TempProps } from './GraphComponent';
+import GraphComponent, { GraphComponentPrivateProps } from './GraphComponent';
 
 type UndirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
@@ -19,8 +19,8 @@ function UndirectedGraphComponent<V, E>({
   edges,
   settings,
   renderers,
-  onMeasure
-}: UndirectedGraphComponentProps<V, E> & TempProps) {
+  setContentDimensions
+}: UndirectedGraphComponentProps<V, E> & GraphComponentPrivateProps) {
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
     const vertexRadius =
@@ -42,7 +42,7 @@ function UndirectedGraphComponent<V, E>({
       graph={graph}
       settings={settings}
       renderers={renderers}
-      onMeasure={onMeasure}
+      setContentDimensions={setContentDimensions}
     />
   );
 }
@@ -50,7 +50,8 @@ function UndirectedGraphComponent<V, E>({
 export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
   return (
     <UndirectedGraphComponent
-      {...(props as UndirectedGraphComponentProps<V, E> & TempProps)}
+      {...(props as UndirectedGraphComponentProps<V, E> &
+        GraphComponentPrivateProps)}
     />
   );
 };

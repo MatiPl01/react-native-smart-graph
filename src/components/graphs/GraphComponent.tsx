@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Group } from '@shopify/react-native-skia';
 
@@ -15,17 +16,11 @@ import DefaultEdgeRenderer from './renderers/DefaultEdgeRenderer';
 import DefaultVertexRenderer from './renderers/DefaultVertexRenderer';
 import VertexComponent from './vertices/VertexComponent';
 
-export type MeasureEvent = {
-  // TODO - remove this
-  layout: {
-    width: number;
-    height: number;
-  };
-};
-
-export type TempProps = {
-  // TODO - remove this
-  onMeasure: (event: MeasureEvent) => void;
+export type GraphComponentPrivateProps = {
+  setContentDimensions: (
+    width: SharedValue<number>,
+    height: SharedValue<number>
+  ) => void;
 };
 
 type GraphComponentProps<
@@ -48,9 +43,12 @@ export default function GraphComponent<
   graph,
   settings,
   renderers,
-  onMeasure
-}: GraphComponentProps<V, E, S, R> & TempProps) {
+  setContentDimensions
+}: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
   const [areAllVerticesRendered, setAreAllVerticesRendered] = useState(false);
+
+  const contentWidth = useSharedValue(0);
+  const contentHeight = useSharedValue(0);
 
   const renderedVerticesCountRef = useRef(0);
   const verticesPositionsRef = useRef<
@@ -89,25 +87,21 @@ export default function GraphComponent<
   const graphLayout = useMemo(() => {
     renderedVerticesCountRef.current = 0;
 
+    const layout = placeVertices(
+      graph,
+      memoSettings.components.vertex.radius,
+      memoSettings.placement
+    );
+
+    contentHeight.value = layout.height;
+    contentWidth.value = layout.width;
+    setContentDimensions(contentWidth, contentHeight);
+
     return {
-      ...placeVertices(
-        graph,
-        memoSettings.components.vertex.radius,
-        memoSettings.placement
-      ),
+      ...layout,
       verticesCount: graph.vertices.length
     };
   }, [graph]);
-
-  useEffect(() => {
-    // TODO - improve this
-    onMeasure({
-      layout: {
-        width: graphLayout.width,
-        height: graphLayout.height
-      }
-    });
-  }, [graphLayout]);
 
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedPositionCoordinates) => {

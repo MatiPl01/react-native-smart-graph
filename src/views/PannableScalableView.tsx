@@ -10,6 +10,7 @@ import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   Easing,
+  SharedValue,
   useDerivedValue,
   useSharedValue,
   withDecay,
@@ -19,8 +20,9 @@ import {
 import { Canvas, Group } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { MeasureEvent, TempProps } from '@/components/graphs/GraphComponent';
-import { Dimensions, ObjectFit } from '@/types/views';
+import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
+import { AnimatedDimensions } from '@/types/layout';
+import { ObjectFit } from '@/types/views';
 import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
@@ -45,8 +47,13 @@ export default function PannableScalableView({
   const minScaleRef = useRef(minScale);
   const maxScaleRef = useRef(maxScale);
 
-  const canvasDimensions = useSharedValue({ width: 0, height: 0 });
-  const contentDimensions = useSharedValue({ width: 0, height: 0 });
+  const contentDimensionsRef = useRef<AnimatedDimensions | null>(null);
+  const canvasWidth = useSharedValue(0);
+  const canvasHeight = useSharedValue(0);
+  const canvasDimensions = {
+    width: canvasWidth,
+    height: canvasHeight
+  };
   const initialScale = useSharedValue(0);
 
   const startScale = useSharedValue(0);
@@ -69,38 +76,59 @@ export default function PannableScalableView({
         layout: { width, height }
       }
     }: LayoutChangeEvent) => {
-      canvasDimensions.value = { width, height };
+      canvasDimensions.width.value = width;
+      canvasDimensions.height.value = height;
       isRenderedRef.current.canvas = true;
 
       if (isRenderedRef.current.content) {
-        updateContentPosition(contentDimensions.value, { width, height });
+        updateContentPosition(
+          contentDimensionsRef.current as AnimatedDimensions,
+          canvasDimensions
+        );
       }
     },
     []
   );
 
-  const handleContentMeasure = useCallback(
-    ({ layout: { width, height } }: MeasureEvent) => {
+  const handleSetContentDimensions = useCallback(
+    (width: SharedValue<number>, height: SharedValue<number>) => {
       isRenderedRef.current.content = true;
-      contentDimensions.value = { width, height };
+      contentDimensionsRef.current = { width, height };
 
       if (isRenderedRef.current.canvas) {
-        updateContentPosition({ width, height }, canvasDimensions.value);
+        updateContentPosition({ width, height }, canvasDimensions);
       }
     },
     []
   );
 
   const updateContentPosition = useCallback(
-    (contentDims: Dimensions, canvasDims: Dimensions, animated?: boolean) => {
+    (
+      contentDims: AnimatedDimensions,
+      canvasDims: AnimatedDimensions,
+      animated?: boolean
+    ) => {
       const { scale: renderedScale, dimensions: renderedDimensions } =
-        getScaleInParent(objectFit, contentDims, canvasDims);
+        getScaleInParent(
+          objectFit,
+          {
+            width: contentDims.width.value,
+            height: contentDims.height.value
+          },
+          {
+            width: canvasDims.width.value,
+            height: canvasDims.height.value
+          }
+        );
 
       initialScale.value = renderedScale;
       scaleContentTo(renderedScale, undefined, animated);
 
       translateContentTo(
-        getCenterInParent(renderedDimensions, canvasDims),
+        getCenterInParent(renderedDimensions, {
+          width: canvasDims.width.value,
+          height: canvasDims.height.value
+        }),
         undefined,
         animated
       );
@@ -110,8 +138,8 @@ export default function PannableScalableView({
 
   const handleReset = useCallback(() => {
     updateContentPosition(
-      contentDimensions.value,
-      canvasDimensions.value,
+      contentDimensionsRef.current as AnimatedDimensions,
+      canvasDimensions,
       true
     );
   }, []);
@@ -177,12 +205,11 @@ export default function PannableScalableView({
     if (origin) {
       const relativeScale = clampedScale / scale.value;
       const { width: contentWidth, height: contentHeight } =
-        contentDimensions.value;
-      const { width: canvasWidth, height: canvasHeight } =
-        canvasDimensions.value;
+        contentDimensionsRef.current as AnimatedDimensions;
 
-      const clampWidth = canvasWidth - contentWidth * clampedScale;
-      const clampHeight = canvasHeight - contentHeight * clampedScale;
+      const clampWidth = canvasWidth.value - contentWidth.value * clampedScale;
+      const clampHeight =
+        canvasHeight.value - contentHeight.value * clampedScale;
 
       translateContentTo(
         {
@@ -217,14 +244,16 @@ export default function PannableScalableView({
       translateX.value = translateWithDecay(
         velocityX,
         translateX.value,
-        canvasDimensions.value.width -
-          contentDimensions.value.width * scale.value
+        canvasWidth.value -
+          (contentDimensionsRef.current as AnimatedDimensions).width.value *
+            scale.value
       );
       translateY.value = translateWithDecay(
         velocityY,
         translateY.value,
-        canvasDimensions.value.height -
-          contentDimensions.value.height * scale.value
+        canvasHeight.value -
+          (contentDimensionsRef.current as AnimatedDimensions).height.value *
+            scale.value
       );
     });
 
@@ -270,9 +299,10 @@ export default function PannableScalableView({
         <StyledCanvas className={className} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
-              const childElement = child as React.ReactElement<TempProps>;
+              const childElement =
+                child as React.ReactElement<GraphComponentPrivateProps>;
               return cloneElement(childElement, {
-                onMeasure: handleContentMeasure
+                setContentDimensions: handleSetContentDimensions
               });
             })}
           </Group>
