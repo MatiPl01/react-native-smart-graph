@@ -5,7 +5,7 @@ import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
 
-import GraphComponent, { TempProps } from './GraphComponent';
+import GraphComponent, { GraphComponentPrivateProps } from './GraphComponent';
 
 type DirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
@@ -19,8 +19,8 @@ function DirectedGraphComponent<V, E>({
   edges,
   settings,
   renderers,
-  onMeasure
-}: DirectedGraphComponentProps<V, E> & TempProps) {
+  setContentDimensions
+}: DirectedGraphComponentProps<V, E> & GraphComponentPrivateProps) {
   const graph = useMemo(() => {
     const g = new DirectedGraph<V, E>();
     const vertexRadius =
@@ -41,7 +41,7 @@ function DirectedGraphComponent<V, E>({
       graph={graph}
       renderers={renderers}
       settings={settings}
-      onMeasure={onMeasure}
+      setContentDimensions={setContentDimensions}
     />
   );
 }
@@ -49,7 +49,8 @@ function DirectedGraphComponent<V, E>({
 export default <V, E>(props: DirectedGraphComponentProps<V, E>) => {
   return (
     <DirectedGraphComponent
-      {...(props as DirectedGraphComponentProps<V, E> & TempProps)}
+      {...(props as DirectedGraphComponentProps<V, E> &
+        GraphComponentPrivateProps)}
     />
   );
 };
