@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SharedValue } from 'react-native-reanimated';
 
 import { Group } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { Graph } from '@/types/graphs';
+import { AnimatedPositionCoordinates } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
 import { placeVertices } from '@/utils/placement';
@@ -54,13 +54,7 @@ export default function GraphComponent<
 
   const renderedVerticesCountRef = useRef(0);
   const verticesPositionsRef = useRef<
-    Record<
-      string,
-      {
-        x: SharedValue<number>;
-        y: SharedValue<number>;
-      }
-    >
+    Record<string, AnimatedPositionCoordinates>
   >({});
 
   const memoSettings = useMemo(
@@ -80,21 +74,17 @@ export default function GraphComponent<
     [settings]
   );
 
-  const memoRenderers = useMemo(() => {
-    const defaultRenderers = {
+  const memoRenderers = useMemo(
+    () => ({
       vertex: DefaultVertexRenderer,
       edge: {
         arrow: graph.isDirected() ? DefaultEdgeArrowRenderer : undefined,
-        edge: DefaultEdgeRenderer
-        // label: null // TODO
+        edge: DefaultEdgeRenderer,
+        label: renderers?.edgeLabel
       }
-    };
-
-    return {
-      ...defaultRenderers,
-      ...renderers
-    };
-  }, [renderers]);
+    }),
+    [renderers]
+  );
 
   const graphLayout = useMemo(() => {
     renderedVerticesCountRef.current = 0;
@@ -120,36 +110,11 @@ export default function GraphComponent<
   }, [graphLayout]);
 
   const setAnimatedVertexPosition = useCallback(
-    (
-      key: string,
-      position: { x: SharedValue<number>; y: SharedValue<number> }
-    ) => {
+    (key: string, position: AnimatedPositionCoordinates) => {
       verticesPositionsRef.current[key] = position;
 
       if (++renderedVerticesCountRef.current === graphLayout.verticesCount) {
         setAreAllVerticesRendered(true);
-
-        // const center = {
-        //   x: graphLayout.width / 2,
-        //   y: graphLayout.height / 2
-        // };
-
-        // Object.values(verticesPositionsRef.current).forEach(({ x, y }) => {
-        //   x.value = withRepeat(
-        //     withTiming(x.value + 1.25 * (x.value - center.x), {
-        //       duration: 1000
-        //     }),
-        //     Infinity,
-        //     true
-        //   );
-        //   y.value = withRepeat(
-        //     withTiming(y.value + 1.25 * (y.value - center.y), {
-        //       duration: 1000
-        //     }),
-        //     Infinity,
-        //     true
-        //   );
-        // });
       }
     },
     [verticesPositionsRef.current]
