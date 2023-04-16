@@ -17,14 +17,13 @@ type UndirectedGraphComponentProps<V, E> = {
 function UndirectedGraphComponent<V, E>({
   vertices,
   edges,
-  settings,
-  renderers,
-  setContentDimensions
+  ...componentProps
 }: UndirectedGraphComponentProps<V, E> & GraphComponentPrivateProps) {
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
     const vertexRadius =
-      settings?.components?.vertex?.radius ?? VERTEX_COMPONENT_SETTINGS.radius;
+      componentProps.settings?.components?.vertex?.radius ??
+      VERTEX_COMPONENT_SETTINGS.radius;
 
     vertices.forEach(({ key, data }) => {
       g.insertVertex(key, data, vertexRadius);
@@ -37,14 +36,7 @@ function UndirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  return (
-    <GraphComponent
-      graph={graph}
-      settings={settings}
-      renderers={renderers}
-      setContentDimensions={setContentDimensions}
-    />
-  );
+  return <GraphComponent graph={graph} {...componentProps} />;
 }
 
 export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {

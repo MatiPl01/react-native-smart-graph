@@ -1,4 +1,5 @@
-import { Dimensions, ObjectFit } from '@/types/views';
+import { Dimensions, Position } from '@/types/layout';
+import { ObjectFit } from '@/types/views';
 
 export const getScaleInParent = (
   objectFit: ObjectFit,
@@ -43,7 +44,7 @@ export const getScaleInParent = (
 export const getCenterInParent = (
   containerDimensions: Dimensions,
   parentDimensions: Dimensions
-): { x: number; y: number } => {
+): Position => {
   const { width: containerWidth, height: containerHeight } =
     containerDimensions;
   const { width: parentWidth, height: parentHeight } = parentDimensions;

@@ -98,7 +98,8 @@ const placeChildrenOnRingSection = <V, E>(
 
     minLayersRadius[parentLayer] = Math.max(
       minLayersRadius[parentLayer] || 0,
-      sectionRadius
+      sectionRadius,
+      minVertexCenterDistance
     );
   } else {
     minLayersRadius[parentLayer] = 0;
