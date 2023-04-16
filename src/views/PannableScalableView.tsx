@@ -1,19 +1,11 @@
 import { styled } from 'nativewind';
-import {
-  Children,
-  PropsWithChildren,
-  cloneElement,
-  useCallback,
-  useMemo
-} from 'react';
+import { Children, PropsWithChildren, cloneElement, useCallback } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   Easing,
-  useAnimatedReaction,
   useDerivedValue,
   useSharedValue,
-  withDecay,
   withTiming
 } from 'react-native-reanimated';
 
@@ -21,8 +13,10 @@ import { Canvas, Group } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
+import { Position } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
-import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
+import { fixedWithDecay } from '@/utils/reanimated';
+import { clamp, getScaleInParent } from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
@@ -63,6 +57,10 @@ export default function PannableScalableView({
     [containerY1, containerY2]
   );
 
+  // CONTAINER SCALE
+  const currentScale = useSharedValue(1);
+  const pinchStartScale = useSharedValue(1);
+
   // CONTAINER TRANSFORM
   // Translation in percentage
   const relativeTranslateX = useSharedValue(0.5);
@@ -70,30 +68,35 @@ export default function PannableScalableView({
   // Translation in pixels
   const absoluteTranslateX = useDerivedValue(
     () =>
-      relativeTranslateX.value * (canvasWidth.value - containerWidth.value) -
-      containerX1.value,
+      relativeTranslateX.value *
+        (canvasWidth.value - containerWidth.value * currentScale.value) -
+      containerX1.value * currentScale.value,
     [containerWidth, relativeTranslateX]
   );
   const absoluteTranslateY = useDerivedValue(
     () =>
-      relativeTranslateY.value * (canvasHeight.value - containerHeight.value) -
-      containerY1.value,
+      relativeTranslateY.value *
+        (canvasHeight.value - containerHeight.value * currentScale.value) -
+      containerY1.value * currentScale.value,
     [containerHeight, relativeTranslateY]
   );
-
-  // TODO - add scaling
-  const initialScale = useSharedValue(0);
-  const startScale = useSharedValue(0);
-  const scale = useSharedValue(1);
 
   const transform = useDerivedValue(
     () => [
       { translateX: absoluteTranslateX.value },
-      { translateY: absoluteTranslateY.value }
-      // { scale: scale.value }
+      { translateY: absoluteTranslateY.value },
+      { scale: currentScale.value }
     ],
-    [absoluteTranslateX, absoluteTranslateY, scale]
+    [absoluteTranslateX, absoluteTranslateY, currentScale]
   );
+
+  const calcMaxTranslate = () => {
+    'worklet';
+    return {
+      x: 1 + canvasWidth.value - containerWidth.value * currentScale.value,
+      y: 1 + canvasHeight.value - containerHeight.value * currentScale.value
+    };
+  };
 
   const handleCanvasRender = useCallback(
     ({
@@ -107,164 +110,133 @@ export default function PannableScalableView({
     []
   );
 
-  // const updateContentPosition = useCallback(
-  //   (animated?: boolean) => {
-  //     const { scale: renderedScale, dimensions: renderedDimensions } =
-  //       getScaleInParent(
-  //         objectFit,
-  //         {
-  //           width: containerWidth.value,
-  //           height: containerHeight.value
-  //         },
-  //         {
-  //           width: canvasWidth.value,
-  //           height: canvasHeight.value
-  //         }
-  //       );
+  const updateContentPosition = useCallback(
+    (animated?: boolean) => {
+      const renderedScale = getScaleInParent(
+        objectFit,
+        {
+          width: containerWidth.value,
+          height: containerHeight.value
+        },
+        {
+          width: canvasWidth.value,
+          height: canvasHeight.value
+        }
+      );
 
-  //     initialScale.value = renderedScale;
-  //     scaleContentTo(renderedScale, undefined, animated);
+      const centerPosition = { x: 0.5, y: 0.5 };
 
-  //     translateContentTo(
-  //       getCenterInParent(renderedDimensions, {
-  //         width: canvasWidth.value,
-  //         height: canvasHeight.value
-  //       }),
-  //       undefined,
-  //       animated
-  //     );
-  //   },
-  //   [objectFit]
-  // );
+      scaleContentTo(renderedScale, undefined, animated);
+      translateContentTo(centerPosition, undefined, animated);
+    },
+    [objectFit]
+  );
 
   const handleReset = useCallback(() => {
-    // updateContentPosition(true);
+    updateContentPosition(true);
   }, []);
 
-  // const translateContentTo = (
-  //   translate: Position,
-  //   clampTo?: { x?: [number, number]; y?: [number, number] },
-  //   animated?: boolean
-  // ) => {
-  //   'worklet';
-  //   const timingConfig = { duration: 150, easing: Easing.ease };
-
-  //   const newTranslateX = clampTo?.x
-  //     ? clamp(translate.x, clampTo.x)
-  //     : translate.x;
-  //   const newTranslateY = clampTo?.y
-  //     ? clamp(translate.y, clampTo.y)
-  //     : translate.y;
-
-  //   if (animated) {
-  //     translateX.value = withTiming(newTranslateX, timingConfig);
-  //     translateY.value = withTiming(newTranslateY, timingConfig);
-  //   } else {
-  //     translateX.value = newTranslateX;
-  //     translateY.value = newTranslateY;
-  //   }
-  // };
-
-  const translateWithDecay = (
-    velocity: number,
-    position: number,
-    clampSize: number
+  const translateContentTo = (
+    translate: Position,
+    clampTo?: { x?: [number, number]; y?: [number, number] },
+    animated?: boolean
   ) => {
     'worklet';
-    let newVelocity = velocity;
-    if (position < Math.min(0, clampSize) && velocity > 0) {
-      newVelocity = -0.01;
-    } else if (position > Math.max(0, clampSize) && velocity < 0) {
-      newVelocity = 0.01;
-    }
 
-    return withDecay({
-      velocity: newVelocity,
-      clamp: [Math.min(0, clampSize), Math.max(0, clampSize)],
-      rubberBandEffect: true,
-      deceleration: 0.98,
-      rubberBandFactor: 3
-    });
+    const newTranslateX = clampTo?.x
+      ? clamp(translate.x, clampTo.x)
+      : translate.x;
+    const newTranslateY = clampTo?.y
+      ? clamp(translate.y, clampTo.y)
+      : translate.y;
+
+    if (animated) {
+      const timingConfig = { duration: 150, easing: Easing.ease };
+
+      relativeTranslateX.value = withTiming(newTranslateX, timingConfig);
+      relativeTranslateY.value = withTiming(newTranslateY, timingConfig);
+    } else {
+      relativeTranslateX.value = newTranslateX;
+      relativeTranslateY.value = newTranslateY;
+    }
   };
 
-  // const scaleContentTo = (
-  //   newScale: number,
-  //   origin?: Position,
-  //   animated = false
-  // ) => {
-  //   'worklet';
-  //   const timingConfig = { duration: 150, easing: Easing.ease };
-  //   const clampedScale = clamp(newScale, [minScale, maxScale]);
+  const scaleContentTo = (
+    newScale: number,
+    origin?: Position,
+    animated = false
+  ) => {
+    'worklet';
+    const clampedScale = clamp(newScale, [minScale, maxScale]);
 
-  //   if (origin) {
-  //     const relativeScale = clampedScale / scale.value;
+    if (origin) {
+      const relativeScale = clampedScale / currentScale.value;
 
-  //     const clampWidth =
-  //       canvasWidth.value - containerWidth.value * clampedScale;
-  //     const clampHeight =
-  //       canvasHeight.value - containerHeight.value * clampedScale;
+      translateContentTo(
+        {
+          x:
+            relativeTranslateX.value -
+            (origin.x - relativeTranslateX.value) * (relativeScale - 1),
+          y:
+            relativeTranslateY.value -
+            (origin.y - relativeTranslateY.value) * (relativeScale - 1)
+        },
+        {
+          x: [0, 1],
+          y: [0, 1]
+        },
+        animated
+      );
+    }
 
-  //     translateContentTo(
-  //       {
-  //         x:
-  //           translateX.value -
-  //           (origin.x - translateX.value) * (relativeScale - 1),
-  //         y:
-  //           translateY.value -
-  //           (origin.y - translateY.value) * (relativeScale - 1)
-  //       },
-  //       {
-  //         x: [Math.min(0, clampWidth), Math.max(0, clampWidth)],
-  //         y: [Math.min(0, clampHeight), Math.max(0, clampHeight)]
-  //       },
-  //       animated
-  //     );
-  //   }
-
-  //   if (animated) {
-  //     scale.value = withTiming(clampedScale, timingConfig);
-  //   } else {
-  //     scale.value = clampedScale;
-  //   }
-  // };
+    if (animated) {
+      currentScale.value = withTiming(clampedScale, {
+        duration: 150,
+        easing: Easing.ease
+      });
+    } else {
+      currentScale.value = clampedScale;
+    }
+  };
 
   const panGestureHandler = Gesture.Pan()
     .onChange(e => {
-      relativeTranslateX.value +=
-        e.changeX / (canvasWidth.value - containerWidth.value);
-      relativeTranslateY.value +=
-        e.changeY / (canvasHeight.value - containerHeight.value);
+      const maxTranslate = calcMaxTranslate();
+      relativeTranslateX.value += e.changeX / maxTranslate.x;
+      relativeTranslateY.value += e.changeY / maxTranslate.y;
     })
     .onEnd(({ velocityX, velocityY }) => {
-      const maxTranslateX = canvasWidth.value - containerWidth.value;
-      relativeTranslateX.value = translateWithDecay(
-        velocityX / maxTranslateX,
+      const maxTranslate = calcMaxTranslate();
+
+      relativeTranslateX.value = fixedWithDecay(
+        velocityX / maxTranslate.x,
         relativeTranslateX.value,
-        1 //scale.value
+        [0, 1]
       );
 
-      const maxTranslateY = canvasHeight.value - containerHeight.value;
-      relativeTranslateY.value = translateWithDecay(
-        velocityY / maxTranslateY,
+      relativeTranslateY.value = fixedWithDecay(
+        velocityY / maxTranslate.y,
         relativeTranslateY.value,
-        1 //scale.value
+        [0, 1]
       );
     });
 
-  // const pinchGestureHandler = Gesture.Pinch()
-  //   .onStart(() => {
-  //     startScale.value = scale.value;
-  //   })
-  //   .onChange(e => {
-  //     scaleContentTo(startScale.value * e.scale, { x: e.focalX, y: e.focalY });
-  //   })
-  //   .onEnd(e => {
-  //     scale.value = withDecay({
-  //       velocity: e.velocity,
-  //       clamp: [minScale, maxScale],
-  //       rubberBandEffect: true
-  //     });
-  //   });
+  const pinchGestureHandler = Gesture.Pinch()
+    .onStart(() => {
+      pinchStartScale.value = currentScale.value;
+    })
+    .onChange(e => {
+      scaleContentTo(pinchStartScale.value * e.scale, {
+        x: e.focalX / canvasWidth.value,
+        y: e.focalY / canvasHeight.value
+      });
+    })
+    .onEnd(e => {
+      currentScale.value = fixedWithDecay(e.velocity, currentScale.value, [
+        minScale,
+        maxScale
+      ]);
+    });
 
   // const tapGestureHandler = Gesture.Tap()
   //   .numberOfTaps(2)
@@ -287,8 +259,7 @@ export default function PannableScalableView({
     <View className='grow relative overflow-hidden'>
       <GestureDetector
         gesture={Gesture.Race(
-          panGestureHandler
-          // Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
+          Gesture.Simultaneous(pinchGestureHandler, panGestureHandler)
           // tapGestureHandler
         )}>
         <StyledCanvas className={className} onLayout={handleCanvasRender}>
