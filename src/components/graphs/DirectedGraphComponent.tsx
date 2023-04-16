@@ -17,14 +17,13 @@ type DirectedGraphComponentProps<V, E> = {
 function DirectedGraphComponent<V, E>({
   vertices,
   edges,
-  settings,
-  renderers,
-  setContentDimensions
+  ...componentProps
 }: DirectedGraphComponentProps<V, E> & GraphComponentPrivateProps) {
   const graph = useMemo(() => {
     const g = new DirectedGraph<V, E>();
     const vertexRadius =
-      settings?.components?.vertex?.radius ?? VERTEX_COMPONENT_SETTINGS.radius;
+      componentProps.settings?.components?.vertex?.radius ??
+      VERTEX_COMPONENT_SETTINGS.radius;
 
     vertices.forEach(({ key, data }) => {
       g.insertVertex(key, data, vertexRadius);
@@ -36,14 +35,7 @@ function DirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  return (
-    <GraphComponent
-      graph={graph}
-      renderers={renderers}
-      settings={settings}
-      setContentDimensions={setContentDimensions}
-    />
-  );
+  return <GraphComponent graph={graph} {...componentProps} />;
 }
 
 export default <V, E>(props: DirectedGraphComponentProps<V, E>) => {

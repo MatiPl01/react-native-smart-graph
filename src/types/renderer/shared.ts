@@ -1,6 +1,6 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { AnimatedPositionCoordinates } from '../layout';
+import { AnimatedPosition, AnimatedPositionCoordinates } from '../layout';
 
 export type VertexRendererProps<V> = {
   key: string;
@@ -17,7 +17,7 @@ export type EdgeLabelRendererProps<E> = {
   key: string;
   data: E;
   vertexRadius: number;
-  edgeCenterPosition: SharedValue<{ x: number; y: number }>;
+  edgeCenterPosition: AnimatedPosition;
   edgeRotation: SharedValue<number>;
   edgeLength: SharedValue<number>;
 };

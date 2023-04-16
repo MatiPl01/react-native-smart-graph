@@ -3,6 +3,7 @@ import {
   SHARED_PLACEMENT_SETTINGS
 } from '@/constants/placement';
 import { Graph, Vertex } from '@/types/graphs';
+import { Position } from '@/types/layout';
 import {
   GraphLayout,
   PlacedVerticesPositions,
@@ -55,7 +56,7 @@ const calcVerticesGridPositions = <V, E>(
   const verticesCount = vertices.length;
 
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
-  const availablePositions: { x: number; y: number }[] = [];
+  const availablePositions: Position[] = [];
 
   for (let i = 0; i < maxPointsInLine; i++) {
     for (let j = 0; j < maxPointsInLine; j++) {
@@ -75,7 +76,7 @@ const calcVerticesGridPositions = <V, E>(
     width: containerSize,
     height: containerSize,
     verticesPositions: vertices.reduce((acc, { key }, idx) => {
-      acc[key] = selectedPositions[idx] as { x: number; y: number };
+      acc[key] = selectedPositions[idx] as Position;
       return acc;
     }, {} as PlacedVerticesPositions)
   };
@@ -90,7 +91,7 @@ const calcVerticesHoneycombPositions = <V, E>(
   const triangleHeight = (minVertexCenterDistance * Math.sqrt(3)) / 2;
 
   const availablePositionsCount = Math.ceil(verticesCount / density);
-  const availablePositions: { x: number; y: number }[] = [];
+  const availablePositions: Position[] = [];
 
   let lineNumber = 1;
   let currentVertexIndex = 0;
@@ -140,7 +141,7 @@ const calcVerticesHoneycombPositions = <V, E>(
     height: maxY + vertexRadius,
     verticesPositions: verticesAndPositions.reduce(
       (acc, [vertex, position]) => {
-        acc[vertex.key] = position as { x: number; y: number };
+        acc[vertex.key] = position;
         return acc;
       },
       {} as PlacedVerticesPositions

@@ -1,4 +1,5 @@
 import { Vertex } from '../graphs';
+import { Position } from '../layout';
 
 export type PlacementStrategy = 'random' | 'circular' | 'orbits' | 'tree';
 
@@ -83,7 +84,7 @@ export type TreePlacementSettings = SharedPlacementSettings & {
   strategy: 'tree';
 };
 
-export type PlacedVerticesPositions = Record<string, { x: number; y: number }>;
+export type PlacedVerticesPositions = Record<string, Position>;
 
 export type GraphLayout = {
   width: number;
