@@ -1,11 +1,15 @@
+import { SharedValue } from 'react-native-reanimated';
+
 import { UndirectedEdge } from '@/types/graphs';
-import { AnimatedPosition } from '@/types/layout';
 import { UndirectedEdgeRenderers } from '@/types/renderer';
 import { UndirectedEdgeSettings } from '@/types/settings';
 
 type UndirectedEdgeComponentProps<E, V> = {
   edge: UndirectedEdge<E, V>;
-  points: [AnimatedPosition, AnimatedPosition];
+  points: [
+    SharedValue<{ x: number; y: number }>,
+    SharedValue<{ x: number; y: number }>
+  ];
   renderers: UndirectedEdgeRenderers<E>;
   settings?: UndirectedEdgeSettings;
 };
