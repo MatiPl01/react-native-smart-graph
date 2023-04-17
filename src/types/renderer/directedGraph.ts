@@ -1,19 +1,20 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { VertexRenderFunction } from '.';
+import { EdgeLabelRendererFunction, VertexRenderFunction } from '.';
+import { AnimatedPosition } from '../layout';
 
 export type DirectedEdgeRendererProps<E> = {
   key: string;
   data: E;
-  from: SharedValue<{ x: number; y: number }>;
-  to: SharedValue<{ x: number; y: number }>;
+  from: AnimatedPosition;
+  to: AnimatedPosition;
 };
 
 export type EdgeArrowRendererProps = {
   size: number;
-  vertexPosition: SharedValue<{ x: number; y: number }>;
-  tipPosition: SharedValue<{ x: number; y: number }>;
-  centerPosition: SharedValue<{ x: number; y: number }>;
+  vertexPosition: AnimatedPosition;
+  tipPosition: AnimatedPosition;
+  centerPosition: AnimatedPosition;
   rotation: SharedValue<number>;
 };
 
@@ -29,11 +30,11 @@ export type DirectedGraphRenderers<V, E> = {
   vertex?: VertexRenderFunction<V>;
   edge?: DirectedEdgeRenderFunction<E>;
   edgeArrow?: EdgeArrowRenderFunction;
-  edgeLabel?: DirectedEdgeRenderFunction<E>;
+  edgeLabel?: EdgeLabelRendererFunction<E>;
 };
 
 export type DirectedEdgeRenderers<E> = {
   edge: DirectedEdgeRenderFunction<E>;
   arrow: EdgeArrowRenderFunction;
-  label?: DirectedEdgeRenderFunction<E>;
+  label?: EdgeLabelRendererFunction<E>;
 };
