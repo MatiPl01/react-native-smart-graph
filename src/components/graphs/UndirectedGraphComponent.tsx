@@ -5,7 +5,7 @@ import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 
-import GraphComponent, { TempProps } from './GraphComponent';
+import GraphComponent, { GraphComponentPrivateProps } from './GraphComponent';
 
 type UndirectedGraphComponentProps<V, E> = {
   vertices: Array<{ key: string; data: V }>;
@@ -17,14 +17,13 @@ type UndirectedGraphComponentProps<V, E> = {
 function UndirectedGraphComponent<V, E>({
   vertices,
   edges,
-  settings,
-  renderers,
-  onMeasure
-}: UndirectedGraphComponentProps<V, E> & TempProps) {
+  ...componentProps
+}: UndirectedGraphComponentProps<V, E> & GraphComponentPrivateProps) {
   const graph = useMemo(() => {
     const g = new UndirectedGraph<V, E>();
     const vertexRadius =
-      settings?.components?.vertex?.radius ?? VERTEX_COMPONENT_SETTINGS.radius;
+      componentProps.settings?.components?.vertex?.radius ??
+      VERTEX_COMPONENT_SETTINGS.radius;
 
     vertices.forEach(({ key, data }) => {
       g.insertVertex(key, data, vertexRadius);
@@ -37,20 +36,14 @@ function UndirectedGraphComponent<V, E>({
     return g;
   }, [vertices, edges]);
 
-  return (
-    <GraphComponent
-      graph={graph}
-      settings={settings}
-      renderers={renderers}
-      onMeasure={onMeasure}
-    />
-  );
+  return <GraphComponent graph={graph} {...componentProps} />;
 }
 
 export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
   return (
     <UndirectedGraphComponent
-      {...(props as UndirectedGraphComponentProps<V, E> & TempProps)}
+      {...(props as UndirectedGraphComponentProps<V, E> &
+        GraphComponentPrivateProps)}
     />
   );
 };

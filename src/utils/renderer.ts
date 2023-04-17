@@ -1,3 +1,4 @@
+import { Position } from '@/types/layout';
 import { DirectedEdgeRendererProps, EdgeRendererProps } from '@/types/renderer';
 
 export function areDirectedEdgeRendererProps<E>(
@@ -7,10 +8,7 @@ export function areDirectedEdgeRendererProps<E>(
   return !!(from && to);
 }
 
-export const calcUnitVector = (
-  from: { x: number; y: number },
-  to: { x: number; y: number }
-): { x: number; y: number } => {
+export const calcUnitVector = (from: Position, to: Position): Position => {
   'worklet';
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -20,10 +18,10 @@ export const calcUnitVector = (
 };
 
 export const translateAlongVector = (
-  point: { x: number; y: number },
-  unitVector: { x: number; y: number },
+  point: Position,
+  unitVector: Position,
   distance: number
-): { x: number; y: number } => {
+): Position => {
   'worklet';
   return {
     x: point.x + unitVector.x * distance,
