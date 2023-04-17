@@ -1,20 +1,20 @@
+import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { Graph } from '@/types/graphs';
 import {
   CircularPlacementSettings,
   GraphLayout,
   PlacedVerticesPositions
-} from '@/types/placement';
+} from '@/types/settings';
 
-import { SHARED } from '../constants';
 import { defaultSortComparator } from '../shared';
 
 const placeVerticesCircular = <V, E>(
   graph: Graph<V, E>,
+  vertexRadius: number,
   {
     sortComparator = defaultSortComparator,
     sortVertices = false,
-    vertexRadius = SHARED.vertexRadius,
-    minVertexSpacing = SHARED.minVertexSpacing
+    minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing
   }: CircularPlacementSettings<V, E>
 ): GraphLayout => {
   const vertices = sortVertices

@@ -17,7 +17,6 @@ export type PlacementSettings<V, E> =
   | UndirectedGraphPlacementSettings<V, E>;
 
 type SharedPlacementSettings = {
-  vertexRadius?: number;
   minVertexSpacing?: number;
 };
 
@@ -30,7 +29,6 @@ export type RandomLayoutType = 'grid' | 'honeycomb' | 'random';
 
 export type RandomPlacementSettings = {
   strategy: 'random';
-  vertexRadius?: number;
 } & (
   | {
       layoutType: Exclude<RandomLayoutType, 'random'>;

@@ -20,13 +20,13 @@ export default abstract class Graph<
 
   abstract isDirected(): boolean;
 
-  abstract insertVertex(key: string, value: V): GV;
+  abstract insertVertex(key: string, value: V, radius: number): GV;
 
   abstract insertEdge(
-      sourceKey: string,
-      targetKey: string,
-      edgeKey: string,
-      value: E
+    sourceKey: string,
+    targetKey: string,
+    edgeKey: string,
+    value: E
   ): GE;
 
   abstract removeEdge(key: string): E;

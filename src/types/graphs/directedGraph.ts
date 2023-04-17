@@ -1,4 +1,4 @@
-import { Edge, Vertex } from './shared.types';
+import { Edge, Vertex } from './shared.';
 
 export interface DirectedGraphVertex<V, E> extends Vertex<V, E> {
   get inEdges(): Array<DirectedEdge<E, V>>;

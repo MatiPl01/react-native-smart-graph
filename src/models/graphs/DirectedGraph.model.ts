@@ -12,8 +12,14 @@ export default class DirectedGraph<V, E> extends Graph<
     return true;
   }
 
-  insertVertex(key: string, value: V): DirectedGraphVertex<V, E> {
-    return this.insertVertexObject(new DirectedGraphVertex<V, E>(key, value));
+  insertVertex(
+    key: string,
+    value: V,
+    radius: number
+  ): DirectedGraphVertex<V, E> {
+    return this.insertVertexObject(
+      new DirectedGraphVertex<V, E>(key, value, radius)
+    );
   }
 
   insertEdge(

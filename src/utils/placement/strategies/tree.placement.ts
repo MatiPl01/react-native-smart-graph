@@ -1,19 +1,18 @@
+import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphVertex, Graph } from '@/types/graphs';
 import {
   GraphLayout,
   PlacedVerticesPositions,
   TreePlacementSettings
-} from '@/types/placement';
+} from '@/types/settings';
 import { findRootVertex, isGraphATree, isGraphDirected } from '@/utils/graphs';
-
-import { SHARED } from '../constants';
 
 const placeVerticesOnTree = <V, E>(
   graph: Graph<V, E>,
+  vertexRadius: number,
   {
-    vertexRadius = SHARED.vertexRadius,
-    minVertexSpacing = SHARED.minVertexSpacing
+    minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing
   }: TreePlacementSettings
 ): GraphLayout => {
   // TODO - maybe add undirected graph support, there is a problem finding root vertex

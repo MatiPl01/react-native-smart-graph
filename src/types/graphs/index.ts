@@ -1,3 +1,3 @@
-export * from './shared.types';
-export * from './undirectedGraph.types';
-export * from './directedGraph.types';
+export * from './shared.';
+export * from './undirectedGraph';
+export * from './directedGraph';

@@ -2,7 +2,7 @@ import React from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
+import { useFont } from '@shopify/react-native-skia';
 
 import FONTS from '@/assets/fonts';
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
@@ -10,7 +10,7 @@ import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import PannableScalableView from './views/PannableScalableView';
 
 export default function App() {
-  const font = useFont(FONTS.rubikFont, 10);
+  const font = useFont(FONTS.rubikFont, 25);
 
   if (font === null) {
     return null;
@@ -19,15 +19,9 @@ export default function App() {
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
-        <View className='h-4/5 bg-black'>
+        <View className='grow bg-black'>
           <PannableScalableView objectFit='cover' controls>
             <DirectedGraphComponent
-              placementSettings={{
-                strategy: 'orbits',
-                vertexRadius: 5,
-                minVertexSpacing: 10,
-                layerSizing: 'equal'
-              }}
               vertices={[
                 { key: 'A', data: [] },
                 { key: 'B', data: [] },
@@ -71,14 +65,12 @@ export default function App() {
                 { key: 'OS', from: 'O', to: 'S', data: [] },
                 { key: 'ST', from: 'S', to: 'T', data: [] }
               ]}
-              // eslint-disable-next-line react/no-unstable-nested-components
-              vertexRenderer={({ key, radius, position: { x, y } }) => (
-                <Group>
-                  <Circle cx={x} cy={y} r={radius} color='brown' />
-                  <Circle cx={x} cy={y} r={radius * 0.75} color='green' />
-                  <Text x={x} y={y} text={key} font={font} color='white' />
-                </Group>
-              )}
+              settings={{
+                placement: {
+                  strategy: 'orbits',
+                  layerSizing: 'equal'
+                }
+              }}
             />
           </PannableScalableView>
         </View>
