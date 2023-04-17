@@ -1,16 +1,14 @@
-import { SharedValue } from 'react-native-reanimated';
-
 import { Line } from '@shopify/react-native-skia';
 
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
+import { AnimatedPosition } from '@/types/layout';
 import { EdgeRendererProps } from '@/types/renderer';
 import { areDirectedEdgeRendererProps } from '@/utils/renderer';
 
 export default function DefaultEdgeRenderer<E, R extends EdgeRendererProps<E>>(
   props: R
 ) {
-  let p1: SharedValue<{ x: number; y: number }>,
-    p2: SharedValue<{ x: number; y: number }>;
+  let p1: AnimatedPosition, p2: AnimatedPosition;
   if (areDirectedEdgeRendererProps(props)) {
     ({ from: p1, to: p2 } = props);
   } else {

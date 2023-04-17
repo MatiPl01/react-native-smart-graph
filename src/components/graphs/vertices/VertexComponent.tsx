@@ -1,7 +1,8 @@
 import { memo, useEffect } from 'react';
-import { SharedValue, useSharedValue } from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 
 import { Vertex } from '@/types/graphs';
+import { AnimatedPositionCoordinates } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
 import { GraphVertexSettings } from '@/types/settings';
 
@@ -11,7 +12,7 @@ type VertexComponentProps<V, E> = {
   placementPosition: { x: number; y: number };
   setAnimatedPosition: (
     key: string,
-    position: { x: SharedValue<number>; y: SharedValue<number> }
+    position: AnimatedPositionCoordinates
   ) => void;
   renderer: VertexRenderFunction<V>;
 };
