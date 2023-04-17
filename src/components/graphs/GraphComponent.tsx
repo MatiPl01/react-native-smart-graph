@@ -108,8 +108,8 @@ export default function GraphComponent<
     );
 
     x1.value = 0;
-    x2.value = layout.width;
     y1.value = 0;
+    x2.value = layout.width;
     y2.value = layout.height;
 
     return {
@@ -131,7 +131,7 @@ export default function GraphComponent<
         };
 
         Object.values(verticesPositionsRef.current)
-          .slice(0, 1)
+          // .slice(0, 1)
           // .slice(1, 2)
           // .slice(2, 3)
           // .slice(0, 2)
@@ -203,6 +203,13 @@ export default function GraphComponent<
         y={y1}
         width={containerWidth}
         height={containerHeight}
+        color='#444'
+      />
+      <Rect
+        x={0}
+        y={0}
+        width={graphLayout.width}
+        height={graphLayout.height}
         color='#333'
       />
       {areAllVerticesRendered && renderEdges()}
