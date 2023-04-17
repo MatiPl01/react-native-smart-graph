@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useDerivedValue,
+  useFrameCallback,
   withRepeat,
   withTiming
 } from 'react-native-reanimated';
@@ -8,6 +9,7 @@ import {
 import { Group, Rect } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
+import { ForceManager } from '@/types/forces';
 import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
@@ -15,6 +17,7 @@ import {
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
+import DefaultForceManager from '@/utils/forces/DefaultForceManager';
 import { placeVertices } from '@/utils/placement';
 
 import EdgeComponent, { EdgeComponentProps } from './edges/EdgeComponent';
@@ -57,17 +60,16 @@ export default function GraphComponent<
     Record<string, AnimatedPositionCoordinates>
   >({});
 
-  const boundingVertices = useMemo<
+  const boundingVertices = useRef<
     Record<keyof AnimatedBoundingRect, string | null>
-  >(
-    () => ({
-      x1: null,
-      x2: null,
-      y1: null,
-      y2: null
-    }),
-    []
-  );
+  >({
+    x1: null,
+    x2: null,
+    y1: null,
+    y2: null
+  });
+
+  const forceManagerRef = useRef<ForceManager | null>(null);
 
   const memoSettings = useMemo(
     () => ({
@@ -118,42 +120,24 @@ export default function GraphComponent<
     };
   }, [graph]);
 
+  useEffect(() => {
+    forceManagerRef.current = new DefaultForceManager(
+      graph,
+      verticesPositionsRef.current
+    );
+    frameCallback.setActive(true);
+  }, [areAllVerticesRendered]);
+
+  const frameCallback = useFrameCallback(() => {
+    forceManagerRef.current?.update();
+  }, false);
+
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedPositionCoordinates) => {
       verticesPositionsRef.current[key] = position;
 
       if (++renderedVerticesCountRef.current === graphLayout.verticesCount) {
         setAreAllVerticesRendered(true);
-
-        const center = {
-          x: graphLayout.width / 2,
-          y: graphLayout.height / 2
-        };
-
-        Object.values(verticesPositionsRef.current)
-          // .slice(0, 1)
-          // .slice(1, 2)
-          // .slice(2, 3)
-          // .slice(0, 2)
-          // .slice(1, 3)
-          // .slice(0, 3)
-          // .slice(1, 4)
-          .forEach(({ x, y }) => {
-            x.value = withRepeat(
-              withTiming(x.value + 1.25 * (x.value - center.x), {
-                duration: 1000
-              }),
-              Infinity,
-              true
-            );
-            y.value = withRepeat(
-              withTiming(y.value + 1.25 * (y.value - center.y), {
-                duration: 1000
-              }),
-              Infinity,
-              true
-            );
-          });
       }
     },
     [verticesPositionsRef.current]
@@ -183,7 +167,7 @@ export default function GraphComponent<
             settings={memoSettings.components.vertex}
             placementPosition={placementPosition}
             containerBoundingRect={boundingRect}
-            boundingVertices={boundingVertices}
+            boundingVertices={boundingVertices.current}
             renderer={memoRenderers.vertex}
             setAnimatedPosition={setAnimatedVertexPosition}
           />
@@ -198,6 +182,7 @@ export default function GraphComponent<
 
   return (
     <Group>
+      {/*TODO - remove these rects after testing*/}
       <Rect
         x={x1}
         y={y1}

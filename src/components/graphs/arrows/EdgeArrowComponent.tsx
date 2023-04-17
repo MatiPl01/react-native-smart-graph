@@ -4,7 +4,7 @@ import { ARROW_COMPONENT_SETTINGS } from '@/constants/components';
 import { AnimatedPosition } from '@/types/layout';
 import { EdgeArrowRenderFunction } from '@/types/renderer';
 import { EdgeArrowSettings } from '@/types/settings';
-import { calcUnitVector, translateAlongVector } from '@/utils/renderer';
+import { calcUnitVector, translateAlongVector } from '@/utils/vectors';
 
 type EdgeArrowComponentProps = {
   from: AnimatedPosition;
