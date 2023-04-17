@@ -1,10 +1,14 @@
-import { EdgeLabelRendererFunction, VertexRenderFunction } from '.';
-import { AnimatedPosition } from '../layout';
+import { SharedValue } from 'react-native-reanimated';
+
+import { VertexRenderFunction } from '.';
 
 export type UndirectedEdgeRendererProps<E> = {
   key: string;
   data: E;
-  points: [AnimatedPosition, AnimatedPosition];
+  points: [
+    SharedValue<{ x: number; y: number }>,
+    SharedValue<{ x: number; y: number }>
+  ];
 };
 
 export type UndirectedEdgeRenderFunction<E> = (
@@ -14,10 +18,10 @@ export type UndirectedEdgeRenderFunction<E> = (
 export type UndirectedGraphRenderers<V, E> = {
   vertex?: VertexRenderFunction<V>;
   edge?: UndirectedEdgeRenderFunction<E>;
-  edgeLabel?: EdgeLabelRendererFunction<E>;
+  edgeLabel?: UndirectedEdgeRenderFunction<E>;
 };
 
 export type UndirectedEdgeRenderers<E> = {
   edge: UndirectedEdgeRenderFunction<E>;
-  label?: EdgeLabelRendererFunction<E>;
+  label?: UndirectedEdgeRenderFunction<E>;
 };

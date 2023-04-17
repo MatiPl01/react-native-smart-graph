@@ -1,14 +1,13 @@
-import { useDerivedValue } from 'react-native-reanimated';
+import { SharedValue, useDerivedValue } from 'react-native-reanimated';
 
 import { ARROW_COMPONENT_SETTINGS } from '@/constants/components';
-import { AnimatedPosition } from '@/types/layout';
 import { EdgeArrowRenderFunction } from '@/types/renderer';
 import { EdgeArrowSettings } from '@/types/settings';
 import { calcUnitVector, translateAlongVector } from '@/utils/renderer';
 
 type EdgeArrowComponentProps = {
-  from: AnimatedPosition;
-  to: AnimatedPosition;
+  from: SharedValue<{ x: number; y: number }>;
+  to: SharedValue<{ x: number; y: number }>;
   vertexRadius: number;
   renderer: EdgeArrowRenderFunction;
   settings?: EdgeArrowSettings;

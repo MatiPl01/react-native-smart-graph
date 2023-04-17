@@ -2,12 +2,20 @@ import React from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { useFont } from '@shopify/react-native-skia';
+
+import FONTS from '@/assets/fonts';
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 
-import DefaultEdgeLabelRenderer from './components/graphs/renderers/DefaultEdgeLabelRenderer';
 import PannableScalableView from './views/PannableScalableView';
 
 export default function App() {
+  const font = useFont(FONTS.rubikFont, 25);
+
+  if (font === null) {
+    return null;
+  }
+
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
@@ -62,9 +70,6 @@ export default function App() {
                   strategy: 'orbits',
                   layerSizing: 'equal'
                 }
-              }}
-              renderers={{
-                edgeLabel: DefaultEdgeLabelRenderer
               }}
             />
           </PannableScalableView>
