@@ -1,30 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  useDerivedValue,
-  useFrameCallback,
-  withRepeat,
-  withTiming
-} from 'react-native-reanimated';
+import { useDerivedValue, useFrameCallback, withRepeat, withTiming } from 'react-native-reanimated';
+
+
 
 import { Group, Rect } from '@shopify/react-native-skia';
+
+
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { ForceManager } from '@/types/forces';
 import { Graph } from '@/types/graphs';
-import {
-  AnimatedBoundingRect,
-  AnimatedPositionCoordinates
-} from '@/types/layout';
+import { AnimatedBoundingRect, AnimatedPositionCoordinates } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
 import DefaultForceManager from '@/utils/forces/DefaultForceManager';
 import { placeVertices } from '@/utils/placement';
+
+
 
 import EdgeComponent, { EdgeComponentProps } from './edges/EdgeComponent';
 import DefaultEdgeArrowRenderer from './renderers/DefaultEdgeArrowRenderer';
 import DefaultEdgeRenderer from './renderers/DefaultEdgeRenderer';
 import DefaultVertexRenderer from './renderers/DefaultVertexRenderer';
 import VertexComponent from './vertices/VertexComponent';
+
 
 export type GraphComponentPrivateProps = {
   boundingRect: AnimatedBoundingRect;
@@ -122,14 +121,14 @@ export default function GraphComponent<
 
   useEffect(() => {
     forceManagerRef.current = new DefaultForceManager(
-      graph,
+      graph.connections,
       verticesPositionsRef.current
     );
     frameCallback.setActive(true);
   }, [areAllVerticesRendered]);
 
   const frameCallback = useFrameCallback(() => {
-    forceManagerRef.current?.update();
+    console.log(forceManagerRef.current?.updateForces);
   }, false);
 
   const setAnimatedVertexPosition = useCallback(

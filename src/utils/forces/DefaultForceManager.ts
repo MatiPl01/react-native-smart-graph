@@ -1,14 +1,14 @@
-import { Graph } from '@/types/graphs';
+import { GraphConnections } from '@/types/graphs';
 import { AnimatedPositionCoordinates } from '@/types/layout';
 import ForceManager from '@/utils/forces/ForceManager';
 
-export default class DefaultForceManager<V, E> extends ForceManager<V, E> {
+export default class DefaultForceManager extends ForceManager {
   private readonly attractionForceFactor: number;
   private readonly attractionScale: number;
   private readonly repulsionScale: number;
 
   constructor(
-    graphModel: Graph<V, E>,
+    connections: GraphConnections,
     verticesPositions: Record<string, AnimatedPositionCoordinates>,
     config?: {
       attractionForceFactor?: number;
@@ -16,7 +16,7 @@ export default class DefaultForceManager<V, E> extends ForceManager<V, E> {
       repulsionScale?: number;
     }
   ) {
-    super(graphModel, verticesPositions);
+    super(connections, verticesPositions);
     this.attractionForceFactor = config?.attractionForceFactor ?? 1;
     this.attractionScale = config?.attractionScale ?? 1;
     this.repulsionScale = config?.repulsionScale ?? 1;

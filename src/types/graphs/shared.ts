@@ -16,9 +16,12 @@ export interface Edge<E, V> {
   isDirected(): boolean;
 }
 
+export type GraphConnections = Record<string, Array<string>>;
+
 export interface Graph<V, E> {
   get vertices(): Array<Vertex<V, E>>;
   get edges(): Array<Edge<E, V>>;
+  get connections(): GraphConnections;
   isDirected(): boolean;
   hasVertex(key: string): boolean;
   hasEdge(key: string): boolean;

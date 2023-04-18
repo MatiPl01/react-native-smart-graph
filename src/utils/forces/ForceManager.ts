@@ -1,7 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
 import { ForceManager as IForceManager } from '@/types/forces';
-import { Graph } from '@/types/graphs';
+import { GraphConnections } from '@/types/graphs';
 import { AnimatedPositionCoordinates } from '@/types/layout';
 import {
   addVectors,
@@ -11,20 +11,20 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
-export default abstract class ForceManager<V, E> implements IForceManager {
+export default abstract class ForceManager implements IForceManager {
   private readonly forces: Record<string, Vector> = {};
   private readonly verticesPositions: Record<
     string,
     AnimatedPositionCoordinates
   >;
-  private readonly graphModel: Graph<V, E>;
+  private readonly connections: GraphConnections;
 
   protected constructor(
-    graphModel: Graph<V, E>,
+    connections: GraphConnections,
     verticesPositions: Record<string, AnimatedPositionCoordinates>
   ) {
     this.verticesPositions = verticesPositions;
-    this.graphModel = graphModel;
+    this.connections = connections;
   }
 
   protected abstract getAttractionFactor(distance: number): number;
@@ -97,7 +97,6 @@ export default abstract class ForceManager<V, E> implements IForceManager {
   }
 
   update() {
-    'worklet';
     console.log('update');
 
     // this.updateForces();
