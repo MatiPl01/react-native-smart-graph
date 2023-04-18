@@ -9,17 +9,17 @@ import placeVerticesOnTree from './strategies/tree.placement';
 export const placeVertices = <V, E>(
   graph: Graph<V, E>,
   vertexRadius: number,
-  placementSettings?: PlacementSettings<V, E>
+  settings?: PlacementSettings<V, E>
 ): GraphLayout => {
-  switch (placementSettings?.strategy) {
+  switch (settings?.strategy) {
     case 'circular':
-      return placeVerticesCircular(graph, vertexRadius, placementSettings);
+      return placeVerticesCircular(graph, vertexRadius, settings);
     case 'orbits':
-      return placeVerticesOnOrbits(graph, vertexRadius, placementSettings);
+      return placeVerticesOnOrbits(graph, vertexRadius, settings);
     case 'tree':
-      return placeVerticesOnTree(graph, vertexRadius, placementSettings);
+      return placeVerticesOnTree(graph, vertexRadius, settings);
     default:
     case 'random':
-      return placeVerticesRandomly(graph, vertexRadius, placementSettings);
+      return placeVerticesRandomly(graph, vertexRadius, settings);
   }
 };

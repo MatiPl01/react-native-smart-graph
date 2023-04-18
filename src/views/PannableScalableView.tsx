@@ -59,7 +59,7 @@ export default function PannableScalableView({
 
   // CONTAINER SCALE
   const renderScale = useSharedValue(1);
-  const currentScale = useSharedValue(1);
+  const currentScale = useSharedValue(0.25);
   const pinchStartScale = useSharedValue(1);
 
   // CONTAINER TRANSFORM
@@ -87,6 +87,7 @@ export default function PannableScalableView({
     []
   );
 
+  // TODO - this should be called after graph is rendered
   const resetContentPosition = useCallback(
     (animated?: boolean) => {
       const containerDimensions = {

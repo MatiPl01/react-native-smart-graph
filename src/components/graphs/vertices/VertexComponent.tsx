@@ -59,7 +59,7 @@ function VertexComponent<V, E>({
         boundingVertices.x2 = key;
       }
     },
-    [x]
+    [x, boundingVertices]
   );
 
   useAnimatedReaction(
@@ -77,7 +77,7 @@ function VertexComponent<V, E>({
         boundingVertices.y2 = key;
       }
     },
-    [y]
+    [y, boundingVertices]
   );
 
   return renderer({

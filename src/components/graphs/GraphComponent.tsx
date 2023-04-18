@@ -1,29 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDerivedValue, useFrameCallback, withRepeat, withTiming } from 'react-native-reanimated';
-
-
+import { useDerivedValue, useFrameCallback } from 'react-native-reanimated';
 
 import { Group, Rect } from '@shopify/react-native-skia';
 
-
-
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
-import { ForceManager } from '@/types/forces';
 import { Graph } from '@/types/graphs';
-import { AnimatedBoundingRect, AnimatedPositionCoordinates } from '@/types/layout';
+import {
+  AnimatedBoundingRect,
+  AnimatedPositionCoordinates
+} from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
-import DefaultForceManager from '@/utils/forces/DefaultForceManager';
+import applyDefaultForces from '@/utils/forces/strategies/default.forces';
 import { placeVertices } from '@/utils/placement';
-
-
 
 import EdgeComponent, { EdgeComponentProps } from './edges/EdgeComponent';
 import DefaultEdgeArrowRenderer from './renderers/DefaultEdgeArrowRenderer';
 import DefaultEdgeRenderer from './renderers/DefaultEdgeRenderer';
 import DefaultVertexRenderer from './renderers/DefaultVertexRenderer';
 import VertexComponent from './vertices/VertexComponent';
-
 
 export type GraphComponentPrivateProps = {
   boundingRect: AnimatedBoundingRect;
@@ -67,8 +62,6 @@ export default function GraphComponent<
     y1: null,
     y2: null
   });
-
-  const forceManagerRef = useRef<ForceManager | null>(null);
 
   const memoSettings = useMemo(
     () => ({
@@ -119,17 +112,20 @@ export default function GraphComponent<
     };
   }, [graph]);
 
-  useEffect(() => {
-    forceManagerRef.current = new DefaultForceManager(
-      graph.connections,
-      verticesPositionsRef.current
-    );
-    frameCallback.setActive(true);
-  }, [areAllVerticesRendered]);
+  const graphConnections = useMemo(() => graph.connections, [graph]);
 
-  const frameCallback = useFrameCallback(() => {
-    console.log(forceManagerRef.current?.updateForces);
-  }, false);
+  useEffect(() => {
+    setInterval(() => {
+      if (!verticesPositionsRef.current) {
+        return;
+      }
+      applyDefaultForces(graphConnections, verticesPositionsRef.current);
+    }, 100);
+  }, []);
+
+  // const frameCallback = useFrameCallback(() => {
+  //   applyDefaultForces(graphConnections, verticesPositionsRef.current);
+  // }, false);
 
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedPositionCoordinates) => {
