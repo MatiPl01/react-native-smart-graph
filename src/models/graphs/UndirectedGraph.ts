@@ -1,6 +1,6 @@
-import UndirectedEdge from '../edges/UndirectedEdge.model';
-import UndirectedGraphVertex from '../vertices/UndirectedGraphVertex.model';
-import Graph from './Graph.model';
+import UndirectedEdge from '../edges/UndirectedEdge';
+import UndirectedGraphVertex from '../vertices/UndirectedGraphVertex';
+import Graph from './Graph';
 
 export default class UndirectedGraph<V, E> extends Graph<
   V,

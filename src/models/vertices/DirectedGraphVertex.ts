@@ -3,7 +3,7 @@ import {
   DirectedGraphVertex as IDirectedGraphVertex
 } from '@/types/graphs';
 
-import Vertex from './Vertex.model';
+import Vertex from './Vertex';
 
 export default class DirectedGraphVertex<V, E>
   extends Vertex<V, E>

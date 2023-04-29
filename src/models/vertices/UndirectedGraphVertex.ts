@@ -3,7 +3,7 @@ import {
   UndirectedEdge
 } from '@/types/graphs';
 
-import Vertex from './Vertex.model';
+import Vertex from './Vertex';
 
 export default class UndirectedGraphVertex<V, E> extends Vertex<V, E> {
   private readonly edges$: Record<string, UndirectedEdge<E, V>> = {};

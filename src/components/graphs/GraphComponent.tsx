@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDerivedValue, useFrameCallback } from 'react-native-reanimated';
+import { useAnimationFrame } from '@/hooks';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import { Group, Rect } from '@shopify/react-native-skia';
 
@@ -48,6 +49,9 @@ export default function GraphComponent<
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
   const { x1, x2, y1, y2 } = boundingRect;
   const [areAllVerticesRendered, setAreAllVerticesRendered] = useState(false);
+  const [isAnimating, setIsAnimating] = useAnimationFrame(() =>
+    applyDefaultForces(graphConnections, verticesPositionsRef.current)
+  );
 
   const renderedVerticesCountRef = useRef(0);
   const verticesPositionsRef = useRef<
@@ -114,25 +118,16 @@ export default function GraphComponent<
 
   const graphConnections = useMemo(() => graph.connections, [graph]);
 
-  useEffect(() => {
-    setInterval(() => {
-      if (!verticesPositionsRef.current) {
-        return;
-      }
-      applyDefaultForces(graphConnections, verticesPositionsRef.current);
-    }, 100);
-  }, []);
-
-  // const frameCallback = useFrameCallback(() => {
-  //   applyDefaultForces(graphConnections, verticesPositionsRef.current);
-  // }, false);
-
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedPositionCoordinates) => {
       verticesPositionsRef.current[key] = position;
 
       if (++renderedVerticesCountRef.current === graphLayout.verticesCount) {
         setAreAllVerticesRendered(true);
+
+        requestAnimationFrame(() => {
+          setIsAnimating(true);
+        });
       }
     },
     [verticesPositionsRef.current]

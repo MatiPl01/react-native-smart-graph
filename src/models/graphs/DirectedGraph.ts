@@ -1,6 +1,6 @@
-import DirectedEdge from '../edges/DirectedEdge.model';
-import DirectedGraphVertex from '../vertices/DirectedGraphVertex.model';
-import Graph from './Graph.model';
+import DirectedEdge from '../edges/DirectedEdge';
+import DirectedGraphVertex from '../vertices/DirectedGraphVertex';
+import Graph from './Graph';
 
 export default class DirectedGraph<V, E> extends Graph<
   V,
