@@ -329,7 +329,7 @@ PODS:
   - React-jsinspector (0.71.5)
   - React-logger (0.71.5):
     - glog
-  - react-native-skia (0.1.178):
+  - react-native-skia (0.1.185):
     - React
     - React-callinvoker
     - React-Core
@@ -648,7 +648,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 1579bf3207afadc72ac3638a66a102d1bf5263e3
   React-jsinspector: 14a342151ab810862998dfc99e2720746734e9b3
   React-logger: 94ec392ae471683635e4bf874d4e82f675399d2d
-  react-native-skia: 5b2eefdca9869b4b927828efbab941609afe3748
+  react-native-skia: 8d65fa55196f437b475563b67b06a744f2ad4a0d
   React-perflogger: 883a55a9a899535eaf06d0029108ef9ef22cce92
   React-RCTActionSheet: 1a3b8416688a3d291367be645022886f71d6842a
   React-RCTAnimation: e5560cb72d91ba35151d51e2eb0d467b42763f43
@@ -669,6 +669,6 @@ SPEC CHECKSUMS:
   Yoga: cd7d7f509dbfac14ee7f31a6c750acb957cd5022
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 103e3dfe0cae969b62215839f2a37e20b2c273a7
+PODFILE CHECKSUM: 15f6c580622653cba1c8ea74c340a0b591ea2d59
 
 COCOAPODS: 1.11.3
