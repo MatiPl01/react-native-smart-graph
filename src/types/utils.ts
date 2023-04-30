@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type DeepRequired<T, P extends string[]> = T extends object
+// https://stackoverflow.com/questions/57835286/deep-recursive-requiredt-on-specific-properties
+export type DeepRequired<T, P extends Array<string>> = T extends object
   ? Omit<T, Extract<keyof T, P[0]>> &
       Required<{
         [K in Extract<keyof T, P[0]>]: NonNullable<
@@ -8,15 +9,14 @@ export type DeepRequired<T, P extends string[]> = T extends object
       }>
   : T;
 
-type Shift<T extends any[]> = ((...t: T) => any) extends (
+type Shift<T extends Array<any>> = ((...t: T) => any) extends (
   first: any,
   ...rest: infer Rest
 ) => any
   ? Rest
   : never;
 
-type ShiftUnion<P extends PropertyKey, T extends any[]> = T extends any[]
-  ? T[0] extends P
-    ? Shift<T>
-    : never
-  : never;
+type ShiftUnion<
+  P extends PropertyKey,
+  T extends Array<any>
+> = T extends Array<any> ? (T[0] extends P ? Shift<T> : never) : never;

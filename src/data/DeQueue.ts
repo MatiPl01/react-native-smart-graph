@@ -8,7 +8,7 @@ export default class DeQueue<T> extends Queue<T> {
     this.linkedList.prepend(value);
   }
 
-  public enqueueFrontMany(values: T[]): void {
+  public enqueueFrontMany(values: Array<T>): void {
     values.forEach(value => this.enqueueFront(value));
   }
 

@@ -34,12 +34,12 @@ export const animatedVectorToVector = (
   };
 };
 
-export const addVectors = (...vectors: Vector[]): Vector => {
+export const addVectors = (...vectors: Array<Vector>): Vector => {
   'worklet';
   return addVectorsArray(vectors);
 };
 
-export const addVectorsArray = (vectors: Vector[]): Vector => {
+export const addVectorsArray = (vectors: Array<Vector>): Vector => {
   'worklet';
   return vectors.reduce(
     (accVector, currentVector) => ({

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -7,58 +7,101 @@ import DefaultEdgeLabelRenderer from '@/components/graphs/renderers/DefaultEdgeL
 import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
+const ADDED_COMPONENTS = [
+  {
+    key: 'B',
+    data: []
+  },
+  {
+    key: 'AB',
+    from: 'A',
+    to: 'B',
+    data: []
+  },
+  {
+    key: 'C',
+    data: []
+  },
+  {
+    key: 'AC',
+    from: 'A',
+    to: 'C',
+    data: []
+  },
+  {
+    key: 'BC',
+    from: 'B',
+    to: 'C',
+    data: []
+  },
+  {
+    key: 'D',
+    data: []
+  },
+  {
+    key: 'AD',
+    from: 'A',
+    to: 'D',
+    data: []
+  },
+  {
+    key: 'BD',
+    from: 'B',
+    to: 'D',
+    data: []
+  },
+  {
+    key: 'CD',
+    from: 'C',
+    to: 'D',
+    data: []
+  }
+];
+
+let idx = 0;
+
 export default function App() {
-  const graph = DirectedGraph.fromData(
-    [
-      { key: 'A', data: [] },
-      { key: 'B', data: [] },
-      { key: 'C', data: [] },
-      { key: 'D', data: [] },
-      { key: 'E', data: [] },
-      { key: 'F', data: [] },
-      { key: 'G', data: [] },
-      { key: 'H', data: [] },
-      { key: 'I', data: [] },
-      { key: 'J', data: [] },
-      { key: 'K', data: [] },
-      { key: 'L', data: [] },
-      { key: 'M', data: [] },
-      { key: 'N', data: [] },
-      { key: 'O', data: [] },
-      { key: 'P', data: [] },
-      { key: 'Q', data: [] },
-      { key: 'R', data: [] },
-      { key: 'S', data: [] },
-      { key: 'T', data: [] }
-    ],
-    [
-      { key: 'AB', from: 'A', to: 'B', data: [] },
-      { key: 'AC', from: 'A', to: 'C', data: [] },
-      { key: 'AD', from: 'A', to: 'D', data: [] },
-      { key: 'BE', from: 'B', to: 'E', data: [] },
-      { key: 'BF', from: 'B', to: 'F', data: [] },
-      { key: 'BG', from: 'B', to: 'G', data: [] },
-      { key: 'AH', from: 'A', to: 'H', data: [] },
-      { key: 'AI', from: 'A', to: 'I', data: [] },
-      { key: 'IJ', from: 'I', to: 'J', data: [] },
-      { key: 'IK', from: 'I', to: 'K', data: [] },
-      { key: 'IL', from: 'I', to: 'L', data: [] },
-      { key: 'IM', from: 'I', to: 'M', data: [] },
-      { key: 'IN', from: 'I', to: 'N', data: [] },
-      { key: 'NO', from: 'N', to: 'O', data: [] },
-      { key: 'JP', from: 'J', to: 'P', data: [] },
-      { key: 'OQ', from: 'O', to: 'Q', data: [] },
-      { key: 'OR', from: 'O', to: 'R', data: [] },
-      { key: 'OS', from: 'O', to: 'S', data: [] },
-      { key: 'ST', from: 'S', to: 'T', data: [] }
-    ]
-  );
+  const graph = DirectedGraph.fromData([{ key: 'A', data: [] }]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const component = ADDED_COMPONENTS[idx];
+      if (!component) {
+        clearInterval(interval);
+        return;
+      }
+
+      console.log('>>> Inserting component', component.key);
+
+      try {
+        if (component.from && component.to) {
+          console.log('edge', component.from, component.to);
+          graph.insertEdge(
+            component.from,
+            component.to,
+            component.key,
+            component.data
+          );
+        } else {
+          console.log('vertex', component.key);
+          graph.insertVertex(component.key, component.data);
+        }
+        idx++;
+      } catch (e) {
+        clearInterval(interval);
+        console.error(e);
+        return;
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <PannableScalableView objectFit='contain' controls>
+          <PannableScalableView controls>
             <DirectedGraphComponent
               graph={graph}
               settings={{

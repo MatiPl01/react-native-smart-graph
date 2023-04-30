@@ -43,7 +43,7 @@ const placeVerticesRandomly = <V, E>(
 };
 
 type CalcVerticesPositionsProps<V, E> = {
-  vertices: Vertex<V, E>[];
+  vertices: Array<Vertex<V, E>>;
   density: number;
   vertexRadius: number;
   minVertexSpacing: number;
@@ -56,7 +56,7 @@ const calcVerticesGridPositions = <V, E>(
   const verticesCount = vertices.length;
 
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
-  const availablePositions: Position[] = [];
+  const availablePositions: Array<Position> = [];
 
   for (let i = 0; i < maxPointsInLine; i++) {
     for (let j = 0; j < maxPointsInLine; j++) {
@@ -91,7 +91,7 @@ const calcVerticesHoneycombPositions = <V, E>(
   const triangleHeight = (minVertexCenterDistance * Math.sqrt(3)) / 2;
 
   const availablePositionsCount = Math.ceil(verticesCount / density);
-  const availablePositions: Position[] = [];
+  const availablePositions: Array<Position> = [];
 
   let lineNumber = 1;
   let currentVertexIndex = 0;
@@ -150,7 +150,7 @@ const calcVerticesHoneycombPositions = <V, E>(
 };
 
 const calcVerticesRandomPositions = <V, E>(
-  vertices: Vertex<V, E>[],
+  vertices: Array<Vertex<V, E>>,
   vertexRadius: number,
   width: number,
   height: number

@@ -1,6 +1,7 @@
 import {
   Edge,
   GraphConnections,
+  GraphObserver,
   Graph as IGraph,
   Vertex
 } from '@/types/graphs';
@@ -14,6 +15,8 @@ export default abstract class Graph<
 {
   protected readonly vertices$: Record<string, GV> = {};
   protected readonly edges$: Record<string, GE> = {};
+
+  private readonly observers: Array<GraphObserver<V, E>> = [];
 
   get vertices(): Array<GV> {
     return Object.values(this.vertices$);
@@ -49,6 +52,19 @@ export default abstract class Graph<
 
   abstract removeEdge(key: string): E;
 
+  addObserver(observer: GraphObserver<V, E>): void {
+    console.log('addObserver');
+    this.observers.push(observer);
+  }
+
+  removeObserver(observer: GraphObserver<V, E>): void {
+    console.log('removeObserver');
+    const index = this.observers.indexOf(observer);
+    if (index > -1) {
+      this.observers.splice(index, 1);
+    }
+  }
+
   hasVertex(key: string): boolean {
     return !!this.vertices$[key];
   }
@@ -81,6 +97,7 @@ export default abstract class Graph<
       this.removeEdge(edge.key);
     });
     delete this.vertices$[key];
+    this.notifyVertexRemoved(vertex);
 
     return vertex.value;
   }
@@ -90,6 +107,7 @@ export default abstract class Graph<
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
+    this.notifyVertexAdded(vertex);
     return vertex;
   }
 
@@ -98,6 +116,27 @@ export default abstract class Graph<
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
     this.edges$[edge.key] = edge;
+    this.notifyEdgeAdded(edge);
     return edge;
+  }
+
+  protected notifyEdgeRemoved(edge: GE): void {
+    console.log('notifyEdgeRemoved', edge.key);
+    this.observers.forEach(observer => observer.edgeRemoved(edge));
+  }
+
+  private notifyEdgeAdded(edge: GE): void {
+    console.log('notifyEdgeAdded', edge.key);
+    this.observers.forEach(observer => observer.edgeAdded(edge));
+  }
+
+  private notifyVertexRemoved(vertex: GV): void {
+    console.log('notifyVertexRemoved', vertex.key);
+    this.observers.forEach(observer => observer.vertexRemoved(vertex));
+  }
+
+  private notifyVertexAdded(vertex: GV): void {
+    console.log('notifyVertexAdded', vertex.key);
+    this.observers.forEach(observer => observer.vertexAdded(vertex));
   }
 }

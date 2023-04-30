@@ -1,4 +1,4 @@
-import { useAnimationFrame } from '@/hooks';
+import { useAnimationFrame, useGraphObserver } from '@/hooks';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
@@ -51,12 +51,17 @@ export default function GraphComponent<
   boundingRect,
   onRendered
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
-  const { top, bottom, right, left } = boundingRect;
   const [areAllVerticesRendered, setAreAllVerticesRendered] = useState(false);
 
   const [_, setIsAnimating] = useAnimationFrame(() =>
-    applyDefaultForces(graphConnections, verticesPositionsRef.current)
+    applyDefaultForces(graph.connections, verticesPositionsRef.current)
   );
+  const [{ vertices, edges }] = useGraphObserver(graph);
+
+  // console.log({
+  //   edges: edges.map(({ key }) => key),
+  //   vertices: vertices.map(({ key }) => key)
+  // });
 
   const topVertexKey = useSharedValue<string | null>(null);
   const bottomVertexKey = useSharedValue<string | null>(null);
@@ -68,6 +73,7 @@ export default function GraphComponent<
     Record<string, AnimatedPositionCoordinates>
   >({});
 
+  const { top, bottom, right, left } = boundingRect;
   const boundingVertices: AnimatedBoundingVertices = {
     top: topVertexKey,
     bottom: bottomVertexKey,
@@ -125,11 +131,9 @@ export default function GraphComponent<
 
     return {
       ...layout,
-      verticesCount: graph.vertices.length
+      verticesCount: vertices.length
     };
-  }, [graph]);
-
-  const graphConnections = useMemo(() => graph.connections, [graph]);
+  }, [vertices, edges]);
 
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedPositionCoordinates) => {
@@ -144,7 +148,7 @@ export default function GraphComponent<
   );
 
   const renderEdges = useCallback(() => {
-    return graph.edges.map(edge => (
+    return edges.map(edge => (
       <EdgeComponent
         key={edge.key}
         {...({

@@ -11,7 +11,7 @@ export default class Queue<T> {
     this.linkedList.append(value);
   }
 
-  public enqueueMany(values: T[]): void {
+  public enqueueMany(values: Array<T>): void {
     values.forEach(value => this.enqueue(value));
   }
 

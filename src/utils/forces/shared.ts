@@ -33,13 +33,13 @@ const calcResultantAttractionForce = (
 ): Vector => {
   'worklet';
   return addVectorsArray(
-    (connections[vertexKey] as string[]).map(neighbourKey =>
+    (connections[vertexKey] as Array<string>).map(neighborKey =>
       calcAttractiveForce(
         animatedVectorToVector(
           verticesPositions[vertexKey] as AnimatedPositionCoordinates
         ),
         animatedVectorToVector(
-          verticesPositions[neighbourKey] as AnimatedPositionCoordinates
+          verticesPositions[neighborKey] as AnimatedPositionCoordinates
         ),
         attractionFactorGetter
       )

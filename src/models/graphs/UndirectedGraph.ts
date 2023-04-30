@@ -59,6 +59,7 @@ export default class UndirectedGraph<V, E> extends Graph<
       edge.vertices[1].removeEdge(key);
     }
     delete this.edges$[key];
+    this.notifyEdgeRemoved(edge);
 
     return edge.value;
   }
