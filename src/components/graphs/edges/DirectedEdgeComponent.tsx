@@ -1,7 +1,7 @@
 import { DirectedEdge } from '@/types/graphs';
 import { AnimatedPosition } from '@/types/layout';
 import { DirectedEdgeRenderers } from '@/types/renderer';
-import { DirectedEdgeSettings } from '@/types/settings';
+import { DirectedGraphComponentsSettings } from '@/types/settings';
 
 import EdgeArrowComponent from '../arrows/EdgeArrowComponent';
 
@@ -9,19 +9,17 @@ type DirectedEdgeComponentProps<E, V> = {
   edge: DirectedEdge<E, V>;
   from: AnimatedPosition;
   to: AnimatedPosition;
+  vertexRadius: number;
   renderers: DirectedEdgeRenderers<E>;
-  settings?: DirectedEdgeSettings;
+  settings?: DirectedGraphComponentsSettings['edge'];
 };
 
 export default function DirectedEdgeComponent<E, V>({
   edge,
   from,
   to,
-  renderers: {
-    edge: edgeRenderer,
-    arrow: edgeArrowRenderer,
-    label: edgeLabelRenderer
-  },
+  vertexRadius,
+  renderers: { edge: edgeRenderer, arrow: edgeArrowRenderer },
   settings
 }: DirectedEdgeComponentProps<E, V>) {
   return (
@@ -35,7 +33,7 @@ export default function DirectedEdgeComponent<E, V>({
       <EdgeArrowComponent
         from={from}
         to={to}
-        vertexRadius={edge.target.radius}
+        vertexRadius={vertexRadius}
         renderer={edgeArrowRenderer}
         settings={settings?.arrow}
       />

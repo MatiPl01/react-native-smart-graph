@@ -8,18 +8,27 @@ export default class UndirectedGraph<V, E> extends Graph<
   UndirectedGraphVertex<V, E>,
   UndirectedEdge<E, V>
 > {
+  // eslint-disable-next-line no-shadow
+  static fromData<V, E>(
+    vertices: Array<{ key: string; data: V }>,
+    edges?: Array<{ key: string; vertices: [string, string]; data: E }>
+  ): UndirectedGraph<V, E> {
+    const instance = new UndirectedGraph<V, E>();
+
+    vertices.forEach(({ key, data }) => instance.insertVertex(key, data));
+    edges?.forEach(({ key, vertices: [v1, v2], data }) =>
+      instance.insertEdge(v1, v2, key, data)
+    );
+
+    return instance;
+  }
+
   isDirected() {
     return false;
   }
 
-  insertVertex(
-    key: string,
-    value: V,
-    radius: number
-  ): UndirectedGraphVertex<V, E> {
-    return this.insertVertexObject(
-      new UndirectedGraphVertex<V, E>(key, value, radius)
-    );
+  insertVertex(key: string, value: V): UndirectedGraphVertex<V, E> {
+    return this.insertVertexObject(new UndirectedGraphVertex<V, E>(key, value));
   }
 
   override insertEdge(

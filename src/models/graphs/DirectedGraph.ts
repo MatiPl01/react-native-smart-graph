@@ -8,18 +8,27 @@ export default class DirectedGraph<V, E> extends Graph<
   DirectedGraphVertex<V, E>,
   DirectedEdge<E, V>
 > {
+  // eslint-disable-next-line no-shadow
+  static fromData<V, E>(
+    vertices: Array<{ key: string; data: V }>,
+    edges?: Array<{ key: string; from: string; to: string; data: E }>
+  ): DirectedGraph<V, E> {
+    const instance = new DirectedGraph<V, E>();
+
+    vertices.forEach(({ key, data }) => instance.insertVertex(key, data));
+    edges?.forEach(({ key, from, to, data }) =>
+      instance.insertEdge(from, to, key, data)
+    );
+
+    return instance;
+  }
+
   isDirected(): this is DirectedGraph<V, E> {
     return true;
   }
 
-  insertVertex(
-    key: string,
-    value: V,
-    radius: number
-  ): DirectedGraphVertex<V, E> {
-    return this.insertVertexObject(
-      new DirectedGraphVertex<V, E>(key, value, radius)
-    );
+  insertVertex(key: string, value: V): DirectedGraphVertex<V, E> {
+    return this.insertVertexObject(new DirectedGraphVertex<V, E>(key, value));
   }
 
   insertEdge(

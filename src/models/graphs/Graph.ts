@@ -38,7 +38,7 @@ export default abstract class Graph<
 
   abstract isDirected(): boolean;
 
-  abstract insertVertex(key: string, value: V, radius: number): GV;
+  abstract insertVertex(key: string, value: V): GV;
 
   abstract insertEdge(
     sourceKey: string,

@@ -1,3 +1,5 @@
+import { DeepRequired } from '../utils';
+
 type SharedGraphVertexSettings = {
   radius?: number;
 };
@@ -23,3 +25,13 @@ export type UndirectedGraphComponentsSettings = {
   vertex?: GraphVertexSettings;
   edge?: UndirectedEdgeSettings;
 };
+
+export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
+  DirectedGraphComponentsSettings,
+  ['vertex', 'radius'] | ['edge']
+>;
+
+export type UndirectedGraphComponentsSettingsWithDefaults = DeepRequired<
+  UndirectedGraphComponentsSettings,
+  ['vertex', 'radius'] | ['edge']
+>;

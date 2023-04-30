@@ -150,6 +150,7 @@ export default function GraphComponent<
         {...({
           edge,
           verticesPositions: verticesPositionsRef.current,
+          vertexRadius: memoSettings.components.vertex.radius,
           renderers: memoRenderers.edge,
           settings: memoSettings.components.edge
         } as EdgeComponentProps<E, V>)}

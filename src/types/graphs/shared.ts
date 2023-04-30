@@ -3,7 +3,6 @@
 export interface Vertex<V, E> {
   get key(): string;
   get value(): V;
-  get radius(): number;
   get edges(): Array<Edge<E, V>>;
   get neighbors(): Array<Vertex<V, E>>;
   get degree(): number;
