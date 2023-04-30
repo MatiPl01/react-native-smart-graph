@@ -53,12 +53,10 @@ export default abstract class Graph<
   abstract removeEdge(key: string): E;
 
   addObserver(observer: GraphObserver<V, E>): void {
-    console.log('addObserver');
     this.observers.push(observer);
   }
 
   removeObserver(observer: GraphObserver<V, E>): void {
-    console.log('removeObserver');
     const index = this.observers.indexOf(observer);
     if (index > -1) {
       this.observers.splice(index, 1);
@@ -115,26 +113,18 @@ export default abstract class Graph<
   }
 
   protected notifyEdgeRemoved(edge: GE): void {
-    console.log('notifyEdgeRemoved', edge.key);
     this.observers.forEach(observer => observer.edgeRemoved(edge));
   }
 
   private notifyEdgeAdded(edge: GE): void {
-    console.log('notifyEdgeAdded', edge.key);
     this.observers.forEach(observer => observer.edgeAdded(edge));
   }
 
   private notifyVertexRemoved(vertex: GV): void {
-    console.log('notifyVertexRemoved', vertex.key);
-    console.log(
-      'vertices',
-      this.vertices.map(v => v.key)
-    );
     this.observers.forEach(observer => observer.vertexRemoved(vertex));
   }
 
   private notifyVertexAdded(vertex: GV): void {
-    console.log('notifyVertexAdded', vertex.key);
     this.observers.forEach(observer => observer.vertexAdded(vertex));
   }
 }

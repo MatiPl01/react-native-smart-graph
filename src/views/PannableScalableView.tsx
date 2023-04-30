@@ -1,11 +1,5 @@
 import { styled } from 'nativewind';
-import {
-  Children,
-  PropsWithChildren,
-  cloneElement,
-  useCallback,
-  useEffect
-} from 'react';
+import { Children, PropsWithChildren, cloneElement, useCallback } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
@@ -78,13 +72,6 @@ export default function PannableScalableView({
     ],
     [translateX, translateY, currentScale]
   );
-
-  // TODO - remove this useEffect after testing
-  useEffect(() => {
-    setInterval(() => {
-      resetContentPosition({ animated: true });
-    }, 10);
-  }, []);
 
   const handleCanvasRender = useCallback(
     ({
