@@ -9,7 +9,8 @@ import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
   AnimatedBoundingVertices,
-  AnimatedPositionCoordinates
+  AnimatedPositionCoordinates,
+  Dimensions
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
@@ -24,6 +25,7 @@ import VertexComponent from './vertices/VertexComponent';
 
 export type GraphComponentPrivateProps = {
   boundingRect: AnimatedBoundingRect;
+  onRendered: (containerDimensions: Dimensions) => void;
 };
 
 type GraphComponentProps<
@@ -46,7 +48,8 @@ export default function GraphComponent<
   graph,
   settings,
   renderers,
-  boundingRect
+  boundingRect,
+  onRendered
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
   const { top, bottom, right, left } = boundingRect;
   const [areAllVerticesRendered, setAreAllVerticesRendered] = useState(false);
@@ -115,6 +118,11 @@ export default function GraphComponent<
     right.value = layout.width;
     bottom.value = layout.height;
 
+    onRendered({
+      width: layout.width,
+      height: layout.height
+    });
+
     return {
       ...layout,
       verticesCount: graph.vertices.length
@@ -129,10 +137,7 @@ export default function GraphComponent<
 
       if (++renderedVerticesCountRef.current === graphLayout.verticesCount) {
         setAreAllVerticesRendered(true);
-
-        requestAnimationFrame(() => {
-          setIsAnimating(true);
-        });
+        setIsAnimating(true);
       }
     },
     [verticesPositionsRef.current]
@@ -171,7 +176,7 @@ export default function GraphComponent<
     [graphLayout, graph]
   );
 
-  // TODO - remove this
+  // TODO - remove this after testing
   const containerWidth = useDerivedValue(
     () => right.value - left.value,
     [right, left]

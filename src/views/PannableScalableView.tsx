@@ -13,7 +13,7 @@ import { Canvas, Group } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
-import { Position } from '@/types/layout';
+import { Dimensions, Position } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { fixedWithDecay } from '@/utils/reanimated';
 import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
@@ -81,18 +81,29 @@ export default function PannableScalableView({
     }: LayoutChangeEvent) => {
       canvasWidth.value = width;
       canvasHeight.value = height;
+
+      resetContentPosition({
+        canvasDimensions: {
+          width,
+          height
+        }
+      });
     },
     []
   );
 
-  // TODO - this should be called after graph is rendered
   const resetContentPosition = useCallback(
-    (animated?: boolean) => {
-      const containerDimensions = {
+    (settings: {
+      containerDimensions?: Dimensions;
+      canvasDimensions?: Dimensions;
+      animated?: boolean;
+    }) => {
+      const containerDimensions = settings.containerDimensions ?? {
         width: containerWidth.value,
         height: containerHeight.value
       };
-      const canvasDimensions = {
+
+      const canvasDimensions = settings.canvasDimensions ?? {
         width: canvasWidth.value,
         height: canvasHeight.value
       };
@@ -101,7 +112,7 @@ export default function PannableScalableView({
         getScaleInParent(objectFit, containerDimensions, canvasDimensions);
 
       renderScale.value = renderedScale;
-      scaleContentTo(renderedScale, undefined, animated);
+      scaleContentTo(renderedScale, undefined, settings.animated);
 
       const parentCenter = getCenterInParent(
         renderedDimensions,
@@ -114,7 +125,7 @@ export default function PannableScalableView({
           y: parentCenter.y - containerTop.value * renderedScale
         },
         undefined,
-        animated
+        settings.animated
       );
     },
     [objectFit]
@@ -275,13 +286,20 @@ export default function PannableScalableView({
                   right: containerRight,
                   top: containerTop,
                   bottom: containerBottom
+                },
+                onRendered(containerDimensions: Dimensions) {
+                  resetContentPosition({ containerDimensions });
                 }
               });
             })}
           </Group>
         </StyledCanvas>
       </GestureDetector>
-      {controls && <ViewControls onReset={() => resetContentPosition(true)} />}
+      {controls && (
+        <ViewControls
+          onReset={() => resetContentPosition({ animated: true })}
+        />
+      )}
     </View>
   );
 }
