@@ -27,8 +27,15 @@ export type AnimatedDimensions = {
 
 // Bounding rect
 export type AnimatedBoundingRect = {
-  x1: SharedValue<number>;
-  x2: SharedValue<number>;
-  y1: SharedValue<number>;
-  y2: SharedValue<number>;
+  top: SharedValue<number>;
+  bottom: SharedValue<number>;
+  right: SharedValue<number>;
+  left: SharedValue<number>;
+};
+
+export type AnimatedBoundingVertices = {
+  top: SharedValue<string | null>;
+  bottom: SharedValue<string | null>;
+  left: SharedValue<string | null>;
+  right: SharedValue<string | null>;
 };

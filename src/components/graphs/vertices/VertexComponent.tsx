@@ -4,6 +4,7 @@ import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 import { Vertex } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
+  AnimatedBoundingVertices,
   AnimatedPositionCoordinates,
   Position
 } from '@/types/layout';
@@ -15,7 +16,7 @@ type VertexComponentProps<V, E> = {
   settings: Required<GraphVertexSettings>;
   placementPosition: Position;
   containerBoundingRect: AnimatedBoundingRect;
-  boundingVertices: Record<keyof AnimatedBoundingRect, string | null>;
+  boundingVertices: AnimatedBoundingVertices;
   renderer: VertexRenderFunction<V>;
   setAnimatedPosition: (
     key: string,
@@ -50,16 +51,22 @@ function VertexComponent<V, E>({
       x2: x.value + settings.radius
     }),
     ({ x1, x2 }) => {
-      if (boundingVertices.x1 === key || x1 <= containerBoundingRect.x1.value) {
-        containerBoundingRect.x1.value = x1;
-        boundingVertices.x1 = key;
+      if (
+        x1 <= containerBoundingRect.left.value ||
+        boundingVertices.left.value === key
+      ) {
+        containerBoundingRect.left.value = x1;
+        boundingVertices.left.value = key;
       }
-      if (boundingVertices.x2 === key || x2 >= containerBoundingRect.x2.value) {
-        containerBoundingRect.x2.value = x2;
-        boundingVertices.x2 = key;
+      if (
+        x2 >= containerBoundingRect.right.value ||
+        boundingVertices.right.value === key
+      ) {
+        containerBoundingRect.right.value = x2;
+        boundingVertices.right.value = key;
       }
     },
-    [x, boundingVertices]
+    [x]
   );
 
   useAnimatedReaction(
@@ -68,16 +75,22 @@ function VertexComponent<V, E>({
       y2: y.value + settings.radius
     }),
     ({ y1, y2 }) => {
-      if (boundingVertices.y1 === key || y1 <= containerBoundingRect.y1.value) {
-        containerBoundingRect.y1.value = y1;
-        boundingVertices.y1 = key;
+      if (
+        y1 <= containerBoundingRect.top.value ||
+        boundingVertices.top.value === key
+      ) {
+        containerBoundingRect.top.value = y1;
+        boundingVertices.top.value = key;
       }
-      if (boundingVertices.y2 === key || y2 >= containerBoundingRect.y2.value) {
-        containerBoundingRect.y2.value = y2;
-        boundingVertices.y2 = key;
+      if (
+        y2 >= containerBoundingRect.bottom.value ||
+        boundingVertices.bottom.value === key
+      ) {
+        containerBoundingRect.bottom.value = y2;
+        boundingVertices.bottom.value = key;
       }
     },
-    [y, boundingVertices]
+    [y]
   );
 
   return renderer({

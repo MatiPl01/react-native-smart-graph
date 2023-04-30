@@ -60,7 +60,9 @@ export default function App() {
               settings={{
                 // TODO - fix orbits strategy padding
                 placement: {
-                  strategy: 'orbits',
+                  strategy: 'random',
+                  layoutType: 'honeycomb',
+                  density: 1,
                   minVertexSpacing: 100
                 }
               }}

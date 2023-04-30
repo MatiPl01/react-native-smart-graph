@@ -41,20 +41,18 @@ export default function PannableScalableView({
   const canvasHeight = useSharedValue(0);
 
   // CONTAINER
-  // Top-left corner
-  const containerX1 = useSharedValue(0);
-  const containerY1 = useSharedValue(0);
-  // Bottom-right corner
-  const containerX2 = useSharedValue(0);
-  const containerY2 = useSharedValue(0);
+  const containerTop = useSharedValue(0);
+  const containerLeft = useSharedValue(0);
+  const containerRight = useSharedValue(0);
+  const containerBottom = useSharedValue(0);
   // Dimensions
   const containerWidth = useDerivedValue(
-    () => containerX2.value - containerX1.value,
-    [containerX1, containerX2]
+    () => containerRight.value - containerLeft.value,
+    [containerRight, containerLeft]
   );
   const containerHeight = useDerivedValue(
-    () => containerY2.value - containerY1.value,
-    [containerY1, containerY2]
+    () => containerBottom.value - containerTop.value,
+    [containerBottom, containerTop]
   );
 
   // CONTAINER SCALE
@@ -112,8 +110,8 @@ export default function PannableScalableView({
 
       translateContentTo(
         {
-          x: parentCenter.x - containerX1.value * renderedScale,
-          y: parentCenter.y - containerY1.value * renderedScale
+          x: parentCenter.x - containerLeft.value * renderedScale,
+          y: parentCenter.y - containerTop.value * renderedScale
         },
         undefined,
         animated
@@ -133,24 +131,24 @@ export default function PannableScalableView({
     return {
       x: [
         Math.min(
-          -containerX1.value,
-          -(containerWidth.value + containerX1.value) * scale +
+          -containerLeft.value,
+          -(containerWidth.value + containerLeft.value) * scale +
             canvasWidth.value
         ),
         Math.max(
-          canvasWidth.value - containerX2.value * scale,
-          -containerX1.value * scale
+          canvasWidth.value - containerRight.value * scale,
+          -containerLeft.value * scale
         )
       ],
       y: [
         Math.min(
-          -containerY1.value,
-          -(containerHeight.value + containerY1.value) * scale +
+          -containerTop.value,
+          -(containerHeight.value + containerTop.value) * scale +
             canvasHeight.value
         ),
         Math.max(
-          canvasHeight.value - containerY2.value * scale,
-          -containerY1.value * scale
+          canvasHeight.value - containerBottom.value * scale,
+          -containerTop.value * scale
         )
       ]
     };
@@ -273,10 +271,10 @@ export default function PannableScalableView({
                 child as React.ReactElement<GraphComponentPrivateProps>;
               return cloneElement(childElement, {
                 boundingRect: {
-                  x1: containerX1,
-                  x2: containerX2,
-                  y1: containerY1,
-                  y2: containerY2
+                  left: containerLeft,
+                  right: containerRight,
+                  top: containerTop,
+                  bottom: containerBottom
                 }
               });
             })}

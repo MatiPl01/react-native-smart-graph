@@ -1,6 +1,6 @@
 import { useAnimationFrame } from '@/hooks';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useDerivedValue } from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Group, Rect } from '@shopify/react-native-skia';
 
@@ -8,6 +8,7 @@ import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
+  AnimatedBoundingVertices,
   AnimatedPositionCoordinates
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
@@ -47,25 +48,29 @@ export default function GraphComponent<
   renderers,
   boundingRect
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
-  const { x1, x2, y1, y2 } = boundingRect;
+  const { top, bottom, right, left } = boundingRect;
   const [areAllVerticesRendered, setAreAllVerticesRendered] = useState(false);
-  const [isAnimating, setIsAnimating] = useAnimationFrame(() =>
+
+  const [_, setIsAnimating] = useAnimationFrame(() =>
     applyDefaultForces(graphConnections, verticesPositionsRef.current)
   );
+
+  const topVertexKey = useSharedValue<string | null>(null);
+  const bottomVertexKey = useSharedValue<string | null>(null);
+  const leftVertexKey = useSharedValue<string | null>(null);
+  const rightVertexKey = useSharedValue<string | null>(null);
 
   const renderedVerticesCountRef = useRef(0);
   const verticesPositionsRef = useRef<
     Record<string, AnimatedPositionCoordinates>
   >({});
 
-  const boundingVertices = useRef<
-    Record<keyof AnimatedBoundingRect, string | null>
-  >({
-    x1: null,
-    x2: null,
-    y1: null,
-    y2: null
-  });
+  const boundingVertices: AnimatedBoundingVertices = {
+    top: topVertexKey,
+    bottom: bottomVertexKey,
+    left: leftVertexKey,
+    right: rightVertexKey
+  };
 
   const memoSettings = useMemo(
     () => ({
@@ -105,10 +110,10 @@ export default function GraphComponent<
       memoSettings.placement
     );
 
-    x1.value = 0;
-    y1.value = 0;
-    x2.value = layout.width;
-    y2.value = layout.height;
+    top.value = 0;
+    left.value = 0;
+    right.value = layout.width;
+    bottom.value = layout.height;
 
     return {
       ...layout,
@@ -157,7 +162,7 @@ export default function GraphComponent<
             settings={memoSettings.components.vertex}
             placementPosition={placementPosition}
             containerBoundingRect={boundingRect}
-            boundingVertices={boundingVertices.current}
+            boundingVertices={boundingVertices}
             renderer={memoRenderers.vertex}
             setAnimatedPosition={setAnimatedVertexPosition}
           />
@@ -167,15 +172,21 @@ export default function GraphComponent<
   );
 
   // TODO - remove this
-  const containerWidth = useDerivedValue(() => x2.value - x1.value, [x1, x2]);
-  const containerHeight = useDerivedValue(() => y2.value - y1.value, [y1, y2]);
+  const containerWidth = useDerivedValue(
+    () => right.value - left.value,
+    [right, left]
+  );
+  const containerHeight = useDerivedValue(
+    () => bottom.value - top.value,
+    [top, bottom]
+  );
 
   return (
     <Group>
       {/*TODO - remove these rects after testing*/}
       <Rect
-        x={x1}
-        y={y1}
+        x={left}
+        y={top}
         width={containerWidth}
         height={containerHeight}
         color='#444'
