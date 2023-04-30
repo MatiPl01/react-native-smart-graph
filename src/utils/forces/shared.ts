@@ -32,15 +32,15 @@ const calcResultantAttractionForce = (
   attractionFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
+  const vertexConnections = connections[vertexKey];
+  if (!vertexConnections) {
+    return vec(0, 0);
+  }
   return addVectorsArray(
-    (connections[vertexKey] as Array<string>).map(neighborKey =>
+    vertexConnections.map(neighborKey =>
       calcAttractiveForce(
-        animatedVectorToVector(
-          verticesPositions[vertexKey] as AnimatedPositionCoordinates
-        ),
-        animatedVectorToVector(
-          verticesPositions[neighborKey] as AnimatedPositionCoordinates
-        ),
+        animatedVectorToVector(verticesPositions[vertexKey]),
+        animatedVectorToVector(verticesPositions[neighborKey]),
         attractionFactorGetter
       )
     )
@@ -60,12 +60,8 @@ const calcResultantRepellingForce = (
       }
 
       return calcRepellingForce(
-        animatedVectorToVector(
-          verticesPositions[vertexKey] as AnimatedPositionCoordinates
-        ),
-        animatedVectorToVector(
-          verticesPositions[otherVertexKey] as AnimatedPositionCoordinates
-        ),
+        animatedVectorToVector(verticesPositions[vertexKey]),
+        animatedVectorToVector(verticesPositions[otherVertexKey]),
         repellingFactorGetter
       );
     })

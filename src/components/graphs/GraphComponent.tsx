@@ -1,5 +1,5 @@
 import { useAnimationFrame, useGraphObserver } from '@/hooks';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Group, Rect } from '@shopify/react-native-skia';
@@ -10,7 +10,8 @@ import {
   AnimatedBoundingRect,
   AnimatedBoundingVertices,
   AnimatedPositionCoordinates,
-  Dimensions
+  Dimensions,
+  Position
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
@@ -51,27 +52,26 @@ export default function GraphComponent<
   boundingRect,
   onRendered
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
-  const [areAllVerticesRendered, setAreAllVerticesRendered] = useState(false);
-
-  const [_, setIsAnimating] = useAnimationFrame(() =>
-    applyDefaultForces(graph.connections, verticesPositionsRef.current)
-  );
   const [{ vertices, edges }] = useGraphObserver(graph);
-
-  // console.log({
-  //   edges: edges.map(({ key }) => key),
-  //   vertices: vertices.map(({ key }) => key)
-  // });
+  const [isAnimating, setIsAnimating] = useAnimationFrame(
+    () =>
+      applyDefaultForces(
+        graph.connections,
+        animatedVerticesPositionsRef.current
+      ),
+    true
+  );
+  const [verticesPlacementPositions, setVerticesPlacementPositions] = useState<
+    Record<string, Position>
+  >({});
+  const animatedVerticesPositionsRef = useRef<
+    Record<string, AnimatedPositionCoordinates>
+  >({});
 
   const topVertexKey = useSharedValue<string | null>(null);
   const bottomVertexKey = useSharedValue<string | null>(null);
   const leftVertexKey = useSharedValue<string | null>(null);
   const rightVertexKey = useSharedValue<string | null>(null);
-
-  const renderedVerticesCountRef = useRef(0);
-  const verticesPositionsRef = useRef<
-    Record<string, AnimatedPositionCoordinates>
-  >({});
 
   const { top, bottom, right, left } = boundingRect;
   const boundingVertices: AnimatedBoundingVertices = {
@@ -110,9 +110,9 @@ export default function GraphComponent<
     [renderers]
   );
 
-  const graphLayout = useMemo(() => {
-    renderedVerticesCountRef.current = 0;
-
+  useEffect(() => {
+    // Place vertices using the selected placement strategy if the whole graph
+    // model was changed
     const layout = placeVertices(
       graph,
       memoSettings.components.vertex.radius,
@@ -129,22 +129,40 @@ export default function GraphComponent<
       height: layout.height
     });
 
-    return {
-      ...layout,
-      verticesCount: vertices.length
-    };
-  }, [vertices, edges]);
+    setVerticesPlacementPositions(layout.verticesPositions);
+  }, [graph]);
+
+  useEffect(() => {
+    // Update vertices placement positions if vertices in the current graph model
+    // were changed
+    animatedVerticesPositionsRef.current = Object.fromEntries(
+      vertices
+        .map(vertex => [
+          vertex.key,
+          animatedVerticesPositionsRef.current[vertex.key]
+        ])
+        .filter(([, position]) => position)
+    ) as typeof animatedVerticesPositionsRef.current;
+
+    setVerticesPlacementPositions(
+      Object.fromEntries(
+        vertices.map(vertex => [
+          vertex.key,
+          // TODO - calculate the initial vertex position
+          verticesPlacementPositions[vertex.key] || {
+            x: (Math.random() > 0.5 ? -1 : 1) * 50 + (Math.random() - 0.5) * 25,
+            y: (Math.random() > 0.5 ? -1 : 1) * 50 + (Math.random() - 0.5) * 25
+          }
+        ])
+      )
+    );
+  }, [vertices]);
 
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedPositionCoordinates) => {
-      verticesPositionsRef.current[key] = position;
-
-      if (++renderedVerticesCountRef.current === graphLayout.verticesCount) {
-        setAreAllVerticesRendered(true);
-        setIsAnimating(true);
-      }
+      animatedVerticesPositionsRef.current[key] = position;
     },
-    [verticesPositionsRef.current]
+    []
   );
 
   const renderEdges = useCallback(() => {
@@ -153,32 +171,42 @@ export default function GraphComponent<
         key={edge.key}
         {...({
           edge,
-          verticesPositions: verticesPositionsRef.current,
+          verticesPositions: animatedVerticesPositionsRef.current,
           vertexRadius: memoSettings.components.vertex.radius,
           renderers: memoRenderers.edge,
           settings: memoSettings.components.edge
         } as EdgeComponentProps<E, V>)}
       />
     ));
-  }, [graph]);
+    // Update edges if edges in the current graph model were changed
+    // or vertices were added/removed from the graph model
+  }, [edges, verticesPlacementPositions]);
 
   const renderVertices = useCallback(
     () =>
-      Object.entries(graphLayout.verticesPositions).map(
-        ([key, placementPosition]) => (
-          <VertexComponent<V, E>
-            key={key}
-            vertex={graph.vertex(key)}
-            settings={memoSettings.components.vertex}
-            placementPosition={placementPosition}
-            containerBoundingRect={boundingRect}
-            boundingVertices={boundingVertices}
-            renderer={memoRenderers.vertex}
-            setAnimatedPosition={setAnimatedVertexPosition}
-          />
-        )
+      Object.entries(verticesPlacementPositions).map(
+        ([key, placementPosition]) => {
+          const vertex = graph.vertex(key);
+
+          if (!vertex) {
+            return null;
+          }
+
+          return (
+            <VertexComponent<V, E>
+              key={key}
+              vertex={vertex}
+              settings={memoSettings.components.vertex}
+              placementPosition={placementPosition}
+              containerBoundingRect={boundingRect}
+              boundingVertices={boundingVertices}
+              renderer={memoRenderers.vertex}
+              setAnimatedPosition={setAnimatedVertexPosition}
+            />
+          );
+        }
       ),
-    [graphLayout, graph]
+    [verticesPlacementPositions]
   );
 
   // TODO - remove this after testing
@@ -193,7 +221,7 @@ export default function GraphComponent<
 
   return (
     <Group>
-      {/*TODO - remove these rects after testing*/}
+      {/* TODO - remove this rect after testing */}
       <Rect
         x={left}
         y={top}
@@ -201,14 +229,7 @@ export default function GraphComponent<
         height={containerHeight}
         color='#444'
       />
-      <Rect
-        x={0}
-        y={0}
-        width={graphLayout.width}
-        height={graphLayout.height}
-        color='#333'
-      />
-      {areAllVerticesRendered && renderEdges()}
+      {renderEdges()}
       {renderVertices()}
     </Group>
   );

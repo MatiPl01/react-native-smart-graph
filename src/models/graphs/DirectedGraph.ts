@@ -40,6 +40,13 @@ export default class DirectedGraph<V, E> extends Graph<
     const source = this.vertex(sourceKey);
     const target = this.vertex(targetKey);
 
+    if (!source) {
+      throw new Error(`Vertex ${sourceKey} does not exist`);
+    }
+    if (!target) {
+      throw new Error(`Vertex ${targetKey} does not exist`);
+    }
+
     const edge = new DirectedEdge<E, V>(edgeKey, value, source, target);
     this.insertEdgeObject(edge);
 
@@ -51,6 +58,10 @@ export default class DirectedGraph<V, E> extends Graph<
 
   removeEdge(key: string): E {
     const edge = this.edge(key);
+
+    if (!edge) {
+      throw new Error(`Edge ${key} does not exist`);
+    }
 
     edge.source.removeOutEdge(key);
     edge.target.removeInEdge(key);

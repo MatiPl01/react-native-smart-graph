@@ -4,7 +4,11 @@ import { ARROW_COMPONENT_SETTINGS } from '@/constants/components';
 import { AnimatedPosition } from '@/types/layout';
 import { EdgeArrowRenderFunction } from '@/types/renderer';
 import { EdgeArrowSettings } from '@/types/settings';
-import { calcUnitVector, translateAlongVector } from '@/utils/vectors';
+import {
+  calcUnitVector,
+  distanceBetweenVectors,
+  translateAlongVector
+} from '@/utils/vectors';
 
 type EdgeArrowComponentProps = {
   from: AnimatedPosition;
@@ -25,7 +29,10 @@ export default function EdgeArrowComponent({
     ...ARROW_COMPONENT_SETTINGS,
     ...userSettings
   };
-  const arrowSize = 2 * vertexRadius * settings.scale;
+  const arrowSize = Math.min(
+    2 * vertexRadius * settings.scale,
+    0.35 * distanceBetweenVectors(from.value, to.value)
+  );
 
   const dirVec = useDerivedValue(
     () => calcUnitVector(to.value, from.value),

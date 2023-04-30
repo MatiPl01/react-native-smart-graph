@@ -73,18 +73,12 @@ export default abstract class Graph<
     return !!this.edges$[key];
   }
 
-  vertex(key: string): GV {
-    if (!this.vertices$[key]) {
-      throw new Error(`Vertex with key ${key} does not exist.`);
-    }
-    return this.vertices$[key] as GV;
+  vertex(key: string) {
+    return this.vertices$[key];
   }
 
-  edge(key: string): GE {
-    if (!this.edges$[key]) {
-      throw new Error(`Edge with key ${key} does not exist.`);
-    }
-    return this.edges$[key] as GE;
+  edge(key: string) {
+    return this.edges$[key];
   }
 
   removeVertex(key: string): V {
@@ -132,6 +126,10 @@ export default abstract class Graph<
 
   private notifyVertexRemoved(vertex: GV): void {
     console.log('notifyVertexRemoved', vertex.key);
+    console.log(
+      'vertices',
+      this.vertices.map(v => v.key)
+    );
     this.observers.forEach(observer => observer.vertexRemoved(vertex));
   }
 

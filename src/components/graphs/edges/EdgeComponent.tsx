@@ -59,6 +59,10 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
     [v2Position?.x, v2Position?.y]
   );
 
+  if (!v1Position || !v2Position) {
+    return null;
+  }
+
   const renderEdge = () =>
     areDirectedEdgeComponentProps(props) ? (
       <DirectedEdgeComponent<E, V>
