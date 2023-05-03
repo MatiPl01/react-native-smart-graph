@@ -1,3 +1,3 @@
-export { default as Graph } from './Graph.model';
-export { default as DirectedGraph } from './DirectedGraph.model';
-export { default as UndirectedGraph } from './UndirectedGraph.model';
+export { default as Graph } from './Graph';
+export { default as DirectedGraph } from './DirectedGraph';
+export { default as UndirectedGraph } from './UndirectedGraph';

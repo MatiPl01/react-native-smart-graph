@@ -1,4 +1,9 @@
-import { Edge, Graph as IGraph, Vertex } from '@/types/graphs';
+import {
+  Edge,
+  GraphConnections,
+  Graph as IGraph,
+  Vertex
+} from '@/types/graphs';
 
 export default abstract class Graph<
   V,
@@ -16,6 +21,19 @@ export default abstract class Graph<
 
   get edges(): Array<GE> {
     return Object.values(this.edges$);
+  }
+
+  get connections(): GraphConnections {
+    return Object.fromEntries(
+      Object.values(this.vertices$).map(vertex => [
+        vertex.key,
+        vertex.edges.map(edge =>
+          edge.vertices[0].key === vertex.key
+            ? edge.vertices[1].key
+            : edge.vertices[0].key
+        )
+      ])
+    );
   }
 
   abstract isDirected(): boolean;
