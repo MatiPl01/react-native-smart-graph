@@ -23,3 +23,6 @@ export const placeVertices = <V, E>(
       return placeVerticesRandomly(graph, vertexRadius, settings);
   }
 };
+
+// export const calcVertexPlacementPosition = (
+//   vertexKey: string,

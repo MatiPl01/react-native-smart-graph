@@ -1,8 +1,11 @@
 import { DEFAULT_FORCES_SETTINGS } from '@/constants/forces';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedPositionCoordinates } from '@/types/layout';
-import { DefaultForcesStrategySettings } from '@/types/settings/forces';
-import { applyForces, calcForces } from '@/utils/forces/shared';
+import {
+  CalculatedForces,
+  DefaultForcesStrategySettings
+} from '@/types/settings/forces';
+import { calcForces } from '@/utils/forces/shared';
 
 const createAttractionFactorGetter = (
   attractionForceFactor: number,
@@ -23,11 +26,11 @@ const createRepellingFactorGetter = (repulsionScale: number) => {
   };
 };
 
-export default function applyDefaultForces(
+export default function calcDefaultForces(
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedPositionCoordinates>,
   settings?: DefaultForcesStrategySettings
-): void {
+): CalculatedForces {
   'worklet';
   const attractionScale =
     settings?.attractionForce?.attractionScale ||
@@ -39,11 +42,10 @@ export default function applyDefaultForces(
     settings?.repellingForce?.repulsionScale ||
     DEFAULT_FORCES_SETTINGS.repulsionScale;
 
-  const forces = calcForces(
+  return calcForces(
     connections,
     verticesPositions,
     createAttractionFactorGetter(attractionScale, attractionForceFactor),
     createRepellingFactorGetter(repulsionScale)
   );
-  applyForces(forces, verticesPositions);
 }

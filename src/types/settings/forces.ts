@@ -1,3 +1,5 @@
+import { Vector } from '@shopify/react-native-skia';
+
 export type ForcesStrategy = 'default';
 
 export type DefaultForcesStrategySettings = {
@@ -12,3 +14,8 @@ export type DefaultForcesStrategySettings = {
 };
 
 export type ForcesSettings = DefaultForcesStrategySettings;
+
+export type CalculatedForces = {
+  attractionForces: Record<string, Vector>;
+  repellingForces: Record<string, Vector>;
+};

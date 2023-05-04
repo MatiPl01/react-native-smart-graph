@@ -2,7 +2,7 @@ import { useAnimationFrame, useGraphObserver } from '@/hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
-import { Group, Rect } from '@shopify/react-native-skia';
+import { Group, Rect, Vector } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { Graph } from '@/types/graphs';
@@ -15,7 +15,7 @@ import {
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
-import applyDefaultForces from '@/utils/forces/strategies/default.forces';
+import { applyForcesFrame } from '@/utils/forces';
 import { placeVertices } from '@/utils/placement';
 
 import EdgeComponent, { EdgeComponentProps } from './edges/EdgeComponent';
@@ -55,9 +55,14 @@ export default function GraphComponent<
   const [{ vertices, edges }] = useGraphObserver(graph);
   const [isAnimating, setIsAnimating] = useAnimationFrame(
     () =>
-      applyDefaultForces(
+      applyForcesFrame(
         graph.connections,
-        animatedVerticesPositionsRef.current
+        animatedVerticesPositionsRef.current,
+        undefined,
+        forces => {
+          attractionForcesRef.current = forces.attractionForces;
+          repellingForcesRef.current = forces.repellingForces;
+        }
       ),
     true
   );
@@ -67,6 +72,8 @@ export default function GraphComponent<
   const animatedVerticesPositionsRef = useRef<
     Record<string, AnimatedPositionCoordinates>
   >({});
+  const attractionForcesRef = useRef<Record<string, Vector>>({});
+  const repellingForcesRef = useRef<Record<string, Vector>>({});
 
   const topVertexKey = useSharedValue<string | null>(null);
   const bottomVertexKey = useSharedValue<string | null>(null);
