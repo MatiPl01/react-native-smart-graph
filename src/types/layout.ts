@@ -1,15 +1,10 @@
 import { SharedValue } from 'react-native-reanimated';
 
-// Positions
-export type Position = {
-  x: number;
-  y: number;
-};
+import { Vector } from '@shopify/react-native-skia';
 
-export type AnimatedPosition = SharedValue<{ x: number; y: number }>;
+export type AnimatedVector = SharedValue<Vector>;
 
-// TODO - change AnimatedPositionCoordinates to AnimatedVector
-export type AnimatedPositionCoordinates = {
+export type AnimatedVectorCoordinates = {
   x: SharedValue<number>;
   y: SharedValue<number>;
 };

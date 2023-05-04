@@ -1,7 +1,7 @@
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { ARROW_COMPONENT_SETTINGS } from '@/constants/components';
-import { AnimatedPosition } from '@/types/layout';
+import { AnimatedVector } from '@/types/layout';
 import { EdgeArrowRenderFunction } from '@/types/renderer';
 import { EdgeArrowSettings } from '@/types/settings';
 import {
@@ -11,8 +11,8 @@ import {
 } from '@/utils/vectors';
 
 type EdgeArrowComponentProps = {
-  from: AnimatedPosition;
-  to: AnimatedPosition;
+  from: AnimatedVector;
+  to: AnimatedVector;
   vertexRadius: number;
   renderer: EdgeArrowRenderFunction;
   settings?: EdgeArrowSettings;

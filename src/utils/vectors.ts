@@ -1,9 +1,8 @@
 import { Vector, vec } from '@shopify/react-native-skia';
 
-import { AnimatedPositionCoordinates, Position } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 
-// TODO - change Position type to Vector
-export const calcUnitVector = (from: Position, to: Position): Position => {
+export const calcUnitVector = (from: Vector, to: Vector): Vector => {
   'worklet';
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -13,10 +12,10 @@ export const calcUnitVector = (from: Position, to: Position): Position => {
 };
 
 export const translateAlongVector = (
-  point: Position,
-  unitVector: Position,
+  point: Vector,
+  unitVector: Vector,
   distance: number
-): Position => {
+): Vector => {
   'worklet';
   return {
     x: point.x + unitVector.x * distance,
@@ -25,7 +24,7 @@ export const translateAlongVector = (
 };
 
 export const animatedVectorToVector = (
-  vector?: AnimatedPositionCoordinates
+  vector?: AnimatedVectorCoordinates
 ): Vector => {
   'worklet';
   return vector

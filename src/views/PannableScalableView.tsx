@@ -9,11 +9,11 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
-import { Canvas, Group } from '@shopify/react-native-skia';
+import { Canvas, Group, Vector } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
-import { Dimensions, Position } from '@/types/layout';
+import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { fixedWithDecay } from '@/utils/reanimated';
 import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
@@ -166,7 +166,7 @@ export default function PannableScalableView({
   };
 
   const translateContentTo = (
-    translate: Position,
+    translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
     animated?: boolean
   ) => {
@@ -192,7 +192,7 @@ export default function PannableScalableView({
 
   const scaleContentTo = (
     newScale: number,
-    origin?: Position,
+    origin?: Vector,
     animated = false
   ) => {
     'worklet';
@@ -286,9 +286,6 @@ export default function PannableScalableView({
                   right: containerRight,
                   top: containerTop,
                   bottom: containerBottom
-                },
-                onRendered(containerDimensions: Dimensions) {
-                  resetContentPosition({ containerDimensions });
                 }
               });
             })}

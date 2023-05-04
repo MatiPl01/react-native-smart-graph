@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
-import { AnimatedPositionCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   DirectedEdgeRenderers,
   UndirectedEdgeRenderers
@@ -23,7 +23,7 @@ const areDirectedEdgeComponentProps = <E, V>(
 };
 
 type SharedEdgeComponentProps = {
-  verticesPositions: Record<string, AnimatedPositionCoordinates>;
+  verticesPositions: Record<string, AnimatedVectorCoordinates>;
   vertexRadius: number;
 };
 

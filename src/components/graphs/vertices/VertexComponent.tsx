@@ -5,45 +5,52 @@ import { Vertex } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
   AnimatedBoundingVertices,
-  AnimatedPositionCoordinates,
-  Position
+  AnimatedVectorCoordinates
 } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
 import { GraphVertexSettings } from '@/types/settings';
 
+type AnimatedPositionSetter = (
+  key: string,
+  position: AnimatedVectorCoordinates | null
+) => void;
+
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
   settings: Required<GraphVertexSettings>;
-  placementPosition: Position;
   containerBoundingRect: AnimatedBoundingRect;
   boundingVertices: AnimatedBoundingVertices;
   renderer: VertexRenderFunction<V>;
-  setAnimatedPosition: (
-    key: string,
-    position: AnimatedPositionCoordinates
-  ) => void;
+  setAnimatedPosition: AnimatedPositionSetter;
+  setAnimatedPlacementPosition: AnimatedPositionSetter;
 };
 
 function VertexComponent<V, E>({
   vertex,
   settings,
-  placementPosition,
   containerBoundingRect,
   boundingVertices,
   renderer,
-  setAnimatedPosition
+  setAnimatedPosition,
+  setAnimatedPlacementPosition
 }: VertexComponentProps<V, E>) {
-  const x = useSharedValue(placementPosition.x);
-  const y = useSharedValue(placementPosition.y);
+  const x = useSharedValue(0);
+  const y = useSharedValue(0);
+
+  const placementX = useSharedValue(0);
+  const placementY = useSharedValue(0);
 
   const key = vertex.key;
 
+  console.log('VertexComponent', vertex.key);
+
   useEffect(() => {
-    x.value = placementPosition.x;
-    y.value = placementPosition.y;
-
+    console.log('VertexComponent useEffect', vertex.key);
+    // Add vertex to animated positions if it's added to the graph
     setAnimatedPosition(vertex.key, { x, y });
+    setAnimatedPlacementPosition(vertex.key, { x: placementX, y: placementY });
 
+    // Remove vertex from bounding vertices if it's removed from the graph
     return () => {
       if (boundingVertices.left.value === key) {
         boundingVertices.left.value = null;
@@ -57,9 +64,14 @@ function VertexComponent<V, E>({
       if (boundingVertices.bottom.value === key) {
         boundingVertices.bottom.value = null;
       }
-    };
-  }, [vertex.key, placementPosition]);
 
+      // Remove vertex from animated positions if it's removed from the graph
+      setAnimatedPosition(vertex.key, null);
+      setAnimatedPlacementPosition(vertex.key, null);
+    };
+  }, [vertex.key]);
+
+  // Update bounding vertices if vertex x position coordinate was changed
   useAnimatedReaction(
     () => ({
       x1: x.value - settings.radius,
@@ -86,6 +98,7 @@ function VertexComponent<V, E>({
     [x]
   );
 
+  // Update bounding vertices if vertex y position coordinate was changed
   useAnimatedReaction(
     () => ({
       y1: y.value - settings.radius,
@@ -112,6 +125,7 @@ function VertexComponent<V, E>({
     [y]
   );
 
+  // Render the vertex component
   return renderer({
     key: vertex.key,
     data: vertex.value,

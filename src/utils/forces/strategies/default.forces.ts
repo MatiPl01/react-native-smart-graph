@@ -1,6 +1,6 @@
 import { DEFAULT_FORCES_SETTINGS } from '@/constants/forces';
 import { GraphConnections } from '@/types/graphs';
-import { AnimatedPositionCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import { DefaultForcesStrategySettings } from '@/types/settings/forces';
 import { applyForces, calcForces } from '@/utils/forces/shared';
 
@@ -25,7 +25,7 @@ const createRepellingFactorGetter = (repulsionScale: number) => {
 
 export default function applyDefaultForces(
   connections: GraphConnections,
-  verticesPositions: Record<string, AnimatedPositionCoordinates>,
+  verticesPositions: Record<string, AnimatedVectorCoordinates>,
   settings?: DefaultForcesStrategySettings
 ): void {
   'worklet';
