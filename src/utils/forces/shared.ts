@@ -13,7 +13,7 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
-export const applyForces = (
+export const updateVerticesPositions = (
   forces: Record<string, Vector>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>
 ) => {

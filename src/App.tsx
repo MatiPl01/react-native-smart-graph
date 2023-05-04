@@ -3,7 +3,7 @@ import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
-import DefaultEdgeLabelRenderer from '@/components/graphs/renderers/DefaultEdgeLabelRenderer';
+import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
 import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
