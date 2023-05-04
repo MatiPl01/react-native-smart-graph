@@ -203,18 +203,29 @@ export default function GraphComponent<
   );
 
   const renderEdges = useCallback(() => {
-    return edges.map(edge => (
-      <EdgeComponent
-        key={edge.key}
-        {...({
-          edge,
-          verticesPositions: animatedVerticesPositions,
-          vertexRadius: memoSettings.components.vertex.radius,
-          renderers: memoRenderers.edge,
-          settings: memoSettings.components.edge
-        } as EdgeComponentProps<E, V>)}
-      />
-    ));
+    return edges.map(edge => {
+      const [v1, v2] = edge.vertices;
+      const v1Position = animatedVerticesPositions[v1.key];
+      const v2Position = animatedVerticesPositions[v2.key];
+
+      if (!v1Position || !v2Position) {
+        return null;
+      }
+
+      return (
+        <EdgeComponent
+          key={edge.key}
+          {...({
+            edge,
+            v1Position,
+            v2Position,
+            vertexRadius: memoSettings.components.vertex.radius,
+            renderers: memoRenderers.edge,
+            settings: memoSettings.components.edge
+          } as EdgeComponentProps<E, V>)}
+        />
+      );
+    });
     // Update edges if rendered vertices were changed or if edges in the current
     // graph model were changed
   }, [animatedVerticesPositions, edges]);

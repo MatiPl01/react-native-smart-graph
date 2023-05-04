@@ -49,45 +49,10 @@ function VertexComponent<V, E>({
 
   const key = vertex.key;
 
-  console.log('VertexComponent', vertex.key);
-
   useEffect(() => {
-    console.log('VertexComponent useEffect', vertex.key);
     // Add vertex to animated positions if it's added to the graph
     setAnimatedPosition(vertex.key, { x, y });
     setAnimatedPlacementPosition(vertex.key, { x: placementX, y: placementY });
-
-    // TODO - fix bounding vertices
-    // Update the bounding rect if vertex is added to the graph
-    // if (
-    //   placementPosition.x - settings.radius <=
-    //   containerBoundingRect.left.value
-    // ) {
-    //   containerBoundingRect.left.value = placementPosition.x - settings.radius;
-    //   boundingVertices.left.value = key;
-    // }
-    // if (
-    //   placementPosition.x + settings.radius >=
-    //   containerBoundingRect.right.value
-    // ) {
-    //   containerBoundingRect.right.value = placementPosition.x + settings.radius;
-    //   boundingVertices.right.value = key;
-    // }
-    // if (
-    //   placementPosition.y - settings.radius <=
-    //   containerBoundingRect.top.value
-    // ) {
-    //   containerBoundingRect.top.value = placementPosition.y - settings.radius;
-    //   boundingVertices.top.value = key;
-    // }
-    // if (
-    //   placementPosition.y + settings.radius >=
-    //   containerBoundingRect.bottom.value
-    // ) {
-    //   containerBoundingRect.bottom.value =
-    //     placementPosition.y + settings.radius;
-    //   boundingVertices.bottom.value = key;
-    // }
 
     // Remove vertex from bounding vertices if it's removed from the graph
     return () => {

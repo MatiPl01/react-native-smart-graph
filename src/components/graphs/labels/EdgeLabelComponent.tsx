@@ -7,19 +7,20 @@ import { EdgeLabelRendererFunction } from '@/types/renderer';
 type EdgeLabelComponentProps<E, V> = {
   edge: Edge<E, V>;
   vertexRadius: number;
-  verticesPositions: Record<string, AnimatedVectorCoordinates>;
+  v1Position: AnimatedVectorCoordinates;
+  v2Position: AnimatedVectorCoordinates;
   renderer: EdgeLabelRendererFunction<E>;
 };
 
 export default function EdgeLabelComponent<E, V>({
   edge,
   vertexRadius,
-  verticesPositions,
+  v1Position,
+  v2Position,
   renderer
 }: EdgeLabelComponentProps<E, V>) {
-  const [{ key: key1 }, { key: key2 }] = edge.vertices;
-  const { x: x1, y: y1 } = verticesPositions[key1] as AnimatedVectorCoordinates;
-  const { x: x2, y: y2 } = verticesPositions[key2] as AnimatedVectorCoordinates;
+  const { x: x1, y: y1 } = v1Position;
+  const { x: x2, y: y2 } = v2Position;
 
   const edgeCenterPosition = useDerivedValue(
     () => ({
