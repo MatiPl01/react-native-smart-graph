@@ -70,13 +70,19 @@ export default function GraphComponent<
   const [animatedVerticesPositions, setAnimatedVerticesPositions] = useState<
     Record<string, AnimatedVectorCoordinates>
   >({});
+  // This is used as a workaround for the VertexComponent which must have
+  // information about current positions of vertices in the graph model
+  // but cannot be rerendered on every change of the positions
+  const sharedAnimatedVerticesPositions = useMemo<
+    Record<string, AnimatedVectorCoordinates>
+  >(() => ({}), []);
   // Target placement positions of vertices in the graph model
   // (This is used to animate placement vertices to their target positions when
   // graph layout changes or placement strategy changes)
   const [targetPlacementPositions, setTargetPlacementPositions] = useState<
     Record<string, Vector>
   >({});
-  // This is used ad a workaround for callback functions which don't see
+  // This is used as a workaround for callback functions which don't see
   // targetPlacementPositions state changes
   const targetPlacementPositionsRef = useRef<Record<string, Vector>>({});
   // Current positions of placement vertices in the graph model
@@ -86,12 +92,13 @@ export default function GraphComponent<
     Record<string, AnimatedVectorCoordinates>
   >({});
 
+  // BOUNDING VERTICES
+  // Current bounding vertices
   const topVertexKey = useSharedValue<string | null>(null);
   const bottomVertexKey = useSharedValue<string | null>(null);
   const leftVertexKey = useSharedValue<string | null>(null);
   const rightVertexKey = useSharedValue<string | null>(null);
-
-  const boundingVertices: AnimatedBoundingVertices = useMemo(
+  const boundingVertices = useMemo<AnimatedBoundingVertices>(
     () => ({
       top: topVertexKey,
       bottom: bottomVertexKey,
@@ -162,15 +169,26 @@ export default function GraphComponent<
 
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedVectorCoordinates | null) => {
+      // Update the state to trigger rerendering of the graph
       setAnimatedVerticesPositions(prev =>
         updateAnimatedVerticesPositions(key, position, prev)
       );
+      // Update the shared memoized animated positions object
+      // (this is used as a workaround for the VertexComponent which must have
+      // information about current positions of vertices in the graph model
+      // but cannot be rerendered on every change of the positions)
+      if (position) {
+        sharedAnimatedVerticesPositions[key] = position;
+      } else {
+        delete sharedAnimatedVerticesPositions[key];
+      }
     },
     []
   );
 
   const setAnimatedVertexPlacementPosition = useCallback(
     (key: string, position: AnimatedVectorCoordinates | null) => {
+      // Update the placement positions ref
       animatedVerticesPlacementPositionsRef.current =
         updateAnimatedVerticesPositions(
           key,
@@ -237,8 +255,9 @@ export default function GraphComponent<
           key={vertex.key}
           vertex={vertex}
           settings={memoSettings.components.vertex}
-          containerBoundingRect={boundingRect}
           boundingVertices={boundingVertices}
+          containerBoundingRect={boundingRect}
+          verticesPositions={animatedVerticesPositions}
           renderer={memoRenderers.vertex}
           setAnimatedPosition={setAnimatedVertexPosition}
           setAnimatedPlacementPosition={setAnimatedVertexPlacementPosition}

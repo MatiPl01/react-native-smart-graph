@@ -32,165 +32,165 @@ const ADDED_COMPONENTS = [
     from: 'A',
     to: 'C',
     data: []
-  },
-  {
-    key: 'BC',
-    from: 'B',
-    to: 'C',
-    data: []
-  },
-  {
-    key: 'D',
-    data: []
-  },
-  {
-    key: 'AD',
-    from: 'A',
-    to: 'D',
-    data: []
-  },
-  {
-    key: 'BD',
-    from: 'B',
-    to: 'D',
-    data: []
-  },
-  {
-    key: 'CD',
-    from: 'C',
-    to: 'D',
-    data: []
-  },
-  {
-    key: 'E',
-    data: []
-  },
-  {
-    key: 'AE',
-    from: 'A',
-    to: 'E',
-    data: []
-  },
-  {
-    key: 'BE',
-    from: 'B',
-    to: 'E',
-    data: []
-  },
-  {
-    key: 'CE',
-    from: 'C',
-    to: 'E',
-    data: []
-  },
-  {
-    key: 'F',
-    data: []
-  },
-  {
-    key: 'AF',
-    from: 'A',
-    to: 'F',
-    data: []
-  },
-  {
-    key: 'BF',
-    from: 'B',
-    to: 'F',
-    data: []
-  },
-  {
-    key: 'G',
-    data: []
-  },
-  {
-    key: 'H',
-    data: []
-  },
-  {
-    key: 'I',
-    data: []
-  },
-  {
-    key: 'GA',
-    from: 'G',
-    to: 'A',
-    data: []
-  },
-  {
-    key: 'HI',
-    from: 'H',
-    to: 'I',
-    data: []
-  },
-  {
-    key: 'GI',
-    from: 'G',
-    to: 'I',
-    data: []
-  },
-  {
-    key: 'GH',
-    from: 'G',
-    to: 'H',
-    data: []
-  },
-  {
-    key: 'J',
-    data: []
-  },
-  {
-    key: 'K',
-    data: []
-  },
-  {
-    key: 'JK',
-    from: 'J',
-    to: 'K',
-    data: []
-  },
-  {
-    key: 'JG',
-    from: 'J',
-    to: 'G',
-    data: []
-  },
-  {
-    key: 'JH',
-    from: 'J',
-    to: 'H',
-    data: []
-  },
-  {
-    key: 'JF',
-    from: 'J',
-    to: 'F',
-    data: []
-  },
-  {
-    key: 'JE',
-    from: 'J',
-    to: 'E',
-    data: []
-  },
-  {
-    key: 'JD',
-    from: 'J',
-    to: 'D',
-    data: []
-  },
-  {
-    key: 'JC',
-    from: 'J',
-    to: 'C',
-    data: []
-  },
-  {
-    key: 'JB',
-    from: 'J',
-    to: 'B',
-    data: []
   }
+  // {
+  //   key: 'BC',
+  //   from: 'B',
+  //   to: 'C',
+  //   data: []
+  // },
+  // {
+  //   key: 'D',
+  //   data: []
+  // },
+  // {
+  //   key: 'AD',
+  //   from: 'A',
+  //   to: 'D',
+  //   data: []
+  // },
+  // {
+  //   key: 'BD',
+  //   from: 'B',
+  //   to: 'D',
+  //   data: []
+  // },
+  // {
+  //   key: 'CD',
+  //   from: 'C',
+  //   to: 'D',
+  //   data: []
+  // },
+  // {
+  //   key: 'E',
+  //   data: []
+  // },
+  // {
+  //   key: 'AE',
+  //   from: 'A',
+  //   to: 'E',
+  //   data: []
+  // },
+  // {
+  //   key: 'BE',
+  //   from: 'B',
+  //   to: 'E',
+  //   data: []
+  // },
+  // {
+  //   key: 'CE',
+  //   from: 'C',
+  //   to: 'E',
+  //   data: []
+  // },
+  // {
+  //   key: 'F',
+  //   data: []
+  // },
+  // {
+  //   key: 'AF',
+  //   from: 'A',
+  //   to: 'F',
+  //   data: []
+  // },
+  // {
+  //   key: 'BF',
+  //   from: 'B',
+  //   to: 'F',
+  //   data: []
+  // },
+  // {
+  //   key: 'G',
+  //   data: []
+  // },
+  // {
+  //   key: 'H',
+  //   data: []
+  // },
+  // {
+  //   key: 'I',
+  //   data: []
+  // },
+  // {
+  //   key: 'GA',
+  //   from: 'G',
+  //   to: 'A',
+  //   data: []
+  // },
+  // {
+  //   key: 'HI',
+  //   from: 'H',
+  //   to: 'I',
+  //   data: []
+  // },
+  // {
+  //   key: 'GI',
+  //   from: 'G',
+  //   to: 'I',
+  //   data: []
+  // },
+  // {
+  //   key: 'GH',
+  //   from: 'G',
+  //   to: 'H',
+  //   data: []
+  // },
+  // {
+  //   key: 'J',
+  //   data: []
+  // },
+  // {
+  //   key: 'K',
+  //   data: []
+  // },
+  // {
+  //   key: 'JK',
+  //   from: 'J',
+  //   to: 'K',
+  //   data: []
+  // },
+  // {
+  //   key: 'JG',
+  //   from: 'J',
+  //   to: 'G',
+  //   data: []
+  // },
+  // {
+  //   key: 'JH',
+  //   from: 'J',
+  //   to: 'H',
+  //   data: []
+  // },
+  // {
+  //   key: 'JF',
+  //   from: 'J',
+  //   to: 'F',
+  //   data: []
+  // },
+  // {
+  //   key: 'JE',
+  //   from: 'J',
+  //   to: 'E',
+  //   data: []
+  // },
+  // {
+  //   key: 'JD',
+  //   from: 'J',
+  //   to: 'D',
+  //   data: []
+  // },
+  // {
+  //   key: 'JC',
+  //   from: 'J',
+  //   to: 'C',
+  //   data: []
+  // },
+  // {
+  //   key: 'JB',
+  //   from: 'J',
+  //   to: 'B',
+  //   data: []
+  // }
 ];
 
 let idx = 0;
