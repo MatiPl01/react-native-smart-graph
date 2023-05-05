@@ -8,6 +8,7 @@ import {
 } from '@/types/settings';
 import { findRootVertex, isGraphATree, isGraphDirected } from '@/utils/graphs';
 
+// TODO - fix positioning (make relative tot the center pof tbe screen)
 const placeVerticesOnTree = <V, E>(
   graph: Graph<V, E>,
   vertexRadius: number,

@@ -8,8 +8,8 @@ import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
-  AnimatedBoundingVertices,
-  AnimatedVectorCoordinates
+  AnimatedVectorCoordinates,
+  RelativeVerticesOrder
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
@@ -18,7 +18,7 @@ import {
   animateVerticesToFinalPositions
 } from '@/utils/animations';
 import { applyForces } from '@/utils/forces';
-import { placeVertices } from '@/utils/placement';
+import { orderVertices, placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
 import EdgeComponent, { EdgeComponentProps } from './edges/EdgeComponent';
@@ -70,12 +70,6 @@ export default function GraphComponent<
   const [animatedVerticesPositions, setAnimatedVerticesPositions] = useState<
     Record<string, AnimatedVectorCoordinates>
   >({});
-  // This is used as a workaround for the VertexComponent which must have
-  // information about current positions of vertices in the graph model
-  // but cannot be rerendered on every change of the positions
-  const sharedAnimatedVerticesPositions = useMemo<
-    Record<string, AnimatedVectorCoordinates>
-  >(() => ({}), []);
   // Target placement positions of vertices in the graph model
   // (This is used to animate placement vertices to their target positions when
   // graph layout changes or placement strategy changes)
@@ -92,20 +86,12 @@ export default function GraphComponent<
     Record<string, AnimatedVectorCoordinates>
   >({});
 
-  // BOUNDING VERTICES
-  // Current bounding vertices
-  const topVertexKey = useSharedValue<string | null>(null);
-  const bottomVertexKey = useSharedValue<string | null>(null);
-  const leftVertexKey = useSharedValue<string | null>(null);
-  const rightVertexKey = useSharedValue<string | null>(null);
-  const boundingVertices = useMemo<AnimatedBoundingVertices>(
-    () => ({
-      top: topVertexKey,
-      bottom: bottomVertexKey,
-      left: leftVertexKey,
-      right: rightVertexKey
-    }),
-    []
+  // RELATIVE VERTICES ORDER
+  const relativeHorizontalVerticesOrder = useSharedValue<RelativeVerticesOrder>(
+    {}
+  );
+  const relativeVerticalVerticesOrder = useSharedValue<RelativeVerticesOrder>(
+    {}
   );
 
   const memoSettings = useMemo(
@@ -145,6 +131,14 @@ export default function GraphComponent<
     );
 
     targetPlacementPositionsRef.current = layout.verticesPositions;
+    relativeHorizontalVerticesOrder.value = orderVertices(
+      'x',
+      layout.verticesPositions
+    );
+    relativeVerticalVerticesOrder.value = orderVertices(
+      'y',
+      layout.verticesPositions
+    );
     setTargetPlacementPositions(layout.verticesPositions);
 
     // Animate graph vertices to their target positions only if
@@ -173,15 +167,6 @@ export default function GraphComponent<
       setAnimatedVerticesPositions(prev =>
         updateAnimatedVerticesPositions(key, position, prev)
       );
-      // Update the shared memoized animated positions object
-      // (this is used as a workaround for the VertexComponent which must have
-      // information about current positions of vertices in the graph model
-      // but cannot be rerendered on every change of the positions)
-      if (position) {
-        sharedAnimatedVerticesPositions[key] = position;
-      } else {
-        delete sharedAnimatedVerticesPositions[key];
-      }
     },
     []
   );
@@ -255,9 +240,9 @@ export default function GraphComponent<
           key={vertex.key}
           vertex={vertex}
           settings={memoSettings.components.vertex}
-          boundingVertices={boundingVertices}
+          relativeHorizontalOrder={relativeHorizontalVerticesOrder}
+          relativeVerticalOrder={relativeVerticalVerticesOrder}
           containerBoundingRect={boundingRect}
-          verticesPositions={animatedVerticesPositions}
           renderer={memoRenderers.vertex}
           setAnimatedPosition={setAnimatedVertexPosition}
           setAnimatedPlacementPosition={setAnimatedVertexPlacementPosition}

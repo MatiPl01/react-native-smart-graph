@@ -28,9 +28,11 @@ export type AnimatedBoundingRect = {
   left: SharedValue<number>;
 };
 
-export type AnimatedBoundingVertices = {
-  top: SharedValue<string | null>;
-  bottom: SharedValue<string | null>;
-  left: SharedValue<string | null>;
-  right: SharedValue<string | null>;
-};
+export type RelativeVerticesOrder = Record<
+  string,
+  {
+    prev?: string;
+    next?: string;
+    position: number;
+  }
+>;
