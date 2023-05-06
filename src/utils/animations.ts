@@ -8,11 +8,19 @@ export const animateVerticesToFinalPositions = (
   animatedPositions: Record<string, AnimatedVectorCoordinates>,
   finalPositions: Record<string, Vector>
 ) => {
+  'worklet';
   // TODO - improve this animation (add settings)
   Object.entries(finalPositions).forEach(([key, finalPosition]) => {
     const animatedPosition = animatedPositions[key];
     if (animatedPosition) {
-      animateVertexToFinalPosition(animatedPosition, finalPosition);
+      animatedPosition.x.value = withTiming(finalPosition.x, {
+        duration: 300,
+        easing: Easing.bezier(0.175, 0.885, 0.32, 1.275)
+      });
+      animatedPosition.y.value = withTiming(finalPosition.y, {
+        duration: 300,
+        easing: Easing.bezier(0.175, 0.885, 0.32, 1.275)
+      });
     }
   });
 };

@@ -161,8 +161,8 @@ const calcVerticesRandomPositions = <V, E>(
 
   const verticesPositions = vertices.reduce((acc, { key }) => {
     acc[key] = {
-      x: vertexRadius + Math.random() * innerWidth,
-      y: vertexRadius + Math.random() * innerHeight
+      x: vertexRadius + (Math.random() - 0.5) * innerWidth,
+      y: vertexRadius + (Math.random() - 0.5) * innerHeight
     };
     return acc;
   }, {} as PlacedVerticesPositions);

@@ -22,7 +22,7 @@ const placeVerticesCircular = <V, E>(
     : graph.vertices;
 
   const initialAngle = -Math.PI / 2;
-  const { radius, center, angleStep, width, height } = getLayout(
+  const { radius, angleStep, width, height } = getLayout(
     vertices.length,
     vertexRadius,
     minVertexSpacing
@@ -33,8 +33,8 @@ const placeVerticesCircular = <V, E>(
     height,
     verticesPositions: vertices.reduce((acc, { key }, idx) => {
       acc[key] = {
-        x: center.x + radius * Math.cos(initialAngle + angleStep * idx),
-        y: center.y + radius * Math.sin(initialAngle + angleStep * idx)
+        x: radius * Math.cos(initialAngle + angleStep * idx),
+        y: radius * Math.sin(initialAngle + angleStep * idx)
       };
       return acc;
     }, {} as PlacedVerticesPositions)
@@ -63,11 +63,7 @@ const getLayout = (
     angleStep,
     radius,
     width: containerSize,
-    height: containerSize,
-    center: {
-      x: containerSize / 2,
-      y: containerSize / 2
-    }
+    height: containerSize
   };
 };
 

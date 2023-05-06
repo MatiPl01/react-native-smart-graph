@@ -27,10 +27,3 @@ export type AnimatedBoundingRect = {
   right: SharedValue<number>;
   left: SharedValue<number>;
 };
-
-export type AnimatedBoundingVertices = {
-  top: SharedValue<string | null>;
-  bottom: SharedValue<string | null>;
-  left: SharedValue<string | null>;
-  right: SharedValue<string | null>;
-};

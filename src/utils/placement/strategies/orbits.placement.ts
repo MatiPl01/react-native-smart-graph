@@ -56,7 +56,7 @@ const placeVerticesOnOrbits = <V, E>(
     verticesLayerPositions
   );
 
-  const { width, height, center, layersRadius } = getLayout(
+  const { width, height, layersRadius } = getLayout(
     minLayersRadius,
     minVertexSpacing,
     vertexRadius,
@@ -70,8 +70,8 @@ const placeVerticesOnOrbits = <V, E>(
       (acc, [key, { layer, angle }]) => {
         const r = layersRadius[layer] as number;
         acc[key] = {
-          x: center.x + r * Math.cos(angle),
-          y: center.y + r * Math.sin(angle)
+          x: r * Math.cos(angle),
+          y: r * Math.sin(angle)
         };
         return acc;
       },
@@ -281,10 +281,6 @@ const getLayout = (
   return {
     width: containerSize,
     height: containerSize,
-    center: {
-      x: containerSize / 2,
-      y: containerSize / 2
-    },
     layersRadius
   };
 };
