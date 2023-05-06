@@ -173,7 +173,7 @@ export default function GraphComponent<
 
   const setAnimatedVertexPlacementPosition = useCallback(
     (key: string, position: AnimatedVectorCoordinates | null) => {
-      // Update the placement positions ref
+      // Update placement positions
       if (position) {
         animatedVerticesPlacementPosition[key] = position;
       } else {

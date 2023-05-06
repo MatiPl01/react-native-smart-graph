@@ -250,9 +250,9 @@ export default function App() {
                 // TODO - fix orbits strategy padding
                 placement: {
                   strategy: 'random',
-                  layoutType: 'grid',
+                  layoutType: 'honeycomb',
                   minVertexSpacing: 100,
-                  density: 1
+                  density: 0.1
                 }
               }}
               renderers={{
