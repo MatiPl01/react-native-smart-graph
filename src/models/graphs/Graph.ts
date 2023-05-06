@@ -1,6 +1,7 @@
 import {
   Edge,
   GraphConnections,
+  GraphObserver,
   Graph as IGraph,
   Vertex
 } from '@/types/graphs';
@@ -14,6 +15,8 @@ export default abstract class Graph<
 {
   protected readonly vertices$: Record<string, GV> = {};
   protected readonly edges$: Record<string, GE> = {};
+
+  private readonly observers: Array<GraphObserver<V, E>> = [];
 
   get vertices(): Array<GV> {
     return Object.values(this.vertices$);
@@ -38,7 +41,7 @@ export default abstract class Graph<
 
   abstract isDirected(): boolean;
 
-  abstract insertVertex(key: string, value: V, radius: number): GV;
+  abstract insertVertex(key: string, value: V): GV;
 
   abstract insertEdge(
     sourceKey: string,
@@ -49,6 +52,17 @@ export default abstract class Graph<
 
   abstract removeEdge(key: string): E;
 
+  addObserver(observer: GraphObserver<V, E>): void {
+    this.observers.push(observer);
+  }
+
+  removeObserver(observer: GraphObserver<V, E>): void {
+    const index = this.observers.indexOf(observer);
+    if (index > -1) {
+      this.observers.splice(index, 1);
+    }
+  }
+
   hasVertex(key: string): boolean {
     return !!this.vertices$[key];
   }
@@ -57,18 +71,12 @@ export default abstract class Graph<
     return !!this.edges$[key];
   }
 
-  vertex(key: string): GV {
-    if (!this.vertices$[key]) {
-      throw new Error(`Vertex with key ${key} does not exist.`);
-    }
-    return this.vertices$[key] as GV;
+  vertex(key: string) {
+    return this.vertices$[key];
   }
 
-  edge(key: string): GE {
-    if (!this.edges$[key]) {
-      throw new Error(`Edge with key ${key} does not exist.`);
-    }
-    return this.edges$[key] as GE;
+  edge(key: string) {
+    return this.edges$[key];
   }
 
   removeVertex(key: string): V {
@@ -81,6 +89,7 @@ export default abstract class Graph<
       this.removeEdge(edge.key);
     });
     delete this.vertices$[key];
+    this.notifyVertexRemoved(vertex);
 
     return vertex.value;
   }
@@ -90,6 +99,7 @@ export default abstract class Graph<
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
+    this.notifyVertexAdded(vertex);
     return vertex;
   }
 
@@ -98,6 +108,23 @@ export default abstract class Graph<
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
     this.edges$[edge.key] = edge;
+    this.notifyEdgeAdded(edge);
     return edge;
+  }
+
+  protected notifyEdgeRemoved(edge: GE): void {
+    this.observers.forEach(observer => observer.edgeRemoved(edge));
+  }
+
+  private notifyEdgeAdded(edge: GE): void {
+    this.observers.forEach(observer => observer.edgeAdded(edge));
+  }
+
+  private notifyVertexRemoved(vertex: GV): void {
+    this.observers.forEach(observer => observer.vertexRemoved(vertex));
+  }
+
+  private notifyVertexAdded(vertex: GV): void {
+    this.observers.forEach(observer => observer.vertexAdded(vertex));
   }
 }

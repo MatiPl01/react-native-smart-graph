@@ -25,21 +25,23 @@ export const translateAlongVector = (
 };
 
 export const animatedVectorToVector = (
-  vector: AnimatedPositionCoordinates
+  vector?: AnimatedPositionCoordinates
 ): Vector => {
   'worklet';
-  return {
-    x: vector.x.value,
-    y: vector.y.value
-  };
+  return vector
+    ? {
+        x: vector.x.value,
+        y: vector.y.value
+      }
+    : vec(0, 0);
 };
 
-export const addVectors = (...vectors: Vector[]): Vector => {
+export const addVectors = (...vectors: Array<Vector>): Vector => {
   'worklet';
   return addVectorsArray(vectors);
 };
 
-export const addVectorsArray = (vectors: Vector[]): Vector => {
+export const addVectorsArray = (vectors: Array<Vector>): Vector => {
   'worklet';
   return vectors.reduce(
     (accVector, currentVector) => ({

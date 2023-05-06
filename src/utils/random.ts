@@ -1,16 +1,16 @@
-const shuffle = <T>(arr: T[]): T[] => {
+const shuffle = <T>(arr: Array<T>): Array<T> => {
   const shuffled = [...arr];
   return shuffled.sort(() => Math.random() - 0.5);
 };
 
-const choice = <T>(arr: T[]): T => {
+const choice = <T>(arr: Array<T>): T => {
   if (!arr.length) {
     throw new Error('Array is empty');
   }
   return arr[Math.floor(Math.random() * arr.length)] as T;
 };
 
-const sample = <T>(arr: T[], size: number): T[] => {
+const sample = <T>(arr: Array<T>, size: number): Array<T> => {
   if (size > arr.length) {
     throw new Error('Sample size is bigger than array length');
   }

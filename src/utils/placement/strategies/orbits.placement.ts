@@ -127,7 +127,7 @@ const placeChildrenOnRingSection = <V, E>(
 
 const getEqualLayersRadius = (
   minLayersRadius: Record<string, number>
-): number[] => {
+): Array<number> => {
   const layersCount = Object.keys(minLayersRadius).length;
 
   const lastLayerRadius = Object.entries(minLayersRadius).reduce(
@@ -151,7 +151,7 @@ const getEqualLayersRadius = (
 
 const getQuadIncreasingLayersRadius = (
   minLayersRadius: Record<string, number>
-): number[] => {
+): Array<number> => {
   const maxCoefficient = Object.entries(minLayersRadius).reduce(
     (acc, [layerNumber, minLayerRadius]) => {
       if (layerNumber === '0') {
@@ -171,7 +171,7 @@ const getNonDecreasingLayersRadius = (
   minLayersRadius: Record<string, number>,
   minVertexSpacing: number,
   vertexRadius: number
-): number[] => {
+): Array<number> => {
   const layersRadius = [0];
   let maxDistanceBetweenLayers = minVertexSpacing + 2 * vertexRadius;
 
@@ -195,7 +195,7 @@ const getNonDecreasingLayersRadius = (
 const getCustomLayersRadius = (
   layersCount: number,
   getLayerRadius: GetLayerRadiusFunction
-): number[] => {
+): Array<number> => {
   const layersRadius = [0];
 
   for (let i = 1; i < layersCount; i++) {
@@ -215,7 +215,7 @@ const getAutoLayersRadius = (
   minLayersRadius: Record<string, number>,
   minVertexSpacing: number,
   vertexRadius: number
-): number[] => {
+): Array<number> => {
   const layersRadius = [0];
 
   for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
@@ -235,7 +235,7 @@ const getLayersRadius = (
   minVertexSpacing: number,
   vertexRadius: number,
   layerSizingSettings: OrbitsLayerSizingSettings
-): number[] => {
+): Array<number> => {
   switch (layerSizingSettings.layerSizing) {
     case 'equal':
       return getEqualLayersRadius(minLayersRadius);

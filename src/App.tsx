@@ -1,68 +1,255 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
+import DefaultEdgeLabelRenderer from '@/components/graphs/renderers/DefaultEdgeLabelRenderer';
+import { DirectedGraph } from '@/models/graphs';
+import PannableScalableView from '@/views/PannableScalableView';
 
-import DefaultEdgeLabelRenderer from './components/graphs/renderers/DefaultEdgeLabelRenderer';
-import PannableScalableView from './views/PannableScalableView';
+// TODO - remove this after testing
+const ADDED_COMPONENTS = [
+  {
+    key: 'A',
+    data: []
+  },
+  {
+    key: 'B',
+    data: []
+  },
+  {
+    key: 'AB',
+    from: 'A',
+    to: 'B',
+    data: []
+  },
+  {
+    key: 'C',
+    data: []
+  },
+  {
+    key: 'AC',
+    from: 'A',
+    to: 'C',
+    data: []
+  },
+  {
+    key: 'BC',
+    from: 'B',
+    to: 'C',
+    data: []
+  },
+  {
+    key: 'D',
+    data: []
+  },
+  {
+    key: 'AD',
+    from: 'A',
+    to: 'D',
+    data: []
+  },
+  {
+    key: 'BD',
+    from: 'B',
+    to: 'D',
+    data: []
+  },
+  {
+    key: 'CD',
+    from: 'C',
+    to: 'D',
+    data: []
+  },
+  {
+    key: 'E',
+    data: []
+  },
+  {
+    key: 'AE',
+    from: 'A',
+    to: 'E',
+    data: []
+  },
+  {
+    key: 'BE',
+    from: 'B',
+    to: 'E',
+    data: []
+  },
+  {
+    key: 'CE',
+    from: 'C',
+    to: 'E',
+    data: []
+  },
+  {
+    key: 'F',
+    data: []
+  },
+  {
+    key: 'AF',
+    from: 'A',
+    to: 'F',
+    data: []
+  },
+  {
+    key: 'BF',
+    from: 'B',
+    to: 'F',
+    data: []
+  },
+  {
+    key: 'G',
+    data: []
+  },
+  {
+    key: 'H',
+    data: []
+  },
+  {
+    key: 'I',
+    data: []
+  },
+  {
+    key: 'GA',
+    from: 'G',
+    to: 'A',
+    data: []
+  },
+  {
+    key: 'HI',
+    from: 'H',
+    to: 'I',
+    data: []
+  },
+  {
+    key: 'GI',
+    from: 'G',
+    to: 'I',
+    data: []
+  },
+  {
+    key: 'GH',
+    from: 'G',
+    to: 'H',
+    data: []
+  },
+  {
+    key: 'J',
+    data: []
+  },
+  {
+    key: 'K',
+    data: []
+  },
+  {
+    key: 'JK',
+    from: 'J',
+    to: 'K',
+    data: []
+  },
+  {
+    key: 'JG',
+    from: 'J',
+    to: 'G',
+    data: []
+  },
+  {
+    key: 'JH',
+    from: 'J',
+    to: 'H',
+    data: []
+  },
+  {
+    key: 'JF',
+    from: 'J',
+    to: 'F',
+    data: []
+  },
+  {
+    key: 'JE',
+    from: 'J',
+    to: 'E',
+    data: []
+  },
+  {
+    key: 'JD',
+    from: 'J',
+    to: 'D',
+    data: []
+  },
+  {
+    key: 'JC',
+    from: 'J',
+    to: 'C',
+    data: []
+  },
+  {
+    key: 'JB',
+    from: 'J',
+    to: 'B',
+    data: []
+  }
+];
+
+let idx = 0;
+let mode = 0;
 
 export default function App() {
+  const graph = new DirectedGraph();
+
+  // TODO - remove this useEffect after testing
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
+        mode = mode === 0 ? 1 : 0;
+        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
+      }
+      const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
+
+      try {
+        if (mode === 0) {
+          if (component.from && component.to) {
+            graph.insertEdge(
+              component.from,
+              component.to,
+              component.key,
+              component.data
+            );
+          } else {
+            graph.insertVertex(component.key, component.data);
+          }
+          idx++;
+        } else {
+          if (component.from && component.to) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
+          idx--;
+        }
+      } catch (e) {
+        clearInterval(interval);
+        console.error(e);
+        return;
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <PannableScalableView objectFit='contain' controls>
+          <PannableScalableView objectFit='contain' maxScale={0.1} controls>
             <DirectedGraphComponent
-              vertices={[
-                { key: 'A', data: [] },
-                { key: 'B', data: [] },
-                { key: 'C', data: [] },
-                { key: 'D', data: [] },
-                { key: 'E', data: [] },
-                { key: 'F', data: [] },
-                { key: 'G', data: [] },
-                { key: 'H', data: [] },
-                { key: 'I', data: [] },
-                { key: 'J', data: [] },
-                { key: 'K', data: [] },
-                { key: 'L', data: [] },
-                { key: 'M', data: [] },
-                { key: 'N', data: [] },
-                { key: 'O', data: [] },
-                { key: 'P', data: [] },
-                { key: 'Q', data: [] },
-                { key: 'R', data: [] },
-                { key: 'S', data: [] },
-                { key: 'T', data: [] }
-              ]}
-              edges={[
-                { key: 'AB', from: 'A', to: 'B', data: [] },
-                { key: 'AC', from: 'A', to: 'C', data: [] },
-                { key: 'AD', from: 'A', to: 'D', data: [] },
-                { key: 'BE', from: 'B', to: 'E', data: [] },
-                { key: 'BF', from: 'B', to: 'F', data: [] },
-                { key: 'BG', from: 'B', to: 'G', data: [] },
-                { key: 'AH', from: 'A', to: 'H', data: [] },
-                { key: 'AI', from: 'A', to: 'I', data: [] },
-                { key: 'IJ', from: 'I', to: 'J', data: [] },
-                { key: 'IK', from: 'I', to: 'K', data: [] },
-                { key: 'IL', from: 'I', to: 'L', data: [] },
-                { key: 'IM', from: 'I', to: 'M', data: [] },
-                { key: 'IN', from: 'I', to: 'N', data: [] },
-                { key: 'NO', from: 'N', to: 'O', data: [] },
-                { key: 'JP', from: 'J', to: 'P', data: [] },
-                { key: 'OQ', from: 'O', to: 'Q', data: [] },
-                { key: 'OR', from: 'O', to: 'R', data: [] },
-                { key: 'OS', from: 'O', to: 'S', data: [] },
-                { key: 'ST', from: 'S', to: 'T', data: [] }
-              ]}
+              graph={graph}
               settings={{
                 // TODO - fix orbits strategy padding
                 placement: {
-                  strategy: 'random',
-                  layoutType: 'honeycomb',
-                  density: 1,
+                  strategy: 'circular',
                   minVertexSpacing: 100
                 }
               }}

@@ -43,6 +43,21 @@ function VertexComponent<V, E>({
     y.value = placementPosition.y;
 
     setAnimatedPosition(vertex.key, { x, y });
+
+    return () => {
+      if (boundingVertices.left.value === key) {
+        boundingVertices.left.value = null;
+      }
+      if (boundingVertices.right.value === key) {
+        boundingVertices.right.value = null;
+      }
+      if (boundingVertices.top.value === key) {
+        boundingVertices.top.value = null;
+      }
+      if (boundingVertices.bottom.value === key) {
+        boundingVertices.bottom.value = null;
+      }
+    };
   }, [vertex.key, placementPosition]);
 
   useAnimatedReaction(
@@ -53,14 +68,16 @@ function VertexComponent<V, E>({
     ({ x1, x2 }) => {
       if (
         x1 <= containerBoundingRect.left.value ||
-        boundingVertices.left.value === key
+        boundingVertices.left.value === key ||
+        !boundingVertices.left.value
       ) {
         containerBoundingRect.left.value = x1;
         boundingVertices.left.value = key;
       }
       if (
         x2 >= containerBoundingRect.right.value ||
-        boundingVertices.right.value === key
+        boundingVertices.right.value === key ||
+        !boundingVertices.right.value
       ) {
         containerBoundingRect.right.value = x2;
         boundingVertices.right.value = key;
@@ -77,14 +94,16 @@ function VertexComponent<V, E>({
     ({ y1, y2 }) => {
       if (
         y1 <= containerBoundingRect.top.value ||
-        boundingVertices.top.value === key
+        boundingVertices.top.value === key ||
+        !boundingVertices.top.value
       ) {
         containerBoundingRect.top.value = y1;
         boundingVertices.top.value = key;
       }
       if (
         y2 >= containerBoundingRect.bottom.value ||
-        boundingVertices.bottom.value === key
+        boundingVertices.bottom.value === key ||
+        !boundingVertices.bottom.value
       ) {
         containerBoundingRect.bottom.value = y2;
         boundingVertices.bottom.value = key;

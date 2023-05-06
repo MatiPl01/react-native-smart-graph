@@ -93,17 +93,17 @@ export default function PannableScalableView({
   );
 
   const resetContentPosition = useCallback(
-    (settings: {
+    (settings?: {
       containerDimensions?: Dimensions;
       canvasDimensions?: Dimensions;
       animated?: boolean;
     }) => {
-      const containerDimensions = settings.containerDimensions ?? {
+      const containerDimensions = settings?.containerDimensions ?? {
         width: containerWidth.value,
         height: containerHeight.value
       };
 
-      const canvasDimensions = settings.canvasDimensions ?? {
+      const canvasDimensions = settings?.canvasDimensions ?? {
         width: canvasWidth.value,
         height: canvasHeight.value
       };
@@ -112,7 +112,7 @@ export default function PannableScalableView({
         getScaleInParent(objectFit, containerDimensions, canvasDimensions);
 
       renderScale.value = renderedScale;
-      scaleContentTo(renderedScale, undefined, settings.animated);
+      scaleContentTo(renderedScale, undefined, settings?.animated);
 
       const parentCenter = getCenterInParent(
         renderedDimensions,
@@ -125,7 +125,7 @@ export default function PannableScalableView({
           y: parentCenter.y - containerTop.value * renderedScale
         },
         undefined,
-        settings.animated
+        settings?.animated
       );
     },
     [objectFit]

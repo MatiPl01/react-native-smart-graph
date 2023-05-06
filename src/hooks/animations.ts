@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 
 // TODO - replace this later with an implementation running on the UI thread (not in JS)
 export const useAnimationFrame = (
@@ -7,6 +7,14 @@ export const useAnimationFrame = (
 ) => {
   let lastUpdateTime = Date.now();
   let animationFrameRef: number;
+
+  useEffect(() => {
+    setActive(autostart);
+
+    return () => {
+      setActive(false);
+    };
+  }, [autostart]);
 
   const animate = () => {
     const now = Date.now();
