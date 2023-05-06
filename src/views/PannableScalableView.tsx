@@ -1,5 +1,11 @@
 import { styled } from 'nativewind';
-import { Children, PropsWithChildren, cloneElement, useCallback } from 'react';
+import {
+  Children,
+  PropsWithChildren,
+  cloneElement,
+  useCallback,
+  useRef
+} from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
@@ -46,6 +52,7 @@ export default function PannableScalableView({
   const containerRight = useSharedValue(0);
   const containerBottom = useSharedValue(0);
   // Dimensions
+  const initialContainerDimensionsRef = useRef<Dimensions | null>(null);
   const containerWidth = useDerivedValue(
     () => containerRight.value - containerLeft.value,
     [containerRight, containerLeft]
@@ -99,8 +106,14 @@ export default function PannableScalableView({
       animated?: boolean;
     }) => {
       const containerDimensions = settings?.containerDimensions ?? {
-        width: containerWidth.value,
-        height: containerHeight.value
+        width:
+          containerWidth.value ||
+          initialContainerDimensionsRef.current?.width ||
+          0,
+        height:
+          containerHeight.value ||
+          initialContainerDimensionsRef.current?.height ||
+          0
       };
 
       const canvasDimensions = settings?.canvasDimensions ?? {
@@ -284,6 +297,12 @@ export default function PannableScalableView({
                   right: containerRight,
                   top: containerTop,
                   bottom: containerBottom
+                },
+                onRender: (containerDimensions: Dimensions) => {
+                  initialContainerDimensionsRef.current ??= containerDimensions;
+                  resetContentPosition({
+                    containerDimensions
+                  });
                 }
               });
             })}

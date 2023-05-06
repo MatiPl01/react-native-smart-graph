@@ -9,6 +9,7 @@ import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
   AnimatedVectorCoordinates,
+  Dimensions,
   RelativeVerticesOrder
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
@@ -28,6 +29,7 @@ import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
 
 export type GraphComponentPrivateProps = {
   boundingRect: AnimatedBoundingRect;
+  onRender: (containerDimensions: Dimensions) => void;
 };
 
 type GraphComponentProps<
@@ -52,9 +54,11 @@ export default function GraphComponent<
   settings,
   renderers,
   boundingRect,
-  forcesApplied = false
+  forcesApplied = false,
+  onRender
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
   const [{ vertices, edges }] = useGraphObserver(graph);
+  const isFirstRenderRef = useRef(true);
   // const [_, setIsAnimatingForces] = useAnimationFrame(
   //   () =>
   //     applyForces(
@@ -149,6 +153,15 @@ export default function GraphComponent<
         animatedVerticesPositions,
         layout.verticesPositions
       );
+    }
+
+    // Call the onRender callback only on the first render
+    if (isFirstRenderRef.current) {
+      onRender({
+        width: layout.width,
+        height: layout.height
+      });
+      isFirstRenderRef.current = false;
     }
   }, [vertices, edges]);
 
