@@ -1,6 +1,6 @@
 import { useAnimationFrame, useGraphObserver } from '@/hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import { Circle, Group, Rect, Vector } from '@shopify/react-native-skia';
 
@@ -55,15 +55,15 @@ export default function GraphComponent<
   forcesApplied = false
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
   const [{ vertices, edges }] = useGraphObserver(graph);
-  const [_, setIsAnimatingForces] = useAnimationFrame(
-    () =>
-      applyForces(
-        graph.connections,
-        animatedVerticesPositions,
-        animatedVerticesPlacementPositionsRef.current
-      ),
-    forcesApplied
-  );
+  // const [_, setIsAnimatingForces] = useAnimationFrame(
+  //   () =>
+  //     applyForces(
+  //       graph.connections,
+  //       animatedVerticesPositions,
+  //       animatedVerticesPlacementPositionsRef.current
+  //     ),
+  //   forcesApplied
+  // );
 
   // VERTICES POSITIONS
   // Current positions of vertices in the graph model
@@ -87,11 +87,14 @@ export default function GraphComponent<
   >({});
 
   // RELATIVE VERTICES ORDER
-  const relativeHorizontalVerticesOrder = useSharedValue<RelativeVerticesOrder>(
-    {}
-  );
-  const relativeVerticalVerticesOrder = useSharedValue<RelativeVerticesOrder>(
-    {}
+  const relativeHorizontalVerticesOrder =
+    useDerivedValue<RelativeVerticesOrder>(
+      () => orderVertices('x', targetPlacementPositions),
+      [targetPlacementPositions]
+    );
+  const relativeVerticalVerticesOrder = useDerivedValue<RelativeVerticesOrder>(
+    () => orderVertices('y', targetPlacementPositions),
+    [targetPlacementPositions]
   );
 
   const memoSettings = useMemo(
@@ -131,14 +134,6 @@ export default function GraphComponent<
     );
 
     targetPlacementPositionsRef.current = layout.verticesPositions;
-    relativeHorizontalVerticesOrder.value = orderVertices(
-      'x',
-      layout.verticesPositions
-    );
-    relativeVerticalVerticesOrder.value = orderVertices(
-      'y',
-      layout.verticesPositions
-    );
     setTargetPlacementPositions(layout.verticesPositions);
 
     // Animate graph vertices to their target positions only if
@@ -157,9 +152,9 @@ export default function GraphComponent<
     }
   }, [vertices, edges]);
 
-  useEffect(() => {
-    setIsAnimatingForces(forcesApplied);
-  }, [forcesApplied]);
+  // useEffect(() => {
+  //   setIsAnimatingForces(forcesApplied);
+  // }, [forcesApplied]);
 
   const setAnimatedVertexPosition = useCallback(
     (key: string, position: AnimatedVectorCoordinates | null) => {
@@ -178,7 +173,8 @@ export default function GraphComponent<
         updateAnimatedVerticesPositions(
           key,
           position,
-          animatedVerticesPlacementPositionsRef.current
+          animatedVerticesPlacementPositionsRef.current,
+          false
         );
     },
     []
@@ -188,9 +184,9 @@ export default function GraphComponent<
     (
       key: string,
       position: AnimatedVectorCoordinates | null,
-      animatedPositions: Record<string, AnimatedVectorCoordinates>
+      animatedPositions: Record<string, AnimatedVectorCoordinates>,
+      cloneObject = true
     ): Record<string, AnimatedVectorCoordinates> => {
-      // TODO - check if this works
       if (!position) {
         delete animatedPositions[key];
       } else {
@@ -200,7 +196,7 @@ export default function GraphComponent<
           animateVertexToFinalPosition(position, finalPosition);
         }
       }
-      return { ...animatedPositions };
+      return cloneObject ? { ...animatedPositions } : animatedPositions;
     },
     []
   );
@@ -253,28 +249,28 @@ export default function GraphComponent<
   );
 
   // TODO - improve this function and add to forces settings
-  const renderPlacementVertices = useCallback(
-    () =>
-      vertices.map(vertex => {
-        const position =
-          animatedVerticesPlacementPositionsRef.current[vertex.key];
-        if (!position) {
-          return null;
-        }
-        return (
-          <Circle
-            key={`${vertex.key}-placement`}
-            cx={position.x}
-            cy={position.y}
-            r={memoSettings.components.vertex.radius}
-            color='#ff0000'
-            opacity={0.25}
-          />
-        );
-      }),
-    // Render placement vertices after graph vertices were rendered
-    [animatedVerticesPositions]
-  );
+  // const renderPlacementVertices = useCallback(
+  //   () =>
+  //     vertices.map(vertex => {
+  //       const position =
+  //         animatedVerticesPlacementPositionsRef.current[vertex.key];
+  //       if (!position) {
+  //         return null;
+  //       }
+  //       return (
+  //         <Circle
+  //           key={`${vertex.key}-placement`}
+  //           cx={position.x}
+  //           cy={position.y}
+  //           r={memoSettings.components.vertex.radius}
+  //           color='#ff0000'
+  //           opacity={0.25}
+  //         />
+  //       );
+  //     }),
+  //   // Render placement vertices after graph vertices were rendered
+  //   [animatedVerticesPositions]
+  // );
 
   // TODO - remove this after testing
   const { top, bottom, right, left } = boundingRect;
@@ -299,7 +295,7 @@ export default function GraphComponent<
       />
       {renderEdges()}
       {/* TODO = make this render optional (forces settings) */}
-      {forcesApplied && renderPlacementVertices()}
+      {/* {forcesApplied && renderPlacementVertices()} */}
       {renderVertices()}
     </Group>
   );

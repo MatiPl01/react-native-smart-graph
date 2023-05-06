@@ -16,6 +16,7 @@ export const placeVertices = <V, E>(
   vertexRadius: number,
   settings?: PlacementSettings<V, E>
 ): GraphLayout => {
+  'worklet';
   switch (settings?.strategy) {
     case 'circular':
       return placeVerticesCircular(graph, vertexRadius, settings);
@@ -33,6 +34,7 @@ export const orderVertices = (
   axis: 'x' | 'y',
   positions: PlacedVerticesPositions
 ): RelativeVerticesOrder => {
+  'worklet';
   const order: RelativeVerticesOrder = {};
   const sortedKeys = Object.keys(positions).sort((a, b) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

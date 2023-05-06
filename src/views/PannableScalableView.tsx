@@ -142,9 +142,8 @@ export default function PannableScalableView({
     return {
       x: [
         Math.min(
-          -containerLeft.value,
-          -(containerWidth.value + containerLeft.value) * scale +
-            canvasWidth.value
+          -containerLeft.value * scale,
+          canvasWidth.value - containerRight.value * scale
         ),
         Math.max(
           canvasWidth.value - containerRight.value * scale,
@@ -153,9 +152,8 @@ export default function PannableScalableView({
       ],
       y: [
         Math.min(
-          -containerTop.value,
-          -(containerHeight.value + containerTop.value) * scale +
-            canvasHeight.value
+          -containerTop.value * scale,
+          canvasHeight.value - containerBottom.value * scale
         ),
         Math.max(
           canvasHeight.value - containerBottom.value * scale,

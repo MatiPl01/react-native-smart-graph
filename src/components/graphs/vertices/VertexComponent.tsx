@@ -41,18 +41,14 @@ function VertexComponent<V, E>({
   setAnimatedPlacementPosition
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
-  const renderX =
-    containerBoundingRect.left.value + containerBoundingRect.right.value / 2;
-  const renderY =
-    containerBoundingRect.top.value + containerBoundingRect.bottom.value / 2;
 
   // Current vertex position
-  const positionX = useSharedValue(renderX);
-  const positionY = useSharedValue(renderY);
+  const positionX = useSharedValue(0);
+  const positionY = useSharedValue(0);
 
   // Vertex placement position
-  const placementX = useSharedValue(renderX);
-  const placementY = useSharedValue(renderY);
+  const placementX = useSharedValue(0);
+  const placementY = useSharedValue(0);
 
   useEffect(() => {
     // Add vertex to animated positions if it's added to the graph
