@@ -193,62 +193,51 @@ const ADDED_COMPONENTS = [
   }
 ];
 
-const idx = 0;
-const mode = 0;
+let idx = 0;
+let mode = 0;
 
 export default function App() {
-  const graph = DirectedGraph.fromData(
-    ADDED_COMPONENTS.filter(c => !c.from || !c.to),
-    ADDED_COMPONENTS.filter(c => c.from && c.to)
-  );
-
-  useEffect(() => {
-    graph.insertVertex('AA', []);
-    graph.insertVertex('BB', []);
-    graph.insertVertex('CC', []);
-    graph.insertVertex('DD', []);
-    graph.insertVertex('EE', []);
-  }, []);
+  const graph = new DirectedGraph();
 
   // TODO - remove this useEffect after testing
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
-  //       mode = mode === 0 ? 1 : 0;
-  //       idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
-  //     }
-  //     const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
+        mode = mode === 0 ? 1 : 0;
+        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
+      }
+      const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
 
-  //     try {
-  //       if (mode === 0) {
-  //         if (component.from && component.to) {
-  //           graph.insertEdge(
-  //             component.from,
-  //             component.to,
-  //             component.key,
-  //             component.data
-  //           );
-  //         } else {
-  //           graph.insertVertex(component.key, component.data);
-  //         }
-  //         idx++;
-  //       } else {
-  //         if (component.from && component.to) {
-  //           graph.removeEdge(component.key);
-  //         } else {
-  //           graph.removeVertex(component.key);
-  //         }
-  //         idx--;
-  //       }
-  //     } catch (e) {
-  //       clearInterval(interval);
-  //       console.error(e);
-  //       return;
-  //     }
-  //   }, 500);
+      try {
+        if (mode === 0) {
+          if (component.from && component.to) {
+            graph.insertEdge(
+              component.from,
+              component.to,
+              component.key,
+              component.data
+            );
+          } else {
+            graph.insertVertex(component.key, component.data);
+          }
+          idx++;
+        } else {
+          if (component.from && component.to) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
+          idx--;
+        }
+      } catch (e) {
+        clearInterval(interval);
+        console.error(e);
+        return;
+      }
+    }, 500);
 
-  //   return () => clearInterval(interval);
-  // }, []);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <SafeAreaView className='grow'>
