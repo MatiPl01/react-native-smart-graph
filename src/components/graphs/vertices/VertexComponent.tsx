@@ -1,8 +1,6 @@
 import { memo, useCallback, useEffect } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { Vector } from '@shopify/react-native-skia';
-
 import { Vertex } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
