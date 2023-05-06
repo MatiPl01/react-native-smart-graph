@@ -123,10 +123,6 @@ export default function GraphComponent<
     left.value = 0;
     right.value = layout.width;
     bottom.value = layout.height;
-    top.value = 0;
-    left.value = 0;
-    right.value = layout.width;
-    bottom.value = layout.height;
 
     onRendered({
       width: layout.width,
