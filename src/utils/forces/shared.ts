@@ -3,7 +3,7 @@ import 'react-native-reanimated';
 import { Vector, vec } from '@shopify/react-native-skia';
 
 import { GraphConnections } from '@/types/graphs';
-import { AnimatedPositionCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   addVectors,
   addVectorsArray,
@@ -13,9 +13,9 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
-export const applyForces = (
+export const updateVerticesPositions = (
   forces: Record<string, Vector>,
-  verticesPositions: Record<string, AnimatedPositionCoordinates>
+  verticesPositions: Record<string, AnimatedVectorCoordinates>
 ) => {
   'worklet';
   Object.entries(verticesPositions).forEach(([vertexKey, vertexPosition]) => {
@@ -28,7 +28,7 @@ export const applyForces = (
 const calcResultantAttractionForce = (
   vertexKey: string,
   connections: GraphConnections,
-  verticesPositions: Record<string, AnimatedPositionCoordinates>,
+  verticesPositions: Record<string, AnimatedVectorCoordinates>,
   attractionFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
@@ -49,7 +49,7 @@ const calcResultantAttractionForce = (
 
 const calcResultantRepellingForce = (
   vertexKey: string,
-  verticesPositions: Record<string, AnimatedPositionCoordinates>,
+  verticesPositions: Record<string, AnimatedVectorCoordinates>,
   repellingFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
@@ -70,7 +70,7 @@ const calcResultantRepellingForce = (
 
 export const calcForces = (
   connections: GraphConnections,
-  verticesPositions: Record<string, AnimatedPositionCoordinates>,
+  verticesPositions: Record<string, AnimatedVectorCoordinates>,
   attractionFactorGetter: (distance: number) => number,
   repellingFactorGetter: (distance: number) => number
 ): Record<string, Vector> => {

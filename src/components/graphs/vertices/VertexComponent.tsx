@@ -1,49 +1,58 @@
-import { memo, useEffect } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import { Vertex } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
   AnimatedBoundingVertices,
-  AnimatedPositionCoordinates,
-  Position
+  AnimatedVectorCoordinates
 } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
 import { GraphVertexSettings } from '@/types/settings';
 
+type AnimatedPositionSetter = (
+  key: string,
+  position: AnimatedVectorCoordinates | null
+) => void;
+
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
   settings: Required<GraphVertexSettings>;
-  placementPosition: Position;
   containerBoundingRect: AnimatedBoundingRect;
   boundingVertices: AnimatedBoundingVertices;
   renderer: VertexRenderFunction<V>;
-  setAnimatedPosition: (
-    key: string,
-    position: AnimatedPositionCoordinates
-  ) => void;
+  setAnimatedPosition: AnimatedPositionSetter;
+  setAnimatedPlacementPosition: AnimatedPositionSetter;
 };
 
 function VertexComponent<V, E>({
   vertex,
   settings,
-  placementPosition,
   containerBoundingRect,
   boundingVertices,
   renderer,
-  setAnimatedPosition
+  setAnimatedPosition,
+  setAnimatedPlacementPosition
 }: VertexComponentProps<V, E>) {
-  const x = useSharedValue(placementPosition.x);
-  const y = useSharedValue(placementPosition.y);
+  const renderX =
+    containerBoundingRect.left.value + containerBoundingRect.right.value / 2;
+  const renderY =
+    containerBoundingRect.top.value + containerBoundingRect.bottom.value / 2;
+
+  const x = useSharedValue(renderX);
+  const y = useSharedValue(renderY);
+
+  const placementX = useSharedValue(renderX);
+  const placementY = useSharedValue(renderY);
 
   const key = vertex.key;
 
   useEffect(() => {
-    x.value = placementPosition.x;
-    y.value = placementPosition.y;
-
+    // Add vertex to animated positions if it's added to the graph
     setAnimatedPosition(vertex.key, { x, y });
+    setAnimatedPlacementPosition(vertex.key, { x: placementX, y: placementY });
 
+    // Remove vertex from bounding vertices if it's removed from the graph
     return () => {
       if (boundingVertices.left.value === key) {
         boundingVertices.left.value = null;
@@ -57,9 +66,14 @@ function VertexComponent<V, E>({
       if (boundingVertices.bottom.value === key) {
         boundingVertices.bottom.value = null;
       }
-    };
-  }, [vertex.key, placementPosition]);
 
+      // Remove vertex from animated positions if it's removed from the graph
+      setAnimatedPosition(vertex.key, null);
+      setAnimatedPlacementPosition(vertex.key, null);
+    };
+  }, [vertex.key]);
+
+  // Update bounding vertices if vertex x position coordinate was changed
   useAnimatedReaction(
     () => ({
       x1: x.value - settings.radius,
@@ -67,7 +81,7 @@ function VertexComponent<V, E>({
     }),
     ({ x1, x2 }) => {
       if (
-        x1 <= containerBoundingRect.left.value ||
+        x1 < containerBoundingRect.left.value ||
         boundingVertices.left.value === key ||
         !boundingVertices.left.value
       ) {
@@ -75,7 +89,7 @@ function VertexComponent<V, E>({
         boundingVertices.left.value = key;
       }
       if (
-        x2 >= containerBoundingRect.right.value ||
+        x2 > containerBoundingRect.right.value ||
         boundingVertices.right.value === key ||
         !boundingVertices.right.value
       ) {
@@ -86,6 +100,7 @@ function VertexComponent<V, E>({
     [x]
   );
 
+  // Update bounding vertices if vertex y position coordinate was changed
   useAnimatedReaction(
     () => ({
       y1: y.value - settings.radius,
@@ -93,7 +108,7 @@ function VertexComponent<V, E>({
     }),
     ({ y1, y2 }) => {
       if (
-        y1 <= containerBoundingRect.top.value ||
+        y1 < containerBoundingRect.top.value ||
         boundingVertices.top.value === key ||
         !boundingVertices.top.value
       ) {
@@ -101,7 +116,7 @@ function VertexComponent<V, E>({
         boundingVertices.top.value = key;
       }
       if (
-        y2 >= containerBoundingRect.bottom.value ||
+        y2 > containerBoundingRect.bottom.value ||
         boundingVertices.bottom.value === key ||
         !boundingVertices.bottom.value
       ) {
@@ -112,12 +127,19 @@ function VertexComponent<V, E>({
     [y]
   );
 
-  return renderer({
-    key: vertex.key,
-    data: vertex.value,
-    radius: settings.radius,
-    position: { x, y }
-  });
+  const renderVertex = useCallback(
+    () =>
+      renderer({
+        key: vertex.key,
+        data: vertex.value,
+        radius: settings.radius,
+        position: { x, y }
+      }),
+    [vertex]
+  );
+
+  // Render the vertex component
+  return renderVertex();
 }
 
 export default memo(VertexComponent) as <V, E>(

@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
-import { AnimatedPositionCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   DirectedEdgeRenderers,
   UndirectedEdgeRenderers
@@ -23,7 +23,8 @@ const areDirectedEdgeComponentProps = <E, V>(
 };
 
 type SharedEdgeComponentProps = {
-  verticesPositions: Record<string, AnimatedPositionCoordinates>;
+  v1Position: AnimatedVectorCoordinates;
+  v2Position: AnimatedVectorCoordinates;
   vertexRadius: number;
 };
 
@@ -44,24 +45,17 @@ export type EdgeComponentProps<E, V> =
   | DirectedEdgeComponentProps<E, V>;
 
 function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
-  const { edge, verticesPositions, vertexRadius } = props;
-  const [v1, v2] = edge.vertices;
-  const v1Position = verticesPositions[v1.key];
-  const v2Position = verticesPositions[v2.key];
+  const { edge, v1Position, v2Position, vertexRadius } = props;
 
   const p1 = useDerivedValue(
-    () => ({ x: v1Position?.x.value || 0, y: v1Position?.y.value || 0 }),
-    [v1Position?.x, v1Position?.y]
+    () => ({ x: v1Position.x.value || 0, y: v1Position.y.value || 0 }),
+    [v1Position.x, v1Position.y]
   );
 
   const p2 = useDerivedValue(
-    () => ({ x: v2Position?.x.value || 0, y: v2Position?.y.value || 0 }),
-    [v2Position?.x, v2Position?.y]
+    () => ({ x: v2Position.x.value || 0, y: v2Position.y.value || 0 }),
+    [v2Position.x, v2Position.y]
   );
-
-  if (!v1Position || !v2Position) {
-    return null;
-  }
 
   const renderEdge = () =>
     areDirectedEdgeComponentProps(props) ? (
@@ -89,7 +83,8 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         <EdgeLabelComponent
           edge={edge}
           vertexRadius={vertexRadius}
-          verticesPositions={verticesPositions}
+          v1Position={v1Position}
+          v2Position={v2Position}
           renderer={props.renderers.label}
         />
       )}

@@ -1,9 +1,10 @@
+import { Vector } from '@shopify/react-native-skia';
+
 import {
   RANDOM_PLACEMENT_SETTING,
   SHARED_PLACEMENT_SETTINGS
 } from '@/constants/placement';
 import { Graph, Vertex } from '@/types/graphs';
-import { Position } from '@/types/layout';
 import {
   GraphLayout,
   PlacedVerticesPositions,
@@ -56,7 +57,7 @@ const calcVerticesGridPositions = <V, E>(
   const verticesCount = vertices.length;
 
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
-  const availablePositions: Array<Position> = [];
+  const availablePositions: Array<Vector> = [];
 
   for (let i = 0; i < maxPointsInLine; i++) {
     for (let j = 0; j < maxPointsInLine; j++) {
@@ -76,7 +77,7 @@ const calcVerticesGridPositions = <V, E>(
     width: containerSize,
     height: containerSize,
     verticesPositions: vertices.reduce((acc, { key }, idx) => {
-      acc[key] = selectedPositions[idx] as Position;
+      acc[key] = selectedPositions[idx] as Vector;
       return acc;
     }, {} as PlacedVerticesPositions)
   };
@@ -91,7 +92,7 @@ const calcVerticesHoneycombPositions = <V, E>(
   const triangleHeight = (minVertexCenterDistance * Math.sqrt(3)) / 2;
 
   const availablePositionsCount = Math.ceil(verticesCount / density);
-  const availablePositions: Array<Position> = [];
+  const availablePositions: Array<Vector> = [];
 
   let lineNumber = 1;
   let currentVertexIndex = 0;

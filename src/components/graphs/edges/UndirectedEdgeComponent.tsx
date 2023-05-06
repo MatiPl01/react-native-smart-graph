@@ -1,11 +1,11 @@
 import { UndirectedEdge } from '@/types/graphs';
-import { AnimatedPosition } from '@/types/layout';
+import { AnimatedVector } from '@/types/layout';
 import { UndirectedEdgeRenderers } from '@/types/renderer';
 import { UndirectedGraphComponentsSettingsWithDefaults } from '@/types/settings';
 
 type UndirectedEdgeComponentProps<E, V> = {
   edge: UndirectedEdge<E, V>;
-  points: [AnimatedPosition, AnimatedPosition];
+  points: [AnimatedVector, AnimatedVector];
   renderers: UndirectedEdgeRenderers<E>;
   settings?: UndirectedGraphComponentsSettingsWithDefaults['edge'];
 };

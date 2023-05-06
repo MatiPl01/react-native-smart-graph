@@ -1,10 +1,10 @@
 import { EdgeLabelRendererFunction, VertexRenderFunction } from '.';
-import { AnimatedPosition } from '../layout';
+import { AnimatedVector } from '../layout';
 
 export type UndirectedEdgeRendererProps<E> = {
   key: string;
   data: E;
-  points: [AnimatedPosition, AnimatedPosition];
+  points: [AnimatedVector, AnimatedVector];
 };
 
 export type UndirectedEdgeRenderFunction<E> = (

@@ -28,7 +28,6 @@ export interface Graph<V, E> {
   get vertices(): Array<Vertex<V, E>>;
   get edges(): Array<Edge<E, V>>;
   get connections(): GraphConnections;
-  get connections(): GraphConnections;
   isDirected(): boolean;
   addObserver(observer: GraphObserver<V, E>): void;
   removeObserver(observer: GraphObserver<V, E>): void;
