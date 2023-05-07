@@ -1,7 +1,8 @@
-import { Easing, withTiming } from 'react-native-reanimated';
+import { withTiming } from 'react-native-reanimated';
 
 import { Vector } from '@shopify/react-native-skia';
 
+import EASING from '@/constants/easings';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
 export const animateVerticesToFinalPositions = (
@@ -15,11 +16,11 @@ export const animateVerticesToFinalPositions = (
     if (animatedPosition) {
       animatedPosition.x.value = withTiming(finalPosition.x, {
         duration: 300,
-        easing: Easing.bezier(0.175, 0.885, 0.32, 1.275)
+        easing: EASING.bounce
       });
       animatedPosition.y.value = withTiming(finalPosition.y, {
         duration: 300,
-        easing: Easing.bezier(0.175, 0.885, 0.32, 1.275)
+        easing: EASING.bounce
       });
     }
   });
@@ -32,10 +33,10 @@ export const animateVertexToFinalPosition = (
   // TODO - improve this animation (add settings)
   animatedPosition.x.value = withTiming(finalPosition.x, {
     duration: 300,
-    easing: Easing.bezier(0.175, 0.885, 0.32, 1.275)
+    easing: EASING.bounce
   });
   animatedPosition.y.value = withTiming(finalPosition.y, {
     duration: 300,
-    easing: Easing.bezier(0.175, 0.885, 0.32, 1.275)
+    easing: EASING.bounce
   });
 };

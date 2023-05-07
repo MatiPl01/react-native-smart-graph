@@ -1,5 +1,9 @@
 import { memo, useEffect } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
+import {
+  useDerivedValue,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
 import { Vertex } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
@@ -28,10 +32,10 @@ function VertexComponent<V, E>({
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
+  // POSITION
   // Current vertex position
   const positionX = useSharedValue(0);
   const positionY = useSharedValue(0);
-
   // Vertex placement position
   const placementX = useSharedValue(0);
   const placementY = useSharedValue(0);
@@ -43,6 +47,7 @@ function VertexComponent<V, E>({
 
     // Remove vertex from animated positions if it's removed from the graph
     return () => {
+      // Animate vertex scale on unmount
       setAnimatedPosition(key, null);
       setAnimatedPlacementPosition(key, null);
     };
