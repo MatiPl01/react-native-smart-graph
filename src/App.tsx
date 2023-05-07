@@ -41,27 +41,16 @@ export default function App() {
         mode = mode === 0 ? 1 : 0;
         idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
       }
-      const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
-
+      const component = ADDED_COMPONENTS[idx];
+      if (!component) {
+        return;
+      }
       try {
         if (mode === 0) {
-          if (component.from && component.to) {
-            graph.insertEdge(
-              component.from,
-              component.to,
-              component.key,
-              component.data
-            );
-          } else {
-            graph.insertVertex(component.key, component.data);
-          }
+          graph.insertVertex(component.key, component.data);
           idx++;
         } else {
-          if (component.from && component.to) {
-            graph.removeEdge(component.key);
-          } else {
-            graph.removeVertex(component.key);
-          }
+          graph.removeVertex(component.key);
           idx--;
         }
       } catch (e) {

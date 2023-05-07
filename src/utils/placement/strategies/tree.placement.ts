@@ -8,9 +8,9 @@ import {
 } from '@/types/settings';
 import {
   findRootVertex,
-  isGraphATree,
+  isGraphConnected,
   isGraphDirected
-} from '@/utils/graphs/models';
+} from '@/utils/graphs';
 
 // TODO - fix positioning (make relative tot the center pof tbe screen)
 const placeVerticesOnTree = <V, E>(
@@ -24,13 +24,22 @@ const placeVerticesOnTree = <V, E>(
   if (!isGraphDirected(graph)) {
     throw new Error('Cannot place vertices on tree for undirected graph');
   }
-  if (!isGraphATree(graph)) {
-    throw new Error('Cannot place vertices on tree for non-tree graph');
-  }
 
-  const { width, height } = getLayout(vertexRadius, minVertexSpacing, graph);
+  const isConnected = isGraphConnected(graph);
+
+  const { width, height } = getLayout(
+    vertexRadius,
+    minVertexSpacing,
+    graph,
+    isConnected
+  );
 
   const orderGrid = getOrderGrid(graph);
+
+  if (!isConnected) {
+    placeOrphanedVertices(graph, orderGrid);
+  }
+
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
   return {
@@ -56,6 +65,32 @@ const placeVerticesOnTree = <V, E>(
       return acc;
     }, {} as PlacedVerticesPositions)
   };
+};
+
+const placeOrphanedVertices = <V, E>(
+  graph: DirectedGraph<V, E>,
+  orderGrid: Record<string, { row: number; col: number }>
+) => {
+  const orphanedVertices = graph.vertices.filter(
+    v => orderGrid[v.key] === undefined
+  );
+  const orphanRow =
+    Object.values(orderGrid).reduce((acc, { row }) => Math.max(acc, row), 0) +
+    1;
+  const maxTreeWidth = Object.values(orderGrid).reduce(
+    (acc, { col }) => Math.max(acc, col),
+    0
+  );
+
+  orphanedVertices.forEach((vertex, i) => {
+    orderGrid[vertex.key] = {
+      row: orphanRow,
+      col:
+        orphanedVertices.length > 1
+          ? (i / (orphanedVertices.length - 1)) * maxTreeWidth
+          : maxTreeWidth / 2
+    };
+  });
 };
 
 const getOrderGrid = <V, E>(
@@ -107,17 +142,22 @@ const placeVertices = <V, E>(
 const getLayout = <V, E>(
   vertexRadius: number,
   minVertexSpacing: number,
-  graph: DirectedGraph<V, E>
+  graph: DirectedGraph<V, E>,
+  isConnected: boolean
 ) => {
   const rootVertex = findRootVertex(graph) as DirectedGraphVertex<V, E>;
-  const { width: maxTreeWidth, depth: maxTreeDepth } =
-    getMaxTreeDimensions(rootVertex);
+  const dimensions = getMaxTreeDimensions(rootVertex);
+
+  if (!isConnected) {
+    dimensions.depth += 1;
+  }
 
   const padding = 2 * vertexRadius;
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
-  const containerWidth = padding + (maxTreeWidth - 1) * minVertexCenterDistance;
+  const containerWidth =
+    padding + (dimensions.width - 1) * minVertexCenterDistance;
   const containerHeight =
-    padding + (maxTreeDepth - 1) * minVertexCenterDistance;
+    padding + (dimensions.depth - 1) * minVertexCenterDistance;
 
   return {
     width: containerWidth,

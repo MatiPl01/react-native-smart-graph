@@ -10,7 +10,6 @@ import {
 } from '@/types/settings';
 import {
   findRootVertex,
-  isGraphATree,
   isGraphConnected,
   isGraphDirected
 } from '@/utils/graphs';

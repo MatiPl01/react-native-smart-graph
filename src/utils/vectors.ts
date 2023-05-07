@@ -38,7 +38,7 @@ export const animatedVectorCoordinatesToVector = (
         x: vector.x.value,
         y: vector.y.value
       }
-    : vec(0, 0);
+    : { x: 0, y: 0 };
 };
 
 export const animatedVectorToVector = (vector?: AnimatedVector): Vector => {
@@ -63,7 +63,7 @@ export const addVectorsArray = (vectors: Array<Vector>): Vector => {
       x: accVector.x + currentVector.x,
       y: accVector.y + currentVector.y
     }),
-    vec(0, 0)
+    { x: 0, y: 0 }
   );
 };
 

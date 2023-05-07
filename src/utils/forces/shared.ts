@@ -5,7 +5,6 @@ import { Vector, vec } from '@shopify/react-native-skia';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
-  addVectors,
   addVectorsArray,
   animatedVectorCoordinatesToVector,
   calcUnitVector,
@@ -34,7 +33,7 @@ const calcResultantAttractionForce = (
   'worklet';
   const vertexConnections = connections[vertexKey];
   if (!vertexConnections) {
-    return vec(0, 0);
+    return { x: 0, y: 0 };
   }
   return addVectorsArray(
     vertexConnections.map(neighborKey =>
@@ -56,7 +55,7 @@ const calcResultantRepellingForce = (
   return addVectorsArray(
     Object.keys(verticesPositions).map(otherVertexKey => {
       if (otherVertexKey === vertexKey) {
-        return vec(0, 0);
+        return { x: 0, y: 0 };
       }
 
       return calcRepellingForce(
@@ -88,7 +87,7 @@ export const calcForces = (
       verticesPositions,
       repellingFactorGetter
     );
-    forces[vertexKey] = addVectors(attractionForce, repellingForce);
+    forces[vertexKey] = addVectorsArray([attractionForce, repellingForce]);
   }
   return forces;
 };
