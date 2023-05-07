@@ -45,17 +45,3 @@ export const clamp = (value: number, bounds: [number, number]) => {
   'worklet';
   return Math.min(Math.max(value, bounds[0]), bounds[1]);
 };
-
-export const getCenterInParent = (
-  containerDimensions: Dimensions,
-  parentDimensions: Dimensions
-): { x: number; y: number } => {
-  const { width: containerWidth, height: containerHeight } =
-    containerDimensions;
-  const { width: parentWidth, height: parentHeight } = parentDimensions;
-
-  return {
-    x: (parentWidth - containerWidth) / 2,
-    y: (parentHeight - containerHeight) / 2
-  };
-};

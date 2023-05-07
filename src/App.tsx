@@ -193,8 +193,8 @@ const ADDED_COMPONENTS = [
   }
 ].slice(0, 2);
 
-const idx = 0;
-const mode = 0;
+let idx = 0;
+let mode = 0;
 
 export default function App() {
   const graph = DirectedGraph.fromData([
@@ -209,42 +209,42 @@ export default function App() {
     graph.insertEdge('BB', 'CC', 'BBCC', []);
     graph.insertEdge('CC', 'AA', 'CCAA', []);
 
-    // const interval = setInterval(() => {
-    //   if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
-    //     mode = mode === 0 ? 1 : 0;
-    //     idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
-    //   }
-    //   const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
+    const interval = setInterval(() => {
+      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
+        mode = mode === 0 ? 1 : 0;
+        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
+      }
+      const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
 
-    //   try {
-    //     if (mode === 0) {
-    //       if (component.from && component.to) {
-    //         graph.insertEdge(
-    //           component.from,
-    //           component.to,
-    //           component.key,
-    //           component.data
-    //         );
-    //       } else {
-    //         graph.insertVertex(component.key, component.data);
-    //       }
-    //       idx++;
-    //     } else {
-    //       if (component.from && component.to) {
-    //         graph.removeEdge(component.key);
-    //       } else {
-    //         graph.removeVertex(component.key);
-    //       }
-    //       idx--;
-    //     }
-    //   } catch (e) {
-    //     clearInterval(interval);
-    //     console.error(e);
-    //     return;
-    //   }
-    // }, 1000);
+      try {
+        if (mode === 0) {
+          if (component.from && component.to) {
+            graph.insertEdge(
+              component.from,
+              component.to,
+              component.key,
+              component.data
+            );
+          } else {
+            graph.insertVertex(component.key, component.data);
+          }
+          idx++;
+        } else {
+          if (component.from && component.to) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
+          idx--;
+        }
+      } catch (e) {
+        clearInterval(interval);
+        console.error(e);
+        return;
+      }
+    }, 1000);
 
-    // return () => clearInterval(interval);
+    return () => clearInterval(interval);
   }, []);
 
   return (

@@ -22,7 +22,7 @@ import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { fixedWithDecay } from '@/utils/reanimated';
-import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
+import { clamp, getScaleInParent } from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
@@ -95,11 +95,7 @@ export default function PannableScalableView({
             width,
             height
           },
-          containerDimensions: initialContainerDimensionsRef.current,
-          boundingRect: {
-            left: -initialContainerDimensionsRef.current.width,
-            top: -initialContainerDimensionsRef.current.height
-          }
+          containerDimensions: initialContainerDimensionsRef.current
         });
       }
     },
@@ -110,7 +106,6 @@ export default function PannableScalableView({
     (settings?: {
       containerDimensions?: Dimensions;
       canvasDimensions?: Dimensions;
-      boundingRect?: { top?: number; left?: number };
       animated?: boolean;
     }) => {
       const containerDimensions = settings?.containerDimensions ?? {
@@ -123,26 +118,19 @@ export default function PannableScalableView({
         height: canvasHeight.value
       };
 
-      const { scale: renderedScale, dimensions: renderedDimensions } =
-        getScaleInParent(objectFit, containerDimensions, canvasDimensions);
+      const { scale: renderedScale } = getScaleInParent(
+        objectFit,
+        containerDimensions,
+        canvasDimensions
+      );
 
       renderScale.value = renderedScale;
       scaleContentTo(renderedScale, undefined, settings?.animated);
 
-      const parentCenter = getCenterInParent(
-        renderedDimensions,
-        canvasDimensions
-      );
-
       translateContentTo(
         {
-          x:
-            parentCenter.x -
-            (settings?.boundingRect?.left ??
-              containerLeft.value * renderedScale),
-          y:
-            parentCenter.y -
-            (settings?.boundingRect?.top ?? containerTop.value * renderedScale)
+          x: canvasDimensions.width / 2,
+          y: canvasDimensions.height / 2
         },
         undefined,
         settings?.animated
