@@ -21,6 +21,7 @@ export const useGraphObserver = <V, E>(
   };
 
   const isObservingRef = useRef(false);
+  const isFirstRenderRef = useRef(true);
   const observer = useMemo(
     () => ({
       vertexAdded: updateState,
@@ -30,6 +31,14 @@ export const useGraphObserver = <V, E>(
     }),
     []
   );
+
+  if (isFirstRenderRef.current) {
+    graph.addObserver(observer);
+    isFirstRenderRef.current = false;
+    if (active) {
+      isObservingRef.current = true;
+    }
+  }
 
   useEffect(() => {
     setActive(active);
@@ -41,7 +50,7 @@ export const useGraphObserver = <V, E>(
     if (value && !isObservingRef.current) {
       graph.addObserver(observer);
       isObservingRef.current = true;
-    } else if (isObservingRef.current) {
+    } else if (!value && isObservingRef.current) {
       graph.removeObserver(observer);
       isObservingRef.current = false;
     }
