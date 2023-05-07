@@ -14,7 +14,14 @@ export const animateVerticesToFinalPositions = (
   Object.entries(finalPositions).forEach(([key, finalPosition]) => {
     const animatedPosition = animatedPositions[key];
     if (animatedPosition) {
-      animateVertexToFinalPosition(animatedPosition, finalPosition);
+      animatedPosition.x.value = withTiming(finalPosition.x, {
+        duration: 300,
+        easing: EASING.bounce
+      });
+      animatedPosition.y.value = withTiming(finalPosition.y, {
+        duration: 300,
+        easing: EASING.bounce
+      });
     }
   });
 };

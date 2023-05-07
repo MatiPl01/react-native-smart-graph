@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDerivedValue } from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Group, Vertices, vec } from '@shopify/react-native-skia';
 
@@ -18,16 +18,17 @@ export default function DefaultEdgeArrowRenderer({
   const vertices = useDerivedValue(() => {
     const x = size.value / 2 - (1 - animationProgress.value) * size.value;
     const y = 0.25 * size.value * animationProgress.value;
-    return [vec(-size.value / 2, 0), vec(x, -y), vec(x, y)];
-  });
-  const transform = useDerivedValue(
-    () => [
-      { translateX: centerPosition.value.x },
-      { translateY: centerPosition.value.y },
-      { rotate: rotation.value }
-    ],
-    [centerPosition]
-  );
+    return [
+      { x: -size.value / 2, y: 0 },
+      { x, y: -y },
+      { x, y }
+    ];
+  }, []);
+  const transform = useDerivedValue(() => [
+    { translateX: centerPosition.value.x },
+    { translateY: centerPosition.value.y },
+    { rotate: rotation.value }
+  ]);
 
   return (
     <Group transform={transform}>

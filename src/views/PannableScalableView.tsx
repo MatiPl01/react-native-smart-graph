@@ -89,12 +89,19 @@ export default function PannableScalableView({
       canvasWidth.value = width;
       canvasHeight.value = height;
 
-      resetContentPosition({
-        canvasDimensions: {
-          width,
-          height
-        }
-      });
+      if (initialContainerDimensionsRef.current) {
+        resetContentPosition({
+          canvasDimensions: {
+            width,
+            height
+          },
+          containerDimensions: initialContainerDimensionsRef.current,
+          boundingRect: {
+            left: -initialContainerDimensionsRef.current.width,
+            top: -initialContainerDimensionsRef.current.height
+          }
+        });
+      }
     },
     []
   );
@@ -103,17 +110,12 @@ export default function PannableScalableView({
     (settings?: {
       containerDimensions?: Dimensions;
       canvasDimensions?: Dimensions;
+      boundingRect?: { top?: number; left?: number };
       animated?: boolean;
     }) => {
       const containerDimensions = settings?.containerDimensions ?? {
-        width:
-          containerWidth.value ||
-          initialContainerDimensionsRef.current?.width ||
-          0,
-        height:
-          containerHeight.value ||
-          initialContainerDimensionsRef.current?.height ||
-          0
+        width: containerWidth.value || 0,
+        height: containerHeight.value || 0
       };
 
       const canvasDimensions = settings?.canvasDimensions ?? {
@@ -134,8 +136,13 @@ export default function PannableScalableView({
 
       translateContentTo(
         {
-          x: parentCenter.x - containerLeft.value * renderedScale,
-          y: parentCenter.y - containerTop.value * renderedScale
+          x:
+            parentCenter.x -
+            (settings?.boundingRect?.left ??
+              containerLeft.value * renderedScale),
+          y:
+            parentCenter.y -
+            (settings?.boundingRect?.top ?? containerTop.value * renderedScale)
         },
         undefined,
         settings?.animated

@@ -1,4 +1,4 @@
-import { useDerivedValue } from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { Edge } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
@@ -38,9 +38,18 @@ export default function EdgeLabelComponent<E, V>({
     [x1, x2, y1, y2]
   );
 
+  // This is used as a workaround for jumping labels when edge is vertical
+  // and angle changes are small
+  const prevSwapRotation = useSharedValue(0);
   const edgeRotation = useDerivedValue(() => {
     const angle = Math.atan2(y2.value - y1.value, x2.value - x1.value);
-    if (-Math.PI / 2 < angle && angle < Math.PI / 2) {
+
+    if (
+      -Math.PI / 2 < angle &&
+      angle < Math.PI / 2 &&
+      !(Math.abs(angle - prevSwapRotation.value) < Math.PI / 10)
+    ) {
+      prevSwapRotation.value = angle;
       return angle;
     }
     return angle - Math.PI;

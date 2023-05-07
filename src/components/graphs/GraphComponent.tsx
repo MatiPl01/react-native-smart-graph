@@ -12,11 +12,8 @@ import {
   Dimensions
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
-import { GraphSettings } from '@/types/settings';
-import {
-  animateVertexToFinalPosition,
-  animateVerticesToFinalPositions
-} from '@/utils/animations';
+import { GraphLayout, GraphSettings } from '@/types/settings';
+import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
@@ -115,22 +112,27 @@ export default function GraphComponent<
     [graph, renderers]
   );
 
-  useEffect(() => {
-    const layout = placeVertices(
-      graph,
-      memoSettings.components.vertex.radius,
-      memoSettings.placement
-    );
+  const memoGraphLayout = useMemo<GraphLayout>(
+    () =>
+      placeVertices(
+        graph,
+        memoSettings.components.vertex.radius,
+        memoSettings.placement
+      ),
+    [vertices, edges]
+  );
 
+  useEffect(() => {
     // UPDATE VERTICES DATA
     const newVerticesData = { ...verticesData };
     // Add new vertices to vertex data
     vertices.forEach(vertex => {
-      if (!newVerticesData[vertex.key]) {
+      const targetPlacementPosition =
+        memoGraphLayout.verticesPositions[vertex.key];
+      if (!newVerticesData[vertex.key] && targetPlacementPosition) {
         newVerticesData[vertex.key] = {
           vertex,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          targetPlacementPosition: layout.verticesPositions[vertex.key]!,
+          targetPlacementPosition,
           removed: false
         };
       }
@@ -145,21 +147,15 @@ export default function GraphComponent<
     // Set new vertices data
     setVerticesData(newVerticesData);
 
-    // Animate vertices to their target positions
-    animateVerticesToFinalPositions(
-      animatedVerticesPositions,
-      layout.verticesPositions
-    );
-
     // Call onRender callback on the first render
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
       onRender({
-        width: layout.width,
-        height: layout.height
+        width: memoGraphLayout.width,
+        height: memoGraphLayout.height
       });
     }
-  }, [vertices, edges]);
+  }, [memoGraphLayout]);
 
   useEffect(() => {
     // UPDATE EDGES DATA
@@ -213,18 +209,25 @@ export default function GraphComponent<
       boundingRect.bottom.value = bottom + vertexRadius;
       boundingRect.left.value = left - vertexRadius;
       boundingRect.right.value = right + vertexRadius;
-    }
+    },
+    [animatedVerticesPositions]
+  );
+
+  useAnimatedReaction(
+    () => ({}),
+    () => {
+      animateVerticesToFinalPositions(
+        animatedVerticesPositions,
+        memoGraphLayout.verticesPositions
+      );
+    },
+    [animatedVerticesPositions]
   );
 
   const handleVertexRender = useCallback(
     (key: string, position: AnimatedVectorCoordinates) => {
       // Update animated vertices positions
       setAnimatedVerticesPositions(prev => ({ ...prev, [key]: position }));
-      // Animate vertex to its final position
-      const finalPosition = verticesData[key]?.targetPlacementPosition;
-      if (position && finalPosition) {
-        animateVertexToFinalPosition(position, finalPosition);
-      }
     },
     []
   );
@@ -281,7 +284,7 @@ export default function GraphComponent<
     });
     // Update edges if rendered vertices were changed or if edges in the current
     // graph model were changed
-  }, [animatedVerticesPositions, edges]);
+  }, [animatedVerticesPositions, edgesData]);
 
   const renderVertices = useCallback(
     () =>

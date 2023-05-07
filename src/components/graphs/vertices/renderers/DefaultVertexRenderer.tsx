@@ -25,7 +25,7 @@ export default function DefaultVertexRenderer<V>({
   );
   // TODO - fix text position (make centered)
   const textTransform = useDerivedValue(() => [
-    { scale: animationProgress.value },
+    { scale: Math.max(animationProgress.value, 0) },
     { translateX: x.value },
     { translateY: y.value }
   ]);

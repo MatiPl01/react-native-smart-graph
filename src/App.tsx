@@ -4,10 +4,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
+import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
-
-import UndirectedGraphComponent from './components/graphs/UndirectedGraphComponent';
 
 // TODO - remove this after testing
 const ADDED_COMPONENTS = [
@@ -193,13 +191,13 @@ const ADDED_COMPONENTS = [
     to: 'B',
     data: []
   }
-];
+].slice(0, 2);
 
-let idx = 0;
-let mode = 0;
+const idx = 0;
+const mode = 0;
 
 export default function App() {
-  const graph = UndirectedGraph.fromData([
+  const graph = DirectedGraph.fromData([
     { key: 'AA', data: 'AA' },
     { key: 'BB', data: 'BB' },
     { key: 'CC', data: 'CC' }
@@ -211,42 +209,42 @@ export default function App() {
     graph.insertEdge('BB', 'CC', 'BBCC', []);
     graph.insertEdge('CC', 'AA', 'CCAA', []);
 
-    const interval = setInterval(() => {
-      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
-        mode = mode === 0 ? 1 : 0;
-        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
-      }
-      const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
+    // const interval = setInterval(() => {
+    //   if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
+    //     mode = mode === 0 ? 1 : 0;
+    //     idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
+    //   }
+    //   const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
 
-      try {
-        if (mode === 0) {
-          if (component.from && component.to) {
-            graph.insertEdge(
-              component.from,
-              component.to,
-              component.key,
-              component.data
-            );
-          } else {
-            graph.insertVertex(component.key, component.data);
-          }
-          idx++;
-        } else {
-          if (component.from && component.to) {
-            graph.removeEdge(component.key);
-          } else {
-            graph.removeVertex(component.key);
-          }
-          idx--;
-        }
-      } catch (e) {
-        clearInterval(interval);
-        console.error(e);
-        return;
-      }
-    }, 100);
+    //   try {
+    //     if (mode === 0) {
+    //       if (component.from && component.to) {
+    //         graph.insertEdge(
+    //           component.from,
+    //           component.to,
+    //           component.key,
+    //           component.data
+    //         );
+    //       } else {
+    //         graph.insertVertex(component.key, component.data);
+    //       }
+    //       idx++;
+    //     } else {
+    //       if (component.from && component.to) {
+    //         graph.removeEdge(component.key);
+    //       } else {
+    //         graph.removeVertex(component.key);
+    //       }
+    //       idx--;
+    //     }
+    //   } catch (e) {
+    //     clearInterval(interval);
+    //     console.error(e);
+    //     return;
+    //   }
+    // }, 1000);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   return (
@@ -254,7 +252,7 @@ export default function App() {
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
           <PannableScalableView objectFit='contain' controls>
-            <UndirectedGraphComponent
+            <DirectedGraphComponent
               graph={graph}
               settings={{
                 // TODO - fix orbits strategy padding
