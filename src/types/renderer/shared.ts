@@ -7,6 +7,8 @@ export type VertexRendererProps<V> = {
   data: V;
   radius: number;
   position: AnimatedVectorCoordinates;
+  removed: boolean;
+  animationProgress: SharedValue<number>;
 };
 
 export type VertexRenderFunction<V> = (

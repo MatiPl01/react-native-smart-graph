@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
@@ -26,6 +26,8 @@ type SharedEdgeComponentProps = {
   v1Position: AnimatedVectorCoordinates;
   v2Position: AnimatedVectorCoordinates;
   vertexRadius: number;
+  removed: boolean;
+  onRemove: (key: string) => void;
 };
 
 type UndirectedEdgeComponentProps<E, V> = SharedEdgeComponentProps & {
@@ -45,7 +47,8 @@ export type EdgeComponentProps<E, V> =
   | DirectedEdgeComponentProps<E, V>;
 
 function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
-  const { edge, v1Position, v2Position, vertexRadius } = props;
+  const { edge, v1Position, v2Position, vertexRadius, removed, onRemove } =
+    props;
 
   const p1 = useDerivedValue(
     () => ({ x: v1Position.x.value || 0, y: v1Position.y.value || 0 }),
@@ -56,6 +59,14 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
     () => ({ x: v2Position.x.value || 0, y: v2Position.y.value || 0 }),
     [v2Position.x, v2Position.y]
   );
+
+  useEffect(() => {
+    // Call onRemove callback if edge is removed from the graph
+    if (removed) {
+      // TODO - add some animation before removing
+      onRemove(edge.key);
+    }
+  }, [removed]);
 
   const renderEdge = () =>
     areDirectedEdgeComponentProps(props) ? (
