@@ -1,7 +1,7 @@
 // TODO - improve docs later
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { DirectedGraph } from '@/models/graphs';
-import { DirectedGraphVertex, Graph, Vertex } from '@/types/graphs';
+import { DirectedGraphVertex } from '@/types/graphs';
 import {
   GetLayerRadiusFunction,
   GraphLayout,
@@ -11,8 +11,9 @@ import {
 } from '@/types/settings';
 import {
   findRootVertex,
+  getBallancingOrphanedNeighbours,
+  getOrphanedVertices,
   isGraphAcyclic,
-  isGraphConnected,
   isGraphDirected
 } from '@/utils/graphs';
 
@@ -54,7 +55,7 @@ const placeVerticesOnOrbits = <V, E>(
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
-  const orphanedNeighbours = getOrphanedNeighbours(
+  const orphanedNeighbours = getBallancingOrphanedNeighbours(
     rootVertex,
     orphanedVertices
   );
@@ -92,47 +93,6 @@ const placeVerticesOnOrbits = <V, E>(
       {} as PlacedVerticesPositions
     )
   };
-};
-
-const getOrphanedVertices = <V, E>(vertices: DirectedGraphVertex<V, E>[]) =>
-  vertices.filter(vertex => vertex.inDegree === 0 && vertex.outDegree === 0);
-
-const getOrphanedNeighbours = <V, E>(
-  rootVertex: DirectedGraphVertex<V, E>,
-  orphanedVertices: DirectedGraphVertex<V, E>[]
-): Record<string, Array<DirectedGraphVertex<V, E>>> => {
-  let layerVertices = [rootVertex];
-  let layer = 0;
-  const layerMaxChildrenCount = {} as Record<number, number>;
-  const orphanedNeighbours = {} as Record<
-    string,
-    Array<DirectedGraphVertex<V, E>>
-  >;
-
-  while (orphanedVertices.length > 0) {
-    const newLayerVertices = layerVertices.flatMap(vertex => vertex.neighbors);
-    layerMaxChildrenCount[layer] = layerVertices.reduce(
-      (acc, vertex) => Math.max(acc, vertex.neighbors.length),
-      2
-    );
-
-    for (const vertex of layerVertices) {
-      if (vertex.neighbors.length < layerMaxChildrenCount[layer]!) {
-        const chosenVertices = orphanedVertices.splice(
-          0,
-          layerMaxChildrenCount[layer]! - vertex.neighbors.length
-        );
-
-        orphanedNeighbours[vertex.key] = chosenVertices;
-        newLayerVertices.push(...chosenVertices);
-      }
-    }
-
-    layerVertices = newLayerVertices;
-    layer++;
-  }
-
-  return orphanedNeighbours;
 };
 
 const placeChildrenOnRingSection = <V, E>(

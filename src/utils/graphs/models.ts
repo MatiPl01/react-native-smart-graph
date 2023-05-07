@@ -1,6 +1,7 @@
 import { DirectedGraph } from '@/models/graphs';
 import {
   DirectedEdge,
+  DirectedGraphVertex,
   Edge,
   Graph,
   UndirectedEdge,
@@ -82,3 +83,47 @@ export const isEdgeDirected = <V, E>(
 export const isEdgeUndirected = <V, E>(
   edge: Edge<E, V>
 ): edge is UndirectedEdge<E, V> => !isEdgeDirected(edge);
+
+export const getOrphanedVertices = <V, E>(
+  vertices: DirectedGraphVertex<V, E>[]
+) => vertices.filter(vertex => vertex.inDegree === 0 && vertex.outDegree === 0);
+
+export const getBallancingOrphanedNeighbours = <V, E>(
+  rootVertex: DirectedGraphVertex<V, E>,
+  orphanedVertices: DirectedGraphVertex<V, E>[]
+): Record<string, Array<DirectedGraphVertex<V, E>>> => {
+  let layerVertices = [rootVertex];
+  let layer = 0;
+  const layerMaxChildrenCount = {} as Record<number, number>;
+  const orphanedNeighbours = {} as Record<
+    string,
+    Array<DirectedGraphVertex<V, E>>
+  >;
+
+  while (orphanedVertices.length > 0) {
+    const newLayerVertices = layerVertices.flatMap(vertex => vertex.neighbors);
+    layerMaxChildrenCount[layer] = layerVertices.reduce(
+      (acc, vertex) => Math.max(acc, vertex.neighbors.length),
+      2
+    );
+
+    for (const vertex of layerVertices) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if (vertex.neighbors.length < layerMaxChildrenCount[layer]!) {
+        const chosenVertices = orphanedVertices.splice(
+          0,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          layerMaxChildrenCount[layer]! - vertex.neighbors.length
+        );
+
+        orphanedNeighbours[vertex.key] = chosenVertices;
+        newLayerVertices.push(...chosenVertices);
+      }
+    }
+
+    layerVertices = newLayerVertices;
+    layer++;
+  }
+
+  return orphanedNeighbours;
+};

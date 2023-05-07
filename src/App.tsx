@@ -10,17 +10,12 @@ import PannableScalableView from '@/views/PannableScalableView';
 import GraphEventsProvider from './context/graphEvents';
 
 // TODO - remove this after testing
-const ADDED_COMPONENTS = [
-  { from: 'V1', to: 'V2', key: 'E1', data: 'E1' },
-  { from: 'V1', to: 'V2', key: 'E2', data: 'E2' },
-  { from: 'V2', to: 'V1', key: 'E3', data: 'E3' },
-  { key: 'V3', data: 'V3' },
-  { from: 'V2', to: 'V1', key: 'E4', data: 'E4' },
-  { from: 'V2', to: 'V3', key: 'E5', data: 'E5' },
-  { from: 'V3', to: 'V1', key: 'E6', data: 'E6' },
-  { from: 'V1', to: 'V2', key: 'E8', data: 'E8' },
-  { from: 'V3', to: 'V2', key: 'E7', data: 'E7' }
-];
+const ADDED_COMPONENTS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
+  // .slice(0, 5)
+  .map(key => ({
+    key,
+    data: key
+  }));
 
 let idx = 0;
 let mode = 0;
