@@ -44,8 +44,14 @@ const placeVerticesOnTree = <V, E>(
       const gridPosition = orderGrid[key]!;
 
       acc[key] = {
-        x: vertexRadius + gridPosition.col * minVertexCenterDistance,
-        y: vertexRadius + gridPosition.row * minVertexCenterDistance
+        x:
+          -(width / 2) +
+          vertexRadius +
+          gridPosition.col * minVertexCenterDistance,
+        y:
+          -(height / 2) +
+          vertexRadius +
+          gridPosition.row * minVertexCenterDistance
       };
       return acc;
     }, {} as PlacedVerticesPositions)

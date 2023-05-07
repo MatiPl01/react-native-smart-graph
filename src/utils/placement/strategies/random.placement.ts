@@ -59,8 +59,9 @@ const calcVerticesGridPositions = <V, E>(
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
   const availablePositions: Array<Vector> = [];
 
-  for (let i = 0; i < maxPointsInLine; i++) {
-    for (let j = 0; j < maxPointsInLine; j++) {
+  const shiftedPositionBoundary = (maxPointsInLine - 1) / 2;
+  for (let i = -shiftedPositionBoundary; i <= shiftedPositionBoundary; i++) {
+    for (let j = -shiftedPositionBoundary; j <= shiftedPositionBoundary; j++) {
       availablePositions.push({
         x: vertexRadius + i * (2 * vertexRadius + minVertexSpacing),
         y: vertexRadius + j * (2 * vertexRadius + minVertexSpacing)
@@ -132,9 +133,14 @@ const calcVerticesTrianglesPositions = <V, E>(
     availablePositions.push({ x, y });
   }
 
+  const shiftedAvailablePositions = availablePositions.map(({ x, y }) => ({
+    x: x - maxX / 2,
+    y: y - maxY / 2
+  }));
+
   const verticesAndPositions = zipArrays(
     vertices,
-    random.sample(availablePositions, verticesCount)
+    random.sample(shiftedAvailablePositions, verticesCount)
   );
 
   return {

@@ -10,7 +10,9 @@ import {
 export const findRootVertex = <V, E>(
   graph: DirectedGraph<V, E>
 ): Vertex<V, E> | undefined => {
-  const rootVertices = graph.vertices.filter(v => v.inDegree === 0);
+  const rootVertices = graph.vertices.filter(
+    v => v.inDegree === 0 && v.outDegree > 0
+  );
 
   if (rootVertices.length > 1) {
     throw new Error('Multiple root vertices found');

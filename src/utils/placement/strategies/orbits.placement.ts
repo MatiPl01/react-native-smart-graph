@@ -11,8 +11,9 @@ import {
 import {
   findRootVertex,
   isGraphATree,
+  isGraphConnected,
   isGraphDirected
-} from '@/utils/graphs/models';
+} from '@/utils/graphs';
 
 /**
  * The graph must be a tree!
@@ -32,9 +33,8 @@ const placeVerticesOnOrbits = <V, E>(
   if (!isGraphDirected(graph)) {
     throw new Error('Cannot place vertices on rings for undirected graph');
   }
-  if (!isGraphATree(graph)) {
-    throw new Error('Cannot place vertices on rings for non-tree graph');
-  }
+
+  const isConnected = isGraphConnected(graph);
 
   const {
     minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
@@ -60,6 +60,15 @@ const placeVerticesOnOrbits = <V, E>(
     verticesLayerPositions
   );
 
+  if (!isConnected) {
+    placeOrphanedVertices(
+      graph.vertices,
+      minVertexCenterDistance,
+      minLayersRadius,
+      verticesLayerPositions
+    );
+  }
+
   const { width, height, layersRadius } = getLayout(
     minLayersRadius,
     minVertexSpacing,
@@ -82,6 +91,31 @@ const placeVerticesOnOrbits = <V, E>(
       {} as PlacedVerticesPositions
     )
   };
+};
+
+const placeOrphanedVertices = <V, E>(
+  vertices: Vertex<V, E>[],
+  minVertexCenterDistance: number,
+  minLayersRadius: Record<string, number>,
+  verticesLayerPositions: Record<string, { layer: number; angle: number }>
+) => {
+  const maxLayer = Object.values(verticesLayerPositions).reduce(
+    (acc, { layer }) => Math.max(acc, layer),
+    0
+  );
+
+  const orphanedVertices = vertices.filter(
+    vertex => !verticesLayerPositions[vertex.key]
+  );
+
+  orphanedVertices.forEach((vertex, i) => {
+    const layer = maxLayer + 1;
+    const angle = (2 * Math.PI * i) / orphanedVertices.length;
+
+    minLayersRadius[layer] = minVertexCenterDistance;
+
+    verticesLayerPositions[vertex.key] = { layer, angle };
+  });
 };
 
 const placeChildrenOnRingSection = <V, E>(
