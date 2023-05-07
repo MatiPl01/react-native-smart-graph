@@ -11,7 +11,7 @@ export type DirectedEdgeRendererProps<E> = {
 };
 
 export type EdgeArrowRendererProps = {
-  size: number;
+  size: SharedValue<number>;
   vertexPosition: AnimatedVector;
   tipPosition: AnimatedVector;
   centerPosition: AnimatedVector;

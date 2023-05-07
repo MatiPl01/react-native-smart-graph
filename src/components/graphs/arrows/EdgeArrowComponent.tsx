@@ -29,28 +29,29 @@ export default function EdgeArrowComponent({
     ...ARROW_COMPONENT_SETTINGS,
     ...userSettings
   };
-  const arrowSize = Math.min(
-    2 * vertexRadius * settings.scale,
-    0.35 * distanceBetweenVectors(from.value, to.value)
+  const arrowSize = useDerivedValue(() =>
+    Math.min(
+      2 * vertexRadius * settings.scale,
+      0.35 * distanceBetweenVectors(from.value, to.value)
+    )
   );
 
-  const dirVec = useDerivedValue(
-    () => calcUnitVector(to.value, from.value),
-    [to, from]
-  );
+  const dirVec = useDerivedValue(() => calcUnitVector(to.value, from.value));
 
-  const tipPosition = useDerivedValue(
-    () => translateAlongVector(to.value, dirVec.value, vertexRadius),
-    [to, dirVec]
+  const tipPosition = useDerivedValue(() =>
+    translateAlongVector(to.value, dirVec.value, vertexRadius)
   );
 
   const centerPosition = useDerivedValue(() => {
-    return translateAlongVector(tipPosition.value, dirVec.value, arrowSize / 2);
-  }, [tipPosition, dirVec]);
+    return translateAlongVector(
+      tipPosition.value,
+      dirVec.value,
+      arrowSize.value / 2
+    );
+  });
 
-  const rotation = useDerivedValue(
-    () => Math.atan2(dirVec.value.y, dirVec.value.x),
-    [dirVec]
+  const rotation = useDerivedValue(() =>
+    Math.atan2(dirVec.value.y, dirVec.value.x)
   );
 
   return renderer({
