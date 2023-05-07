@@ -11,11 +11,11 @@ export default function DefaultEdgeArrowRenderer({
   centerPosition,
   rotation
 }: EdgeArrowRendererProps) {
-  const vertices = [
-    vec(-size / 2, 0),
-    vec(size / 2, -0.25 * size),
-    vec(size / 2, 0.25 * size)
-  ];
+  const vertices = useDerivedValue(() => [
+    vec(-size.value / 2, 0),
+    vec(size.value / 2, -0.25 * size.value),
+    vec(size.value / 2, 0.25 * size.value)
+  ]);
 
   const color = DEFAULT_EDGE_RENDERER_SETTINGS.color;
   const colors = [color, color, color];

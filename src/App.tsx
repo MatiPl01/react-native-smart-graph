@@ -205,6 +205,10 @@ export default function App() {
 
   // TODO - remove this useEffect after testing
   useEffect(() => {
+    graph.insertEdge('AA', 'BB', 'AABB', []);
+    graph.insertEdge('BB', 'CC', 'BBCC', []);
+    graph.insertEdge('CC', 'AA', 'CCAA', []);
+
     const interval = setInterval(() => {
       if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
         mode = mode === 0 ? 1 : 0;
