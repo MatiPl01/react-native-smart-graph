@@ -8,7 +8,8 @@ import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
-  AnimatedVectorCoordinates
+  AnimatedVectorCoordinates,
+  Dimensions
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings } from '@/types/settings';
@@ -26,6 +27,7 @@ import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
 
 export type GraphComponentPrivateProps = {
   boundingRect: AnimatedBoundingRect;
+  onRender: (containerDimensions: Dimensions) => void;
 };
 
 type GraphComponentProps<
@@ -49,9 +51,11 @@ export default function GraphComponent<
   graph,
   settings,
   renderers,
-  boundingRect
+  boundingRect,
+  onRender
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
   const [{ vertices, edges }] = useGraphObserver(graph);
+  const isFirstRenderRef = useRef(true);
 
   // VERTICES POSITIONS
   // Current positions of vertices in the graph model
@@ -112,6 +116,15 @@ export default function GraphComponent<
 
     targetPlacementPositionsRef.current = layout.verticesPositions;
     setTargetPlacementPositions(layout.verticesPositions);
+
+    // Call onRender callback on the first render
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      onRender({
+        width: layout.width,
+        height: layout.height
+      });
+    }
   }, [vertices, edges]);
 
   useAnimatedReaction(

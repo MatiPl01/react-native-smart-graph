@@ -197,7 +197,11 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = new DirectedGraph();
+  const graph = DirectedGraph.fromData([
+    { key: 'AA', data: 'AA' },
+    { key: 'BB', data: 'BB' },
+    { key: 'CC', data: 'CC' }
+  ]);
 
   // TODO - remove this useEffect after testing
   useEffect(() => {
@@ -243,16 +247,14 @@ export default function App() {
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <PannableScalableView objectFit='contain' maxScale={0.1} controls>
+          <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               graph={graph}
               settings={{
                 // TODO - fix orbits strategy padding
                 placement: {
-                  strategy: 'random',
-                  layoutType: 'honeycomb',
-                  minVertexSpacing: 100,
-                  density: 0.1
+                  strategy: 'circular',
+                  minVertexSpacing: 100
                 }
               }}
               renderers={{

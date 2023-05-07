@@ -27,3 +27,12 @@ export type AnimatedBoundingRect = {
   right: SharedValue<number>;
   left: SharedValue<number>;
 };
+
+export type RelativeVerticesOrder = Record<
+  string,
+  {
+    prev?: string;
+    next?: string;
+    position: number;
+  }
+>;
