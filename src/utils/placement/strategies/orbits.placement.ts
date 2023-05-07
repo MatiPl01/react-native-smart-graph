@@ -1,6 +1,7 @@
 // TODO - improve docs later
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { Graph, Vertex } from '@/types/graphs';
+import { DirectedGraph } from '@/models/graphs';
+import { DirectedGraphVertex, Graph, Vertex } from '@/types/graphs';
 import {
   GetLayerRadiusFunction,
   GraphLayout,
@@ -10,6 +11,7 @@ import {
 } from '@/types/settings';
 import {
   findRootVertex,
+  isGraphAcyclic,
   isGraphConnected,
   isGraphDirected
 } from '@/utils/graphs';
@@ -24,7 +26,7 @@ import {
  * @returns
  */
 const placeVerticesOnOrbits = <V, E>(
-  graph: Graph<V, E>,
+  graph: DirectedGraph<V, E>,
   vertexRadius: number,
   settings: OrbitsPlacementSettings
 ): GraphLayout => {
@@ -33,7 +35,9 @@ const placeVerticesOnOrbits = <V, E>(
     throw new Error('Cannot place vertices on rings for undirected graph');
   }
 
-  const isConnected = isGraphConnected(graph);
+  if (!isGraphAcyclic(graph)) {
+    throw new Error('Cannot place vertices on rings for cyclic graph');
+  }
 
   const {
     minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
@@ -46,8 +50,14 @@ const placeVerticesOnOrbits = <V, E>(
   > = {};
   const minLayersRadius: Record<string, number> = {};
 
-  const rootVertex = findRootVertex(graph) as Vertex<V, E>;
+  const rootVertex = findRootVertex(graph) as DirectedGraphVertex<V, E>;
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
+
+  const orphanedVertices = getOrphanedVertices(graph.vertices);
+  const orphanedNeighbours = getOrphanedNeighbours(
+    rootVertex,
+    orphanedVertices
+  );
 
   placeChildrenOnRingSection(
     rootVertex,
@@ -56,17 +66,9 @@ const placeVerticesOnOrbits = <V, E>(
     2 * Math.PI,
     minVertexCenterDistance,
     minLayersRadius,
-    verticesLayerPositions
+    verticesLayerPositions,
+    orphanedNeighbours
   );
-
-  if (!isConnected) {
-    placeOrphanedVertices(
-      graph.vertices,
-      minVertexCenterDistance,
-      minLayersRadius,
-      verticesLayerPositions
-    );
-  }
 
   const { width, height, layersRadius } = getLayout(
     minLayersRadius,
@@ -92,39 +94,56 @@ const placeVerticesOnOrbits = <V, E>(
   };
 };
 
-const placeOrphanedVertices = <V, E>(
-  vertices: Vertex<V, E>[],
-  minVertexCenterDistance: number,
-  minLayersRadius: Record<string, number>,
-  verticesLayerPositions: Record<string, { layer: number; angle: number }>
-) => {
-  const maxLayer = Object.values(verticesLayerPositions).reduce(
-    (acc, { layer }) => Math.max(acc, layer),
-    0
-  );
+const getOrphanedVertices = <V, E>(vertices: DirectedGraphVertex<V, E>[]) =>
+  vertices.filter(vertex => vertex.inDegree === 0 && vertex.outDegree === 0);
 
-  const orphanedVertices = vertices.filter(
-    vertex => !verticesLayerPositions[vertex.key]
-  );
+const getOrphanedNeighbours = <V, E>(
+  rootVertex: DirectedGraphVertex<V, E>,
+  orphanedVertices: DirectedGraphVertex<V, E>[]
+): Record<string, Array<DirectedGraphVertex<V, E>>> => {
+  let layerVertices = [rootVertex];
+  let layer = 0;
+  const layerMaxChildrenCount = {} as Record<number, number>;
+  const orphanedNeighbours = {} as Record<
+    string,
+    Array<DirectedGraphVertex<V, E>>
+  >;
 
-  orphanedVertices.forEach((vertex, i) => {
-    const layer = maxLayer + 1;
-    const angle = (2 * Math.PI * i) / orphanedVertices.length;
+  while (orphanedVertices.length > 0) {
+    const newLayerVertices = layerVertices.flatMap(vertex => vertex.neighbors);
+    layerMaxChildrenCount[layer] = layerVertices.reduce(
+      (acc, vertex) => Math.max(acc, vertex.neighbors.length),
+      2
+    );
 
-    minLayersRadius[layer] = minVertexCenterDistance;
+    for (const vertex of layerVertices) {
+      if (vertex.neighbors.length < layerMaxChildrenCount[layer]!) {
+        const chosenVertices = orphanedVertices.splice(
+          0,
+          layerMaxChildrenCount[layer]! - vertex.neighbors.length
+        );
 
-    verticesLayerPositions[vertex.key] = { layer, angle };
-  });
+        orphanedNeighbours[vertex.key] = chosenVertices;
+        newLayerVertices.push(...chosenVertices);
+      }
+    }
+
+    layerVertices = newLayerVertices;
+    layer++;
+  }
+
+  return orphanedNeighbours;
 };
 
 const placeChildrenOnRingSection = <V, E>(
-  parent: Vertex<V, E>,
+  parent: DirectedGraphVertex<V, E>,
   parentLayer: number,
   parentAngle: number,
   sectionAngle: number,
   minVertexCenterDistance: number,
   minLayersRadius: Record<string, number>,
-  verticesLayerPositions: Record<string, { layer: number; angle: number }>
+  verticesLayerPositions: Record<string, { layer: number; angle: number }>,
+  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>
 ) => {
   if (parentLayer > 0) {
     const denominator = 2 * Math.sin(sectionAngle / 2);
@@ -147,17 +166,22 @@ const placeChildrenOnRingSection = <V, E>(
     angle: parentAngle
   };
 
-  parent.neighbors.forEach((child, i) => {
+  const parentNeighbours = parent.neighbors.concat(
+    orphanedNeighbours[parent.key] ?? []
+  );
+
+  parentNeighbours.forEach((child, i) => {
     placeChildrenOnRingSection(
       child,
       parentLayer + 1,
       parentAngle -
         sectionAngle / 2 +
-        (sectionAngle / parent.neighbors.length) * (i + 0.5),
-      sectionAngle / parent.neighbors.length,
+        (sectionAngle / parentNeighbours.length) * (i + 0.5),
+      sectionAngle / parentNeighbours.length,
       minVertexCenterDistance,
       minLayersRadius,
-      verticesLayerPositions
+      verticesLayerPositions,
+      orphanedNeighbours
     );
   });
 };
