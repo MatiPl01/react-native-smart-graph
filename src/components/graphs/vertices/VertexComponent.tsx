@@ -40,6 +40,8 @@ function VertexComponent<V, E>({
     onRender(key, { x: positionX, y: positionY });
   }, [key]);
 
+  const mode = useSharedValue(-1);
+
   useEffect(() => {
     // ANimate vertex on mount
     if (!removed) {

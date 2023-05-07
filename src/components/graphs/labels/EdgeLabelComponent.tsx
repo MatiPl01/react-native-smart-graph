@@ -38,21 +38,44 @@ export default function EdgeLabelComponent<E, V>({
     [x1, x2, y1, y2]
   );
 
-  // This is used as a workaround for jumping labels when edge is vertical
-  // and angle changes are small
-  const prevSwapRotation = useSharedValue(0);
+  // Block swapping after making a swap
+  // 0 - not blocked
+  // 1 - blocked for top swap
+  // -1 - blocked for bottom swap
+  const blockedAngle = Math.PI / 36; // 5 degrees in one direction (10 degrees total)
+  const swapBlocked = useSharedValue(0);
+  const isSwapped = useSharedValue(false);
   const edgeRotation = useDerivedValue(() => {
     const angle = Math.atan2(y2.value - y1.value, x2.value - x1.value);
 
-    if (
-      -Math.PI / 2 < angle &&
-      angle < Math.PI / 2 &&
-      !(Math.abs(angle - prevSwapRotation.value) < Math.PI / 10)
+    if (!swapBlocked.value) {
+      if (angle < -Math.PI / 2 || Math.PI / 2 < angle) {
+        // Block swapping after making a swap
+        if (!isSwapped.value) {
+          swapBlocked.value = angle < 0 ? 1 : -1;
+          isSwapped.value = true;
+        }
+      } else {
+        // Block swapping after making a swap
+        // eslint-disable-next-line no-lonely-if
+        if (isSwapped.value) {
+          swapBlocked.value = angle < 0 ? 1 : -1;
+          isSwapped.value = false;
+        }
+      }
+      // Unblock swapping if angle is out of blocking range
+    } else if (
+      (swapBlocked.value === 1 &&
+        Math.abs(angle + Math.PI / 2) > blockedAngle) ||
+      (swapBlocked.value === -1 && Math.abs(angle - Math.PI / 2) > blockedAngle)
     ) {
-      prevSwapRotation.value = angle;
-      return angle;
+      swapBlocked.value = 0;
     }
-    return angle - Math.PI;
+
+    if (isSwapped.value) {
+      return angle - Math.PI;
+    }
+    return angle;
   }, [x1, x2, y1, y2]);
 
   return renderer({

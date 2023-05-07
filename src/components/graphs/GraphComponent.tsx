@@ -209,8 +209,7 @@ export default function GraphComponent<
       boundingRect.bottom.value = bottom + vertexRadius;
       boundingRect.left.value = left - vertexRadius;
       boundingRect.right.value = right + vertexRadius;
-    },
-    [animatedVerticesPositions]
+    }
   );
 
   useAnimatedReaction(
@@ -226,8 +225,12 @@ export default function GraphComponent<
 
   const handleVertexRender = useCallback(
     (key: string, position: AnimatedVectorCoordinates) => {
-      // Update animated vertices positions
-      setAnimatedVerticesPositions(prev => ({ ...prev, [key]: position }));
+      // This setTimeout is a tricky workaround to prevent setAnimatedVerticesPositions being called
+      // at the same time as the useAnimatedReaction callback
+      setTimeout(() => {
+        // Update animated vertices positions
+        setAnimatedVerticesPositions(prev => ({ ...prev, [key]: position }));
+      }, 0);
     },
     []
   );
