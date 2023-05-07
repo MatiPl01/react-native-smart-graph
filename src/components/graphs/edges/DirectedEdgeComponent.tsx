@@ -1,11 +1,11 @@
 import { DirectedEdge } from '@/types/graphs';
 import { AnimatedVector } from '@/types/layout';
-import { DirectedEdgeRenderers } from '@/types/renderer';
+import { DirectedEdgeRenderers, SharedRenderersProps } from '@/types/renderer';
 import { DirectedGraphComponentsSettings } from '@/types/settings';
 
 import EdgeArrowComponent from '../arrows/EdgeArrowComponent';
 
-type DirectedEdgeComponentProps<E, V> = {
+type DirectedEdgeComponentProps<E, V> = SharedRenderersProps & {
   edge: DirectedEdge<E, V>;
   from: AnimatedVector;
   to: AnimatedVector;
@@ -16,26 +16,23 @@ type DirectedEdgeComponentProps<E, V> = {
 
 export default function DirectedEdgeComponent<E, V>({
   edge,
-  from,
-  to,
   vertexRadius,
   renderers: { edge: edgeRenderer, arrow: edgeArrowRenderer },
-  settings
+  settings,
+  ...sharedProps
 }: DirectedEdgeComponentProps<E, V>) {
   return (
     <>
       {edgeRenderer({
         key: edge.key,
         data: edge.value,
-        from,
-        to
+        ...sharedProps
       })}
       <EdgeArrowComponent
-        from={from}
-        to={to}
         vertexRadius={vertexRadius}
         renderer={edgeArrowRenderer}
         settings={settings?.arrow}
+        {...sharedProps}
       />
     </>
   );

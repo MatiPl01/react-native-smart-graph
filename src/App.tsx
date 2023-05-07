@@ -4,8 +4,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { DirectedGraph } from '@/models/graphs';
+import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
+
+import UndirectedGraphComponent from './components/graphs/UndirectedGraphComponent';
 
 // TODO - remove this after testing
 const ADDED_COMPONENTS = [
@@ -197,7 +199,7 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = DirectedGraph.fromData([
+  const graph = UndirectedGraph.fromData([
     { key: 'AA', data: 'AA' },
     { key: 'BB', data: 'BB' },
     { key: 'CC', data: 'CC' }
@@ -252,7 +254,7 @@ export default function App() {
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
           <PannableScalableView objectFit='contain' controls>
-            <DirectedGraphComponent
+            <UndirectedGraphComponent
               graph={graph}
               settings={{
                 // TODO - fix orbits strategy padding

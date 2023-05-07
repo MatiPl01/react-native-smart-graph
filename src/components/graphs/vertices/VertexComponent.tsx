@@ -38,17 +38,20 @@ function VertexComponent<V, E>({
   useEffect(() => {
     // Call onRender callback on mount
     onRender(key, { x: positionX, y: positionY });
-    // Animate vertex on mount
-    animationProgress.value = withTiming(1, {
-      // TODO - make this a setting
-      duration: 500,
-      easing: EASING.bounce
-    });
   }, [key]);
 
   useEffect(() => {
+    // ANimate vertex on mount
+    if (!removed) {
+      // Animate vertex on mount
+      animationProgress.value = withTiming(1, {
+        // TODO - make this a setting
+        duration: 500,
+        easing: EASING.bounce
+      });
+    }
     // Animate vertex removal
-    if (removed) {
+    else {
       animationProgress.value = withTiming(
         0,
         {

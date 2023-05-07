@@ -1,10 +1,4 @@
-import { useEffect } from 'react';
-import {
-  Easing,
-  useDerivedValue,
-  useSharedValue,
-  withTiming
-} from 'react-native-reanimated';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import { Group, Text, useFont } from '@shopify/react-native-skia';
 
@@ -16,12 +10,12 @@ export default function DefaultEdgeLabelRenderer<E>({
   key,
   vertexRadius,
   edgeCenterPosition,
-  edgeRotation
+  edgeRotation,
+  animationProgress
 }: EdgeLabelRendererProps<E>) {
   const fontSize =
     vertexRadius * DEFAULT_LABEL_RENDERER_SETTINGS.font.sizeRatio;
   const font = useFont(FONTS.rubikFont, fontSize);
-  const scale = useSharedValue(0);
 
   const wrapperTransform = useDerivedValue(() => [
     { translateX: edgeCenterPosition.value.x },
@@ -29,18 +23,10 @@ export default function DefaultEdgeLabelRenderer<E>({
     { rotate: edgeRotation.value }
   ]);
   const labelTransform = useDerivedValue(() => [
-    { translateX: ((-key.length * fontSize) / 4) * scale.value },
-    { translateY: (fontSize / 4) * scale.value },
-    { scale: scale.value }
+    { translateX: ((-key.length * fontSize) / 4) * animationProgress.value },
+    { translateY: (fontSize / 4) * animationProgress.value },
+    { scale: animationProgress.value }
   ]);
-
-  useEffect(() => {
-    // Animate label on mount
-    scale.value = withTiming(1, {
-      duration: 500,
-      easing: Easing.bounce
-    });
-  }, []);
 
   return (
     font && (

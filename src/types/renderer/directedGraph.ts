@@ -1,16 +1,20 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { EdgeLabelRendererFunction, VertexRenderFunction } from '.';
+import {
+  EdgeLabelRendererFunction,
+  SharedRenderersProps,
+  VertexRenderFunction
+} from '.';
 import { AnimatedVector } from '../layout';
 
-export type DirectedEdgeRendererProps<E> = {
+export type DirectedEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
   data: E;
   from: AnimatedVector;
   to: AnimatedVector;
 };
 
-export type EdgeArrowRendererProps = {
+export type EdgeArrowRendererProps = SharedRenderersProps & {
   size: SharedValue<number>;
   vertexPosition: AnimatedVector;
   tipPosition: AnimatedVector;

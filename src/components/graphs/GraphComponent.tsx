@@ -281,7 +281,7 @@ export default function GraphComponent<
     });
     // Update edges if rendered vertices were changed or if edges in the current
     // graph model were changed
-  }, [edgesData, animatedVerticesPositions]);
+  }, [animatedVerticesPositions, edges]);
 
   const renderVertices = useCallback(
     () =>
@@ -321,7 +321,7 @@ export default function GraphComponent<
         height={containerHeight}
         color='#444'
       />
-      {/* {renderEdges()} */}
+      {renderEdges()}
       {renderVertices()}
     </Group>
   );

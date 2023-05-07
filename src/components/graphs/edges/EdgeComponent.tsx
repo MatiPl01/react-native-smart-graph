@@ -1,6 +1,12 @@
 import { memo, useEffect } from 'react';
-import { useDerivedValue } from 'react-native-reanimated';
+import {
+  runOnJS,
+  useDerivedValue,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
+import EASING from '@/constants/easings';
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
@@ -49,22 +55,52 @@ export type EdgeComponentProps<E, V> =
 function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
   const { edge, v1Position, v2Position, vertexRadius, removed, onRemove } =
     props;
+  const key = edge.key;
 
-  const p1 = useDerivedValue(
-    () => ({ x: v1Position.x.value || 0, y: v1Position.y.value || 0 }),
-    [v1Position.x, v1Position.y]
-  );
+  // POSITION
+  // First vertex position
+  const p1 = useDerivedValue(() => ({
+    x: v1Position.x.value,
+    y: v1Position.y.value
+  }));
+  // Second vertex position
+  const p2 = useDerivedValue(() => ({
+    x: v2Position.x.value,
+    y: v2Position.y.value
+  }));
 
-  const p2 = useDerivedValue(
-    () => ({ x: v2Position.x.value || 0, y: v2Position.y.value || 0 }),
-    [v2Position.x, v2Position.y]
-  );
+  // ANIMATION
+  // Edge render animation progress
+  const animationProgress = useSharedValue(0);
+
+  const sharedProps = {
+    animationProgress,
+    removed
+  };
 
   useEffect(() => {
-    // Call onRemove callback if edge is removed from the graph
-    if (removed) {
-      // TODO - add some animation before removing
-      onRemove(edge.key);
+    // ANimate vertex on mount
+    if (!removed) {
+      // Animate vertex on mount
+      animationProgress.value = withTiming(1, {
+        // TODO - make this a setting
+        duration: 500,
+        easing: EASING.bounce
+      });
+    }
+    // Animate vertex removal
+    else {
+      animationProgress.value = withTiming(
+        0,
+        {
+          duration: 250
+        },
+        finished => {
+          if (finished) {
+            runOnJS(onRemove)(key);
+          }
+        }
+      );
     }
   }, [removed]);
 
@@ -77,6 +113,7 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         vertexRadius={vertexRadius}
         renderers={props.renderers}
         settings={props.settings}
+        {...sharedProps}
       />
     ) : (
       <UndirectedEdgeComponent<E, V>
@@ -84,6 +121,7 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         points={[p1, p2]}
         renderers={props.renderers}
         settings={props.settings}
+        {...sharedProps}
       />
     );
 
@@ -97,6 +135,7 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
           v1Position={v1Position}
           v2Position={v2Position}
           renderer={props.renderers.label}
+          {...sharedProps}
         />
       )}
     </>
