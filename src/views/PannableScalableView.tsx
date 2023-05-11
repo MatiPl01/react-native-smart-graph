@@ -1,7 +1,9 @@
 import { styled } from 'nativewind';
 import {
   Children,
+  MutableRefObject,
   PropsWithChildren,
+  ReactElement,
   cloneElement,
   useCallback,
   useRef
@@ -18,7 +20,11 @@ import {
 import { Canvas, Group, Vector } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
+import {
+  GraphComponentHandlers,
+  GraphComponentPrivateProps
+} from '@/components/graphs/GraphComponent';
+import { GraphEventHandlers } from '@/types/events';
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { fixedWithDecay } from '@/utils/reanimated';
@@ -26,13 +32,15 @@ import { clamp, getScaleInParent } from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
-type PannableScalableViewProps = PropsWithChildren<{
-  minScale?: number; // default is auto (when the whole content is visible)
-  maxScale?: number;
-  objectFit?: ObjectFit;
-  className?: string;
-  controls?: boolean;
-}>;
+type PannableScalableViewProps = PropsWithChildren<
+  GraphEventHandlers & {
+    minScale?: number; // default is auto (when the whole content is visible)
+    maxScale?: number;
+    objectFit?: ObjectFit;
+    className?: string;
+    controls?: boolean;
+  }
+>;
 
 export default function PannableScalableView({
   minScale = 0.25, // TODO - improve scales
@@ -40,7 +48,8 @@ export default function PannableScalableView({
   objectFit = 'none',
   className,
   children,
-  controls = false
+  controls = false,
+  ...eventHandlers
 }: PannableScalableViewProps) {
   // CANVAS
   const canvasWidth = useSharedValue(0);
@@ -79,6 +88,9 @@ export default function PannableScalableView({
     ],
     [translateX, translateY, currentScale]
   );
+
+  // GRAPH COMPONENT
+  const graphComponentRef = useRef<GraphComponentHandlers | null>(null);
 
   const handleCanvasRender = useCallback(
     ({
@@ -257,7 +269,7 @@ export default function PannableScalableView({
       ]);
     });
 
-  const tapGestureHandler = Gesture.Tap()
+  const doubleTapGestureHandler = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd(({ x, y }) => {
       const origin = { x, y };
@@ -274,19 +286,45 @@ export default function PannableScalableView({
       }
     });
 
+  const pressGestureHandler = Gesture.Tap()
+    .numberOfTaps(1)
+    .onEnd(({ x, y }) => {
+      console.log(graphComponentRef.current);
+      console.log(
+        'press results',
+        graphComponentRef.current?.handlePress(x, y)
+      );
+    });
+
+  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) => {
+    console.log(graphComponentRef.current);
+    console.log(
+      'long press results',
+      graphComponentRef.current?.handleLongPress(x, y)
+    );
+  });
+
   return (
     <View className='grow relative overflow-hidden'>
       <GestureDetector
-        gesture={Gesture.Race(
-          Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
-          tapGestureHandler
+        gesture={Gesture.Exclusive(
+          Gesture.Race(
+            Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
+            doubleTapGestureHandler
+          ),
+          pressGestureHandler,
+          longPressGestureHandler
         )}>
         <StyledCanvas className={className} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
-              const childElement =
-                child as React.ReactElement<GraphComponentPrivateProps>;
+              const childElement = child as ReactElement<
+                GraphComponentPrivateProps & {
+                  ref: MutableRefObject<GraphComponentHandlers | null>;
+                }
+              >;
               return cloneElement(childElement, {
+                ref: graphComponentRef,
                 boundingRect: {
                   left: containerLeft,
                   right: containerRight,

@@ -1,5 +1,15 @@
 import { useGraphObserver } from '@/hooks';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ForwardedRef,
+  ReactElement,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
 import { Group, Rect, Vector } from '@shopify/react-native-skia';
@@ -39,18 +49,28 @@ type GraphComponentProps<
   forcesApplied?: boolean;
 };
 
-export default function GraphComponent<
+type PressHandler = (x: number, y: number) => string | null;
+
+export type GraphComponentHandlers = {
+  handlePress: PressHandler;
+  handleLongPress: PressHandler;
+};
+
+function GraphComponent<
   V,
   E,
   S extends GraphSettings<V, E>,
   R extends GraphRenderers<V, E>
->({
-  graph,
-  settings,
-  renderers,
-  boundingRect,
-  onRender
-}: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
+>(
+  {
+    graph,
+    settings,
+    renderers,
+    boundingRect,
+    onRender
+  }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps,
+  ref: ForwardedRef<GraphComponentHandlers>
+) {
   const [{ vertices, edges }] = useGraphObserver(graph);
   const isFirstRenderRef = useRef(true);
 
@@ -120,6 +140,26 @@ export default function GraphComponent<
         memoSettings.placement
       ),
     [vertices, edges]
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      handlePress: (x, y) => {
+        'worklet';
+
+        // TODO - implement
+        console.log('handlePress', x, y);
+        return null;
+      },
+      handleLongPress: (x, y) => {
+        'worklet';
+        // TODO - implement
+        console.log('handleLongPress', x, y);
+        return null;
+      }
+    }),
+    []
   );
 
   useEffect(() => {
@@ -220,7 +260,7 @@ export default function GraphComponent<
         memoGraphLayout.verticesPositions
       );
     },
-    [animatedVerticesPositions]
+    [animatedVerticesPositions, memoGraphLayout]
   );
 
   const handleVertexRender = useCallback(
@@ -332,3 +372,14 @@ export default function GraphComponent<
     </Group>
   );
 }
+
+export default forwardRef(GraphComponent) as unknown as <
+  V,
+  E,
+  S extends GraphSettings<V, E>,
+  R extends GraphRenderers<V, E>
+>(
+  props: GraphComponentProps<V, E, S, R> & {
+    ref?: ForwardedRef<GraphComponentHandlers>;
+  }
+) => ReactElement;

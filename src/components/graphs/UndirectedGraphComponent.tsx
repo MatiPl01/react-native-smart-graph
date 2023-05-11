@@ -1,8 +1,13 @@
+import { ForwardedRef, forwardRef } from 'react';
+
 import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 
-import GraphComponent, { GraphComponentPrivateProps } from './GraphComponent';
+import GraphComponent, {
+  GraphComponentHandlers,
+  GraphComponentPrivateProps
+} from './GraphComponent';
 
 type UndirectedGraphComponentProps<V, E> = {
   graph: UndirectedGraph<V, E>;
@@ -10,17 +15,13 @@ type UndirectedGraphComponentProps<V, E> = {
   renderers?: UndirectedGraphRenderers<V, E>;
 };
 
-function UndirectedGraphComponent<V, E>(
-  props: UndirectedGraphComponentProps<V, E> & GraphComponentPrivateProps
+export default forwardRef(function UndirectedGraphComponent<V, E>(
+  {
+    ...props
+  }: UndirectedGraphComponentProps<V, E> & GraphComponentPrivateProps,
+  ref: ForwardedRef<GraphComponentHandlers>
 ) {
-  return <GraphComponent {...props} />;
-}
-
-export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
-  return (
-    <UndirectedGraphComponent
-      {...(props as UndirectedGraphComponentProps<V, E> &
-        GraphComponentPrivateProps)}
-    />
-  );
-};
+  return <GraphComponent ref={ref} {...props} />;
+}) as unknown as <V, E>(
+  props: UndirectedGraphComponentProps<V, E>
+) => JSX.Element;

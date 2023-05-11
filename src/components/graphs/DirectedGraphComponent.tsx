@@ -1,8 +1,13 @@
+import { ForwardedRef, forwardRef } from 'react';
+
 import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
 
-import GraphComponent, { GraphComponentPrivateProps } from './GraphComponent';
+import GraphComponent, {
+  GraphComponentHandlers,
+  GraphComponentPrivateProps
+} from './GraphComponent';
 
 type DirectedGraphComponentProps<V, E> = {
   graph: DirectedGraph<V, E>;
@@ -10,17 +15,11 @@ type DirectedGraphComponentProps<V, E> = {
   renderers?: DirectedGraphRenderers<V, E>;
 };
 
-function DirectedGraphComponent<V, E>(
-  props: DirectedGraphComponentProps<V, E> & GraphComponentPrivateProps
+export default forwardRef(function DirectedGraphComponent<V, E>(
+  { ...props }: DirectedGraphComponentProps<V, E> & GraphComponentPrivateProps,
+  ref: ForwardedRef<GraphComponentHandlers>
 ) {
-  return <GraphComponent {...props} />;
-}
-
-export default <V, E>(props: DirectedGraphComponentProps<V, E>) => {
-  return (
-    <DirectedGraphComponent
-      {...(props as DirectedGraphComponentProps<V, E> &
-        GraphComponentPrivateProps)}
-    />
-  );
-};
+  return <GraphComponent ref={ref} {...props} />;
+}) as unknown as <V, E>(
+  props: DirectedGraphComponentProps<V, E>
+) => JSX.Element;
