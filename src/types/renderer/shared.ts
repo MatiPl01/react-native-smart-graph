@@ -2,18 +2,25 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedVector, AnimatedVectorCoordinates } from '../layout';
 
-export type VertexRendererProps<V> = {
+export type SharedRenderersProps = {
+  removed: boolean;
+  animationProgress: SharedValue<number>;
+};
+
+export type VertexRendererProps<V> = SharedRenderersProps & {
   key: string;
   data: V;
   radius: number;
   position: AnimatedVectorCoordinates;
+  removed: boolean;
+  animationProgress: SharedValue<number>;
 };
 
 export type VertexRenderFunction<V> = (
   props: VertexRendererProps<V>
 ) => JSX.Element | null;
 
-export type EdgeLabelRendererProps<E> = {
+export type EdgeLabelRendererProps<E> = SharedRenderersProps & {
   key: string;
   data: E;
   vertexRadius: number;

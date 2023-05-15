@@ -2,7 +2,10 @@ import { useDerivedValue } from 'react-native-reanimated';
 
 import { ARROW_COMPONENT_SETTINGS } from '@/constants/components';
 import { AnimatedVector } from '@/types/layout';
-import { EdgeArrowRenderFunction } from '@/types/renderer';
+import {
+  EdgeArrowRenderFunction,
+  SharedRenderersProps
+} from '@/types/renderer';
 import { EdgeArrowSettings } from '@/types/settings';
 import {
   calcUnitVector,
@@ -10,7 +13,7 @@ import {
   translateAlongVector
 } from '@/utils/vectors';
 
-type EdgeArrowComponentProps = {
+type EdgeArrowComponentProps = SharedRenderersProps & {
   from: AnimatedVector;
   to: AnimatedVector;
   vertexRadius: number;
@@ -23,7 +26,8 @@ export default function EdgeArrowComponent({
   to,
   vertexRadius,
   renderer,
-  settings: userSettings
+  settings: userSettings,
+  ...restProps
 }: EdgeArrowComponentProps) {
   const settings = {
     ...ARROW_COMPONENT_SETTINGS,
@@ -59,6 +63,7 @@ export default function EdgeArrowComponent({
     vertexPosition: to,
     tipPosition,
     centerPosition,
-    rotation
+    rotation,
+    ...restProps
   });
 }

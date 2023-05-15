@@ -5,18 +5,15 @@ import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 import { Group, Rect, Vector } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
-import { Graph } from '@/types/graphs';
+import { Edge, Graph, Vertex } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
   AnimatedVectorCoordinates,
   Dimensions
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
-import { GraphSettings } from '@/types/settings';
-import {
-  animateVertexToFinalPosition,
-  animateVerticesToFinalPositions
-} from '@/utils/animations';
+import { GraphLayout, GraphSettings } from '@/types/settings';
+import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
@@ -57,26 +54,34 @@ export default function GraphComponent<
   const [{ vertices, edges }] = useGraphObserver(graph);
   const isFirstRenderRef = useRef(true);
 
-  // VERTICES POSITIONS
-  // Current positions of vertices in the graph model
+  // GRAPH STATE
+  // Vertices
+  const [verticesData, setVerticesData] = useState<
+    Record<
+      string,
+      {
+        vertex: Vertex<V, E>;
+        targetPlacementPosition: Vector;
+        removed: boolean;
+      }
+    >
+  >({});
+  // Edges
+  const [edgesData, setEdgesData] = useState<
+    Record<
+      string,
+      {
+        edge: Edge<E, V>;
+        removed: boolean;
+      }
+    >
+  >({});
+
+  // ANIMATED VALUES
+  // Current vertices positions
   const [animatedVerticesPositions, setAnimatedVerticesPositions] = useState<
     Record<string, AnimatedVectorCoordinates>
   >({});
-  // Target placement positions of vertices in the graph model
-  // (This is used to animate placement vertices to their target positions when
-  // graph layout changes or placement strategy changes)
-  const [targetPlacementPositions, setTargetPlacementPositions] = useState<
-    Record<string, Vector>
-  >({});
-  // This is used as a workaround for callback functions which don't see
-  // targetPlacementPositions state changes
-  const targetPlacementPositionsRef = useRef<Record<string, Vector>>({});
-  // Current positions of placement vertices in the graph model
-  // (placement vertices are used to calculate the initial positions of vertices
-  // and to ensure that vertices are placed depending on the placement strategy)
-  const animatedVerticesPlacementPosition = useMemo<
-    Record<string, AnimatedVectorCoordinates>
-  >(() => ({}), []);
 
   const memoSettings = useMemo(
     () => ({
@@ -107,25 +112,73 @@ export default function GraphComponent<
     [graph, renderers]
   );
 
-  useEffect(() => {
-    const layout = placeVertices(
-      graph,
-      memoSettings.components.vertex.radius,
-      memoSettings.placement
-    );
+  const memoGraphLayout = useMemo<GraphLayout>(
+    () =>
+      placeVertices(
+        graph,
+        memoSettings.components.vertex.radius,
+        memoSettings.placement
+      ),
+    [vertices, edges]
+  );
 
-    targetPlacementPositionsRef.current = layout.verticesPositions;
-    setTargetPlacementPositions(layout.verticesPositions);
+  useEffect(() => {
+    // UPDATE VERTICES DATA
+    const newVerticesData = { ...verticesData };
+    // Add new vertices to vertex data
+    vertices.forEach(vertex => {
+      const targetPlacementPosition =
+        memoGraphLayout.verticesPositions[vertex.key];
+      if (!newVerticesData[vertex.key] && targetPlacementPosition) {
+        newVerticesData[vertex.key] = {
+          vertex,
+          targetPlacementPosition,
+          removed: false
+        };
+      }
+    });
+    // Mark vertices as removed if there were removed from the graph model
+    Object.keys(newVerticesData).forEach(key => {
+      if (!graph.hasVertex(key)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        newVerticesData[key]!.removed = true;
+      }
+    });
+    // Set new vertices data
+    setVerticesData(newVerticesData);
 
     // Call onRender callback on the first render
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
       onRender({
-        width: layout.width,
-        height: layout.height
+        width: memoGraphLayout.width,
+        height: memoGraphLayout.height
       });
     }
-  }, [vertices, edges]);
+  }, [memoGraphLayout]);
+
+  useEffect(() => {
+    // UPDATE EDGES DATA
+    // Add new edges to edges data
+    const newEdgesData = { ...edgesData };
+    edges.forEach(edge => {
+      if (!newEdgesData[edge.key]) {
+        newEdgesData[edge.key] = {
+          edge,
+          removed: false
+        };
+      }
+    });
+    // Mark edges as removed if there were removed from the graph model
+    Object.keys(newEdgesData).forEach(key => {
+      if (!graph.hasEdge(key)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        newEdgesData[key]!.removed = true;
+      }
+    });
+    // Set the new edges data
+    setEdgesData(newEdgesData);
+  }, [edges]);
 
   useAnimatedReaction(
     () => ({ positions: animatedVerticesPositions }),
@@ -160,44 +213,54 @@ export default function GraphComponent<
   );
 
   useAnimatedReaction(
-    () => ({ positions: targetPlacementPositions }),
-    ({ positions }) => {
-      // Animate vertices to their final positions
-      animateVerticesToFinalPositions(animatedVerticesPositions, positions);
-    }
-  );
-
-  const setAnimatedVertexPosition = useCallback(
-    (key: string, position: AnimatedVectorCoordinates | null) => {
-      // Update the state to trigger rerendering of the graph
-      setAnimatedVerticesPositions(prev =>
-        position
-          ? { ...prev, [key]: position }
-          : Object.fromEntries(Object.entries(prev).filter(([k]) => k !== key))
+    () => ({}),
+    () => {
+      animateVerticesToFinalPositions(
+        animatedVerticesPositions,
+        memoGraphLayout.verticesPositions
       );
-      // Animate vertex to its final position
-      const finalPosition = targetPlacementPositionsRef.current[key];
-      if (position && finalPosition) {
-        animateVertexToFinalPosition(position, finalPosition);
-      }
+    },
+    [animatedVerticesPositions]
+  );
+
+  const handleVertexRender = useCallback(
+    (key: string, position: AnimatedVectorCoordinates) => {
+      // This setTimeout is a tricky workaround to prevent setAnimatedVerticesPositions being called
+      // at the same time as the useAnimatedReaction callback
+      setTimeout(() => {
+        // Update animated vertices positions
+        setAnimatedVerticesPositions(prev => ({ ...prev, [key]: position }));
+      }, 0);
     },
     []
   );
 
-  const setAnimatedVertexPlacementPosition = useCallback(
-    (key: string, position: AnimatedVectorCoordinates | null) => {
-      // Update placement positions
-      if (position) {
-        animatedVerticesPlacementPosition[key] = position;
-      } else {
-        delete animatedVerticesPlacementPosition[key];
-      }
-    },
-    []
-  );
+  const handleVertexRemove = useCallback((key: string) => {
+    // Remove vertex from the vertices data
+    setVerticesData(prev =>
+      Object.fromEntries(
+        Object.entries(prev).filter(([vertexKey]) => vertexKey !== key)
+      )
+    );
+    // Remove vertex animated position
+    setAnimatedVerticesPositions(prev =>
+      Object.fromEntries(
+        Object.entries(prev).filter(([vertexKey]) => vertexKey !== key)
+      )
+    );
+  }, []);
+
+  const handleEdgeRemove = useCallback((key: string) => {
+    // Remove edge from the edges data
+    setEdgesData(prev =>
+      Object.fromEntries(
+        Object.entries(prev).filter(([edgeKey]) => edgeKey !== key)
+      )
+    );
+  }, []);
 
   const renderEdges = useCallback(() => {
-    return edges.map(edge => {
+    return Object.values(edgesData).map(({ edge, removed }) => {
       const [v1, v2] = edge.vertices;
       const v1Position = animatedVerticesPositions[v1.key];
       const v2Position = animatedVerticesPositions[v2.key];
@@ -215,29 +278,32 @@ export default function GraphComponent<
             v2Position,
             vertexRadius: memoSettings.components.vertex.radius,
             renderers: memoRenderers.edge,
-            settings: memoSettings.components.edge
+            settings: memoSettings.components.edge,
+            onRemove: handleEdgeRemove,
+            removed
           } as EdgeComponentProps<E, V>)}
         />
       );
     });
     // Update edges if rendered vertices were changed or if edges in the current
     // graph model were changed
-  }, [animatedVerticesPositions, edges]);
+  }, [animatedVerticesPositions, edgesData]);
 
   const renderVertices = useCallback(
     () =>
-      vertices.map(vertex => (
+      Object.values(verticesData).map(({ vertex, removed }) => (
         <VertexComponent<V, E>
           key={vertex.key}
           vertex={vertex}
           settings={memoSettings.components.vertex}
           renderer={memoRenderers.vertex}
-          setAnimatedPosition={setAnimatedVertexPosition}
-          setAnimatedPlacementPosition={setAnimatedVertexPlacementPosition}
+          onRender={handleVertexRender}
+          onRemove={handleVertexRemove}
+          removed={removed}
         />
       )),
     // Update vertices after graph layout was recalculated
-    [targetPlacementPositions]
+    [verticesData]
   );
 
   // TODO - remove this after testing

@@ -22,7 +22,7 @@ import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { fixedWithDecay } from '@/utils/reanimated';
-import { clamp, getCenterInParent, getScaleInParent } from '@/utils/views';
+import { clamp, getScaleInParent } from '@/utils/views';
 
 const StyledCanvas = styled(Canvas, 'grow');
 
@@ -89,12 +89,15 @@ export default function PannableScalableView({
       canvasWidth.value = width;
       canvasHeight.value = height;
 
-      resetContentPosition({
-        canvasDimensions: {
-          width,
-          height
-        }
-      });
+      if (initialContainerDimensionsRef.current) {
+        resetContentPosition({
+          canvasDimensions: {
+            width,
+            height
+          },
+          containerDimensions: initialContainerDimensionsRef.current
+        });
+      }
     },
     []
   );
@@ -106,14 +109,8 @@ export default function PannableScalableView({
       animated?: boolean;
     }) => {
       const containerDimensions = settings?.containerDimensions ?? {
-        width:
-          containerWidth.value ||
-          initialContainerDimensionsRef.current?.width ||
-          0,
-        height:
-          containerHeight.value ||
-          initialContainerDimensionsRef.current?.height ||
-          0
+        width: containerWidth.value || 0,
+        height: containerHeight.value || 0
       };
 
       const canvasDimensions = settings?.canvasDimensions ?? {
@@ -121,21 +118,19 @@ export default function PannableScalableView({
         height: canvasHeight.value
       };
 
-      const { scale: renderedScale, dimensions: renderedDimensions } =
-        getScaleInParent(objectFit, containerDimensions, canvasDimensions);
+      const { scale: renderedScale } = getScaleInParent(
+        objectFit,
+        containerDimensions,
+        canvasDimensions
+      );
 
       renderScale.value = renderedScale;
       scaleContentTo(renderedScale, undefined, settings?.animated);
 
-      const parentCenter = getCenterInParent(
-        renderedDimensions,
-        canvasDimensions
-      );
-
       translateContentTo(
         {
-          x: parentCenter.x - containerLeft.value * renderedScale,
-          y: parentCenter.y - containerTop.value * renderedScale
+          x: canvasDimensions.width / 2,
+          y: canvasDimensions.height / 2
         },
         undefined,
         settings?.animated

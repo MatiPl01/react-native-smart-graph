@@ -10,31 +10,36 @@ export default function DefaultEdgeLabelRenderer<E>({
   key,
   vertexRadius,
   edgeCenterPosition,
-  edgeRotation
+  edgeRotation,
+  animationProgress
 }: EdgeLabelRendererProps<E>) {
   const fontSize =
     vertexRadius * DEFAULT_LABEL_RENDERER_SETTINGS.font.sizeRatio;
   const font = useFont(FONTS.rubikFont, fontSize);
 
-  const transform = useDerivedValue(
-    () => [
-      { translateX: edgeCenterPosition.value.x },
-      { translateY: edgeCenterPosition.value.y },
-      { rotate: edgeRotation.value }
-    ],
-    [edgeCenterPosition, edgeRotation]
-  );
+  const wrapperTransform = useDerivedValue(() => [
+    { translateX: edgeCenterPosition.value.x },
+    { translateY: edgeCenterPosition.value.y },
+    { rotate: edgeRotation.value }
+  ]);
+  const labelTransform = useDerivedValue(() => [
+    { translateX: ((-key.length * fontSize) / 4) * animationProgress.value },
+    { translateY: (fontSize / 4) * animationProgress.value },
+    { scale: animationProgress.value }
+  ]);
 
   return (
     font && (
-      <Group transform={transform}>
-        <Text
-          x={(-key.length * fontSize) / 4}
-          y={fontSize / 4}
-          font={font}
-          text={key}
-          color={DEFAULT_LABEL_RENDERER_SETTINGS.font.color}
-        />
+      <Group transform={wrapperTransform}>
+        <Group transform={labelTransform}>
+          <Text
+            x={0}
+            y={0}
+            font={font}
+            text={key}
+            color={DEFAULT_LABEL_RENDERER_SETTINGS.font.color}
+          />
+        </Group>
       </Group>
     )
   );

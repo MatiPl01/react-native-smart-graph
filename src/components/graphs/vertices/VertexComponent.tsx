@@ -1,59 +1,82 @@
 import { memo, useEffect } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
+import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 
+import EASING from '@/constants/easings';
 import { Vertex } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
 import { GraphVertexSettings } from '@/types/settings';
 
-type AnimatedPositionSetter = (
-  key: string,
-  position: AnimatedVectorCoordinates | null
-) => void;
-
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
   settings: Required<GraphVertexSettings>;
   renderer: VertexRenderFunction<V>;
-  setAnimatedPosition: AnimatedPositionSetter;
-  setAnimatedPlacementPosition: AnimatedPositionSetter;
+  removed: boolean;
+  onRender: (key: string, position: AnimatedVectorCoordinates) => void;
+  onRemove: (key: string) => void;
 };
 
 function VertexComponent<V, E>({
   vertex,
   settings,
   renderer,
-  setAnimatedPosition,
-  setAnimatedPlacementPosition
+  removed,
+  onRender,
+  onRemove
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
+  // POSITION
   // Current vertex position
   const positionX = useSharedValue(0);
   const positionY = useSharedValue(0);
 
-  // Vertex placement position
-  const placementX = useSharedValue(0);
-  const placementY = useSharedValue(0);
+  // ANIMATION
+  // Vertex render animation progress
+  const animationProgress = useSharedValue(0);
 
   useEffect(() => {
-    // Add vertex to animated positions if it's added to the graph
-    setAnimatedPosition(key, { x: positionX, y: positionY });
-    setAnimatedPlacementPosition(key, { x: placementX, y: placementY });
-
-    // Remove vertex from animated positions if it's removed from the graph
-    return () => {
-      setAnimatedPosition(key, null);
-      setAnimatedPlacementPosition(key, null);
-    };
+    // Call onRender callback on mount
+    onRender(key, { x: positionX, y: positionY });
   }, [key]);
+
+  const mode = useSharedValue(-1);
+
+  useEffect(() => {
+    // ANimate vertex on mount
+    if (!removed) {
+      // Animate vertex on mount
+      animationProgress.value = withTiming(1, {
+        // TODO - make this a setting
+        duration: 500,
+        easing: EASING.bounce
+      });
+    }
+    // Animate vertex removal
+    else {
+      animationProgress.value = withTiming(
+        0,
+        {
+          duration: 500,
+          easing: EASING.bounce
+        },
+        finished => {
+          if (finished) {
+            runOnJS(onRemove)(key);
+          }
+        }
+      );
+    }
+  }, [removed]);
 
   // Render the vertex component
   return renderer({
     key,
     data: vertex.value,
     radius: settings.radius,
-    position: { x: positionX, y: positionY }
+    position: { x: positionX, y: positionY },
+    removed,
+    animationProgress
   });
 }
 

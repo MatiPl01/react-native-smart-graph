@@ -1,9 +1,12 @@
 import { UndirectedEdge } from '@/types/graphs';
 import { AnimatedVector } from '@/types/layout';
-import { UndirectedEdgeRenderers } from '@/types/renderer';
+import {
+  SharedRenderersProps,
+  UndirectedEdgeRenderers
+} from '@/types/renderer';
 import { UndirectedGraphComponentsSettingsWithDefaults } from '@/types/settings';
 
-type UndirectedEdgeComponentProps<E, V> = {
+type UndirectedEdgeComponentProps<E, V> = SharedRenderersProps & {
   edge: UndirectedEdge<E, V>;
   points: [AnimatedVector, AnimatedVector];
   renderers: UndirectedEdgeRenderers<E>;
@@ -12,12 +15,12 @@ type UndirectedEdgeComponentProps<E, V> = {
 
 export default function UndirectedEdgeComponent<E, V>({
   edge,
-  points,
-  renderers: { edge: edgeRenderer }
+  renderers: { edge: edgeRenderer },
+  ...restProps
 }: UndirectedEdgeComponentProps<E, V>) {
   return edgeRenderer({
     key: edge.key,
     data: edge.value,
-    points
+    ...restProps
   });
 }
