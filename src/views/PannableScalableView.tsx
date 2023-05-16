@@ -1,5 +1,5 @@
 import { styled } from 'nativewind';
-import {
+import React, {
   Children,
   PropsWithChildren,
   cloneElement,
@@ -10,6 +10,7 @@ import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   Easing,
+  runOnJS,
   useDerivedValue,
   useSharedValue,
   withTiming
@@ -19,6 +20,7 @@ import { Canvas, Group, Vector } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
+import { useGraphEventsContext } from '@/context/graphEvents';
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { fixedWithDecay } from '@/utils/reanimated';
@@ -42,6 +44,9 @@ export default function PannableScalableView({
   children,
   controls = false
 }: PannableScalableViewProps) {
+  // CONTEXT
+  const graphEventsContext = useGraphEventsContext();
+
   // CANVAS
   const canvasWidth = useSharedValue(0);
   const canvasHeight = useSharedValue(0);
@@ -257,7 +262,7 @@ export default function PannableScalableView({
       ]);
     });
 
-  const tapGestureHandler = Gesture.Tap()
+  const doubleTapGestureHandler = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd(({ x, y }) => {
       const origin = { x, y };
@@ -274,13 +279,36 @@ export default function PannableScalableView({
       }
     });
 
+  const pressGestureHandler = Gesture.Tap()
+    .numberOfTaps(1)
+    .onEnd(({ x, y }) => {
+      if (graphEventsContext) {
+        runOnJS(graphEventsContext?.handlePress)({ x, y });
+      }
+    });
+
+  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) => {
+    if (graphEventsContext) {
+      runOnJS(graphEventsContext?.handleLongPress)({ x, y });
+    }
+  });
+
+  const canvasGestureHandler = Gesture.Race(
+    Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
+    doubleTapGestureHandler
+  );
+
+  const gestureHandler = graphEventsContext
+    ? Gesture.Exclusive(
+        canvasGestureHandler,
+        pressGestureHandler,
+        longPressGestureHandler
+      )
+    : canvasGestureHandler;
+
   return (
     <View className='grow relative overflow-hidden'>
-      <GestureDetector
-        gesture={Gesture.Race(
-          Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
-          tapGestureHandler
-        )}>
+      <GestureDetector gesture={gestureHandler}>
         <StyledCanvas className={className} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
@@ -298,7 +326,9 @@ export default function PannableScalableView({
                   resetContentPosition({
                     containerDimensions
                   });
-                }
+                },
+                setAnimatedVerticesPositions:
+                  graphEventsContext?.setAnimatedVerticesPositions
               });
             })}
           </Group>

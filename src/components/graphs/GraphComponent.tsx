@@ -25,6 +25,9 @@ import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
 export type GraphComponentPrivateProps = {
   boundingRect: AnimatedBoundingRect;
   onRender: (containerDimensions: Dimensions) => void;
+  setAnimatedVerticesPositions?: (
+    positions: Record<string, AnimatedVectorCoordinates>
+  ) => void;
 };
 
 type GraphComponentProps<
@@ -49,9 +52,13 @@ export default function GraphComponent<
   settings,
   renderers,
   boundingRect,
-  onRender
+  onRender,
+  setAnimatedVerticesPositions: setContextAnimatedVerticesPositions
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
+  // GRAPH OBSERVER
   const [{ vertices, edges }] = useGraphObserver(graph);
+
+  // HELPER REFS
   const isFirstRenderRef = useRef(true);
 
   // GRAPH STATE
@@ -179,6 +186,10 @@ export default function GraphComponent<
     // Set the new edges data
     setEdgesData(newEdgesData);
   }, [edges]);
+
+  useEffect(() => {
+    setContextAnimatedVerticesPositions?.(animatedVerticesPositions);
+  }, [animatedVerticesPositions]);
 
   useAnimatedReaction(
     () => ({ positions: animatedVerticesPositions }),

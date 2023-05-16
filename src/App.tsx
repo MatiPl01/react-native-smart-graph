@@ -7,6 +7,8 @@ import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/Defau
 import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
+import GraphEventsProvider from './context/graphEvents';
+
 // TODO - remove this after testing
 const ADDED_COMPONENTS: Array<{
   key: string;
@@ -80,21 +82,23 @@ export default function App() {
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <PannableScalableView objectFit='contain' controls>
-            <DirectedGraphComponent
-              graph={graph}
-              settings={{
-                // TODO - fix orbits strategy padding
-                placement: {
-                  strategy: 'circular',
-                  minVertexSpacing: 100
-                }
-              }}
-              renderers={{
-                edgeLabel: DefaultEdgeLabelRenderer
-              }}
-            />
-          </PannableScalableView>
+          <GraphEventsProvider>
+            <PannableScalableView objectFit='contain' controls>
+              <DirectedGraphComponent
+                graph={graph}
+                settings={{
+                  // TODO - fix orbits strategy padding
+                  placement: {
+                    strategy: 'circular',
+                    minVertexSpacing: 100
+                  }
+                }}
+                renderers={{
+                  edgeLabel: DefaultEdgeLabelRenderer
+                }}
+              />
+            </PannableScalableView>
+          </GraphEventsProvider>
         </View>
       </GestureHandlerRootView>
     </SafeAreaView>
