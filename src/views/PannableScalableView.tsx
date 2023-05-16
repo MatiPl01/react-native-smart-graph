@@ -344,7 +344,8 @@ export default function PannableScalableView<V, E>({
                 },
                 setAnimatedVerticesPositions:
                   graphEventsContext?.setAnimatedVerticesPositions,
-                setGraphSettings: graphEventsContext?.setGraphSettings
+                setGraphSettings: graphEventsContext?.setGraphSettings,
+                setGraphModel: graphEventsContext?.setGraphModel
               });
             })}
           </Group>

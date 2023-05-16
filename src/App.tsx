@@ -83,11 +83,18 @@ export default function App() {
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
           <GraphEventsProvider
+            edgePressDistance={10}
             onVertexPress={key => {
               console.log('vertex pressed', key);
             }}
             onVertexLongPress={key => {
               console.log('vertex long pressed', key);
+            }}
+            onEdgePress={key => {
+              console.log('edge pressed', key);
+            }}
+            onEdgeLongPress={key => {
+              console.log('edge long pressed', key);
             }}>
             <PannableScalableView objectFit='contain' controls>
               <DirectedGraphComponent
