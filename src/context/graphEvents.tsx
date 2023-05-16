@@ -2,19 +2,24 @@ import { PropsWithChildren, createContext, useContext, useRef } from 'react';
 
 import { Vector } from '@shopify/react-native-skia';
 
-import { Vertex } from '@/types/graphs';
+import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { GraphSettings } from '@/types/settings';
+import { findPressedVertex } from '@/utils/graphs/layout';
 
-type GraphEventsContextType = {
+type GraphEventsContextType<V, E> = {
   setAnimatedVerticesPositions: (
     positions: Record<string, AnimatedVectorCoordinates>
   ) => void;
+  setGraphSettings: (settings: GraphSettings<V, E>) => void;
   handlePress: (position: Vector) => void;
   handleLongPress: (position: Vector) => void;
 };
 
-const GraphEventsContext = createContext<GraphEventsContextType>({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const GraphEventsContext = createContext<GraphEventsContextType<any, any>>({
   setAnimatedVerticesPositions: () => undefined,
+  setGraphSettings: () => undefined,
   handlePress: () => undefined,
   handleLongPress: () => undefined
 });
@@ -29,40 +34,61 @@ export const useGraphEventsContext = () => {
   return context;
 };
 
-type GraphEventsProviderProps<V, E> = PropsWithChildren<{
-  onVertexPress?: (vertex: Vertex<V, E>) => void;
-  onVertexLongPress?: (vertex: Vertex<V, E>) => void;
+type GraphEventsProviderProps = PropsWithChildren<{
+  onVertexPress?: (vertexKey: string) => void;
+  onVertexLongPress?: (vertexKey: string) => void;
 }>;
 
 export default function GraphEventsProvider<V, E>({
   children,
   ...eventHandlers
-}: GraphEventsProviderProps<V, E>) {
+}: GraphEventsProviderProps) {
   const animatedVerticesPositionsRef = useRef<
     Record<string, AnimatedVectorCoordinates>
   >({});
+  const graphSettingsRef = useRef<GraphSettings<V, E>>({});
 
   const setAnimatedVerticesPositions = (
     positions: Record<string, AnimatedVectorCoordinates>
   ) => {
-    console.log('setAnimatedVerticesPositions');
     animatedVerticesPositionsRef.current = positions;
   };
 
-  const handlePress = (position: Vector) => {
-    // TODO - implement
-    console.log(
-      'handle press',
-      Object.keys(animatedVerticesPositionsRef.current)
-    );
+  const setGraphSettings = (settings: GraphSettings<V, E>) => {
+    graphSettingsRef.current = settings;
   };
+
+  const handlePressHelper = (
+    position: Vector,
+    handlers: { onVertex?: (vertex: string) => void }
+  ) => {
+    if (handlers.onVertex) {
+      const vertexKey = findPressedVertex(
+        position,
+        graphSettingsRef.current.components?.vertex?.radius ||
+          VERTEX_COMPONENT_SETTINGS.radius,
+        animatedVerticesPositionsRef.current
+      );
+      if (vertexKey) {
+        handlers.onVertex(vertexKey);
+      }
+    }
+  };
+
+  const handlePress = (position: Vector) =>
+    handlePressHelper(position, {
+      onVertex: eventHandlers.onVertexPress
+    });
 
   const handleLongPress = (position: Vector) => {
-    // TODO - implement
+    return handlePressHelper(position, {
+      onVertex: eventHandlers.onVertexLongPress
+    });
   };
 
-  const contextValue: GraphEventsContextType = {
+  const contextValue: GraphEventsContextType<V, E> = {
     setAnimatedVerticesPositions,
+    setGraphSettings,
     handlePress,
     handleLongPress
   };

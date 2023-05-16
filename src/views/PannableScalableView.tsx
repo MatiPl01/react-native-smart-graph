@@ -23,6 +23,7 @@ import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
 import { useGraphEventsContext } from '@/context/graphEvents';
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
+import { canvasCoordinatesToContainerCoordinates } from '@/utils/canvas';
 import { fixedWithDecay } from '@/utils/reanimated';
 import { clamp, getScaleInParent } from '@/utils/views';
 
@@ -36,7 +37,7 @@ type PannableScalableViewProps = PropsWithChildren<{
   controls?: boolean;
 }>;
 
-export default function PannableScalableView({
+export default function PannableScalableView<V, E>({
   minScale = 0.25, // TODO - improve scales
   maxScale = 10,
   objectFit = 'none',
@@ -279,19 +280,31 @@ export default function PannableScalableView({
       }
     });
 
+  const handlePress = useCallback(
+    ({ x, y }: Vector, pressHandler?: (position: Vector) => void) => {
+      'worklet';
+      if (pressHandler) {
+        runOnJS(pressHandler)(
+          canvasCoordinatesToContainerCoordinates(
+            { x, y },
+            { x: translateX.value, y: translateY.value },
+            currentScale.value
+          )
+        );
+      }
+    },
+    []
+  );
+
   const pressGestureHandler = Gesture.Tap()
     .numberOfTaps(1)
-    .onEnd(({ x, y }) => {
-      if (graphEventsContext) {
-        runOnJS(graphEventsContext?.handlePress)({ x, y });
-      }
-    });
+    .onEnd(({ x, y }) =>
+      handlePress({ x, y }, graphEventsContext?.handlePress)
+    );
 
-  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) => {
-    if (graphEventsContext) {
-      runOnJS(graphEventsContext?.handleLongPress)({ x, y });
-    }
-  });
+  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) =>
+    handlePress({ x, y }, graphEventsContext?.handleLongPress)
+  );
 
   const canvasGestureHandler = Gesture.Race(
     Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
@@ -312,8 +325,9 @@ export default function PannableScalableView({
         <StyledCanvas className={className} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
-              const childElement =
-                child as React.ReactElement<GraphComponentPrivateProps>;
+              const childElement = child as React.ReactElement<
+                GraphComponentPrivateProps<V, E>
+              >;
               return cloneElement(childElement, {
                 boundingRect: {
                   left: containerLeft,
@@ -328,7 +342,8 @@ export default function PannableScalableView({
                   });
                 },
                 setAnimatedVerticesPositions:
-                  graphEventsContext?.setAnimatedVerticesPositions
+                  graphEventsContext?.setAnimatedVerticesPositions,
+                setGraphSettings: graphEventsContext?.setGraphSettings
               });
             })}
           </Group>

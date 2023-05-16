@@ -74,7 +74,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 50);
+    }, 500);
     return () => clearInterval(interval);
   }, []);
 
@@ -82,7 +82,13 @@ export default function App() {
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <GraphEventsProvider>
+          <GraphEventsProvider
+            onVertexPress={key => {
+              console.log('vertex pressed', key);
+            }}
+            onVertexLongPress={key => {
+              console.log('vertex long pressed', key);
+            }}>
             <PannableScalableView objectFit='contain' controls>
               <DirectedGraphComponent
                 graph={graph}

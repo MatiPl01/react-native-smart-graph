@@ -25,18 +25,3 @@ export const animateVerticesToFinalPositions = (
     }
   });
 };
-
-export const animateVertexToFinalPosition = (
-  animatedPosition: AnimatedVectorCoordinates,
-  finalPosition: Vector
-) => {
-  // TODO - improve this animation (add settings)
-  animatedPosition.x.value = withTiming(finalPosition.x, {
-    duration: 300,
-    easing: EASING.bounce
-  });
-  animatedPosition.y.value = withTiming(finalPosition.y, {
-    duration: 300,
-    easing: EASING.bounce
-  });
-};

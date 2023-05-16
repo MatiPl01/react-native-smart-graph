@@ -22,12 +22,14 @@ import DefaultEdgeRenderer from './edges/renderers/DefaultEdgeRenderer';
 import VertexComponent from './vertices/VertexComponent';
 import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
 
-export type GraphComponentPrivateProps = {
+export type GraphComponentPrivateProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   onRender: (containerDimensions: Dimensions) => void;
   setAnimatedVerticesPositions?: (
     positions: Record<string, AnimatedVectorCoordinates>
   ) => void;
+  setGraphSettings?: (settings: GraphSettings<V, E>) => void;
+  setGraphModel?: (graph: Graph<V, E>) => void;
 };
 
 type GraphComponentProps<
@@ -53,8 +55,10 @@ export default function GraphComponent<
   renderers,
   boundingRect,
   onRender,
-  setAnimatedVerticesPositions: setContextAnimatedVerticesPositions
-}: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps) {
+  setAnimatedVerticesPositions: setContextAnimatedVerticesPositions,
+  setGraphSettings,
+  setGraphModel
+}: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
   const [{ vertices, edges }] = useGraphObserver(graph);
 
@@ -90,8 +94,8 @@ export default function GraphComponent<
     Record<string, AnimatedVectorCoordinates>
   >({});
 
-  const memoSettings = useMemo(
-    () => ({
+  const memoSettings = useMemo(() => {
+    const newSettings = {
       ...settings,
       components: {
         ...settings?.components,
@@ -103,9 +107,12 @@ export default function GraphComponent<
           ...settings?.components?.edge
         }
       }
-    }),
-    [settings]
-  );
+    };
+
+    setGraphSettings?.(newSettings);
+
+    return newSettings;
+  }, [settings]);
 
   const memoRenderers = useMemo(
     () => ({
@@ -128,6 +135,10 @@ export default function GraphComponent<
       ),
     [vertices, edges]
   );
+
+  useEffect(() => {
+    setGraphModel?.(graph);
+  }, [graph]);
 
   useEffect(() => {
     // UPDATE VERTICES DATA
