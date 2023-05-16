@@ -84,17 +84,17 @@ export default function App() {
         <View className='grow bg-black'>
           <GraphEventsProvider
             edgePressDistance={10}
-            onVertexPress={key => {
-              console.log('vertex pressed', key);
+            onVertexPress={data => {
+              console.log('vertex pressed', data);
             }}
-            onVertexLongPress={key => {
-              console.log('vertex long pressed', key);
+            onVertexLongPress={data => {
+              console.log('vertex long pressed', data);
             }}
-            onEdgePress={key => {
-              console.log('edge pressed', key);
+            onEdgePress={data => {
+              console.log('edge pressed', data);
             }}
-            onEdgeLongPress={key => {
-              console.log('edge long pressed', key);
+            onEdgeLongPress={data => {
+              console.log('edge long pressed', data);
             }}>
             <PannableScalableView objectFit='contain' controls>
               <DirectedGraphComponent

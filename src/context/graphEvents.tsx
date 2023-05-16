@@ -37,12 +37,14 @@ export const useGraphEventsContext = () => {
   return context;
 };
 
+type PressHandler = (data: { key: string; position: Vector }) => void;
+
 type GraphEventsProviderProps = PropsWithChildren<{
   edgePressDistance?: number;
-  onVertexPress?: (vertexKey: string) => void;
-  onVertexLongPress?: (vertexKey: string) => void;
-  onEdgePress?: (edgeKey: string) => void;
-  onEdgeLongPress?: (edgeKey: string) => void;
+  onVertexPress?: PressHandler;
+  onVertexLongPress?: PressHandler;
+  onEdgePress?: PressHandler;
+  onEdgeLongPress?: PressHandler;
 }>;
 
 export default function GraphEventsProvider<V, E>({
@@ -73,8 +75,8 @@ export default function GraphEventsProvider<V, E>({
   const handlePressHelper = (
     position: Vector,
     pressHandlers: {
-      vertex?: (vertex: string) => void;
-      edge?: (edge: string) => void;
+      vertex?: PressHandler;
+      edge?: PressHandler;
     }
   ) => {
     if (pressHandlers.vertex) {
@@ -85,7 +87,7 @@ export default function GraphEventsProvider<V, E>({
         animatedVerticesPositionsRef.current
       );
       if (vertexKey) {
-        pressHandlers.vertex(vertexKey);
+        pressHandlers.vertex({ key: vertexKey, position });
         return;
       }
     }
@@ -98,7 +100,7 @@ export default function GraphEventsProvider<V, E>({
         animatedVerticesPositionsRef.current
       );
       if (edgeKey) {
-        pressHandlers.edge(edgeKey);
+        pressHandlers.edge({ key: edgeKey, position });
       }
     }
   };
