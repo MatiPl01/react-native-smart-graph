@@ -1,7 +1,8 @@
 import { styled } from 'nativewind';
-import React, {
+import {
   Children,
   PropsWithChildren,
+  ReactElement,
   cloneElement,
   useCallback,
   useRef
@@ -325,7 +326,7 @@ export default function PannableScalableView<V, E>({
         <StyledCanvas className={className} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
-              const childElement = child as React.ReactElement<
+              const childElement = child as ReactElement<
                 GraphComponentPrivateProps<V, E>
               >;
               return cloneElement(childElement, {
