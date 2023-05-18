@@ -11,7 +11,7 @@ type DirectedGraphComponentProps<V, E> = {
 };
 
 function DirectedGraphComponent<V, E>(
-  props: DirectedGraphComponentProps<V, E> & GraphComponentPrivateProps
+  props: DirectedGraphComponentProps<V, E> & GraphComponentPrivateProps<V, E>
 ) {
   return <GraphComponent {...props} />;
 }
@@ -20,7 +20,7 @@ export default <V, E>(props: DirectedGraphComponentProps<V, E>) => {
   return (
     <DirectedGraphComponent
       {...(props as DirectedGraphComponentProps<V, E> &
-        GraphComponentPrivateProps)}
+        GraphComponentPrivateProps<V, E>)}
     />
   );
 };

@@ -5,7 +5,7 @@ import { Line } from '@shopify/react-native-skia';
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
 import { AnimatedVector } from '@/types/layout';
 import { EdgeRendererProps } from '@/types/renderer';
-import { areDirectedEdgeRendererProps } from '@/utils/renderer';
+import { areDirectedEdgeRendererProps } from '@/utils/renderers';
 
 export default function DefaultEdgeRenderer<E, R extends EdgeRendererProps<E>>(
   props: R

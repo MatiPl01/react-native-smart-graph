@@ -8,7 +8,11 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
-import { findRootVertex, isGraphATree, isGraphDirected } from '@/utils/graphs';
+import {
+  findRootVertex,
+  isGraphATree,
+  isGraphDirected
+} from '@/utils/graphs/models';
 
 /**
  * The graph must be a tree!

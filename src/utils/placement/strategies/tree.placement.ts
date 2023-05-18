@@ -6,7 +6,11 @@ import {
   PlacedVerticesPositions,
   TreePlacementSettings
 } from '@/types/settings';
-import { findRootVertex, isGraphATree, isGraphDirected } from '@/utils/graphs';
+import {
+  findRootVertex,
+  isGraphATree,
+  isGraphDirected
+} from '@/utils/graphs/models';
 
 // TODO - fix positioning (make relative tot the center pof tbe screen)
 const placeVerticesOnTree = <V, E>(
