@@ -85,7 +85,7 @@ export const isEdgeUndirected = <V, E>(
 ): edge is UndirectedEdge<E, V> => !isEdgeDirected(edge);
 
 export const getOrphanedVertices = <V, E>(
-  vertices: DirectedGraphVertex<V, E>[]
+  vertices: Array<DirectedGraphVertex<V, E>>
 ) => vertices.filter(vertex => vertex.inDegree === 0 && vertex.outDegree === 0);
 
 export const getBalancingOrphanedNeighbors = <V, E>(
