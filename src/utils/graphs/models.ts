@@ -88,7 +88,7 @@ export const getOrphanedVertices = <V, E>(
   vertices: DirectedGraphVertex<V, E>[]
 ) => vertices.filter(vertex => vertex.inDegree === 0 && vertex.outDegree === 0);
 
-export const getBallancingOrphanedNeighbours = <V, E>(
+export const getBalancingOrphanedNeighbors = <V, E>(
   rootVertex: DirectedGraphVertex<V, E>,
   orphanedVertices: DirectedGraphVertex<V, E>[]
 ): Record<string, Array<DirectedGraphVertex<V, E>>> => {
