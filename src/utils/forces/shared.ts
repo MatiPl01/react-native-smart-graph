@@ -5,6 +5,7 @@ import { Vector, vec } from '@shopify/react-native-skia';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
+  addVectors,
   addVectorsArray,
   animatedVectorCoordinatesToVector,
   calcUnitVector,
@@ -87,7 +88,7 @@ export const calcForces = (
       verticesPositions,
       repellingFactorGetter
     );
-    forces[vertexKey] = addVectorsArray([attractionForce, repellingForce]);
+    forces[vertexKey] = addVectors(attractionForce, repellingForce);
   }
   return forces;
 };

@@ -67,6 +67,11 @@ export const addVectorsArray = (vectors: Array<Vector>): Vector => {
   );
 };
 
+export const addVectors = (vector1: Vector, vector2: Vector): Vector => {
+  'worklet';
+  return { x: vector1.x + vector2.x, y: vector1.y + vector2.y };
+};
+
 export const subtractVectors = (vector1: Vector, vector2: Vector): Vector => {
   'worklet';
   return { x: vector1.x - vector2.x, y: vector1.y - vector2.y };

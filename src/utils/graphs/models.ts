@@ -11,9 +11,7 @@ import {
 export const findRootVertex = <V, E>(
   graph: DirectedGraph<V, E>
 ): DirectedGraphVertex<V, E> => {
-  const rootVertices = graph.vertices.filter(
-    v => v.inDegree === 0 && v.outDegree > 0
-  );
+  const rootVertices = findRootVertices(graph);
 
   if (rootVertices.length > 1) {
     throw new Error('Multiple root vertices found');
@@ -21,8 +19,17 @@ export const findRootVertex = <V, E>(
   if (rootVertices.length === 0) {
     throw new Error('No root vertices found');
   }
+  if (!rootVertices[0]) {
+    throw new Error('Root vertex is undefined');
+  }
 
   return rootVertices[0];
+};
+
+export const findRootVertices = <V, E>(
+  graph: DirectedGraph<V, E>
+): Array<DirectedGraphVertex<V, E>> => {
+  return graph.vertices.filter(v => v.inDegree === 0 && v.outDegree > 0);
 };
 
 export const isGraphDirected = <V, E>(
@@ -100,7 +107,8 @@ export const getBalancingOrphanedNeighbors = <V, E>(
     Array<DirectedGraphVertex<V, E>>
   >;
 
-  while (orphanedVertices.length > 0) {
+  let i = 0;
+  while (i < orphanedVertices.length) {
     const newLayerVertices = layerVertices.flatMap(vertex => vertex.neighbors);
     layerMaxChildrenCount[layer] = layerVertices.reduce(
       (acc, vertex) => Math.max(acc, vertex.neighbors.length),
@@ -110,11 +118,14 @@ export const getBalancingOrphanedNeighbors = <V, E>(
     for (const vertex of layerVertices) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (vertex.neighbors.length < layerMaxChildrenCount[layer]!) {
-        const chosenVertices = orphanedVertices.splice(
-          0,
+        const nOfVerticesToChoose =
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          layerMaxChildrenCount[layer]! - vertex.neighbors.length
+          layerMaxChildrenCount[layer]! - vertex.neighbors.length;
+        const chosenVertices = orphanedVertices.slice(
+          i,
+          i + nOfVerticesToChoose
         );
+        i += nOfVerticesToChoose;
 
         orphanedNeighbours[vertex.key] = chosenVertices;
         newLayerVertices.push(...chosenVertices);

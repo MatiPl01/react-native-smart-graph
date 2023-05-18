@@ -8,7 +8,7 @@ import {
 } from '@/types/settings';
 import {
   findRootVertex,
-  getBallancingOrphanedNeighbours,
+  getBalancingOrphanedNeighbors,
   getOrphanedVertices,
   isGraphAcyclic,
   isGraphDirected
@@ -33,10 +33,10 @@ const placeVerticesOnTree = <V, E>(
     );
   }
 
-  const rootVertex = findRootVertex(graph) as DirectedGraphVertex<V, E>;
+  const rootVertex = findRootVertex(graph);
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
-  const orphanedNeighbours = getBallancingOrphanedNeighbours(
+  const orphanedNeighbours = getBalancingOrphanedNeighbors(
     rootVertex,
     orphanedVertices
   );
@@ -130,7 +130,7 @@ const getLayout = <V, E>(
   minVertexSpacing: number,
   graph: DirectedGraph<V, E>
 ) => {
-  const rootVertex = findRootVertex(graph) as DirectedGraphVertex<V, E>;
+  const rootVertex = findRootVertex(graph);
   const dimensions = getMaxTreeDimensions(rootVertex);
 
   const padding = 2 * vertexRadius;

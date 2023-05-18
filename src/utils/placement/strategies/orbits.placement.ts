@@ -11,7 +11,7 @@ import {
 } from '@/types/settings';
 import {
   findRootVertex,
-  getBallancingOrphanedNeighbours,
+  getBalancingOrphanedNeighbors,
   getOrphanedVertices,
   isGraphAcyclic,
   isGraphDirected
@@ -55,7 +55,7 @@ const placeVerticesOnOrbits = <V, E>(
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
-  const orphanedNeighbours = getBallancingOrphanedNeighbours(
+  const orphanedNeighbours = getBalancingOrphanedNeighbors(
     rootVertex,
     orphanedVertices
   );
