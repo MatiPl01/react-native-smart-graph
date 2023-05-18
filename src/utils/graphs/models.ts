@@ -90,7 +90,7 @@ export const getOrphanedVertices = <V, E>(
 
 export const getBalancingOrphanedNeighbors = <V, E>(
   rootVertex: DirectedGraphVertex<V, E>,
-  orphanedVertices: DirectedGraphVertex<V, E>[]
+  orphanedVertices: Array<DirectedGraphVertex<V, E>>
 ): Record<string, Array<DirectedGraphVertex<V, E>>> => {
   let layerVertices = [rootVertex];
   let layer = 0;
