@@ -10,7 +10,7 @@ import {
 
 export const findRootVertex = <V, E>(
   graph: DirectedGraph<V, E>
-): Vertex<V, E> | undefined => {
+): DirectedGraphVertex<V, E> => {
   const rootVertices = graph.vertices.filter(
     v => v.inDegree === 0 && v.outDegree > 0
   );
