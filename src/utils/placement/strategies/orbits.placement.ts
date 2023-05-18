@@ -126,9 +126,10 @@ const placeChildrenOnRingSection = <V, E>(
     angle: parentAngle
   };
 
-  const parentNeighbours = parent.neighbors.concat(
-    orphanedNeighbours[parent.key] ?? []
-  );
+  const parentNeighbours = [
+    ...parent.neighbors,
+    ...(orphanedNeighbours[parent.key] ?? [])
+  ];
 
   parentNeighbours.forEach((child, i) => {
     placeChildrenOnRingSection(
