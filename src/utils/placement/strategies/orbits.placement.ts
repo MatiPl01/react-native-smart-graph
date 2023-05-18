@@ -51,7 +51,7 @@ const placeVerticesOnOrbits = <V, E>(
   > = {};
   const minLayersRadius: Record<string, number> = {};
 
-  const rootVertex = findRootVertex(graph) as DirectedGraphVertex<V, E>;
+  const rootVertex = findRootVertex(graph);
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
