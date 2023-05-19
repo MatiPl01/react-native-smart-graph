@@ -1,37 +1,53 @@
 import { DeepRequired } from '../utils';
 
-type SharedGraphVertexSettings = {
+type SharedVertexSettings = {
   radius?: number;
 };
 
-export type GraphVertexSettings = SharedGraphVertexSettings;
+export type VertexSettings = SharedVertexSettings;
+
+export type StraightEdgeSettings = {
+  type: 'straight';
+  spacing: 'between' | 'around' | 'evenly';
+  spacingFactor?: number; // 0.5 is a good value
+};
+
+export type CurvedEdgeSettings = {
+  type: 'curved';
+  curveFactor?: number; // 0.5 is a good value
+};
+
+type SharedEdgeSettings =
+  | Record<string, never>
+  | StraightEdgeSettings
+  | CurvedEdgeSettings;
 
 export type EdgeArrowSettings = {
   scale?: number; // scale relative to vertex radius
 };
 
-export type DirectedEdgeSettings = {
+export type DirectedEdgeSettings = SharedEdgeSettings & {
   arrow?: EdgeArrowSettings;
 };
 
-export type UndirectedEdgeSettings = never; // TODO - maybe add some settings later
+export type UndirectedEdgeSettings = SharedEdgeSettings;
 
 export type DirectedGraphComponentsSettings = {
-  vertex?: GraphVertexSettings;
+  vertex?: VertexSettings;
   edge?: DirectedEdgeSettings;
 };
 
 export type UndirectedGraphComponentsSettings = {
-  vertex?: GraphVertexSettings;
+  vertex?: VertexSettings;
   edge?: UndirectedEdgeSettings;
 };
 
 export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   DirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge']
+  ['vertex', 'radius'] | ['edge', 'type']
 >;
 
 export type UndirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   UndirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge']
+  ['vertex', 'radius'] | ['edge', 'type']
 >;

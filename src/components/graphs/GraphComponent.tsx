@@ -4,7 +4,12 @@ import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
 import { Group, Rect, Vector } from '@shopify/react-native-skia';
 
-import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
+import {
+  CURVED_EDGE_COMPONENT_SETTINGS,
+  STRAIGHT_EDGE_COMPONENT_SETTINGS,
+  VERTEX_COMPONENT_SETTINGS
+} from '@/constants/components';
+import { EdgeComponentProps } from '@/types/components';
 import { Edge, Graph, Vertex } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
@@ -12,13 +17,19 @@ import {
   Dimensions
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
-import { GraphLayout, GraphSettings } from '@/types/settings';
+import {
+  CurvedEdgeSettings,
+  GraphLayout,
+  GraphSettings,
+  GraphSettingsWithDefaults,
+  StraightEdgeSettings
+} from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
-import EdgeComponent, { EdgeComponentProps } from './edges/EdgeComponent';
-import DefaultEdgeRenderer from './edges/renderers/DefaultEdgeRenderer';
+import EdgeComponent from './edges/EdgeComponent';
+import DefaultEdgeRenderer from './edges/straight/renderers/DefaultEdgeRenderer';
 import VertexComponent from './vertices/VertexComponent';
 import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
 
@@ -95,7 +106,7 @@ export default function GraphComponent<
   >({});
 
   const memoSettings = useMemo(() => {
-    const newSettings = {
+    const newSettings: GraphSettingsWithDefaults<V, E> = {
       ...settings,
       components: {
         ...settings?.components,
@@ -104,6 +115,9 @@ export default function GraphComponent<
           ...settings?.components?.vertex
         },
         edge: {
+          ...(settings?.components?.edge?.type === 'curved'
+            ? (CURVED_EDGE_COMPONENT_SETTINGS as Required<CurvedEdgeSettings>)
+            : (STRAIGHT_EDGE_COMPONENT_SETTINGS as Required<StraightEdgeSettings>)),
           ...settings?.components?.edge
         }
       }
@@ -115,12 +129,13 @@ export default function GraphComponent<
   }, [settings]);
 
   const memoRenderers = useMemo(
+    // TODO - update default renderers (for straight and curved edges)
     () => ({
       vertex: DefaultVertexRenderer,
       edge: {
         arrow: graph.isDirected() ? DefaultEdgeArrowRenderer : undefined,
-        edge: DefaultEdgeRenderer,
-        label: renderers?.edgeLabel
+        edge: renderers?.edge || DefaultEdgeRenderer,
+        label: renderers?.label
       }
     }),
     [graph, renderers]
@@ -298,6 +313,7 @@ export default function GraphComponent<
             edge,
             v1Position,
             v2Position,
+            edgesBetween: graph.getEdgesBetween(v1.key, v2.key),
             vertexRadius: memoSettings.components.vertex.radius,
             renderers: memoRenderers.edge,
             settings: memoSettings.components.edge,
