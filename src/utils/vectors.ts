@@ -73,3 +73,23 @@ export const distanceBetweenVectors = (
   'worklet';
   return vectorLength(subtractVectors(vector1, vector2));
 };
+
+export const distanceBetweenPointAndLine = (
+  point: Vector,
+  lineStart: Vector,
+  lineEnd: Vector
+): number => {
+  'worklet';
+  if (point.x - lineStart.x === 0 || point.y - lineStart.y === 0) {
+    return 0;
+  }
+
+  const a = (lineEnd.y - lineStart.y) / (lineEnd.x - lineStart.x);
+  const b = lineStart.y - a * lineStart.x;
+
+  const A = a;
+  const B = -1;
+  const C = b;
+
+  return Math.abs(A * point.x + B * point.y + C) / Math.sqrt(A ** 2 + B ** 2);
+};

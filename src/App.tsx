@@ -88,6 +88,12 @@ export default function App() {
             }}
             onVertexLongPress={key => {
               console.log('vertex long pressed', key);
+            }}
+            onEdgePress={key => {
+              console.log('edge pressed', key);
+            }}
+            onEdgeLongPress={key => {
+              console.log('edge long pressed', key);
             }}>
             <PannableScalableView objectFit='contain' controls>
               <DirectedGraphComponent
