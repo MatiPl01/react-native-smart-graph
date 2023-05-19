@@ -11,6 +11,7 @@ import { EdgeLabelRendererFunction, VertexRenderFunction } from './shared';
 
 export * from './edges/straight';
 export * from './edges/curved';
+export * from './edges/shared';
 export * from './shared';
 
 export type EdgeRendererProps<E> =

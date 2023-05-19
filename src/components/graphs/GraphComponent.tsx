@@ -29,7 +29,8 @@ import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
 import EdgeComponent from './edges/EdgeComponent';
-import DefaultEdgeRenderer from './edges/straight/renderers/DefaultEdgeRenderer';
+import DefaultCurvedEdgeRenderer from './edges/curved/renderers/DefaultCurvedEdgeRenderer';
+import DefaultStraightEdgeRenderer from './edges/straight/renderers/DefaultStraightEdgeRenderer';
 import VertexComponent from './vertices/VertexComponent';
 import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
 
@@ -129,16 +130,18 @@ export default function GraphComponent<
   }, [settings]);
 
   const memoRenderers = useMemo(
-    // TODO - update default renderers (for straight and curved edges)
     () => ({
       vertex: DefaultVertexRenderer,
       edge: {
         arrow: graph.isDirected() ? DefaultEdgeArrowRenderer : undefined,
-        edge: renderers?.edge || DefaultEdgeRenderer,
+        edge:
+          renderers?.edge || settings?.components?.edge?.type === 'curved'
+            ? DefaultCurvedEdgeRenderer
+            : DefaultStraightEdgeRenderer,
         label: renderers?.label
       }
     }),
-    [graph, renderers]
+    [graph, settings, renderers]
   );
 
   const memoGraphLayout = useMemo<GraphLayout>(

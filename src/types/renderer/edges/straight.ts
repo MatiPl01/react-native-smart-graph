@@ -1,10 +1,10 @@
 import { AnimatedVector } from '@/types/layout';
 
-import { EdgeLabelRendererFunction } from '../shared';
+import { EdgeLabelRendererFunction, SharedRenderersProps } from '../shared';
 import { EdgeArrowRenderFunction } from './shared';
 
 // STRAIGHT
-export type StraightEdgeRendererProps<E> = {
+export type StraightEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
   data: E;
   p1: AnimatedVector;

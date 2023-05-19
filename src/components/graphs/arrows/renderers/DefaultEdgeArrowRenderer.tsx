@@ -1,7 +1,7 @@
 import React from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { useDerivedValue } from 'react-native-reanimated';
 
-import { Group, Vertices, vec } from '@shopify/react-native-skia';
+import { Group, Vertices } from '@shopify/react-native-skia';
 
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
 import { EdgeArrowRendererProps } from '@/types/renderer';
