@@ -23,7 +23,6 @@ type SharedEdgeComponentProps = {
   vertexRadius: number;
   animationProgress: SharedValue<number>;
   removed: boolean;
-  onRemove: (key: string) => void;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =
@@ -68,8 +67,11 @@ export type UndirectedStraightEdgeComponentProps<E, V> =
     };
   };
 
-export type EdgeComponentProps<E, V> =
+export type EdgeComponentProps<E, V> = (
   | UndirectedCurvedEdgeComponentProps<E, V>
   | DirectedCurvedEdgeComponentProps<E, V>
   | UndirectedStraightEdgeComponentProps<E, V>
-  | DirectedStraightEdgeComponentProps<E, V>;
+  | DirectedStraightEdgeComponentProps<E, V>
+) & {
+  onRemove: (key: string) => void;
+};

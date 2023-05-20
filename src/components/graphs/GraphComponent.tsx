@@ -179,7 +179,10 @@ export default function GraphComponent<
     vertices.forEach(vertex => {
       const targetPlacementPosition =
         memoGraphLayout.verticesPositions[vertex.key];
-      if (!newVerticesData[vertex.key] && targetPlacementPosition) {
+      if (
+        targetPlacementPosition &&
+        (!newVerticesData[vertex.key] || newVerticesData[vertex.key]?.removed)
+      ) {
         newVerticesData[vertex.key] = {
           vertex,
           targetPlacementPosition,
@@ -212,7 +215,7 @@ export default function GraphComponent<
     // Add new edges to edges data
     const newEdgesData = { ...edgesData };
     edges.forEach(edge => {
-      if (!newEdgesData[edge.key]) {
+      if (!newEdgesData[edge.key] || newEdgesData[edge.key]?.removed) {
         newEdgesData[edge.key] = {
           edge,
           edgesBetweenVertices: graph.getEdgesBetween(

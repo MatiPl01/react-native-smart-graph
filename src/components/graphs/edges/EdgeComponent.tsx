@@ -15,15 +15,20 @@ import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponen
 import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeComponent';
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
-function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
-  const key = props.edge.key;
+function EdgeComponent<E, V>({
+  edge,
+  removed,
+  onRemove,
+  ...restProps
+}: EdgeComponentProps<E, V>) {
+  const key = edge.key;
   // ANIMATION
   // Edge render animation progress
   const animationProgress = useSharedValue(0);
 
   useEffect(() => {
     // ANimate vertex on mount
-    if (!props.removed) {
+    if (!removed) {
       // Animate vertex on mount
       animationProgress.value = withTiming(1, {
         // TODO - make this a setting
@@ -40,21 +45,23 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         },
         finished => {
           if (finished) {
-            runOnJS(props.onRemove)(key);
+            runOnJS(onRemove)(key);
           }
         }
       );
     }
-  }, []);
+  }, [removed]);
 
   const sharedProps = {
-    ...props,
+    ...restProps,
+    edge,
+    removed,
     animationProgress
   };
 
-  switch (props.settings.type) {
+  switch (sharedProps.settings.type) {
     case 'straight':
-      return props.edge.isDirected() ? (
+      return edge.isDirected() ? (
         <DirectedStraightEdgeComponent
           {...(sharedProps as DirectedStraightEdgeComponentProps<E, V>)}
         />
@@ -64,7 +71,7 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         />
       );
     case 'curved':
-      return props.edge.isDirected() ? (
+      return edge.isDirected() ? (
         <DirectedCurvedEdgeComponent
           {...(sharedProps as DirectedCurvedEdgeComponentProps<E, V>)}
         />
