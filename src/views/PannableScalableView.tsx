@@ -342,6 +342,8 @@ export default function PannableScalableView<V, E>({
                     containerDimensions
                   });
                 },
+                setAnimatedEdgeLabelsPositions:
+                  graphEventsContext?.setAnimatedEdgeLabelsPositions,
                 setAnimatedVerticesPositions:
                   graphEventsContext?.setAnimatedVerticesPositions,
                 setGraphSettings: graphEventsContext?.setGraphSettings,

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -7,7 +8,7 @@ import {
 import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   calcUnitVector,
   multiplyVector,
@@ -26,7 +27,8 @@ export default function DirectedStraightEdgeComponent<E, V>({
   edgesBetweenVertices,
   animationProgress,
   removed,
-  renderers
+  renderers,
+  onRender
 }: DirectedStraightEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
@@ -51,10 +53,14 @@ export default function DirectedStraightEdgeComponent<E, V>({
   }));
   const labelHeight = useSharedValue(0);
 
+  useEffect(() => {
+    onRender(edge.key, center);
+  }, [edge.key]);
+
   useAnimatedReaction(
     () => ({
-      v1: animatedVectorToVector(v1Position),
-      v2: animatedVectorToVector(v2Position)
+      v1: animatedVectorCoordinatesToVector(v1Position),
+      v2: animatedVectorCoordinatesToVector(v2Position)
     }),
     ({ v1, v2 }) => {
       const maxTranslationOffset = settings.maxOffsetFactor * vertexRadius;

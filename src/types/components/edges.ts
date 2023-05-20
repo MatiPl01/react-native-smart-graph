@@ -1,7 +1,7 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedEdge, UndirectedEdge } from '../graphs';
-import { AnimatedVectorCoordinates } from '../layout';
+import { AnimatedVector, AnimatedVectorCoordinates } from '../layout';
 import {
   DirectedStraightEdgeRenderers,
   UndirectedStraightEdgeRenderers
@@ -24,6 +24,7 @@ type SharedEdgeComponentProps = {
   animationProgress: SharedValue<number>;
   removed: boolean;
   onRemove: (key: string) => void;
+  onRender: (key: string, position: AnimatedVector) => void;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =

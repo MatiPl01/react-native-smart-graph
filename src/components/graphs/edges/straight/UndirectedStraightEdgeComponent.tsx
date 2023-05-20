@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -8,7 +9,7 @@ import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   multiplyVector
 } from '@/utils/vectors';
@@ -24,7 +25,8 @@ export default function UndirectedStraightEdgeComponent<E, V>({
   settings,
   animationProgress,
   removed,
-  renderers
+  renderers,
+  onRender
 }: UndirectedStraightEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
@@ -47,6 +49,10 @@ export default function UndirectedStraightEdgeComponent<E, V>({
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
 
+  useEffect(() => {
+    onRender(edge.key, center);
+  }, [edge.key]);
+
   useAnimatedReaction(
     () => {
       let v1: AnimatedVectorCoordinates, v2: AnimatedVectorCoordinates;
@@ -63,8 +69,8 @@ export default function UndirectedStraightEdgeComponent<E, V>({
       }
 
       return {
-        v1: animatedVectorToVector(v1),
-        v2: animatedVectorToVector(v2)
+        v1: animatedVectorCoordinatesToVector(v1),
+        v2: animatedVectorCoordinatesToVector(v2)
       };
     },
     ({ v1, v2 }) => {

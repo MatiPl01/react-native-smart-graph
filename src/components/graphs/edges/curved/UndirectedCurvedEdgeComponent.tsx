@@ -1,10 +1,11 @@
+import { useEffect } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   translateAlongVector
 } from '@/utils/vectors';
@@ -20,7 +21,8 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
   settings,
   renderers,
   animationProgress,
-  removed
+  removed,
+  onRender
 }: UndirectedCurvedEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
@@ -49,8 +51,8 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
 
     // Calculate the parabola vertex position
     const orthogonalUnitVector = calcOrthogonalUnitVector(
-      animatedVectorToVector(v1),
-      animatedVectorToVector(v2)
+      animatedVectorCoordinatesToVector(v1),
+      animatedVectorCoordinatesToVector(v2)
     );
     const offset = labelHeight.value * (edgeIndex - (edgesCount - 1) / 2);
     return translateAlongVector(
@@ -62,6 +64,11 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
       offset
     );
   });
+
+  useEffect(() => {
+    onRender(edge.key, parabolaVertex);
+  }, [edge.key]);
+
   // Edge curve path
   const path = useDerivedValue(() => {
     const controlPoint = {

@@ -1,16 +1,17 @@
+import { useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
   useSharedValue
 } from 'react-native-reanimated';
 
-import { rotate } from '@shopify/react-native-skia';
+import { Vector, rotate } from '@shopify/react-native-skia';
 
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { getEdgeIndex } from '@/utils/graphs/layout';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   calcUnitVector,
   translateAlongVector
@@ -28,13 +29,14 @@ export default function DirectedCurvedEdgeComponent<E, V>({
   renderers,
   settings,
   animationProgress,
-  removed
+  removed,
+  onRender
 }: DirectedCurvedEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
 
   // Parabola vertex
-  const parabolaVertex = useSharedValue({
+  const parabolaVertex = useSharedValue<Vector>({
     x: (v1Position.x.value + v2Position.x.value) / 2,
     y: (v1Position.y.value + v2Position.y.value) / 2
   });
@@ -66,10 +68,14 @@ export default function DirectedCurvedEdgeComponent<E, V>({
     return pathString;
   });
 
+  useEffect(() => {
+    onRender(edge.key, parabolaVertex);
+  }, [edge.key]);
+
   useAnimatedReaction(
     () => {
-      const p1 = animatedVectorToVector(v1Position);
-      const p2 = animatedVectorToVector(v2Position);
+      const p1 = animatedVectorCoordinatesToVector(v1Position);
+      const p2 = animatedVectorCoordinatesToVector(v2Position);
 
       return {
         p1,
@@ -84,8 +90,8 @@ export default function DirectedCurvedEdgeComponent<E, V>({
     ({ p1, p2, center, labelSize }) => {
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(
-        animatedVectorToVector(v1Position),
-        animatedVectorToVector(v2Position)
+        animatedVectorCoordinatesToVector(v1Position),
+        animatedVectorCoordinatesToVector(v2Position)
       );
       const offset = labelSize * (edgeIndex - (edgesCount - 1) / 2);
       const parabolaVertexPosition = translateAlongVector(
