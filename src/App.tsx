@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -13,12 +12,18 @@ export default function App() {
   const graph = DirectedGraph.fromData(
     [
       { key: 'V1', data: 'V1' },
-      { key: 'V2', data: 'V2' }
+      { key: 'V2', data: 'V2' },
+      { key: 'V3', data: 'V3' }
     ],
     [
       { from: 'V1', to: 'V2', key: 'E1', data: 'E1' },
       { from: 'V1', to: 'V2', key: 'E2', data: 'E2' },
-      { from: 'V2', to: 'V1', key: 'E3', data: 'E3' }
+      { from: 'V2', to: 'V1', key: 'E3', data: 'E3' },
+      { from: 'V2', to: 'V1', key: 'E4', data: 'E4' },
+      { from: 'V2', to: 'V3', key: 'E5', data: 'E5' },
+      { from: 'V3', to: 'V1', key: 'E6', data: 'E6' },
+      { from: 'V3', to: 'V2', key: 'E7', data: 'E7' },
+      { from: 'V1', to: 'V2', key: 'E8', data: 'E8' }
     ]
   );
 
@@ -50,12 +55,12 @@ export default function App() {
                   },
                   components: {
                     edge: {
-                      type: 'straight'
+                      type: 'straight' // TODO - fix types
                     }
                   }
                 }}
                 renderers={{
-                  edgeLabel: DefaultEdgeLabelRenderer
+                  label: DefaultEdgeLabelRenderer
                 }}
               />
             </PannableScalableView>

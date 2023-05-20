@@ -24,33 +24,33 @@ type SharedEdgeComponentProps = {
 export type DirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: DirectedEdge<E, V>;
-    edgesBetween: Array<DirectedEdge<E, V>>;
+    edgesBetweenVertices: Array<DirectedEdge<E, V>>;
     renderers: DirectedCurvedEdgeRenderers<E>;
-    settings: CurvedEdgeSettings;
+    settings: Required<CurvedEdgeSettings>;
   };
 
 export type UndirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: UndirectedEdge<E, V>;
-    edgesBetween: Array<UndirectedEdge<E, V>>;
+    edgesBetweenVertices: Array<UndirectedEdge<E, V>>;
     renderers: UndirectedCurvedEdgeRenderers<E>;
-    settings: CurvedEdgeSettings;
+    settings: Required<CurvedEdgeSettings>;
   };
 
 export type DirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: DirectedEdge<E, V>;
-    edgesBetween: Array<DirectedEdge<E, V>>;
+    edgesBetweenVertices: Array<DirectedEdge<E, V>>;
     renderers: DirectedStraightEdgeRenderers<E>;
-    settings: StraightEdgeSettings;
+    settings: Required<StraightEdgeSettings>;
   };
 
 export type UndirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: UndirectedEdge<E, V>;
-    edgesBetween: Array<UndirectedEdge<E, V>>;
+    edgesBetweenVertices: Array<UndirectedEdge<E, V>>;
     renderers: UndirectedStraightEdgeRenderers<E>;
-    settings: StraightEdgeSettings;
+    settings: Required<StraightEdgeSettings>;
   };
 
 export type EdgeComponentProps<E, V> =

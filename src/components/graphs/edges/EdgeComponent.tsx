@@ -3,11 +3,15 @@ import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import EASING from '@/constants/easings';
 import {
+  DirectedCurvedEdgeComponentProps,
   DirectedStraightEdgeComponentProps,
   EdgeComponentProps,
+  UndirectedCurvedEdgeComponentProps,
   UndirectedStraightEdgeComponentProps
 } from '@/types/components/edges';
 
+import DirectedCurvedEdgeComponent from './curved/DirectedCurvedEdgeComponent';
+import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponent';
 import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeComponent';
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
@@ -61,12 +65,12 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
       );
     case 'curved':
       return props.edge.isDirected() ? (
-        <DirectedStraightEdgeComponent
-          {...(sharedProps as DirectedStraightEdgeComponentProps<E, V>)}
+        <DirectedCurvedEdgeComponent
+          {...(sharedProps as DirectedCurvedEdgeComponentProps<E, V>)}
         />
       ) : (
-        <UndirectedStraightEdgeComponent
-          {...(sharedProps as UndirectedStraightEdgeComponentProps<E, V>)}
+        <UndirectedCurvedEdgeComponent
+          {...(sharedProps as UndirectedCurvedEdgeComponentProps<E, V>)}
         />
       );
   }

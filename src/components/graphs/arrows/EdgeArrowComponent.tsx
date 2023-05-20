@@ -1,4 +1,4 @@
-import { useDerivedValue } from 'react-native-reanimated';
+import { SharedValue, useDerivedValue } from 'react-native-reanimated';
 
 import { ARROW_COMPONENT_SETTINGS } from '@/constants/components';
 import { AnimatedVector } from '@/types/layout';
@@ -7,24 +7,22 @@ import {
   SharedRenderersProps
 } from '@/types/renderer';
 import { EdgeArrowSettings } from '@/types/settings';
-import {
-  calcUnitVector,
-  distanceBetweenVectors,
-  translateAlongVector
-} from '@/utils/vectors';
+import { translateAlongVector } from '@/utils/vectors';
 
 type EdgeArrowComponentProps = SharedRenderersProps & {
-  from: AnimatedVector;
-  to: AnimatedVector;
+  directionVector: AnimatedVector;
+  tipPosition: AnimatedVector;
   vertexRadius: number;
+  maxWidth: SharedValue<number>;
   renderer: EdgeArrowRenderFunction;
   settings?: EdgeArrowSettings;
 };
 
 export default function EdgeArrowComponent({
-  from,
-  to,
+  directionVector,
+  tipPosition,
   vertexRadius,
+  maxWidth,
   renderer,
   settings: userSettings,
   ...restProps
@@ -33,34 +31,26 @@ export default function EdgeArrowComponent({
     ...ARROW_COMPONENT_SETTINGS,
     ...userSettings
   };
-  const arrowSize = useDerivedValue(() =>
-    Math.min(
-      2 * vertexRadius * settings.scale,
-      0.35 * distanceBetweenVectors(from.value, to.value)
-    )
+  const arrowWidth = useDerivedValue(() =>
+    Math.min(maxWidth.value, vertexRadius * settings.scale)
   );
-
-  const dirVec = useDerivedValue(() => calcUnitVector(to.value, from.value));
-
-  const tipPosition = useDerivedValue(() =>
-    translateAlongVector(to.value, dirVec.value, vertexRadius)
-  );
+  const arrowHeight = useDerivedValue(() => 1.5 * arrowWidth.value);
 
   const centerPosition = useDerivedValue(() => {
     return translateAlongVector(
       tipPosition.value,
-      dirVec.value,
-      arrowSize.value / 2
+      directionVector.value,
+      arrowHeight.value / 2
     );
   });
 
   const rotation = useDerivedValue(() =>
-    Math.atan2(dirVec.value.y, dirVec.value.x)
+    Math.atan2(directionVector.value.y, directionVector.value.x)
   );
 
   return renderer({
-    size: arrowSize,
-    vertexPosition: to,
+    width: arrowWidth,
+    height: arrowHeight,
     tipPosition,
     centerPosition,
     rotation,

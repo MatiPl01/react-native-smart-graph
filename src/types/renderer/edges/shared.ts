@@ -6,8 +6,8 @@ import { SharedRenderersProps } from '../shared';
 
 // Edge arrow
 export type EdgeArrowRendererProps = SharedRenderersProps & {
-  size: SharedValue<number>;
-  vertexPosition: AnimatedVector;
+  width: SharedValue<number>;
+  height: SharedValue<number>;
   tipPosition: AnimatedVector;
   centerPosition: AnimatedVector;
   rotation: SharedValue<number>;

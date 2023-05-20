@@ -4,8 +4,7 @@ export const VERTEX_COMPONENT_SETTINGS = {
 
 export const STRAIGHT_EDGE_COMPONENT_SETTINGS = {
   type: 'straight',
-  spacing: 'between',
-  spacingFactor: 0.5
+  maxOffsetFactor: 0.5
 };
 
 export const CURVED_EDGE_COMPONENT_SETTINGS = {

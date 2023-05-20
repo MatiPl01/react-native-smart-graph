@@ -8,8 +8,7 @@ export type VertexSettings = SharedVertexSettings;
 
 export type StraightEdgeSettings = {
   type: 'straight';
-  spacing: 'between' | 'around' | 'evenly';
-  spacingFactor?: number; // 0.5 is a good value
+  maxOffsetFactor?: number; // 0.5 is a good value
 };
 
 export type CurvedEdgeSettings = {

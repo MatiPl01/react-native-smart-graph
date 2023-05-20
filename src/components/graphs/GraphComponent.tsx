@@ -316,7 +316,7 @@ export default function GraphComponent<
             edge,
             v1Position,
             v2Position,
-            edgesBetween: graph.getEdgesBetween(v1.key, v2.key),
+            edgesBetweenVertices: graph.getEdgesBetween(v1.key, v2.key),
             vertexRadius: memoSettings.components.vertex.radius,
             renderers: memoRenderers.edge,
             settings: memoSettings.components.edge,
@@ -333,7 +333,7 @@ export default function GraphComponent<
   const renderVertices = useCallback(
     () =>
       Object.values(verticesData).map(({ vertex, removed }) => (
-        <VertexComponent<V, E>
+        <VertexComponent
           key={vertex.key}
           vertex={vertex}
           settings={memoSettings.components.vertex}

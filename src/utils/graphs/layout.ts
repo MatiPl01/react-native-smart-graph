@@ -52,6 +52,7 @@ export const findPressedVertex = (
   return null;
 };
 
+// TODO - fix edge press handlers
 export const findClosestEdge = <E, V>(
   position: Vector,
   edges: Array<Edge<E, V>>,
