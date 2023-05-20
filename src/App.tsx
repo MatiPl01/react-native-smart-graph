@@ -55,7 +55,7 @@ export default function App() {
                   },
                   components: {
                     edge: {
-                      type: 'straight' // TODO - fix types
+                      type: 'straight'
                     }
                   }
                 }}
