@@ -6,6 +6,7 @@ import {
 
 import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
   animatedVectorToVector,
   calcOrthogonalUnitVector,
@@ -26,7 +27,7 @@ export default function UndirectedStraightEdgeComponent<E, V>({
   renderers
 }: UndirectedStraightEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
-  const edgeIndex = edgesBetweenVertices.findIndex(e => e.key === edge.key);
+  const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
   // Edge line
   const p1 = useSharedValue({
     x: v1Position.x.value,
@@ -41,7 +42,7 @@ export default function UndirectedStraightEdgeComponent<E, V>({
     x: (p1.value.x + p2.value.x) / 2,
     y: (p1.value.y + p2.value.y) / 2
   }));
-  const maxLabelSize = useSharedValue(0);
+  const labelHeight = useSharedValue(0);
 
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
@@ -87,7 +88,7 @@ export default function UndirectedStraightEdgeComponent<E, V>({
         y: v2.y + translationVector.y
       };
       // Update edge label max size
-      maxLabelSize.value =
+      labelHeight.value =
         2 *
         (edgesCount === 1
           ? maxTranslationOffset
@@ -113,11 +114,11 @@ export default function UndirectedStraightEdgeComponent<E, V>({
         <EdgeLabelComponent
           {...sharedProps}
           edge={edge}
-          p1={p1}
-          p2={p2}
+          v1Position={v1Position}
+          v2Position={v2Position}
           vertexRadius={vertexRadius}
           centerPosition={center}
-          maxSize={maxLabelSize}
+          height={labelHeight}
           renderer={renderers.label}
         />
       )}

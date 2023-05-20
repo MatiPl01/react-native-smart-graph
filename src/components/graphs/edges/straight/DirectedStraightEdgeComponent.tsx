@@ -5,7 +5,7 @@ import {
 } from 'react-native-reanimated';
 
 import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
-import { DirectedEdge } from '@/types/graphs';
+import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
   animatedVectorToVector,
   calcOrthogonalUnitVector,
@@ -16,22 +16,6 @@ import {
 
 import EdgeArrowComponent from '../../arrows/EdgeArrowComponent';
 import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
-
-const getEdgeIndex = <E, V>(
-  edge: DirectedEdge<E, V>,
-  edgesBetweenVertices: Array<DirectedEdge<E, V>>
-): number => {
-  let index = 0;
-  for (const e of edgesBetweenVertices) {
-    if (e.key === edge.key) {
-      break;
-    }
-    if (e.source.key === edge.source.key && e.target.key === edge.target.key) {
-      index++;
-    }
-  }
-  return index;
-};
 
 export default function DirectedStraightEdgeComponent<E, V>({
   v1Position,
@@ -58,13 +42,14 @@ export default function DirectedStraightEdgeComponent<E, V>({
   // Edge arrow
   const dirVec = useDerivedValue(() => calcUnitVector(p2.value, p1.value));
   const arrowTipPosition = useSharedValue(p2.value);
-  const maxArrowWidth = useSharedValue(0);
+  const arrowWidth = useSharedValue(0);
+  const arrowHeight = useDerivedValue(() => 1.5 * arrowWidth.value);
   // Edge label
   const center = useDerivedValue(() => ({
     x: (p1.value.x + p2.value.x) / 2,
     y: (p1.value.y + p2.value.y) / 2
   }));
-  const maxLabelSize = useSharedValue(0);
+  const labelHeight = useSharedValue(0);
 
   useAnimatedReaction(
     () => ({
@@ -102,9 +87,9 @@ export default function DirectedStraightEdgeComponent<E, V>({
           ? maxTranslationOffset
           : maxTranslationOffset / (edgesCount - 1));
       // Update edge label max size
-      maxLabelSize.value = maxSize;
+      labelHeight.value = maxSize;
       // Update edge arrow max size
-      maxArrowWidth.value = maxSize;
+      arrowWidth.value = Math.min(maxSize, settings.arrow.scale * vertexRadius);
     }
   );
 
@@ -122,25 +107,24 @@ export default function DirectedStraightEdgeComponent<E, V>({
         p1,
         p2
       })}
-      {renderers.arrow && (
-        <EdgeArrowComponent
-          {...sharedProps}
-          directionVector={dirVec}
-          tipPosition={arrowTipPosition}
-          renderer={renderers.arrow}
-          vertexRadius={vertexRadius}
-          maxWidth={maxArrowWidth}
-        />
-      )}
+      <EdgeArrowComponent
+        {...sharedProps}
+        directionVector={dirVec}
+        tipPosition={arrowTipPosition}
+        renderer={renderers.arrow}
+        vertexRadius={vertexRadius}
+        width={arrowWidth}
+        height={arrowHeight}
+      />
       {renderers.label && (
         <EdgeLabelComponent
           {...sharedProps}
           edge={edge}
-          p1={p1}
-          p2={p2}
+          v1Position={v1Position}
+          v2Position={v2Position}
           vertexRadius={vertexRadius}
           centerPosition={center}
-          maxSize={maxLabelSize}
+          height={labelHeight}
           renderer={renderers.label}
         />
       )}

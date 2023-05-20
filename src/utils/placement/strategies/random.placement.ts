@@ -38,8 +38,8 @@ const placeVerticesRandomly = <V, E>(
   switch (settings.layoutType) {
     case 'grid':
       return calcVerticesGridPositions(props);
-    case 'honeycomb':
-      return calcVerticesHoneycombPositions(props);
+    case 'triangles':
+      return calcVerticesTrianglesPositions(props);
   }
 };
 
@@ -83,7 +83,7 @@ const calcVerticesGridPositions = <V, E>(
   };
 };
 
-const calcVerticesHoneycombPositions = <V, E>(
+const calcVerticesTrianglesPositions = <V, E>(
   props: CalcVerticesPositionsProps<V, E>
 ): GraphLayout => {
   const { vertices, density, vertexRadius, minVertexSpacing } = props;

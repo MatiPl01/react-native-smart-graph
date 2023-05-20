@@ -5,7 +5,7 @@ import {
 } from 'react-native-reanimated';
 
 import { Edge } from '@/types/graphs';
-import { AnimatedVector } from '@/types/layout';
+import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import {
   EdgeLabelRendererFunction,
   SharedRenderersProps
@@ -13,25 +13,28 @@ import {
 
 type EdgeLabelComponentProps<E, V> = SharedRenderersProps & {
   edge: Edge<E, V>;
-  p1: AnimatedVector;
-  p2: AnimatedVector;
+  v1Position: AnimatedVectorCoordinates;
+  v2Position: AnimatedVectorCoordinates;
   vertexRadius: number;
   centerPosition: AnimatedVector;
-  maxSize: SharedValue<number>;
+  height: SharedValue<number>;
   renderer: EdgeLabelRendererFunction<E>;
 };
 
 export default function EdgeLabelComponent<E, V>({
   edge,
-  p1,
-  p2,
+  v1Position,
+  v2Position,
   centerPosition,
-  maxSize,
+  height,
   renderer,
   ...restProps
 }: EdgeLabelComponentProps<E, V>) {
   const edgeLength = useDerivedValue(() =>
-    Math.sqrt((p2.value.x - p1.value.x) ** 2 + (p2.value.y - p1.value.y) ** 2)
+    Math.sqrt(
+      (v2Position.x.value - v1Position.x.value) ** 2 +
+        (v2Position.y.value - v1Position.y.value) ** 2
+    )
   );
   // Block swapping after making a swap
   // 0 - not blocked
@@ -41,8 +44,14 @@ export default function EdgeLabelComponent<E, V>({
   const swapBlocked = useSharedValue(0);
   const isSwapped = useSharedValue(false);
   const edgeRotation = useDerivedValue(() => {
-    const { x: x1, y: y1 } = p1.value;
-    const { x: x2, y: y2 } = p2.value;
+    const {
+      x: { value: x1 },
+      y: { value: y1 }
+    } = v1Position;
+    const {
+      x: { value: x2 },
+      y: { value: y2 }
+    } = v2Position;
     const angle = Math.atan2(y2 - y1, x2 - x1);
 
     if (!swapBlocked.value) {
@@ -79,7 +88,7 @@ export default function EdgeLabelComponent<E, V>({
     key: edge.key,
     data: edge.value,
     centerPosition,
-    maxSize,
+    height,
     edgeRotation,
     edgeLength,
     ...restProps

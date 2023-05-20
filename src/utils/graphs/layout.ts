@@ -1,6 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { Edge, Graph } from '@/types/graphs';
+import { DirectedEdge, Edge, Graph, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
 import {
@@ -110,3 +110,38 @@ export const findPressedEdge = <E, V>(
 
   return null;
 };
+
+const getDirectedEdgeIndex = <E, V>(
+  edge: DirectedEdge<E, V>,
+  edges: Array<DirectedEdge<E, V>>
+): number => {
+  let index = 0;
+  for (const e of edges) {
+    if (e.key === edge.key) {
+      break;
+    }
+    if (e.source.key === edge.source.key && e.target.key === edge.target.key) {
+      index++;
+    }
+  }
+  return index;
+};
+
+const getUndirectedEdgeIndex = <E, V>(
+  edge: UndirectedEdge<E, V>,
+  edges: Array<UndirectedEdge<E, V>>
+): number => edges.findIndex(e => e.key === edge.key);
+
+export const getEdgeIndex = <E, V, GE extends Edge<E, V>>(
+  edge: GE,
+  edges: Array<GE>
+): number =>
+  edge.isDirected()
+    ? getDirectedEdgeIndex(
+        edge as unknown as DirectedEdge<E, V>,
+        edges as unknown as Array<DirectedEdge<E, V>>
+      )
+    : getUndirectedEdgeIndex(
+        edge as unknown as UndirectedEdge<E, V>,
+        edges as unknown as Array<UndirectedEdge<E, V>>
+      );

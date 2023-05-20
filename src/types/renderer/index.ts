@@ -22,15 +22,18 @@ export type EdgeRenderFunction<E> =
   | StraightEdgeRenderFunction<E>
   | CurvedEdgeRenderFunction<E>;
 
-export type GraphRenderers<V, E> = {
-  vertex: VertexRenderFunction<V>;
+type SharedGraphRenderers<V, E> = {
+  vertex?: VertexRenderFunction<V>;
+  edge?: EdgeRenderFunction<E>;
   label?: EdgeLabelRendererFunction<E>;
+};
+
+export type DirectedGraphRenderers<V, E> = SharedGraphRenderers<V, E> & {
   arrow?: EdgeArrowRenderFunction;
-} & (
-  | {
-      edge: StraightEdgeRenderFunction<E>;
-    }
-  | {
-      edge: CurvedEdgeRenderFunction<E>;
-    }
-);
+};
+
+export type UndirectedGraphRenderers<V, E> = SharedGraphRenderers<V, E>;
+
+export type GraphRenderers<V, E> =
+  | DirectedGraphRenderers<V, E>
+  | UndirectedGraphRenderers<V, E>;

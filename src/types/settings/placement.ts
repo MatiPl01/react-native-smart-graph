@@ -27,7 +27,7 @@ type SortablePlacementSettings<V, E> = {
   sortComparator?: (u: Vertex<V, E>, v: Vertex<V, E>) => number;
 };
 
-export type RandomLayoutType = 'grid' | 'honeycomb' | 'random';
+export type RandomLayoutType = 'grid' | 'triangles' | 'random';
 
 export type RandomPlacementSettings = {
   strategy: 'random';

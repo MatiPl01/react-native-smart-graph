@@ -10,7 +10,12 @@ import {
   DirectedCurvedEdgeRenderers,
   UndirectedCurvedEdgeRenderers
 } from '../renderer/edges/curved';
-import { CurvedEdgeSettings, StraightEdgeSettings } from '../settings';
+import {
+  CurvedEdgeSettings,
+  EdgeArrowSettings,
+  EdgeLabelSettings,
+  StraightEdgeSettings
+} from '../settings';
 
 type SharedEdgeComponentProps = {
   v1Position: AnimatedVectorCoordinates;
@@ -26,7 +31,10 @@ export type DirectedCurvedEdgeComponentProps<E, V> =
     edge: DirectedEdge<E, V>;
     edgesBetweenVertices: Array<DirectedEdge<E, V>>;
     renderers: DirectedCurvedEdgeRenderers<E>;
-    settings: Required<CurvedEdgeSettings>;
+    settings: Required<CurvedEdgeSettings> & {
+      arrow: Required<EdgeArrowSettings>;
+      label?: EdgeLabelSettings;
+    };
   };
 
 export type UndirectedCurvedEdgeComponentProps<E, V> =
@@ -34,7 +42,9 @@ export type UndirectedCurvedEdgeComponentProps<E, V> =
     edge: UndirectedEdge<E, V>;
     edgesBetweenVertices: Array<UndirectedEdge<E, V>>;
     renderers: UndirectedCurvedEdgeRenderers<E>;
-    settings: Required<CurvedEdgeSettings>;
+    settings: Required<CurvedEdgeSettings> & {
+      label?: EdgeLabelSettings;
+    };
   };
 
 export type DirectedStraightEdgeComponentProps<E, V> =
@@ -42,7 +52,10 @@ export type DirectedStraightEdgeComponentProps<E, V> =
     edge: DirectedEdge<E, V>;
     edgesBetweenVertices: Array<DirectedEdge<E, V>>;
     renderers: DirectedStraightEdgeRenderers<E>;
-    settings: Required<StraightEdgeSettings>;
+    settings: Required<StraightEdgeSettings> & {
+      arrow: Required<EdgeArrowSettings>;
+      label?: EdgeLabelSettings;
+    };
   };
 
 export type UndirectedStraightEdgeComponentProps<E, V> =
@@ -50,7 +63,9 @@ export type UndirectedStraightEdgeComponentProps<E, V> =
     edge: UndirectedEdge<E, V>;
     edgesBetweenVertices: Array<UndirectedEdge<E, V>>;
     renderers: UndirectedStraightEdgeRenderers<E>;
-    settings: Required<StraightEdgeSettings>;
+    settings: Required<StraightEdgeSettings> & {
+      label?: EdgeLabelSettings;
+    };
   };
 
 export type EdgeComponentProps<E, V> =
