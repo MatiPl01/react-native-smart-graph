@@ -5,7 +5,7 @@ import { AnimatedVectorCoordinates } from '@/types/layout';
 
 import {
   animatedVectorToVector,
-  distanceBetweenPointAndLine,
+  distanceBetweenPointAndSegment,
   distanceBetweenVectors
 } from '../vectors';
 
@@ -38,6 +38,7 @@ export const findClosestVertex = (
 export const findPressedVertex = (
   position: Vector,
   vertexRadius: number,
+  hitSlop: number,
   animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
 ): string | null => {
   const { key: closestVertexKey, distance } = findClosestVertex(
@@ -45,7 +46,7 @@ export const findPressedVertex = (
     animatedVerticesPositions
   );
 
-  if (closestVertexKey && distance <= vertexRadius) {
+  if (closestVertexKey && distance <= vertexRadius + hitSlop) {
     return closestVertexKey;
   }
 
@@ -70,7 +71,7 @@ export const findClosestEdge = <E, V>(
       animatedVerticesPositions[vertex2.key]
     );
 
-    const distance = distanceBetweenPointAndLine(
+    const distance = distanceBetweenPointAndSegment(
       position,
       vertex1Position,
       vertex2Position
@@ -91,7 +92,7 @@ export const findClosestEdge = <E, V>(
 export const findPressedEdge = <E, V>(
   position: Vector,
   graph: Graph<V, E>,
-  pressDistance: number,
+  hitSlop: number,
   animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
 ): string | null => {
   const { key: closestEdgeKey, distance } = findClosestEdge(
@@ -102,7 +103,7 @@ export const findPressedEdge = <E, V>(
 
   if (closestEdgeKey) {
     const edge = graph.edge(closestEdgeKey);
-    if (edge && distance <= pressDistance) {
+    if (edge && distance <= hitSlop) {
       return closestEdgeKey;
     }
   }

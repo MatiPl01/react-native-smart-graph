@@ -3,6 +3,7 @@ import { PropsWithChildren, createContext, useContext, useRef } from 'react';
 import { Vector } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
+import { EDGE_HIT_SLOP, VERTEX_HIT_SLOP } from '@/constants/events';
 import { Graph } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphSettings } from '@/types/settings';
@@ -40,7 +41,8 @@ export const useGraphEventsContext = () => {
 type PressHandler = (data: { key: string; position: Vector }) => void;
 
 type GraphEventsProviderProps = PropsWithChildren<{
-  edgePressDistance?: number;
+  edgeHitSlop?: number;
+  vertexHitSlop?: number;
   onVertexPress?: PressHandler;
   onVertexLongPress?: PressHandler;
   onEdgePress?: PressHandler;
@@ -49,7 +51,8 @@ type GraphEventsProviderProps = PropsWithChildren<{
 
 export default function GraphEventsProvider<V, E>({
   children,
-  edgePressDistance = 10,
+  edgeHitSlop = EDGE_HIT_SLOP,
+  vertexHitSlop = VERTEX_HIT_SLOP,
   ...eventHandlers
 }: GraphEventsProviderProps) {
   const animatedVerticesPositionsRef = useRef<
@@ -84,6 +87,7 @@ export default function GraphEventsProvider<V, E>({
         position,
         graphSettingsRef.current.components?.vertex?.radius ||
           VERTEX_COMPONENT_SETTINGS.radius,
+        vertexHitSlop,
         animatedVerticesPositionsRef.current
       );
       if (vertexKey) {
@@ -96,7 +100,7 @@ export default function GraphEventsProvider<V, E>({
       const edgeKey = findPressedEdge(
         position,
         graphModelRef.current,
-        edgePressDistance,
+        edgeHitSlop,
         animatedVerticesPositionsRef.current
       );
       if (edgeKey) {
