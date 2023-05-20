@@ -96,6 +96,7 @@ export default function GraphComponent<
       string,
       {
         edge: Edge<E, V>;
+        edgesBetweenVertices: Array<Edge<E, V>>;
         removed: boolean;
       }
     >
@@ -214,6 +215,10 @@ export default function GraphComponent<
       if (!newEdgesData[edge.key]) {
         newEdgesData[edge.key] = {
           edge,
+          edgesBetweenVertices: graph.getEdgesBetween(
+            edge.vertices[0].key,
+            edge.vertices[1].key
+          ),
           removed: false
         };
       }
@@ -313,32 +318,34 @@ export default function GraphComponent<
   }, []);
 
   const renderEdges = useCallback(() => {
-    return Object.values(edgesData).map(({ edge, removed }) => {
-      const [v1, v2] = edge.vertices;
-      const v1Position = animatedVerticesPositions[v1.key];
-      const v2Position = animatedVerticesPositions[v2.key];
+    return Object.values(edgesData).map(
+      ({ edge, edgesBetweenVertices, removed }) => {
+        const [v1, v2] = edge.vertices;
+        const v1Position = animatedVerticesPositions[v1.key];
+        const v2Position = animatedVerticesPositions[v2.key];
 
-      if (!v1Position || !v2Position) {
-        return null;
+        if (!v1Position || !v2Position) {
+          return null;
+        }
+
+        return (
+          <EdgeComponent
+            key={edge.key}
+            {...({
+              edge,
+              v1Position,
+              v2Position,
+              edgesBetweenVertices,
+              vertexRadius: memoSettings.components.vertex.radius,
+              renderers: memoRenderers.edge,
+              settings: memoSettings.components.edge,
+              onRemove: handleEdgeRemove,
+              removed
+            } as EdgeComponentProps<E, V>)}
+          />
+        );
       }
-
-      return (
-        <EdgeComponent
-          key={edge.key}
-          {...({
-            edge,
-            v1Position,
-            v2Position,
-            edgesBetweenVertices: graph.getEdgesBetween(v1.key, v2.key),
-            vertexRadius: memoSettings.components.vertex.radius,
-            renderers: memoRenderers.edge,
-            settings: memoSettings.components.edge,
-            onRemove: handleEdgeRemove,
-            removed
-          } as EdgeComponentProps<E, V>)}
-        />
-      );
-    });
+    );
     // Update edges if rendered vertices were changed or if edges in the current
     // graph model were changed
   }, [animatedVerticesPositions, edgesData]);

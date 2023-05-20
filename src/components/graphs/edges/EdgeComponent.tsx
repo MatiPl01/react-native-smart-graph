@@ -45,7 +45,7 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         }
       );
     }
-  }, [props.removed]);
+  }, []);
 
   const sharedProps = {
     ...props,
