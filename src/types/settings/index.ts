@@ -1,6 +1,8 @@
 import {
   DirectedGraphComponentsSettings,
-  UndirectedGraphComponentsSettings
+  DirectedGraphComponentsSettingsWithDefaults,
+  UndirectedGraphComponentsSettings,
+  UndirectedGraphComponentsSettingsWithDefaults
 } from './components';
 import {
   DirectedGraphPlacementSettings,
@@ -23,3 +25,11 @@ export type UndirectedGraphSettings<V, E> = {
 export type GraphSettings<V, E> =
   | DirectedGraphSettings<V, E>
   | UndirectedGraphSettings<V, E>;
+
+export type GraphSettingsWithDefaults<V, E> =
+  | (DirectedGraphSettings<V, E> & {
+      components: DirectedGraphComponentsSettingsWithDefaults;
+    })
+  | (UndirectedGraphSettings<V, E> & {
+      components: UndirectedGraphComponentsSettingsWithDefaults;
+    });

@@ -2,6 +2,7 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { Vector } from '@shopify/react-native-skia';
 
+// Vectors
 export type AnimatedVector = SharedValue<Vector>;
 
 export type AnimatedVectorCoordinates = {
@@ -28,6 +29,7 @@ export type AnimatedBoundingRect = {
   left: SharedValue<number>;
 };
 
+// Others
 export type RelativeVerticesOrder = Record<
   string,
   {
@@ -36,3 +38,5 @@ export type RelativeVerticesOrder = Record<
     position: number;
   }
 >;
+
+export type AnimatedPath = SharedValue<string>;

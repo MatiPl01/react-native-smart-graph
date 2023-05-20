@@ -3,26 +3,18 @@ import { useDerivedValue } from 'react-native-reanimated';
 import { Line } from '@shopify/react-native-skia';
 
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
-import { AnimatedVector } from '@/types/layout';
-import { EdgeRendererProps } from '@/types/renderer';
-import { areDirectedEdgeRendererProps } from '@/utils/renderers';
+import { StraightEdgeRendererProps } from '@/types/renderer';
 
-export default function DefaultEdgeRenderer<E, R extends EdgeRendererProps<E>>(
-  props: R
-) {
-  const animationProgress = props.animationProgress;
-  let p1Target: AnimatedVector, p2Target: AnimatedVector;
-
-  if (areDirectedEdgeRendererProps(props)) {
-    ({ from: p1Target, to: p2Target } = props);
-  } else {
-    [p1Target, p2Target] = props.points;
-  }
-
+export default function DefaultStraightEdgeRenderer<E>({
+  animationProgress,
+  p1: p1Target,
+  p2: p2Target
+}: StraightEdgeRendererProps<E>) {
   const center = useDerivedValue(() => ({
     x: (p1Target.value.x + p2Target.value.x) / 2,
     y: (p1Target.value.y + p2Target.value.y) / 2
   }));
+
   const p1 = useDerivedValue(() => ({
     x:
       center.value.x +
@@ -31,6 +23,7 @@ export default function DefaultEdgeRenderer<E, R extends EdgeRendererProps<E>>(
       center.value.y +
       (p1Target.value.y - center.value.y) * animationProgress.value
   }));
+
   const p2 = useDerivedValue(() => ({
     x:
       center.value.x +

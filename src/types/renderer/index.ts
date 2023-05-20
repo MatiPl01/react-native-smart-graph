@@ -1,26 +1,36 @@
 import {
-  DirectedEdgeRenderFunction,
-  DirectedEdgeRendererProps,
-  DirectedGraphRenderers
-} from './directedGraph';
+  CurvedEdgeRenderFunction,
+  CurvedEdgeRendererProps
+} from './edges/curved';
+import { EdgeArrowRenderFunction } from './edges/shared';
 import {
-  UndirectedEdgeRenderFunction,
-  UndirectedEdgeRendererProps,
-  UndirectedGraphRenderers
-} from './undirectedGraph';
+  StraightEdgeRenderFunction,
+  StraightEdgeRendererProps
+} from './edges/straight';
+import { EdgeLabelRendererFunction, VertexRenderFunction } from './shared';
 
-export * from './directedGraph';
+export * from './edges/straight';
+export * from './edges/curved';
+export * from './edges/shared';
 export * from './shared';
-export * from './undirectedGraph';
 
 export type EdgeRendererProps<E> =
-  | DirectedEdgeRendererProps<E>
-  | UndirectedEdgeRendererProps<E>;
+  | StraightEdgeRendererProps<E>
+  | CurvedEdgeRendererProps<E>;
 
 export type EdgeRenderFunction<E> =
-  | DirectedEdgeRenderFunction<E>
-  | UndirectedEdgeRenderFunction<E>;
+  | StraightEdgeRenderFunction<E>
+  | CurvedEdgeRenderFunction<E>;
 
-export type GraphRenderers<V, E> =
-  | DirectedGraphRenderers<V, E>
-  | UndirectedGraphRenderers<V, E>;
+export type GraphRenderers<V, E> = {
+  vertex: VertexRenderFunction<V>;
+  label?: EdgeLabelRendererFunction<E>;
+  arrow?: EdgeArrowRenderFunction;
+} & (
+  | {
+      edge: StraightEdgeRenderFunction<E>;
+    }
+  | {
+      edge: CurvedEdgeRenderFunction<E>;
+    }
+);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Edge,
   GraphConnections,
@@ -15,6 +16,10 @@ export default abstract class Graph<
 {
   protected readonly vertices$: Record<string, GV> = {};
   protected readonly edges$: Record<string, GE> = {};
+  protected readonly edgesBetweenVertices$: Record<
+    string,
+    Record<string, Array<GE>>
+  > = {};
 
   private readonly observers: Array<GraphObserver<V, E>> = [];
 
@@ -79,6 +84,10 @@ export default abstract class Graph<
     return this.edges$[key];
   }
 
+  getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE> {
+    return this.edgesBetweenVertices$[vertex1key]?.[vertex2key] || [];
+  }
+
   removeVertex(key: string): V {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
@@ -107,9 +116,48 @@ export default abstract class Graph<
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
+    // Add edge to edges between vertices
+    const [vertex1, vertex2] = edge.vertices;
+    if (!this.edgesBetweenVertices$[vertex1.key]) {
+      this.edgesBetweenVertices$[vertex1.key] = {};
+    }
+    if (!this.edgesBetweenVertices$[vertex2.key]) {
+      this.edgesBetweenVertices$[vertex2.key] = {};
+    }
+    if (!this.edgesBetweenVertices$[vertex1.key]![vertex2.key]) {
+      this.edgesBetweenVertices$[vertex1.key]![vertex2.key] = [];
+    }
+    if (!this.edgesBetweenVertices$[vertex2.key]![vertex1.key]) {
+      this.edgesBetweenVertices$[vertex2.key]![vertex1.key] =
+        this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!;
+    }
+    this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
+    // Add edge to edges
     this.edges$[edge.key] = edge;
     this.notifyEdgeAdded(edge);
     return edge;
+  }
+
+  protected removeEdgeObject(edge: GE): void {
+    // Remove edge from edges between vertices
+    const [vertex1, vertex2] = edge.vertices;
+    this.edgesBetweenVertices$[vertex1.key]![vertex2.key]?.splice(
+      this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.indexOf(edge),
+      1
+    );
+    if (!this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.length) {
+      delete this.edgesBetweenVertices$[vertex1.key]![vertex2.key];
+      delete this.edgesBetweenVertices$[vertex2.key]![vertex1.key];
+    }
+    if (!Object.keys(this.edgesBetweenVertices$[vertex1.key]!).length) {
+      delete this.edgesBetweenVertices$[vertex1.key];
+    }
+    if (!Object.keys(this.edgesBetweenVertices$[vertex2.key]!).length) {
+      delete this.edgesBetweenVertices$[vertex2.key];
+    }
+    // Remove the edge from edges
+    delete this.edges$[edge.key];
+    this.notifyEdgeRemoved(edge);
   }
 
   protected notifyEdgeRemoved(edge: GE): void {

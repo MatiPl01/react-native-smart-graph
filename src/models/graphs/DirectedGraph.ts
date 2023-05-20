@@ -65,8 +65,7 @@ export default class DirectedGraph<V, E> extends Graph<
 
     edge.source.removeOutEdge(key);
     edge.target.removeInEdge(key);
-    delete this.edges$[key];
-    this.notifyEdgeRemoved(edge);
+    this.removeEdgeObject(edge);
 
     return edge.value;
   }

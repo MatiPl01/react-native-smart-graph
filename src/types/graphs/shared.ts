@@ -33,6 +33,7 @@ export interface Graph<V, E> {
   removeObserver(observer: GraphObserver<V, E>): void;
   hasVertex(key: string): boolean;
   hasEdge(key: string): boolean;
+  getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<E, V>>;
   vertex(key: string): Vertex<V, E> | undefined;
   edge(key: string): Edge<E, V> | undefined;
   insertVertex(key: string, value: V, radius: number): Vertex<V, E>;

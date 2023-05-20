@@ -1,13 +1,14 @@
 import React from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { useDerivedValue } from 'react-native-reanimated';
 
-import { Group, Vertices, vec } from '@shopify/react-native-skia';
+import { Group, Vertices } from '@shopify/react-native-skia';
 
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
 import { EdgeArrowRendererProps } from '@/types/renderer';
 
 export default function DefaultEdgeArrowRenderer({
-  size,
+  width,
+  height,
   centerPosition,
   rotation,
   animationProgress
@@ -16,10 +17,10 @@ export default function DefaultEdgeArrowRenderer({
   const colors = [color, color, color];
 
   const vertices = useDerivedValue(() => {
-    const x = size.value / 2 - (1 - animationProgress.value) * size.value;
-    const y = 0.25 * size.value * animationProgress.value;
+    const x = height.value / 2 - (1 - animationProgress.value) * height.value;
+    const y = 0.35 * width.value * animationProgress.value;
     return [
-      { x: -size.value / 2, y: 0 },
+      { x: -height.value / 2, y: 0 },
       { x, y: -y },
       { x, y }
     ];

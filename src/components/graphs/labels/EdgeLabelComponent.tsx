@@ -1,7 +1,11 @@
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import {
+  SharedValue,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { Edge } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVector } from '@/types/layout';
 import {
   EdgeLabelRendererFunction,
   SharedRenderersProps
@@ -9,35 +13,26 @@ import {
 
 type EdgeLabelComponentProps<E, V> = SharedRenderersProps & {
   edge: Edge<E, V>;
+  p1: AnimatedVector;
+  p2: AnimatedVector;
   vertexRadius: number;
-  v1Position: AnimatedVectorCoordinates;
-  v2Position: AnimatedVectorCoordinates;
+  centerPosition: AnimatedVector;
+  maxSize: SharedValue<number>;
   renderer: EdgeLabelRendererFunction<E>;
 };
 
 export default function EdgeLabelComponent<E, V>({
   edge,
-  v1Position,
-  v2Position,
+  p1,
+  p2,
+  centerPosition,
+  maxSize,
   renderer,
   ...restProps
 }: EdgeLabelComponentProps<E, V>) {
-  const { x: x1, y: y1 } = v1Position;
-  const { x: x2, y: y2 } = v2Position;
-
-  const edgeCenterPosition = useDerivedValue(
-    () => ({
-      x: (x1.value + x2.value) / 2,
-      y: (y1.value + y2.value) / 2
-    }),
-    [x1, x2, y1, y2]
+  const edgeLength = useDerivedValue(() =>
+    Math.sqrt((p2.value.x - p1.value.x) ** 2 + (p2.value.y - p1.value.y) ** 2)
   );
-
-  const edgeLength = useDerivedValue(
-    () => Math.sqrt((x2.value - x1.value) ** 2 + (y2.value - y1.value) ** 2),
-    [x1, x2, y1, y2]
-  );
-
   // Block swapping after making a swap
   // 0 - not blocked
   // 1 - blocked for top swap
@@ -46,7 +41,9 @@ export default function EdgeLabelComponent<E, V>({
   const swapBlocked = useSharedValue(0);
   const isSwapped = useSharedValue(false);
   const edgeRotation = useDerivedValue(() => {
-    const angle = Math.atan2(y2.value - y1.value, x2.value - x1.value);
+    const { x: x1, y: y1 } = p1.value;
+    const { x: x2, y: y2 } = p2.value;
+    const angle = Math.atan2(y2 - y1, x2 - x1);
 
     if (!swapBlocked.value) {
       if (angle < -Math.PI / 2 || Math.PI / 2 < angle) {
@@ -76,14 +73,15 @@ export default function EdgeLabelComponent<E, V>({
       return angle - Math.PI;
     }
     return angle;
-  }, [x1, x2, y1, y2]);
+  });
 
   return renderer({
     key: edge.key,
     data: edge.value,
-    edgeCenterPosition,
-    edgeLength,
+    centerPosition,
+    maxSize,
     edgeRotation,
+    edgeLength,
     ...restProps
   });
 }

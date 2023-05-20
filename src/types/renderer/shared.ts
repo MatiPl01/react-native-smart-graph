@@ -24,7 +24,8 @@ export type EdgeLabelRendererProps<E> = SharedRenderersProps & {
   key: string;
   data: E;
   vertexRadius: number;
-  edgeCenterPosition: AnimatedVector;
+  centerPosition: AnimatedVector;
+  maxSize: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   edgeLength: SharedValue<number>;
 };

@@ -9,21 +9,24 @@ import { EdgeLabelRendererProps } from '@/types/renderer';
 export default function DefaultEdgeLabelRenderer<E>({
   key,
   vertexRadius,
-  edgeCenterPosition,
+  centerPosition,
+  maxSize,
   edgeRotation,
   animationProgress
 }: EdgeLabelRendererProps<E>) {
   const fontSize =
     vertexRadius * DEFAULT_LABEL_RENDERER_SETTINGS.font.sizeRatio;
-  const font = useFont(FONTS.rubikFont, fontSize);
+  const font = useFont(FONTS.rubikFont, 20);
 
   const wrapperTransform = useDerivedValue(() => [
-    { translateX: edgeCenterPosition.value.x },
-    { translateY: edgeCenterPosition.value.y },
-    { rotate: edgeRotation.value }
+    { translateX: centerPosition.value.x },
+    { translateY: centerPosition.value.y },
+    { rotate: edgeRotation.value },
+    { scale: Math.min(1, maxSize.value / fontSize) }
   ]);
+  // TODO - improve label centering
   const labelTransform = useDerivedValue(() => [
-    { translateX: ((-key.length * fontSize) / 4) * animationProgress.value },
+    { translateX: ((-key.length * fontSize) / 3.25) * animationProgress.value },
     { translateY: (fontSize / 4) * animationProgress.value },
     { scale: animationProgress.value }
   ]);
