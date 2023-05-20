@@ -5,7 +5,7 @@ import { AnimatedVectorCoordinates } from '@/types/layout';
 
 import {
   animatedVectorToVector,
-  distanceBetweenPointAndLine,
+  distanceBetweenPointAndSegment,
   distanceBetweenVectors
 } from '../vectors';
 
@@ -70,7 +70,7 @@ export const findClosestEdge = <E, V>(
       animatedVerticesPositions[vertex2.key]
     );
 
-    const distance = distanceBetweenPointAndLine(
+    const distance = distanceBetweenPointAndSegment(
       position,
       vertex1Position,
       vertex2Position

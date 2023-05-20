@@ -1,4 +1,4 @@
-import { Vector, vec } from '@shopify/react-native-skia';
+import { Vector, sub, vec } from '@shopify/react-native-skia';
 
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
@@ -66,6 +66,11 @@ export const vectorLength = (vector: Vector): number => {
   return Math.sqrt(vector.x ** 2 + vector.y ** 2);
 };
 
+export const dotProduct = (vector1: Vector, vector2: Vector): number => {
+  'worklet';
+  return vector1.x * vector2.x + vector1.y * vector2.y;
+};
+
 export const distanceBetweenVectors = (
   vector1: Vector,
   vector2: Vector
@@ -74,22 +79,31 @@ export const distanceBetweenVectors = (
   return vectorLength(subtractVectors(vector1, vector2));
 };
 
-export const distanceBetweenPointAndLine = (
+// answer with great explanation - https://stackoverflow.com/a/6853926
+export const distanceBetweenPointAndSegment = (
   point: Vector,
   lineStart: Vector,
   lineEnd: Vector
 ): number => {
   'worklet';
-  if (point.x - lineStart.x === 0 || point.y - lineStart.y === 0) {
-    return 0;
+  const A = subtractVectors(point, lineStart);
+  const B = subtractVectors(lineEnd, lineStart);
+
+  const dot = dotProduct(A, B);
+  const len2 = vectorLength(B) ** 2;
+  let param = -1;
+  if (len2 !== 0) {
+    param = dot / len2;
   }
 
-  const a = (lineEnd.y - lineStart.y) / (lineEnd.x - lineStart.x);
-  const b = lineStart.y - a * lineStart.x;
+  let projectedPoint: Vector;
+  if (param < 0) {
+    projectedPoint = lineStart;
+  } else if (param > 1) {
+    projectedPoint = lineEnd;
+  } else {
+    projectedPoint = addVectors(lineStart, multiplyVector(B, param));
+  }
 
-  const A = a;
-  const B = -1;
-  const C = b;
-
-  return Math.abs(A * point.x + B * point.y + C) / Math.sqrt(A ** 2 + B ** 2);
+  return distanceBetweenVectors(point, projectedPoint);
 };
