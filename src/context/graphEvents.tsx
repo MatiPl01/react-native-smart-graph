@@ -40,7 +40,8 @@ export const useGraphEventsContext = () => {
 type PressHandler = (data: { key: string; position: Vector }) => void;
 
 type GraphEventsProviderProps = PropsWithChildren<{
-  edgePressDistance?: number;
+  edgeHitSlop?: number;
+  vertexHitSlop?: number;
   onVertexPress?: PressHandler;
   onVertexLongPress?: PressHandler;
   onEdgePress?: PressHandler;
@@ -49,7 +50,8 @@ type GraphEventsProviderProps = PropsWithChildren<{
 
 export default function GraphEventsProvider<V, E>({
   children,
-  edgePressDistance = 10,
+  edgeHitSlop = 10,
+  vertexHitSlop = 10,
   ...eventHandlers
 }: GraphEventsProviderProps) {
   const animatedVerticesPositionsRef = useRef<
@@ -84,6 +86,7 @@ export default function GraphEventsProvider<V, E>({
         position,
         graphSettingsRef.current.components?.vertex?.radius ||
           VERTEX_COMPONENT_SETTINGS.radius,
+        vertexHitSlop,
         animatedVerticesPositionsRef.current
       );
       if (vertexKey) {
@@ -96,7 +99,7 @@ export default function GraphEventsProvider<V, E>({
       const edgeKey = findPressedEdge(
         position,
         graphModelRef.current,
-        edgePressDistance,
+        edgeHitSlop,
         animatedVerticesPositionsRef.current
       );
       if (edgeKey) {

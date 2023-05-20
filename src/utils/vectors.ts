@@ -53,12 +53,12 @@ export const addVectorsArray = (vectors: Array<Vector>): Vector => {
 
 export const subtractVectors = (vector1: Vector, vector2: Vector): Vector => {
   'worklet';
-  return vec(vector1.x - vector2.x, vector1.y - vector2.y);
+  return { x: vector1.x - vector2.x, y: vector1.y - vector2.y };
 };
 
 export const multiplyVector = (vector: Vector, factor: number): Vector => {
   'worklet';
-  return vec(vector.x * factor, vector.y * factor);
+  return { x: vector.x * factor, y: vector.y * factor };
 };
 
 export const vectorLength = (vector: Vector): number => {
