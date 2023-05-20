@@ -5,7 +5,6 @@ import {
   StraightEdgeSettings,
   VertexSettings
 } from '@/types/settings';
-import { DeepRequiredAll } from '@/types/utils';
 
 export const VERTEX_COMPONENT_SETTINGS: Required<VertexSettings> = {
   radius: 20

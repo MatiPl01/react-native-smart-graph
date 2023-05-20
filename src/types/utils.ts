@@ -20,7 +20,3 @@ type ShiftUnion<
   P extends PropertyKey,
   T extends Array<any>
 > = T extends Array<any> ? (T[0] extends P ? Shift<T> : never) : never;
-
-export type DeepRequiredAll<T> = {
-  [K in keyof T]: DeepRequiredAll<T[K]>;
-} & Required<T>;

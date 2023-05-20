@@ -26,6 +26,7 @@ import {
   GraphSettingsWithDefaults
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
+import { getEdgeIndex } from '@/utils/graphs/layout';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
@@ -96,7 +97,8 @@ export default function GraphComponent<
       string,
       {
         edge: Edge<E, V>;
-        edgesBetweenVertices: Array<Edge<E, V>>;
+        order: number;
+        edgesCount: number;
         removed: boolean;
       }
     >
@@ -215,13 +217,18 @@ export default function GraphComponent<
     // Add new edges to edges data
     const newEdgesData = { ...edgesData };
     edges.forEach(edge => {
-      if (!newEdgesData[edge.key] || newEdgesData[edge.key]?.removed) {
+      const [v1, v2] = edge.vertices;
+      const edgesBetween = graph.getEdgesBetween(v1.key, v2.key);
+
+      if (
+        !newEdgesData[edge.key] ||
+        newEdgesData[edge.key]?.removed ||
+        newEdgesData[edge.key]?.edgesCount !== edgesBetween.length
+      ) {
         newEdgesData[edge.key] = {
           edge,
-          edgesBetweenVertices: graph.getEdgesBetween(
-            edge.vertices[0].key,
-            edge.vertices[1].key
-          ),
+          order: getEdgeIndex(edge, edgesBetween),
+          edgesCount: edgesBetween.length,
           removed: false
         };
       }
@@ -322,7 +329,7 @@ export default function GraphComponent<
 
   const renderEdges = useCallback(() => {
     return Object.values(edgesData).map(
-      ({ edge, edgesBetweenVertices, removed }) => {
+      ({ edge, order, edgesCount, removed }) => {
         const [v1, v2] = edge.vertices;
         const v1Position = animatedVerticesPositions[v1.key];
         const v2Position = animatedVerticesPositions[v2.key];
@@ -338,7 +345,8 @@ export default function GraphComponent<
               edge,
               v1Position,
               v2Position,
-              edgesBetweenVertices,
+              order,
+              edgesCount,
               vertexRadius: memoSettings.components.vertex.radius,
               renderers: memoRenderers.edge,
               settings: memoSettings.components.edge,

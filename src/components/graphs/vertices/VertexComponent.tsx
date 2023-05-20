@@ -73,7 +73,6 @@ function VertexComponent<V, E>({
     data: vertex.value,
     radius: settings.radius,
     position: { x: positionX, y: positionY },
-    removed,
     animationProgress
   });
 }

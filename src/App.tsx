@@ -11,16 +11,10 @@ import GraphEventsProvider from './context/graphEvents';
 
 // TODO - remove this after testing
 const ADDED_COMPONENTS = [
-  { key: 'V1', data: 'V1' },
-  { key: 'V2', data: 'V2' },
   { from: 'V1', to: 'V2', key: 'E1', data: 'E1' },
   { from: 'V1', to: 'V2', key: 'E2', data: 'E2' },
   { from: 'V2', to: 'V1', key: 'E3', data: 'E3' },
   { from: 'V2', to: 'V1', key: 'E4', data: 'E4' },
-  { key: 'V3', data: 'V3' },
-  { from: 'V2', to: 'V3', key: 'E5', data: 'E5' },
-  { from: 'V3', to: 'V1', key: 'E6', data: 'E6' },
-  { from: 'V3', to: 'V2', key: 'E7', data: 'E7' },
   { from: 'V1', to: 'V2', key: 'E8', data: 'E8' }
 ];
 
@@ -28,7 +22,18 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = new DirectedGraph();
+  const graph = DirectedGraph.fromData(
+    [
+      { key: 'V1', data: 'V1' },
+      { key: 'V2', data: 'V2' },
+      { key: 'V3', data: 'V3' }
+    ],
+    [
+      { from: 'V2', to: 'V3', key: 'E5', data: 'E5' },
+      { from: 'V3', to: 'V1', key: 'E6', data: 'E6' },
+      { from: 'V3', to: 'V2', key: 'E7', data: 'E7' }
+    ]
+  );
 
   // TODO - remove this useEffect after testing
   useEffect(() => {
@@ -65,7 +70,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 250);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
@@ -98,10 +103,7 @@ export default function App() {
                   },
                   components: {
                     edge: {
-                      type: 'curved',
-                      label: {
-                        sizeRatio: 0.5
-                      }
+                      type: 'curved'
                     }
                   }
                 }}

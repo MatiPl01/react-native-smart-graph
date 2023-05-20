@@ -1,5 +1,10 @@
 import { memo, useEffect } from 'react';
-import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  runOnJS,
+  useDerivedValue,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
 import EASING from '@/constants/easings';
 import {
@@ -17,6 +22,8 @@ import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeCo
 
 function EdgeComponent<E, V>({
   edge,
+  order,
+  edgesCount,
   removed,
   onRemove,
   ...restProps
@@ -25,7 +32,12 @@ function EdgeComponent<E, V>({
   // ANIMATION
   // Edge render animation progress
   const animationProgress = useSharedValue(0);
+  // EDGE ORDERING
+  // Target edge order
+  const animatedOrder = useSharedValue(order);
+  const animatedEdgesCount = useSharedValue(edgesCount);
 
+  // Edge mount/unmount animation
   useEffect(() => {
     // ANimate vertex on mount
     if (!removed) {
@@ -52,11 +64,24 @@ function EdgeComponent<E, V>({
     }
   }, [removed]);
 
+  console.log(edge.key, order, edgesCount);
+
+  // Edge ordering animation
+  useEffect(() => {
+    animatedOrder.value = withTiming(order, {
+      duration: 500 // TODO - make this a setting
+    });
+    animatedEdgesCount.value = withTiming(edgesCount, {
+      duration: 500 // TODO - make this a setting
+    });
+  }, [order, edgesCount]);
+
   const sharedProps = {
     ...restProps,
     edge,
-    removed,
-    animationProgress
+    animationProgress,
+    animatedOrder,
+    animatedEdgesCount
   };
 
   switch (sharedProps.settings.type) {

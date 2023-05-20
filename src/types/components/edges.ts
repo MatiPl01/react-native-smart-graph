@@ -22,13 +22,13 @@ type SharedEdgeComponentProps = {
   v2Position: AnimatedVectorCoordinates;
   vertexRadius: number;
   animationProgress: SharedValue<number>;
-  removed: boolean;
+  animatedOrder: SharedValue<number>;
+  animatedEdgesCount: SharedValue<number>;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: DirectedEdge<E, V>;
-    edgesBetweenVertices: Array<DirectedEdge<E, V>>;
     renderers: DirectedCurvedEdgeRenderers<E>;
     settings: Required<CurvedEdgeSettings> & {
       arrow: Required<EdgeArrowSettings>;
@@ -39,7 +39,6 @@ export type DirectedCurvedEdgeComponentProps<E, V> =
 export type UndirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: UndirectedEdge<E, V>;
-    edgesBetweenVertices: Array<UndirectedEdge<E, V>>;
     renderers: UndirectedCurvedEdgeRenderers<E>;
     settings: Required<CurvedEdgeSettings> & {
       label?: EdgeLabelSettings;
@@ -49,7 +48,6 @@ export type UndirectedCurvedEdgeComponentProps<E, V> =
 export type DirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: DirectedEdge<E, V>;
-    edgesBetweenVertices: Array<DirectedEdge<E, V>>;
     renderers: DirectedStraightEdgeRenderers<E>;
     settings: Required<StraightEdgeSettings> & {
       arrow: Required<EdgeArrowSettings>;
@@ -60,18 +58,21 @@ export type DirectedStraightEdgeComponentProps<E, V> =
 export type UndirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
     edge: UndirectedEdge<E, V>;
-    edgesBetweenVertices: Array<UndirectedEdge<E, V>>;
     renderers: UndirectedStraightEdgeRenderers<E>;
     settings: Required<StraightEdgeSettings> & {
       label?: EdgeLabelSettings;
     };
   };
 
-export type EdgeComponentProps<E, V> = (
+export type EdgeComponentProps<E, V> = Omit<
   | UndirectedCurvedEdgeComponentProps<E, V>
   | DirectedCurvedEdgeComponentProps<E, V>
   | UndirectedStraightEdgeComponentProps<E, V>
-  | DirectedStraightEdgeComponentProps<E, V>
-) & {
+  | DirectedStraightEdgeComponentProps<E, V>,
+  'animationProgress'
+> & {
+  order: number;
+  edgesCount: number;
+  removed: boolean;
   onRemove: (key: string) => void;
 };

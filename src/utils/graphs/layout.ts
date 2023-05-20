@@ -135,8 +135,8 @@ const getUndirectedEdgeIndex = <E, V>(
 export const getEdgeIndex = <E, V, GE extends Edge<E, V>>(
   edge: GE,
   edges: Array<GE>
-): number =>
-  edge.isDirected()
+): number => {
+  const res = edge.isDirected()
     ? getDirectedEdgeIndex(
         edge as unknown as DirectedEdge<E, V>,
         edges as unknown as Array<DirectedEdge<E, V>>
@@ -145,3 +145,14 @@ export const getEdgeIndex = <E, V, GE extends Edge<E, V>>(
         edge as unknown as UndirectedEdge<E, V>,
         edges as unknown as Array<UndirectedEdge<E, V>>
       );
+
+  console.log(
+    edge.key,
+    res,
+    edges.map(
+      e => `${e.key} ${e.vertices[0].key === edge.vertices[0].key ? 's' : 'o'}`
+    )
+  );
+
+  return res;
+};
