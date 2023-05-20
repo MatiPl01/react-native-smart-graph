@@ -23,10 +23,75 @@ let mode = 0;
 export default function App() {
   const graph = DirectedGraph.fromData(
     [
-      { key: 'V1', data: 'V1' },
-      { key: 'V2', data: 'V2' }
+      { key: 'root', data: 'root' },
+      { key: 'child1', data: 'child1' },
+      { key: 'child2', data: 'child2' },
+      { key: 'child3', data: 'child3' },
+      { key: 'child11', data: 'child11' },
+      { key: 'child12', data: 'child12' },
+      { key: 'root2', data: 'root2' },
+      { key: 'child21', data: 'child21' },
+      { key: 'child22', data: 'child22' },
+      { key: 'child23', data: 'child23' },
+      { key: 'child24', data: 'child24' },
+      { key: 'child25', data: 'child25' }
     ],
-    []
+    [
+      {
+        from: 'root',
+        to: 'child1',
+        data: 'root -> child1',
+        key: 'root-child1'
+      },
+      {
+        from: 'child1',
+        to: 'child11',
+        data: 'child1 -> child11',
+        key: 'child1-child11'
+      },
+      {
+        from: 'child1',
+        to: 'child12',
+        data: 'child1 -> child12',
+        key: 'child1-child12'
+      },
+      {
+        from: 'root',
+        to: 'child2',
+        data: 'root -> child2',
+        key: 'root-child2'
+      },
+      {
+        from: 'root',
+        to: 'child3',
+        data: 'root -> child3',
+        key: 'root-child3'
+      },
+      {
+        from: 'root2',
+        to: 'child21',
+        data: 'root2 -> child21',
+        key: 'root2-child21'
+      },
+      {
+        from: 'root2',
+        to: 'child22',
+        data: 'root2 -> child22',
+        key: 'root2-child22'
+      },
+      {
+        from: 'child22',
+        to: 'child23',
+        data: 'child22 -> child23',
+        key: 'child22-child23'
+      },
+      {
+        from: 'child22',
+        to: 'child24',
+        data: 'child22 -> child24',
+        key: 'child22-child24'
+      }
+    ]
   );
 
   // TODO - remove this useEffect after testing
@@ -53,8 +118,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 1500);
-
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 

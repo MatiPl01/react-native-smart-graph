@@ -96,10 +96,10 @@ export const getOrphanedVertices = <V, E>(
 ) => vertices.filter(vertex => vertex.inDegree === 0 && vertex.outDegree === 0);
 
 export const getBalancingOrphanedNeighbors = <V, E>(
-  rootVertex: DirectedGraphVertex<V, E>,
+  rootVertices: Array<DirectedGraphVertex<V, E>>,
   orphanedVertices: Array<DirectedGraphVertex<V, E>>
 ): Record<string, Array<DirectedGraphVertex<V, E>>> => {
-  let layerVertices = [rootVertex];
+  let layerVertices = [...rootVertices];
   let layer = 0;
   const layerMaxChildrenCount = {} as Record<number, number>;
   const orphanedNeighbours = {} as Record<
