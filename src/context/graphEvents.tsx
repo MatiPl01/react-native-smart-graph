@@ -3,6 +3,7 @@ import { PropsWithChildren, createContext, useContext, useRef } from 'react';
 import { Vector } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
+import { EDGE_HIT_SLOP, VERTEX_HIT_SLOP } from '@/constants/events';
 import { Graph } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphSettings } from '@/types/settings';
@@ -50,8 +51,8 @@ type GraphEventsProviderProps = PropsWithChildren<{
 
 export default function GraphEventsProvider<V, E>({
   children,
-  edgeHitSlop = 10,
-  vertexHitSlop = 10,
+  edgeHitSlop = EDGE_HIT_SLOP,
+  vertexHitSlop = VERTEX_HIT_SLOP,
   ...eventHandlers
 }: GraphEventsProviderProps) {
   const animatedVerticesPositionsRef = useRef<
