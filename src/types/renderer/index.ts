@@ -23,13 +23,13 @@ export type EdgeRenderFunction<E> =
   | CurvedEdgeRenderFunction<E>;
 
 type SharedGraphRenderers<V, E> = {
-  vertex: VertexRenderFunction<V>;
-  edge: EdgeRenderFunction<E>;
+  vertex?: VertexRenderFunction<V>;
+  edge?: EdgeRenderFunction<E>;
   label?: EdgeLabelRendererFunction<E>;
 };
 
 export type DirectedGraphRenderers<V, E> = SharedGraphRenderers<V, E> & {
-  arrow: EdgeArrowRenderFunction;
+  arrow?: EdgeArrowRenderFunction;
 };
 
 export type UndirectedGraphRenderers<V, E> = SharedGraphRenderers<V, E>;

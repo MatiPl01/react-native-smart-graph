@@ -24,7 +24,7 @@ import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
 import { useGraphEventsContext } from '@/context/graphEvents';
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
-import { canvasCoordinatesToContainerCoordinates } from '@/utils/canvas';
+import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
 import { fixedWithDecay } from '@/utils/reanimated';
 import { clamp, getScaleInParent } from '@/utils/views';
 

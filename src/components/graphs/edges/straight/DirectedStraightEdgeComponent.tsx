@@ -42,7 +42,8 @@ export default function DirectedStraightEdgeComponent<E, V>({
   // Edge arrow
   const dirVec = useDerivedValue(() => calcUnitVector(p2.value, p1.value));
   const arrowTipPosition = useSharedValue(p2.value);
-  const maxArrowWidth = useSharedValue(0);
+  const arrowWidth = useSharedValue(0);
+  const arrowHeight = useDerivedValue(() => 1.5 * arrowWidth.value);
   // Edge label
   const center = useDerivedValue(() => ({
     x: (p1.value.x + p2.value.x) / 2,
@@ -88,7 +89,7 @@ export default function DirectedStraightEdgeComponent<E, V>({
       // Update edge label max size
       maxLabelSize.value = maxSize;
       // Update edge arrow max size
-      maxArrowWidth.value = maxSize;
+      arrowWidth.value = Math.min(maxSize, settings.arrow.scale * vertexRadius);
     }
   );
 
@@ -112,7 +113,8 @@ export default function DirectedStraightEdgeComponent<E, V>({
         tipPosition={arrowTipPosition}
         renderer={renderers.arrow}
         vertexRadius={vertexRadius}
-        maxWidth={maxArrowWidth}
+        width={arrowWidth}
+        height={arrowHeight}
       />
       {renderers.label && (
         <EdgeLabelComponent
