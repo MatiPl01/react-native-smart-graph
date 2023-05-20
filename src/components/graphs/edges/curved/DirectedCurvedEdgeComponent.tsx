@@ -4,10 +4,11 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { Vector, rotate } from '@shopify/react-native-skia';
+import { rotate } from '@shopify/react-native-skia';
 
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { getEdgeIndex } from '@/utils/graphs/layout';
+import { calcApproxPointOnParabola } from '@/utils/math';
 import {
   animatedVectorToVector,
   calcOrthogonalUnitVector,
@@ -17,26 +18,6 @@ import {
 
 import EdgeArrowComponent from '../../arrows/EdgeArrowComponent';
 import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
-
-const parabola = (x: number, a: number, p: number, q: number): number => {
-  'worklet';
-  return a * (x - p) ** 2 + q;
-};
-
-const calcApproxPointOnParabola = (
-  x1: number,
-  a: number,
-  p: number,
-  q: number,
-  d: number
-): Vector => {
-  'worklet';
-  const tangentSlope = 2 * a * (x1 - p);
-  const dPrime = d / Math.sqrt(1 + tangentSlope * tangentSlope);
-  const x2 = x1 + dPrime;
-  const y2 = parabola(x2, a, p, q);
-  return { x: x2, y: y2 };
-};
 
 export default function DirectedCurvedEdgeComponent<E, V>({
   v1Position,
@@ -58,10 +39,14 @@ export default function DirectedCurvedEdgeComponent<E, V>({
     y: (v1Position.y.value + v2Position.y.value) / 2
   });
   // Edge label
-  const maxLabelSize = useSharedValue(10); // TODO - calculate this
+  const labelHeight = useSharedValue(
+    vertexRadius * (settings.label?.sizeRatio || 0.5)
+  );
   // Edge arrow
-  const arrowWidth = useSharedValue(10); // TODO - calculate this
-  const arrowHeight = useDerivedValue(() => 1.5 * arrowWidth.value);
+  const arrowHeight = useDerivedValue(
+    () => 1.5 * Math.min(vertexRadius * settings.arrow.scale, labelHeight.value)
+  );
+  const arrowWidth = useDerivedValue(() => (2 / 3) * arrowHeight.value);
   const arrowTipPosition = useSharedValue({ x: 0, y: 0 });
   const dirVec = useSharedValue({ x: 0, y: 0 });
   // Edge curve path
@@ -92,16 +77,17 @@ export default function DirectedCurvedEdgeComponent<E, V>({
         center: {
           x: (p1.x + p2.x) / 2,
           y: (p1.y + p2.y) / 2
-        }
+        },
+        labelSize: labelHeight.value
       };
     },
-    ({ p1, p2, center }) => {
+    ({ p1, p2, center, labelSize }) => {
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(
         animatedVectorToVector(v1Position),
         animatedVectorToVector(v2Position)
       );
-      const offset = 20 * (edgeIndex - (edgesCount - 1) / 2); // TODO - make this configurable
+      const offset = labelSize * (edgeIndex - (edgesCount - 1) / 2);
       const parabolaVertexPosition = translateAlongVector(
         center,
         orthogonalUnitVector,
@@ -205,9 +191,8 @@ export default function DirectedCurvedEdgeComponent<E, V>({
           v2Position={v2Position}
           vertexRadius={vertexRadius}
           centerPosition={parabolaVertex}
-          maxSize={maxLabelSize}
+          height={labelHeight}
           renderer={renderers.label}
-          // TODO -  pass label settings to the label component
         />
       )}
     </>

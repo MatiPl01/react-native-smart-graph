@@ -55,7 +55,10 @@ export default function App() {
                   },
                   components: {
                     edge: {
-                      type: 'curved'
+                      type: 'curved',
+                      label: {
+                        sizeRatio: 0.5
+                      }
                     }
                   }
                 }}

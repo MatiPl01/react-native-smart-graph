@@ -17,7 +17,7 @@ type EdgeLabelComponentProps<E, V> = SharedRenderersProps & {
   v2Position: AnimatedVectorCoordinates;
   vertexRadius: number;
   centerPosition: AnimatedVector;
-  maxSize: SharedValue<number>;
+  height: SharedValue<number>;
   renderer: EdgeLabelRendererFunction<E>;
 };
 
@@ -26,7 +26,7 @@ export default function EdgeLabelComponent<E, V>({
   v1Position,
   v2Position,
   centerPosition,
-  maxSize,
+  height,
   renderer,
   ...restProps
 }: EdgeLabelComponentProps<E, V>) {
@@ -88,7 +88,7 @@ export default function EdgeLabelComponent<E, V>({
     key: edge.key,
     data: edge.value,
     centerPosition,
-    maxSize,
+    height,
     edgeRotation,
     edgeLength,
     ...restProps

@@ -49,7 +49,7 @@ export default function DirectedStraightEdgeComponent<E, V>({
     x: (p1.value.x + p2.value.x) / 2,
     y: (p1.value.y + p2.value.y) / 2
   }));
-  const maxLabelSize = useSharedValue(0);
+  const labelHeight = useSharedValue(0);
 
   useAnimatedReaction(
     () => ({
@@ -87,7 +87,7 @@ export default function DirectedStraightEdgeComponent<E, V>({
           ? maxTranslationOffset
           : maxTranslationOffset / (edgesCount - 1));
       // Update edge label max size
-      maxLabelSize.value = maxSize;
+      labelHeight.value = maxSize;
       // Update edge arrow max size
       arrowWidth.value = Math.min(maxSize, settings.arrow.scale * vertexRadius);
     }
@@ -124,7 +124,7 @@ export default function DirectedStraightEdgeComponent<E, V>({
           v2Position={v2Position}
           vertexRadius={vertexRadius}
           centerPosition={center}
-          maxSize={maxLabelSize}
+          height={labelHeight}
           renderer={renderers.label}
         />
       )}

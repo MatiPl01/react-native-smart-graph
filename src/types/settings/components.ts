@@ -17,10 +17,7 @@ export type CurvedEdgeSettings = {
 };
 
 export type EdgeLabelSettings = {
-  font?: {
-    sizeRatio?: number;
-    color?: string;
-  };
+  sizeRatio?: number; // 0.75 is a good value
 };
 
 type SharedEdgeSettings = (

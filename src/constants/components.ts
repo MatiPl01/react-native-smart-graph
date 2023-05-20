@@ -27,8 +27,5 @@ export const ARROW_COMPONENT_SETTINGS: Required<EdgeArrowSettings> = {
 };
 
 export const LABEL_COMPONENT_SETTINGS: DeepRequiredAll<EdgeLabelSettings> = {
-  font: {
-    color: '#eee',
-    sizeRatio: 1 // relative to vertex radius
-  }
+  sizeRatio: 0.75
 };
