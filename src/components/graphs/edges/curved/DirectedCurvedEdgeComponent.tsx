@@ -96,7 +96,10 @@ function DirectedCurvedEdgeComponent<E, V>({
 
       // Calculate the edge arrow tip position and direction vector
       // If points are collinear
-      if (p1.x === p2.x || p1.y === p2.y) {
+      if (
+        p1.x === parabolaVertexPosition.x ||
+        p1.y === parabolaVertexPosition.y
+      ) {
         // 1. Calculate the direction vector
         const directionVector = calcUnitVector(p2, p1);
         dirVec.value = directionVector;
@@ -104,7 +107,7 @@ function DirectedCurvedEdgeComponent<E, V>({
         const tipPosition = translateAlongVector(
           p2,
           directionVector,
-          -vertexRadius
+          vertexRadius
         );
         arrowTipPosition.value = tipPosition;
       }

@@ -64,7 +64,7 @@ function EdgeComponent<E, V>({
     }
   }, [removed]);
 
-  console.log(edge.key, order, edgesCount);
+  // console.log(edge.key, order, edgesCount);
 
   // Edge ordering animation
   useEffect(() => {
