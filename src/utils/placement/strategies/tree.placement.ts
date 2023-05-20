@@ -57,7 +57,12 @@ const placeVerticesOnTree = <V, E>(
     columnShift += treeWidth;
   }
 
-  const { width, height } = getLayout(vertexRadius, minVertexSpacing, graph);
+  const { width, height } = getLayout(
+    vertexRadius,
+    minVertexSpacing,
+    graph,
+    orphanedNeighbours
+  );
 
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
@@ -147,7 +152,8 @@ const placeVertices = <V, E>(
 const getLayout = <V, E>(
   vertexRadius: number,
   minVertexSpacing: number,
-  graph: DirectedGraph<V, E>
+  graph: DirectedGraph<V, E>,
+  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>
 ) => {
   const padding = 2 * vertexRadius;
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
@@ -155,7 +161,7 @@ const getLayout = <V, E>(
   const dimensions = { width: 0, depth: 0 };
 
   for (const rootVertex of rootVertices) {
-    const treeDimensions = getMaxTreeDimensions(rootVertex);
+    const treeDimensions = getMaxTreeDimensions(rootVertex, orphanedNeighbours);
     dimensions.width += treeDimensions.width;
     dimensions.depth = Math.max(dimensions.depth, treeDimensions.depth);
   }
@@ -172,16 +178,20 @@ const getLayout = <V, E>(
 };
 
 const getMaxTreeDimensions = <V, E>(
-  vertex: DirectedGraphVertex<V, E>
+  vertex: DirectedGraphVertex<V, E>,
+  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>
 ): { width: number; depth: number } => {
-  if (vertex.outDegree === 0) {
+  if (vertex.outDegree === 0 && !orphanedNeighbours[vertex.key]) {
     return { width: 1, depth: 1 };
   }
 
   let maxSubtreeWidth = 0;
   let maxSubtreeDepth = 0;
-  vertex.outEdges.forEach(edge => {
-    const { width, depth } = getMaxTreeDimensions(edge.target);
+  [
+    ...vertex.outEdges.map(e => e.target),
+    ...(orphanedNeighbours[vertex.key] || [])
+  ].forEach(v => {
+    const { width, depth } = getMaxTreeDimensions(v, orphanedNeighbours);
     maxSubtreeWidth += width;
     maxSubtreeDepth = Math.max(maxSubtreeDepth, depth);
   });

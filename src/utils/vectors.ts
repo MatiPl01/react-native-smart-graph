@@ -67,9 +67,9 @@ export const addVectorsArray = (vectors: Array<Vector>): Vector => {
   );
 };
 
-export const addVectors = (vector1: Vector, vector2: Vector): Vector => {
+export const addVectors = (...vectors: Array<Vector>): Vector => {
   'worklet';
-  return { x: vector1.x + vector2.x, y: vector1.y + vector2.y };
+  return addVectorsArray(vectors);
 };
 
 export const subtractVectors = (vector1: Vector, vector2: Vector): Vector => {
