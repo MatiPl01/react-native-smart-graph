@@ -6,9 +6,7 @@ import { EdgeArrowRenderFunction } from './shared';
 export type CurvedEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
   data: E;
-  p1: AnimatedVector;
-  p2: AnimatedVector;
-  controlPoint: AnimatedVector;
+  parabolaVertex: AnimatedVector;
   path: AnimatedPath;
 };
 

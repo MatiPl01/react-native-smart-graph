@@ -3,7 +3,7 @@ import { useDerivedValue } from 'react-native-reanimated';
 import { Group, Text, useFont } from '@shopify/react-native-skia';
 
 import FONTS from '@/assets/fonts';
-import { DEFAULT_LABEL_RENDERER_SETTINGS } from '@/constants/renderers';
+import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { EdgeLabelRendererProps } from '@/types/renderer';
 
 export default function DefaultEdgeLabelRenderer<E>({
@@ -14,8 +14,7 @@ export default function DefaultEdgeLabelRenderer<E>({
   edgeRotation,
   animationProgress
 }: EdgeLabelRendererProps<E>) {
-  const fontSize =
-    vertexRadius * DEFAULT_LABEL_RENDERER_SETTINGS.font.sizeRatio;
+  const fontSize = vertexRadius * LABEL_COMPONENT_SETTINGS.font.sizeRatio;
   const font = useFont(FONTS.rubikFont, 20);
 
   const wrapperTransform = useDerivedValue(() => [
@@ -40,7 +39,7 @@ export default function DefaultEdgeLabelRenderer<E>({
             y={0}
             font={font}
             text={key}
-            color={DEFAULT_LABEL_RENDERER_SETTINGS.font.color}
+            color={LABEL_COMPONENT_SETTINGS.font.color}
           />
         </Group>
       </Group>

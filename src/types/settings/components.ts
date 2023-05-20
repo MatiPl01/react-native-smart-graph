@@ -16,10 +16,20 @@ export type CurvedEdgeSettings = {
   curveFactor?: number; // 0.5 is a good value
 };
 
-type SharedEdgeSettings =
+export type EdgeLabelSettings = {
+  font?: {
+    sizeRatio?: number;
+    color?: string;
+  };
+};
+
+type SharedEdgeSettings = (
   | Record<string, never>
   | StraightEdgeSettings
-  | CurvedEdgeSettings;
+  | CurvedEdgeSettings
+) & {
+  label?: EdgeLabelSettings;
+};
 
 export type EdgeArrowSettings = {
   scale?: number; // scale relative to vertex radius
@@ -31,22 +41,25 @@ export type DirectedEdgeSettings = SharedEdgeSettings & {
 
 export type UndirectedEdgeSettings = SharedEdgeSettings;
 
-export type DirectedGraphComponentsSettings = {
+type SharedGraphComponentsSettings = {
   vertex?: VertexSettings;
+};
+
+export type DirectedGraphComponentsSettings = SharedGraphComponentsSettings & {
   edge?: DirectedEdgeSettings;
 };
 
-export type UndirectedGraphComponentsSettings = {
-  vertex?: VertexSettings;
-  edge?: UndirectedEdgeSettings;
-};
+export type UndirectedGraphComponentsSettings =
+  SharedGraphComponentsSettings & {
+    edge?: UndirectedEdgeSettings;
+  };
 
 export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   DirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge', 'type']
+  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'fontSize']
 >;
 
 export type UndirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   UndirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge', 'type']
+  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'fontSize']
 >;

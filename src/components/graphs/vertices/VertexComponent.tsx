@@ -5,11 +5,11 @@ import EASING from '@/constants/easings';
 import { Vertex } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
-import { GraphVertexSettings } from '@/types/settings';
+import { VertexSettings } from '@/types/settings';
 
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
-  settings: Required<GraphVertexSettings>;
+  settings: Required<VertexSettings>;
   renderer: VertexRenderFunction<V>;
   removed: boolean;
   onRender: (key: string, position: AnimatedVectorCoordinates) => void;
@@ -39,8 +39,6 @@ function VertexComponent<V, E>({
     // Call onRender callback on mount
     onRender(key, { x: positionX, y: positionY });
   }, [key]);
-
-  const mode = useSharedValue(-1);
 
   useEffect(() => {
     // ANimate vertex on mount

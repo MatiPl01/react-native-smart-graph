@@ -6,6 +6,7 @@ import {
 
 import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
   animatedVectorToVector,
   calcOrthogonalUnitVector,
@@ -26,7 +27,7 @@ export default function UndirectedStraightEdgeComponent<E, V>({
   renderers
 }: UndirectedStraightEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
-  const edgeIndex = edgesBetweenVertices.findIndex(e => e.key === edge.key);
+  const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
   // Edge line
   const p1 = useSharedValue({
     x: v1Position.x.value,
@@ -113,8 +114,8 @@ export default function UndirectedStraightEdgeComponent<E, V>({
         <EdgeLabelComponent
           {...sharedProps}
           edge={edge}
-          p1={p1}
-          p2={p2}
+          v1Position={v1Position}
+          v2Position={v2Position}
           vertexRadius={vertexRadius}
           centerPosition={center}
           maxSize={maxLabelSize}

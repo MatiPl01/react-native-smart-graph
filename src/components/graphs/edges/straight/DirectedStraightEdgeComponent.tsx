@@ -5,7 +5,7 @@ import {
 } from 'react-native-reanimated';
 
 import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
-import { DirectedEdge } from '@/types/graphs';
+import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
   animatedVectorToVector,
   calcOrthogonalUnitVector,
@@ -16,22 +16,6 @@ import {
 
 import EdgeArrowComponent from '../../arrows/EdgeArrowComponent';
 import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
-
-const getEdgeIndex = <E, V>(
-  edge: DirectedEdge<E, V>,
-  edgesBetweenVertices: Array<DirectedEdge<E, V>>
-): number => {
-  let index = 0;
-  for (const e of edgesBetweenVertices) {
-    if (e.key === edge.key) {
-      break;
-    }
-    if (e.source.key === edge.source.key && e.target.key === edge.target.key) {
-      index++;
-    }
-  }
-  return index;
-};
 
 export default function DirectedStraightEdgeComponent<E, V>({
   v1Position,
@@ -122,22 +106,20 @@ export default function DirectedStraightEdgeComponent<E, V>({
         p1,
         p2
       })}
-      {renderers.arrow && (
-        <EdgeArrowComponent
-          {...sharedProps}
-          directionVector={dirVec}
-          tipPosition={arrowTipPosition}
-          renderer={renderers.arrow}
-          vertexRadius={vertexRadius}
-          maxWidth={maxArrowWidth}
-        />
-      )}
+      <EdgeArrowComponent
+        {...sharedProps}
+        directionVector={dirVec}
+        tipPosition={arrowTipPosition}
+        renderer={renderers.arrow}
+        vertexRadius={vertexRadius}
+        maxWidth={maxArrowWidth}
+      />
       {renderers.label && (
         <EdgeLabelComponent
           {...sharedProps}
           edge={edge}
-          p1={p1}
-          p2={p2}
+          v1Position={v1Position}
+          v2Position={v2Position}
           vertexRadius={vertexRadius}
           centerPosition={center}
           maxSize={maxLabelSize}

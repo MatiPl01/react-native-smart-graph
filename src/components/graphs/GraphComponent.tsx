@@ -5,7 +5,9 @@ import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 import { Group, Rect, Vector } from '@shopify/react-native-skia';
 
 import {
+  ARROW_COMPONENT_SETTINGS,
   CURVED_EDGE_COMPONENT_SETTINGS,
+  LABEL_COMPONENT_SETTINGS,
   STRAIGHT_EDGE_COMPONENT_SETTINGS,
   VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
@@ -18,11 +20,10 @@ import {
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import {
-  CurvedEdgeSettings,
+  DirectedEdgeSettings,
   GraphLayout,
   GraphSettings,
-  GraphSettingsWithDefaults,
-  StraightEdgeSettings
+  GraphSettingsWithDefaults
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
@@ -117,9 +118,21 @@ export default function GraphComponent<
         },
         edge: {
           ...(settings?.components?.edge?.type === 'curved'
-            ? (CURVED_EDGE_COMPONENT_SETTINGS as Required<CurvedEdgeSettings>)
-            : (STRAIGHT_EDGE_COMPONENT_SETTINGS as Required<StraightEdgeSettings>)),
-          ...settings?.components?.edge
+            ? CURVED_EDGE_COMPONENT_SETTINGS
+            : STRAIGHT_EDGE_COMPONENT_SETTINGS),
+          ...settings?.components?.edge,
+          ...(graph.isDirected()
+            ? {
+                arrow: {
+                  ...ARROW_COMPONENT_SETTINGS,
+                  ...(settings?.components?.edge as DirectedEdgeSettings)?.arrow
+                }
+              }
+            : {}),
+          label: {
+            ...LABEL_COMPONENT_SETTINGS,
+            ...settings?.components?.edge?.label
+          }
         }
       }
     };
