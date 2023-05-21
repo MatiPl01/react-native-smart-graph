@@ -112,8 +112,8 @@ export default function GraphComponent<
     Record<string, AnimatedVectorCoordinates>
   >({});
   // Current edge labels positions
-  const [animatedEdgeLabelsPositions, setAnimatedEdgeLabelsPositions] =
-    useState<Record<string, AnimatedVector>>({});
+  const animatedEdgeLabelsPositionsRef =
+    useRef<Record<string, AnimatedVector>>({});
 
   const memoSettings = useMemo(() => {
     const newSettings: GraphSettingsWithDefaults<V, E> = {
