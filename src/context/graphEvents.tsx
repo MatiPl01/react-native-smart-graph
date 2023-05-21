@@ -9,7 +9,7 @@ import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphSettings } from '@/types/settings';
 import { findPressedEdgeLabel, findPressedVertex } from '@/utils/graphs/layout';
 
-type GraphEventsContextType<V, E> = {
+export type GraphEventsContextType<V, E> = {
   setAnimatedEdgeLabelsPositions: (
     positions: Record<string, AnimatedVector>
   ) => void;

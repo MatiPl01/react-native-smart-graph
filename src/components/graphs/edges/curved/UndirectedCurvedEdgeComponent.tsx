@@ -22,7 +22,7 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
   renderers,
   animationProgress,
   removed,
-  onRender
+  onLabelRender
 }: UndirectedCurvedEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
@@ -66,7 +66,7 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
   });
 
   useEffect(() => {
-    onRender(edge.key, parabolaVertex);
+    onLabelRender?.(edge.key, parabolaVertex);
   }, [edge.key]);
 
   // Edge curve path

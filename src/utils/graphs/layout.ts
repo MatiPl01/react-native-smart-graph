@@ -54,13 +54,13 @@ export const findPressedVertex = (
 };
 
 // TODO - fix edge press handlers
-export const findClosestEdge = <E, V>(
+export const findClosestEdgeLabel = <E, V>(
   position: Vector,
   edges: Array<Edge<E, V>>,
   animatedEdgeLabelsPositions: Record<string, AnimatedVector>
 ): { key: string | null; distance: number } => {
-  let closestEdgeKey: string | null = null;
-  let closestEdgeDistance = Infinity;
+  let closestEdgeLabelKey: string | null = null;
+  let closestEdgeLabelDistance = Infinity;
 
   edges.forEach(edge => {
     const key = edge.key;
@@ -69,15 +69,15 @@ export const findClosestEdge = <E, V>(
     );
     const distance = distanceBetweenVectors(position, labelPosition);
 
-    if (distance < closestEdgeDistance) {
-      closestEdgeKey = edge.key;
-      closestEdgeDistance = distance;
+    if (distance < closestEdgeLabelDistance) {
+      closestEdgeLabelKey = edge.key;
+      closestEdgeLabelDistance = distance;
     }
   });
 
   return {
-    key: closestEdgeKey,
-    distance: closestEdgeDistance
+    key: closestEdgeLabelKey,
+    distance: closestEdgeLabelDistance
   };
 };
 
@@ -87,7 +87,7 @@ export const findPressedEdgeLabel = <E, V>(
   hitSlop: number,
   animatedEdgeLabelsPositions: Record<string, AnimatedVector>
 ): string | null => {
-  const { key: closestEdgeKey, distance } = findClosestEdge(
+  const { key: closestEdgeKey, distance } = findClosestEdgeLabel(
     position,
     graph.edges,
     animatedEdgeLabelsPositions

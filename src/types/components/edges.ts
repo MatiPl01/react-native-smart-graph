@@ -24,7 +24,7 @@ type SharedEdgeComponentProps = {
   animationProgress: SharedValue<number>;
   removed: boolean;
   onRemove: (key: string) => void;
-  onRender: (key: string, position: AnimatedVector) => void;
+  onLabelRender?: (key: string, position: AnimatedVector) => void;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =

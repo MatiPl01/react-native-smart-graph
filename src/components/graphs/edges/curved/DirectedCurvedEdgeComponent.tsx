@@ -30,7 +30,7 @@ export default function DirectedCurvedEdgeComponent<E, V>({
   settings,
   animationProgress,
   removed,
-  onRender
+  onLabelRender
 }: DirectedCurvedEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
@@ -69,7 +69,7 @@ export default function DirectedCurvedEdgeComponent<E, V>({
   });
 
   useEffect(() => {
-    onRender(edge.key, parabolaVertex);
+    onLabelRender?.(edge.key, parabolaVertex);
   }, [edge.key]);
 
   useAnimatedReaction(

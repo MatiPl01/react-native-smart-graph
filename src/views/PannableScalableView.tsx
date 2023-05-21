@@ -342,12 +342,8 @@ export default function PannableScalableView<V, E>({
                     containerDimensions
                   });
                 },
-                setAnimatedEdgeLabelsPositions:
-                  graphEventsContext?.setAnimatedEdgeLabelsPositions,
-                setAnimatedVerticesPositions:
-                  graphEventsContext?.setAnimatedVerticesPositions,
-                setGraphSettings: graphEventsContext?.setGraphSettings,
-                setGraphModel: graphEventsContext?.setGraphModel
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                graphEventsContext: graphEventsContext!
               });
             })}
           </Group>

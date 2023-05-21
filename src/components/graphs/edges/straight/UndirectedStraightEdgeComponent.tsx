@@ -26,7 +26,7 @@ export default function UndirectedStraightEdgeComponent<E, V>({
   animationProgress,
   removed,
   renderers,
-  onRender
+  onLabelRender
 }: UndirectedStraightEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
@@ -50,7 +50,7 @@ export default function UndirectedStraightEdgeComponent<E, V>({
   const v2Key = edge.vertices[1].key;
 
   useEffect(() => {
-    onRender(edge.key, center);
+    onLabelRender?.(edge.key, center);
   }, [edge.key]);
 
   useAnimatedReaction(

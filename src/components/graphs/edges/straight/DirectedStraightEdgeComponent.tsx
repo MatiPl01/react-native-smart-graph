@@ -28,7 +28,7 @@ export default function DirectedStraightEdgeComponent<E, V>({
   animationProgress,
   removed,
   renderers,
-  onRender
+  onLabelRender
 }: DirectedStraightEdgeComponentProps<E, V>) {
   const edgesCount = edgesBetweenVertices.length;
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
@@ -54,7 +54,7 @@ export default function DirectedStraightEdgeComponent<E, V>({
   const labelHeight = useSharedValue(0);
 
   useEffect(() => {
-    onRender(edge.key, center);
+    onLabelRender?.(edge.key, center);
   }, [edge.key]);
 
   useAnimatedReaction(
