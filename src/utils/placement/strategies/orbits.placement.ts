@@ -9,13 +9,14 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
+
 import {
   findRootVertex,
   getBalancingOrphanedNeighbors,
   getOrphanedVertices,
   isGraphAcyclic,
   isGraphDirected
-} from '@/utils/graphs';
+} from './../../graphs/models';
 
 /**
  * The graph must be a tree!

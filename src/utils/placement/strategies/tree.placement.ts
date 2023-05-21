@@ -7,13 +7,14 @@ import {
   PlacedVerticesPositions,
   TreePlacementSettings
 } from '@/types/settings';
+
 import {
   findRootVertices,
   getBalancingOrphanedNeighbors,
   getOrphanedVertices,
   isGraphAcyclic,
   isGraphDirected
-} from '@/utils/graphs';
+} from './../../graphs/models';
 
 const placeVerticesOnTree = <V, E>(
   graph: Graph<V, E>,
@@ -35,9 +36,8 @@ const placeVerticesOnTree = <V, E>(
   const rootVertices = findRootVertices(graph);
 
   if (rootVertices.length === 0) {
-    throw new Error(
-      'Cannot place vertices on tree for graph without root vertex'
-    );
+    // If no root vertices found, use all vertices as roots
+    rootVertices.push(...graph.vertices);
   }
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
