@@ -26,7 +26,6 @@ import {
   GraphSettingsWithDefaults
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
-import { getEdgeIndex } from '@/utils/graphs/layout';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
@@ -74,7 +73,7 @@ export default function GraphComponent<
   setGraphModel
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
-  const [{ vertices, edges }] = useGraphObserver(graph);
+  const [{ vertices, orderedEdges }] = useGraphObserver(graph);
 
   // HELPER REFS
   const isFirstRenderRef = useRef(true);
@@ -167,7 +166,7 @@ export default function GraphComponent<
         memoSettings.components.vertex.radius,
         memoSettings.placement
       ),
-    [vertices, edges]
+    [vertices, orderedEdges]
   );
 
   useEffect(() => {
@@ -216,19 +215,16 @@ export default function GraphComponent<
     // UPDATE EDGES DATA
     // Add new edges to edges data
     const newEdgesData = { ...edgesData };
-    edges.forEach(edge => {
-      const [v1, v2] = edge.vertices;
-      const edgesBetween = graph.getEdgesBetween(v1.key, v2.key);
-
+    orderedEdges.forEach(({ edge, order, edgesCount }) => {
       if (
         !newEdgesData[edge.key] ||
         newEdgesData[edge.key]?.removed ||
-        newEdgesData[edge.key]?.edgesCount !== edgesBetween.length
+        newEdgesData[edge.key]?.edgesCount !== edgesCount
       ) {
         newEdgesData[edge.key] = {
           edge,
-          order: getEdgeIndex(edge, edgesBetween),
-          edgesCount: edgesBetween.length,
+          order,
+          edgesCount,
           removed: false
         };
       }
@@ -242,7 +238,7 @@ export default function GraphComponent<
     });
     // Set the new edges data
     setEdgesData(newEdgesData);
-  }, [edges]);
+  }, [orderedEdges]);
 
   useEffect(() => {
     setContextAnimatedVerticesPositions?.(animatedVerticesPositions);
