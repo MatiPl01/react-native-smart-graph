@@ -27,6 +27,11 @@ export type GraphObserver<V, E> = {
 export interface Graph<V, E> {
   get vertices(): Array<Vertex<V, E>>;
   get edges(): Array<Edge<E, V>>;
+  get orderedEdges(): Array<{
+    edge: Edge<E, V>;
+    order: number;
+    edgesCount: number;
+  }>;
   get connections(): GraphConnections;
   isDirected(): boolean;
   addObserver(observer: GraphObserver<V, E>): void;

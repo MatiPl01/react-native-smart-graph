@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -6,7 +7,6 @@ import {
 
 import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
   animatedVectorToVector,
   calcOrthogonalUnitVector,
@@ -15,19 +15,17 @@ import {
 
 import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
 
-export default function UndirectedStraightEdgeComponent<E, V>({
+function UndirectedStraightEdgeComponent<E, V>({
   v1Position,
   v2Position,
   vertexRadius,
   edge,
-  edgesBetweenVertices,
+  animatedOrder,
+  animatedEdgesCount,
   settings,
   animationProgress,
-  removed,
   renderers
 }: UndirectedStraightEdgeComponentProps<E, V>) {
-  const edgesCount = edgesBetweenVertices.length;
-  const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
   // Edge line
   const p1 = useSharedValue({
     x: v1Position.x.value,
@@ -64,15 +62,17 @@ export default function UndirectedStraightEdgeComponent<E, V>({
 
       return {
         v1: animatedVectorToVector(v1),
-        v2: animatedVectorToVector(v2)
+        v2: animatedVectorToVector(v2),
+        order: animatedOrder.value,
+        edgesCount: animatedEdgesCount.value
       };
     },
-    ({ v1, v2 }) => {
+    ({ v1, v2, order, edgesCount }) => {
       const maxTranslationOffset = settings.maxOffsetFactor * vertexRadius;
       const edgesPerSide = (edgesCount - 1) / 2;
       const translationOffset =
         edgesCount > 1
-          ? (maxTranslationOffset * (edgeIndex - edgesPerSide)) / edgesPerSide
+          ? (maxTranslationOffset * (order - edgesPerSide)) / edgesPerSide
           : 0;
       const translationVector = multiplyVector(
         calcOrthogonalUnitVector(v1, v2),
@@ -96,23 +96,17 @@ export default function UndirectedStraightEdgeComponent<E, V>({
     }
   );
 
-  const sharedProps = {
-    animationProgress,
-    removed
-  };
-
   return (
     <>
       {renderers.edge({
-        ...sharedProps,
         key: edge.key,
         data: edge.value,
         p1,
-        p2
+        p2,
+        animationProgress
       })}
       {renderers.label && (
         <EdgeLabelComponent
-          {...sharedProps}
           edge={edge}
           v1Position={v1Position}
           v2Position={v2Position}
@@ -120,8 +114,13 @@ export default function UndirectedStraightEdgeComponent<E, V>({
           centerPosition={center}
           height={labelHeight}
           renderer={renderers.label}
+          animationProgress={animationProgress}
         />
       )}
     </>
   );
 }
+
+export default memo(UndirectedStraightEdgeComponent) as <E, V>(
+  props: UndirectedStraightEdgeComponentProps<E, V>
+) => JSX.Element;

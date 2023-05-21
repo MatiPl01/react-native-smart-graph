@@ -1,5 +1,10 @@
 import { memo, useEffect } from 'react';
-import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  runOnJS,
+  useDerivedValue,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
 import EASING from '@/constants/easings';
 import {
@@ -15,15 +20,27 @@ import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponen
 import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeComponent';
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
-function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
-  const key = props.edge.key;
+function EdgeComponent<E, V>({
+  edge,
+  order,
+  edgesCount,
+  removed,
+  onRemove,
+  ...restProps
+}: EdgeComponentProps<E, V>) {
+  const key = edge.key;
   // ANIMATION
   // Edge render animation progress
   const animationProgress = useSharedValue(0);
+  // EDGE ORDERING
+  // Target edge order
+  const animatedOrder = useSharedValue(order);
+  const animatedEdgesCount = useSharedValue(edgesCount);
 
+  // Edge mount/unmount animation
   useEffect(() => {
     // ANimate vertex on mount
-    if (!props.removed) {
+    if (!removed) {
       // Animate vertex on mount
       animationProgress.value = withTiming(1, {
         // TODO - make this a setting
@@ -40,21 +57,36 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         },
         finished => {
           if (finished) {
-            runOnJS(props.onRemove)(key);
+            runOnJS(onRemove)(key);
           }
         }
       );
     }
-  }, [props.removed]);
+  }, [removed]);
+
+  // console.log(edge.key, order, edgesCount);
+
+  // Edge ordering animation
+  useEffect(() => {
+    animatedOrder.value = withTiming(order, {
+      duration: 500 // TODO - make this a setting
+    });
+    animatedEdgesCount.value = withTiming(edgesCount, {
+      duration: 500 // TODO - make this a setting
+    });
+  }, [order, edgesCount]);
 
   const sharedProps = {
-    ...props,
-    animationProgress
+    ...restProps,
+    edge,
+    animationProgress,
+    animatedOrder,
+    animatedEdgesCount
   };
 
-  switch (props.settings.type) {
+  switch (sharedProps.settings.type) {
     case 'straight':
-      return props.edge.isDirected() ? (
+      return edge.isDirected() ? (
         <DirectedStraightEdgeComponent
           {...(sharedProps as DirectedStraightEdgeComponentProps<E, V>)}
         />
@@ -64,7 +96,7 @@ function EdgeComponent<E, V>(props: EdgeComponentProps<E, V>) {
         />
       );
     case 'curved':
-      return props.edge.isDirected() ? (
+      return edge.isDirected() ? (
         <DirectedCurvedEdgeComponent
           {...(sharedProps as DirectedCurvedEdgeComponentProps<E, V>)}
         />

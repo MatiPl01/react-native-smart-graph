@@ -13,7 +13,6 @@ export type StraightEdgeSettings = {
 
 export type CurvedEdgeSettings = {
   type: 'curved';
-  curveFactor?: number; // 0.5 is a good value
 };
 
 export type EdgeLabelSettings = {

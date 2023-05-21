@@ -73,7 +73,7 @@ export default function GraphComponent<
   setGraphModel
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
-  const [{ vertices, edges }] = useGraphObserver(graph);
+  const [{ vertices, orderedEdges }] = useGraphObserver(graph);
 
   // HELPER REFS
   const isFirstRenderRef = useRef(true);
@@ -96,6 +96,8 @@ export default function GraphComponent<
       string,
       {
         edge: Edge<E, V>;
+        order: number;
+        edgesCount: number;
         removed: boolean;
       }
     >
@@ -164,7 +166,7 @@ export default function GraphComponent<
         memoSettings.components.vertex.radius,
         memoSettings.placement
       ),
-    [vertices, edges]
+    [vertices, orderedEdges]
   );
 
   useEffect(() => {
@@ -178,7 +180,10 @@ export default function GraphComponent<
     vertices.forEach(vertex => {
       const targetPlacementPosition =
         memoGraphLayout.verticesPositions[vertex.key];
-      if (!newVerticesData[vertex.key] && targetPlacementPosition) {
+      if (
+        targetPlacementPosition &&
+        (!newVerticesData[vertex.key] || newVerticesData[vertex.key]?.removed)
+      ) {
         newVerticesData[vertex.key] = {
           vertex,
           targetPlacementPosition,
@@ -210,10 +215,16 @@ export default function GraphComponent<
     // UPDATE EDGES DATA
     // Add new edges to edges data
     const newEdgesData = { ...edgesData };
-    edges.forEach(edge => {
-      if (!newEdgesData[edge.key]) {
+    orderedEdges.forEach(({ edge, order, edgesCount }) => {
+      if (
+        !newEdgesData[edge.key] ||
+        newEdgesData[edge.key]?.removed ||
+        newEdgesData[edge.key]?.edgesCount !== edgesCount
+      ) {
         newEdgesData[edge.key] = {
           edge,
+          order,
+          edgesCount,
           removed: false
         };
       }
@@ -227,7 +238,7 @@ export default function GraphComponent<
     });
     // Set the new edges data
     setEdgesData(newEdgesData);
-  }, [edges]);
+  }, [orderedEdges]);
 
   useEffect(() => {
     setContextAnimatedVerticesPositions?.(animatedVerticesPositions);
@@ -313,32 +324,35 @@ export default function GraphComponent<
   }, []);
 
   const renderEdges = useCallback(() => {
-    return Object.values(edgesData).map(({ edge, removed }) => {
-      const [v1, v2] = edge.vertices;
-      const v1Position = animatedVerticesPositions[v1.key];
-      const v2Position = animatedVerticesPositions[v2.key];
+    return Object.values(edgesData).map(
+      ({ edge, order, edgesCount, removed }) => {
+        const [v1, v2] = edge.vertices;
+        const v1Position = animatedVerticesPositions[v1.key];
+        const v2Position = animatedVerticesPositions[v2.key];
 
-      if (!v1Position || !v2Position) {
-        return null;
+        if (!v1Position || !v2Position) {
+          return null;
+        }
+
+        return (
+          <EdgeComponent
+            key={edge.key}
+            {...({
+              edge,
+              v1Position,
+              v2Position,
+              order,
+              edgesCount,
+              vertexRadius: memoSettings.components.vertex.radius,
+              renderers: memoRenderers.edge,
+              settings: memoSettings.components.edge,
+              onRemove: handleEdgeRemove,
+              removed
+            } as EdgeComponentProps<E, V>)}
+          />
+        );
       }
-
-      return (
-        <EdgeComponent
-          key={edge.key}
-          {...({
-            edge,
-            v1Position,
-            v2Position,
-            edgesBetweenVertices: graph.getEdgesBetween(v1.key, v2.key),
-            vertexRadius: memoSettings.components.vertex.radius,
-            renderers: memoRenderers.edge,
-            settings: memoSettings.components.edge,
-            onRemove: handleEdgeRemove,
-            removed
-          } as EdgeComponentProps<E, V>)}
-        />
-      );
-    });
+    );
     // Update edges if rendered vertices were changed or if edges in the current
     // graph model were changed
   }, [animatedVerticesPositions, edgesData]);

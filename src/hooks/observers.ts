@@ -6,17 +6,27 @@ export const useGraphObserver = <V, E>(
   graph: Graph<V, E>,
   active = true
 ): [
-  { vertices: Array<Vertex<V, E>>; edges: Array<Edge<E, V>> },
+  {
+    vertices: Array<Vertex<V, E>>;
+    edges: Array<Edge<E, V>>;
+    orderedEdges: Array<{
+      edge: Edge<E, V>;
+      order: number;
+      edgesCount: number;
+    }>;
+  },
   (value: boolean) => void
 ] => {
   const [state, setState] = useState({
     vertices: graph.vertices,
-    edges: graph.edges
+    edges: graph.edges,
+    orderedEdges: graph.orderedEdges
   });
   const updateState = () => {
     setState({
       vertices: graph.vertices,
-      edges: graph.edges
+      edges: graph.edges,
+      orderedEdges: graph.orderedEdges
     });
   };
 
