@@ -41,7 +41,7 @@ const placeVerticesOnTree = <V, E>(
   }
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
-  const orphanedNeighbours = getBalancingOrphanedNeighbors(
+  const orphanedNeighbors = getBalancingOrphanedNeighbors(
     rootVertices,
     orphanedVertices
   );
@@ -51,155 +51,98 @@ const placeVerticesOnTree = <V, E>(
   for (const rootVertex of rootVertices) {
     orderGrid = {
       ...orderGrid,
-      ...getOrderGrid(rootVertex, graph, orphanedNeighbours, columnShift)
+      ...getOrderGrid(rootVertex, graph, orphanedNeighbors, columnShift)
     };
     const treeWidth = (orderGrid[rootVertex.key]!.col - columnShift + 0.5) * 2;
     columnShift += treeWidth;
   }
 
-  const { width, height } = getLayout(
-    vertexRadius,
-    minVertexSpacing,
-    graph,
-    orphanedNeighbours
-  );
-
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
+
+  const { numRows, numCols } = Object.values(orderGrid).reduce(
+    (acc, { row, col }) => ({
+      numRows: Math.max(acc.numRows, row + 1),
+      numCols: Math.max(acc.numCols, col + 1)
+    }),
+    { numRows: 0, numCols: 0 }
+  );
+  const padding = 2 * vertexRadius;
+  const width = padding + numCols * minVertexCenterDistance;
+  const height = padding + numRows * minVertexCenterDistance;
 
   return {
     width,
     height,
-    verticesPositions: graph.vertices.reduce((acc, { key }) => {
-      if (orderGrid[key] === undefined) {
-        return acc;
-      }
-      const gridPosition = orderGrid[key]!;
-
-      acc[key] = {
-        x:
-          -(width / 2) +
-          vertexRadius +
-          gridPosition.col * minVertexCenterDistance,
-        y:
-          -(height / 2) +
-          vertexRadius +
-          gridPosition.row * minVertexCenterDistance
-      };
-      return acc;
-    }, {} as PlacedVerticesPositions)
+    verticesPositions: Object.entries(orderGrid).reduce(
+      (acc, [key, { row, col }]) => ({
+        ...acc,
+        [key]: {
+          x: vertexRadius + col * minVertexCenterDistance - width / 2,
+          y: vertexRadius + row * minVertexCenterDistance - height / 2
+        }
+      }),
+      {} as PlacedVerticesPositions
+    )
   };
 };
 
 const getOrderGrid = <V, E>(
   rootVertex: DirectedGraphVertex<V, E>,
   graph: DirectedGraph<V, E>,
-  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>,
+  orphanedNeighbors: Record<string, Array<DirectedGraphVertex<V, E>>>,
   columnShift: number
 ): Record<string, { row: number; col: number }> => {
-  const verticesPositions = {} as Record<string, { row: number; col: number }>;
+  const verticesOrder = {} as Record<string, { row: number; col: number }>;
   const treeWidth = placeVertices(
     graph,
-    verticesPositions,
-    orphanedNeighbours,
+    verticesOrder,
+    orphanedNeighbors,
     rootVertex,
     columnShift
   );
-  verticesPositions[rootVertex.key] = {
+  verticesOrder[rootVertex.key] = {
     row: 0,
     col: columnShift + treeWidth / 2 - 0.5
   };
 
-  return verticesPositions;
+  return verticesOrder;
 };
 
 const placeVertices = <V, E>(
   graph: DirectedGraph<V, E>,
-  verticesPositions: Record<string, { row: number; col: number }>,
-  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>,
+  verticesOrder: Record<string, { row: number; col: number }>,
+  orphanedNeighbors: Record<string, Array<DirectedGraphVertex<V, E>>>,
   vertex: DirectedGraphVertex<V, E>,
   currentColumn: number,
   currentDepth = 0
 ): number => {
-  const vertexNeighbours = vertex.outEdges
+  const vertexNeighbors = vertex.outEdges
     .map(edge => edge.target)
-    .concat(orphanedNeighbours[vertex.key] || []);
+    .concat(orphanedNeighbors[vertex.key] || []);
 
-  if (vertexNeighbours.length === 0) {
+  if (vertexNeighbors.length === 0) {
     return 1;
   }
 
   let subtreeWidth = 0;
-  vertexNeighbours.forEach(neighbour => {
+  vertexNeighbors.forEach(neighbor => {
     const oldSubtreeWidth = subtreeWidth;
     const childSubtreeWidth = placeVertices(
       graph,
-      verticesPositions,
-      orphanedNeighbours,
-      neighbour,
+      verticesOrder,
+      orphanedNeighbors,
+      neighbor,
       currentColumn + subtreeWidth,
       currentDepth + 1
     );
     subtreeWidth += childSubtreeWidth;
 
-    verticesPositions[neighbour.key] = {
+    verticesOrder[neighbor.key] = {
       row: currentDepth + 1,
       col: currentColumn + oldSubtreeWidth + childSubtreeWidth / 2 - 0.5
     };
   });
   return subtreeWidth;
-};
-
-const getLayout = <V, E>(
-  vertexRadius: number,
-  minVertexSpacing: number,
-  graph: DirectedGraph<V, E>,
-  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>
-) => {
-  const padding = 2 * vertexRadius;
-  const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
-  const rootVertices = findRootVertices(graph);
-  const dimensions = { width: 0, depth: 0 };
-
-  for (const rootVertex of rootVertices) {
-    const treeDimensions = getMaxTreeDimensions(rootVertex, orphanedNeighbours);
-    dimensions.width += treeDimensions.width;
-    dimensions.depth = Math.max(dimensions.depth, treeDimensions.depth);
-  }
-
-  const containerWidth =
-    padding + (dimensions.width - 1) * minVertexCenterDistance;
-  const containerHeight =
-    padding + (dimensions.depth - 1) * minVertexCenterDistance;
-
-  return {
-    width: containerWidth,
-    height: containerHeight
-  };
-};
-
-const getMaxTreeDimensions = <V, E>(
-  vertex: DirectedGraphVertex<V, E>,
-  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>
-): { width: number; depth: number } => {
-  if (vertex.outDegree === 0 && !orphanedNeighbours[vertex.key]) {
-    return { width: 1, depth: 1 };
-  }
-
-  let maxSubtreeWidth = 0;
-  let maxSubtreeDepth = 0;
-  [
-    ...vertex.outEdges.map(e => e.target),
-    ...(orphanedNeighbours[vertex.key] || [])
-  ].forEach(v => {
-    const { width, depth } = getMaxTreeDimensions(v, orphanedNeighbours);
-    maxSubtreeWidth += width;
-    maxSubtreeDepth = Math.max(maxSubtreeDepth, depth);
-  });
-
-  return {
-    width: maxSubtreeWidth,
-    depth: maxSubtreeDepth + 1
-  };
 };
 
 export default placeVerticesOnTree;

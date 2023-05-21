@@ -9,13 +9,35 @@ import PannableScalableView from '@/views/PannableScalableView';
 
 import GraphEventsProvider from './context/graphEvents';
 
-// TODO - remove this after testing
-const ADDED_COMPONENTS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
-  // .slice(0, 5)
-  .map(key => ({
-    key,
-    data: key
-  }));
+const ADDED_COMPONENTS = [
+  { key: 'o1', data: 'o1' },
+  { key: 'o2', data: 'o2' },
+  { key: 'o3', data: 'o3' },
+  { key: 'o4', data: 'o4' },
+  { key: 'o5', data: 'o5' },
+  { key: 'o6', data: 'o6' },
+  { key: 'o7', data: 'o7' },
+  { key: 'o8', data: 'o8' },
+  { key: 'o9', data: 'o9' },
+  {
+    from: 'root2',
+    to: 'child22',
+    data: 'root2 -> child22',
+    key: 'root2-child22'
+  },
+  {
+    from: 'child22',
+    to: 'child23',
+    data: 'child22 -> child23',
+    key: 'child22-child23'
+  },
+  {
+    from: 'child22',
+    to: 'child24',
+    data: 'child22 -> child24',
+    key: 'child22-child24'
+  }
+];
 
 let idx = 0;
 let mode = 0;
@@ -33,8 +55,7 @@ export default function App() {
       { key: 'child21', data: 'child21' },
       { key: 'child22', data: 'child22' },
       { key: 'child23', data: 'child23' },
-      { key: 'child24', data: 'child24' },
-      { key: 'child25', data: 'child25' }
+      { key: 'child24', data: 'child24' }
     ],
     [
       {
@@ -72,24 +93,6 @@ export default function App() {
         to: 'child21',
         data: 'root2 -> child21',
         key: 'root2-child21'
-      },
-      {
-        from: 'root2',
-        to: 'child22',
-        data: 'root2 -> child22',
-        key: 'root2-child22'
-      },
-      {
-        from: 'child22',
-        to: 'child23',
-        data: 'child22 -> child23',
-        key: 'child22-child23'
-      },
-      {
-        from: 'child22',
-        to: 'child24',
-        data: 'child22 -> child24',
-        key: 'child22-child24'
       }
     ]
   );
@@ -101,16 +104,28 @@ export default function App() {
         mode = mode === 0 ? 1 : 0;
         idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
       }
-      const component = ADDED_COMPONENTS[idx];
-      if (!component) {
-        return;
-      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const component = ADDED_COMPONENTS[idx]!;
+
       try {
         if (mode === 0) {
-          graph.insertVertex(component.key, component.data);
+          if (component.from && component.to) {
+            graph.insertEdge(
+              component.from,
+              component.to,
+              component.key,
+              component.data
+            );
+          } else {
+            graph.insertVertex(component.key, component.data);
+          }
           idx++;
         } else {
-          graph.removeVertex(component.key);
+          if (component.from && component.to) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
           idx--;
         }
       } catch (e) {
@@ -118,7 +133,8 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 1000);
+    }, 500);
+
     return () => clearInterval(interval);
   }, []);
 
