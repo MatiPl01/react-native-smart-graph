@@ -20,14 +20,14 @@ export default function DefaultEdgeLabelRenderer<E>({
     { translateX: centerPosition.value.x },
     { translateY: centerPosition.value.y },
     { rotate: edgeRotation.value },
-    { scale: Math.min(1, height.value / FONT_SIZE) }
+    { scale: height.value / FONT_SIZE }
   ]);
   // TODO - improve label centering
   const labelTransform = useDerivedValue(() => [
     {
       translateX: ((-key.length * FONT_SIZE) / 3.25) * animationProgress.value
     },
-    { translateY: (FONT_SIZE / 4) * animationProgress.value },
+    { translateY: (FONT_SIZE / 3) * animationProgress.value },
     { scale: animationProgress.value }
   ]);
 

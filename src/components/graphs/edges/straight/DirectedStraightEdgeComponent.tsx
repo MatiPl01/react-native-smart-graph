@@ -59,9 +59,9 @@ function DirectedStraightEdgeComponent<E, V>({
     ({ v1, v2, order, edgesCount }) => {
       const maxTranslationOffset = settings.maxOffsetFactor * vertexRadius;
       const translationOffset =
-        edgesCount > 1
+        edgesCount >= 2
           ? (1 - order / ((edgesCount - 1) / 2)) * maxTranslationOffset
-          : 0;
+          : maxTranslationOffset * (edgesCount - 1);
       const translationVector = multiplyVector(
         calcOrthogonalUnitVector(v1, v2),
         translationOffset
@@ -81,13 +81,14 @@ function DirectedStraightEdgeComponent<E, V>({
         dirVec.value,
         Math.sqrt(vertexRadius ** 2 - translationOffset ** 2)
       );
-      const maxSize =
-        2 *
-        (edgesCount === 1
-          ? maxTranslationOffset
-          : maxTranslationOffset / (edgesCount - 1));
+      const maxSize = (2 * maxTranslationOffset) / (edgesCount - 1);
       // Update edge label max size
-      labelHeight.value = maxSize;
+      if (settings.label?.sizeRatio) {
+        labelHeight.value = Math.min(
+          settings.label?.sizeRatio * vertexRadius,
+          maxSize
+        );
+      }
       // Update edge arrow max size
       arrowWidth.value = Math.min(maxSize, settings.arrow.scale * vertexRadius);
     }
