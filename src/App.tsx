@@ -161,7 +161,7 @@ export default function App() {
                   },
                   components: {
                     edge: {
-                      type: 'curved'
+                      type: 'straight'
                     }
                   }
                 }}
