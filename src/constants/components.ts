@@ -17,8 +17,7 @@ export const STRAIGHT_EDGE_COMPONENT_SETTINGS: Required<StraightEdgeSettings> =
   };
 
 export const CURVED_EDGE_COMPONENT_SETTINGS: Required<CurvedEdgeSettings> = {
-  type: 'curved',
-  curveFactor: 0.5
+  type: 'curved'
 };
 
 export const ARROW_COMPONENT_SETTINGS: Required<EdgeArrowSettings> = {
