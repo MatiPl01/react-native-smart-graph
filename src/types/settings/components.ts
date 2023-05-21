@@ -52,10 +52,10 @@ export type UndirectedGraphComponentsSettings =
 
 export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   DirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'fontSize']
+  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'sizeRatio']
 >;
 
 export type UndirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   UndirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'fontSize']
+  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'sizeRatio']
 >;

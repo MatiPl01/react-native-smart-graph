@@ -9,6 +9,7 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
+
 import {
   findRootVertex,
   getBalancingOrphanedNeighbors,

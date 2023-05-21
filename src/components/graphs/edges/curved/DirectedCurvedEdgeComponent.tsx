@@ -7,6 +7,7 @@ import {
 
 import { Vector, rotate } from '@shopify/react-native-skia';
 
+import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import {
@@ -38,7 +39,8 @@ function DirectedCurvedEdgeComponent<E, V>({
   });
   // Edge label
   const labelHeight = useSharedValue(
-    vertexRadius * (settings.label?.sizeRatio || 0.5)
+    vertexRadius *
+      (settings.label?.sizeRatio || LABEL_COMPONENT_SETTINGS.sizeRatio)
   );
   // Edge arrow
   const arrowHeight = useDerivedValue(
