@@ -20,6 +20,12 @@ const ADDED_COMPONENTS = [
   { key: 'o8', data: 'o8' },
   { key: 'o9', data: 'o9' },
   {
+    from: 'o2',
+    to: 'o3',
+    data: 'o2 -> o3',
+    key: 'o2-o3'
+  },
+  {
     from: 'root2',
     to: 'child22',
     data: 'root2 -> child22',
@@ -52,10 +58,7 @@ export default function App() {
       { key: 'child11', data: 'child11' },
       { key: 'child12', data: 'child12' },
       { key: 'root2', data: 'root2' },
-      { key: 'child21', data: 'child21' },
-      { key: 'child22', data: 'child22' },
-      { key: 'child23', data: 'child23' },
-      { key: 'child24', data: 'child24' }
+      { key: 'child21', data: 'child21' }
     ],
     [
       {
@@ -87,13 +90,13 @@ export default function App() {
         to: 'child3',
         data: 'root -> child3',
         key: 'root-child3'
-      },
-      {
-        from: 'root2',
-        to: 'child21',
-        data: 'root2 -> child21',
-        key: 'root2-child21'
       }
+      // {
+      //   from: 'root2',
+      //   to: 'child21',
+      //   data: 'root2 -> child21',
+      //   key: 'root2-child21'
+      // }
     ]
   );
 
@@ -109,31 +112,23 @@ export default function App() {
 
       try {
         if (mode === 0) {
-          if (component.from && component.to) {
-            graph.insertEdge(
-              component.from,
-              component.to,
-              component.key,
-              component.data
-            );
-          } else {
-            graph.insertVertex(component.key, component.data);
-          }
-          idx++;
+          graph.insertEdge(
+            'root2',
+            'child21',
+            'child22 -> child23',
+            'child22-child23'
+          );
         } else {
-          if (component.from && component.to) {
-            graph.removeEdge(component.key);
-          } else {
-            graph.removeVertex(component.key);
-          }
-          idx--;
+          graph.removeEdge('child22 -> child23');
         }
+        mode += 1;
+        mode %= 2;
       } catch (e) {
         clearInterval(interval);
         console.error(e);
         return;
       }
-    }, 500);
+    }, 1500);
 
     return () => clearInterval(interval);
   }, []);
@@ -161,7 +156,7 @@ export default function App() {
                 settings={{
                   // TODO - fix orbits strategy padding
                   placement: {
-                    strategy: 'circular',
+                    strategy: 'tree',
                     minVertexSpacing: 100
                   },
                   components: {

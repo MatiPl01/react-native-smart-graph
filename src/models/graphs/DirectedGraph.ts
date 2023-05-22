@@ -48,10 +48,10 @@ export default class DirectedGraph<V, E> extends Graph<
     }
 
     const edge = new DirectedEdge<E, V>(edgeKey, value, source, target);
-    this.insertEdgeObject(edge);
-
     source.addOutEdge(edge);
     target.addInEdge(edge);
+
+    this.insertEdgeObject(edge);
 
     return edge;
   }

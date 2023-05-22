@@ -291,7 +291,7 @@ export default function GraphComponent<
         memoGraphLayout.verticesPositions
       );
     },
-    [animatedVerticesPositions]
+    [animatedVerticesPositions, memoGraphLayout.verticesPositions]
   );
 
   const handleVertexRender = useCallback(
