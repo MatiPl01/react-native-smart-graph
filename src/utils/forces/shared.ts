@@ -34,7 +34,7 @@ const calcResultantAttractionForce = (
   'worklet';
   const vertexConnections = connections[vertexKey];
   if (!vertexConnections) {
-    return vec(0, 0);
+    return { x: 0, y: 0 };
   }
   return addVectorsArray(
     vertexConnections.map(neighborKey =>
@@ -56,7 +56,7 @@ const calcResultantRepellingForce = (
   return addVectorsArray(
     Object.keys(verticesPositions).map(otherVertexKey => {
       if (otherVertexKey === vertexKey) {
-        return vec(0, 0);
+        return { x: 0, y: 0 };
       }
 
       return calcRepellingForce(

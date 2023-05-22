@@ -5,6 +5,7 @@ export interface DirectedGraphVertex<V, E> extends Vertex<V, E> {
   get outEdges(): Array<DirectedEdge<E, V>>;
   get inDegree(): number;
   get outDegree(): number;
+  get neighbors(): Array<DirectedGraphVertex<V, E>>;
   addInEdge(edge: DirectedEdge<E, V>): void;
   addOutEdge(edge: DirectedEdge<E, V>): void;
   removeInEdge(key: string): DirectedEdge<E, V>;

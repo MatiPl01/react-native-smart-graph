@@ -9,17 +9,40 @@ import PannableScalableView from '@/views/PannableScalableView';
 
 import GraphEventsProvider from './context/graphEvents';
 
-// TODO - remove this after testing
 const ADDED_COMPONENTS = [
-  { from: 'V1', to: 'V2', key: 'E1', data: 'E1' },
-  { from: 'V1', to: 'V2', key: 'E2', data: 'E2' },
-  { from: 'V2', to: 'V1', key: 'E3', data: 'E3' },
-  { key: 'V3', data: 'V3' },
-  { from: 'V2', to: 'V1', key: 'E4', data: 'E4' },
-  { from: 'V2', to: 'V3', key: 'E5', data: 'E5' },
-  { from: 'V3', to: 'V1', key: 'E6', data: 'E6' },
-  { from: 'V1', to: 'V2', key: 'E8', data: 'E8' },
-  { from: 'V3', to: 'V2', key: 'E7', data: 'E7' }
+  { key: 'o1', data: 'o1' },
+  { key: 'o2', data: 'o2' },
+  { key: 'o3', data: 'o3' },
+  { key: 'o4', data: 'o4' },
+  { key: 'o5', data: 'o5' },
+  { key: 'o6', data: 'o6' },
+  { key: 'o7', data: 'o7' },
+  { key: 'o8', data: 'o8' },
+  { key: 'o9', data: 'o9' },
+  {
+    from: 'o2',
+    to: 'o3',
+    data: 'o2 -> o3',
+    key: 'o2-o3'
+  },
+  {
+    from: 'root2',
+    to: 'child22',
+    data: 'root2 -> child22',
+    key: 'root2-child22'
+  },
+  {
+    from: 'child22',
+    to: 'child23',
+    data: 'child22 -> child23',
+    key: 'child22-child23'
+  },
+  {
+    from: 'child22',
+    to: 'child24',
+    data: 'child22 -> child24',
+    key: 'child22-child24'
+  }
 ];
 
 let idx = 0;
@@ -28,10 +51,53 @@ let mode = 0;
 export default function App() {
   const graph = DirectedGraph.fromData(
     [
-      { key: 'V1', data: 'V1' },
-      { key: 'V2', data: 'V2' }
+      { key: 'root', data: 'root' },
+      { key: 'child1', data: 'child1' },
+      { key: 'child2', data: 'child2' },
+      { key: 'child3', data: 'child3' },
+      { key: 'child11', data: 'child11' },
+      { key: 'child12', data: 'child12' },
+      { key: 'root2', data: 'root2' },
+      { key: 'child21', data: 'child21' }
     ],
-    []
+    [
+      {
+        from: 'root',
+        to: 'child1',
+        data: 'root -> child1',
+        key: 'root-child1'
+      },
+      {
+        from: 'child1',
+        to: 'child11',
+        data: 'child1 -> child11',
+        key: 'child1-child11'
+      },
+      {
+        from: 'child1',
+        to: 'child12',
+        data: 'child1 -> child12',
+        key: 'child1-child12'
+      },
+      {
+        from: 'root',
+        to: 'child2',
+        data: 'root -> child2',
+        key: 'root-child2'
+      },
+      {
+        from: 'root',
+        to: 'child3',
+        data: 'root -> child3',
+        key: 'root-child3'
+      }
+      // {
+      //   from: 'root2',
+      //   to: 'child21',
+      //   data: 'root2 -> child21',
+      //   key: 'root2-child21'
+      // }
+    ]
   );
 
   // TODO - remove this useEffect after testing
@@ -41,29 +107,22 @@ export default function App() {
         mode = mode === 0 ? 1 : 0;
         idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
       }
-      const component = ADDED_COMPONENTS[idx] as (typeof ADDED_COMPONENTS)[0];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const component = ADDED_COMPONENTS[idx]!;
 
       try {
         if (mode === 0) {
-          if (component.from && component.to) {
-            graph.insertEdge(
-              component.from,
-              component.to,
-              component.key,
-              component.data
-            );
-          } else {
-            graph.insertVertex(component.key, component.data);
-          }
-          idx++;
+          graph.insertEdge(
+            'root2',
+            'child21',
+            'child22 -> child23',
+            'child22-child23'
+          );
         } else {
-          if (component.from && component.to) {
-            graph.removeEdge(component.key);
-          } else {
-            graph.removeVertex(component.key);
-          }
-          idx--;
+          graph.removeEdge('child22 -> child23');
         }
+        mode += 1;
+        mode %= 2;
       } catch (e) {
         clearInterval(interval);
         console.error(e);
@@ -97,7 +156,7 @@ export default function App() {
                 settings={{
                   // TODO - fix orbits strategy padding
                   placement: {
-                    strategy: 'circular',
+                    strategy: 'tree',
                     minVertexSpacing: 100
                   },
                   components: {
