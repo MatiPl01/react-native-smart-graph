@@ -138,7 +138,7 @@ export default function GraphComponent<
       }
     };
 
-    graphEventsContext.setGraphSettings?.(newSettings);
+    graphEventsContext.setGraphSettings(newSettings);
 
     return newSettings;
   }, [settings]);
