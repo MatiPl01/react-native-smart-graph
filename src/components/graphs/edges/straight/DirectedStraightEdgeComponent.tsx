@@ -26,7 +26,6 @@ function DirectedStraightEdgeComponent<E, V>({
   animatedOrder,
   animatedEdgesCount,
   animationProgress,
-  removed,
   renderers,
   onLabelRender
 }: DirectedStraightEdgeComponentProps<E, V>) {

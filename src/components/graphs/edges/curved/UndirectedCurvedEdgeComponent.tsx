@@ -21,7 +21,6 @@ function UndirectedCurvedEdgeComponent<E, V>({
   settings,
   renderers,
   animationProgress,
-  removed,
   onLabelRender
 }: UndirectedCurvedEdgeComponentProps<E, V>) {
   const v1Key = edge.vertices[0].key;

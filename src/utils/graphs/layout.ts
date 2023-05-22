@@ -1,6 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { DirectedEdge, Edge, Graph, UndirectedEdge } from '@/types/graphs';
+import { Edge, Graph } from '@/types/graphs';
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 
 import {
