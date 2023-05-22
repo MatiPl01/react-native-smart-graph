@@ -7,7 +7,7 @@ import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   addVectors,
   addVectorsArray,
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcUnitVector,
   distanceBetweenVectors,
   multiplyVector
@@ -39,8 +39,8 @@ const calcResultantAttractionForce = (
   return addVectorsArray(
     vertexConnections.map(neighborKey =>
       calcAttractiveForce(
-        animatedVectorToVector(verticesPositions[vertexKey]),
-        animatedVectorToVector(verticesPositions[neighborKey]),
+        animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
+        animatedVectorCoordinatesToVector(verticesPositions[neighborKey]),
         attractionFactorGetter
       )
     )
@@ -60,8 +60,8 @@ const calcResultantRepellingForce = (
       }
 
       return calcRepellingForce(
-        animatedVectorToVector(verticesPositions[vertexKey]),
-        animatedVectorToVector(verticesPositions[otherVertexKey]),
+        animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
+        animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
         repellingFactorGetter
       );
     })

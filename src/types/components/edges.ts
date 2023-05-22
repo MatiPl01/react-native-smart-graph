@@ -1,7 +1,7 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedEdge, UndirectedEdge } from '../graphs';
-import { AnimatedVectorCoordinates } from '../layout';
+import { AnimatedVector, AnimatedVectorCoordinates } from '../layout';
 import {
   DirectedStraightEdgeRenderers,
   UndirectedStraightEdgeRenderers
@@ -22,6 +22,7 @@ type SharedEdgeComponentProps = {
   v2Position: AnimatedVectorCoordinates;
   vertexRadius: number;
   animationProgress: SharedValue<number>;
+  onLabelRender?: (key: string, position: AnimatedVector) => void;
   animatedOrder: SharedValue<number>;
   animatedEdgesCount: SharedValue<number>;
 };

@@ -1,16 +1,16 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
   useSharedValue
 } from 'react-native-reanimated';
 
-import { rotate } from '@shopify/react-native-skia';
+import { Vector, rotate } from '@shopify/react-native-skia';
 
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   calcUnitVector,
   translateAlongVector
@@ -28,7 +28,8 @@ function DirectedCurvedEdgeComponent<E, V>({
   animatedEdgesCount,
   renderers,
   settings,
-  animationProgress
+  animationProgress,
+  onLabelRender
 }: DirectedCurvedEdgeComponentProps<E, V>) {
   // Parabola vertex
   const parabolaVertex = useSharedValue({
@@ -63,10 +64,14 @@ function DirectedCurvedEdgeComponent<E, V>({
     return pathString;
   });
 
+  useEffect(() => {
+    onLabelRender?.(edge.key, parabolaVertex);
+  }, [edge.key]);
+
   useAnimatedReaction(
     () => {
-      const p1 = animatedVectorToVector(v1Position);
-      const p2 = animatedVectorToVector(v2Position);
+      const p1 = animatedVectorCoordinatesToVector(v1Position);
+      const p2 = animatedVectorCoordinatesToVector(v2Position);
 
       return {
         p1,
@@ -83,8 +88,8 @@ function DirectedCurvedEdgeComponent<E, V>({
     ({ p1, p2, center, labelSize, order, edgesCount }) => {
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(
-        animatedVectorToVector(v1Position),
-        animatedVectorToVector(v2Position)
+        animatedVectorCoordinatesToVector(v1Position),
+        animatedVectorCoordinatesToVector(v2Position)
       );
       const offset = labelSize * (order - (edgesCount - 1) / 2);
       const parabolaVertexPosition = translateAlongVector(

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -8,7 +8,7 @@ import {
 import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   multiplyVector
 } from '@/utils/vectors';
@@ -24,7 +24,8 @@ function UndirectedStraightEdgeComponent<E, V>({
   animatedEdgesCount,
   settings,
   animationProgress,
-  renderers
+  renderers,
+  onLabelRender
 }: UndirectedStraightEdgeComponentProps<E, V>) {
   // Edge line
   const p1 = useSharedValue({
@@ -45,6 +46,10 @@ function UndirectedStraightEdgeComponent<E, V>({
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
 
+  useEffect(() => {
+    onLabelRender?.(edge.key, center);
+  }, [edge.key]);
+
   useAnimatedReaction(
     () => {
       let v1: AnimatedVectorCoordinates, v2: AnimatedVectorCoordinates;
@@ -61,8 +66,8 @@ function UndirectedStraightEdgeComponent<E, V>({
       }
 
       return {
-        v1: animatedVectorToVector(v1),
-        v2: animatedVectorToVector(v2),
+        v1: animatedVectorCoordinatesToVector(v1),
+        v2: animatedVectorCoordinatesToVector(v2),
         order: animatedOrder.value,
         edgesCount: animatedEdgesCount.value
       };

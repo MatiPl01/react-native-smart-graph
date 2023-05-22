@@ -1,10 +1,10 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   translateAlongVector
 } from '@/utils/vectors';
@@ -20,7 +20,8 @@ function UndirectedCurvedEdgeComponent<E, V>({
   animatedEdgesCount,
   settings,
   renderers,
-  animationProgress
+  animationProgress,
+  onLabelRender
 }: UndirectedCurvedEdgeComponentProps<E, V>) {
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
@@ -46,8 +47,8 @@ function UndirectedCurvedEdgeComponent<E, V>({
 
     // Calculate the parabola vertex position
     const orthogonalUnitVector = calcOrthogonalUnitVector(
-      animatedVectorToVector(v1),
-      animatedVectorToVector(v2)
+      animatedVectorCoordinatesToVector(v1),
+      animatedVectorCoordinatesToVector(v2)
     );
     const offset =
       labelHeight.value *
@@ -61,6 +62,11 @@ function UndirectedCurvedEdgeComponent<E, V>({
       offset
     );
   });
+
+  useEffect(() => {
+    onLabelRender?.(edge.key, parabolaVertex);
+  }, [edge.key]);
+
   // Edge curve path
   const path = useDerivedValue(() => {
     const controlPoint = {

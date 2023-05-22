@@ -11,10 +11,12 @@ import {
   STRAIGHT_EDGE_COMPONENT_SETTINGS,
   VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
+import { GraphEventsContextType } from '@/context/graphEvents';
 import { EdgeComponentProps } from '@/types/components';
 import { Edge, Graph, Vertex } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
+  AnimatedVector,
   AnimatedVectorCoordinates,
   Dimensions
 } from '@/types/layout';
@@ -38,11 +40,7 @@ import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
 export type GraphComponentPrivateProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   onRender: (containerDimensions: Dimensions) => void;
-  setAnimatedVerticesPositions?: (
-    positions: Record<string, AnimatedVectorCoordinates>
-  ) => void;
-  setGraphSettings?: (settings: GraphSettings<V, E>) => void;
-  setGraphModel?: (graph: Graph<V, E>) => void;
+  graphEventsContext: GraphEventsContextType<V, E>;
 };
 
 type GraphComponentProps<
@@ -68,9 +66,7 @@ export default function GraphComponent<
   renderers,
   boundingRect,
   onRender,
-  setAnimatedVerticesPositions: setContextAnimatedVerticesPositions,
-  setGraphSettings,
-  setGraphModel
+  graphEventsContext
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
   const [{ vertices, orderedEdges }] = useGraphObserver(graph);
@@ -108,6 +104,10 @@ export default function GraphComponent<
   const [animatedVerticesPositions, setAnimatedVerticesPositions] = useState<
     Record<string, AnimatedVectorCoordinates>
   >({});
+  // Current edge labels positions
+  const animatedEdgeLabelsPositions = useRef<Record<string, AnimatedVector>>(
+    {} as Record<string, AnimatedVector>
+  );
 
   const memoSettings = useMemo(() => {
     const newSettings: GraphSettingsWithDefaults<V, E> = {
@@ -131,6 +131,7 @@ export default function GraphComponent<
                 }
               }
             : {}),
+
           label: {
             ...LABEL_COMPONENT_SETTINGS,
             ...settings?.components?.edge?.label
@@ -139,7 +140,7 @@ export default function GraphComponent<
       }
     };
 
-    setGraphSettings?.(newSettings);
+    graphEventsContext.setGraphSettings(newSettings);
 
     return newSettings;
   }, [settings]);
@@ -170,7 +171,7 @@ export default function GraphComponent<
   );
 
   useEffect(() => {
-    setGraphModel?.(graph);
+    graphEventsContext.setGraphModel(graph);
   }, [graph]);
 
   useEffect(() => {
@@ -241,8 +242,14 @@ export default function GraphComponent<
   }, [orderedEdges]);
 
   useEffect(() => {
-    setContextAnimatedVerticesPositions?.(animatedVerticesPositions);
+    graphEventsContext.setAnimatedVerticesPositions(animatedVerticesPositions);
   }, [animatedVerticesPositions]);
+
+  useEffect(() => {
+    graphEventsContext.setAnimatedEdgeLabelsPositions(
+      animatedEdgeLabelsPositions.current
+    );
+  }, [animatedEdgeLabelsPositions]);
 
   useAnimatedReaction(
     () => ({ positions: animatedVerticesPositions }),
@@ -299,6 +306,13 @@ export default function GraphComponent<
     []
   );
 
+  const handleEdgeLabelRender = useCallback(
+    (key: string, position: AnimatedVector) => {
+      animatedEdgeLabelsPositions.current[key] = position;
+    },
+    []
+  );
+
   const handleVertexRemove = useCallback((key: string) => {
     // Remove vertex from the vertices data
     setVerticesData(prev =>
@@ -347,6 +361,7 @@ export default function GraphComponent<
               renderers: memoRenderers.edge,
               settings: memoSettings.components.edge,
               onRemove: handleEdgeRemove,
+              onLabelRender: handleEdgeLabelRender,
               removed
             } as EdgeComponentProps<E, V>)}
           />

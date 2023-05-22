@@ -69,7 +69,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 500);
+    }, 1500);
 
     return () => clearInterval(interval);
   }, []);

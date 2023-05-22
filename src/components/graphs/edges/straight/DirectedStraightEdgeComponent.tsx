@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -7,7 +7,7 @@ import {
 
 import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import {
-  animatedVectorToVector,
+  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   calcUnitVector,
   multiplyVector,
@@ -26,7 +26,8 @@ function DirectedStraightEdgeComponent<E, V>({
   animatedOrder,
   animatedEdgesCount,
   animationProgress,
-  renderers
+  renderers,
+  onLabelRender
 }: DirectedStraightEdgeComponentProps<E, V>) {
   // Edge line
   const p1 = useSharedValue({
@@ -49,10 +50,14 @@ function DirectedStraightEdgeComponent<E, V>({
   }));
   const labelHeight = useSharedValue(0);
 
+  useEffect(() => {
+    onLabelRender?.(edge.key, center);
+  }, [edge.key]);
+
   useAnimatedReaction(
     () => ({
-      v1: animatedVectorToVector(v1Position),
-      v2: animatedVectorToVector(v2Position),
+      v1: animatedVectorCoordinatesToVector(v1Position),
+      v2: animatedVectorCoordinatesToVector(v2Position),
       order: animatedOrder.value,
       edgesCount: animatedEdgesCount.value
     }),

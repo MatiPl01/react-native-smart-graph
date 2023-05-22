@@ -3,13 +3,16 @@ import { PropsWithChildren, createContext, useContext, useRef } from 'react';
 import { Vector } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
-import { EDGE_HIT_SLOP, VERTEX_HIT_SLOP } from '@/constants/events';
+import { EDGE_LABEL_HIT_SLOP, VERTEX_HIT_SLOP } from '@/constants/events';
 import { Graph } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphSettings } from '@/types/settings';
-import { findPressedEdge, findPressedVertex } from '@/utils/graphs/layout';
+import { findPressedEdgeLabel, findPressedVertex } from '@/utils/graphs/layout';
 
-type GraphEventsContextType<V, E> = {
+export type GraphEventsContextType<V, E> = {
+  setAnimatedEdgeLabelsPositions: (
+    positions: Record<string, AnimatedVector>
+  ) => void;
   setAnimatedVerticesPositions: (
     positions: Record<string, AnimatedVectorCoordinates>
   ) => void;
@@ -21,6 +24,7 @@ type GraphEventsContextType<V, E> = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GraphEventsContext = createContext<GraphEventsContextType<any, any>>({
+  setAnimatedEdgeLabelsPositions: () => undefined,
   setAnimatedVerticesPositions: () => undefined,
   setGraphSettings: () => undefined,
   setGraphModel: () => undefined,
@@ -41,7 +45,7 @@ export const useGraphEventsContext = () => {
 type PressHandler = (data: { key: string; position: Vector }) => void;
 
 type GraphEventsProviderProps = PropsWithChildren<{
-  edgeHitSlop?: number;
+  edgeLabelHitSlop?: number;
   vertexHitSlop?: number;
   onVertexPress?: PressHandler;
   onVertexLongPress?: PressHandler;
@@ -51,13 +55,16 @@ type GraphEventsProviderProps = PropsWithChildren<{
 
 export default function GraphEventsProvider<V, E>({
   children,
-  edgeHitSlop = EDGE_HIT_SLOP,
+  edgeLabelHitSlop = EDGE_LABEL_HIT_SLOP,
   vertexHitSlop = VERTEX_HIT_SLOP,
   ...eventHandlers
 }: GraphEventsProviderProps) {
   const animatedVerticesPositionsRef = useRef<
     Record<string, AnimatedVectorCoordinates>
   >({});
+  const animatedEdgeLabelsPositionsRef = useRef<Record<string, AnimatedVector>>(
+    {}
+  );
   const graphSettingsRef = useRef<GraphSettings<V, E>>({});
   const graphModelRef = useRef<Graph<V, E> | null>(null);
 
@@ -65,6 +72,12 @@ export default function GraphEventsProvider<V, E>({
     positions: Record<string, AnimatedVectorCoordinates>
   ) => {
     animatedVerticesPositionsRef.current = positions;
+  };
+
+  const setAnimatedEdgeLabelsPositions = (
+    positions: Record<string, AnimatedVector>
+  ) => {
+    animatedEdgeLabelsPositionsRef.current = positions;
   };
 
   const setGraphSettings = (settings: GraphSettings<V, E>) => {
@@ -97,11 +110,11 @@ export default function GraphEventsProvider<V, E>({
     }
 
     if (graphModelRef.current && pressHandlers.edge) {
-      const edgeKey = findPressedEdge(
+      const edgeKey = findPressedEdgeLabel(
         position,
         graphModelRef.current,
-        edgeHitSlop,
-        animatedVerticesPositionsRef.current
+        edgeLabelHitSlop,
+        animatedEdgeLabelsPositionsRef.current
       );
       if (edgeKey) {
         pressHandlers.edge({ key: edgeKey, position });
@@ -123,6 +136,7 @@ export default function GraphEventsProvider<V, E>({
   };
 
   const contextValue: GraphEventsContextType<V, E> = {
+    setAnimatedEdgeLabelsPositions,
     setAnimatedVerticesPositions,
     setGraphSettings,
     setGraphModel,

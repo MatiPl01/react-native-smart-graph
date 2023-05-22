@@ -1,11 +1,11 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { DirectedEdge, Edge, Graph, UndirectedEdge } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { Edge, Graph } from '@/types/graphs';
+import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 
 import {
+  animatedVectorCoordinatesToVector,
   animatedVectorToVector,
-  distanceBetweenPointAndSegment,
   distanceBetweenVectors
 } from '../vectors';
 
@@ -20,7 +20,7 @@ export const findClosestVertex = (
     ([key, animatedPosition]) => {
       const distance = distanceBetweenVectors(
         position,
-        animatedVectorToVector(animatedPosition)
+        animatedVectorCoordinatesToVector(animatedPosition)
       );
       if (distance < closestVertexDistance) {
         closestVertexKey = key;
@@ -54,57 +54,49 @@ export const findPressedVertex = (
 };
 
 // TODO - fix edge press handlers
-export const findClosestEdge = <E, V>(
+export const findClosestEdgeLabel = <E, V>(
   position: Vector,
   edges: Array<Edge<E, V>>,
-  animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
+  animatedEdgeLabelsPositions: Record<string, AnimatedVector>
 ): { key: string | null; distance: number } => {
-  let closestEdgeKey: string | null = null;
-  let closestEdgeDistance = Infinity;
+  let closestEdgeLabelKey: string | null = null;
+  let closestEdgeLabelDistance = Infinity;
 
   edges.forEach(edge => {
-    const [vertex1, vertex2] = edge.vertices;
-    const vertex1Position = animatedVectorToVector(
-      animatedVerticesPositions[vertex1.key]
+    const key = edge.key;
+    const labelPosition = animatedVectorToVector(
+      animatedEdgeLabelsPositions[key]
     );
-    const vertex2Position = animatedVectorToVector(
-      animatedVerticesPositions[vertex2.key]
-    );
+    const distance = distanceBetweenVectors(position, labelPosition);
 
-    const distance = distanceBetweenPointAndSegment(
-      position,
-      vertex1Position,
-      vertex2Position
-    );
-
-    if (distance < closestEdgeDistance) {
-      closestEdgeKey = edge.key;
-      closestEdgeDistance = distance;
+    if (distance < closestEdgeLabelDistance) {
+      closestEdgeLabelKey = edge.key;
+      closestEdgeLabelDistance = distance;
     }
   });
 
   return {
-    key: closestEdgeKey,
-    distance: closestEdgeDistance
+    key: closestEdgeLabelKey,
+    distance: closestEdgeLabelDistance
   };
 };
 
-export const findPressedEdge = <E, V>(
+export const findPressedEdgeLabel = <E, V>(
   position: Vector,
   graph: Graph<V, E>,
   hitSlop: number,
-  animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
+  animatedEdgeLabelsPositions: Record<string, AnimatedVector>
 ): string | null => {
-  const { key: closestEdgeKey, distance } = findClosestEdge(
+  const { key: closestEdgeLabelKey, distance } = findClosestEdgeLabel(
     position,
     graph.edges,
-    animatedVerticesPositions
+    animatedEdgeLabelsPositions
   );
 
-  if (closestEdgeKey) {
-    const edge = graph.edge(closestEdgeKey);
+  if (closestEdgeLabelKey) {
+    const edge = graph.edge(closestEdgeLabelKey);
     if (edge && distance <= hitSlop) {
-      return closestEdgeKey;
+      return closestEdgeLabelKey;
     }
   }
 
