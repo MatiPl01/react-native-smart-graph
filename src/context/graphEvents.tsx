@@ -3,7 +3,7 @@ import { PropsWithChildren, createContext, useContext, useRef } from 'react';
 import { Vector } from '@shopify/react-native-skia';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
-import { EDGE_HIT_SLOP, VERTEX_HIT_SLOP } from '@/constants/events';
+import { EDGE_LABEL_HIT_SLOP, VERTEX_HIT_SLOP } from '@/constants/events';
 import { Graph } from '@/types/graphs';
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphSettings } from '@/types/settings';
