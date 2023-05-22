@@ -113,7 +113,7 @@ export default function GraphEventsProvider<V, E>({
       const edgeKey = findPressedEdgeLabel(
         position,
         graphModelRef.current,
-        edgeHitSlop,
+        edgeLabelHitSlop,
         animatedEdgeLabelsPositionsRef.current
       );
       if (edgeKey) {
