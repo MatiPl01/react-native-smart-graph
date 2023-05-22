@@ -169,7 +169,7 @@ export default function GraphComponent<
   );
 
   useEffect(() => {
-    graphEventsContext.setGraphModel?.(graph);
+    graphEventsContext.setGraphModel(graph);
   }, [graph]);
 
   useEffect(() => {
