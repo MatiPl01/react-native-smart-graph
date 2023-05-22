@@ -237,7 +237,7 @@ export default function GraphComponent<
   }, [animatedVerticesPositions]);
 
   useEffect(() => {
-    graphEventsContext.setAnimatedEdgeLabelsPositions?.(
+    graphEventsContext.setAnimatedEdgeLabelsPositions(
       animatedEdgeLabelsPositions.current
     );
   }, [animatedEdgeLabelsPositions]);
