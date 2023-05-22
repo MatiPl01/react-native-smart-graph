@@ -87,7 +87,7 @@ export const findPressedEdgeLabel = <E, V>(
   hitSlop: number,
   animatedEdgeLabelsPositions: Record<string, AnimatedVector>
 ): string | null => {
-  const { key: closestEdgeKey, distance } = findClosestEdgeLabel(
+  const { key: closestEdgeLabelKey, distance } = findClosestEdgeLabel(
     position,
     graph.edges,
     animatedEdgeLabelsPositions
