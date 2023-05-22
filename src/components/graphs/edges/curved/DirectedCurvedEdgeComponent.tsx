@@ -36,7 +36,7 @@ export default function DirectedCurvedEdgeComponent<E, V>({
   const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
 
   // Parabola vertex
-  const parabolaVertex = useSharedValue<Vector>({
+  const parabolaVertex = useSharedValue({
     x: (v1Position.x.value + v2Position.x.value) / 2,
     y: (v1Position.y.value + v2Position.y.value) / 2
   });
