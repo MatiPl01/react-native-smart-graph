@@ -23,11 +23,11 @@ export default class UndirectedGraph<V, E> extends Graph<
     return instance;
   }
 
-  isDirected() {
+  override isDirected() {
     return false;
   }
 
-  insertVertex(key: string, value: V): UndirectedGraphVertex<V, E> {
+  override insertVertex(key: string, value: V): UndirectedGraphVertex<V, E> {
     return this.insertVertexObject(new UndirectedGraphVertex<V, E>(key, value));
   }
 
@@ -72,5 +72,14 @@ export default class UndirectedGraph<V, E> extends Graph<
     this.removeEdgeObject(edge);
 
     return edge.value;
+  }
+
+  override orderEdgesBetweenVertices(
+    edges: Array<UndirectedEdge<E, V>>
+  ): Array<{ edge: UndirectedEdge<E, V>; order: number }> {
+    return edges.map((edge, index) => ({
+      edge,
+      order: index
+    }));
   }
 }

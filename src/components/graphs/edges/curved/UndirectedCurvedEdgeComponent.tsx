@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
   animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
@@ -12,21 +11,19 @@ import {
 
 import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
 
-export default function UndirectedCurvedEdgeComponent<E, V>({
+function UndirectedCurvedEdgeComponent<E, V>({
   v1Position,
   v2Position,
   vertexRadius,
   edge,
-  edgesBetweenVertices,
+  animatedOrder,
+  animatedEdgesCount,
   settings,
   renderers,
   animationProgress,
   removed,
   onLabelRender
 }: UndirectedCurvedEdgeComponentProps<E, V>) {
-  const edgesCount = edgesBetweenVertices.length;
-  const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
-
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
 
@@ -54,7 +51,9 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
       animatedVectorCoordinatesToVector(v1),
       animatedVectorCoordinatesToVector(v2)
     );
-    const offset = labelHeight.value * (edgeIndex - (edgesCount - 1) / 2);
+    const offset =
+      labelHeight.value *
+      (animatedOrder.value - (animatedEdgesCount.value - 1) / 2);
     return translateAlongVector(
       {
         x: (v1.x.value + v2.x.value) / 2,
@@ -86,23 +85,17 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
     return pathString;
   });
 
-  const sharedProps = {
-    animationProgress,
-    removed
-  };
-
   return (
     <>
       {renderers.edge({
-        ...sharedProps,
         key: edge.key,
         data: edge.value,
         parabolaVertex,
-        path
+        path,
+        animationProgress
       })}
       {renderers.label && (
         <EdgeLabelComponent
-          {...sharedProps}
           edge={edge}
           v1Position={v1Position}
           v2Position={v2Position}
@@ -110,8 +103,13 @@ export default function UndirectedCurvedEdgeComponent<E, V>({
           centerPosition={parabolaVertex}
           height={labelHeight}
           renderer={renderers.label}
+          animationProgress={animationProgress}
         />
       )}
     </>
   );
 }
+
+export default memo(UndirectedCurvedEdgeComponent) as <E, V>(
+  props: UndirectedCurvedEdgeComponentProps<E, V>
+) => JSX.Element;

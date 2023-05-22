@@ -23,15 +23,15 @@ export default class DirectedGraph<V, E> extends Graph<
     return instance;
   }
 
-  isDirected(): this is DirectedGraph<V, E> {
+  override isDirected(): this is DirectedGraph<V, E> {
     return true;
   }
 
-  insertVertex(key: string, value: V): DirectedGraphVertex<V, E> {
+  override insertVertex(key: string, value: V): DirectedGraphVertex<V, E> {
     return this.insertVertexObject(new DirectedGraphVertex<V, E>(key, value));
   }
 
-  insertEdge(
+  override insertEdge(
     sourceKey: string,
     targetKey: string,
     edgeKey: string,
@@ -56,7 +56,7 @@ export default class DirectedGraph<V, E> extends Graph<
     return edge;
   }
 
-  removeEdge(key: string): E {
+  override removeEdge(key: string): E {
     const edge = this.edge(key);
 
     if (!edge) {
@@ -68,5 +68,20 @@ export default class DirectedGraph<V, E> extends Graph<
     this.removeEdgeObject(edge);
 
     return edge.value;
+  }
+
+  override orderEdgesBetweenVertices(
+    edges: Array<DirectedEdge<E, V>>
+  ): Array<{ edge: DirectedEdge<E, V>; order: number }> {
+    // Display edges that have the same direction next to each other
+    let order = 0;
+    let oppositeOrder = 0; // For edges in the opposite direction
+
+    return edges.map(edge => {
+      if (edge.source.key < edge.target.key) {
+        return { edge, order: order++ };
+      }
+      return { edge, order: oppositeOrder++ };
+    });
   }
 }

@@ -45,7 +45,7 @@ export const useGraphEventsContext = () => {
 type PressHandler = (data: { key: string; position: Vector }) => void;
 
 type GraphEventsProviderProps = PropsWithChildren<{
-  edgeHitSlop?: number;
+  edgeLabelHitSlop?: number;
   vertexHitSlop?: number;
   onVertexPress?: PressHandler;
   onVertexLongPress?: PressHandler;
@@ -55,7 +55,7 @@ type GraphEventsProviderProps = PropsWithChildren<{
 
 export default function GraphEventsProvider<V, E>({
   children,
-  edgeHitSlop = EDGE_HIT_SLOP,
+  edgeLabelHitSlop = EDGE_LABEL_HIT_SLOP,
   vertexHitSlop = VERTEX_HIT_SLOP,
   ...eventHandlers
 }: GraphEventsProviderProps) {

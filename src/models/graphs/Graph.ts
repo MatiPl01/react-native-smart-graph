@@ -31,6 +31,32 @@ export default abstract class Graph<
     return Object.values(this.edges$);
   }
 
+  get orderedEdges(): Array<{ edge: GE; order: number; edgesCount: number }> {
+    const addedEdgesKeys = new Set<string>();
+    const result: Array<{ edge: GE; order: number; edgesCount: number }> = [];
+
+    this.edges.forEach(edge => {
+      if (addedEdgesKeys.has(edge.key)) {
+        return;
+      }
+      const [v1, v2] = edge.vertices;
+      const edgesBetweenVertices =
+        this.edgesBetweenVertices$[v1.key]?.[v2.key] || [];
+      this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
+        ({ edge: e, order }) => {
+          result.push({
+            edge: e,
+            order,
+            edgesCount: edgesBetweenVertices.length
+          });
+          addedEdgesKeys.add(edge.key);
+        }
+      );
+    });
+
+    return result;
+  }
+
   get connections(): GraphConnections {
     return Object.fromEntries(
       Object.values(this.vertices$).map(vertex => [
@@ -56,6 +82,10 @@ export default abstract class Graph<
   ): GE;
 
   abstract removeEdge(key: string): E;
+
+  abstract orderEdgesBetweenVertices(
+    edges: Array<GE>
+  ): Array<{ edge: GE; order: number }>;
 
   addObserver(observer: GraphObserver<V, E>): void {
     this.observers.push(observer);
@@ -85,7 +115,8 @@ export default abstract class Graph<
   }
 
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE> {
-    return this.edgesBetweenVertices$[vertex1key]?.[vertex2key] || [];
+    const res = this.edgesBetweenVertices$[vertex1key]?.[vertex2key];
+    return res ? [...res] : []; // Create a copy of the array
   }
 
   removeVertex(key: string): V {

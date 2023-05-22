@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -8,7 +8,6 @@ import {
 import { Vector, rotate } from '@shopify/react-native-skia';
 
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
-import { getEdgeIndex } from '@/utils/graphs/layout';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import {
   animatedVectorCoordinatesToVector,
@@ -20,21 +19,18 @@ import {
 import EdgeArrowComponent from '../../arrows/EdgeArrowComponent';
 import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
 
-export default function DirectedCurvedEdgeComponent<E, V>({
+function DirectedCurvedEdgeComponent<E, V>({
   v1Position,
   v2Position,
   vertexRadius,
   edge,
-  edgesBetweenVertices,
+  animatedOrder,
+  animatedEdgesCount,
   renderers,
   settings,
   animationProgress,
-  removed,
   onLabelRender
 }: DirectedCurvedEdgeComponentProps<E, V>) {
-  const edgesCount = edgesBetweenVertices.length;
-  const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
-
   // Parabola vertex
   const parabolaVertex = useSharedValue({
     x: (v1Position.x.value + v2Position.x.value) / 2,
@@ -84,16 +80,18 @@ export default function DirectedCurvedEdgeComponent<E, V>({
           x: (p1.x + p2.x) / 2,
           y: (p1.y + p2.y) / 2
         },
-        labelSize: labelHeight.value
+        labelSize: labelHeight.value,
+        order: animatedOrder.value,
+        edgesCount: animatedEdgesCount.value
       };
     },
-    ({ p1, p2, center, labelSize }) => {
+    ({ p1, p2, center, labelSize, order, edgesCount }) => {
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(
         animatedVectorCoordinatesToVector(v1Position),
         animatedVectorCoordinatesToVector(v2Position)
       );
-      const offset = labelSize * (edgeIndex - (edgesCount - 1) / 2);
+      const offset = labelSize * (order - (edgesCount - 1) / 2);
       const parabolaVertexPosition = translateAlongVector(
         center,
         orthogonalUnitVector,
@@ -103,7 +101,10 @@ export default function DirectedCurvedEdgeComponent<E, V>({
 
       // Calculate the edge arrow tip position and direction vector
       // If points are collinear
-      if (p1.x === p2.x || p1.y === p2.y) {
+      if (
+        p1.x === parabolaVertexPosition.x ||
+        p1.y === parabolaVertexPosition.y
+      ) {
         // 1. Calculate the direction vector
         const directionVector = calcUnitVector(p2, p1);
         dirVec.value = directionVector;
@@ -111,7 +112,7 @@ export default function DirectedCurvedEdgeComponent<E, V>({
         const tipPosition = translateAlongVector(
           p2,
           directionVector,
-          -vertexRadius
+          vertexRadius
         );
         arrowTipPosition.value = tipPosition;
       }
@@ -166,32 +167,26 @@ export default function DirectedCurvedEdgeComponent<E, V>({
     }
   );
 
-  const sharedProps = {
-    animationProgress,
-    removed
-  };
-
   return (
     <>
       {renderers.edge({
-        ...sharedProps,
         key: edge.key,
         data: edge.value,
         parabolaVertex,
-        path
+        path,
+        animationProgress
       })}
       <EdgeArrowComponent
-        {...sharedProps}
         directionVector={dirVec}
         tipPosition={arrowTipPosition}
         renderer={renderers.arrow}
         vertexRadius={vertexRadius}
         width={arrowWidth}
         height={arrowHeight}
+        animationProgress={animationProgress}
       />
       {renderers.label && (
         <EdgeLabelComponent
-          {...sharedProps}
           edge={edge}
           v1Position={v1Position}
           v2Position={v2Position}
@@ -199,8 +194,13 @@ export default function DirectedCurvedEdgeComponent<E, V>({
           centerPosition={parabolaVertex}
           height={labelHeight}
           renderer={renderers.label}
+          animationProgress={animationProgress}
         />
       )}
     </>
   );
 }
+
+export default memo(DirectedCurvedEdgeComponent) as <E, V>(
+  props: DirectedCurvedEdgeComponentProps<E, V>
+) => JSX.Element;

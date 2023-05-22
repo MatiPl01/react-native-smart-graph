@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -6,7 +6,6 @@ import {
 } from 'react-native-reanimated';
 
 import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
-import { getEdgeIndex } from '@/utils/graphs/layout';
 import {
   animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
@@ -18,20 +17,19 @@ import {
 import EdgeArrowComponent from '../../arrows/EdgeArrowComponent';
 import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
 
-export default function DirectedStraightEdgeComponent<E, V>({
+function DirectedStraightEdgeComponent<E, V>({
   v1Position,
   v2Position,
   edge,
   vertexRadius,
   settings,
-  edgesBetweenVertices,
+  animatedOrder,
+  animatedEdgesCount,
   animationProgress,
   removed,
   renderers,
   onLabelRender
 }: DirectedStraightEdgeComponentProps<E, V>) {
-  const edgesCount = edgesBetweenVertices.length;
-  const edgeIndex = getEdgeIndex(edge, edgesBetweenVertices);
   // Edge line
   const p1 = useSharedValue({
     x: v1Position.x.value,
@@ -60,14 +58,16 @@ export default function DirectedStraightEdgeComponent<E, V>({
   useAnimatedReaction(
     () => ({
       v1: animatedVectorCoordinatesToVector(v1Position),
-      v2: animatedVectorCoordinatesToVector(v2Position)
+      v2: animatedVectorCoordinatesToVector(v2Position),
+      order: animatedOrder.value,
+      edgesCount: animatedEdgesCount.value
     }),
-    ({ v1, v2 }) => {
+    ({ v1, v2, order, edgesCount }) => {
       const maxTranslationOffset = settings.maxOffsetFactor * vertexRadius;
       const translationOffset =
-        edgesCount > 1
-          ? (1 - edgeIndex / ((edgesCount - 1) / 2)) * maxTranslationOffset
-          : 0;
+        edgesCount >= 2
+          ? (1 - order / ((edgesCount - 1) / 2)) * maxTranslationOffset
+          : maxTranslationOffset * (edgesCount - 1);
       const translationVector = multiplyVector(
         calcOrthogonalUnitVector(v1, v2),
         translationOffset
@@ -87,44 +87,39 @@ export default function DirectedStraightEdgeComponent<E, V>({
         dirVec.value,
         Math.sqrt(vertexRadius ** 2 - translationOffset ** 2)
       );
-      const maxSize =
-        2 *
-        (edgesCount === 1
-          ? maxTranslationOffset
-          : maxTranslationOffset / (edgesCount - 1));
+      const maxSize = (2 * maxTranslationOffset) / (edgesCount - 1);
       // Update edge label max size
-      labelHeight.value = maxSize;
+      if (settings.label?.sizeRatio) {
+        labelHeight.value = Math.min(
+          settings.label?.sizeRatio * vertexRadius,
+          maxSize
+        );
+      }
       // Update edge arrow max size
       arrowWidth.value = Math.min(maxSize, settings.arrow.scale * vertexRadius);
     }
   );
 
-  const sharedProps = {
-    animationProgress,
-    removed
-  };
-
   return (
     <>
       {renderers.edge({
-        ...sharedProps,
         key: edge.key,
         data: edge.value,
         p1,
-        p2
+        p2,
+        animationProgress
       })}
       <EdgeArrowComponent
-        {...sharedProps}
         directionVector={dirVec}
         tipPosition={arrowTipPosition}
         renderer={renderers.arrow}
         vertexRadius={vertexRadius}
         width={arrowWidth}
         height={arrowHeight}
+        animationProgress={animationProgress}
       />
       {renderers.label && (
         <EdgeLabelComponent
-          {...sharedProps}
           edge={edge}
           v1Position={v1Position}
           v2Position={v2Position}
@@ -132,8 +127,13 @@ export default function DirectedStraightEdgeComponent<E, V>({
           centerPosition={center}
           height={labelHeight}
           renderer={renderers.label}
+          animationProgress={animationProgress}
         />
       )}
     </>
   );
 }
+
+export default memo(DirectedStraightEdgeComponent) as <E, V>(
+  props: DirectedStraightEdgeComponentProps<E, V>
+) => JSX.Element;
