@@ -231,7 +231,7 @@ export default function GraphComponent<
   }, [edges]);
 
   useEffect(() => {
-    graphEventsContext.setAnimatedVerticesPositions?.(
+    graphEventsContext.setAnimatedVerticesPositions(
       animatedVerticesPositions
     );
   }, [animatedVerticesPositions]);
