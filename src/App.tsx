@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -34,14 +33,16 @@ const SPORT_GRAPH = {
     { key: 'Basketball', data: [] },
     { key: 'Gym', data: [] },
     { key: 'Running', data: [] },
-    { key: 'Cycling', data: [] }
+    { key: 'Cycling', data: [] },
+    { key: 'Root', data: [] }
   ],
   edges: [
     { from: 'Sport', to: 'Football', key: 'E1', data: [] },
     { from: 'Sport', to: 'Basketball', key: 'E2', data: [] },
     { from: 'Sport', to: 'Gym', key: 'E3', data: [] },
     { from: 'Sport', to: 'Running', key: 'E4', data: [] },
-    { from: 'Sport', to: 'Cycling', key: 'E5', data: [] }
+    { from: 'Sport', to: 'Cycling', key: 'E5', data: [] },
+    { from: 'Sport', to: 'Root', key: 'E6', data: [] }
   ]
 };
 
@@ -51,17 +52,17 @@ const GYM_GRAPH = {
     { key: 'Bench Press', data: [] },
     { key: 'Squats', data: [] },
     { key: 'Deadlift', data: [] },
-    { key: 'Push Ups', data: [] }
+    { key: 'Push Ups', data: [] },
+    { key: 'Sport', data: [] }
   ],
   edges: [
     { from: 'Gym', to: 'Bench Press', key: 'E1', data: [] },
     { from: 'Gym', to: 'Squats', key: 'E2', data: [] },
     { from: 'Gym', to: 'Deadlift', key: 'E3', data: [] },
-    { from: 'Gym', to: 'Push Ups', key: 'E5', data: [] }
+    { from: 'Gym', to: 'Push Ups', key: 'E5', data: [] },
+    { from: 'Gym', to: 'Sport', key: 'E6', data: [] }
   ]
 };
-
-const mode = 0;
 
 export default function App() {
   const graph = DirectedGraph.fromData(
@@ -69,46 +70,52 @@ export default function App() {
     CATEGORIES_GRAPH.edges
   );
 
-  // TODO - remove this useEffect after testing
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (mode === 0) {
-  //       graph.removeBatch({
-  //         vertices: ['child12', 'root2', 'child21', 'root']
-  //       });
-  //       mode = 1;
-  //     } else {
-  //       graph.insertBatch({
-  //         vertices: [
-  //           { key: 'child12', value: 'child12' },
-  //           { key: 'root2', value: 'root2' },
-  //           { key: 'child21', value: 'child21' },
-  //           { key: 'root', value: 'root' }
-  //         ]
-  //       });
-  //       mode = 0;
-  //     }
-  //   }, 1500);
-
-  //   return () => clearInterval(interval);
-  // }, []);
-
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
           <GraphEventsProvider
-            onVertexPress={key => {
-              console.log('vertex pressed', key);
-            }}
-            onVertexLongPress={key => {
-              console.log('vertex long pressed', key);
-            }}
-            onEdgePress={key => {
-              console.log('edge pressed', key);
-            }}
-            onEdgeLongPress={key => {
-              console.log('edge long pressed', key);
+            onVertexPress={({ key }) => {
+              if (key === 'Sport') {
+                graph.replaceBatch({
+                  vertices: SPORT_GRAPH.vertices.map(v => ({
+                    key: v.key,
+                    value: v.data
+                  })),
+                  edges: SPORT_GRAPH.edges.map(e => ({
+                    vertex1key: e.from,
+                    vertex2key: e.to,
+                    key: e.key,
+                    value: e.data
+                  }))
+                });
+              } else if (key === 'Gym') {
+                graph.replaceBatch({
+                  vertices: GYM_GRAPH.vertices.map(v => ({
+                    key: v.key,
+                    value: v.data
+                  })),
+                  edges: GYM_GRAPH.edges.map(e => ({
+                    vertex1key: e.from,
+                    vertex2key: e.to,
+                    key: e.key,
+                    value: e.data
+                  }))
+                });
+              } else if (key === 'Root') {
+                graph.replaceBatch({
+                  vertices: CATEGORIES_GRAPH.vertices.map(v => ({
+                    key: v.key,
+                    value: v.data
+                  })),
+                  edges: CATEGORIES_GRAPH.edges.map(e => ({
+                    vertex1key: e.from,
+                    vertex2key: e.to,
+                    key: e.key,
+                    value: e.data
+                  }))
+                });
+              }
             }}>
             <PannableScalableView objectFit='contain' controls>
               <DirectedGraphComponent
