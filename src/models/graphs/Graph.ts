@@ -117,7 +117,10 @@ export default abstract class Graph<
 
   replaceBatch(data: BatchUpdateProps<V, E>, notifyObservers = true): void {
     this.clear();
-    this.insertBatch(data, notifyObservers);
+    this.notifyChange();
+    setTimeout(() => {
+      this.insertBatch(data, notifyObservers);
+    }, 0);
   }
 
   clear(): void {
