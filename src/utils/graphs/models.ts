@@ -10,14 +10,14 @@ import {
 
 export const findRootVertex = <V, E>(
   graph: DirectedGraph<V, E>
-): DirectedGraphVertex<V, E> => {
+): DirectedGraphVertex<V, E> | null => {
   const rootVertices = findRootVertices(graph);
 
   if (rootVertices.length > 1) {
     throw new Error('Multiple root vertices found');
   }
   if (rootVertices.length === 0) {
-    throw new Error('No root vertices found');
+    return null;
   }
   if (!rootVertices[0]) {
     throw new Error('Root vertex is undefined');
