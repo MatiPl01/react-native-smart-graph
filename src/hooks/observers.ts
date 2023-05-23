@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Edge, Graph, Vertex } from '@/types/graphs';
+import { Edge, Graph, GraphObserver, Vertex } from '@/types/graphs';
 
 export const useGraphObserver = <V, E>(
   graph: Graph<V, E>,
@@ -32,18 +32,12 @@ export const useGraphObserver = <V, E>(
 
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
-  const observer = useMemo(
-    () => ({
-      vertexAdded: updateState,
-      vertexRemoved: updateState,
-      edgeAdded: updateState,
-      edgeRemoved: updateState
-    }),
-    []
-  );
+  const observerRef = useRef<GraphObserver>({
+    graphChanged: updateState
+  });
 
   if (isFirstRenderRef.current) {
-    graph.addObserver(observer);
+    graph.addObserver(observerRef.current);
     isFirstRenderRef.current = false;
     if (active) {
       isObservingRef.current = true;
@@ -58,10 +52,10 @@ export const useGraphObserver = <V, E>(
 
   const setActive = (value: boolean) => {
     if (value && !isObservingRef.current) {
-      graph.addObserver(observer);
+      graph.addObserver(observerRef.current);
       isObservingRef.current = true;
     } else if (!value && isObservingRef.current) {
-      graph.removeObserver(observer);
+      graph.removeObserver(observerRef.current);
       isObservingRef.current = false;
     }
   };
