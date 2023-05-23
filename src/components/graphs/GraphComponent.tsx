@@ -389,27 +389,8 @@ export default function GraphComponent<
     [verticesData]
   );
 
-  // TODO - remove this after testing
-  const { top, bottom, right, left } = boundingRect;
-  const containerWidth = useDerivedValue(
-    () => right.value - left.value,
-    [right, left]
-  );
-  const containerHeight = useDerivedValue(
-    () => bottom.value - top.value,
-    [top, bottom]
-  );
-
   return (
     <Group>
-      {/* TODO - remove this rect after testing */}
-      <Rect
-        x={left}
-        y={top}
-        width={containerWidth}
-        height={containerHeight}
-        color='#444'
-      />
       {renderEdges()}
       {renderVertices()}
     </Group>

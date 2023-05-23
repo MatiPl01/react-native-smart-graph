@@ -124,7 +124,8 @@ export default function App() {
                   // TODO - fix orbits strategy padding
                   placement: {
                     strategy: 'orbits',
-                    minVertexSpacing: 100
+                    minVertexSpacing: 30,
+                    layerSizing: 'quad-increasing'
                   },
                   components: {
                     edge: {
