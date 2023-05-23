@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
-  BatchRemoveProps,
-  BatchUpdateProps,
   Edge,
   GraphConnections,
   GraphObserver,
@@ -14,7 +13,8 @@ export default abstract class Graph<
   V,
   E,
   GV extends Vertex<V, E>,
-  GE extends Edge<E, V>
+  GE extends Edge<E, V>,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
   protected readonly vertices$: Record<string, GV> = {};
@@ -91,21 +91,29 @@ export default abstract class Graph<
     edges: Array<GE>
   ): Array<{ edge: GE; order: number }>;
 
-  insertBatch(data: BatchUpdateProps<V, E>, notifyObservers = true): void {
-    // Insert edges and vertices to the graph model
-    data.vertices?.forEach(({ key, value }) =>
-      this.insertVertex(key, value, false)
-    );
-    data.edges?.forEach(({ key, value, vertex1key, vertex2key }) =>
-      this.insertEdge(key, value, vertex1key, vertex2key, false)
-    );
-    // Notify observers after all changes to the graph model are made
-    if (notifyObservers) {
-      this.notifyChange();
-    }
-  }
+  abstract insertBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<ED>;
+    },
+    notifyObservers?: boolean
+  ): void;
 
-  removeBatch(data: BatchRemoveProps, notifyObservers = true): void {
+  abstract replaceBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<ED>;
+    },
+    notifyObservers?: boolean
+  ): void;
+
+  removeBatch(
+    data: {
+      vertices?: Array<string>;
+      edges?: Array<string>;
+    },
+    notifyObservers = true
+  ): void {
     // Remove edges and vertices from graph
     data.edges?.forEach(key => this.removeEdge(key, false));
     data.vertices?.forEach(key => this.removeVertex(key, false));
@@ -115,20 +123,16 @@ export default abstract class Graph<
     }
   }
 
-  replaceBatch(data: BatchUpdateProps<V, E>, notifyObservers = true): void {
-    this.clear();
-    this.notifyChange();
-    setTimeout(() => {
-      this.insertBatch(data, notifyObservers);
-    }, 0);
-  }
-
-  clear(): void {
+  clear(notifyObservers = true): void {
     // Clear the whole graph
     (this.vertices$ as Mutable<typeof this.vertices$>) = {};
     (this.edges$ as Mutable<typeof this.edges$>) = {};
     (this.edgesBetweenVertices$ as Mutable<typeof this.edgesBetweenVertices$>) =
       {};
+    // Notify observers after all changes to the graph model are made
+    if (notifyObservers) {
+      this.notifyChange();
+    }
   }
 
   addObserver(observer: GraphObserver): void {

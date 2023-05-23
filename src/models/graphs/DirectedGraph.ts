@@ -1,3 +1,5 @@
+import { DirectedEdgeData, VertexData } from '@/types/data';
+
 import DirectedEdge from '../edges/DirectedEdge';
 import DirectedGraphVertex from '../vertices/DirectedGraphVertex';
 import Graph from './Graph';
@@ -6,12 +8,13 @@ export default class DirectedGraph<V, E> extends Graph<
   V,
   E,
   DirectedGraphVertex<V, E>,
-  DirectedEdge<E, V>
+  DirectedEdge<E, V>,
+  DirectedEdgeData<E>
 > {
   // eslint-disable-next-line no-shadow
   static fromData<V, E>(
-    vertices: Array<{ key: string; data: V }>,
-    edges?: Array<{ key: string; from: string; to: string; data: E }>
+    vertices: Array<VertexData<V>>,
+    edges?: Array<DirectedEdgeData<E>>
   ): DirectedGraph<V, E> {
     const instance = new DirectedGraph<V, E>();
 
@@ -93,5 +96,38 @@ export default class DirectedGraph<V, E> extends Graph<
       }
       return { edge, order: oppositeOrder++ };
     });
+  }
+
+  override insertBatch(
+    batchData: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E>>;
+    },
+    notifyObservers = true
+  ): void {
+    // Insert edges and vertices to the graph model
+    batchData.vertices?.forEach(({ key, data }) =>
+      this.insertVertex(key, data, false)
+    );
+    batchData.edges?.forEach(({ key, data, from, to }) =>
+      this.insertEdge(key, data, from, to, false)
+    );
+    // Notify observers after all changes to the graph model are made
+    if (notifyObservers) {
+      this.notifyChange();
+    }
+  }
+
+  override replaceBatch(
+    batchData: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E>>;
+    },
+    notifyObservers = true
+  ): void {
+    this.clear();
+    setTimeout(() => {
+      this.insertBatch(batchData, notifyObservers);
+    }, 0);
   }
 }

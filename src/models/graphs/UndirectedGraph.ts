@@ -1,3 +1,5 @@
+import { UndirectedEdgeData, VertexData } from '@/types/data';
+
 import UndirectedEdge from '../edges/UndirectedEdge';
 import UndirectedGraphVertex from '../vertices/UndirectedGraphVertex';
 import Graph from './Graph';
@@ -6,12 +8,13 @@ export default class UndirectedGraph<V, E> extends Graph<
   V,
   E,
   UndirectedGraphVertex<V, E>,
-  UndirectedEdge<E, V>
+  UndirectedEdge<E, V>,
+  UndirectedEdgeData<E>
 > {
   // eslint-disable-next-line no-shadow
   static fromData<V, E>(
-    vertices: Array<{ key: string; data: V }>,
-    edges?: Array<{ key: string; vertices: [string, string]; data: E }>
+    vertices: Array<VertexData<V>>,
+    edges?: Array<UndirectedEdgeData<E>>
   ): UndirectedGraph<V, E> {
     const instance = new UndirectedGraph<V, E>();
 
@@ -28,8 +31,15 @@ export default class UndirectedGraph<V, E> extends Graph<
     return false;
   }
 
-  override insertVertex(key: string, value: V): UndirectedGraphVertex<V, E> {
-    return this.insertVertexObject(new UndirectedGraphVertex<V, E>(key, value));
+  override insertVertex(
+    key: string,
+    value: V,
+    notifyObservers = true
+  ): UndirectedGraphVertex<V, E> {
+    return this.insertVertexObject(
+      new UndirectedGraphVertex<V, E>(key, value),
+      notifyObservers
+    );
   }
 
   override insertEdge(
@@ -37,7 +47,7 @@ export default class UndirectedGraph<V, E> extends Graph<
     value: E,
     vertex1key: string,
     vertex2key: string,
-    notifyObservers?: boolean
+    notifyObservers = true
   ): UndirectedEdge<E, V> {
     const vertex1 = this.vertex(vertex1key);
     const vertex2 = this.vertex(vertex2key);
@@ -60,7 +70,7 @@ export default class UndirectedGraph<V, E> extends Graph<
     return edge;
   }
 
-  override removeEdge(key: string, notifyObservers?: boolean): E {
+  override removeEdge(key: string, notifyObservers = true): E {
     const edge = this.edge(key);
 
     if (!edge) {
@@ -83,5 +93,38 @@ export default class UndirectedGraph<V, E> extends Graph<
       edge,
       order: index
     }));
+  }
+
+  override insertBatch(
+    batchData: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<UndirectedEdgeData<E>>;
+    },
+    notifyObservers = true
+  ): void {
+    // Insert edges and vertices to the graph model
+    batchData.vertices?.forEach(({ key, data }) =>
+      this.insertVertex(key, data, false)
+    );
+    batchData.edges?.forEach(({ key, data, vertices }) =>
+      this.insertEdge(key, data, ...vertices, false)
+    );
+    // Notify observers after all changes to the graph model are made
+    if (notifyObservers) {
+      this.notifyChange();
+    }
+  }
+
+  override replaceBatch(
+    batchData: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<UndirectedEdgeData<E>>;
+    },
+    notifyObservers = true
+  ): void {
+    this.clear();
+    setTimeout(() => {
+      this.insertBatch(batchData, notifyObservers);
+    }, 0);
   }
 }
