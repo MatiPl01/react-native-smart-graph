@@ -42,7 +42,7 @@ const SPORT_GRAPH = {
     { from: 'Sport', to: 'Gym', key: 'E3', data: [] },
     { from: 'Sport', to: 'Running', key: 'E4', data: [] },
     { from: 'Sport', to: 'Cycling', key: 'E5', data: [] },
-    { from: 'Sport', to: 'Root', key: 'E6', data: [] }
+    { from: 'Root', to: 'Sport', key: 'E6', data: [] }
   ]
 };
 
@@ -60,7 +60,7 @@ const GYM_GRAPH = {
     { from: 'Gym', to: 'Squats', key: 'E2', data: [] },
     { from: 'Gym', to: 'Deadlift', key: 'E3', data: [] },
     { from: 'Gym', to: 'Push Ups', key: 'E5', data: [] },
-    { from: 'Gym', to: 'Sport', key: 'E6', data: [] }
+    { from: 'Sport', to: 'Gym', key: 'E6', data: [] }
   ]
 };
 
@@ -77,44 +77,11 @@ export default function App() {
           <GraphEventsProvider
             onVertexPress={({ key }) => {
               if (key === 'Sport') {
-                graph.replaceBatch({
-                  vertices: SPORT_GRAPH.vertices.map(v => ({
-                    key: v.key,
-                    value: v.data
-                  })),
-                  edges: SPORT_GRAPH.edges.map(e => ({
-                    vertex1key: e.from,
-                    vertex2key: e.to,
-                    key: e.key,
-                    value: e.data
-                  }))
-                });
+                graph.replaceBatch(SPORT_GRAPH);
               } else if (key === 'Gym') {
-                graph.replaceBatch({
-                  vertices: GYM_GRAPH.vertices.map(v => ({
-                    key: v.key,
-                    value: v.data
-                  })),
-                  edges: GYM_GRAPH.edges.map(e => ({
-                    vertex1key: e.from,
-                    vertex2key: e.to,
-                    key: e.key,
-                    value: e.data
-                  }))
-                });
+                graph.replaceBatch(GYM_GRAPH);
               } else if (key === 'Root') {
-                graph.replaceBatch({
-                  vertices: CATEGORIES_GRAPH.vertices.map(v => ({
-                    key: v.key,
-                    value: v.data
-                  })),
-                  edges: CATEGORIES_GRAPH.edges.map(e => ({
-                    vertex1key: e.from,
-                    vertex2key: e.to,
-                    key: e.key,
-                    value: e.data
-                  }))
-                });
+                graph.replaceBatch(CATEGORIES_GRAPH);
               }
             }}>
             <PannableScalableView objectFit='contain' controls>
@@ -124,13 +91,8 @@ export default function App() {
                   // TODO - fix orbits strategy padding
                   placement: {
                     strategy: 'orbits',
-                    minVertexSpacing: 30,
-                    layerSizing: 'quad-increasing'
-                  },
-                  components: {
-                    edge: {
-                      type: 'straight'
-                    }
+                    layerSizing: 'equal',
+                    minVertexSpacing: 125
                   }
                 }}
                 renderers={{

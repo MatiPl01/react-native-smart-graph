@@ -21,21 +21,6 @@ export type GraphObserver = {
   graphChanged(): void;
 };
 
-export type BatchUpdateProps<V, E> = {
-  vertices?: Array<{ key: string; value: V }>;
-  edges?: Array<{
-    key: string;
-    value: E;
-    vertex1key: string;
-    vertex2key: string;
-  }>;
-};
-
-export type BatchRemoveProps = {
-  vertices?: Array<string>;
-  edges?: Array<string>;
-};
-
 export interface Graph<V, E> {
   get vertices(): Array<Vertex<V, E>>;
   get edges(): Array<Edge<E, V>>;
@@ -63,8 +48,5 @@ export interface Graph<V, E> {
   ): Edge<E, V>;
   removeVertex(key: string, notifyObservers?: boolean): V;
   removeEdge(key: string, notifyObservers?: boolean): E;
-  insertBatch(data: BatchUpdateProps<V, E>, notifyObservers?: boolean): void;
-  removeBatch(data: BatchRemoveProps, notifyObservers?: boolean): void;
-  replaceBatch(data: BatchUpdateProps<V, E>, notifyObservers?: boolean): void;
-  clear(): void;
+  clear(notifyObservers?: boolean): void;
 }
