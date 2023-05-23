@@ -20,3 +20,7 @@ type ShiftUnion<
   P extends PropertyKey,
   T extends Array<any>
 > = T extends Array<any> ? (T[0] extends P ? Shift<T> : never) : never;
+
+export type Mutable<T> = {
+  -readonly [k in keyof T]: T[k];
+};

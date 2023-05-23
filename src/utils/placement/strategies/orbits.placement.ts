@@ -57,7 +57,7 @@ const placeVerticesOnOrbits = <V, E>(
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
   const orphanedNeighbours = getBalancingOrphanedNeighbors(
-    rootVertex,
+    [rootVertex],
     orphanedVertices
   );
 

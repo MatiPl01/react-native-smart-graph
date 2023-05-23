@@ -17,8 +17,9 @@ export default class UndirectedGraph<V, E> extends Graph<
 
     vertices.forEach(({ key, data }) => instance.insertVertex(key, data));
     edges?.forEach(({ key, vertices: [v1, v2], data }) =>
-      instance.insertEdge(v1, v2, key, data)
+      instance.insertEdge(key, data, v1, v2, false)
     );
+    instance.notifyChange();
 
     return instance;
   }
@@ -32,10 +33,11 @@ export default class UndirectedGraph<V, E> extends Graph<
   }
 
   override insertEdge(
+    key: string,
+    value: E,
     vertex1key: string,
     vertex2key: string,
-    edgeKey: string,
-    value: E
+    notifyObservers?: boolean
   ): UndirectedEdge<E, V> {
     const vertex1 = this.vertex(vertex1key);
     const vertex2 = this.vertex(vertex2key);
@@ -47,18 +49,18 @@ export default class UndirectedGraph<V, E> extends Graph<
       throw new Error(`Vertex ${vertex2key} does not exist`);
     }
 
-    const edge = new UndirectedEdge<E, V>(edgeKey, value, [vertex1, vertex2]);
-    this.insertEdgeObject(edge);
+    const edge = new UndirectedEdge<E, V>(key, value, [vertex1, vertex2]);
 
     vertex1.addEdge(edge);
     if (vertex1key !== vertex2key) {
       vertex2.addEdge(edge);
     }
+    this.insertEdgeObject(edge, notifyObservers);
 
     return edge;
   }
 
-  override removeEdge(key: string): E {
+  override removeEdge(key: string, notifyObservers?: boolean): E {
     const edge = this.edge(key);
 
     if (!edge) {
@@ -69,7 +71,7 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (!edge.isLoop) {
       edge.vertices[1].removeEdge(key);
     }
-    this.removeEdgeObject(edge);
+    this.removeEdgeObject(edge, notifyObservers);
 
     return edge.value;
   }
