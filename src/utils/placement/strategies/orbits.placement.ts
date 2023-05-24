@@ -83,18 +83,27 @@ const findRootVertex = <V, E>(
   }
   // 3. If the graph is directed, select the vertex with the highest out degree
   // as the root vertex
-  return findSourceVertex(graphComponent as Array<DirectedGraphVertex<V, E>>);
+  return findDirectedGraphSourceVertex(
+    graphComponent as Array<DirectedGraphVertex<V, E>>
+  );
 };
 
-const findSourceVertex = <V, E>(
+const findDirectedGraphSourceVertex = <V, E>(
   graphComponent: Array<DirectedGraphVertex<V, E>>
 ): DirectedGraphVertex<V, E> => {
-  return graphComponent.reduce((sourceVertex, vertex) => {
+  let vertices = graphComponent.filter(
+    v => v.inDegree === 0 && v.outDegree > 0
+  );
+  if (vertices.length === 0) {
+    vertices = graphComponent;
+  }
+
+  return vertices.reduce((sourceVertex, vertex) => {
     if (vertex.outDegree > sourceVertex.outDegree) {
       return vertex;
     }
     return sourceVertex;
-  }, graphComponent[0]!);
+  }, vertices[0]!);
 };
 
 const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
