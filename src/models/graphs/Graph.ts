@@ -73,7 +73,39 @@ export default abstract class Graph<
     );
   }
 
+  hasVertex(key: string): boolean {
+    return !!this.vertices$[key];
+  }
+
+  hasEdge(key: string): boolean {
+    return !!this.edges$[key];
+  }
+
+  getVertex(key: string): GV | null {
+    return this.vertices$[key] ?? null;
+  }
+
+  getEdge(key: string): GE | null {
+    return this.edges$[key] ?? null;
+  }
+
+  getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE> {
+    const res = this.edgesBetweenVertices$[vertex1key]?.[vertex2key];
+    return res ? [...res] : []; // Create a copy of the array
+  }
+
   abstract isDirected(): boolean;
+
+  addObserver(observer: GraphObserver): void {
+    this.observers.push(observer);
+  }
+
+  removeObserver(observer: GraphObserver): void {
+    const index = this.observers.indexOf(observer);
+    if (index > -1) {
+      this.observers.splice(index, 1);
+    }
+  }
 
   abstract insertVertex(key: string, value: V, notifyObservers?: boolean): GV;
 
@@ -133,38 +165,6 @@ export default abstract class Graph<
     if (notifyObservers) {
       this.notifyChange();
     }
-  }
-
-  addObserver(observer: GraphObserver): void {
-    this.observers.push(observer);
-  }
-
-  removeObserver(observer: GraphObserver): void {
-    const index = this.observers.indexOf(observer);
-    if (index > -1) {
-      this.observers.splice(index, 1);
-    }
-  }
-
-  hasVertex(key: string): boolean {
-    return !!this.vertices$[key];
-  }
-
-  hasEdge(key: string): boolean {
-    return !!this.edges$[key];
-  }
-
-  vertex(key: string) {
-    return this.vertices$[key];
-  }
-
-  edge(key: string) {
-    return this.edges$[key];
-  }
-
-  getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE> {
-    const res = this.edgesBetweenVertices$[vertex1key]?.[vertex2key];
-    return res ? [...res] : []; // Create a copy of the array
   }
 
   removeVertex(key: string, notifyObservers = true): V {

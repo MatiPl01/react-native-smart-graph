@@ -36,8 +36,8 @@ export interface Graph<V, E> {
   hasVertex(key: string): boolean;
   hasEdge(key: string): boolean;
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<E, V>>;
-  vertex(key: string): Vertex<V, E> | undefined;
-  edge(key: string): Edge<E, V> | undefined;
+  getVertex(key: string): Vertex<V, E> | null;
+  getEdge(key: string): Edge<E, V> | null;
   insertVertex(key: string, value: V, notifyObservers?: boolean): Vertex<V, E>;
   insertEdge(
     key: string,

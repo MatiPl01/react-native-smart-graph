@@ -1,7 +1,9 @@
-// TODO - improve docs later
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Vector } from '@shopify/react-native-skia';
+
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { DirectedGraph } from '@/models/graphs';
-import { DirectedGraphVertex } from '@/types/graphs';
+import { Vertex } from '@/types/graphs';
+import { Dimensions } from '@/types/layout';
 import {
   GetLayerRadiusFunction,
   GraphLayout,
@@ -9,153 +11,192 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
+import { bfs, findGraphCenter } from '@/utils/algorithms';
 
-import {
-  findRootVertex,
-  getBalancingOrphanedNeighbors,
-  getOrphanedVertices,
-  isGraphAcyclic,
-  isGraphDirected
-} from '@/utils/graphs/models';
+import { arrangeGraphComponents } from '../shared';
 
-/**
- * The graph must be a tree!
- * Places vertices in a circular fashion. The root vertex is placed in the center of the circle.
- *
- * @param graph
- * @param containerWidth
- * @param containerHeight
- * @returns
- */
+type ArrangedVertices = Record<
+  string,
+  { layer: number; angle: number; sectorAngle: number }
+>;
+
 const placeVerticesOnOrbits = <V, E>(
-  graph: DirectedGraph<V, E>,
+  graphComponents: Array<Array<Vertex<V, E>>>,
   vertexRadius: number,
+  isGraphDirected: boolean,
   settings: OrbitsPlacementSettings
 ): GraphLayout => {
-  // TODO - maybe add undirected graph support
-  if (!isGraphDirected(graph)) {
-    throw new Error('Cannot place vertices on rings for undirected graph');
+  const componentsLayouts: Array<GraphLayout> = [];
+  const rootVertexKeys = new Set(settings.roots);
+
+  for (const component of graphComponents) {
+    // Find the root vertex of the component
+    const rootVertex = findRootVertex(
+      component,
+      rootVertexKeys,
+      isGraphDirected
+    );
+    // Arrange vertices in sectors
+    const arrangedVertices = arrangeVertices(rootVertex, isGraphDirected);
+    // Calculate the layout of the component
+    const layerRadiuses = calcLayerRadiuses(
+      arrangedVertices,
+      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      vertexRadius,
+      settings
+    );
+    // Place vertices on the layout
+    const placedVerticesPositions = placeVertices(
+      arrangedVertices,
+      layerRadiuses
+    );
+    // Calc container dimensions
+    const containerDimensions = calcContainerDimensions(
+      placedVerticesPositions,
+      vertexRadius
+    );
+    componentsLayouts.push({
+      ...containerDimensions,
+      verticesPositions: placedVerticesPositions
+    });
   }
 
-  if (!isGraphAcyclic(graph)) {
-    throw new Error('Cannot place vertices on rings for cyclic graph');
+  return arrangeGraphComponents(componentsLayouts);
+};
+
+const findRootVertex = <V, E>(
+  graphComponent: Array<Vertex<V, E>>,
+  selectedRootVertexKeys: Set<string>,
+  isGraphDirected: boolean
+): Vertex<V, E> => {
+  // Find the root vertex of the component
+  // 1. If there are selected root vertices, look for the root vertex among them
+  for (const vertex of graphComponent) {
+    if (selectedRootVertexKeys.has(vertex.key)) {
+      return vertex;
+    }
+  }
+  // 2. If the graph is undirected, select the center of the graph diameter
+  // as the root vertex
+  if (!isGraphDirected) {
+    return findGraphCenter(graphComponent);
+  }
+  // 3. If the graph is directed, select the vertex with the highest out degree
+  // as the root vertex
+};
+
+const arrangeVertices = <V, E>(
+  rootVertex: Vertex<V, E>,
+  isGraphDirected: boolean
+): ArrangedVertices => {
+  if (isGraphDirected) {
+    return {}; // TODO - add directed graph support
   }
 
-  const {
-    minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
-    ...layerSizingSettings
-  } = settings;
+  return arrangeUndirectedGraphVertices(rootVertex);
+};
 
-  const verticesLayerPositions: Record<
+const arrangeUndirectedGraphVertices = <V, E>(
+  rootVertex: Vertex<V, E>
+): ArrangedVertices => {
+  const layersAndChildren: Record<
     string,
-    { layer: number; angle: number }
+    { layer: number; children: Array<Vertex<V, E>> }
   > = {};
-  const minLayersRadius: Record<string, number> = {};
 
-  const rootVertex = findRootVertex(graph);
-  if (rootVertex) {
-    const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
+  // Use BFS algorithm to traverse the graph and create layers
+  bfs([rootVertex], ({ vertex, parent, depth }) => {
+    if (!layersAndChildren[vertex.key]) {
+      layersAndChildren[vertex.key] = {
+        layer: depth,
+        children: []
+      };
+    }
+    if (parent) {
+      layersAndChildren[parent.key]!.children.push(vertex);
+    }
+    return false;
+  });
 
-    const orphanedVertices = getOrphanedVertices(graph.vertices);
-    const orphanedNeighbours = getBalancingOrphanedNeighbors(
-      [rootVertex],
-      orphanedVertices
-    );
+  // Transform layersAndChildren to arranged vertices
+  const arrangedVertices: ArrangedVertices = {
+    [rootVertex.key]: { layer: 0, angle: 0, sectorAngle: 2 * Math.PI }
+  };
+  for (const [key, { layer, children }] of Object.entries(layersAndChildren)) {
+    if (!children.length) {
+      continue;
+    }
+    const vertexArrangedData = arrangedVertices[key]!;
+    const childSectorAngle = vertexArrangedData.sectorAngle / children.length;
+    let childStartAngle =
+      vertexArrangedData.angle +
+      (childSectorAngle - vertexArrangedData.sectorAngle) / 2;
 
-    placeChildrenOnRingSection(
-      rootVertex,
-      0,
-      0,
-      2 * Math.PI,
-      minVertexCenterDistance,
-      minLayersRadius,
-      verticesLayerPositions,
-      orphanedNeighbours
+    for (const child of children) {
+      arrangedVertices[child.key] = {
+        layer: layer + 1,
+        angle: childStartAngle,
+        sectorAngle: childSectorAngle
+      };
+      childStartAngle += childSectorAngle;
+    }
+  }
+
+  return arrangedVertices;
+};
+
+const calcLayerRadiuses = (
+  arrangedVertices: ArrangedVertices,
+  minVertexSpacing: number,
+  vertexRadius: number,
+  layerSizingSettings: OrbitsLayerSizingSettings
+): Record<number, number> => {
+  // Calc min layer radiuses
+  const minLayerRadiuses: Record<number, number> = {};
+  const minDistanceBetweenVerticesCenters = 2 * vertexRadius + minVertexSpacing;
+
+  for (const { layer, sectorAngle } of Object.values(arrangedVertices)) {
+    minLayerRadiuses[layer] = Math.max(
+      minLayerRadiuses[layer] || 0,
+      calcVertexCenterDistance(minDistanceBetweenVerticesCenters, sectorAngle)
     );
   }
 
-  const { width, height, layersRadius } = getLayout(
-    minLayersRadius,
+  // Calc layers radiuses
+  return getLayerRadiuses(
+    minLayerRadiuses,
     minVertexSpacing,
     vertexRadius,
     layerSizingSettings
   );
-
-  return {
-    width,
-    height,
-    verticesPositions: Object.entries(verticesLayerPositions).reduce(
-      (acc, [key, { layer, angle }]) => {
-        const r = layersRadius[layer] as number;
-        acc[key] = {
-          x: r * Math.cos(angle),
-          y: r * Math.sin(angle)
-        };
-        return acc;
-      },
-      {} as PlacedVerticesPositions
-    )
-  };
 };
 
-const placeChildrenOnRingSection = <V, E>(
-  parent: DirectedGraphVertex<V, E>,
-  parentLayer: number,
-  parentAngle: number,
-  sectionAngle: number,
-  minVertexCenterDistance: number,
-  minLayersRadius: Record<string, number>,
-  verticesLayerPositions: Record<string, { layer: number; angle: number }>,
-  orphanedNeighbours: Record<string, Array<DirectedGraphVertex<V, E>>>
-) => {
-  if (parentLayer > 0) {
-    const denominator = 2 * Math.sin(sectionAngle / 2);
-    const sectionRadius =
-      denominator > 1e-10
-        ? minVertexCenterDistance / denominator
-        : minVertexCenterDistance;
-
-    minLayersRadius[parentLayer] = Math.max(
-      minLayersRadius[parentLayer] || 0,
-      sectionRadius,
-      minVertexCenterDistance
-    );
-  } else {
-    minLayersRadius[parentLayer] = 0;
-  }
-
-  verticesLayerPositions[parent.key] = {
-    layer: parentLayer,
-    angle: parentAngle
-  };
-
-  const parentNeighbours = [
-    ...parent.neighbors,
-    ...(orphanedNeighbours[parent.key] ?? [])
-  ];
-
-  parentNeighbours.forEach((child, i) => {
-    placeChildrenOnRingSection(
-      child,
-      parentLayer + 1,
-      parentAngle -
-        sectionAngle / 2 +
-        (sectionAngle / parentNeighbours.length) * (i + 0.5),
-      sectionAngle / parentNeighbours.length,
-      minVertexCenterDistance,
-      minLayersRadius,
-      verticesLayerPositions,
-      orphanedNeighbours
-    );
-  });
+const calcVertexCenterDistance = (
+  layer: number,
+  sectorAngle: number
+): number => {
+  return 2 * Math.sin(sectorAngle / 2) * layer;
 };
 
-const getEqualLayersRadius = (
-  minLayersRadius: Record<string, number>
+const placeVertices = (
+  arrangedVertices: ArrangedVertices,
+  layerRadiuses: Record<number, number>
+): PlacedVerticesPositions =>
+  Object.entries(arrangedVertices).reduce((acc, [key, { layer, angle }]) => {
+    const radius = layerRadiuses[layer]!;
+    acc[key] = {
+      x: radius * Math.cos(angle),
+      y: radius * Math.sin(angle)
+    };
+    return acc;
+  }, {} as PlacedVerticesPositions);
+
+const getEqualLayerRadiuses = (
+  minLayerRadiuses: Record<string, number>
 ): Array<number> => {
-  const layersCount = Object.keys(minLayersRadius).length;
+  const layersCount = Object.keys(minLayerRadiuses).length;
 
-  const lastLayerRadius = Object.entries(minLayersRadius).reduce(
+  const lastLayerRadius = Object.entries(minLayerRadiuses).reduce(
     (acc, [layerNumber, minLayerRadius]) => {
       if (layerNumber === '0') {
         return 0;
@@ -174,10 +215,32 @@ const getEqualLayersRadius = (
   return layersRadius;
 };
 
-const getQuadIncreasingLayersRadius = (
-  minLayersRadius: Record<string, number>
+const calcContainerDimensions = (
+  placedVertices: PlacedVerticesPositions,
+  vertexRadius: number
+): Dimensions => {
+  let minX = 0;
+  let maxX = 0;
+  let minY = 0;
+  let maxY = 0;
+
+  for (const { x, y } of Object.values(placedVertices)) {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  }
+
+  return {
+    width: maxX - minX + 2 * vertexRadius,
+    height: maxY - minY + 2 * vertexRadius
+  };
+};
+
+const getQuadIncreasingLayerRadiuses = (
+  minLayerRadiuses: Record<string, number>
 ): Array<number> => {
-  const maxCoefficient = Object.entries(minLayersRadius).reduce(
+  const maxCoefficient = Object.entries(minLayerRadiuses).reduce(
     (acc, [layerNumber, minLayerRadius]) => {
       if (layerNumber === '0') {
         return 0;
@@ -187,24 +250,24 @@ const getQuadIncreasingLayersRadius = (
     0
   );
 
-  return Object.keys(minLayersRadius).map(
+  return Object.keys(minLayerRadiuses).map(
     layerNumber => maxCoefficient * (+layerNumber) ** 2
   );
 };
 
-const getNonDecreasingLayersRadius = (
-  minLayersRadius: Record<string, number>,
+const getNonDecreasingLayerRadiuses = (
+  minLayerRadiuses: Record<string, number>,
   minVertexSpacing: number,
   vertexRadius: number
 ): Array<number> => {
   const layersRadius = [0];
   let maxDistanceBetweenLayers = minVertexSpacing + 2 * vertexRadius;
 
-  for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
+  for (let i = 1; i < Object.keys(minLayerRadiuses).length; i++) {
     layersRadius.push(
       Math.max(
         (layersRadius[i - 1] as number) + maxDistanceBetweenLayers,
-        minLayersRadius[i] as number
+        minLayerRadiuses[i] as number
       )
     );
 
@@ -217,7 +280,7 @@ const getNonDecreasingLayersRadius = (
   return layersRadius;
 };
 
-const getCustomLayersRadius = (
+const getCustomLayerRadiuses = (
   layersCount: number,
   getLayerRadius: GetLayerRadiusFunction
 ): Array<number> => {
@@ -236,17 +299,17 @@ const getCustomLayersRadius = (
   return layersRadius;
 };
 
-const getAutoLayersRadius = (
-  minLayersRadius: Record<string, number>,
+const getAutoLayerRadiuses = (
+  minLayerRadiuses: Record<string, number>,
   minVertexSpacing: number,
   vertexRadius: number
 ): Array<number> => {
   const layersRadius = [0];
 
-  for (let i = 1; i < Object.keys(minLayersRadius).length; i++) {
+  for (let i = 1; i < Object.keys(minLayerRadiuses).length; i++) {
     layersRadius.push(
       Math.max(
-        minLayersRadius[i] as number,
+        minLayerRadiuses[i] as number,
         (layersRadius[i - 1] as number) + minVertexSpacing + 2 * vertexRadius
       )
     );
@@ -255,59 +318,36 @@ const getAutoLayersRadius = (
   return layersRadius;
 };
 
-const getLayersRadius = (
-  minLayersRadius: Record<string, number>,
+const getLayerRadiuses = (
+  minLayerRadiuses: Record<string, number>,
   minVertexSpacing: number,
   vertexRadius: number,
   layerSizingSettings: OrbitsLayerSizingSettings
 ): Array<number> => {
   switch (layerSizingSettings.layerSizing) {
     case 'equal':
-      return getEqualLayersRadius(minLayersRadius);
+      return getEqualLayerRadiuses(minLayerRadiuses);
     case 'quad-increasing':
-      return getQuadIncreasingLayersRadius(minLayersRadius);
+      return getQuadIncreasingLayerRadiuses(minLayerRadiuses);
     case 'non-decreasing':
-      return getNonDecreasingLayersRadius(
-        minLayersRadius,
+      return getNonDecreasingLayerRadiuses(
+        minLayerRadiuses,
         minVertexSpacing,
         vertexRadius
       );
     case 'custom':
-      return getCustomLayersRadius(
-        Object.keys(minLayersRadius).length,
+      return getCustomLayerRadiuses(
+        Object.keys(minLayerRadiuses).length,
         layerSizingSettings.getLayerRadius
       );
     case 'auto':
     default:
-      return getAutoLayersRadius(
-        minLayersRadius,
+      return getAutoLayerRadiuses(
+        minLayerRadiuses,
         minVertexSpacing,
         vertexRadius
       );
   }
-};
-
-const getLayout = (
-  minLayersRadius: Record<string, number>,
-  minVertexSpacing: number,
-  vertexRadius: number,
-  layerSizingSettings: OrbitsLayerSizingSettings
-) => {
-  const layersRadius = getLayersRadius(
-    minLayersRadius,
-    minVertexSpacing,
-    vertexRadius,
-    layerSizingSettings
-  );
-
-  const containerSize =
-    2 * ((layersRadius[layersRadius.length - 1] as number) + vertexRadius);
-
-  return {
-    width: containerSize,
-    height: containerSize,
-    layersRadius
-  };
 };
 
 export default placeVerticesOnOrbits;

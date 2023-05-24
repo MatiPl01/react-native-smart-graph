@@ -94,7 +94,7 @@ export const findPressedEdgeLabel = <E, V>(
   );
 
   if (closestEdgeLabelKey) {
-    const edge = graph.edge(closestEdgeLabelKey);
+    const edge = graph.getEdge(closestEdgeLabelKey);
     if (edge && distance <= hitSlop) {
       return closestEdgeLabelKey;
     }

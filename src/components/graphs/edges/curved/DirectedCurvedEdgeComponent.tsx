@@ -5,7 +5,7 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { Vector, rotate } from '@shopify/react-native-skia';
+import { rotate } from '@shopify/react-native-skia';
 
 import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';

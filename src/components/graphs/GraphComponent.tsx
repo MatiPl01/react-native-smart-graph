@@ -1,8 +1,8 @@
 import { useGraphObserver } from '@/hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
+import { useAnimatedReaction } from 'react-native-reanimated';
 
-import { Group, Rect, Vector } from '@shopify/react-native-skia';
+import { Group, Vector } from '@shopify/react-native-skia';
 
 import {
   ARROW_COMPONENT_SETTINGS,

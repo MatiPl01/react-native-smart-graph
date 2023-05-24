@@ -1,4 +1,3 @@
-import { DirectedGraph } from '@/models/graphs';
 import { Graph } from '@/types/graphs';
 import { GraphLayout, PlacementSettings } from '@/types/settings';
 
@@ -19,14 +18,15 @@ export const placeVertices = <V, E>(
       return placeVerticesOnCircle(graph.vertices, vertexRadius, settings);
     case 'circles':
       return placeVerticesOnCircles(
-        findGraphComponents(graph),
+        findGraphComponents(graph.vertices),
         vertexRadius,
         settings
       );
     case 'orbits':
       return placeVerticesOnOrbits(
-        graph as DirectedGraph<V, E>, // TODO - change this to take graph components after adding undirected graphs
+        findGraphComponents(graph.vertices),
         vertexRadius,
+        graph.isDirected(),
         settings
       );
     case 'trees':

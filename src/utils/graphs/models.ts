@@ -8,6 +8,8 @@ import {
   Vertex
 } from '@/types/graphs';
 
+// TODO - remove unused functions later
+
 export const findRootVertex = <V, E>(
   graph: DirectedGraph<V, E>
 ): DirectedGraphVertex<V, E> | null => {
