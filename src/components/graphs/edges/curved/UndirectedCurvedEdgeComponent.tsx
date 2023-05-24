@@ -1,6 +1,7 @@
 import { memo, useEffect } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
+import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
@@ -28,7 +29,8 @@ function UndirectedCurvedEdgeComponent<E, V>({
 
   // Edge label
   const labelHeight = useSharedValue(
-    vertexRadius * (settings.label?.sizeRatio || 0.5)
+    vertexRadius *
+      (settings.label?.sizeRatio || LABEL_COMPONENT_SETTINGS.sizeRatio)
   );
   // Parabola vertex
   const parabolaVertex = useDerivedValue(() => {

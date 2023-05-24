@@ -53,24 +53,26 @@ const placeVerticesOnOrbits = <V, E>(
   const minLayersRadius: Record<string, number> = {};
 
   const rootVertex = findRootVertex(graph);
-  const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
+  if (rootVertex) {
+    const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
 
-  const orphanedVertices = getOrphanedVertices(graph.vertices);
-  const orphanedNeighbours = getBalancingOrphanedNeighbors(
-    rootVertex,
-    orphanedVertices
-  );
+    const orphanedVertices = getOrphanedVertices(graph.vertices);
+    const orphanedNeighbours = getBalancingOrphanedNeighbors(
+      [rootVertex],
+      orphanedVertices
+    );
 
-  placeChildrenOnRingSection(
-    rootVertex,
-    0,
-    0,
-    2 * Math.PI,
-    minVertexCenterDistance,
-    minLayersRadius,
-    verticesLayerPositions,
-    orphanedNeighbours
-  );
+    placeChildrenOnRingSection(
+      rootVertex,
+      0,
+      0,
+      2 * Math.PI,
+      minVertexCenterDistance,
+      minLayersRadius,
+      verticesLayerPositions,
+      orphanedNeighbours
+    );
+  }
 
   const { width, height, layersRadius } = getLayout(
     minLayersRadius,

@@ -17,11 +17,8 @@ export interface Edge<E, V> {
 
 export type GraphConnections = Record<string, Array<string>>;
 
-export type GraphObserver<V, E> = {
-  vertexAdded(vertex: Vertex<V, E>): void;
-  vertexRemoved(vertex: Vertex<V, E>): void;
-  edgeAdded(edge: Edge<E, V>): void;
-  edgeRemoved(edge: Edge<E, V>): void;
+export type GraphObserver = {
+  graphChanged(): void;
 };
 
 export interface Graph<V, E> {
@@ -34,20 +31,22 @@ export interface Graph<V, E> {
   }>;
   get connections(): GraphConnections;
   isDirected(): boolean;
-  addObserver(observer: GraphObserver<V, E>): void;
-  removeObserver(observer: GraphObserver<V, E>): void;
+  addObserver(observer: GraphObserver): void;
+  removeObserver(observer: GraphObserver): void;
   hasVertex(key: string): boolean;
   hasEdge(key: string): boolean;
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<E, V>>;
   vertex(key: string): Vertex<V, E> | undefined;
   edge(key: string): Edge<E, V> | undefined;
-  insertVertex(key: string, value: V, radius: number): Vertex<V, E>;
+  insertVertex(key: string, value: V, notifyObservers?: boolean): Vertex<V, E>;
   insertEdge(
+    key: string,
+    value: E,
     vertex1key: string,
     vertex2key: string,
-    edgeKey: string,
-    value: E
+    notifyObservers?: boolean
   ): Edge<E, V>;
-  removeVertex(key: string): V;
-  removeEdge(key: string): E;
+  removeVertex(key: string, notifyObservers?: boolean): V;
+  removeEdge(key: string, notifyObservers?: boolean): E;
+  clear(notifyObservers?: boolean): void;
 }

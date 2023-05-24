@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
   GraphConnections,
@@ -6,12 +7,14 @@ import {
   Graph as IGraph,
   Vertex
 } from '@/types/graphs';
+import { Mutable } from '@/types/utils';
 
 export default abstract class Graph<
   V,
   E,
   GV extends Vertex<V, E>,
-  GE extends Edge<E, V>
+  GE extends Edge<E, V>,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
   protected readonly vertices$: Record<string, GV> = {};
@@ -21,7 +24,7 @@ export default abstract class Graph<
     Record<string, Array<GE>>
   > = {};
 
-  private readonly observers: Array<GraphObserver<V, E>> = [];
+  private readonly observers: Array<GraphObserver> = [];
 
   get vertices(): Array<GV> {
     return Object.values(this.vertices$);
@@ -72,26 +75,71 @@ export default abstract class Graph<
 
   abstract isDirected(): boolean;
 
-  abstract insertVertex(key: string, value: V): GV;
+  abstract insertVertex(key: string, value: V, notifyObservers?: boolean): GV;
 
   abstract insertEdge(
+    key: string,
+    value: E,
     sourceKey: string,
     targetKey: string,
-    edgeKey: string,
-    value: E
+    notifyObservers?: boolean
   ): GE;
 
-  abstract removeEdge(key: string): E;
+  abstract removeEdge(key: string, notifyObservers?: boolean): E;
 
   abstract orderEdgesBetweenVertices(
     edges: Array<GE>
   ): Array<{ edge: GE; order: number }>;
 
-  addObserver(observer: GraphObserver<V, E>): void {
+  abstract insertBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<ED>;
+    },
+    notifyObservers?: boolean
+  ): void;
+
+  abstract replaceBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<ED>;
+    },
+    notifyObservers?: boolean
+  ): void;
+
+  removeBatch(
+    data: {
+      vertices?: Array<string>;
+      edges?: Array<string>;
+    },
+    notifyObservers = true
+  ): void {
+    // Remove edges and vertices from graph
+    data.edges?.forEach(key => this.removeEdge(key, false));
+    data.vertices?.forEach(key => this.removeVertex(key, false));
+    // Notify observers after all changes to the graph model are made
+    if (notifyObservers) {
+      this.notifyChange();
+    }
+  }
+
+  clear(notifyObservers = true): void {
+    // Clear the whole graph
+    (this.vertices$ as Mutable<typeof this.vertices$>) = {};
+    (this.edges$ as Mutable<typeof this.edges$>) = {};
+    (this.edgesBetweenVertices$ as Mutable<typeof this.edgesBetweenVertices$>) =
+      {};
+    // Notify observers after all changes to the graph model are made
+    if (notifyObservers) {
+      this.notifyChange();
+    }
+  }
+
+  addObserver(observer: GraphObserver): void {
     this.observers.push(observer);
   }
 
-  removeObserver(observer: GraphObserver<V, E>): void {
+  removeObserver(observer: GraphObserver): void {
     const index = this.observers.indexOf(observer);
     if (index > -1) {
       this.observers.splice(index, 1);
@@ -119,7 +167,7 @@ export default abstract class Graph<
     return res ? [...res] : []; // Create a copy of the array
   }
 
-  removeVertex(key: string): V {
+  removeVertex(key: string, notifyObservers = true): V {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
     }
@@ -129,21 +177,27 @@ export default abstract class Graph<
       this.removeEdge(edge.key);
     });
     delete this.vertices$[key];
-    this.notifyVertexRemoved(vertex);
+    // Notify change if notifyObservers is set to true
+    if (notifyObservers) {
+      this.notifyChange();
+    }
 
     return vertex.value;
   }
 
-  protected insertVertexObject(vertex: GV): GV {
+  protected insertVertexObject(vertex: GV, notifyObservers = true): GV {
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
-    this.notifyVertexAdded(vertex);
+    // Notify change if notifyObservers is set to true
+    if (notifyObservers) {
+      this.notifyChange();
+    }
     return vertex;
   }
 
-  protected insertEdgeObject(edge: GE): GE {
+  protected insertEdgeObject(edge: GE, notifyObservers = true): GE {
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
@@ -165,11 +219,14 @@ export default abstract class Graph<
     this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
     // Add edge to edges
     this.edges$[edge.key] = edge;
-    this.notifyEdgeAdded(edge);
+    // Notify change if notifyObservers is set to true
+    if (notifyObservers) {
+      this.notifyChange();
+    }
     return edge;
   }
 
-  protected removeEdgeObject(edge: GE): void {
+  protected removeEdgeObject(edge: GE, notifyObservers = true): void {
     // Remove edge from edges between vertices
     const [vertex1, vertex2] = edge.vertices;
     this.edgesBetweenVertices$[vertex1.key]![vertex2.key]?.splice(
@@ -188,22 +245,15 @@ export default abstract class Graph<
     }
     // Remove the edge from edges
     delete this.edges$[edge.key];
-    this.notifyEdgeRemoved(edge);
+    // Notify change if notifyObservers is set to true
+    if (notifyObservers) {
+      this.notifyChange();
+    }
   }
 
-  protected notifyEdgeRemoved(edge: GE): void {
-    this.observers.forEach(observer => observer.edgeRemoved(edge));
-  }
-
-  private notifyEdgeAdded(edge: GE): void {
-    this.observers.forEach(observer => observer.edgeAdded(edge));
-  }
-
-  private notifyVertexRemoved(vertex: GV): void {
-    this.observers.forEach(observer => observer.vertexRemoved(vertex));
-  }
-
-  private notifyVertexAdded(vertex: GV): void {
-    this.observers.forEach(observer => observer.vertexAdded(vertex));
+  protected notifyChange(): void {
+    this.observers.forEach(observer => {
+      observer.graphChanged();
+    });
   }
 }

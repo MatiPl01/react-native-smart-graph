@@ -1,3 +1,5 @@
+import { DirectedEdgeData, VertexData } from '@/types/data';
+
 import DirectedEdge from '../edges/DirectedEdge';
 import DirectedGraphVertex from '../vertices/DirectedGraphVertex';
 import Graph from './Graph';
@@ -6,19 +8,23 @@ export default class DirectedGraph<V, E> extends Graph<
   V,
   E,
   DirectedGraphVertex<V, E>,
-  DirectedEdge<E, V>
+  DirectedEdge<E, V>,
+  DirectedEdgeData<E>
 > {
   // eslint-disable-next-line no-shadow
   static fromData<V, E>(
-    vertices: Array<{ key: string; data: V }>,
-    edges?: Array<{ key: string; from: string; to: string; data: E }>
+    vertices: Array<VertexData<V>>,
+    edges?: Array<DirectedEdgeData<E>>
   ): DirectedGraph<V, E> {
     const instance = new DirectedGraph<V, E>();
 
-    vertices.forEach(({ key, data }) => instance.insertVertex(key, data));
-    edges?.forEach(({ key, from, to, data }) =>
-      instance.insertEdge(from, to, key, data)
+    vertices.forEach(({ key, data }) =>
+      instance.insertVertex(key, data, false)
     );
+    edges?.forEach(({ key, from, to, data }) =>
+      instance.insertEdge(key, data, from, to, false)
+    );
+    instance.notifyChange();
 
     return instance;
   }
@@ -27,15 +33,23 @@ export default class DirectedGraph<V, E> extends Graph<
     return true;
   }
 
-  override insertVertex(key: string, value: V): DirectedGraphVertex<V, E> {
-    return this.insertVertexObject(new DirectedGraphVertex<V, E>(key, value));
+  override insertVertex(
+    key: string,
+    value: V,
+    notifyObservers?: boolean
+  ): DirectedGraphVertex<V, E> {
+    return this.insertVertexObject(
+      new DirectedGraphVertex<V, E>(key, value),
+      notifyObservers
+    );
   }
 
   override insertEdge(
+    key: string,
+    value: E,
     sourceKey: string,
     targetKey: string,
-    edgeKey: string,
-    value: E
+    notifyObservers?: boolean
   ): DirectedEdge<E, V> {
     const source = this.vertex(sourceKey);
     const target = this.vertex(targetKey);
@@ -47,16 +61,15 @@ export default class DirectedGraph<V, E> extends Graph<
       throw new Error(`Vertex ${targetKey} does not exist`);
     }
 
-    const edge = new DirectedEdge<E, V>(edgeKey, value, source, target);
+    const edge = new DirectedEdge<E, V>(key, value, source, target);
     source.addOutEdge(edge);
     target.addInEdge(edge);
-
-    this.insertEdgeObject(edge);
+    this.insertEdgeObject(edge, notifyObservers);
 
     return edge;
   }
 
-  override removeEdge(key: string): E {
+  override removeEdge(key: string, notifyObservers?: boolean): E {
     const edge = this.edge(key);
 
     if (!edge) {
@@ -65,7 +78,7 @@ export default class DirectedGraph<V, E> extends Graph<
 
     edge.source.removeOutEdge(key);
     edge.target.removeInEdge(key);
-    this.removeEdgeObject(edge);
+    this.removeEdgeObject(edge, notifyObservers);
 
     return edge.value;
   }
@@ -83,5 +96,38 @@ export default class DirectedGraph<V, E> extends Graph<
       }
       return { edge, order: oppositeOrder++ };
     });
+  }
+
+  override insertBatch(
+    batchData: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E>>;
+    },
+    notifyObservers = true
+  ): void {
+    // Insert edges and vertices to the graph model
+    batchData.vertices?.forEach(({ key, data }) =>
+      this.insertVertex(key, data, false)
+    );
+    batchData.edges?.forEach(({ key, data, from, to }) =>
+      this.insertEdge(key, data, from, to, false)
+    );
+    // Notify observers after all changes to the graph model are made
+    if (notifyObservers) {
+      this.notifyChange();
+    }
+  }
+
+  override replaceBatch(
+    batchData: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E>>;
+    },
+    notifyObservers = true
+  ): void {
+    this.clear();
+    setTimeout(() => {
+      this.insertBatch(batchData, notifyObservers);
+    }, 0);
   }
 }

@@ -90,7 +90,7 @@ function DirectedStraightEdgeComponent<E, V>({
       // Update edge label max size
       if (settings.label?.sizeRatio) {
         labelHeight.value = Math.min(
-          settings.label?.sizeRatio * vertexRadius,
+          settings.label.sizeRatio * vertexRadius,
           maxSize
         );
       }
