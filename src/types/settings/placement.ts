@@ -2,13 +2,18 @@ import { Vector } from '@shopify/react-native-skia';
 
 import { Vertex } from '../graphs';
 
-export type PlacementStrategy = 'random' | 'circular' | 'orbits' | 'tree';
+export type PlacementStrategy =
+  | 'random'
+  | 'circle'
+  | 'circles'
+  | 'orbits'
+  | 'trees';
 
 export type DirectedGraphPlacementSettings<V, E> =
   | RandomPlacementSettings
   | CircularPlacementSettings<V, E>
   | OrbitsPlacementSettings
-  | TreePlacementSettings;
+  | TreesPlacementSettings;
 
 export type UndirectedGraphPlacementSettings<V, E> =
   | RandomPlacementSettings
@@ -78,11 +83,11 @@ export type OrbitsPlacementSettings = (SharedPlacementSettings & {
 
 export type CircularPlacementSettings<V, E> = SharedPlacementSettings &
   SortablePlacementSettings<V, E> & {
-    strategy: 'circular';
+    strategy: 'circle' | 'circles';
   };
 
-export type TreePlacementSettings = SharedPlacementSettings & {
-  strategy: 'tree';
+export type TreesPlacementSettings = SharedPlacementSettings & {
+  strategy: 'trees';
 };
 
 export type PlacedVerticesPositions = Record<string, Vector>;

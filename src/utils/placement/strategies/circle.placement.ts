@@ -1,5 +1,5 @@
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { Graph } from '@/types/graphs';
+import { Vertex } from '@/types/graphs';
 import {
   CircularPlacementSettings,
   GraphLayout,
@@ -8,8 +8,8 @@ import {
 
 import { defaultSortComparator } from '../shared';
 
-const placeVerticesCircular = <V, E>(
-  graph: Graph<V, E>,
+const placeVerticesOnCircle = <V, E>(
+  vertices: Array<Vertex<V, E>>,
   vertexRadius: number,
   {
     sortComparator = defaultSortComparator,
@@ -17,21 +17,22 @@ const placeVerticesCircular = <V, E>(
     minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing
   }: CircularPlacementSettings<V, E>
 ): GraphLayout => {
-  const vertices = sortVertices
-    ? graph.vertices.sort(sortComparator)
-    : graph.vertices;
+  const updatedVertices = sortVertices
+    ? vertices.sort(sortComparator)
+    : vertices;
 
   const initialAngle = -Math.PI / 2;
   const { radius, angleStep, width, height } = getLayout(
-    vertices.length,
+    updatedVertices.length,
     vertexRadius,
     minVertexSpacing
   );
+  const padding = minVertexSpacing;
 
   return {
-    width,
-    height,
-    verticesPositions: vertices.reduce((acc, { key }, idx) => {
+    width: width + padding,
+    height: height + padding,
+    verticesPositions: updatedVertices.reduce((acc, { key }, idx) => {
       acc[key] = {
         x: radius * Math.cos(initialAngle + angleStep * idx),
         y: radius * Math.sin(initialAngle + angleStep * idx)
@@ -67,4 +68,4 @@ const getLayout = (
   };
 };
 
-export default placeVerticesCircular;
+export default placeVerticesOnCircle;
