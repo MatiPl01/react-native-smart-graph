@@ -66,6 +66,8 @@ const DISCONNECTED_GRAPH = {
   edges: [...GRAPH1.edges, ...GRAPH2.edges, ...GRAPH3.edges]
 };
 
+let phase = 0;
+
 export default function App() {
   const graph = UndirectedGraph.fromData(
     DISCONNECTED_GRAPH.vertices,
@@ -74,11 +76,16 @@ export default function App() {
 
   useEffect(() => {
     setInterval(() => {
-      if (graph.hasEdge('bridge')) {
-        graph.removeEdge('bridge');
-      } else {
-        graph.insertEdge('bridge', 'bridge', 'A', 'F');
+      if (phase === 0) {
+        graph.insertEdge('PC', '', 'P', 'C');
+      } else if (phase === 1) {
+        graph.insertEdge('CI', '', 'C', 'I');
+      } else if (phase === 2) {
+        graph.removeEdge('PC');
+      } else if (phase === 3) {
+        graph.removeEdge('CI');
       }
+      phase = (phase + 1) % 4;
     }, 1000);
   }, [graph]);
 
@@ -93,6 +100,7 @@ export default function App() {
                 // TODO - fix orbits strategy padding
                 placement: {
                   strategy: 'orbits',
+                  layerSizing: 'equal',
                   minVertexSpacing: 100
                 },
                 components: {

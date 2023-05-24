@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Vector } from '@shopify/react-native-skia';
-
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { Vertex } from '@/types/graphs';
 import { Dimensions } from '@/types/layout';
@@ -39,9 +37,11 @@ const placeVerticesOnOrbits = <V, E>(
     // Arrange vertices in sectors
     const arrangedVertices = arrangeVertices(rootVertex, isGraphDirected);
     // Calculate the layout of the component
+    const minVertexSpacing =
+      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
-      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      minVertexSpacing,
       vertexRadius,
       settings
     );
@@ -56,7 +56,8 @@ const placeVerticesOnOrbits = <V, E>(
       vertexRadius
     );
     componentsLayouts.push({
-      ...containerDimensions,
+      width: containerDimensions.width + minVertexSpacing,
+      height: containerDimensions.height + minVertexSpacing,
       verticesPositions: placedVerticesPositions
     });
   }
@@ -157,7 +158,7 @@ const calcLayerRadiuses = (
 
   for (const { layer, sectorAngle } of Object.values(arrangedVertices)) {
     minLayerRadiuses[layer] = Math.max(
-      minLayerRadiuses[layer] || 0,
+      minLayerRadiuses[layer] || minVertexSpacing + 2 * vertexRadius,
       calcVertexCenterDistance(minDistanceBetweenVerticesCenters, sectorAngle)
     );
   }

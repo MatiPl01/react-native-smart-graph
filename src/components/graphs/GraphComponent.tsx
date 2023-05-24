@@ -1,8 +1,8 @@
 import { useGraphObserver } from '@/hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAnimatedReaction } from 'react-native-reanimated';
+import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
-import { Group, Vector } from '@shopify/react-native-skia';
+import { Group, Rect, Vector } from '@shopify/react-native-skia';
 
 import {
   ARROW_COMPONENT_SETTINGS,
@@ -389,8 +389,22 @@ export default function GraphComponent<
     [verticesData]
   );
 
+  const containerWidth = useDerivedValue(
+    () => boundingRect.right.value - boundingRect.left.value
+  );
+  const containerHeight = useDerivedValue(
+    () => boundingRect.bottom.value - boundingRect.top.value
+  );
+
   return (
     <Group>
+      <Rect
+        x={boundingRect.left}
+        y={boundingRect.top}
+        width={containerWidth}
+        height={containerHeight}
+        color='#222'
+      />
       {renderEdges()}
       {renderVertices()}
     </Group>

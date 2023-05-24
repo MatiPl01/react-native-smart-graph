@@ -26,7 +26,13 @@ export const arrangeGraphComponents = (
       h,
       x: 0,
       y: 0,
-      verticesPositions
+      verticesPositions,
+      rootTopLeft: Object.values(verticesPositions).reduce(
+        (acc, { x: vx, y: vy }) => ({
+          x: Math.max(acc.x, -vx),
+          y: Math.max(acc.y, -vy)
+        })
+      )
     })
   );
   // Pack graph components on the screen
@@ -36,14 +42,15 @@ export const arrangeGraphComponents = (
     width: packed.w,
     height: packed.h,
     verticesPositions: Object.fromEntries(
-      preparedComponents.flatMap(({ verticesPositions, x, y, w, h }) =>
-        Object.entries(verticesPositions).map(([key, { x: vx, y: vy }]) => [
-          key,
-          {
-            x: vx + x + (w - packed.w) / 2,
-            y: vy + y + (h - packed.h) / 2
-          }
-        ])
+      preparedComponents.flatMap(
+        ({ verticesPositions, x, y, rootTopLeft: { x: dx, y: dy } }) =>
+          Object.entries(verticesPositions).map(([key, { x: vx, y: vy }]) => [
+            key,
+            {
+              x: vx + dx + x - packed.w / 2,
+              y: vy + dy + y - packed.h / 2
+            }
+          ])
       )
     )
   };
