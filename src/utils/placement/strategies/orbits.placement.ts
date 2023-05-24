@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Vector } from '@shopify/react-native-skia';
-
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
+import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
 import { Vertex } from '@/types/graphs';
 import { Dimensions } from '@/types/layout';
 import {
@@ -36,8 +35,9 @@ const placeVerticesOnOrbits = <V, E>(
       rootVertexKeys,
       isGraphDirected
     );
+
     // Arrange vertices in sectors
-    const arrangedVertices = arrangeVertices(rootVertex, isGraphDirected);
+    const arrangedVertices = arrangeVertices(rootVertex);
     // Calculate the layout of the component
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
@@ -83,22 +83,21 @@ const findRootVertex = <V, E>(
   }
   // 3. If the graph is directed, select the vertex with the highest out degree
   // as the root vertex
+  return findSourceVertex(graphComponent as Array<DirectedGraphVertex<V, E>>);
 };
 
-const arrangeVertices = <V, E>(
-  rootVertex: Vertex<V, E>,
-  isGraphDirected: boolean
-): ArrangedVertices => {
-  if (isGraphDirected) {
-    return {}; // TODO - add directed graph support
-  }
-
-  return arrangeUndirectedGraphVertices(rootVertex);
+const findSourceVertex = <V, E>(
+  graphComponent: Array<DirectedGraphVertex<V, E>>
+): DirectedGraphVertex<V, E> => {
+  return graphComponent.reduce((sourceVertex, vertex) => {
+    if (vertex.outDegree > sourceVertex.outDegree) {
+      return vertex;
+    }
+    return sourceVertex;
+  }, graphComponent[0]!);
 };
 
-const arrangeUndirectedGraphVertices = <V, E>(
-  rootVertex: Vertex<V, E>
-): ArrangedVertices => {
+const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
   const layersAndChildren: Record<
     string,
     { layer: number; children: Array<Vertex<V, E>> }
@@ -232,8 +231,8 @@ const calcContainerDimensions = (
   }
 
   return {
-    width: maxX - minX + 2 * vertexRadius,
-    height: maxY - minY + 2 * vertexRadius
+    width: 2 * (Math.max(Math.abs(maxX), Math.abs(minX)) + vertexRadius),
+    height: 2 * (Math.max(Math.abs(maxY), Math.abs(minY)) + vertexRadius)
   };
 };
 

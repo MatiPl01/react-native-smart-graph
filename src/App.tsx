@@ -3,10 +3,12 @@ import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { UndirectedGraph } from '@/models/graphs';
+import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
+import DirectedGraphComponent from './components/graphs/DirectedGraphComponent';
 import UndirectedGraphComponent from './components/graphs/UndirectedGraphComponent';
+import { DirectedEdgeData, VertexData } from './types/data';
 
 const GRAPH1 = {
   vertices: [
@@ -14,80 +16,94 @@ const GRAPH1 = {
     { key: 'B', data: 'B' },
     { key: 'C', data: 'C' },
     { key: 'D', data: 'D' },
-    { key: 'E', data: 'E' }
-  ],
-  edges: [
-    { key: 'AB', vertices: ['A', 'B'], data: 'AB' },
-    { key: 'AC', vertices: ['A', 'C'], data: 'AC' },
-    { key: 'AD', vertices: ['A', 'D'], data: 'AD' },
-    { key: 'AE', vertices: ['A', 'E'], data: 'AE' }
-  ]
-};
-
-const GRAPH2 = {
-  vertices: [
+    { key: 'E', data: 'E' },
     { key: 'F', data: 'F' },
     { key: 'G', data: 'G' },
     { key: 'H', data: 'H' },
     { key: 'I', data: 'I' },
     { key: 'J', data: 'J' },
     { key: 'K', data: 'K' },
-    { key: 'L', data: 'L' },
-    { key: 'M', data: 'M' },
-    { key: 'N', data: 'N' },
-    { key: 'O', data: 'O' }
-  ],
+    { key: 'L', data: 'L' }
+  ] as VertexData<string>[],
   edges: [
-    { key: 'FG', vertices: ['F', 'G'], data: 'FG' },
-    { key: 'FH', vertices: ['F', 'H'], data: 'FH' },
-    { key: 'FI', vertices: ['F', 'I'], data: 'FI' },
-    { key: 'GJ', vertices: ['G', 'J'], data: 'GJ' },
-    { key: 'GK', vertices: ['G', 'K'], data: 'GK' },
-    { key: 'GL', vertices: ['G', 'L'], data: 'GL' },
-    { key: 'GM', vertices: ['G', 'M'], data: 'GM' },
-    { key: 'GN', vertices: ['G', 'N'], data: 'GN' },
-    { key: 'GO', vertices: ['G', 'O'], data: 'GO' }
-  ]
-};
-
-const GRAPH3 = {
-  vertices: [
-    { key: 'P', data: 'P' },
-    { key: 'Q', data: 'Q' }
-  ],
-  edges: [
-    { key: 'PQ1', vertices: ['P', 'Q'], data: 'PQ1' },
-    { key: 'PQ2', vertices: ['P', 'Q'], data: 'PQ2' }
-  ]
-};
-
-const DISCONNECTED_GRAPH = {
-  vertices: [...GRAPH1.vertices, ...GRAPH2.vertices, ...GRAPH3.vertices],
-  edges: [...GRAPH1.edges, ...GRAPH2.edges, ...GRAPH3.edges]
+    {
+      key: 'AB',
+      from: 'A',
+      to: 'B',
+      data: 'AB'
+    },
+    {
+      key: 'AC',
+      from: 'A',
+      to: 'C',
+      data: 'AC'
+    },
+    {
+      key: 'CD',
+      from: 'C',
+      to: 'D',
+      data: 'CD'
+    },
+    {
+      key: 'CE',
+      from: 'C',
+      to: 'E',
+      data: 'CE'
+    },
+    {
+      key: 'EK',
+      from: 'E',
+      to: 'K',
+      data: 'EK'
+    },
+    {
+      key: 'EL',
+      from: 'E',
+      to: 'L',
+      data: 'EL'
+    },
+    {
+      key: 'CF',
+      from: 'C',
+      to: 'F',
+      data: 'CF'
+    },
+    {
+      key: 'CG',
+      from: 'C',
+      to: 'G',
+      data: 'CG'
+    },
+    {
+      key: 'CH',
+      from: 'C',
+      to: 'H',
+      data: 'CH'
+    },
+    {
+      key: 'CI',
+      from: 'C',
+      to: 'I',
+      data: 'CI'
+    },
+    {
+      key: 'CJ',
+      from: 'C',
+      to: 'J',
+      data: 'CJ'
+    }
+  ] as DirectedEdgeData<string>[]
 };
 
 export default function App() {
-  const graph = UndirectedGraph.fromData(
-    DISCONNECTED_GRAPH.vertices,
-    DISCONNECTED_GRAPH.edges
-  );
-
-  useEffect(() => {
-    setInterval(() => {
-      if (graph.hasEdge('bridge')) {
-        graph.removeEdge('bridge');
-      } else {
-        graph.insertEdge('bridge', 'bridge', 'A', 'F');
-      }
-    }, 1000);
-  }, [graph]);
+  const graph = DirectedGraph.fromData(GRAPH1.vertices, GRAPH1.edges);
 
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
           <PannableScalableView objectFit='contain' controls>
-            <UndirectedGraphComponent
+            <DirectedGraphComponent
               graph={graph}
               settings={{
                 // TODO - fix orbits strategy padding
