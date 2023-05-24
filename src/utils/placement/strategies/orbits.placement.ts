@@ -9,14 +9,13 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
-
 import {
   findRootVertex,
   getBalancingOrphanedNeighbors,
   getOrphanedVertices,
   isGraphAcyclic,
   isGraphDirected
-} from './../../graphs/models';
+} from '@/utils/graphs/models';
 
 /**
  * The graph must be a tree!
@@ -57,7 +56,7 @@ const placeVerticesOnOrbits = <V, E>(
 
   const orphanedVertices = getOrphanedVertices(graph.vertices);
   const orphanedNeighbours = getBalancingOrphanedNeighbors(
-    rootVertex,
+    [rootVertex],
     orphanedVertices
   );
 

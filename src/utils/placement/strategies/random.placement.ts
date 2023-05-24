@@ -4,7 +4,7 @@ import {
   RANDOM_PLACEMENT_SETTING,
   SHARED_PLACEMENT_SETTINGS
 } from '@/constants/placement';
-import { Graph, Vertex } from '@/types/graphs';
+import { Vertex } from '@/types/graphs';
 import {
   GraphLayout,
   PlacedVerticesPositions,
@@ -14,13 +14,13 @@ import { zipArrays } from '@/utils/arrays';
 import random from '@/utils/random';
 
 const placeVerticesRandomly = <V, E>(
-  graph: Graph<V, E>,
+  vertices: Array<Vertex<V, E>>,
   vertexRadius: number,
   settings: RandomPlacementSettings = {} as RandomPlacementSettings
 ): GraphLayout => {
   if (settings.layoutType === 'random') {
     return calcVerticesRandomPositions(
-      graph.vertices,
+      vertices,
       vertexRadius,
       settings.containerWidth,
       settings.containerHeight
@@ -28,7 +28,7 @@ const placeVerticesRandomly = <V, E>(
   }
 
   const props: CalcVerticesPositionsProps<V, E> = {
-    vertices: graph.vertices,
+    vertices,
     density: settings.density || RANDOM_PLACEMENT_SETTING.density,
     minVertexSpacing:
       settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing,

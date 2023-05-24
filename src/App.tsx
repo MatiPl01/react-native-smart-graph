@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -7,170 +6,94 @@ import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/Defau
 import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
-import GraphEventsProvider from './context/graphEvents';
+const GRAPH1 = {
+  vertices: [
+    { key: 'A', data: 'A' },
+    { key: 'B', data: 'B' },
+    { key: 'C', data: 'C' },
+    { key: 'D', data: 'D' },
+    { key: 'E', data: 'E' }
+  ],
+  edges: [
+    { key: 'AB', from: 'A', to: 'B', data: 'AB' },
+    { key: 'AC', from: 'A', to: 'C', data: 'AC' },
+    { key: 'AD', from: 'A', to: 'D', data: 'AD' },
+    { key: 'AE', from: 'A', to: 'E', data: 'AE' }
+  ]
+};
 
-const ADDED_COMPONENTS = [
-  { key: 'o1', data: 'o1' },
-  { key: 'o2', data: 'o2' },
-  { key: 'o3', data: 'o3' },
-  { key: 'o4', data: 'o4' },
-  { key: 'o5', data: 'o5' },
-  { key: 'o6', data: 'o6' },
-  { key: 'o7', data: 'o7' },
-  { key: 'o8', data: 'o8' },
-  { key: 'o9', data: 'o9' },
-  {
-    from: 'o2',
-    to: 'o3',
-    data: 'o2 -> o3',
-    key: 'o2-o3'
-  },
-  {
-    from: 'root2',
-    to: 'child22',
-    data: 'root2 -> child22',
-    key: 'root2-child22'
-  },
-  {
-    from: 'child22',
-    to: 'child23',
-    data: 'child22 -> child23',
-    key: 'child22-child23'
-  },
-  {
-    from: 'child22',
-    to: 'child24',
-    data: 'child22 -> child24',
-    key: 'child22-child24'
-  }
-];
+const GRAPH2 = {
+  vertices: [
+    { key: 'F', data: 'F' },
+    { key: 'G', data: 'G' },
+    { key: 'H', data: 'H' },
+    { key: 'I', data: 'I' },
+    { key: 'J', data: 'J' },
+    { key: 'K', data: 'K' },
+    { key: 'L', data: 'L' },
+    { key: 'M', data: 'M' },
+    { key: 'N', data: 'N' },
+    { key: 'O', data: 'O' }
+  ],
+  edges: [
+    { key: 'FG', from: 'F', to: 'G', data: 'FG' },
+    { key: 'FH', from: 'F', to: 'H', data: 'FH' },
+    { key: 'FI', from: 'F', to: 'I', data: 'FI' },
+    { key: 'GJ', from: 'G', to: 'J', data: 'GJ' },
+    { key: 'GK', from: 'G', to: 'K', data: 'GK' },
+    { key: 'GL', from: 'G', to: 'L', data: 'GL' },
+    { key: 'GM', from: 'G', to: 'M', data: 'GM' },
+    { key: 'GN', from: 'G', to: 'N', data: 'GN' },
+    { key: 'GO', from: 'G', to: 'O', data: 'GO' }
+  ]
+};
 
-let idx = 0;
-let mode = 0;
+const GRAPH3 = {
+  vertices: [
+    { key: 'P', data: 'P' },
+    { key: 'Q', data: 'Q' }
+  ],
+  edges: [
+    { key: 'PQ1', from: 'P', to: 'Q', data: 'PQ1' },
+    { key: 'PQ2', from: 'P', to: 'Q', data: 'PQ2' }
+  ]
+};
+
+const DISCONNECTED_GRAPH = {
+  vertices: [...GRAPH1.vertices, ...GRAPH2.vertices, ...GRAPH3.vertices],
+  edges: [...GRAPH1.edges, ...GRAPH2.edges, ...GRAPH3.edges]
+};
 
 export default function App() {
   const graph = DirectedGraph.fromData(
-    [
-      { key: 'root', data: 'root' },
-      { key: 'child1', data: 'child1' },
-      { key: 'child2', data: 'child2' },
-      { key: 'child3', data: 'child3' },
-      { key: 'child11', data: 'child11' },
-      { key: 'child12', data: 'child12' },
-      { key: 'root2', data: 'root2' },
-      { key: 'child21', data: 'child21' }
-    ],
-    [
-      {
-        from: 'root',
-        to: 'child1',
-        data: 'root -> child1',
-        key: 'root-child1'
-      },
-      {
-        from: 'child1',
-        to: 'child11',
-        data: 'child1 -> child11',
-        key: 'child1-child11'
-      },
-      {
-        from: 'child1',
-        to: 'child12',
-        data: 'child1 -> child12',
-        key: 'child1-child12'
-      },
-      {
-        from: 'root',
-        to: 'child2',
-        data: 'root -> child2',
-        key: 'root-child2'
-      },
-      {
-        from: 'root',
-        to: 'child3',
-        data: 'root -> child3',
-        key: 'root-child3'
-      }
-      // {
-      //   from: 'root2',
-      //   to: 'child21',
-      //   data: 'root2 -> child21',
-      //   key: 'root2-child21'
-      // }
-    ]
+    DISCONNECTED_GRAPH.vertices,
+    DISCONNECTED_GRAPH.edges
   );
-
-  // TODO - remove this useEffect after testing
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
-        mode = mode === 0 ? 1 : 0;
-        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
-      }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const component = ADDED_COMPONENTS[idx]!;
-
-      try {
-        if (mode === 0) {
-          graph.insertEdge(
-            'root2',
-            'child21',
-            'child22 -> child23',
-            'child22-child23'
-          );
-        } else {
-          graph.removeEdge('child22 -> child23');
-        }
-        mode += 1;
-        mode %= 2;
-      } catch (e) {
-        clearInterval(interval);
-        console.error(e);
-        return;
-      }
-    }, 1500);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
-          <GraphEventsProvider
-            onVertexPress={key => {
-              console.log('vertex pressed', key);
-            }}
-            onVertexLongPress={key => {
-              console.log('vertex long pressed', key);
-            }}
-            onEdgePress={key => {
-              console.log('edge pressed', key);
-            }}
-            onEdgeLongPress={key => {
-              console.log('edge long pressed', key);
-            }}>
-            <PannableScalableView objectFit='contain' controls>
-              <DirectedGraphComponent
-                graph={graph}
-                settings={{
-                  // TODO - fix orbits strategy padding
-                  placement: {
-                    strategy: 'tree',
-                    minVertexSpacing: 100
-                  },
-                  components: {
-                    edge: {
-                      type: 'curved'
-                    }
+          <PannableScalableView objectFit='contain' controls>
+            <DirectedGraphComponent
+              graph={graph}
+              settings={{
+                // TODO - fix orbits strategy padding
+                placement: {
+                  strategy: 'circles',
+                  minVertexSpacing: 100
+                },
+                components: {
+                  edge: {
+                    type: 'curved'
                   }
-                }}
-                renderers={{
-                  label: DefaultEdgeLabelRenderer
-                }}
-              />
-            </PannableScalableView>
-          </GraphEventsProvider>
+                }
+              }}
+              renderers={{
+                label: DefaultEdgeLabelRenderer
+              }}
+            />
+          </PannableScalableView>
         </View>
       </GestureHandlerRootView>
     </SafeAreaView>

@@ -1,7 +1,10 @@
+import { DirectedGraph } from '@/models/graphs';
 import { Graph } from '@/types/graphs';
 import { GraphLayout, PlacementSettings } from '@/types/settings';
 
-import placeVerticesCircular from './strategies/circular.placement';
+import { findGraphComponents } from '../algorithms/graphs';
+import placeVerticesOnCircle from './strategies/circle.placement';
+import placeVerticesOnCircles from './strategies/circles.placement';
 import placeVerticesOnOrbits from './strategies/orbits.placement';
 import placeVerticesRandomly from './strategies/random.placement';
 import placeVerticesOnTree from './strategies/tree.placement';
@@ -12,14 +15,24 @@ export const placeVertices = <V, E>(
   settings?: PlacementSettings<V, E>
 ): GraphLayout => {
   switch (settings?.strategy) {
-    case 'circular':
-      return placeVerticesCircular(graph, vertexRadius, settings);
+    case 'circle':
+      return placeVerticesOnCircle(graph.vertices, vertexRadius, settings);
+    case 'circles':
+      return placeVerticesOnCircles(
+        findGraphComponents(graph),
+        vertexRadius,
+        settings
+      );
     case 'orbits':
-      return placeVerticesOnOrbits(graph, vertexRadius, settings);
-    case 'tree':
-      return placeVerticesOnTree(graph, vertexRadius, settings);
+      return placeVerticesOnOrbits(
+        graph as DirectedGraph<V, E>, // TODO - change this to take graph components after adding undirected graphs
+        vertexRadius,
+        settings
+      );
+    case 'trees':
+      return placeVerticesOnTree(graph, vertexRadius, settings); // TODO - change this to take graph components after adding undirected graphs support
     default:
     case 'random':
-      return placeVerticesRandomly(graph, vertexRadius, settings);
+      return placeVerticesRandomly(graph.vertices, vertexRadius, settings);
   }
 };

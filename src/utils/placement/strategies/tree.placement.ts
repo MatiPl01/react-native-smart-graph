@@ -5,23 +5,22 @@ import { DirectedGraphVertex, Graph } from '@/types/graphs';
 import {
   GraphLayout,
   PlacedVerticesPositions,
-  TreePlacementSettings
+  TreesPlacementSettings
 } from '@/types/settings';
-
 import {
   findRootVertices,
   getBalancingOrphanedNeighbors,
   getOrphanedVertices,
   isGraphAcyclic,
   isGraphDirected
-} from './../../graphs/models';
+} from '@/utils/graphs/models';
 
 const placeVerticesOnTree = <V, E>(
   graph: Graph<V, E>,
   vertexRadius: number,
   {
     minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing
-  }: TreePlacementSettings
+  }: TreesPlacementSettings
 ): GraphLayout => {
   if (!isGraphDirected(graph)) {
     throw new Error('Cannot place vertices on tree for undirected graph');
