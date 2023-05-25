@@ -1,5 +1,10 @@
 import { memo, useEffect } from 'react';
-import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  runOnJS,
+  useAnimatedReaction,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
 import EASING from '@/constants/easings';
 import { Vertex } from '@/types/graphs';
@@ -12,7 +17,13 @@ type VertexComponentProps<V, E> = {
   settings: Required<VertexSettings>;
   renderer: VertexRenderFunction<V>;
   removed: boolean;
-  onRender: (key: string, position: AnimatedVectorCoordinates) => void;
+  onRender: (
+    key: string,
+    positions: {
+      displayed: AnimatedVectorCoordinates;
+      target: AnimatedVectorCoordinates;
+    }
+  ) => void;
   onRemove: (key: string) => void;
 };
 
@@ -27,9 +38,12 @@ function VertexComponent<V, E>({
   const key = vertex.key;
 
   // POSITION
-  // Current vertex position
+  // Displayed vertex position (where it is rendered)
   const positionX = useSharedValue(0);
   const positionY = useSharedValue(0);
+  // Placement vertex position (where it should be rendered in the calculated layout)
+  const targetX = useSharedValue(0);
+  const targetY = useSharedValue(0);
 
   // ANIMATION
   // Vertex render animation progress
@@ -37,7 +51,10 @@ function VertexComponent<V, E>({
 
   useEffect(() => {
     // Call onRender callback on mount
-    onRender(key, { x: positionX, y: positionY });
+    onRender(key, {
+      displayed: { x: positionX, y: positionY },
+      target: { x: targetX, y: targetY }
+    });
   }, [key]);
 
   useEffect(() => {

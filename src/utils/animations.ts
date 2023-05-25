@@ -5,7 +5,7 @@ import { Vector } from '@shopify/react-native-skia';
 import EASING from '@/constants/easings';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
-export const animateVerticesToFinalPositions = (
+export const animateToFinalPositions = (
   animatedPositions: Record<string, AnimatedVectorCoordinates>,
   finalPositions: Record<string, Vector>
 ) => {

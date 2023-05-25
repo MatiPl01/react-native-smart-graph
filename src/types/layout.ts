@@ -40,3 +40,8 @@ export type RelativeVerticesOrder = Record<
 >;
 
 export type AnimatedPath = SharedValue<string>;
+
+export type VerticesPositions = Record<
+  string,
+  { displayed: AnimatedVectorCoordinates; target: AnimatedVectorCoordinates }
+>;

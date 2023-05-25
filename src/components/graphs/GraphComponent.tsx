@@ -1,8 +1,8 @@
-import { useGraphObserver } from '@/hooks';
+import { useAnimationFrame, useGraphObserver } from '@/hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
-import { Group, Rect, Vector } from '@shopify/react-native-skia';
+import { Circle, Group, Rect, Vector } from '@shopify/react-native-skia';
 
 import {
   ARROW_COMPONENT_SETTINGS,
@@ -18,7 +18,8 @@ import {
   AnimatedBoundingRect,
   AnimatedVector,
   AnimatedVectorCoordinates,
-  Dimensions
+  Dimensions,
+  VerticesPositions
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import {
@@ -27,7 +28,8 @@ import {
   GraphSettings,
   GraphSettingsWithDefaults
 } from '@/types/settings';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
+import { animateToFinalPositions } from '@/utils/animations';
+import { applyForces } from '@/utils/forces';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
@@ -70,6 +72,16 @@ export default function GraphComponent<
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
   const [{ vertices, orderedEdges }] = useGraphObserver(graph);
+  // GRAPH FORCES ANIMATION
+  const [_, setForcesApplied] = useAnimationFrame(() => {
+    applyForces(
+      graph.connections,
+      animatedVerticesPositions,
+      {
+        strategy: 'default'
+      } // TODO: replace this by actual forces settings
+    );
+  });
 
   // HELPER REFS
   const isFirstRenderRef = useRef(true);
@@ -101,9 +113,8 @@ export default function GraphComponent<
 
   // ANIMATED VALUES
   // Current vertices positions
-  const [animatedVerticesPositions, setAnimatedVerticesPositions] = useState<
-    Record<string, AnimatedVectorCoordinates>
-  >({});
+  const [animatedVerticesPositions, setAnimatedVerticesPositions] =
+    useState<VerticesPositions>({});
   // Current edge labels positions
   const animatedEdgeLabelsPositions = useRef<Record<string, AnimatedVector>>(
     {} as Record<string, AnimatedVector>
@@ -242,8 +253,20 @@ export default function GraphComponent<
   }, [orderedEdges]);
 
   useEffect(() => {
-    graphEventsContext.setAnimatedVerticesPositions(animatedVerticesPositions);
+    graphEventsContext.setAnimatedVerticesPositions(
+      Object.fromEntries(
+        Object.entries(animatedVerticesPositions).map(
+          ([key, { displayed }]) => [key, displayed]
+        )
+      )
+    );
   }, [animatedVerticesPositions]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setForcesApplied(true); // TODO - remove this timeout
+    }, 100);
+  }, []);
 
   useEffect(() => {
     graphEventsContext.setAnimatedEdgeLabelsPositions(
@@ -260,7 +283,7 @@ export default function GraphComponent<
       let left = Infinity;
       let right = -Infinity;
 
-      Object.values(positions).forEach(({ x, y }) => {
+      Object.values(positions).forEach(({ displayed: { x, y } }) => {
         if (x.value < left) {
           left = x.value;
         }
@@ -286,8 +309,13 @@ export default function GraphComponent<
   useAnimatedReaction(
     () => ({}),
     () => {
-      animateVerticesToFinalPositions(
-        animatedVerticesPositions,
+      animateToFinalPositions(
+        Object.fromEntries(
+          Object.entries(animatedVerticesPositions).map(([key, { target }]) => [
+            key,
+            target
+          ])
+        ),
         memoGraphLayout.verticesPositions
       );
     },
@@ -295,12 +323,21 @@ export default function GraphComponent<
   );
 
   const handleVertexRender = useCallback(
-    (key: string, position: AnimatedVectorCoordinates) => {
+    (
+      key: string,
+      positions: {
+        displayed: AnimatedVectorCoordinates;
+        target: AnimatedVectorCoordinates;
+      }
+    ) => {
       // This setTimeout is a tricky workaround to prevent setAnimatedVerticesPositions being called
       // at the same time as the useAnimatedReaction callback
       setTimeout(() => {
         // Update animated vertices positions
-        setAnimatedVerticesPositions(prev => ({ ...prev, [key]: position }));
+        setAnimatedVerticesPositions(prev => ({
+          ...prev,
+          [key]: positions
+        }));
       }, 0);
     },
     []
@@ -341,8 +378,8 @@ export default function GraphComponent<
     return Object.values(edgesData).map(
       ({ edge, order, edgesCount, removed }) => {
         const [v1, v2] = edge.vertices;
-        const v1Position = animatedVerticesPositions[v1.key];
-        const v2Position = animatedVerticesPositions[v2.key];
+        const v1Position = animatedVerticesPositions[v1.key]?.displayed;
+        const v2Position = animatedVerticesPositions[v2.key]?.displayed;
 
         if (!v1Position || !v2Position) {
           return null;
@@ -405,6 +442,16 @@ export default function GraphComponent<
         height={containerHeight}
         color='#222'
       />
+      {Object.entries(animatedVerticesPositions).map(
+        ([
+          key,
+          {
+            target: { x: cx, y: cy }
+          }
+        ]) => (
+          <Circle key={key} cx={cx} cy={cy} r={10} color='white' />
+        )
+      )}
       {renderEdges()}
       {renderVertices()}
     </Group>
