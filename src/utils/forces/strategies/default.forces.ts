@@ -1,7 +1,12 @@
-import { DEFAULT_FORCES_SETTINGS } from '@/constants/forces';
+import { merge } from 'lodash-es';
+
+import { DEFAULT_FORCES_SETTINGS } from '@/constants/settings';
 import { GraphConnections } from '@/types/graphs';
 import { VerticesPositions } from '@/types/layout';
-import { DefaultForcesStrategySettings } from '@/types/settings/forces';
+import {
+  DefaultForcesStrategySettings,
+  ForcesScale
+} from '@/types/settings/forces';
 import { calcForces, updateVerticesPositions } from '@/utils/forces/shared';
 
 const createAttractionFactorGetter = (
@@ -11,7 +16,9 @@ const createAttractionFactorGetter = (
   'worklet';
   return (distance: number) => {
     'worklet';
-    return attractionForceFactor * Math.log(distance / attractionScale);
+    return (
+      attractionForceFactor * Math.log(Math.max(distance, 1) / attractionScale)
+    );
   };
 };
 
@@ -19,35 +26,31 @@ const createRepellingFactorGetter = (repulsionScale: number) => {
   'worklet';
   return (distance: number) => {
     'worklet';
-    return -repulsionScale / distance ** 2;
+    return -repulsionScale / Math.max(distance, 1) ** 2;
   };
 };
 
 export default function applyDefaultForces(
   connections: GraphConnections,
   verticesPositions: VerticesPositions,
+  forcesScale: ForcesScale,
   settings?: DefaultForcesStrategySettings
 ): void {
   'worklet';
-  const attractionScale =
-    settings?.attractionForce?.attractionScale ||
-    DEFAULT_FORCES_SETTINGS.attractionScale;
-  const attractionForceFactor =
-    settings?.attractionForce?.attractionForceFactor ||
-    DEFAULT_FORCES_SETTINGS.attractionForceFactor;
-  const repulsionScale =
-    settings?.repellingForce?.repulsionScale ||
-    DEFAULT_FORCES_SETTINGS.repulsionScale;
+  const {
+    forces: {
+      attraction: { targetPositions, edges },
+      repelling: { vertices }
+    }
+  } = merge({}, DEFAULT_FORCES_SETTINGS, settings);
 
   const forces = calcForces(
     connections,
     verticesPositions,
-    createRepellingFactorGetter(repulsionScale),
-    createAttractionFactorGetter(attractionScale, attractionForceFactor),
-    createAttractionFactorGetter(
-      attractionScale * 2,
-      attractionForceFactor / 10
-    ) // TODO - get parameters from settings
+    forcesScale,
+    createRepellingFactorGetter(vertices.scale),
+    createAttractionFactorGetter(edges.factor, edges.scale),
+    createAttractionFactorGetter(targetPositions.factor, targetPositions.scale)
   );
   updateVerticesPositions(forces, verticesPositions);
 }

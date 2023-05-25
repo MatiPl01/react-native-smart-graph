@@ -5,6 +5,7 @@ import { Vector } from '@shopify/react-native-skia';
 
 import { GraphConnections } from '@/types/graphs';
 import { VerticesPositions } from '@/types/layout';
+import { ForcesScale } from '@/types/settings/forces';
 import {
   addVectors,
   addVectorsArray,
@@ -93,10 +94,14 @@ const calcTargetAttractionForce = (
 
   const { displayed: displayedPosition, target: targetPosition } =
     verticesPositions[vertexKey]!;
+  const displayedPositionVector =
+    animatedVectorCoordinatesToVector(displayedPosition);
+  const targetPositionVector =
+    animatedVectorCoordinatesToVector(targetPosition);
 
   return calcForce(
-    animatedVectorCoordinatesToVector(displayedPosition),
-    animatedVectorCoordinatesToVector(targetPosition),
+    displayedPositionVector,
+    targetPositionVector,
     targetAttractionFactorGetter
   );
 };
@@ -104,36 +109,46 @@ const calcTargetAttractionForce = (
 export const calcForces = (
   connections: GraphConnections,
   verticesPositions: VerticesPositions,
+  forcesScale: ForcesScale,
   verticesRepellingFactorGetter: (distance: number) => number,
   edgesAttractionFactorGetter: (distance: number) => number,
   targetAttractionFactorGetter: (distance: number) => number
 ): Record<string, Vector> => {
   'worklet';
-  const forces: Record<string, Vector> = {};
-  for (const vertexKey in verticesPositions) {
-    const verticesRepellingForce = calcVerticesRepellingForce(
-      vertexKey,
-      verticesPositions,
-      verticesRepellingFactorGetter
-    );
-    const targetAttractionForce = calcTargetAttractionForce(
-      vertexKey,
-      verticesPositions,
-      targetAttractionFactorGetter
-    );
-    const edgesAttractionForce = calcEdgesAttractionForce(
-      vertexKey,
-      connections,
-      verticesPositions,
-      edgesAttractionFactorGetter
-    );
-    forces[vertexKey] = addVectors(
-      // verticesRepellingForce,
-      targetAttractionForce
-      // edgesAttractionForce
-    );
-  }
-  return forces;
+  return Object.fromEntries(
+    Object.keys(verticesPositions).map(vertexKey => {
+      const verticesRepellingForce = calcVerticesRepellingForce(
+        vertexKey,
+        verticesPositions,
+        verticesRepellingFactorGetter
+      );
+      const targetAttractionForce = calcTargetAttractionForce(
+        vertexKey,
+        verticesPositions,
+        targetAttractionFactorGetter
+      );
+      const edgesAttractionForce = calcEdgesAttractionForce(
+        vertexKey,
+        connections,
+        verticesPositions,
+        edgesAttractionFactorGetter
+      );
+
+      // Calculate graph force
+      const graphForce = addVectors(
+        verticesRepellingForce,
+        edgesAttractionForce
+      );
+      // Calculate the resulting force
+      return [
+        vertexKey,
+        addVectors(
+          multiplyVector(graphForce, forcesScale.graph.value),
+          multiplyVector(targetAttractionForce, forcesScale.target.value)
+        )
+      ];
+    })
+  );
 };
 
 const calcForce = (

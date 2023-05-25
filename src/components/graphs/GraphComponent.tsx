@@ -1,6 +1,13 @@
 import { useAnimationFrame, useGraphObserver } from '@/hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
+import {
+  useAnimatedReaction,
+  useDerivedValue,
+  useSharedValue,
+  withDecay,
+  withDelay,
+  withTiming
+} from 'react-native-reanimated';
 
 import { Circle, Group, Rect, Vector } from '@shopify/react-native-skia';
 
@@ -74,9 +81,14 @@ export default function GraphComponent<
   const [{ vertices, orderedEdges }] = useGraphObserver(graph);
   // GRAPH FORCES ANIMATION
   const [_, setForcesApplied] = useAnimationFrame(() => {
+    // TODO - run animations on the UI thread instead of JS thread (don't use custom useAnimationFrame hook)
     applyForces(
       graph.connections,
       animatedVerticesPositions,
+      {
+        graph: graphForcesScale,
+        target: targetForcesScale
+      },
       {
         strategy: 'default'
       } // TODO: replace this by actual forces settings
@@ -84,7 +96,11 @@ export default function GraphComponent<
   });
 
   // HELPER REFS
+  // Render
   const isFirstRenderRef = useRef(true);
+  // Forces
+  const graphForcesScale = useSharedValue(0);
+  const targetForcesScale = useSharedValue(1);
 
   // GRAPH STATE
   // Vertices
@@ -309,6 +325,14 @@ export default function GraphComponent<
   useAnimatedReaction(
     () => ({}),
     () => {
+      // TODO cleanup this function, find better timing values
+      targetForcesScale.value = withTiming(10, {
+        duration: 250
+      });
+      graphForcesScale.value = withTiming(0.1, {
+        duration: 250
+      });
+
       animateToFinalPositions(
         Object.fromEntries(
           Object.entries(animatedVerticesPositions).map(([key, { target }]) => [
@@ -317,6 +341,19 @@ export default function GraphComponent<
           ])
         ),
         memoGraphLayout.verticesPositions
+      );
+
+      targetForcesScale.value = withDelay(
+        500,
+        withTiming(1, {
+          duration: 250
+        })
+      );
+      graphForcesScale.value = withDelay(
+        500,
+        withTiming(1, {
+          duration: 250
+        })
       );
     },
     [animatedVerticesPositions, memoGraphLayout.verticesPositions]

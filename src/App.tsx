@@ -86,7 +86,7 @@ export default function App() {
         graph.removeEdge('CI');
       }
       phase = (phase + 1) % 4;
-    }, 1000);
+    }, 1500);
   }, [graph]);
 
   return (
