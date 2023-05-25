@@ -19,9 +19,12 @@ export default class UndirectedGraph<V, E> extends Graph<
     const instance = new UndirectedGraph<V, E>();
 
     vertices.forEach(({ key, data }) => instance.insertVertex(key, data));
-    edges?.forEach(({ key, vertices: [v1, v2], data }) =>
-      instance.insertEdge(key, data, v1, v2, false)
-    );
+    edges?.forEach(({ key, vertices: [v1, v2], data }) => {
+      if (!v1 || !v2) {
+        throw new Error(`Edge ${key} must have two vertices`);
+      }
+      return instance.insertEdge(key, data, v1, v2, false);
+    });
     instance.notifyChange();
 
     return instance;
@@ -106,9 +109,12 @@ export default class UndirectedGraph<V, E> extends Graph<
     batchData.vertices?.forEach(({ key, data }) =>
       this.insertVertex(key, data, false)
     );
-    batchData.edges?.forEach(({ key, data, vertices }) =>
-      this.insertEdge(key, data, ...vertices, false)
-    );
+    batchData.edges?.forEach(({ key, data, vertices: [v1, v2] }) => {
+      if (!v1 || !v2) {
+        throw new Error(`Edge ${key} must have two vertices`);
+      }
+      this.insertEdge(key, data, v1, v2, false);
+    });
     // Notify observers after all changes to the graph model are made
     if (notifyObservers) {
       this.notifyChange();

@@ -4,7 +4,6 @@ import {
   useAnimatedReaction,
   useDerivedValue,
   useSharedValue,
-  withDecay,
   withDelay,
   withTiming
 } from 'react-native-reanimated';

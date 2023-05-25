@@ -1,10 +1,5 @@
 import { memo, useEffect } from 'react';
-import {
-  runOnJS,
-  useAnimatedReaction,
-  useSharedValue,
-  withTiming
-} from 'react-native-reanimated';
+import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import EASING from '@/constants/easings';
 import { Vertex } from '@/types/graphs';
