@@ -17,7 +17,8 @@ export type DirectedGraphPlacementSettings<V, E> =
 
 export type UndirectedGraphPlacementSettings<V, E> =
   | RandomPlacementSettings
-  | CircularPlacementSettings<V, E>;
+  | CircularPlacementSettings<V, E>
+  | OrbitsPlacementSettings;
 
 export type PlacementSettings<V, E> =
   | DirectedGraphPlacementSettings<V, E>
@@ -78,6 +79,7 @@ export type OrbitsLayerSizingSettings =
 // TODO - maybe add orbits vertices sorting
 export type OrbitsPlacementSettings = (SharedPlacementSettings & {
   strategy: 'orbits';
+  roots?: Array<string>;
 }) &
   OrbitsLayerSizingSettings;
 

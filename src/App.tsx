@@ -1,10 +1,12 @@
+import { useEffect } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { DirectedGraph } from '@/models/graphs';
+import { UndirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
+
+import UndirectedGraphComponent from './components/graphs/UndirectedGraphComponent';
 
 const GRAPH1 = {
   vertices: [
@@ -15,10 +17,10 @@ const GRAPH1 = {
     { key: 'E', data: 'E' }
   ],
   edges: [
-    { key: 'AB', from: 'A', to: 'B', data: 'AB' },
-    { key: 'AC', from: 'A', to: 'C', data: 'AC' },
-    { key: 'AD', from: 'A', to: 'D', data: 'AD' },
-    { key: 'AE', from: 'A', to: 'E', data: 'AE' }
+    { key: 'AB', vertices: ['A', 'B'], data: 'AB' },
+    { key: 'AC', vertices: ['A', 'C'], data: 'AC' },
+    { key: 'AD', vertices: ['A', 'D'], data: 'AD' },
+    { key: 'AE', vertices: ['A', 'E'], data: 'AE' }
   ]
 };
 
@@ -36,15 +38,15 @@ const GRAPH2 = {
     { key: 'O', data: 'O' }
   ],
   edges: [
-    { key: 'FG', from: 'F', to: 'G', data: 'FG' },
-    { key: 'FH', from: 'F', to: 'H', data: 'FH' },
-    { key: 'FI', from: 'F', to: 'I', data: 'FI' },
-    { key: 'GJ', from: 'G', to: 'J', data: 'GJ' },
-    { key: 'GK', from: 'G', to: 'K', data: 'GK' },
-    { key: 'GL', from: 'G', to: 'L', data: 'GL' },
-    { key: 'GM', from: 'G', to: 'M', data: 'GM' },
-    { key: 'GN', from: 'G', to: 'N', data: 'GN' },
-    { key: 'GO', from: 'G', to: 'O', data: 'GO' }
+    { key: 'FG', vertices: ['F', 'G'], data: 'FG' },
+    { key: 'FH', vertices: ['F', 'H'], data: 'FH' },
+    { key: 'FI', vertices: ['F', 'I'], data: 'FI' },
+    { key: 'GJ', vertices: ['G', 'J'], data: 'GJ' },
+    { key: 'GK', vertices: ['G', 'K'], data: 'GK' },
+    { key: 'GL', vertices: ['G', 'L'], data: 'GL' },
+    { key: 'GM', vertices: ['G', 'M'], data: 'GM' },
+    { key: 'GN', vertices: ['G', 'N'], data: 'GN' },
+    { key: 'GO', vertices: ['G', 'O'], data: 'GO' }
   ]
 };
 
@@ -54,8 +56,8 @@ const GRAPH3 = {
     { key: 'Q', data: 'Q' }
   ],
   edges: [
-    { key: 'PQ1', from: 'P', to: 'Q', data: 'PQ1' },
-    { key: 'PQ2', from: 'P', to: 'Q', data: 'PQ2' }
+    { key: 'PQ1', vertices: ['P', 'Q'], data: 'PQ1' },
+    { key: 'PQ2', vertices: ['P', 'Q'], data: 'PQ2' }
   ]
 };
 
@@ -64,23 +66,41 @@ const DISCONNECTED_GRAPH = {
   edges: [...GRAPH1.edges, ...GRAPH2.edges, ...GRAPH3.edges]
 };
 
+let phase = 0;
+
 export default function App() {
-  const graph = DirectedGraph.fromData(
+  const graph = UndirectedGraph.fromData(
     DISCONNECTED_GRAPH.vertices,
     DISCONNECTED_GRAPH.edges
   );
+
+  useEffect(() => {
+    setInterval(() => {
+      if (phase === 0) {
+        graph.insertEdge('PC', '', 'P', 'C');
+      } else if (phase === 1) {
+        graph.insertEdge('CI', '', 'C', 'I');
+      } else if (phase === 2) {
+        graph.removeEdge('PC');
+      } else if (phase === 3) {
+        graph.removeEdge('CI');
+      }
+      phase = (phase + 1) % 4;
+    }, 1000);
+  }, [graph]);
 
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
           <PannableScalableView objectFit='contain' controls>
-            <DirectedGraphComponent
+            <UndirectedGraphComponent
               graph={graph}
               settings={{
                 // TODO - fix orbits strategy padding
                 placement: {
-                  strategy: 'circles',
+                  strategy: 'orbits',
+                  layerSizing: 'equal',
                   minVertexSpacing: 100
                 },
                 components: {

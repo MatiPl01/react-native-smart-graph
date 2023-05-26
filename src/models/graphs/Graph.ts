@@ -154,12 +154,12 @@ export default abstract class Graph<
     return !!this.edges$[key];
   }
 
-  vertex(key: string) {
-    return this.vertices$[key];
+  getVertex(key: string): GV | null {
+    return this.vertices$[key] ?? null;
   }
 
-  edge(key: string) {
-    return this.edges$[key];
+  getEdge(key: string): GE | null {
+    return this.edges$[key] ?? null;
   }
 
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE> {

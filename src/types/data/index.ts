@@ -12,6 +12,6 @@ export type DirectedEdgeData<E> = {
 
 export type UndirectedEdgeData<E> = {
   key: string;
-  vertices: [string, string];
+  vertices: string[];
   data: E;
 };
