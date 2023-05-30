@@ -1,7 +1,33 @@
 import potpack from 'potpack';
 
 import { Vertex } from '@/types/graphs';
-import { GraphLayout } from '@/types/settings/placement';
+import { Dimensions } from '@/types/layout';
+import {
+  GraphLayout,
+  PlacedVerticesPositions
+} from '@/types/settings/placement';
+
+export const calcContainerDimensions = (
+  placedVertices: PlacedVerticesPositions,
+  vertexRadius: number
+): Dimensions => {
+  let minX = 0;
+  let maxX = 0;
+  let minY = 0;
+  let maxY = 0;
+
+  for (const { x, y } of Object.values(placedVertices)) {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  }
+
+  return {
+    width: maxX - minX + 2 * vertexRadius,
+    height: maxY - minY + 2 * vertexRadius
+  };
+};
 
 export const defaultSortComparator = <V, E>(
   u: Vertex<V, E>,

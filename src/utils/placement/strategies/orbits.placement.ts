@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
 import { Vertex } from '@/types/graphs';
-import { Dimensions } from '@/types/layout';
 import {
   GetLayerRadiusFunction,
   GraphLayout,
@@ -10,9 +8,10 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
-import { bfs, findGraphCenter } from '@/utils/algorithms';
+import { bfs } from '@/utils/algorithms';
+import { findRootVertex } from '@/utils/graphs/models';
 
-import { arrangeGraphComponents } from '../shared';
+import { arrangeGraphComponents, calcContainerDimensions } from '../shared';
 
 type ArrangedVertices = Record<
   string,
@@ -62,48 +61,6 @@ const placeVerticesOnOrbits = <V, E>(
   }
 
   return arrangeGraphComponents(componentsLayouts);
-};
-
-const findRootVertex = <V, E>(
-  graphComponent: Array<Vertex<V, E>>,
-  selectedRootVertexKeys: Set<string>,
-  isGraphDirected: boolean
-): Vertex<V, E> => {
-  // Find the root vertex of the component
-  // 1. If there are selected root vertices, look for the root vertex among them
-  for (const vertex of graphComponent) {
-    if (selectedRootVertexKeys.has(vertex.key)) {
-      return vertex;
-    }
-  }
-  // 2. If the graph is undirected, select the center of the graph diameter
-  // as the root vertex
-  if (!isGraphDirected) {
-    return findGraphCenter(graphComponent);
-  }
-  // 3. If the graph is directed, select the vertex with the highest out degree
-  // as the root vertex
-  return findDirectedGraphSourceVertex(
-    graphComponent as Array<DirectedGraphVertex<V, E>>
-  );
-};
-
-const findDirectedGraphSourceVertex = <V, E>(
-  graphComponent: Array<DirectedGraphVertex<V, E>>
-): DirectedGraphVertex<V, E> => {
-  let vertices = graphComponent.filter(
-    v => v.inDegree === 0 && v.outDegree > 0
-  );
-  if (vertices.length === 0) {
-    vertices = graphComponent;
-  }
-
-  return vertices.reduce((sourceVertex, vertex) => {
-    if (vertex.outDegree > sourceVertex.outDegree) {
-      return vertex;
-    }
-    return sourceVertex;
-  }, vertices[0]!);
 };
 
 const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
@@ -221,28 +178,6 @@ const getEqualLayerRadiuses = (
   }
 
   return layersRadius;
-};
-
-const calcContainerDimensions = (
-  placedVertices: PlacedVerticesPositions,
-  vertexRadius: number
-): Dimensions => {
-  let minX = 0;
-  let maxX = 0;
-  let minY = 0;
-  let maxY = 0;
-
-  for (const { x, y } of Object.values(placedVertices)) {
-    minX = Math.min(minX, x);
-    maxX = Math.max(maxX, x);
-    minY = Math.min(minY, y);
-    maxY = Math.max(maxY, y);
-  }
-
-  return {
-    width: 2 * (Math.max(Math.abs(maxX), Math.abs(minX)) + vertexRadius),
-    height: 2 * (Math.max(Math.abs(maxY), Math.abs(minY)) + vertexRadius)
-  };
 };
 
 const getQuadIncreasingLayerRadiuses = (

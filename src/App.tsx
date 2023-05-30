@@ -23,7 +23,10 @@ const GRAPH1 = {
     { key: 'I', data: 'I' },
     { key: 'J', data: 'J' },
     { key: 'K', data: 'K' },
-    { key: 'L', data: 'L' }
+    { key: 'L', data: 'L' },
+    { key: 'M', data: 'M' },
+    { key: 'N', data: 'N' },
+    { key: 'O', data: 'O' }
   ] as VertexData<string>[],
   edges: [
     {
@@ -108,7 +111,7 @@ export default function App() {
               settings={{
                 // TODO - fix orbits strategy padding
                 placement: {
-                  strategy: 'orbits',
+                  strategy: 'trees',
                   minVertexSpacing: 100
                 },
                 components: {
