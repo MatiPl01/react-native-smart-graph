@@ -90,6 +90,7 @@ export type CircularPlacementSettings<V, E> = SharedPlacementSettings &
 
 export type TreesPlacementSettings = SharedPlacementSettings & {
   strategy: 'trees';
+  roots?: Array<string>;
 };
 
 export type PlacedVerticesPositions = Record<string, Vector>;

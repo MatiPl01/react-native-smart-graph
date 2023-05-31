@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { Vertex } from '@/types/graphs';
-import { Dimensions } from '@/types/layout';
 import {
   GetLayerRadiusFunction,
   GraphLayout,
@@ -9,9 +8,10 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
-import { bfs, findGraphCenter } from '@/utils/algorithms';
+import { bfs } from '@/utils/algorithms';
+import { findRootVertex } from '@/utils/graphs/models';
 
-import { arrangeGraphComponents } from '../shared';
+import { arrangeGraphComponents, calcContainerDimensions } from '../shared';
 
 type ArrangedVertices = Record<
   string,
@@ -34,14 +34,13 @@ const placeVerticesOnOrbits = <V, E>(
       rootVertexKeys,
       isGraphDirected
     );
+
     // Arrange vertices in sectors
-    const arrangedVertices = arrangeVertices(rootVertex, isGraphDirected);
+    const arrangedVertices = arrangeVertices(rootVertex);
     // Calculate the layout of the component
-    const minVertexSpacing =
-      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
-      minVertexSpacing,
+      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
       vertexRadius,
       settings
     );
@@ -56,8 +55,7 @@ const placeVerticesOnOrbits = <V, E>(
       vertexRadius
     );
     componentsLayouts.push({
-      width: containerDimensions.width + minVertexSpacing,
-      height: containerDimensions.height + minVertexSpacing,
+      ...containerDimensions,
       verticesPositions: placedVerticesPositions
     });
   }
@@ -65,41 +63,7 @@ const placeVerticesOnOrbits = <V, E>(
   return arrangeGraphComponents(componentsLayouts);
 };
 
-const findRootVertex = <V, E>(
-  graphComponent: Array<Vertex<V, E>>,
-  selectedRootVertexKeys: Set<string>,
-  isGraphDirected: boolean
-): Vertex<V, E> => {
-  // Find the root vertex of the component
-  // 1. If there are selected root vertices, look for the root vertex among them
-  for (const vertex of graphComponent) {
-    if (selectedRootVertexKeys.has(vertex.key)) {
-      return vertex;
-    }
-  }
-  // 2. If the graph is undirected, select the center of the graph diameter
-  // as the root vertex
-  if (!isGraphDirected) {
-    return findGraphCenter(graphComponent);
-  }
-  // 3. If the graph is directed, select the vertex with the highest out degree
-  // as the root vertex
-};
-
-const arrangeVertices = <V, E>(
-  rootVertex: Vertex<V, E>,
-  isGraphDirected: boolean
-): ArrangedVertices => {
-  if (isGraphDirected) {
-    return {}; // TODO - add directed graph support
-  }
-
-  return arrangeUndirectedGraphVertices(rootVertex);
-};
-
-const arrangeUndirectedGraphVertices = <V, E>(
-  rootVertex: Vertex<V, E>
-): ArrangedVertices => {
+const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
   const layersAndChildren: Record<
     string,
     { layer: number; children: Array<Vertex<V, E>> }
@@ -158,7 +122,7 @@ const calcLayerRadiuses = (
 
   for (const { layer, sectorAngle } of Object.values(arrangedVertices)) {
     minLayerRadiuses[layer] = Math.max(
-      minLayerRadiuses[layer] || minVertexSpacing + 2 * vertexRadius,
+      minLayerRadiuses[layer] || 0,
       calcVertexCenterDistance(minDistanceBetweenVerticesCenters, sectorAngle)
     );
   }
@@ -214,28 +178,6 @@ const getEqualLayerRadiuses = (
   }
 
   return layersRadius;
-};
-
-const calcContainerDimensions = (
-  placedVertices: PlacedVerticesPositions,
-  vertexRadius: number
-): Dimensions => {
-  let minX = 0;
-  let maxX = 0;
-  let minY = 0;
-  let maxY = 0;
-
-  for (const { x, y } of Object.values(placedVertices)) {
-    minX = Math.min(minX, x);
-    maxX = Math.max(maxX, x);
-    minY = Math.min(minY, y);
-    maxY = Math.max(maxY, y);
-  }
-
-  return {
-    width: maxX - minX + 2 * vertexRadius,
-    height: maxY - minY + 2 * vertexRadius
-  };
 };
 
 const getQuadIncreasingLayerRadiuses = (
