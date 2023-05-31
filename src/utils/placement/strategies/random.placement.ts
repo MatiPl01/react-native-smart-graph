@@ -29,9 +29,9 @@ const placeVerticesRandomly = <V, E>(
 
   const props: CalcVerticesPositionsProps<V, E> = {
     vertices,
-    density: settings.density || RANDOM_PLACEMENT_SETTING.density,
+    density: settings.density ?? RANDOM_PLACEMENT_SETTING.density,
     minVertexSpacing:
-      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
     vertexRadius
   };
 

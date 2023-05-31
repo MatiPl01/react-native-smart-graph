@@ -40,7 +40,7 @@ const placeVerticesOnOrbits = <V, E>(
     // Calculate the layout of the component
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
-      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
       vertexRadius,
       settings
     );

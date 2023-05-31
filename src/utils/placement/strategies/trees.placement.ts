@@ -1,5 +1,5 @@
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { DirectedGraphVertex, Vertex } from '@/types/graphs';
+import { Vertex } from '@/types/graphs';
 import {
   GraphLayout,
   PlacedVerticesPositions,
@@ -10,7 +10,7 @@ import { findRootVertex } from '@/utils/graphs/models';
 import { arrangeGraphComponents, calcContainerDimensions } from '../shared';
 
 const placeVerticesOnTree = <V, E>(
-  graphComponents: Array<Array<DirectedGraphVertex<V, E>>>,
+  graphComponents: Array<Array<Vertex<V, E>>>,
   vertexRadius: number,
   isGraphDirected: boolean,
   settings: TreesPlacementSettings
@@ -25,25 +25,24 @@ const placeVerticesOnTree = <V, E>(
       rootVertexKeys,
       isGraphDirected
     );
-
-    // place vertices on the grid
-    const orderGrid = getOrderGrid(rootVertex);
-
-    // place vertices in the layout
+    // Place vertices on the grid
+    const arrangedVertices = arrangeVertices(rootVertex);
+    // Place vertices in the layout
+    const minVertexSpacing =
+      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
     const placedVerticesPositions = placeVertices(
-      orderGrid,
-      vertexRadius,
-      settings
+      arrangedVertices,
+      minVertexSpacing,
+      vertexRadius
     );
-
-    // calculate container dimensions
+    // Calculate container dimensions
     const containerDimensions = calcContainerDimensions(
       placedVerticesPositions,
       vertexRadius
     );
-
     componentsLayouts.push({
-      ...containerDimensions,
+      width: containerDimensions.width + minVertexSpacing,
+      height: containerDimensions.height + minVertexSpacing,
       verticesPositions: placedVerticesPositions
     });
   }
@@ -51,27 +50,28 @@ const placeVerticesOnTree = <V, E>(
   return arrangeGraphComponents(componentsLayouts);
 };
 
-const getOrderGrid = <V, E>(
+const arrangeVertices = <V, E>(
   rootVertex: Vertex<V, E>
 ): Record<string, { row: number; col: number }> => {
-  const verticesOrder = {} as Record<string, { row: number; col: number }>;
-  const treeWidth = placeVerticesOnGrid(verticesOrder, rootVertex);
-  verticesOrder[rootVertex.key] = {
+  const arrangedVertices: Record<string, { row: number; col: number }> = {};
+  const treeWidth = arrangeVerticesRecur(arrangedVertices, rootVertex);
+
+  arrangedVertices[rootVertex.key] = {
     row: 0,
     col: treeWidth / 2 - 0.5
   };
 
-  return verticesOrder;
+  return arrangedVertices;
 };
 
-const placeVerticesOnGrid = <V, E>(
-  verticesOrder: Record<string, { row: number; col: number }>,
+const arrangeVerticesRecur = <V, E>(
+  arrangedVertices: Record<string, { row: number; col: number }>,
   vertex: Vertex<V, E>,
   currentColumn = 0,
   currentDepth = 0
 ): number => {
   const unusedVertexNeighbors = vertex.neighbors.filter(
-    neighbor => !verticesOrder[neighbor.key]
+    neighbor => !arrangedVertices[neighbor.key]
   );
 
   if (unusedVertexNeighbors.length === 0) {
@@ -81,34 +81,34 @@ const placeVerticesOnGrid = <V, E>(
   let subtreeWidth = 0;
   unusedVertexNeighbors.forEach(neighbor => {
     const oldSubtreeWidth = subtreeWidth;
-    const childSubtreeWidth = placeVerticesOnGrid(
-      verticesOrder,
+    const childSubtreeWidth = arrangeVerticesRecur(
+      arrangedVertices,
       neighbor,
       currentColumn + subtreeWidth,
       currentDepth + 1
     );
     subtreeWidth += childSubtreeWidth;
 
-    verticesOrder[neighbor.key] = {
+    arrangedVertices[neighbor.key] = {
       row: currentDepth + 1,
       col: currentColumn + oldSubtreeWidth + childSubtreeWidth / 2 - 0.5
     };
   });
+
   return subtreeWidth;
 };
 
 const placeVertices = (
-  orderGrid: Record<string, { row: number; col: number }>,
-  vertexRadius: number,
-  settings: TreesPlacementSettings
+  arrangedVertices: Record<string, { row: number; col: number }>,
+  minVertexSpacing: number,
+  vertexRadius: number
 ): PlacedVerticesPositions => {
   // determine the minimum distance between vertices
-  const minVertexCenterDistance =
-    2 * vertexRadius +
-    (settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing);
+  const padding = 2 * vertexRadius;
+  const minVertexCenterDistance = padding + minVertexSpacing;
 
   // determine the width and height of the grid
-  const { numRows, numCols } = Object.values(orderGrid).reduce(
+  const { numRows, numCols } = Object.values(arrangedVertices).reduce(
     (acc, { row, col }) => ({
       numRows: Math.max(acc.numRows, row + 1),
       numCols: Math.max(acc.numCols, col + 1)
@@ -117,12 +117,11 @@ const placeVertices = (
   );
 
   // calculate the width and height of the grid as well as the padding
-  const padding = 2 * vertexRadius;
-  const width = padding + numCols * minVertexCenterDistance;
-  const height = padding + numRows * minVertexCenterDistance;
+  const width = padding + (numCols - 1) * minVertexCenterDistance;
+  const height = padding + (numRows - 1) * minVertexCenterDistance;
 
   // calculate the positions of the vertices based on the grid
-  return Object.entries(orderGrid).reduce(
+  return Object.entries(arrangedVertices).reduce(
     (acc, [key, { row, col }]) => ({
       ...acc,
       [key]: {
@@ -133,4 +132,5 @@ const placeVertices = (
     {} as PlacedVerticesPositions
   );
 };
+
 export default placeVerticesOnTree;
