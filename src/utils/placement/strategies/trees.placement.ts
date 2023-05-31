@@ -9,7 +9,7 @@ import { findRootVertex } from '@/utils/graphs/models';
 
 import { arrangeGraphComponents, calcContainerDimensions } from '../shared';
 
-const placeVerticesOnTree = <V, E>(
+const placeVerticesOnTrees = <V, E>(
   graphComponents: Array<Array<Vertex<V, E>>>,
   vertexRadius: number,
   isGraphDirected: boolean,
@@ -133,4 +133,4 @@ const placeVertices = (
   );
 };
 
-export default placeVerticesOnTree;
+export default placeVerticesOnTrees;

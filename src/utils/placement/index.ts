@@ -6,7 +6,7 @@ import placeVerticesOnCircle from './strategies/circle.placement';
 import placeVerticesOnCircles from './strategies/circles.placement';
 import placeVerticesOnOrbits from './strategies/orbits.placement';
 import placeVerticesRandomly from './strategies/random.placement';
-import placeVerticesOnTree from './strategies/trees.placement';
+import placeVerticesOnTrees from './strategies/trees.placement';
 
 export const placeVertices = <V, E>(
   graph: Graph<V, E>,
@@ -30,7 +30,7 @@ export const placeVertices = <V, E>(
         settings
       );
     case 'trees':
-      return placeVerticesOnTree(
+      return placeVerticesOnTrees(
         findGraphComponents(graph.vertices),
         vertexRadius,
         graph.isDirected(),
