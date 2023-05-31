@@ -26,5 +26,5 @@ export type Mutable<T> = {
 };
 
 export type DeepRequiredAll<T> = {
-  [K in keyof T]: Required<DeepRequiredAll<T[K]>>;
-};
+  [K in keyof T]: DeepRequiredAll<T[K]>;
+} & Required<T>;

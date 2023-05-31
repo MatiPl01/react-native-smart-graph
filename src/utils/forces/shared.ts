@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import 'react-native-reanimated';
+import { withSpring, withTiming } from 'react-native-reanimated';
 
 import { Vector } from '@shopify/react-native-skia';
 
@@ -25,6 +26,19 @@ export const updateVerticesPositions = (
     displayed.x.value += force.x;
     displayed.y.value += force.y;
   });
+};
+
+const calcForce = (
+  from: Vector,
+  to: Vector,
+  factorGetter: (distance: number) => number
+): Vector => {
+  'worklet';
+  const distance = distanceBetweenVectors(from, to);
+  const directionVector = calcUnitVector(from, to);
+  const factor = factorGetter(distance);
+
+  return multiplyVector(directionVector, factor);
 };
 
 const calcEdgesAttractionForce = (
@@ -88,6 +102,7 @@ const calcTargetAttractionForce = (
   verticesPositions: VerticesPositions,
   targetAttractionFactorGetter: (distance: number) => number
 ): Vector => {
+  'worklet';
   if (!verticesPositions[vertexKey]) {
     return { x: 0, y: 0 };
   }
@@ -149,17 +164,4 @@ export const calcForces = (
       ];
     })
   );
-};
-
-const calcForce = (
-  from: Vector,
-  to: Vector,
-  factorGetter: (distance: number) => number
-): Vector => {
-  'worklet';
-  const distance = distanceBetweenVectors(from, to);
-  const directionVector = calcUnitVector(from, to);
-  const factor = factorGetter(distance);
-
-  return multiplyVector(directionVector, factor);
 };

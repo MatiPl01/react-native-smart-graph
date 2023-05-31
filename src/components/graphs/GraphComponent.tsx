@@ -1,10 +1,13 @@
 import { useAnimationFrame, useGraphObserver } from '@/hooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  runOnUI,
   useAnimatedReaction,
   useDerivedValue,
+  useFrameCallback,
   useSharedValue,
   withDelay,
+  withRepeat,
   withTiming
 } from 'react-native-reanimated';
 
@@ -35,7 +38,7 @@ import {
   GraphSettingsWithDefaults
 } from '@/types/settings';
 import { animateToFinalPositions } from '@/utils/animations';
-import { applyForces } from '@/utils/forces';
+import { applyForces, createForcesSettings } from '@/utils/forces';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
@@ -78,21 +81,6 @@ export default function GraphComponent<
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
   const [{ vertices, orderedEdges }] = useGraphObserver(graph);
-  // GRAPH FORCES ANIMATION
-  const [_, setForcesApplied] = useAnimationFrame(() => {
-    // TODO - run animations on the UI thread instead of JS thread (don't use custom useAnimationFrame hook)
-    applyForces(
-      graph.connections,
-      animatedVerticesPositions,
-      {
-        graph: graphForcesScale,
-        target: targetForcesScale
-      },
-      {
-        strategy: 'default'
-      } // TODO: replace this by actual forces settings
-    );
-  });
 
   // HELPER REFS
   // Render
@@ -100,6 +88,7 @@ export default function GraphComponent<
   // Forces
   const graphForcesScale = useSharedValue(0);
   const targetForcesScale = useSharedValue(1);
+  const lastForcesUpdateTime = useSharedValue(0);
 
   // GRAPH STATE
   // Vertices
@@ -163,7 +152,8 @@ export default function GraphComponent<
             ...settings?.components?.edge?.label
           }
         }
-      }
+      },
+      forces: createForcesSettings(settings?.forces)
     };
 
     graphEventsContext.setGraphSettings(newSettings);
@@ -193,6 +183,11 @@ export default function GraphComponent<
         memoSettings.components.vertex.radius,
         memoSettings.placement
       ),
+    [vertices, orderedEdges]
+  );
+
+  const memoConnections = useMemo(
+    () => graph.connections,
     [vertices, orderedEdges]
   );
 
@@ -278,12 +273,6 @@ export default function GraphComponent<
   }, [animatedVerticesPositions]);
 
   useEffect(() => {
-    setTimeout(() => {
-      setForcesApplied(true); // TODO - remove this timeout
-    }, 100);
-  }, []);
-
-  useEffect(() => {
     graphEventsContext.setAnimatedEdgeLabelsPositions(
       animatedEdgeLabelsPositions.current
     );
@@ -357,6 +346,29 @@ export default function GraphComponent<
     },
     [animatedVerticesPositions, memoGraphLayout.verticesPositions]
   );
+
+  useFrameCallback(({ timeSinceFirstFrame }) => {
+    // Update forces every 10ms
+    if (Math.abs(timeSinceFirstFrame - lastForcesUpdateTime.value) > 10) {
+      lastForcesUpdateTime.value = timeSinceFirstFrame;
+      applyForces(
+        memoConnections,
+        animatedVerticesPositions,
+        memoSettings.components.vertex.radius,
+        {
+          graph: graphForcesScale,
+          target: targetForcesScale
+        },
+        memoSettings.forces
+      );
+    }
+  });
+
+  useEffect(() => {
+    setTimeout(() => {
+      // setForcesApplied(true);
+    }, 100);
+  }, []);
 
   const handleVertexRender = useCallback(
     (

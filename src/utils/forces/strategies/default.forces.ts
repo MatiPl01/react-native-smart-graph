@@ -1,23 +1,25 @@
-import { merge } from 'lodash-es';
-
-import { DEFAULT_FORCES_SETTINGS } from '@/constants/settings';
 import { GraphConnections } from '@/types/graphs';
 import { VerticesPositions } from '@/types/layout';
 import {
-  DefaultForcesStrategySettings,
+  DefaultForcesStrategySettingsWithDefaults,
   ForcesScale
 } from '@/types/settings/forces';
 import { calcForces, updateVerticesPositions } from '@/utils/forces/shared';
 
 const createAttractionFactorGetter = (
   attractionForceFactor: number,
-  attractionScale: number
+  attractionScale: number,
+  vertexRadius: number
 ) => {
   'worklet';
   return (distance: number) => {
     'worklet';
     return (
-      attractionForceFactor * Math.log(Math.max(distance, 1) / attractionScale)
+      (distance < 2 * vertexRadius
+        ? Math.sqrt((0.5 * distance) / vertexRadius)
+        : 1) *
+      attractionForceFactor *
+      Math.log(Math.max(distance, vertexRadius) / attractionScale)
     );
   };
 };
@@ -33,8 +35,9 @@ const createRepellingFactorGetter = (repulsionScale: number) => {
 export default function applyDefaultForces(
   connections: GraphConnections,
   verticesPositions: VerticesPositions,
+  vertexRadius: number,
   forcesScale: ForcesScale,
-  settings?: DefaultForcesStrategySettings
+  settings: DefaultForcesStrategySettingsWithDefaults
 ): void {
   'worklet';
   const {
@@ -42,15 +45,19 @@ export default function applyDefaultForces(
       attraction: { targetPositions, edges },
       repelling: { vertices }
     }
-  } = merge({}, DEFAULT_FORCES_SETTINGS, settings);
+  } = settings;
 
   const forces = calcForces(
     connections,
     verticesPositions,
     forcesScale,
     createRepellingFactorGetter(vertices.scale),
-    createAttractionFactorGetter(edges.factor, edges.scale),
-    createAttractionFactorGetter(targetPositions.factor, targetPositions.scale)
+    createAttractionFactorGetter(edges.factor, edges.scale, vertexRadius),
+    createAttractionFactorGetter(
+      targetPositions.factor,
+      targetPositions.scale,
+      vertexRadius
+    )
   );
   updateVerticesPositions(forces, verticesPositions);
 }

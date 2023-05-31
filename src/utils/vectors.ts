@@ -49,11 +49,6 @@ export const animatedVectorToVector = (vector?: AnimatedVector): Vector => {
     : vec(0, 0);
 };
 
-export const addVectors = (...vectors: Array<Vector>): Vector => {
-  'worklet';
-  return addVectorsArray(vectors);
-};
-
 export const addVectorsArray = (vectors: Array<Vector>): Vector => {
   'worklet';
   return vectors.reduce(
@@ -63,6 +58,11 @@ export const addVectorsArray = (vectors: Array<Vector>): Vector => {
     }),
     { x: 0, y: 0 }
   );
+};
+
+export const addVectors = (...vectors: Array<Vector>): Vector => {
+  'worklet';
+  return addVectorsArray(vectors);
 };
 
 export const subtractVectors = (vector1: Vector, vector2: Vector): Vector => {

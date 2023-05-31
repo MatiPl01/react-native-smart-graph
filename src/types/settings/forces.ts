@@ -30,6 +30,9 @@ export type DefaultForcesStrategySettingsWithDefaults =
 
 export type ForcesSettings = DefaultForcesStrategySettings;
 
+export type ForcesSettingsWithDefaults =
+  DefaultForcesStrategySettingsWithDefaults;
+
 export type ForcesScale = {
   graph: SharedValue<number>;
   target: SharedValue<number>;
