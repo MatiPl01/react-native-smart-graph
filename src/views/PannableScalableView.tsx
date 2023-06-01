@@ -1,9 +1,10 @@
+import { Canvas, Group, Vector } from '@shopify/react-native-skia';
 import { styled } from 'nativewind';
 import {
   Children,
+  cloneElement,
   PropsWithChildren,
   ReactElement,
-  cloneElement,
   useCallback,
   useRef
 } from 'react';
@@ -16,8 +17,6 @@ import {
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
-
-import { Canvas, Group, Vector } from '@shopify/react-native-skia';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
