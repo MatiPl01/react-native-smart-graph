@@ -1,6 +1,6 @@
 {
   "name": "react-native-force-graph",
-  "version": "0.0.1",
+  "version": "0.0.0-development",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
@@ -41,6 +41,7 @@
     "metro-react-native-babel-preset": "^0.76.5",
     "prettier": "^2.8.8",
     "react-test-renderer": "^18.2.0",
+    "semantic-release": "^21.0.2",
     "syncpack": "^10.1.0",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.1.0"
@@ -65,6 +66,14 @@
     "lint:fix": "eslint --fix .",
     "prepare": "husky install",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "semantic-release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MatiPl01/react-native-force-graph.git"
+  },
+  "publishConfig": {
+    "access": "restricted"
   }
 }

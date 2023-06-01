@@ -1,4 +1,3 @@
 {
-  "java.compile.nullAnalysis.mode": "disabled",
-  "javascript.validate.enable": true
+  "java.compile.nullAnalysis.mode": "disabled"
 }
