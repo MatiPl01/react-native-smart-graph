@@ -6,7 +6,7 @@ import placeVerticesOnCircle from './strategies/circle.placement';
 import placeVerticesOnCircles from './strategies/circles.placement';
 import placeVerticesOnOrbits from './strategies/orbits.placement';
 import placeVerticesRandomly from './strategies/random.placement';
-import placeVerticesOnTree from './strategies/tree.placement';
+import placeVerticesOnTrees from './strategies/trees.placement';
 
 export const placeVertices = <V, E>(
   graph: Graph<V, E>,
@@ -30,7 +30,12 @@ export const placeVertices = <V, E>(
         settings
       );
     case 'trees':
-      return placeVerticesOnTree(graph, vertexRadius, settings); // TODO - change this to take graph components after adding undirected graphs support
+      return placeVerticesOnTrees(
+        findGraphComponents(graph.vertices),
+        vertexRadius,
+        graph.isDirected(),
+        settings
+      );
     default:
     case 'random':
       return placeVerticesRandomly(graph.vertices, vertexRadius, settings);

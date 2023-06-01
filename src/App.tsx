@@ -3,104 +3,151 @@ import { SafeAreaView, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { UndirectedGraph } from '@/models/graphs';
+import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
-import UndirectedGraphComponent from './components/graphs/UndirectedGraphComponent';
+import DirectedGraphComponent from './components/graphs/DirectedGraphComponent';
 
-const GRAPH1 = {
-  vertices: [
-    { key: 'A', data: 'A' },
-    { key: 'B', data: 'B' },
-    { key: 'C', data: 'C' },
-    { key: 'D', data: 'D' },
-    { key: 'E', data: 'E' }
-  ],
-  edges: [
-    { key: 'AB', vertices: ['A', 'B'], data: 'AB' },
-    { key: 'AC', vertices: ['A', 'C'], data: 'AC' },
-    { key: 'AD', vertices: ['A', 'D'], data: 'AD' },
-    { key: 'AE', vertices: ['A', 'E'], data: 'AE' }
-  ]
-};
+const ADDED_COMPONENTS = [
+  { key: 'B', data: 'B' },
+  {
+    key: 'AB',
+    from: 'A',
+    to: 'B',
+    data: 'AB'
+  },
+  { key: 'C', data: 'C' },
+  {
+    key: 'AC',
+    from: 'A',
+    to: 'C',
+    data: 'AC'
+  },
+  { key: 'D', data: 'D' },
+  { key: 'E', data: 'E' },
+  {
+    key: 'CD',
+    from: 'C',
+    to: 'D',
+    data: 'CD'
+  },
+  {
+    key: 'CE',
+    from: 'C',
+    to: 'E',
+    data: 'CE'
+  },
+  { key: 'F', data: 'F' },
+  { key: 'G', data: 'G' },
+  { key: 'H', data: 'H' },
+  { key: 'I', data: 'I' },
+  { key: 'J', data: 'J' },
+  { key: 'K', data: 'K' },
+  { key: 'L', data: 'L' },
+  {
+    key: 'EK',
+    from: 'E',
+    to: 'K',
+    data: 'EK'
+  },
+  {
+    key: 'EL',
+    from: 'E',
+    to: 'L',
+    data: 'EL'
+  },
+  {
+    key: 'CF',
+    from: 'C',
+    to: 'F',
+    data: 'CF'
+  },
+  { key: 'M', data: 'M' },
+  { key: 'N', data: 'N' },
+  { key: 'O', data: 'O' },
+  {
+    key: 'CG',
+    from: 'C',
+    to: 'G',
+    data: 'CG'
+  },
+  {
+    key: 'CH',
+    from: 'C',
+    to: 'H',
+    data: 'CH'
+  },
+  {
+    key: 'CI',
+    from: 'C',
+    to: 'I',
+    data: 'CI'
+  },
+  {
+    key: 'CJ',
+    from: 'C',
+    to: 'J',
+    data: 'CJ'
+  }
+];
 
-const GRAPH2 = {
-  vertices: [
-    { key: 'F', data: 'F' },
-    { key: 'G', data: 'G' },
-    { key: 'H', data: 'H' },
-    { key: 'I', data: 'I' },
-    { key: 'J', data: 'J' },
-    { key: 'K', data: 'K' },
-    { key: 'L', data: 'L' },
-    { key: 'M', data: 'M' },
-    { key: 'N', data: 'N' },
-    { key: 'O', data: 'O' }
-  ],
-  edges: [
-    { key: 'FG', vertices: ['F', 'G'], data: 'FG' },
-    { key: 'FH', vertices: ['F', 'H'], data: 'FH' },
-    { key: 'FI', vertices: ['F', 'I'], data: 'FI' },
-    { key: 'GJ', vertices: ['G', 'J'], data: 'GJ' },
-    { key: 'GK', vertices: ['G', 'K'], data: 'GK' },
-    { key: 'GL', vertices: ['G', 'L'], data: 'GL' },
-    { key: 'GM', vertices: ['G', 'M'], data: 'GM' },
-    { key: 'GN', vertices: ['G', 'N'], data: 'GN' },
-    { key: 'GO', vertices: ['G', 'O'], data: 'GO' }
-  ]
-};
-
-const GRAPH3 = {
-  vertices: [
-    { key: 'P', data: 'P' },
-    { key: 'Q', data: 'Q' }
-  ],
-  edges: [
-    { key: 'PQ1', vertices: ['P', 'Q'], data: 'PQ1' },
-    { key: 'PQ2', vertices: ['P', 'Q'], data: 'PQ2' }
-  ]
-};
-
-const DISCONNECTED_GRAPH = {
-  vertices: [...GRAPH1.vertices, ...GRAPH2.vertices, ...GRAPH3.vertices],
-  edges: [...GRAPH1.edges, ...GRAPH2.edges, ...GRAPH3.edges]
-};
-
-let phase = 0;
+let idx = 0;
+let mode = 0;
 
 export default function App() {
-  const graph = UndirectedGraph.fromData(
-    DISCONNECTED_GRAPH.vertices,
-    DISCONNECTED_GRAPH.edges
-  );
+  const graph = DirectedGraph.fromData([{ key: 'A', data: 'A' }]);
 
+  // TODO - remove this useEffect after testing
   useEffect(() => {
-    setInterval(() => {
-      if (phase === 0) {
-        graph.insertEdge('PC', '', 'P', 'C');
-      } else if (phase === 1) {
-        graph.insertEdge('CI', '', 'C', 'I');
-      } else if (phase === 2) {
-        graph.removeEdge('PC');
-      } else if (phase === 3) {
-        graph.removeEdge('CI');
+    const interval = setInterval(() => {
+      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
+        mode = mode === 0 ? 1 : 0;
+        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
       }
-      phase = (phase + 1) % 4;
-    }, 1000);
-  }, [graph]);
+      const component = ADDED_COMPONENTS[idx];
+
+      try {
+        if (mode === 0) {
+          if (component.from && component.to) {
+            graph.insertEdge(
+              component.key,
+              component.data,
+              component.from,
+              component.to
+            );
+          } else {
+            graph.insertVertex(component.key, component.data);
+          }
+          idx++;
+        } else {
+          if (component.from && component.to) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
+          idx--;
+        }
+      } catch (e) {
+        clearInterval(interval);
+        console.error(e);
+        return;
+      }
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <SafeAreaView className='grow'>
       <GestureHandlerRootView className='grow'>
         <View className='grow bg-black'>
           <PannableScalableView objectFit='contain' controls>
-            <UndirectedGraphComponent
+            <DirectedGraphComponent
               graph={graph}
               settings={{
                 // TODO - fix orbits strategy padding
                 placement: {
-                  strategy: 'orbits',
-                  layerSizing: 'equal',
+                  strategy: 'trees',
                   minVertexSpacing: 100
                 },
                 components: {
