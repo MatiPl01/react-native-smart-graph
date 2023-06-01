@@ -1,17 +1,17 @@
 import {
-  CurvedEdgeRenderFunction,
-  CurvedEdgeRendererProps
+  CurvedEdgeRendererProps,
+  CurvedEdgeRenderFunction
 } from './edges/curved';
 import { EdgeArrowRenderFunction } from './edges/shared';
 import {
-  StraightEdgeRenderFunction,
-  StraightEdgeRendererProps
+  StraightEdgeRendererProps,
+  StraightEdgeRenderFunction
 } from './edges/straight';
 import { EdgeLabelRendererFunction, VertexRenderFunction } from './shared';
 
-export * from './edges/straight';
 export * from './edges/curved';
 export * from './edges/shared';
+export * from './edges/straight';
 export * from './shared';
 
 export type EdgeRendererProps<E> =

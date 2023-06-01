@@ -10,8 +10,7 @@ import {
   PlacedVerticesPositions
 } from '@/types/settings';
 import { bfs, findGraphCenter } from '@/utils/algorithms';
-
-import { arrangeGraphComponents } from '../shared';
+import { arrangeGraphComponents } from '@/utils/placement/shared';
 
 type ArrangedVertices = Record<
   string,
@@ -84,6 +83,8 @@ const findRootVertex = <V, E>(
   }
   // 3. If the graph is directed, select the vertex with the highest out degree
   // as the root vertex
+  // TODO
+  return {} as Vertex<V, E>;
 };
 
 const arrangeVertices = <V, E>(

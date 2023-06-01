@@ -7,7 +7,7 @@ import applyDefaultForces from './strategies/default.forces';
 export const applyForces = (
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
-  placementPositions: Record<string, AnimatedVectorCoordinates>,
+  /*placementPositions*/ _: Record<string, AnimatedVectorCoordinates>,
   settings?: ForcesSettings
 ): void => {
   'worklet';

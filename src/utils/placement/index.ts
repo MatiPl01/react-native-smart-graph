@@ -1,7 +1,7 @@
 import { Graph } from '@/types/graphs';
 import { GraphLayout, PlacementSettings } from '@/types/settings';
+import { findGraphComponents } from '@/utils/algorithms/graphs';
 
-import { findGraphComponents } from '../algorithms/graphs';
 import placeVerticesOnCircle from './strategies/circle.placement';
 import placeVerticesOnCircles from './strategies/circles.placement';
 import placeVerticesOnOrbits from './strategies/orbits.placement';

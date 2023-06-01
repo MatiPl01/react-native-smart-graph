@@ -2,9 +2,9 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
+  Graph as IGraph,
   GraphConnections,
   GraphObserver,
-  Graph as IGraph,
   Vertex
 } from '@/types/graphs';
 import { Mutable } from '@/types/utils';

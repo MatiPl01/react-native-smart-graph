@@ -5,8 +5,7 @@ import {
   GraphLayout,
   PlacedVerticesPositions
 } from '@/types/settings';
-
-import { defaultSortComparator } from '../shared';
+import { defaultSortComparator } from '@/utils/placement/shared';
 
 const placeVerticesOnCircle = <V, E>(
   vertices: Array<Vertex<V, E>>,

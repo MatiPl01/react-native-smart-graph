@@ -1,6 +1,5 @@
-import { useDerivedValue } from 'react-native-reanimated';
-
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
 import { DEFAULT_VERTEX_RENDERER_SETTINGS } from '@/constants/renderers';

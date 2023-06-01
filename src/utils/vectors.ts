@@ -1,4 +1,4 @@
-import { Vector, vec } from '@shopify/react-native-skia';
+import { vec, Vector } from '@shopify/react-native-skia';
 
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 

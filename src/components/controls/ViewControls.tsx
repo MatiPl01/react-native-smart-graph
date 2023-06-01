@@ -1,10 +1,9 @@
-import { styled } from 'nativewind';
-import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
-
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faArrowsToCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { styled } from 'nativewind';
+import React from 'react';
+import { TouchableOpacity, View } from 'react-native';
 
 const StyledFontAwesomeIcon = styled(FontAwesomeIcon);
 

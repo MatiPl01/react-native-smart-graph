@@ -1,6 +1,5 @@
-import { useDerivedValue } from 'react-native-reanimated';
-
 import { Path } from '@shopify/react-native-skia';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
 import { CurvedEdgeRendererProps } from '@/types/renderer';

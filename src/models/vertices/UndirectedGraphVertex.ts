@@ -1,6 +1,6 @@
 import {
-  UndirectedGraphVertex as IUndirectedGraphVertex,
-  UndirectedEdge
+  UndirectedEdge,
+  UndirectedGraphVertex as IUndirectedGraphVertex
 } from '@/types/graphs';
 
 import Vertex from './Vertex';

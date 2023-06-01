@@ -1,6 +1,9 @@
 import { AnimatedPath, AnimatedVector } from '@/types/layout';
+import {
+  EdgeLabelRendererFunction,
+  SharedRenderersProps
+} from '@/types/renderer/shared';
 
-import { EdgeLabelRendererFunction, SharedRenderersProps } from '../shared';
 import { EdgeArrowRenderFunction } from './shared';
 
 export type CurvedEdgeRendererProps<E> = SharedRenderersProps & {

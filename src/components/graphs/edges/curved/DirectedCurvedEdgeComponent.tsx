@@ -1,3 +1,4 @@
+import { rotate } from '@shopify/react-native-skia';
 import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
@@ -5,8 +6,8 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { rotate } from '@shopify/react-native-skia';
-
+import EdgeArrowComponent from '@/components/graphs/arrows/EdgeArrowComponent';
+import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { calcApproxPointOnParabola } from '@/utils/math';
@@ -16,9 +17,6 @@ import {
   calcUnitVector,
   translateAlongVector
 } from '@/utils/vectors';
-
-import EdgeArrowComponent from '../../arrows/EdgeArrowComponent';
-import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
 
 function DirectedCurvedEdgeComponent<E, V>({
   v1Position,

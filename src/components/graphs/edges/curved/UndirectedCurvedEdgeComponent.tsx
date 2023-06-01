@@ -1,6 +1,7 @@
 import { memo, useEffect } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
+import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
@@ -9,8 +10,6 @@ import {
   calcOrthogonalUnitVector,
   translateAlongVector
 } from '@/utils/vectors';
-
-import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
 
 function UndirectedCurvedEdgeComponent<E, V>({
   v1Position,
