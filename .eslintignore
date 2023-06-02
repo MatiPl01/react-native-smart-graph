@@ -1,4 +1,9 @@
 babel.config.js
+babel.config.build.js
 metro.config.js
 tailwind.config.js
+bob.config.js
 index.js
+
+# Generated files
+lib

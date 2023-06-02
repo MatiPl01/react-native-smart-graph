@@ -1,5 +1,4 @@
 import { Canvas, Group, Vector } from '@shopify/react-native-skia';
-import { styled } from 'nativewind';
 import {
   Children,
   cloneElement,
@@ -8,7 +7,7 @@ import {
   useCallback,
   useRef
 } from 'react';
-import { LayoutChangeEvent, View } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   Easing,
@@ -27,13 +26,10 @@ import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
 import { fixedWithDecay } from '@/utils/reanimated';
 import { clamp, getScaleInParent } from '@/utils/views';
 
-const StyledCanvas = styled(Canvas, 'grow');
-
 type PannableScalableViewProps = PropsWithChildren<{
   minScale?: number; // default is auto (when the whole content is visible)
   maxScale?: number;
   objectFit?: ObjectFit;
-  className?: string;
   controls?: boolean;
 }>;
 
@@ -41,7 +37,6 @@ export default function PannableScalableView<V, E>({
   minScale = 0.25, // TODO - improve scales
   maxScale = 10,
   objectFit = 'none',
-  className,
   children,
   controls = false
 }: PannableScalableViewProps) {
@@ -320,9 +315,9 @@ export default function PannableScalableView<V, E>({
     : canvasGestureHandler;
 
   return (
-    <View className='grow relative overflow-hidden'>
+    <View style={styles.container}>
       <GestureDetector gesture={gestureHandler}>
-        <StyledCanvas className={className} onLayout={handleCanvasRender}>
+        <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
               const childElement = child as ReactElement<
@@ -346,7 +341,7 @@ export default function PannableScalableView<V, E>({
               });
             })}
           </Group>
-        </StyledCanvas>
+        </Canvas>
       </GestureDetector>
       {controls && (
         <ViewControls
@@ -356,3 +351,14 @@ export default function PannableScalableView<V, E>({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  canvas: {
+    flex: 1
+  }
+});
