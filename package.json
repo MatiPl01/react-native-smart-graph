@@ -1,6 +1,11 @@
 {
   "name": "react-native-force-graph",
   "version": "0.0.0-development",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
@@ -21,12 +26,15 @@
     "@babel/preset-env": "^7.22.4",
     "@babel/runtime": "^7.22.3",
     "@react-native-community/eslint-config": "^3.2.0",
+    "@semantic-release/npm": "^10.0.3",
     "@tsconfig/react-native": "^3.0.2",
     "@types/jest": "^29.5.2",
     "@types/react": "^18.2.7",
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.5.0",
     "babel-plugin-module-resolver": "^5.0.0",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.41.0",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-import": "^2.27.5",
@@ -44,10 +52,8 @@
     "semantic-release": "^21.0.2",
     "syncpack": "^10.1.0",
     "tailwindcss": "^3.3.2",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.1.0"
-  },
-  "jest": {
-    "preset": "react-native"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -56,24 +62,22 @@
     ]
   },
   "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "repository": "MatiPl01/react-native-force-graph.git",
   "scripts": {
     "android": "react-native run-android",
     "build:android": "cd android && ./gradlew assembleRelease",
+    "commit": "cz",
     "format:code": "prettier --write .",
     "format:deps": "syncpack format",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prepare": "husky install",
+    "semantic-release": "semantic-release",
     "start": "react-native start",
-    "test": "jest",
-    "semantic-release": "semantic-release"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MatiPl01/react-native-force-graph.git"
-  },
-  "publishConfig": {
-    "access": "restricted"
+    "test": "jest"
   }
 }
