@@ -56,29 +56,55 @@
     "ts-jest": "^29.1.0",
     "typescript": "^5.1.0"
   },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ],
+  "files": [
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write --ignore-unknown"
+      "yarn format:deps && git add package.json",
+      "yarn lint:fix",
+      "yarn format:code"
     ]
   },
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
   "private": true,
   "publishConfig": {
     "access": "restricted"
+  },
+  "react-native": "src/index.ts",
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
   },
   "repository": "MatiPl01/react-native-force-graph.git",
   "scripts": {
     "android": "react-native run-android",
     "build:android": "cd android && ./gradlew assembleRelease",
     "commit": "cz",
-    "format:code": "prettier --write .",
+    "format:code": "prettier --write . --ignore-unknown",
     "format:deps": "syncpack format",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "prepack": "bob build",
     "prepare": "husky install",
     "semantic-release": "semantic-release",
     "start": "react-native start",
     "test": "jest"
-  }
+  },
+  "types": "lib/typescript/src/index.d.ts"
 }
