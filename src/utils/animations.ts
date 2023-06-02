@@ -1,6 +1,5 @@
-import { withTiming } from 'react-native-reanimated';
-
 import { Vector } from '@shopify/react-native-skia';
+import { withTiming } from 'react-native-reanimated';
 
 import EASING from '@/constants/easings';
 import { AnimatedVectorCoordinates } from '@/types/layout';

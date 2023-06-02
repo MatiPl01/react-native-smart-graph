@@ -1,21 +1,21 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { DirectedEdge, UndirectedEdge } from '../graphs';
-import { AnimatedVector, AnimatedVectorCoordinates } from '../layout';
+import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
+import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import {
   DirectedStraightEdgeRenderers,
   UndirectedStraightEdgeRenderers
-} from '../renderer';
+} from '@/types/renderer';
 import {
   DirectedCurvedEdgeRenderers,
   UndirectedCurvedEdgeRenderers
-} from '../renderer/edges/curved';
+} from '@/types/renderer/edges/curved';
 import {
   CurvedEdgeSettings,
   EdgeArrowSettings,
   EdgeLabelSettings,
   StraightEdgeSettings
-} from '../settings';
+} from '@/types/settings';
 
 type SharedEdgeComponentProps = {
   v1Position: AnimatedVectorCoordinates;

@@ -2,12 +2,11 @@ import { Vector } from '@shopify/react-native-skia';
 
 import { Edge, Graph } from '@/types/graphs';
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
-
 import {
   animatedVectorCoordinatesToVector,
   animatedVectorToVector,
   distanceBetweenVectors
-} from '../vectors';
+} from '@/utils/vectors';
 
 export const findClosestVertex = (
   position: Vector,

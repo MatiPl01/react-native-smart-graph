@@ -1,7 +1,7 @@
+import UndirectedEdge from '@/models/edges/UndirectedEdge';
+import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
 
-import UndirectedEdge from '../edges/UndirectedEdge';
-import UndirectedGraphVertex from '../vertices/UndirectedGraphVertex';
 import Graph from './Graph';
 
 export default class UndirectedGraph<V, E> extends Graph<
@@ -17,15 +17,7 @@ export default class UndirectedGraph<V, E> extends Graph<
     edges?: Array<UndirectedEdgeData<E>>
   ): UndirectedGraph<V, E> {
     const instance = new UndirectedGraph<V, E>();
-
-    vertices.forEach(({ key, data }) => instance.insertVertex(key, data));
-    edges?.forEach(({ key, vertices: [v1, v2], data }) => {
-      if (v1 !== undefined && v2 !== undefined) {
-        instance.insertEdge(key, data, v1, v2, false);
-      }
-    });
-    instance.notifyChange();
-
+    instance.insertBatch({ vertices, edges });
     return instance;
   }
 
@@ -98,21 +90,18 @@ export default class UndirectedGraph<V, E> extends Graph<
   }
 
   override insertBatch(
-    batchData: {
+    {
+      vertices,
+      edges
+    }: {
       vertices?: Array<VertexData<V>>;
       edges?: Array<UndirectedEdgeData<E>>;
     },
     notifyObservers = true
   ): void {
     // Insert edges and vertices to the graph model
-    batchData.vertices?.forEach(({ key, data }) =>
-      this.insertVertex(key, data, false)
-    );
-    batchData.edges?.forEach(({ key, data, vertices: [v1, v2] }) => {
-      if (v1 !== undefined && v2 !== undefined) {
-        this.insertEdge(key, data, v1, v2, false);
-      }
-    });
+    vertices?.forEach(({ key, data }) => this.insertVertex(key, data, false));
+    edges?.forEach(edge => this.insertEdgeFromData(edge, false));
     // Notify observers after all changes to the graph model are made
     if (notifyObservers) {
       this.notifyChange();
@@ -130,5 +119,17 @@ export default class UndirectedGraph<V, E> extends Graph<
     setTimeout(() => {
       this.insertBatch(batchData, notifyObservers);
     }, 0);
+  }
+
+  private insertEdgeFromData(
+    { key, data, vertices: [v1, v2] }: UndirectedEdgeData<E>,
+    notifyObservers = true
+  ): void {
+    if (!v1 || !v2) {
+      throw new Error(
+        `Edge ${key} vertices are invalid. Edge must have 2 vertices`
+      );
+    }
+    this.insertEdge(key, data, v1, v2, notifyObservers);
   }
 }

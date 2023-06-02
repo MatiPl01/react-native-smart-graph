@@ -6,8 +6,10 @@ import {
   TreesPlacementSettings
 } from '@/types/settings';
 import { findRootVertex } from '@/utils/graphs/models';
-
-import { arrangeGraphComponents, calcContainerDimensions } from '../shared';
+import {
+  arrangeGraphComponents,
+  calcContainerDimensions
+} from '@/utils/placement/shared';
 
 const placeVerticesOnTrees = <V, E>(
   graphComponents: Array<Array<Vertex<V, E>>>,

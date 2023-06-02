@@ -7,8 +7,7 @@ import {
   UndirectedEdge,
   Vertex
 } from '@/types/graphs';
-
-import { findGraphCenter } from '../algorithms';
+import { findGraphCenter } from '@/utils/algorithms';
 
 // TODO - remove unused functions later
 

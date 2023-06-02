@@ -1,6 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { Vertex } from '../graphs';
+import { Vertex } from '@/types/graphs';
 
 export type PlacementStrategy =
   | 'random'

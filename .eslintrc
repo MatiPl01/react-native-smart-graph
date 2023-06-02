@@ -1,13 +1,21 @@
 {
   "root": true,
   "extends": [
-    "@react-native-community",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:import/recommended",
+    "plugin:no-unsanitized/DOM",
     "plugin:import/typescript"
   ],
-  "plugins": ["react", "@typescript-eslint", "prettier", "import"],
+  "plugins": [
+    "react",
+    "@typescript-eslint",
+    "import",
+    "unused-imports",
+    "simple-import-sort",
+    "no-relative-import-paths",
+    "prettier"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "projectRoot": ".",
@@ -26,7 +34,6 @@
     }
   },
   "rules": {
-    "prettier/prettier": "off",
     "quotes": ["error", "single", { "avoidEscape": true }],
     "camelcase": [
       "error",
@@ -210,7 +217,17 @@
       }
     ],
     "react/react-in-jsx-scope": "off",
-    "react-hooks/exhaustive-deps": "off"
+    "react-hooks/exhaustive-deps": "off",
+    "prettier/prettier": "error",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "import/no-unused-modules": ["warn", { "unusedExports": true }],
+    "no-relative-import-paths/no-relative-import-paths": [
+      "warn",
+      { "allowSameFolder": true, "rootDir": "src", "prefix": "@" }
+    ]
   },
   "env": {
     "es2020": true

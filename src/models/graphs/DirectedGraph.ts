@@ -1,7 +1,7 @@
+import DirectedEdge from '@/models/edges/DirectedEdge';
+import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
 import { DirectedEdgeData, VertexData } from '@/types/data';
 
-import DirectedEdge from '../edges/DirectedEdge';
-import DirectedGraphVertex from '../vertices/DirectedGraphVertex';
 import Graph from './Graph';
 
 export default class DirectedGraph<V, E> extends Graph<
@@ -17,15 +17,7 @@ export default class DirectedGraph<V, E> extends Graph<
     edges?: Array<DirectedEdgeData<E>>
   ): DirectedGraph<V, E> {
     const instance = new DirectedGraph<V, E>();
-
-    vertices.forEach(({ key, data }) =>
-      instance.insertVertex(key, data, false)
-    );
-    edges?.forEach(({ key, from, to, data }) =>
-      instance.insertEdge(key, data, from, to, false)
-    );
-    instance.notifyChange();
-
+    instance.insertBatch({ vertices, edges });
     return instance;
   }
 
@@ -99,17 +91,18 @@ export default class DirectedGraph<V, E> extends Graph<
   }
 
   override insertBatch(
-    batchData: {
+    {
+      vertices,
+      edges
+    }: {
       vertices?: Array<VertexData<V>>;
       edges?: Array<DirectedEdgeData<E>>;
     },
     notifyObservers = true
   ): void {
     // Insert edges and vertices to the graph model
-    batchData.vertices?.forEach(({ key, data }) =>
-      this.insertVertex(key, data, false)
-    );
-    batchData.edges?.forEach(({ key, data, from, to }) =>
+    vertices?.forEach(({ key, data }) => this.insertVertex(key, data, false));
+    edges?.forEach(({ key, data, from, to }) =>
       this.insertEdge(key, data, from, to, false)
     );
     // Notify observers after all changes to the graph model are made

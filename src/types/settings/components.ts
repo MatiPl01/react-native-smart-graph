@@ -1,4 +1,4 @@
-import { DeepRequired } from '../utils';
+import { DeepRequired } from '@/types/utils';
 
 type SharedVertexSettings = {
   radius?: number;

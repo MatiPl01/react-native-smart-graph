@@ -1,6 +1,6 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { AnimatedVector, AnimatedVectorCoordinates } from '../layout';
+import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 
 export type SharedRenderersProps = {
   animationProgress: SharedValue<number>;

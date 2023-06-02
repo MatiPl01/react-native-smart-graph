@@ -1,6 +1,5 @@
-import { PropsWithChildren, createContext, useContext, useRef } from 'react';
-
 import { Vector } from '@shopify/react-native-skia';
+import { createContext, PropsWithChildren, useContext, useRef } from 'react';
 
 import { VERTEX_COMPONENT_SETTINGS } from '@/constants/components';
 import { EDGE_LABEL_HIT_SLOP, VERTEX_HIT_SLOP } from '@/constants/events';

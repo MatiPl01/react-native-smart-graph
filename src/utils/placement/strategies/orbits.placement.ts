@@ -10,8 +10,10 @@ import {
 } from '@/types/settings';
 import { bfs } from '@/utils/algorithms';
 import { findRootVertex } from '@/utils/graphs/models';
-
-import { arrangeGraphComponents, calcContainerDimensions } from '../shared';
+import {
+  arrangeGraphComponents,
+  calcContainerDimensions
+} from '@/utils/placement/shared';
 
 type ArrangedVertices = Record<
   string,

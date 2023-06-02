@@ -1,6 +1,5 @@
-import { SharedValue } from 'react-native-reanimated';
-
 import { Vector } from '@shopify/react-native-skia';
+import { SharedValue } from 'react-native-reanimated';
 
 // Vectors
 export type AnimatedVector = SharedValue<Vector>;
