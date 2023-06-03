@@ -3,14 +3,17 @@ module.exports = {
     [
       '@babel/preset-env',
       {
-        modules: 'commonjs'
+        modules: 'commonjs',
+        targets: {
+          node: 'current'
+        }
       }
     ],
-    '@babel/preset-react',
     '@babel/preset-typescript'
   ],
   plugins: [
-    'react-native-reanimated/plugin',
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-proposal-private-methods',
     [
       'module-resolver',
       {
@@ -20,6 +23,12 @@ module.exports = {
           // This needs to be mirrored in tsconfig.json
           '@': './src'
         }
+      }
+    ],
+    [
+      '@babel/plugin-transform-react-jsx',
+      {
+        runtime: 'automatic'
       }
     ]
   ],
