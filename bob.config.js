@@ -1,18 +1,17 @@
 module.exports = {
   source: 'src',
-  output: 'lib',
+  output: 'dist',
   targets: [
-    'commonjs',
     [
-      'module',
+      'commonjs',
       {
-        configFile: './babel.config.build.js'
+        configFile: './babel.config.cjs.js'
       }
     ],
     [
-      'typescript',
+      'module',
       {
-        project: './tsconfig.build.json'
+        configFile: './babel.config.esm.js'
       }
     ]
   ]

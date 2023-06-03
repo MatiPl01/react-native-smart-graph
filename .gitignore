@@ -63,4 +63,4 @@ yarn-error.log
 .metro-health-check*
 
 # Ignore lib build folder
-lib/
+dist

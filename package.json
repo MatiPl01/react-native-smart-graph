@@ -1,18 +1,21 @@
 {
-  "name": "react-native-force-graph-2",
+  "name": "react-native-force-graph-testing",
   "description": "React Native library for creating dynamic force-directed graphs",
-  "version": "0.0.1-development",
+  "version": "0.0.6-development",
   "author": {
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.4.0",
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "@fortawesome/react-native-fontawesome": "^0.3.0",
+    "potpack": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",
     "@babel/preset-env": "^7.22.4",
     "@babel/runtime": "^7.22.3",
-    "@fortawesome/fontawesome-svg-core": "^6.4.0",
-    "@fortawesome/free-solid-svg-icons": "^6.4.0",
-    "@fortawesome/react-native-fontawesome": "^0.3.0",
     "@react-native-community/eslint-config": "^3.2.0",
     "@shopify/react-native-skia": "^0.1.193",
     "@tsconfig/react-native": "^3.0.2",
@@ -33,7 +36,6 @@
     "lint-staged": "^13.2.2",
     "merge-dirs": "^0.2.1",
     "metro-react-native-babel-preset": "^0.76.5",
-    "potpack": "^2.0.0",
     "prettier": "^2.8.8",
     "react": "^18.2.0",
     "react-native": "^0.71.8",
@@ -44,31 +46,26 @@
     "react-test-renderer": "^18.2.0",
     "syncpack": "^10.1.0",
     "tailwindcss": "^3.3.2",
+    "tsc-alias": "^1.8.6",
     "typescript": "^5.1.0"
   },
   "files": [
-    "lib",
-    "!**/__tests__",
-    "!**/__fixtures__",
-    "!**/__mocks__"
+    "dist"
   ],
   "jest": {
     "preset": "react-native"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "yarn lint:fix",
-      "yarn format:code",
+      "eslint --fix",
+      "prettier --write --ignore-unknown",
       "yarn format:deps"
     ]
   },
-  "main": "src/commonjs/index.js",
+  "main": "dist/commonjs/index.js",
+  "module": "dist/module/index.js",
   "peerDependencies": {
-    "@fortawesome/fontawesome-svg-core": ">=6.0.0",
-    "@fortawesome/free-solid-svg-icons": ">=6.0.0",
-    "@fortawesome/react-native-fontawesome": ">=0.3.0",
     "@shopify/react-native-skia": ">=0.1.193",
-    "potpack": ">=2.0.0",
     "react": ">=18.0.0",
     "react-native": ">=0.71.8",
     "react-native-gesture-handler": ">=2.0.0",
@@ -81,8 +78,9 @@
   "repository": "MatiPl01/react-native-force-graph",
   "scripts": {
     "android": "react-native run-android",
-    "build": "yarn clean && bob build && merge-dirs lib/typescript lib/commonjs && merge-dirs lib/typescript lib/module",
-    "clean": "rm -rf lib && rm -rf react-native-force-graph*.tgz",
+    "build": "yarn clean && bob build && yarn declarations:emit",
+    "clean": "rm -rf dist && rm -rf react-native-force-graph*.tgz",
+    "declarations:emit": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "format:code": "prettier --write .",
     "format:deps": "syncpack format",
     "ios": "react-native run-ios",
@@ -92,5 +90,6 @@
     "prepare": "husky install",
     "start": "react-native start",
     "test": "jest"
-  }
+  },
+  "types": "dist/types/index.d.ts"
 }
