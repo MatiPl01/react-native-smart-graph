@@ -29,6 +29,7 @@
     "babel-plugin-react-require": "^4.0.0",
     "eslint": "^8.41.0",
     "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-no-relative-import-paths": "^1.5.2",
     "eslint-plugin-no-unsanitized": "^4.0.2",
     "eslint-plugin-prettier": "^4.2.1",

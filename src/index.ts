@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 /**
  * This file is the entry point for the library.
  *
@@ -21,6 +22,9 @@ export { default as DefaultCurvedEdgeRenderer } from '@/components/graphs/edges/
 export { default as DefaultStraightEdgeRenderer } from '@/components/graphs/edges/straight/renderers/DefaultStraightEdgeRenderer';
 export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
 export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
+
+// PROVIDERS
+export { default as GraphEventsProvider } from '@/context/graphEvents';
 
 // EXAMPLES
 export * from '@/examples';

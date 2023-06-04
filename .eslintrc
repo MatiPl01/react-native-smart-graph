@@ -3,11 +3,14 @@
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:no-unsanitized/DOM"
+    "plugin:import/recommended",
+    "plugin:no-unsanitized/DOM",
+    "plugin:import/typescript"
   ],
   "plugins": [
     "react",
     "@typescript-eslint",
+    "import",
     "unused-imports",
     "simple-import-sort",
     "no-relative-import-paths",
@@ -18,6 +21,17 @@
     "projectRoot": ".",
     "project": "./tsconfig.json",
     "ecmaFeatures": {}
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      }
+    }
   },
   "rules": {
     "quotes": ["error", "single", { "avoidEscape": true }],
@@ -209,6 +223,7 @@
     "simple-import-sort/exports": "error",
     "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
+    "import/no-unused-modules": ["warn", { "unusedExports": true }],
     "no-relative-import-paths/no-relative-import-paths": [
       "warn",
       { "allowSameFolder": true, "rootDir": "src", "prefix": "@" }
