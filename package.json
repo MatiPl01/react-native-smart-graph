@@ -1,7 +1,7 @@
 {
-  "name": "react-native-force-graph-testing",
+  "name": "react-native-force-graph",
   "description": "React Native library for creating dynamic force-directed graphs",
-  "version": "0.0.13-development",
+  "version": "0.0.1-development",
   "author": {
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"
@@ -86,7 +86,7 @@
     "android": "react-native run-android",
     "build": "yarn clean && bob build && yarn declarations:emit",
     "clean": "rm -rf dist && rm -rf react-native-force-graph*.tgz",
-    "declarations:emit": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
+    "declarations:emit": "tsc && tsc-alias",
     "format:code": "prettier --write .",
     "format:deps": "syncpack format",
     "ios": "react-native run-ios",
@@ -97,5 +97,5 @@
     "start": "react-native start",
     "test": "jest"
   },
-  "types": "dist/types/src/index.d.ts"
+  "types": "dist/types/index.d.ts"
 }

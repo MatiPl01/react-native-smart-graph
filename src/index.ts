@@ -22,4 +22,7 @@ export { default as DefaultStraightEdgeRenderer } from '@/components/graphs/edge
 export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
 export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
 
+// EXAMPLES
+export * from '@/examples';
+
 // TODO - export types
