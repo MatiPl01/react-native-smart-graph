@@ -76,7 +76,7 @@ export const findGraphDiameter = <V, E>(
 
   // Find the farthest vertex from the start vertex and the path
   // between them
-  let farthestDistance = 0;
+  let farthestDistance = -1;
   let farthestVertex: Vertex<V, E> | null = null;
 
   const parents = bfs([startVertex], ({ vertex, depth }) => {
