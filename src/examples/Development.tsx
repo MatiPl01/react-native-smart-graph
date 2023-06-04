@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
-import { SafeAreaView, View } from 'react-native';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
 import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
-
-import DirectedGraphComponent from './components/graphs/DirectedGraphComponent';
 
 const ADDED_COMPONENTS = [
   { key: 'B', data: 'B' },
@@ -104,7 +103,8 @@ export default function App() {
         mode = mode === 0 ? 1 : 0;
         idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
       }
-      const component = ADDED_COMPONENTS[idx];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const component = ADDED_COMPONENTS[idx]!;
 
       try {
         if (mode === 0) {
@@ -138,14 +138,13 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaView className='grow'>
-      <GestureHandlerRootView className='grow'>
-        <View className='grow bg-black'>
+    <SafeAreaView style={styles.container}>
+      <GestureHandlerRootView style={styles.gestureHandler}>
+        <View style={styles.background}>
           <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               graph={graph}
               settings={{
-                // TODO - fix orbits strategy padding
                 placement: {
                   strategy: 'trees',
                   minVertexSpacing: 100
@@ -166,3 +165,16 @@ export default function App() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  gestureHandler: {
+    flex: 1
+  },
+  background: {
+    flex: 1,
+    backgroundColor: 'black'
+  }
+});
