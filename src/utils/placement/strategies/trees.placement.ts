@@ -69,12 +69,23 @@ const arrangeVertices = <V, E>(
 const arrangeVerticesRecur = <V, E>(
   arrangedVertices: Record<string, { row: number; col: number }>,
   vertex: Vertex<V, E>,
+  visitedVertices: Set<string> = new Set(),
   currentColumn = 0,
   currentDepth = 0
 ): number => {
-  const unusedVertexNeighbors = vertex.neighbors.filter(
-    neighbor => !arrangedVertices[neighbor.key]
-  );
+  visitedVertices.add(vertex.key);
+  const unusedVertexNeighbors: Array<Vertex<V, E>> = [];
+  const alreadyCheckedNeighbors = new Set<string>();
+
+  vertex.neighbors.forEach(neighbor => {
+    if (
+      !alreadyCheckedNeighbors.has(neighbor.key) &&
+      !visitedVertices.has(neighbor.key)
+    ) {
+      alreadyCheckedNeighbors.add(neighbor.key);
+      unusedVertexNeighbors.push(neighbor);
+    }
+  });
 
   if (unusedVertexNeighbors.length === 0) {
     return 1;
@@ -86,6 +97,7 @@ const arrangeVerticesRecur = <V, E>(
     const childSubtreeWidth = arrangeVerticesRecur(
       arrangedVertices,
       neighbor,
+      visitedVertices,
       currentColumn + subtreeWidth,
       currentDepth + 1
     );

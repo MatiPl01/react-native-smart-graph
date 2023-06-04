@@ -12,12 +12,12 @@ export default class UndirectedGraph<V, E> extends Graph<
   UndirectedEdgeData<E>
 > {
   // eslint-disable-next-line no-shadow
-  static fromData<V, E>(
-    vertices: Array<VertexData<V>>,
-    edges?: Array<UndirectedEdgeData<E>>
-  ): UndirectedGraph<V, E> {
+  static fromData<V, E>(data: {
+    vertices: Array<VertexData<V>>;
+    edges?: Array<UndirectedEdgeData<E>>;
+  }): UndirectedGraph<V, E> {
     const instance = new UndirectedGraph<V, E>();
-    instance.insertBatch({ vertices, edges });
+    instance.insertBatch(data);
     return instance;
   }
 
@@ -43,6 +43,7 @@ export default class UndirectedGraph<V, E> extends Graph<
     vertex2key: string,
     notifyObservers = true
   ): UndirectedEdge<E, V> {
+    this.checkSelfLoop(vertex1key, vertex2key);
     const vertex1 = this.getVertex(vertex1key);
     const vertex2 = this.getVertex(vertex2key);
 

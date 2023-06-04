@@ -94,7 +94,7 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = DirectedGraph.fromData([{ key: 'A', data: 'A' }]);
+  const graph = DirectedGraph.fromData({ vertices: [{ key: 'A', data: 'A' }] });
 
   // TODO - remove this useEffect after testing
   useEffect(() => {
