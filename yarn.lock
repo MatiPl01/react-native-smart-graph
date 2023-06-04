@@ -2815,6 +2815,11 @@ babel-plugin-polyfill-regenerator@^0.5.0:
   dependencies:
     "@babel/helper-define-polyfill-provider" "^0.4.0"
 
+babel-plugin-react-require@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-react-require/-/babel-plugin-react-require-4.0.0.tgz#cb632c5309c3deb0e6e3eaa0720b32ec7bef55d1"
+  integrity sha512-ozQYb02Svu4iz/uB1gJ7yJwAIpYIFjRHoRgn6dUPPIZd774G1QPge/YljDt7M83eTKWxakdmKCaTYnrPV3Gaog==
+
 babel-plugin-syntax-trailing-function-commas@^7.0.0-beta.0:
   version "7.0.0-beta.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-trailing-function-commas/-/babel-plugin-syntax-trailing-function-commas-7.0.0-beta.0.tgz#aa213c1435e2bffeb6fca842287ef534ad05d5cf"

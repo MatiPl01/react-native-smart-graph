@@ -1,7 +1,7 @@
 {
   "name": "react-native-force-graph-testing",
   "description": "React Native library for creating dynamic force-directed graphs",
-  "version": "0.0.9-development",
+  "version": "0.0.13-development",
   "author": {
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"
@@ -26,6 +26,7 @@
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.5.0",
     "babel-plugin-module-resolver": "^5.0.0",
+    "babel-plugin-react-require": "^4.0.0",
     "eslint": "^8.41.0",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-no-relative-import-paths": "^1.5.2",
@@ -55,7 +56,10 @@
     "dist"
   ],
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist/"
+    ]
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -93,5 +97,5 @@
     "start": "react-native start",
     "test": "jest"
   },
-  "types": "dist/types/index.d.ts"
+  "types": "dist/types/src/index.d.ts"
 }
