@@ -9,6 +9,7 @@ import {
 
 export const calcContainerDimensions = (
   placedVertices: PlacedVerticesPositions,
+  minVertexSpacing: number,
   vertexRadius: number
 ): Dimensions => {
   let minX = 0;
@@ -24,8 +25,8 @@ export const calcContainerDimensions = (
   }
 
   return {
-    width: maxX - minX + 2 * vertexRadius,
-    height: maxY - minY + 2 * vertexRadius
+    width: maxX - minX + 2 * vertexRadius + minVertexSpacing,
+    height: maxY - minY + 2 * vertexRadius + minVertexSpacing
   };
 };
 

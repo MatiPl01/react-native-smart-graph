@@ -1,11 +1,11 @@
-import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
-import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
-import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
-import PannableScalableView from '@/views/PannableScalableView';
 import { useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
+import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
+import { UndirectedGraph } from '@/models/graphs';
+import PannableScalableView from '@/views/PannableScalableView';
 
 const ADDED_COMPONENTS = [
   { key: 'B', data: 'B' },
@@ -94,7 +94,7 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = UndirectedGraph.fromData({
+  const graph = new UndirectedGraph({
     vertices: [{ key: 'A', data: 'A' }]
   });
 

@@ -11,14 +11,12 @@ export default class UndirectedGraph<V, E> extends Graph<
   UndirectedEdge<E, V>,
   UndirectedEdgeData<E>
 > {
-  // eslint-disable-next-line no-shadow
-  static fromData<V, E>(data: {
+  constructor(data: {
     vertices: Array<VertexData<V>>;
     edges?: Array<UndirectedEdgeData<E>>;
-  }): UndirectedGraph<V, E> {
-    const instance = new UndirectedGraph<V, E>();
-    instance.insertBatch(data);
-    return instance;
+  }) {
+    super();
+    this.insertBatch(data);
   }
 
   override isDirected() {
