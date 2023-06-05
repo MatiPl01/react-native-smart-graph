@@ -11,14 +11,12 @@ export default class DirectedGraph<V, E> extends Graph<
   DirectedEdge<E, V>,
   DirectedEdgeData<E>
 > {
-  // eslint-disable-next-line no-shadow
-  static fromData<V, E>(data: {
+  constructor(data: {
     vertices: Array<VertexData<V>>;
     edges?: Array<DirectedEdgeData<E>>;
-  }): DirectedGraph<V, E> {
-    const instance = new DirectedGraph<V, E>();
-    instance.insertBatch(data);
-    return instance;
+  }) {
+    super();
+    this.insertBatch(data);
   }
 
   override isDirected(): this is DirectedGraph<V, E> {

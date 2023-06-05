@@ -40,9 +40,11 @@ const placeVerticesOnOrbits = <V, E>(
     // Arrange vertices in sectors
     const arrangedVertices = arrangeVertices(rootVertex);
     // Calculate the layout of the component
+    const minVertexSpacing =
+      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      minVertexSpacing,
       vertexRadius,
       settings
     );
@@ -54,6 +56,7 @@ const placeVerticesOnOrbits = <V, E>(
     // Calc container dimensions
     const containerDimensions = calcContainerDimensions(
       placedVerticesPositions,
+      minVertexSpacing,
       vertexRadius
     );
     componentsLayouts.push({

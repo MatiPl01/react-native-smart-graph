@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { DirectedGraph } from '@/models/graphs';
+import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
+import { UndirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
 const ADDED_COMPONENTS = [
@@ -94,7 +94,9 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = DirectedGraph.fromData({ vertices: [{ key: 'A', data: 'A' }] });
+  const graph = new UndirectedGraph({
+    vertices: [{ key: 'A', data: 'A' }]
+  });
 
   // TODO - remove this useEffect after testing
   useEffect(() => {
@@ -132,7 +134,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 250);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
@@ -142,11 +144,11 @@ export default function App() {
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
           <PannableScalableView objectFit='contain' controls>
-            <DirectedGraphComponent
+            <UndirectedGraphComponent
               graph={graph}
               settings={{
                 placement: {
-                  strategy: 'trees',
+                  strategy: 'orbits',
                   minVertexSpacing: 100
                 },
                 components: {
