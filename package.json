@@ -24,8 +24,8 @@
     "@babel/preset-env": "^7.22.4",
     "@babel/runtime": "^7.22.3",
     "@react-native-community/eslint-config": "^3.2.0",
-    "@shopify/react-native-skia": "^0.1.193",
     "@semantic-release/npm": "^10.0.3",
+    "@shopify/react-native-skia": "^0.1.193",
     "@tsconfig/react-native": "^3.0.2",
     "@types/jest": "^29.5.2",
     "@types/react": "^18.2.7",
@@ -59,18 +59,9 @@
     "semantic-release": "^21.0.2",
     "syncpack": "^10.1.0",
     "tailwindcss": "^3.3.2",
-    "tsc-alias": "^1.8.6",
     "ts-jest": "^29.1.0",
+    "tsc-alias": "^1.8.6",
     "typescript": "^5.1.0"
-  },
-  "files": [
-    "dist"
-  ],
-  "jest": {
-    "preset": "react-native",
-    "modulePathIgnorePatterns": [
-      "<rootDir>/dist/"
-    ]
   },
   "files": [
     "dist"
@@ -100,7 +91,7 @@
     "android": "react-native run-android",
     "build": "yarn clean && bob build && yarn declarations:emit",
     "clean": "rm -rf dist && rm -f *.tgz",
-    "declarations:emit": "tsc && tsc-alias",
+    "declarations:emit": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "format:code": "prettier --write .",
     "format:deps": "syncpack format",
     "ios": "react-native run-ios",

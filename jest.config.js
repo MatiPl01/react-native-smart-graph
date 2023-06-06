@@ -10,6 +10,6 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   transformIgnorePatterns: ['jest-runner'],
-  modulePathIgnorePatterns: ['<rootDir>/lib/'],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
   setupFiles: ['./jest.setup.js']
 };

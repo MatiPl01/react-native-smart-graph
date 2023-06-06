@@ -94,7 +94,7 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = DirectedGraph.fromData({ vertices: [{ key: 'A', data: 'A' }] });
+  const graph = new DirectedGraph({ vertices: [{ key: 'A', data: 'A' }] });
 
   useEffect(() => {
     const interval = setInterval(() => {
