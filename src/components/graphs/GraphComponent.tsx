@@ -1,9 +1,7 @@
-import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
-import EdgeComponent from './edges/EdgeComponent';
-import DefaultCurvedEdgeRenderer from './edges/curved/renderers/DefaultCurvedEdgeRenderer';
-import DefaultStraightEdgeRenderer from './edges/straight/renderers/DefaultStraightEdgeRenderer';
-import VertexComponent from './vertices/VertexComponent';
-import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
+import { Group, Vector } from '@shopify/react-native-skia';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAnimatedReaction } from 'react-native-reanimated';
+
 import {
   ARROW_COMPONENT_SETTINGS,
   CURVED_EDGE_COMPONENT_SETTINGS,
@@ -11,11 +9,7 @@ import {
   STRAIGHT_EDGE_COMPONENT_SETTINGS,
   VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
-import {
-  RANDOM_PLACEMENT_SETTING,
-  SHARED_PLACEMENT_SETTINGS,
-  TRIANGLES_PLACEMENT_SETTING
-} from '@/constants/placement';
+import { RANDOM_PLACEMENT_SETTING } from '@/constants/placement';
 import { GraphEventsContextType } from '@/context/graphEvents';
 import { useGraphObserver } from '@/hooks';
 import { EdgeComponentProps } from '@/types/components';
@@ -36,9 +30,13 @@ import {
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
-import { Group, Vector } from '@shopify/react-native-skia';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAnimatedReaction } from 'react-native-reanimated';
+
+import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
+import DefaultCurvedEdgeRenderer from './edges/curved/renderers/DefaultCurvedEdgeRenderer';
+import EdgeComponent from './edges/EdgeComponent';
+import DefaultStraightEdgeRenderer from './edges/straight/renderers/DefaultStraightEdgeRenderer';
+import DefaultVertexRenderer from './vertices/renderers/DefaultVertexRenderer';
+import VertexComponent from './vertices/VertexComponent';
 
 export type GraphComponentPrivateProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
@@ -116,7 +114,7 @@ export default function GraphComponent<
     const newSettings: GraphSettingsWithDefaults<V, E> = {
       ...settings,
       placement: {
-        ...RANDOM_PLACEMENT_SETTING as RandomPlacementSettings,
+        ...(RANDOM_PLACEMENT_SETTING as RandomPlacementSettings),
         ...settings?.placement
       },
       components: {

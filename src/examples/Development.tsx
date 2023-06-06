@@ -98,7 +98,6 @@ export default function App() {
     vertices: [{ key: 'A', data: 'A' }]
   });
 
-  // TODO - remove this useEffect after testing
   useEffect(() => {
     const interval = setInterval(() => {
       if (idx < 0 || idx >= ADDED_COMPONENTS.length) {

@@ -15,10 +15,6 @@
     "removeComments": true,
     "checkJs": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": false,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "dist/types",
     "rootDir": "./src",
     "baseUrl": "./src",
     "paths": {

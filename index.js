@@ -1,7 +1,7 @@
 /**
- * This file is the entry point for the tester app using the library.
+ * This file is the main entry point for the local development server.
  *
- * It is used to test if everything works properly.
+ * It is used to test the library.
  */
 import { AppRegistry } from 'react-native';
 import App from '@/examples/Development';
