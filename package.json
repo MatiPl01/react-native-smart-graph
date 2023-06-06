@@ -24,6 +24,7 @@
     "@babel/preset-env": "^7.22.4",
     "@babel/runtime": "^7.22.3",
     "@react-native-community/eslint-config": "^3.2.0",
+    "@semantic-release/git": "^10.0.1",
     "@semantic-release/npm": "^10.0.3",
     "@shopify/react-native-skia": "^0.1.193",
     "@tsconfig/react-native": "^3.0.2",

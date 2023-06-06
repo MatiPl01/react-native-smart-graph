@@ -18,4 +18,3 @@ jobs:
           node-version: 18
       - run: yarn install --frozen-lockfile
       - run: yarn test
-      - run: rm -rf node_modules
