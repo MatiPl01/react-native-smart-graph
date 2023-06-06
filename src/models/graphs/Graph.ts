@@ -256,4 +256,13 @@ export default abstract class Graph<
       observer.graphChanged();
     });
   }
+
+  // TODO - remove this method after adding self-loop edges support
+  protected checkSelfLoop(vertex1key: string, vertex2key: string): void {
+    if (vertex1key === vertex2key) {
+      throw new Error(
+        `Self-loop edges are not yet supported. Vertex key: ${vertex1key}`
+      );
+    }
+  }
 }

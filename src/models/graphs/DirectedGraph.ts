@@ -12,12 +12,12 @@ export default class DirectedGraph<V, E> extends Graph<
   DirectedEdgeData<E>
 > {
   // eslint-disable-next-line no-shadow
-  static fromData<V, E>(
-    vertices: Array<VertexData<V>>,
-    edges?: Array<DirectedEdgeData<E>>
-  ): DirectedGraph<V, E> {
+  static fromData<V, E>(data: {
+    vertices: Array<VertexData<V>>;
+    edges?: Array<DirectedEdgeData<E>>;
+  }): DirectedGraph<V, E> {
     const instance = new DirectedGraph<V, E>();
-    instance.insertBatch({ vertices, edges });
+    instance.insertBatch(data);
     return instance;
   }
 
@@ -43,6 +43,7 @@ export default class DirectedGraph<V, E> extends Graph<
     targetKey: string,
     notifyObservers?: boolean
   ): DirectedEdge<E, V> {
+    this.checkSelfLoop(sourceKey, targetKey);
     const source = this.getVertex(sourceKey);
     const target = this.getVertex(targetKey);
 

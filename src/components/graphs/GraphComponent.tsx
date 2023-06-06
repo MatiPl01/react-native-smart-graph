@@ -1,6 +1,6 @@
-import { Group, Rect, Vector } from '@shopify/react-native-skia';
+import { Group, Vector } from '@shopify/react-native-skia';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
+import { useAnimatedReaction } from 'react-native-reanimated';
 
 import {
   ARROW_COMPONENT_SETTINGS,
@@ -290,7 +290,7 @@ export default function GraphComponent<
         memoGraphLayout.verticesPositions
       );
     },
-    [animatedVerticesPositions, memoGraphLayout.verticesPositions]
+    [animatedVerticesPositions, memoGraphLayout]
   );
 
   const handleVertexRender = useCallback(
@@ -388,22 +388,8 @@ export default function GraphComponent<
     [verticesData]
   );
 
-  const containerWidth = useDerivedValue(
-    () => boundingRect.right.value - boundingRect.left.value
-  );
-  const containerHeight = useDerivedValue(
-    () => boundingRect.bottom.value - boundingRect.top.value
-  );
-
   return (
     <Group>
-      <Rect
-        x={boundingRect.left}
-        y={boundingRect.top}
-        width={containerWidth}
-        height={containerHeight}
-        color='#222'
-      />
       {renderEdges()}
       {renderVertices()}
     </Group>

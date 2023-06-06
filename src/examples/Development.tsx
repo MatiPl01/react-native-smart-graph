@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { SafeAreaView, View } from 'react-native';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
@@ -94,7 +94,7 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = DirectedGraph.fromData([{ key: 'A', data: 'A' }]);
+  const graph = DirectedGraph.fromData({ vertices: [{ key: 'A', data: 'A' }] });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -137,9 +137,9 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaView className='grow'>
-      <GestureHandlerRootView className='grow'>
-        <View className='grow bg-black'>
+    <SafeAreaView style={styles.container}>
+      <GestureHandlerRootView style={styles.gestureHandler}>
+        <View style={styles.background}>
           <PannableScalableView objectFit='contain' controls>
             <DirectedGraphComponent
               graph={graph}
@@ -164,3 +164,16 @@ export default function App() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  gestureHandler: {
+    flex: 1
+  },
+  background: {
+    flex: 1,
+    backgroundColor: 'black'
+  }
+});
