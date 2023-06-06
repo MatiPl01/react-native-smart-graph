@@ -9,6 +9,7 @@ import {
   STRAIGHT_EDGE_COMPONENT_SETTINGS,
   VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
+import { RANDOM_PLACEMENT_SETTING } from '@/constants/placement';
 import { GraphEventsContextType } from '@/context/graphEvents';
 import { useGraphObserver } from '@/hooks';
 import { EdgeComponentProps } from '@/types/components';
@@ -24,7 +25,8 @@ import {
   DirectedEdgeSettings,
   GraphLayout,
   GraphSettings,
-  GraphSettingsWithDefaults
+  GraphSettingsWithDefaults,
+  RandomPlacementSettings
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
@@ -111,6 +113,10 @@ export default function GraphComponent<
   const memoSettings = useMemo(() => {
     const newSettings: GraphSettingsWithDefaults<V, E> = {
       ...settings,
+      placement: {
+        ...(RANDOM_PLACEMENT_SETTING as RandomPlacementSettings),
+        ...settings?.placement
+      },
       components: {
         ...settings?.components,
         vertex: {
