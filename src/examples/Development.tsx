@@ -14,13 +14,57 @@ export default function App() {
   });
 
   useEffect(() => {
-    setTimeout(() => {
-      graph.insertVertex({ key: 'B', value: 'B' }, { duration: 100 });
-    }, 200);
-
-    // const interval = setInterval(() => {}, 500);
-
-    // return () => clearInterval(interval);
+    graph.insertVertex(
+      { key: 'B', value: 'B' },
+      {
+        duration: 200,
+        onComplete: () => {
+          graph.insertEdge({ key: 'AB', value: 'AB', from: 'A', to: 'B' });
+          graph.insertVertex(
+            { key: 'C', value: 'C' },
+            {
+              duration: 400,
+              onComplete: () => {
+                graph.insertEdge({
+                  key: 'BC',
+                  value: 'BC',
+                  from: 'B',
+                  to: 'C'
+                });
+                graph.insertVertex(
+                  { key: 'D', value: 'D' },
+                  {
+                    duration: 600,
+                    onComplete: () => {
+                      graph.insertEdge({
+                        key: 'CD',
+                        value: 'CD',
+                        from: 'C',
+                        to: 'D'
+                      });
+                      graph.insertVertex(
+                        { key: 'E', value: 'E' },
+                        {
+                          duration: 800,
+                          onComplete: () => {
+                            graph.insertEdge({
+                              key: 'DE',
+                              value: 'DE',
+                              from: 'D',
+                              to: 'E'
+                            });
+                          }
+                        }
+                      );
+                    }
+                  }
+                );
+              }
+            }
+          );
+        }
+      }
+    );
   }, []);
 
   return (
@@ -32,7 +76,7 @@ export default function App() {
               graph={graph}
               settings={{
                 placement: {
-                  strategy: 'orbits',
+                  strategy: 'circle',
                   minVertexSpacing: 100
                 },
                 components: {
