@@ -5,6 +5,7 @@ import {
   PropsWithChildren,
   ReactElement,
   useCallback,
+  useMemo,
   useRef
 } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
@@ -12,6 +13,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   Easing,
   runOnJS,
+  useAnimatedReaction,
   useDerivedValue,
   useSharedValue,
   withTiming
@@ -24,22 +26,42 @@ import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
 import { fixedWithDecay } from '@/utils/reanimated';
-import { clamp, getScaleInParent } from '@/utils/views';
+import {
+  calcContainerScale,
+  calcContainerTranslation,
+  clamp
+} from '@/utils/views';
+
+const INITIAL_SCALE = 1; // 1 = 100% canvas size
+const DEFAULT_SCALES = [0.25, INITIAL_SCALE, 2, 4];
 
 type PannableScalableViewProps = PropsWithChildren<{
-  minScale?: number; // default is auto (when the whole content is visible)
-  maxScale?: number;
+  scales?: number[];
+  initialScale?: number;
   objectFit?: ObjectFit;
   controls?: boolean;
 }>;
 
 export default function PannableScalableView<V, E>({
-  minScale = 0.25, // TODO - improve scales
-  maxScale = 10,
-  objectFit = 'none',
   children,
+  scales = DEFAULT_SCALES,
+  initialScale = INITIAL_SCALE,
+  objectFit = 'none',
   controls = false
 }: PannableScalableViewProps) {
+  // Validate parameters
+  if (scales.length === 0) {
+    throw new Error('At least one scale must be provided');
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const minScale = scales[0]!;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const maxScale = scales[scales.length - 1]!;
+  const initialScaleIndex = scales.indexOf(initialScale);
+  if (initialScaleIndex < 0) {
+    throw new Error('Initial scale must be included in scales');
+  }
+
   // CONTEXT
   const graphEventsContext = useGraphEventsContext();
 
@@ -64,8 +86,8 @@ export default function PannableScalableView<V, E>({
   );
 
   // CONTAINER SCALE
-  const renderScale = useSharedValue(1);
-  const currentScale = useSharedValue(0.25);
+  const scaleValues = useMemo(() => [...scales].sort(), [scales]);
+  const currentScale = useSharedValue(1);
   const pinchStartScale = useSharedValue(1);
 
   // CONTAINER TRANSFORM
@@ -119,14 +141,12 @@ export default function PannableScalableView<V, E>({
         height: canvasHeight.value
       };
 
-      const { scale: renderedScale } = getScaleInParent(
-        objectFit,
-        containerDimensions,
-        canvasDimensions
+      const scale = clamp(
+        calcContainerScale('contain', containerDimensions, canvasDimensions),
+        [minScale, maxScale]
       );
 
-      renderScale.value = renderedScale;
-      scaleContentTo(renderedScale, undefined, settings?.animated);
+      scaleContentTo(scale, undefined, settings?.animated);
 
       translateContentTo(
         {
@@ -230,6 +250,36 @@ export default function PannableScalableView<V, E>({
     }
   };
 
+  useAnimatedReaction(
+    () => ({
+      top: containerTop.value,
+      left: containerLeft.value,
+      containerDimensions: {
+        width: containerWidth.value,
+        height: containerHeight.value
+      },
+      canvasDimensions: {
+        width: canvasWidth.value,
+        height: canvasHeight.value
+      }
+    }),
+    ({ top, left, containerDimensions, canvasDimensions }) => {
+      scaleContentTo(
+        calcContainerScale(objectFit, containerDimensions, canvasDimensions)
+      );
+      translateContentTo(
+        calcContainerTranslation(
+          objectFit,
+          top,
+          left,
+          containerDimensions,
+          canvasDimensions
+        )
+      );
+    },
+    [objectFit]
+  );
+
   const panGestureHandler = Gesture.Pan()
     .onChange(e => {
       translateX.value += e.changeX;
@@ -262,16 +312,13 @@ export default function PannableScalableView<V, E>({
     .numberOfTaps(2)
     .onEnd(({ x, y }) => {
       const origin = { x, y };
-      const halfScale = (minScale + maxScale) / 2;
 
-      if (currentScale.value < renderScale.value) {
-        scaleContentTo(renderScale.value, origin, true);
-      } else if (currentScale.value < halfScale) {
-        scaleContentTo(halfScale, origin, true);
-      } else if (currentScale.value < maxScale) {
-        scaleContentTo(maxScale, origin, true);
+      if (currentScale.value === maxScale) {
+        scaleContentTo(initialScale, origin, true);
       } else {
-        scaleContentTo(renderScale.value, origin, true);
+        // Find first scale that is bigger than current scale
+        const newScale = scaleValues.find(scale => scale > currentScale.value);
+        scaleContentTo(newScale ?? maxScale, origin, true);
       }
     });
 

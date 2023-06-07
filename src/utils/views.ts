@@ -1,28 +1,25 @@
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 
-export const getScaleInParent = (
+export const calcContainerScale = (
   objectFit: ObjectFit,
-  containerDimensions: Dimensions,
-  parentDimensions: Dimensions
-): { scale: number; dimensions: Dimensions } => {
-  const { width: containerWidth, height: containerHeight } =
-    containerDimensions;
-  const { width: parentWidth, height: parentHeight } = parentDimensions;
-
+  { width: containerWidth, height: containerHeight }: Dimensions,
+  { width: canvasWidth, height: canvasHeight }: Dimensions
+): number => {
+  'worklet';
   let scale = 1;
 
   switch (objectFit) {
     case 'contain':
       scale = Math.min(
-        parentWidth / containerWidth,
-        parentHeight / containerHeight
+        canvasWidth / containerWidth,
+        canvasHeight / containerHeight
       );
       break;
     case 'cover':
       scale = Math.max(
-        parentWidth / containerWidth,
-        parentHeight / containerHeight
+        canvasWidth / containerWidth,
+        canvasHeight / containerHeight
       );
       break;
     case 'none':
@@ -32,13 +29,28 @@ export const getScaleInParent = (
       scale = isNaN(objectFit) ? 1 : objectFit;
   }
 
-  return {
-    scale,
-    dimensions: {
-      width: containerWidth * scale,
-      height: containerHeight * scale
-    }
-  };
+  return scale;
+};
+
+export const calcContainerTranslation = (
+  objectFit: ObjectFit,
+  containerTop: number,
+  containerLeft: number,
+  { width: containerWidth, height: containerHeight }: Dimensions,
+  { width: canvasWidth, height: canvasHeight }: Dimensions
+): { x: number; y: number } => {
+  'worklet';
+  let x = 0;
+  let y = 0;
+
+  switch (objectFit) {
+    case 'contain':
+      x = (-containerLeft / containerWidth) * canvasWidth;
+      y = (-containerTop / containerHeight) * canvasHeight;
+      break;
+  }
+
+  return { x, y };
 };
 
 export const clamp = (value: number, bounds: [number, number]) => {
