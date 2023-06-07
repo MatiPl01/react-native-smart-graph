@@ -1,3 +1,5 @@
+import { Vector } from '@shopify/react-native-skia';
+
 import { Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 
@@ -45,12 +47,34 @@ export const calcContainerTranslation = (
 
   switch (objectFit) {
     case 'contain':
+    case 'cover':
       x = (-containerLeft / containerWidth) * canvasWidth;
       y = (-containerTop / containerHeight) * canvasHeight;
       break;
   }
 
   return { x, y };
+};
+
+export const calcScaleOnProgress = (
+  progress: number,
+  startScale: number,
+  endScale: number
+): number => {
+  'worklet';
+  return startScale + progress * (endScale - startScale);
+};
+
+export const calcTranslationOnProgress = (
+  progress: number,
+  startTranslation: Vector,
+  endTranslation: Vector
+): Vector => {
+  'worklet';
+  return {
+    x: startTranslation.x + progress * (endTranslation.x - startTranslation.x),
+    y: startTranslation.y + progress * (endTranslation.y - startTranslation.y)
+  };
 };
 
 export const clamp = (value: number, bounds: [number, number]) => {
