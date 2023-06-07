@@ -70,7 +70,8 @@ export default function GraphComponent<
   graphEventsContext
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
-  const [{ vertices, orderedEdges }] = useGraphObserver(graph);
+  const [{ vertices, orderedEdges, animationSettings }] =
+    useGraphObserver(graph);
 
   // HELPER REFS
   const isFirstRenderRef = useRef(true);
@@ -293,10 +294,11 @@ export default function GraphComponent<
     () => {
       animateVerticesToFinalPositions(
         animatedVerticesPositions,
-        memoGraphLayout.verticesPositions
+        memoGraphLayout.verticesPositions,
+        animationSettings
       );
     },
-    [animatedVerticesPositions, memoGraphLayout]
+    [animatedVerticesPositions, memoGraphLayout, animationSettings]
   );
 
   const handleVertexRender = useCallback(

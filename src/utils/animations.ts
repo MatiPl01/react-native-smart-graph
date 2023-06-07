@@ -1,25 +1,25 @@
 import { Vector } from '@shopify/react-native-skia';
 import { withTiming } from 'react-native-reanimated';
 
-import EASING from '@/constants/easings';
+import { AnimationSettings } from '@/types/animations';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
 export const animateVerticesToFinalPositions = (
   animatedPositions: Record<string, AnimatedVectorCoordinates>,
-  finalPositions: Record<string, Vector>
+  finalPositions: Record<string, Vector>,
+  { duration, easing }: AnimationSettings
 ) => {
   'worklet';
-  // TODO - improve this animation (add settings)
   Object.entries(finalPositions).forEach(([key, finalPosition]) => {
     const animatedPosition = animatedPositions[key];
     if (animatedPosition) {
       animatedPosition.x.value = withTiming(finalPosition.x, {
-        duration: 300,
-        easing: EASING.bounce
+        duration,
+        easing
       });
       animatedPosition.y.value = withTiming(finalPosition.y, {
-        duration: 300,
-        easing: EASING.bounce
+        duration,
+        easing
       });
     }
   });

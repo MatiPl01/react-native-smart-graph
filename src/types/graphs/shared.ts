@@ -1,5 +1,11 @@
 // TODO - add documentation to all interfaces
 
+import {
+  AnimationSettings,
+  AnimationSettingWithDefaults
+} from '@/types/animations';
+import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
+
 export interface Vertex<V, E> {
   get key(): string;
   get value(): V;
@@ -18,7 +24,7 @@ export interface Edge<E, V> {
 export type GraphConnections = Record<string, Array<string>>;
 
 export type GraphObserver = {
-  graphChanged(): void;
+  graphChanged(animationSettings: AnimationSettingWithDefaults): void;
 };
 
 export interface Graph<V, E> {
@@ -38,15 +44,15 @@ export interface Graph<V, E> {
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<E, V>>;
   getVertex(key: string): Vertex<V, E> | null;
   getEdge(key: string): Edge<E, V> | null;
-  insertVertex(key: string, value: V, notifyObservers?: boolean): Vertex<V, E>;
+  insertVertex(
+    data: VertexData<V>,
+    animationSettings?: AnimationSettings | null
+  ): Vertex<V, E>;
   insertEdge(
-    key: string,
-    value: E,
-    vertex1key: string,
-    vertex2key: string,
-    notifyObservers?: boolean
+    data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
+    animationSettings?: AnimationSettings | null
   ): Edge<E, V>;
-  removeVertex(key: string, notifyObservers?: boolean): V;
-  removeEdge(key: string, notifyObservers?: boolean): E;
-  clear(notifyObservers?: boolean): void;
+  removeVertex(key: string, animationSettings?: AnimationSettings | null): V;
+  removeEdge(key: string, animationSettings?: AnimationSettings | null): E;
+  clear(animationSettings?: AnimationSettings | null): void;
 }
