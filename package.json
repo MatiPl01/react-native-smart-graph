@@ -6,11 +6,6 @@
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
@@ -34,8 +29,6 @@
     "babel-jest": "^29.5.0",
     "babel-plugin-module-resolver": "^5.0.0",
     "babel-plugin-react-require": "^4.0.0",
-    "commitizen": "^4.3.0",
-    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.41.0",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-import": "^2.27.5",
@@ -91,7 +84,6 @@
     "android": "react-native run-android",
     "build": "yarn clean && bob build && yarn declarations:emit",
     "clean": "rm -rf dist && rm -f *.tgz",
-    "commit": "cz",
     "declarations:emit": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "format:code": "prettier --write .",
     "format:deps": "syncpack format",
