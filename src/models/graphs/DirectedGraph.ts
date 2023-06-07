@@ -12,12 +12,12 @@ export default class DirectedGraph<V, E> extends Graph<
   DirectedEdge<E, V>,
   DirectedEdgeData<E>
 > {
-  constructor(data: {
+  constructor(data?: {
     vertices: Array<VertexData<V>>;
     edges?: Array<DirectedEdgeData<E>>;
   }) {
     super();
-    this.insertBatch(data);
+    if (data) this.insertBatch(data);
   }
 
   override isDirected(): this is DirectedGraph<V, E> {
