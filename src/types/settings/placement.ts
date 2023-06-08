@@ -1,6 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
 import { Vertex } from '@/types/graphs';
+import { BoundingRect } from '@/types/layout';
 
 export type PlacementStrategy =
   | 'random'
@@ -96,7 +97,6 @@ export type TreesPlacementSettings = SharedPlacementSettings & {
 export type PlacedVerticesPositions = Record<string, Vector>;
 
 export type GraphLayout = {
-  width: number;
-  height: number;
+  boundingRect: BoundingRect;
   verticesPositions: PlacedVerticesPositions;
 };

@@ -8,7 +8,7 @@ import {
 import { findRootVertex } from '@/utils/graphs/models';
 import {
   arrangeGraphComponents,
-  calcContainerDimensions
+  calcContainerBoundingRect
 } from '@/utils/placement/shared';
 
 const placeVerticesOnTrees = <V, E>(
@@ -32,25 +32,24 @@ const placeVerticesOnTrees = <V, E>(
     // Place vertices in the layout
     const minVertexSpacing =
       settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
-    const placedVerticesPositions = placeVertices(
+    const verticesPositions = placeVertices(
       arrangedVertices,
       minVertexSpacing,
       vertexRadius
     );
     // Calculate container dimensions
-    const containerDimensions = calcContainerDimensions(
-      placedVerticesPositions,
-      minVertexSpacing,
-      vertexRadius
-    );
+
     componentsLayouts.push({
-      width: containerDimensions.width + minVertexSpacing,
-      height: containerDimensions.height + minVertexSpacing,
-      verticesPositions: placedVerticesPositions
+      verticesPositions,
+      boundingRect: calcContainerBoundingRect(
+        verticesPositions,
+        minVertexSpacing,
+        vertexRadius
+      )
     });
   }
 
-  return arrangeGraphComponents(componentsLayouts);
+  return arrangeGraphComponents(componentsLayouts, vertexRadius);
 };
 
 const arrangeVertices = <V, E>(

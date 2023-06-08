@@ -12,7 +12,7 @@ import { bfs } from '@/utils/algorithms';
 import { findRootVertex } from '@/utils/graphs/models';
 import {
   arrangeGraphComponents,
-  calcContainerDimensions
+  calcContainerBoundingRect
 } from '@/utils/placement/shared';
 
 type ArrangedVertices = Record<
@@ -54,18 +54,18 @@ const placeVerticesOnOrbits = <V, E>(
       layerRadiuses
     );
     // Calc container dimensions
-    const containerDimensions = calcContainerDimensions(
+    const boundingRect = calcContainerBoundingRect(
       placedVerticesPositions,
       minVertexSpacing,
       vertexRadius
     );
     componentsLayouts.push({
-      ...containerDimensions,
+      boundingRect,
       verticesPositions: placedVerticesPositions
     });
   }
 
-  return arrangeGraphComponents(componentsLayouts);
+  return arrangeGraphComponents(componentsLayouts, vertexRadius);
 };
 
 const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
