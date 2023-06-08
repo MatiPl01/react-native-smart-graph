@@ -15,11 +15,11 @@ export const animateVerticesToFinalPositions = (
     if (animatedPosition) {
       animatedPosition.x.value = withTiming(finalPosition.x, {
         duration: 300,
-        easing: EASING.bounce
+        easing: EASING.ease
       });
       animatedPosition.y.value = withTiming(finalPosition.y, {
         duration: 300,
-        easing: EASING.bounce
+        easing: EASING.ease
       });
     }
   });
