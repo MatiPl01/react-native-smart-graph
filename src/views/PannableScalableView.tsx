@@ -27,7 +27,7 @@ import {
   INITIAL_SCALE
 } from '@/constants/views';
 import { useGraphEventsContext } from '@/context/graphEvents';
-import { Dimensions } from '@/types/layout';
+import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
 import { fixedWithDecay } from '@/utils/reanimated';
@@ -80,26 +80,17 @@ export default function PannableScalableView<V, E>({
   const containerLeft = useSharedValue(0);
   const containerRight = useSharedValue(0);
   const containerBottom = useSharedValue(0);
-  // Dimensions
-  const initialContainerDimensionsRef = useRef<Dimensions | null>(null);
-  const containerWidth = useDerivedValue(
-    () => containerRight.value - containerLeft.value,
-    [containerRight, containerLeft]
-  );
-  const containerHeight = useDerivedValue(
-    () => containerBottom.value - containerTop.value,
-    [containerBottom, containerTop]
-  );
-
-  // CONTAINER SCALE
+  // Bounding rect
+  const initialBoundingRectRef = useRef<BoundingRect | null>(null);
+  // Scale
   const scaleValues = useMemo(() => [...scales].sort(), [scales]);
   const currentScale = useSharedValue(1);
   const pinchStartScale = useSharedValue(1);
 
   // AUTO SIZING
-  const autoSizingEnabled = useSharedValue(false);
+  const autoSizingEnabled = useSharedValue(true);
   // Transition between non-auto-layout and auto-layout states
-  const autoSizingTransitionProgress = useSharedValue(0);
+  const autoSizingTransitionProgress = useSharedValue(1);
   const autoSizingStartScale = useSharedValue<number>(0);
   const autoSizingStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
   const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -126,35 +117,49 @@ export default function PannableScalableView<V, E>({
       canvasWidth.value = width;
       canvasHeight.value = height;
 
-      if (initialContainerDimensionsRef.current) {
-        resetContentPosition({
-          canvasDimensions: {
-            width,
-            height
+      if (initialBoundingRectRef.current) {
+        resetContainerPosition(
+          {
+            canvasDimensions: {
+              width,
+              height
+            },
+            containerBoundingRect: initialBoundingRectRef.current
           },
-          containerDimensions: initialContainerDimensionsRef.current
-        });
+          false
+        );
       }
     },
     []
   );
 
-  const handleGraphRender = useCallback((containerDimensions: Dimensions) => {
-    initialContainerDimensionsRef.current ??= containerDimensions;
-    resetContentPosition({
-      containerDimensions
-    });
-  }, []);
+  const handleGraphRender = useCallback(
+    (containerBoundingRect: BoundingRect) => {
+      initialBoundingRectRef.current ??= containerBoundingRect;
+      resetContainerPosition(
+        {
+          containerBoundingRect
+        },
+        false
+      );
+    },
+    []
+  );
 
-  const resetContentPosition = useCallback(
-    (settings?: {
-      containerDimensions?: Dimensions;
-      canvasDimensions?: Dimensions;
-      animated?: boolean;
-    }) => {
-      const containerDimensions = settings?.containerDimensions ?? {
-        width: containerWidth.value || 0,
-        height: containerHeight.value || 0
+  const resetContainerPosition = useCallback(
+    (
+      settings?: {
+        containerBoundingRect?: BoundingRect;
+        canvasDimensions?: Dimensions;
+        animated?: boolean;
+      },
+      userTriggered = true
+    ) => {
+      const containerBoundingRect = settings?.containerBoundingRect ?? {
+        left: containerLeft.value,
+        right: containerRight.value,
+        top: containerTop.value,
+        bottom: containerBottom.value
       };
 
       const canvasDimensions = settings?.canvasDimensions ?? {
@@ -162,23 +167,31 @@ export default function PannableScalableView<V, E>({
         height: canvasHeight.value
       };
 
-      disableAutoSizing();
+      if (userTriggered) disableAutoSizing();
 
       const scale = clamp(
-        calcContainerScale('contain', containerDimensions, canvasDimensions),
+        calcContainerScale(
+          'contain',
+          {
+            width: containerBoundingRect.right - containerBoundingRect.left,
+            height: containerBoundingRect.bottom - containerBoundingRect.top
+          },
+          canvasDimensions
+        ),
         [minScale, maxScale]
       );
       scaleContentTo(scale, undefined, settings?.animated);
       translateContentTo(
-        {
-          x: canvasDimensions.width / 2,
-          y: canvasDimensions.height / 2
-        },
+        calcContainerTranslation(
+          objectFit,
+          containerBoundingRect,
+          canvasDimensions
+        ),
         undefined,
         settings?.animated
       );
 
-      startAutoSizingTimeout();
+      if (userTriggered) startAutoSizingTimeout();
     },
     [objectFit]
   );
@@ -308,11 +321,11 @@ export default function PannableScalableView<V, E>({
 
   useAnimatedReaction(
     () => ({
-      top: containerTop.value,
-      left: containerLeft.value,
-      containerDimensions: {
-        width: containerWidth.value,
-        height: containerHeight.value
+      boundingRect: {
+        left: containerLeft.value,
+        right: containerRight.value,
+        top: containerTop.value,
+        bottom: containerBottom.value
       },
       canvasDimensions: {
         width: canvasWidth.value,
@@ -324,9 +337,7 @@ export default function PannableScalableView<V, E>({
       transitionProgress: autoSizingTransitionProgress.value
     }),
     ({
-      top,
-      left,
-      containerDimensions,
+      boundingRect,
       canvasDimensions,
       enabled,
       startScale,
@@ -343,7 +354,10 @@ export default function PannableScalableView<V, E>({
           clamp(
             calcContainerScale(
               objectFit,
-              containerDimensions,
+              {
+                width: boundingRect.right - boundingRect.left,
+                height: boundingRect.bottom - boundingRect.top
+              },
               canvasDimensions
             ),
             [minScale, maxScale]
@@ -355,13 +369,7 @@ export default function PannableScalableView<V, E>({
         calcTranslationOnProgress(
           transitionProgress,
           startTranslation,
-          calcContainerTranslation(
-            objectFit,
-            top,
-            left,
-            containerDimensions,
-            canvasDimensions
-          )
+          calcContainerTranslation(objectFit, boundingRect, canvasDimensions)
         )
       );
     },
@@ -485,7 +493,7 @@ export default function PannableScalableView<V, E>({
       </GestureDetector>
       {controls && (
         <ViewControls
-          onReset={() => resetContentPosition({ animated: true })}
+          onReset={() => resetContainerPosition({ animated: true })}
         />
       )}
     </View>

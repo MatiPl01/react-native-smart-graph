@@ -1,6 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { Dimensions } from '@/types/layout';
+import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 
 export const calcContainerScale = (
@@ -36,9 +36,7 @@ export const calcContainerScale = (
 
 export const calcContainerTranslation = (
   objectFit: ObjectFit,
-  containerTop: number,
-  containerLeft: number,
-  { width: containerWidth, height: containerHeight }: Dimensions,
+  { left, right, top, bottom }: BoundingRect,
   { width: canvasWidth, height: canvasHeight }: Dimensions
 ): { x: number; y: number } => {
   'worklet';
@@ -48,8 +46,8 @@ export const calcContainerTranslation = (
   switch (objectFit) {
     case 'contain':
     case 'cover':
-      x = (-containerLeft / containerWidth) * canvasWidth;
-      y = (-containerTop / containerHeight) * canvasHeight;
+      x = (-left / (right - left)) * canvasWidth;
+      y = (-top / (bottom - top)) * canvasHeight;
       break;
   }
 

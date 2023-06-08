@@ -12,7 +12,8 @@ const placeVerticesOnCircles = <V, E>(
   return arrangeGraphComponents(
     components.map(vertices =>
       placeVerticesOnCircle(vertices, vertexRadius, settings)
-    )
+    ),
+    vertexRadius
   );
 };
 
