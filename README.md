@@ -6,14 +6,23 @@
 
 # React Native Smart Graph
 
-## Dynamic Graph Visualization for React Native
+### Dynamic Graph Visualization for React Native
 
-### Effortlessly create and interact with graph structures in your apps
+#### Effortlessly create and interact with graph structures in your apps
+
+![npm](https://img.shields.io/npm/dw/react-native-smart-graph?color=ffd53e)
+![GitHub issues](https://img.shields.io/github/issues/MatiPl01/react-native-smart-graph?color=ffd53e)
+![GitHub contributors](https://img.shields.io/github/contributors/MatiPl01/react-native-smart-graph?color=ffd53e)
+![GitHub Release Date](https://img.shields.io/github/release-date/MatiPl01/react-native-smart-graph?color=ffd53e)
+![GitHub](https://img.shields.io/github/license/MatiPl01/react-native-smart-graph?color=ffd53e)
+
+![GitHub forks](https://img.shields.io/github/forks/MatiPl01/react-native-smart-graph?style=social)
+![GitHub Repo stars](https://img.shields.io/github/stars/MatiPl01/react-native-smart-graph?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/MatiPl01/react-native-smart-graph?style=social)
 
 </div>
 
 <!-- TABLE OF CONTENTS -->
-<br>
 <h3>
 <details>
   <summary>
@@ -22,11 +31,25 @@
   <h5>
     <ol>
       <li>
-        <a href="#getting-started">Getting Started</a>
+        <p>
+          <a href="#getting-started">Getting Started</a>
+        </p>
         <ul>
           <li><a href="#prerequisites">Prerequisites</a></li>
           <li><a href="#installation">Installation</a></li>
         </ul>
+      </li>
+      <li>
+        <p>
+          <a href="#usage">Usage</a>
+          <ul>
+            <li><a href="#basic-usage">Basic usage</a></li>
+            <li><a href="#graph-models">Graph models</a></li>
+            <li><a href="#graph-components">Graph components</a></li>
+            <li><a href="#custom-renderers">Creating custom renderers</a></li>
+            <li><a href="#animations">Creating graph animations</a></li>
+          </ul>
+        </p>
       </li>
     </ol>
   </h5>
@@ -34,8 +57,7 @@
 </h3>
 
 <!-- GETTING STARTED -->
-
-## 📋 Getting Started
+<h2 id="getting-started">⚙ Getting Started</h2>
 
 ### Prerequisites
 
@@ -80,6 +102,8 @@ Before running the app on the iOS device, you will have to take one more step an
 npx pod-install ios
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### Installation
 
 In order to install the library, you will need to run one of the following commands, depending on the package manager you use in your project. All required dependencies will be automatically installed.
@@ -95,5 +119,11 @@ yarn add react-native-smart-graph
 ```sh
 npm i react-native-smart-graph
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- BASIC USAGE -->
+<!-- TODO -->
+<h2 id="basic-usage">🤹 Basic Usage</h2>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
