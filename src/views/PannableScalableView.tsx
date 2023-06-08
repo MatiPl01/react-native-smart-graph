@@ -22,7 +22,7 @@ import {
 import ViewControls from '@/components/controls/ViewControls';
 import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
 import {
-  AUTO_LAYOUT_TIMEOUT,
+  AUTO_SIZING_TIMEOUT,
   DEFAULT_SCALES,
   INITIAL_SCALE
 } from '@/constants/views';
@@ -43,7 +43,7 @@ type PannableScalableViewProps = PropsWithChildren<{
   scales?: number[];
   initialScale?: number;
   objectFit?: ObjectFit;
-  autoLayoutTimeout?: number;
+  autoSizingTimeout?: number;
   controls?: boolean;
 }>;
 
@@ -52,7 +52,7 @@ export default function PannableScalableView<V, E>({
   scales = DEFAULT_SCALES,
   initialScale = INITIAL_SCALE,
   objectFit = 'none',
-  autoLayoutTimeout = AUTO_LAYOUT_TIMEOUT,
+  autoSizingTimeout = AUTO_SIZING_TIMEOUT,
   controls = false
 }: PannableScalableViewProps) {
   // Validate parameters
@@ -96,13 +96,13 @@ export default function PannableScalableView<V, E>({
   const currentScale = useSharedValue(1);
   const pinchStartScale = useSharedValue(1);
 
-  // AUTO LAYOUT
-  const autoLayoutEnabled = useSharedValue(false);
+  // AUTO SIZING
+  const autoSizingEnabled = useSharedValue(false);
   // Transition between non-auto-layout and auto-layout states
-  const autoLayoutTransitionProgress = useSharedValue(0);
-  const autoLayoutStartScale = useSharedValue<number>(0);
-  const autoLayoutStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
-  const autoLayoutTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSizingTransitionProgress = useSharedValue(0);
+  const autoSizingStartScale = useSharedValue<number>(0);
+  const autoSizingStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
+  const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // CONTAINER TRANSFORM
   const translateX = useSharedValue(0);
@@ -162,7 +162,7 @@ export default function PannableScalableView<V, E>({
         height: canvasHeight.value
       };
 
-      disableAutoLayout();
+      disableAutoSizing();
 
       const scale = clamp(
         calcContainerScale('contain', containerDimensions, canvasDimensions),
@@ -178,7 +178,7 @@ export default function PannableScalableView<V, E>({
         settings?.animated
       );
 
-      startAutoLayoutTimeout();
+      startAutoSizingTimeout();
     },
     [objectFit]
   );
@@ -273,37 +273,37 @@ export default function PannableScalableView<V, E>({
     }
   };
 
-  const startAutoLayoutTimeout = () => {
-    clearAutoLayoutTimeout();
-    autoLayoutTimeoutRef.current = setTimeout(() => {
-      autoLayoutTimeoutRef.current = null;
-      autoLayoutEnabled.value = true;
-      autoLayoutTransitionProgress.value = withTiming(1, {
+  const startAutoSizingTimeout = () => {
+    clearAutoSizingTimeout();
+    autoSizingTimeoutRef.current = setTimeout(() => {
+      autoSizingTimeoutRef.current = null;
+      autoSizingEnabled.value = true;
+      autoSizingTransitionProgress.value = withTiming(1, {
         duration: 150,
         easing: Easing.ease
       });
-      autoLayoutStartScale.value = currentScale.value;
-      autoLayoutStartTranslation.value = {
+      autoSizingStartScale.value = currentScale.value;
+      autoSizingStartTranslation.value = {
         x: translateX.value,
         y: translateY.value
       };
-    }, autoLayoutTimeout);
+    }, autoSizingTimeout);
   };
 
-  const clearAutoLayoutTimeout = () => {
-    if (autoLayoutTimeoutRef.current) {
-      clearTimeout(autoLayoutTimeoutRef.current);
-      autoLayoutTimeoutRef.current = null;
+  const clearAutoSizingTimeout = () => {
+    if (autoSizingTimeoutRef.current) {
+      clearTimeout(autoSizingTimeoutRef.current);
+      autoSizingTimeoutRef.current = null;
     }
   };
 
-  const disableAutoLayout = () => {
-    autoLayoutEnabled.value = false;
-    autoLayoutTransitionProgress.value = withTiming(0, {
+  const disableAutoSizing = () => {
+    autoSizingEnabled.value = false;
+    autoSizingTransitionProgress.value = withTiming(0, {
       duration: 150,
       easing: Easing.ease
     });
-    clearAutoLayoutTimeout();
+    clearAutoSizingTimeout();
   };
 
   useAnimatedReaction(
@@ -318,10 +318,10 @@ export default function PannableScalableView<V, E>({
         width: canvasWidth.value,
         height: canvasHeight.value
       },
-      enabled: autoLayoutEnabled.value,
-      startScale: autoLayoutStartScale.value,
-      startTranslation: autoLayoutStartTranslation.value,
-      transitionProgress: autoLayoutTransitionProgress.value
+      enabled: autoSizingEnabled.value,
+      startScale: autoSizingStartScale.value,
+      startTranslation: autoSizingStartTranslation.value,
+      transitionProgress: autoSizingTransitionProgress.value
     }),
     ({
       top,
@@ -370,7 +370,7 @@ export default function PannableScalableView<V, E>({
 
   const panGestureHandler = Gesture.Pan()
     .onStart(() => {
-      runOnJS(disableAutoLayout)();
+      runOnJS(disableAutoSizing)();
     })
     .onChange(e => {
       translateX.value += e.changeX;
@@ -380,13 +380,13 @@ export default function PannableScalableView<V, E>({
       const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
       translateX.value = fixedWithDecay(velocityX, translateX.value, clampX);
       translateY.value = fixedWithDecay(velocityY, translateY.value, clampY);
-      runOnJS(startAutoLayoutTimeout)();
+      runOnJS(startAutoSizingTimeout)();
     });
 
   const pinchGestureHandler = Gesture.Pinch()
     .onStart(() => {
       pinchStartScale.value = currentScale.value;
-      runOnJS(disableAutoLayout)();
+      runOnJS(disableAutoSizing)();
     })
     .onChange(e => {
       scaleContentTo(pinchStartScale.value * e.scale, {
@@ -399,13 +399,13 @@ export default function PannableScalableView<V, E>({
         minScale,
         maxScale
       ]);
-      runOnJS(startAutoLayoutTimeout)();
+      runOnJS(startAutoSizingTimeout)();
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
     .numberOfTaps(2)
     .onStart(() => {
-      runOnJS(disableAutoLayout)();
+      runOnJS(disableAutoSizing)();
     })
     .onEnd(({ x, y }) => {
       const origin = { x, y };
@@ -417,7 +417,7 @@ export default function PannableScalableView<V, E>({
         const newScale = scaleValues.find(scale => scale > currentScale.value);
         scaleContentTo(newScale ?? maxScale, origin, true);
       }
-      runOnJS(startAutoLayoutTimeout)();
+      runOnJS(startAutoSizingTimeout)();
     });
 
   const handlePress = (

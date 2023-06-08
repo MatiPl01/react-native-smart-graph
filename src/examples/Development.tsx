@@ -142,7 +142,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
-          <PannableScalableView objectFit='none' controls>
+          <PannableScalableView objectFit='contain' controls>
             <UndirectedGraphComponent
               graph={graph}
               settings={{
