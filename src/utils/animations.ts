@@ -4,7 +4,9 @@ import { runOnJS, withTiming } from 'react-native-reanimated';
 
 import {
   AnimationSettings,
+  AnimationSettingsWithDefaults,
   AnimationsSettings,
+  AnimationsSettingsWithDefaults,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/animations';
@@ -154,4 +156,53 @@ export const createAnimationsSettingsForBatchModification = (
       ]) || []
     )
   };
+};
+
+export const updateAnimationsSettingsWithDefaults = (
+  animationsSettings: AnimationsSettings,
+  defaultAnimationSettings: AnimationSettingsWithDefaults
+): AnimationsSettingsWithDefaults => ({
+  layout: {
+    ...defaultAnimationSettings,
+    ...animationsSettings.layout,
+    onComplete: createAnimationCallback(animationsSettings.layout?.onComplete)
+  },
+  vertices: Object.fromEntries(
+    Object.entries(animationsSettings.vertices).map(([key, settings]) => [
+      key,
+      {
+        ...defaultAnimationSettings,
+        ...settings,
+        onComplete: createAnimationCallback(settings?.onComplete)
+      }
+    ])
+  ),
+  edges: Object.fromEntries(
+    Object.entries(animationsSettings.edges).map(([key, settings]) => [
+      key,
+      {
+        ...defaultAnimationSettings,
+        ...settings,
+        onComplete: createAnimationCallback(settings?.onComplete)
+      }
+    ])
+  )
+});
+
+export const createAnimationCallback = (
+  callback?: () => void
+): (() => void) => {
+  if (!callback) {
+    return () => undefined;
+  }
+
+  // TODO - fix this
+  return callback;
+  // return function () {
+  //   if (this.wasCalled) {
+  //     return;
+  //   }
+  //   callback();
+  //   this.wasCalled = true;
+  // };
 };

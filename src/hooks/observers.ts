@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
-import { AnimationsSettingsWithDefaults } from '@/types/animations';
+import { AnimationsSettings } from '@/types/animations';
 import { Edge, Graph, GraphObserver, Vertex } from '@/types/graphs';
 
 type State<V, E> = {
@@ -12,7 +11,7 @@ type State<V, E> = {
     order: number;
     edgesCount: number;
   }>;
-  animationSettings: AnimationsSettingsWithDefaults;
+  animationsSettings: AnimationsSettings;
 };
 
 export const useGraphObserver = <V, E>(
@@ -23,8 +22,7 @@ export const useGraphObserver = <V, E>(
     vertices: graph.vertices,
     edges: graph.edges,
     orderedEdges: graph.orderedEdges,
-    animationSettings: {
-      layout: DEFAULT_ANIMATION_SETTINGS,
+    animationsSettings: {
       vertices: {},
       edges: {}
     }
@@ -38,27 +36,18 @@ export const useGraphObserver = <V, E>(
         vertices: graph.vertices,
         edges: graph.edges,
         orderedEdges: graph.orderedEdges,
-        animationSettings: {
-          layout: {
-            ...DEFAULT_ANIMATION_SETTINGS,
-            ...animationSettings.layout
-          },
+        animationsSettings: {
+          layout: animationSettings.layout,
           vertices: Object.fromEntries(
             graph.vertices.map(vertex => [
               vertex.key,
-              {
-                ...DEFAULT_ANIMATION_SETTINGS,
-                ...animationSettings.vertices?.[vertex.key]
-              }
+              animationSettings.vertices?.[vertex.key]
             ])
           ),
           edges: Object.fromEntries(
             graph.edges.map(edge => [
               edge.key,
-              {
-                ...DEFAULT_ANIMATION_SETTINGS,
-                ...animationSettings.edges?.[edge.key]
-              }
+              animationSettings.edges?.[edge.key]
             ])
           )
         }

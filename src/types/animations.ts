@@ -31,7 +31,7 @@ export type AnimationsSettings = {
   edges: Record<string, AnimationSettings | undefined>;
 };
 
-type AnimationSettingsWithDefaults = Required<AnimationSettings>;
+export type AnimationSettingsWithDefaults = Required<AnimationSettings>;
 
 export type AnimationsSettingsWithDefaults = {
   layout: AnimationSettingsWithDefaults;

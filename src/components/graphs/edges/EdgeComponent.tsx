@@ -1,7 +1,6 @@
 import { memo, useEffect } from 'react';
 import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import EASING from '@/constants/easings';
 import {
   DirectedCurvedEdgeComponentProps,
   DirectedStraightEdgeComponentProps,
@@ -21,6 +20,7 @@ function EdgeComponent<E, V>({
   edgesCount,
   removed,
   onRemove,
+  animationSettings,
   ...restProps
 }: EdgeComponentProps<E, V>) {
   const key = edge.key;
@@ -37,36 +37,22 @@ function EdgeComponent<E, V>({
     // ANimate vertex on mount
     if (!removed) {
       // Animate vertex on mount
-      animationProgress.value = withTiming(1, {
-        // TODO - make this a setting
-        duration: 500,
-        easing: EASING.bounce
-      });
+      animationProgress.value = withTiming(1, animationSettings);
     }
     // Animate vertex removal
     else {
-      animationProgress.value = withTiming(
-        0,
-        {
-          duration: 250
-        },
-        finished => {
-          if (finished) {
-            runOnJS(onRemove)(key);
-          }
+      animationProgress.value = withTiming(0, animationSettings, finished => {
+        if (finished) {
+          runOnJS(onRemove)(key);
         }
-      );
+      });
     }
   }, [removed]);
 
   // Edge ordering animation
   useEffect(() => {
-    animatedOrder.value = withTiming(order, {
-      duration: 500 // TODO - make this a setting
-    });
-    animatedEdgesCount.value = withTiming(edgesCount, {
-      duration: 500 // TODO - make this a setting
-    });
+    animatedOrder.value = withTiming(order, animationSettings);
+    animatedEdgesCount.value = withTiming(edgesCount, animationSettings);
   }, [order, edgesCount]);
 
   const sharedProps = {

@@ -1,7 +1,7 @@
 import { memo, useEffect } from 'react';
 import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import EASING from '@/constants/easings';
+import { AnimationSettingsWithDefaults } from '@/types/animations';
 import { Vertex } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
@@ -11,6 +11,7 @@ type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
   settings: Required<VertexSettings>;
   renderer: VertexRenderFunction<V>;
+  animationSettings: AnimationSettingsWithDefaults;
   removed: boolean;
   onRender: (key: string, position: AnimatedVectorCoordinates) => void;
   onRemove: (key: string) => void;
@@ -22,7 +23,8 @@ function VertexComponent<V, E>({
   renderer,
   removed,
   onRender,
-  onRemove
+  onRemove,
+  animationSettings
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
@@ -44,26 +46,20 @@ function VertexComponent<V, E>({
     // ANimate vertex on mount
     if (!removed) {
       // Animate vertex on mount
-      animationProgress.value = withTiming(1, {
-        // TODO - make this a setting
-        duration: 500,
-        easing: EASING.bounce
+      animationProgress.value = withTiming(1, animationSettings, finished => {
+        if (finished) {
+          // runOnJS(animationSettings.onComplete)(); // TODO - fix callback function
+        }
       });
     }
     // Animate vertex removal
     else {
-      animationProgress.value = withTiming(
-        0,
-        {
-          duration: 500,
-          easing: EASING.bounce
-        },
-        finished => {
-          if (finished) {
-            runOnJS(onRemove)(key);
-          }
+      animationProgress.value = withTiming(0, animationSettings, finished => {
+        if (finished) {
+          runOnJS(onRemove)(key);
+          // runOnJS(animationSettings.onComplete)(); // TODO - fix callback function
         }
-      );
+      });
     }
   }, [removed]);
 
