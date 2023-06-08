@@ -18,7 +18,7 @@ import {
   AnimatedBoundingRect,
   AnimatedVector,
   AnimatedVectorCoordinates,
-  Dimensions
+  BoundingRect
 } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import {
@@ -40,7 +40,7 @@ import VertexComponent from './vertices/VertexComponent';
 
 export type GraphComponentPrivateProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
-  onRender: (containerDimensions: Dimensions) => void;
+  onRender: (containerBounds: BoundingRect) => void;
   graphEventsContext: GraphEventsContextType<V, E>;
 };
 
@@ -211,10 +211,7 @@ export default function GraphComponent<
     // Call onRender callback on the first render
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
-      onRender({
-        width: memoGraphLayout.width,
-        height: memoGraphLayout.height
-      });
+      onRender(memoGraphLayout.boundingRect);
     }
   }, [memoGraphLayout]);
 
