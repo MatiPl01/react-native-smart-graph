@@ -55,7 +55,7 @@
     "react-native-svg": "^13.9.0",
     "react-test-renderer": "^18.2.0",
     "semantic-release": "^21.0.3",
-    "syncpack": "^10.1.0",
+    "syncpack": "^10.5.1",
     "ts-jest": "^29.1.0",
     "tsc-alias": "^1.8.6",
     "typescript": "^5.1.0"
