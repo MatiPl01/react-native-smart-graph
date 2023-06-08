@@ -28,7 +28,7 @@
     "@shopify/react-native-skia": "^0.1.193",
     "@tsconfig/react-native": "^3.0.2",
     "@types/jest": "^29.5.2",
-    "@types/react": "^18.2.7",
+    "@types/react": "^18.2.9",
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.5.0",
     "babel-plugin-module-resolver": "^5.0.0",
