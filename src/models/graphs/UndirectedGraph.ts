@@ -1,7 +1,11 @@
 import UndirectedEdge from '@/models/edges/UndirectedEdge';
 import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
-import { AnimationSettings } from '@/types/animations';
+import {
+  AnimationSettings,
+  SingleModificationAnimationSettings
+} from '@/types/animations';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
+import { createAnimationsSettingsForSingleModification } from '@/utils/animations';
 
 import Graph from './Graph';
 
@@ -26,11 +30,15 @@ export default class UndirectedGraph<V, E> extends Graph<
 
   override insertVertex(
     { key, value }: VertexData<V>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): UndirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new UndirectedGraphVertex<V, E>(key, value),
-      animationSettings
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        )
     );
   }
 
@@ -59,7 +67,14 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (vertex1key !== vertex2key) {
       vertex2.addEdge(edge);
     }
-    this.insertEdgeObject(edge, animationSettings);
+    this.insertEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge;
   }
@@ -78,7 +93,14 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (!edge.isLoop) {
       edge.vertices[1].removeEdge(key);
     }
-    this.removeEdgeObject(edge, animationSettings);
+    this.removeEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge.value;
   }

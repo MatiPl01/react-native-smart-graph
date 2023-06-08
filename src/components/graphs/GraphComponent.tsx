@@ -292,7 +292,7 @@ export default function GraphComponent<
       animateVerticesToFinalPositions(
         animatedVerticesPositions,
         memoGraphLayout.verticesPositions,
-        animationSettings
+        animationSettings.layout
       );
     },
     [animatedVerticesPositions, memoGraphLayout, animationSettings]
