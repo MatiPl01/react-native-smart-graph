@@ -1,7 +1,6 @@
 {
   "extends": "@tsconfig/react-native/tsconfig.json",
   "compilerOptions": {
-    "types": ["jest", "node"],
     "module": "ESNext",
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

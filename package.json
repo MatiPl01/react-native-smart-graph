@@ -1,7 +1,7 @@
 {
   "name": "react-native-smart-graph",
   "description": "React Native library for creating animated dynamic graphs",
-  "version": "0.0.0-development",
+  "version": "0.0.5-development",
   "author": {
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"
@@ -63,6 +63,19 @@
   "files": [
     "dist"
   ],
+  "homepage": "https://github.com/MatiPl01/react-native-smart-graph#readme",
+  "keywords": [
+    "graph",
+    "react-native",
+    "react-native-animated-dynamic-graph",
+    "react-native-animated-graph",
+    "react-native-animated-smart-graph",
+    "react-native-dynamic-graph",
+    "react-native-graph",
+    "react-native-smart-graph",
+    "smart-graph"
+  ],
+  "license": "MIT",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
