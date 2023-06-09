@@ -26,14 +26,16 @@ export type GraphObserver = {
   graphChanged(animationsSettings: AnimationsSettings): void;
 };
 
+export type OrderedEdges<E, V> = Array<{
+  edge: Edge<E, V>;
+  order: number;
+  edgesCount: number;
+}>;
+
 export interface Graph<V, E> {
   get vertices(): Array<Vertex<V, E>>;
   get edges(): Array<Edge<E, V>>;
-  get orderedEdges(): Array<{
-    edge: Edge<E, V>;
-    order: number;
-    edgesCount: number;
-  }>;
+  get orderedEdges(): OrderedEdges<E, V>;
   get connections(): GraphConnections;
   isDirected(): boolean;
   addObserver(observer: GraphObserver): void;

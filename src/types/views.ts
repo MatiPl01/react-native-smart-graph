@@ -1,1 +1,1 @@
-export type ObjectFit = 'contain' | 'cover' | 'none' | number; // defaults to 'none', number is for scale
+export type ObjectFit = 'contain' | 'cover' | 'none'; // defaults to 'none'

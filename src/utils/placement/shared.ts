@@ -12,6 +12,7 @@ export const calcContainerBoundingRect = (
   minVertexSpacing: number,
   vertexRadius: number
 ): BoundingRect => {
+  'worklet';
   let minX = 0;
   let maxX = 0;
   let minY = 0;
