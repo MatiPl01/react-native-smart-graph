@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import Queue from '@/data/Queue';
+import { Queue } from '@/data';
 import { Vertex } from '@/types/graphs';
 
 export const bfs = <V, E>(

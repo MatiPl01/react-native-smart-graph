@@ -15,3 +15,5 @@ export type UndirectedEdgeData<E> = {
   vertices: string[];
   value: E;
 };
+
+export type EdgeData<E> = DirectedEdgeData<E> | UndirectedEdgeData<E>;

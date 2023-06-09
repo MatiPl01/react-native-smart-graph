@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-  AnimationSettings,
   AnimationsSettings,
   BatchModificationAnimationSettings
 } from '@/types/animations';
+import { SingleModificationAnimationSettings } from '@/types/animations';
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
@@ -83,17 +83,17 @@ export default abstract class Graph<
 
   abstract insertVertex(
     data: VertexData<V>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): GV;
 
   abstract insertEdge(
     data: ED,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): GE;
 
   abstract removeEdge(
     key: string,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): E;
 
   abstract orderEdgesBetweenVertices(

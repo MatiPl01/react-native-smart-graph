@@ -1,33 +1,33 @@
-import LinkedList from './LinkedList';
+import { LinkedList } from '@/data';
 
 export default class Queue<T> {
   protected linkedList: LinkedList<T> = new LinkedList();
 
-  public isEmpty(): boolean {
+  get length(): number {
+    return this.linkedList.length;
+  }
+
+  isEmpty(): boolean {
     return !this.linkedList.head;
   }
 
-  public enqueue(value: T): void {
+  enqueue(value: T): void {
     this.linkedList.append(value);
   }
 
-  public enqueueMany(values: Array<T>): void {
+  enqueueMany(values: Array<T>): void {
     values.forEach(value => this.enqueue(value));
   }
 
-  public dequeue(): T | null {
+  dequeue(): T | null {
     return this.linkedList.popLeft();
   }
 
-  public peek(): T | null {
+  peek(): T | null {
     if (!this.linkedList.head) {
       return null;
     }
 
     return this.linkedList.head.value;
-  }
-
-  public get length(): number {
-    return this.linkedList.length;
   }
 }
