@@ -1,8 +1,7 @@
+import placeVerticesOnCircle from './circle.placement';
 import { Vertex } from '@/types/graphs';
 import { CircularPlacementSettings, GraphLayout } from '@/types/settings';
 import { arrangeGraphComponents } from '@/utils/placement/shared';
-
-import placeVerticesOnCircle from './circle.placement';
 
 const placeVerticesOnCircles = <V, E>(
   components: Array<Array<Vertex<V, E>>>,

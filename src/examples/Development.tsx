@@ -1,154 +1,80 @@
-import { useEffect } from 'react';
+import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
+import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
+import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
+import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
+import PannableScalableView from '@/views/PannableScalableView';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
-import { UndirectedGraph } from '@/models/graphs';
-import PannableScalableView from '@/views/PannableScalableView';
-
-const ADDED_COMPONENTS = [
-  { key: 'B', data: 'B' },
-  {
-    key: 'AB',
-    from: 'A',
-    to: 'B',
-    data: 'AB'
-  },
-  { key: 'C', data: 'C' },
-  {
-    key: 'AC',
-    from: 'A',
-    to: 'C',
-    data: 'AC'
-  },
-  { key: 'D', data: 'D' },
-  { key: 'E', data: 'E' },
-  {
-    key: 'CD',
-    from: 'C',
-    to: 'D',
-    data: 'CD'
-  },
-  {
-    key: 'CE',
-    from: 'C',
-    to: 'E',
-    data: 'CE'
-  },
-  { key: 'F', data: 'F' },
-  { key: 'G', data: 'G' },
-  { key: 'H', data: 'H' },
-  { key: 'I', data: 'I' },
-  { key: 'J', data: 'J' },
-  { key: 'K', data: 'K' },
-  { key: 'L', data: 'L' },
-  {
-    key: 'EK',
-    from: 'E',
-    to: 'K',
-    data: 'EK'
-  },
-  {
-    key: 'EL',
-    from: 'E',
-    to: 'L',
-    data: 'EL'
-  },
-  {
-    key: 'CF',
-    from: 'C',
-    to: 'F',
-    data: 'CF'
-  },
-  { key: 'M', data: 'M' },
-  { key: 'N', data: 'N' },
-  { key: 'O', data: 'O' },
-  {
-    key: 'CG',
-    from: 'C',
-    to: 'G',
-    data: 'CG'
-  },
-  {
-    key: 'CH',
-    from: 'C',
-    to: 'H',
-    data: 'CH'
-  },
-  {
-    key: 'CI',
-    from: 'C',
-    to: 'I',
-    data: 'CI'
-  },
-  {
-    key: 'CJ',
-    from: 'C',
-    to: 'J',
-    data: 'CJ'
-  }
-];
-
-let idx = 0;
-let mode = 0;
-
 export default function App() {
-  const graph = new UndirectedGraph({
-    vertices: [{ key: 'A', data: 'A' }]
+  const graph = new DirectedGraph({
+    vertices: [
+      { key: 'A', data: 'A' },
+      { key: 'B', data: 'B' },
+      { key: 'C', data: 'C' },
+      { key: 'D', data: 'D' },
+      { key: 'E', data: 'E' },
+      { key: 'F', data: 'F' },
+      { key: 'G', data: 'G' },
+      { key: 'H', data: 'H' },
+      { key: 'I', data: 'I' },
+      { key: 'J', data: 'J' },
+      { key: 'L', data: 'L' },
+      { key: 'M', data: 'M' },
+      { key: 'N', data: 'N' },
+      { key: 'O', data: 'O' },
+      { key: 'P', data: 'P' },
+      { key: 'Q', data: 'Q' },
+      { key: 'R', data: 'R' },
+      { key: 'S', data: 'S' },
+      { key: 'T', data: 'T' },
+      { key: 'U', data: 'U' },
+      { key: 'V', data: 'V' },
+      { key: 'W', data: 'W' },
+      { key: 'X', data: 'X' },
+      { key: 'Y', data: 'Y' },
+      { key: 'Z', data: 'Z' },
+      { key: 'AA', data: 'AA' },
+      { key: 'AB', data: 'AB' },
+      { key: 'AC', data: 'AC' },
+      { key: 'AD', data: 'AD' },
+      { key: 'AE', data: 'AE' },
+      { key: 'AF', data: 'AF' },
+      { key: 'AG', data: 'AG' },
+      { key: 'AH', data: 'AH' },
+      { key: 'AI', data: 'AI' },
+      { key: 'AJ', data: 'AJ' },
+      { key: 'AK', data: 'AK' },
+      { key: 'AL', data: 'AL' },
+      { key: 'AM', data: 'AM' },
+      { key: 'AN', data: 'AN' },
+      { key: 'AO', data: 'AO' },
+      { key: 'AP', data: 'AP' }
+    ],
+    edges: [
+      { key: 'AB', from: 'A', to: 'B', data: 'AB' },
+      { key: 'AC', from: 'A', to: 'C', data: 'AC' },
+      { key: 'CF', from: 'C', to: 'F', data: 'CF' },
+      { key: 'CE', from: 'C', to: 'E', data: 'CE' },
+      { key: 'CD', from: 'C', to: 'D', data: 'CD' },
+      // { key: 'DH', from: 'D', to: 'H', data: 'DH' },
+      { key: 'EL', from: 'E', to: 'L', data: 'EL' },
+      { key: 'FG', from: 'F', to: 'G', data: 'FG' },
+      { key: 'LJ', from: 'L', to: 'J', data: 'LJ' }
+    ]
   });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
-        mode = mode === 0 ? 1 : 0;
-        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
-      }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const component = ADDED_COMPONENTS[idx]!;
-
-      try {
-        if (mode === 0) {
-          if (component.from && component.to) {
-            graph.insertEdge(
-              component.key,
-              component.data,
-              component.from,
-              component.to
-            );
-          } else {
-            graph.insertVertex(component.key, component.data);
-          }
-          idx++;
-        } else {
-          if (component.from && component.to) {
-            graph.removeEdge(component.key);
-          } else {
-            graph.removeVertex(component.key);
-          }
-          idx--;
-        }
-      } catch (e) {
-        clearInterval(interval);
-        console.error(e);
-        return;
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
           <PannableScalableView objectFit='contain' controls>
-            <UndirectedGraphComponent
+            <DirectedGraphComponent
               graph={graph}
               settings={{
                 placement: {
                   strategy: 'orbits',
-                  minVertexSpacing: 100
+                  minVertexSpacing: 120
                 },
                 components: {
                   edge: {
