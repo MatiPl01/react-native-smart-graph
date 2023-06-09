@@ -9,8 +9,8 @@ import {
 
 export const calcContainerBoundingRect = (
   placedVertices: PlacedVerticesPositions,
-  minVertexSpacing: number,
-  vertexRadius: number
+  minVertexSpacing = 0,
+  vertexRadius = 0
 ): BoundingRect => {
   'worklet';
   let minX = 0;
@@ -64,14 +64,23 @@ export const arrangeGraphComponents = (
   const packed = potpack(preparedComponents);
   // Translate graph components to correct positions on the screen
   const verticesPositions = Object.fromEntries(
-    preparedComponents.flatMap(({ verticesPositions: positions, x, y, w, h }) =>
-      Object.entries(positions).map(([key, { x: vx, y: vy }]) => [
-        key,
-        {
-          x: vx + x + (w - packed.w) / 2,
-          y: vy + y + (h - packed.h) / 2
-        }
-      ])
+    preparedComponents.flatMap(
+      ({ verticesPositions: positions, x, y, w, h }) => {
+        const { left, right, top, bottom } =
+          calcContainerBoundingRect(positions);
+
+        // calculate the shift of graph center relative to component center
+        const widthShift = w / 2 - (left + right) / 2;
+        const heightShift = h / 2 - (top + bottom) / 2;
+
+        return Object.entries(positions).map(([key, { x: vx, y: vy }]) => [
+          key,
+          {
+            x: vx + x - packed.w / 2 + widthShift,
+            y: vy + y - packed.h / 2 + heightShift
+          }
+        ]);
+      }
     )
   );
 

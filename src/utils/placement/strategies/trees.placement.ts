@@ -38,7 +38,6 @@ const placeVerticesOnTrees = <V, E>(
       vertexRadius
     );
     // Calculate container dimensions
-
     componentsLayouts.push({
       verticesPositions,
       boundingRect: calcContainerBoundingRect(

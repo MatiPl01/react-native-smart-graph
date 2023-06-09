@@ -1,91 +1,68 @@
-import { useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
 import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
-import { DirectedGraphComponent } from '..';
-
 export default function App() {
   const graph = new DirectedGraph({
-    vertices: [{ key: 'A', value: 'A' }]
-  });
-
-  useEffect(() => {
-    graph.insertVertex(
+    vertices: [
+      { key: 'A', value: 'A' },
       { key: 'B', value: 'B' },
-      {
-        duration: 400,
-        onComplete: () => {
-          graph.insertEdge(
-            { key: 'AB', value: 'AB', from: 'A', to: 'B' },
-            {
-              duration: 100
-            }
-          );
-          graph.insertVertex(
-            { key: 'C', value: 'C' },
-            {
-              duration: 800,
-              onComplete: () => {
-                graph.insertEdge(
-                  {
-                    key: 'BC',
-                    value: 'BC',
-                    from: 'B',
-                    to: 'C'
-                  },
-                  {
-                    duration: 4000
-                  }
-                );
-                graph.insertVertex(
-                  { key: 'D', value: 'D' },
-                  {
-                    duration: 1200,
-                    onComplete: () => {
-                      graph.insertEdge(
-                        {
-                          key: 'CD',
-                          value: 'CD',
-                          from: 'C',
-                          to: 'D'
-                        },
-                        {
-                          duration: 3000
-                        }
-                      );
-                      graph.insertVertex(
-                        { key: 'E', value: 'E' },
-                        {
-                          duration: 1600,
-                          onComplete: () => {
-                            graph.insertEdge(
-                              {
-                                key: 'DE',
-                                value: 'DE',
-                                from: 'D',
-                                to: 'E'
-                              },
-                              {
-                                duration: 2000
-                              }
-                            );
-                          }
-                        }
-                      );
-                    }
-                  }
-                );
-              }
-            }
-          );
-        }
-      }
-    );
-  }, []);
+      { key: 'C', value: 'C' },
+      { key: 'D', value: 'D' },
+      { key: 'E', value: 'E' },
+      { key: 'F', value: 'F' },
+      { key: 'G', value: 'G' },
+      { key: 'H', value: 'H' },
+      { key: 'I', value: 'I' },
+      { key: 'J', value: 'J' },
+      { key: 'L', value: 'L' },
+      { key: 'M', value: 'M' },
+      { key: 'N', value: 'N' },
+      { key: 'O', value: 'O' },
+      { key: 'P', value: 'P' },
+      { key: 'Q', value: 'Q' },
+      { key: 'R', value: 'R' },
+      { key: 'S', value: 'S' },
+      { key: 'T', value: 'T' },
+      { key: 'U', value: 'U' },
+      { key: 'V', value: 'V' },
+      { key: 'W', value: 'W' },
+      { key: 'X', value: 'X' },
+      { key: 'Y', value: 'Y' },
+      { key: 'Z', value: 'Z' },
+      { key: 'AA', value: 'AA' },
+      { key: 'AB', value: 'AB' },
+      { key: 'AC', value: 'AC' },
+      { key: 'AD', value: 'AD' },
+      { key: 'AE', value: 'AE' },
+      { key: 'AF', value: 'AF' },
+      { key: 'AG', value: 'AG' },
+      { key: 'AH', value: 'AH' },
+      { key: 'AI', value: 'AI' },
+      { key: 'AJ', value: 'AJ' },
+      { key: 'AK', value: 'AK' },
+      { key: 'AL', value: 'AL' },
+      { key: 'AM', value: 'AM' },
+      { key: 'AN', value: 'AN' },
+      { key: 'AO', value: 'AO' },
+      { key: 'AP', value: 'AP' }
+    ],
+    edges: [
+      { key: 'AB', from: 'A', to: 'B', value: 'AB' },
+      { key: 'AC', from: 'A', to: 'C', value: 'AC' },
+      { key: 'CF', from: 'C', to: 'F', value: 'CF' },
+      { key: 'CE', from: 'C', to: 'E', value: 'CE' },
+      { key: 'CD', from: 'C', to: 'D', value: 'CD' },
+      // { key: 'DH', from: 'D', to: 'H', value: 'DH' },
+      { key: 'EL', from: 'E', to: 'L', value: 'EL' },
+      { key: 'FG', from: 'F', to: 'G', value: 'FG' },
+      { key: 'LJ', from: 'L', to: 'J', value: 'LJ' }
+    ]
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,8 +73,8 @@ export default function App() {
               graph={graph}
               settings={{
                 placement: {
-                  strategy: 'circle',
-                  minVertexSpacing: 100
+                  strategy: 'orbits',
+                  minVertexSpacing: 120
                 },
                 components: {
                   edge: {
