@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo } from 'react';
+import { memo, useEffect } from 'react';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 
 import {
@@ -27,22 +27,6 @@ function EdgeComponent<E, V>({
   labelRenderer,
   ...restProps
 }: EdgeComponentProps<E, V>) {
-  // RENDERERS
-  const edgeRenderers = useMemo(
-    () =>
-      arrowRenderer
-        ? {
-            edge: edgeRenderer,
-            arrow: arrowRenderer,
-            label: labelRenderer
-          }
-        : {
-            edge: edgeRenderer,
-            label: labelRenderer
-          },
-    [edgeRenderer, arrowRenderer, labelRenderer]
-  );
-
   // ANIMATION
   // Edge render animation progress
   const animationProgress = useSharedValue(0);
@@ -79,7 +63,16 @@ function EdgeComponent<E, V>({
     animationProgress,
     animatedOrder,
     animatedEdgesCount,
-    renderers: edgeRenderers
+    renderers: arrowRenderer
+      ? {
+          edge: edgeRenderer,
+          arrow: arrowRenderer,
+          label: labelRenderer
+        }
+      : {
+          edge: edgeRenderer,
+          label: labelRenderer
+        }
   };
 
   switch (sharedProps.settings.type) {
