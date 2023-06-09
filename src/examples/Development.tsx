@@ -17,42 +17,62 @@ export default function App() {
     graph.insertVertex(
       { key: 'B', value: 'B' },
       {
-        duration: 200,
+        duration: 400,
         onComplete: () => {
-          graph.insertEdge({ key: 'AB', value: 'AB', from: 'A', to: 'B' });
+          graph.insertEdge(
+            { key: 'AB', value: 'AB', from: 'A', to: 'B' },
+            {
+              duration: 100
+            }
+          );
           graph.insertVertex(
             { key: 'C', value: 'C' },
             {
-              duration: 400,
+              duration: 800,
               onComplete: () => {
-                graph.insertEdge({
-                  key: 'BC',
-                  value: 'BC',
-                  from: 'B',
-                  to: 'C'
-                });
+                graph.insertEdge(
+                  {
+                    key: 'BC',
+                    value: 'BC',
+                    from: 'B',
+                    to: 'C'
+                  },
+                  {
+                    duration: 4000
+                  }
+                );
                 graph.insertVertex(
                   { key: 'D', value: 'D' },
                   {
-                    duration: 600,
+                    duration: 1200,
                     onComplete: () => {
-                      graph.insertEdge({
-                        key: 'CD',
-                        value: 'CD',
-                        from: 'C',
-                        to: 'D'
-                      });
+                      graph.insertEdge(
+                        {
+                          key: 'CD',
+                          value: 'CD',
+                          from: 'C',
+                          to: 'D'
+                        },
+                        {
+                          duration: 3000
+                        }
+                      );
                       graph.insertVertex(
                         { key: 'E', value: 'E' },
                         {
-                          duration: 800,
+                          duration: 1600,
                           onComplete: () => {
-                            graph.insertEdge({
-                              key: 'DE',
-                              value: 'DE',
-                              from: 'D',
-                              to: 'E'
-                            });
+                            graph.insertEdge(
+                              {
+                                key: 'DE',
+                                value: 'DE',
+                                from: 'D',
+                                to: 'E'
+                              },
+                              {
+                                duration: 2000
+                              }
+                            );
                           }
                         }
                       );

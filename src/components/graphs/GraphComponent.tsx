@@ -2,6 +2,7 @@ import { Group, Rect, Vector } from '@shopify/react-native-skia';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
+import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
 import {
   ARROW_COMPONENT_SETTINGS,
   CURVED_EDGE_COMPONENT_SETTINGS,
@@ -12,6 +13,10 @@ import {
 import { RANDOM_PLACEMENT_SETTING } from '@/constants/placement';
 import { GraphEventsContextType } from '@/context/graphEvents';
 import { useGraphObserver } from '@/hooks';
+import {
+  AnimationSettingsWithDefaults,
+  AnimationsSettings
+} from '@/types/animations';
 import { EdgeComponentProps } from '@/types/components';
 import { Edge, Graph, Vertex } from '@/types/graphs';
 import {
@@ -28,6 +33,7 @@ import {
   GraphSettingsWithDefaults,
   RandomPlacementSettings
 } from '@/types/settings';
+import { GraphAnimationsSettingsWithDefaults } from '@/types/settings/animations';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
@@ -70,8 +76,7 @@ export default function GraphComponent<
   graphEventsContext
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
-  const [{ vertices, orderedEdges, animationSettings }] =
-    useGraphObserver(graph);
+  const [graphData] = useGraphObserver(graph);
 
   // HELPER REFS
   const isFirstRenderRef = useRef(true);
@@ -84,6 +89,7 @@ export default function GraphComponent<
       {
         vertex: Vertex<V, E>;
         targetPlacementPosition: Vector;
+        animationSettings: AnimationSettingsWithDefaults;
         removed: boolean;
       }
     >
@@ -96,6 +102,7 @@ export default function GraphComponent<
         edge: Edge<E, V>;
         order: number;
         edgesCount: number;
+        animationSettings: AnimationSettingsWithDefaults;
         removed: boolean;
       }
     >
@@ -143,6 +150,20 @@ export default function GraphComponent<
             ...settings?.components?.edge?.label
           }
         }
+      },
+      animations: {
+        layout: {
+          ...DEFAULT_ANIMATION_SETTINGS,
+          ...settings?.animations?.layout
+        },
+        vertices: {
+          ...DEFAULT_ANIMATION_SETTINGS,
+          ...settings?.animations?.vertices
+        },
+        edges: {
+          ...DEFAULT_ANIMATION_SETTINGS,
+          ...settings?.animations?.edges
+        }
       }
     };
 
@@ -166,14 +187,24 @@ export default function GraphComponent<
     [graph, settings, renderers]
   );
 
-  const memoGraphLayout = useMemo<GraphLayout>(
-    () =>
-      placeVertices(
+  const memoGraphData = useMemo<{
+    vertices: Array<Vertex<V, E>>;
+    edges: Array<Edge<E, V>>;
+    layout: GraphLayout;
+    animations: AnimationsSettings;
+    defaultAnimations: GraphAnimationsSettingsWithDefaults;
+  }>(
+    () => ({
+      ...graphData,
+      layout: placeVertices(
         graph,
         memoSettings.components.vertex.radius,
         memoSettings.placement
       ),
-    [vertices, orderedEdges]
+      animations: graphData.animationsSettings,
+      defaultAnimations: memoSettings.animations
+    }),
+    [graphData, memoSettings]
   );
 
   useEffect(() => {
@@ -184,15 +215,19 @@ export default function GraphComponent<
     // UPDATE VERTICES DATA
     const newVerticesData = { ...verticesData };
     // Add new vertices to vertex data
-    vertices.forEach(vertex => {
+    graphData.vertices.forEach(vertex => {
       const targetPlacementPosition =
-        memoGraphLayout.verticesPositions[vertex.key];
+        memoGraphData.layout.verticesPositions[vertex.key];
       if (
         targetPlacementPosition &&
         (!newVerticesData[vertex.key] || newVerticesData[vertex.key]?.removed)
       ) {
         newVerticesData[vertex.key] = {
           vertex,
+          animationSettings: {
+            ...memoGraphData.defaultAnimations.vertices,
+            ...memoGraphData.animations.vertices[vertex.key]
+          },
           targetPlacementPosition,
           removed: false
         };
@@ -201,25 +236,32 @@ export default function GraphComponent<
     // Mark vertices as removed if there were removed from the graph model
     Object.keys(newVerticesData).forEach(key => {
       if (!graph.hasVertex(key)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newVerticesData[key]!.removed = true;
+        newVerticesData[key] = {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          ...newVerticesData[key]!,
+          removed: true,
+          animationSettings: {
+            ...memoGraphData.defaultAnimations.vertices,
+            ...memoGraphData.animations.vertices[key]
+          }
+        };
       }
     });
-    // Set new vertices data
+    // Set new vertices graphData
     setVerticesData(newVerticesData);
 
     // Call onRender callback on the first render
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
-      onRender(memoGraphLayout.boundingRect);
+      onRender(memoGraphData.layout.boundingRect);
     }
-  }, [memoGraphLayout]);
+  }, [memoGraphData]);
 
   useEffect(() => {
     // UPDATE EDGES DATA
     // Add new edges to edges data
     const newEdgesData = { ...edgesData };
-    orderedEdges.forEach(({ edge, order, edgesCount }) => {
+    graphData.orderedEdges.forEach(({ edge, order, edgesCount }) => {
       if (
         !newEdgesData[edge.key] ||
         newEdgesData[edge.key]?.removed ||
@@ -229,20 +271,31 @@ export default function GraphComponent<
           edge,
           order,
           edgesCount,
-          removed: false
+          removed: false,
+          animationSettings: {
+            ...memoGraphData.defaultAnimations.edges,
+            ...memoGraphData.animations.edges[edge.key]
+          }
         };
       }
     });
     // Mark edges as removed if there were removed from the graph model
     Object.keys(newEdgesData).forEach(key => {
       if (!graph.hasEdge(key)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newEdgesData[key]!.removed = true;
+        newEdgesData[key] = {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          ...newEdgesData[key]!,
+          removed: true,
+          animationSettings: {
+            ...memoGraphData.defaultAnimations.edges,
+            ...memoGraphData.animations.edges[key]
+          }
+        };
       }
     });
-    // Set the new edges data
+    // Set the new edges graphData
     setEdgesData(newEdgesData);
-  }, [orderedEdges]);
+  }, [memoGraphData]);
 
   useEffect(() => {
     graphEventsContext.setAnimatedVerticesPositions(animatedVerticesPositions);
@@ -291,11 +344,14 @@ export default function GraphComponent<
     () => {
       animateVerticesToFinalPositions(
         animatedVerticesPositions,
-        memoGraphLayout.verticesPositions,
-        animationSettings
+        memoGraphData.layout.verticesPositions,
+        {
+          ...memoGraphData.defaultAnimations.layout,
+          ...memoGraphData.animations.layout
+        }
       );
     },
-    [animatedVerticesPositions, memoGraphLayout, animationSettings]
+    [animatedVerticesPositions, memoGraphData]
   );
 
   const handleVertexRender = useCallback(
@@ -318,7 +374,7 @@ export default function GraphComponent<
   );
 
   const handleVertexRemove = useCallback((key: string) => {
-    // Remove vertex from the vertices data
+    // Remove vertex from the vertices graphData
     setVerticesData(prev =>
       Object.fromEntries(
         Object.entries(prev).filter(([vertexKey]) => vertexKey !== key)
@@ -333,7 +389,7 @@ export default function GraphComponent<
   }, []);
 
   const handleEdgeRemove = useCallback((key: string) => {
-    // Remove edge from the edges data
+    // Remove edge from the edges graphData
     setEdgesData(prev =>
       Object.fromEntries(
         Object.entries(prev).filter(([edgeKey]) => edgeKey !== key)
@@ -343,7 +399,7 @@ export default function GraphComponent<
 
   const renderEdges = useCallback(() => {
     return Object.values(edgesData).map(
-      ({ edge, order, edgesCount, removed }) => {
+      ({ edge, order, edgesCount, animationSettings, removed }) => {
         const [v1, v2] = edge.vertices;
         const v1Position = animatedVerticesPositions[v1.key];
         const v2Position = animatedVerticesPositions[v2.key];
@@ -366,6 +422,7 @@ export default function GraphComponent<
               settings: memoSettings.components.edge,
               onRemove: handleEdgeRemove,
               onLabelRender: handleEdgeLabelRender,
+              animationSettings,
               removed
             } as EdgeComponentProps<E, V>)}
           />
@@ -378,17 +435,20 @@ export default function GraphComponent<
 
   const renderVertices = useCallback(
     () =>
-      Object.values(verticesData).map(({ vertex, removed }) => (
-        <VertexComponent
-          key={vertex.key}
-          vertex={vertex}
-          settings={memoSettings.components.vertex}
-          renderer={memoRenderers.vertex}
-          onRender={handleVertexRender}
-          onRemove={handleVertexRemove}
-          removed={removed}
-        />
-      )),
+      Object.values(verticesData).map(
+        ({ vertex, animationSettings, removed }) => (
+          <VertexComponent
+            key={vertex.key}
+            vertex={vertex}
+            settings={memoSettings.components.vertex}
+            renderer={memoRenderers.vertex}
+            onRender={handleVertexRender}
+            onRemove={handleVertexRemove}
+            animationSettings={animationSettings}
+            removed={removed}
+          />
+        )
+      ),
     // Update vertices after graph layout was recalculated
     [verticesData]
   );
