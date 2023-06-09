@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/types"
+  },
+  "exclude": ["**/__tests__", "**/__mocks__", "**/*.test.ts", "**/*.spec.ts"]
+}

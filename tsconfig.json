@@ -3,7 +3,6 @@
   "compilerOptions": {
     "types": ["jest", "node"],
     "module": "ESNext",
-    "baseUrl": "./",
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "noFallthroughCasesInSwitch": true,
@@ -16,9 +15,11 @@
     "removeComments": true,
     "checkJs": true,
     "forceConsistentCasingInFileNames": true,
+    "rootDir": "./src",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./*"]
     }
   },
-  "include": ["./src", "index.js"]
+  "include": ["./src"]
 }

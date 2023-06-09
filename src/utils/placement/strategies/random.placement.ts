@@ -11,6 +11,7 @@ import {
   RandomPlacementSettings
 } from '@/types/settings';
 import { zipArrays } from '@/utils/arrays';
+import { calcContainerBoundingRect } from '@/utils/placement/shared';
 import random from '@/utils/random';
 
 const placeVerticesRandomly = <V, E>(
@@ -29,9 +30,9 @@ const placeVerticesRandomly = <V, E>(
 
   const props: CalcVerticesPositionsProps<V, E> = {
     vertices,
-    density: settings.density || RANDOM_PLACEMENT_SETTING.density,
+    density: settings.density ?? RANDOM_PLACEMENT_SETTING.density,
     minVertexSpacing:
-      settings.minVertexSpacing || SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
     vertexRadius
   };
 
@@ -68,19 +69,20 @@ const calcVerticesGridPositions = <V, E>(
       });
     }
   }
-
-  const containerSize =
-    2 * vertexRadius +
-    (minVertexSpacing + 2 * vertexRadius) * (maxPointsInLine - 1);
   const selectedPositions = random.sample(availablePositions, verticesCount);
 
+  const verticesPositions = vertices.reduce((acc, { key }, idx) => {
+    acc[key] = selectedPositions[idx] as Vector;
+    return acc;
+  }, {} as PlacedVerticesPositions);
+
   return {
-    width: containerSize,
-    height: containerSize,
-    verticesPositions: vertices.reduce((acc, { key }, idx) => {
-      acc[key] = selectedPositions[idx] as Vector;
-      return acc;
-    }, {} as PlacedVerticesPositions)
+    verticesPositions,
+    boundingRect: calcContainerBoundingRect(
+      verticesPositions,
+      minVertexSpacing,
+      vertexRadius
+    )
   };
 };
 
@@ -143,16 +145,21 @@ const calcVerticesTrianglesPositions = <V, E>(
     random.sample(shiftedAvailablePositions, verticesCount)
   );
 
+  const verticesPositions = verticesAndPositions.reduce(
+    (acc, [vertex, position]) => {
+      acc[vertex.key] = position;
+      return acc;
+    },
+    {} as PlacedVerticesPositions
+  );
+
   return {
-    width: maxX + vertexRadius,
-    height: maxY + vertexRadius,
-    verticesPositions: verticesAndPositions.reduce(
-      (acc, [vertex, position]) => {
-        acc[vertex.key] = position;
-        return acc;
-      },
-      {} as PlacedVerticesPositions
-    )
+    boundingRect: calcContainerBoundingRect(
+      verticesPositions,
+      minVertexSpacing,
+      vertexRadius
+    ),
+    verticesPositions
   };
 };
 
@@ -174,9 +181,12 @@ const calcVerticesRandomPositions = <V, E>(
   }, {} as PlacedVerticesPositions);
 
   return {
-    width,
-    height,
-    verticesPositions
+    verticesPositions,
+    boundingRect: calcContainerBoundingRect(
+      verticesPositions,
+      SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      vertexRadius
+    )
   };
 };
 

@@ -1,4 +1,9 @@
-// TODO - add documentation to all interfaces
+import {
+  AnimationsSettings,
+  BatchModificationAnimationSettings,
+  SingleModificationAnimationSettings
+} from '@/types/animations';
+import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 
 export interface Vertex<V, E> {
   get key(): string;
@@ -18,17 +23,19 @@ export interface Edge<E, V> {
 export type GraphConnections = Record<string, Array<string>>;
 
 export type GraphObserver = {
-  graphChanged(): void;
+  graphChanged(animationsSettings: AnimationsSettings): void;
 };
+
+export type OrderedEdges<E, V> = Array<{
+  edge: Edge<E, V>;
+  order: number;
+  edgesCount: number;
+}>;
 
 export interface Graph<V, E> {
   get vertices(): Array<Vertex<V, E>>;
   get edges(): Array<Edge<E, V>>;
-  get orderedEdges(): Array<{
-    edge: Edge<E, V>;
-    order: number;
-    edgesCount: number;
-  }>;
+  get orderedEdges(): OrderedEdges<E, V>;
   get connections(): GraphConnections;
   isDirected(): boolean;
   addObserver(observer: GraphObserver): void;
@@ -38,15 +45,42 @@ export interface Graph<V, E> {
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<E, V>>;
   getVertex(key: string): Vertex<V, E> | null;
   getEdge(key: string): Edge<E, V> | null;
-  insertVertex(key: string, value: V, notifyObservers?: boolean): Vertex<V, E>;
+  insertVertex(
+    data: VertexData<V>,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): Vertex<V, E>;
   insertEdge(
-    key: string,
-    value: E,
-    vertex1key: string,
-    vertex2key: string,
-    notifyObservers?: boolean
+    data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
+    animationSettings?: SingleModificationAnimationSettings | null
   ): Edge<E, V>;
-  removeVertex(key: string, notifyObservers?: boolean): V;
-  removeEdge(key: string, notifyObservers?: boolean): E;
-  clear(notifyObservers?: boolean): void;
+  removeVertex(
+    key: string,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): V;
+  removeEdge(
+    key: string,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): E;
+  insertBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
+  removeBatch(
+    data: {
+      vertices: Array<string>;
+      edges: Array<string>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
+  replaceBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
+  clear(animationSettings?: BatchModificationAnimationSettings | null): void;
 }

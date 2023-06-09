@@ -1,5 +1,10 @@
+/**
+ * This file is the main entry point for the local development server.
+ *
+ * It is used to test the library.
+ */
 import { AppRegistry } from 'react-native';
-import App from 'src/App';
+import App from '@/examples/Development';
 
 import { name as appName } from './app.json';
 

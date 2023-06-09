@@ -1,11 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 
-export const parabola = (
-  x: number,
-  a: number,
-  p: number,
-  q: number
-): number => {
+const parabola = (x: number, a: number, p: number, q: number): number => {
   'worklet';
   return a * (x - p) ** 2 + q;
 };

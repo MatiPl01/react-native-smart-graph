@@ -1,12 +1,8 @@
-import { styled } from 'nativewind';
-import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
-
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faArrowsToCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-
-const StyledFontAwesomeIcon = styled(FontAwesomeIcon);
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 type ViewControlsProps = {
   onReset: () => void;
@@ -14,14 +10,28 @@ type ViewControlsProps = {
 
 export default function ViewControls({ onReset }: ViewControlsProps) {
   return (
-    <View className='absolute top-2 right-2 p-2 rounded-lg bg-black/[.5]'>
+    <View style={styles.container}>
       <TouchableOpacity onPress={onReset}>
-        <StyledFontAwesomeIcon
-          className='text-white'
+        <FontAwesomeIcon
+          style={styles.icon}
           icon={faArrowsToCircle as IconProp}
-          size={24}
+          size={32}
         />
       </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0, 0, 0, .5)'
+  },
+  icon: {
+    color: 'white'
+  }
+});

@@ -5,8 +5,7 @@ import {
   GraphLayout,
   PlacedVerticesPositions
 } from '@/types/settings';
-
-import { defaultSortComparator } from '../shared';
+import { defaultSortComparator } from '@/utils/placement/shared';
 
 const placeVerticesOnCircle = <V, E>(
   vertices: Array<Vertex<V, E>>,
@@ -22,16 +21,19 @@ const placeVerticesOnCircle = <V, E>(
     : vertices;
 
   const initialAngle = -Math.PI / 2;
-  const { radius, angleStep, width, height } = getLayout(
+  const { radius, angleStep, containerRadius } = getLayout(
     updatedVertices.length,
     vertexRadius,
     minVertexSpacing
   );
-  const padding = minVertexSpacing;
 
   return {
-    width: width + padding,
-    height: height + padding,
+    boundingRect: {
+      top: -containerRadius,
+      left: -containerRadius,
+      right: containerRadius,
+      bottom: containerRadius
+    },
     verticesPositions: updatedVertices.reduce((acc, { key }, idx) => {
       acc[key] = {
         x: radius * Math.cos(initialAngle + angleStep * idx),
@@ -58,13 +60,12 @@ const getLayout = (
       (2 * vertexRadius + minVertexSpacing) / (2 * Math.sin(angleStep / 2));
   }
 
-  const containerSize = 2 * radius + 2 * vertexRadius;
+  const containerRadius = radius + vertexRadius + minVertexSpacing / 2;
 
   return {
     angleStep,
     radius,
-    width: containerSize,
-    height: containerSize
+    containerRadius
   };
 };
 

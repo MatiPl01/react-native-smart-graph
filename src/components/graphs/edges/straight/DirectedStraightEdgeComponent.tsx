@@ -5,6 +5,8 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
+import EdgeArrowComponent from '@/components/graphs/arrows/EdgeArrowComponent';
+import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import {
   animatedVectorCoordinatesToVector,
@@ -13,9 +15,6 @@ import {
   multiplyVector,
   translateAlongVector
 } from '@/utils/vectors';
-
-import EdgeArrowComponent from '../../arrows/EdgeArrowComponent';
-import EdgeLabelComponent from '../../labels/EdgeLabelComponent';
 
 function DirectedStraightEdgeComponent<E, V>({
   v1Position,

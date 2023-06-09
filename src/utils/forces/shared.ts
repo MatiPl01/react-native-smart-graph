@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import 'react-native-reanimated';
-import { withSpring, withTiming } from 'react-native-reanimated';
 
 import { Vector } from '@shopify/react-native-skia';
 
