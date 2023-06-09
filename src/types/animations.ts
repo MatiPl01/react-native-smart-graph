@@ -37,9 +37,3 @@ export type AnimationSettingsWithDefaults = DeepRequired<
   AnimationSettings,
   ['duration' | 'easing']
 >;
-
-export type AnimationsSettingsWithDefaults = {
-  layout: AnimationSettingsWithDefaults;
-  vertices: Record<string, AnimationSettingsWithDefaults>;
-  edges: Record<string, AnimationSettingsWithDefaults>;
-};

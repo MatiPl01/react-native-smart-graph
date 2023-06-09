@@ -31,26 +31,12 @@ export const useGraphObserver = <V, E>(
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
   const observerRef = useRef<GraphObserver>({
-    graphChanged(animationSettings) {
+    graphChanged(animationsSettings) {
       setState({
         vertices: graph.vertices,
         edges: graph.edges,
         orderedEdges: graph.orderedEdges,
-        animationsSettings: {
-          layout: animationSettings.layout,
-          vertices: Object.fromEntries(
-            graph.vertices.map(vertex => [
-              vertex.key,
-              animationSettings.vertices?.[vertex.key]
-            ])
-          ),
-          edges: Object.fromEntries(
-            graph.edges.map(edge => [
-              edge.key,
-              animationSettings.edges?.[edge.key]
-            ])
-          )
-        }
+        animationsSettings
       });
     }
   });

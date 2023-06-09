@@ -7,6 +7,7 @@ import {
   DirectedStraightEdgeRenderers,
   EdgeArrowRenderFunction,
   EdgeLabelRendererFunction,
+  EdgeRenderFunction,
   UndirectedStraightEdgeRenderers
 } from '@/types/renderer';
 import {
@@ -19,8 +20,6 @@ import {
   EdgeLabelSettings,
   StraightEdgeSettings
 } from '@/types/settings';
-
-import { EdgeRenderFunction } from '../../../dist/types/types/renderer/index';
 
 type SharedEdgeComponentProps = {
   v1Position: AnimatedVectorCoordinates;

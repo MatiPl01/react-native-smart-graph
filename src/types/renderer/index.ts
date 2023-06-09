@@ -8,7 +8,7 @@ export * from './edges/shared';
 export * from './edges/straight';
 export * from './shared';
 
-type EdgeRenderFunction<E> =
+export type EdgeRenderFunction<E> =
   | StraightEdgeRenderFunction<E>
   | CurvedEdgeRenderFunction<E>;
 
