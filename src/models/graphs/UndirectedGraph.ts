@@ -1,6 +1,11 @@
 import UndirectedEdge from '@/models/edges/UndirectedEdge';
 import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
+import {
+  AnimationSettings,
+  SingleModificationAnimationSettings
+} from '@/types/animations';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
+import { createAnimationsSettingsForSingleModification } from '@/utils/animations';
 
 import Graph from './Graph';
 
@@ -24,23 +29,27 @@ export default class UndirectedGraph<V, E> extends Graph<
   }
 
   override insertVertex(
-    key: string,
-    value: V,
-    notifyObservers = true
+    { key, value }: VertexData<V>,
+    animationSettings?: SingleModificationAnimationSettings | null
   ): UndirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new UndirectedGraphVertex<V, E>(key, value),
-      notifyObservers
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        )
     );
   }
 
   override insertEdge(
-    key: string,
-    value: E,
-    vertex1key: string,
-    vertex2key: string,
-    notifyObservers = true
+    { key, value, vertices: [vertex1key, vertex2key] }: UndirectedEdgeData<E>,
+    animationSettings?: AnimationSettings | null
   ): UndirectedEdge<E, V> {
+    if (!vertex1key || !vertex2key) {
+      throw new Error(`Edge ${key} must have two vertices`);
+    }
+
     this.checkSelfLoop(vertex1key, vertex2key);
     const vertex1 = this.getVertex(vertex1key);
     const vertex2 = this.getVertex(vertex2key);
@@ -58,12 +67,22 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (vertex1key !== vertex2key) {
       vertex2.addEdge(edge);
     }
-    this.insertEdgeObject(edge, notifyObservers);
+    this.insertEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge;
   }
 
-  override removeEdge(key: string, notifyObservers = true): E {
+  override removeEdge(
+    key: string,
+    animationSettings?: AnimationSettings | null
+  ): E {
     const edge = this.getEdge(key);
 
     if (!edge) {
@@ -74,7 +93,14 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (!edge.isLoop) {
       edge.vertices[1].removeEdge(key);
     }
-    this.removeEdgeObject(edge, notifyObservers);
+    this.removeEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge.value;
   }
@@ -96,13 +122,13 @@ export default class UndirectedGraph<V, E> extends Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<UndirectedEdgeData<E>>;
     },
-    notifyObservers = true
+    animationSettings?: AnimationSettings | null
   ): void {
     // Insert edges and vertices to the graph model
-    vertices?.forEach(({ key, data }) => this.insertVertex(key, data, false));
-    edges?.forEach(edge => this.insertEdgeFromData(edge, false));
+    vertices?.forEach(data => this.insertVertex(data, null));
+    edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
-    if (notifyObservers) {
+    if (animationSettings !== null) {
       this.notifyChange();
     }
   }
@@ -112,23 +138,11 @@ export default class UndirectedGraph<V, E> extends Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<UndirectedEdgeData<E>>;
     },
-    notifyObservers = true
+    animationSettings?: AnimationSettings | null
   ): void {
     this.clear();
     setTimeout(() => {
-      this.insertBatch(batchData, notifyObservers);
+      this.insertBatch(batchData, animationSettings);
     }, 0);
-  }
-
-  private insertEdgeFromData(
-    { key, data, vertices: [v1, v2] }: UndirectedEdgeData<E>,
-    notifyObservers = true
-  ): void {
-    if (!v1 || !v2) {
-      throw new Error(
-        `Edge ${key} vertices are invalid. Edge must have 2 vertices`
-      );
-    }
-    this.insertEdge(key, data, v1, v2, notifyObservers);
   }
 }

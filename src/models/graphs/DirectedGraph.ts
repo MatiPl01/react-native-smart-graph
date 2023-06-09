@@ -1,6 +1,15 @@
 import DirectedEdge from '@/models/edges/DirectedEdge';
 import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
+import {
+  AnimationSettings,
+  BatchModificationAnimationSettings,
+  SingleModificationAnimationSettings
+} from '@/types/animations';
 import { DirectedEdgeData, VertexData } from '@/types/data';
+import {
+  createAnimationsSettingsForBatchModification,
+  createAnimationsSettingsForSingleModification
+} from '@/utils/animations';
 
 import Graph from './Graph';
 
@@ -24,22 +33,22 @@ export default class DirectedGraph<V, E> extends Graph<
   }
 
   override insertVertex(
-    key: string,
-    value: V,
-    notifyObservers?: boolean
+    { key, value }: VertexData<V>,
+    animationSettings?: SingleModificationAnimationSettings | null
   ): DirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new DirectedGraphVertex<V, E>(key, value),
-      notifyObservers
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        )
     );
   }
 
   override insertEdge(
-    key: string,
-    value: E,
-    sourceKey: string,
-    targetKey: string,
-    notifyObservers?: boolean
+    { key, value, from: sourceKey, to: targetKey }: DirectedEdgeData<E>,
+    animationSettings?: SingleModificationAnimationSettings | null
   ): DirectedEdge<E, V> {
     this.checkSelfLoop(sourceKey, targetKey);
     const source = this.getVertex(sourceKey);
@@ -55,12 +64,22 @@ export default class DirectedGraph<V, E> extends Graph<
     const edge = new DirectedEdge<E, V>(key, value, source, target);
     source.addOutEdge(edge);
     target.addInEdge(edge);
-    this.insertEdgeObject(edge, notifyObservers);
+    this.insertEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge;
   }
 
-  override removeEdge(key: string, notifyObservers?: boolean): E {
+  override removeEdge(
+    key: string,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): E {
     const edge = this.getEdge(key);
 
     if (!edge) {
@@ -69,9 +88,53 @@ export default class DirectedGraph<V, E> extends Graph<
 
     edge.source.removeOutEdge(key);
     edge.target.removeInEdge(key);
-    this.removeEdgeObject(edge, notifyObservers);
+    this.removeEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge.value;
+  }
+
+  override insertBatch(
+    {
+      vertices,
+      edges
+    }: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void {
+    // Insert edges and vertices to the graph model
+    vertices?.forEach(data => this.insertVertex(data, null));
+    edges?.forEach(data => this.insertEdge(data, null));
+    // Notify observers after all changes to the graph model are made
+    if (animationSettings) {
+      this.notifyChange(
+        createAnimationsSettingsForBatchModification({
+          vertices: vertices?.map(({ key }) => key),
+          edges: edges?.map(({ key }) => key)
+        })
+      );
+    }
+  }
+
+  override replaceBatch(
+    batchData: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E>>;
+    },
+    animationSettings?: AnimationSettings | null
+  ): void {
+    this.clear();
+    setTimeout(() => {
+      this.insertBatch(batchData, animationSettings);
+    }, 0);
   }
 
   override orderEdgesBetweenVertices(
@@ -87,39 +150,5 @@ export default class DirectedGraph<V, E> extends Graph<
       }
       return { edge, order: oppositeOrder++ };
     });
-  }
-
-  override insertBatch(
-    {
-      vertices,
-      edges
-    }: {
-      vertices?: Array<VertexData<V>>;
-      edges?: Array<DirectedEdgeData<E>>;
-    },
-    notifyObservers = true
-  ): void {
-    // Insert edges and vertices to the graph model
-    vertices?.forEach(({ key, data }) => this.insertVertex(key, data, false));
-    edges?.forEach(({ key, data, from, to }) =>
-      this.insertEdge(key, data, from, to, false)
-    );
-    // Notify observers after all changes to the graph model are made
-    if (notifyObservers) {
-      this.notifyChange();
-    }
-  }
-
-  override replaceBatch(
-    batchData: {
-      vertices?: Array<VertexData<V>>;
-      edges?: Array<DirectedEdgeData<E>>;
-    },
-    notifyObservers = true
-  ): void {
-    this.clear();
-    setTimeout(() => {
-      this.insertBatch(batchData, notifyObservers);
-    }, 0);
   }
 }

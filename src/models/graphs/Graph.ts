@@ -1,4 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import {
+  AnimationSettings,
+  AnimationsSettings,
+  BatchModificationAnimationSettings
+} from '@/types/animations';
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
@@ -8,6 +13,7 @@ import {
   Vertex
 } from '@/types/graphs';
 import { Mutable } from '@/types/utils';
+import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 
 export default abstract class Graph<
   V,
@@ -24,7 +30,7 @@ export default abstract class Graph<
     Record<string, Array<GE>>
   > = {};
 
-  private readonly observers: Array<GraphObserver> = [];
+  private readonly observers: Set<GraphObserver> = new Set();
 
   get vertices(): Array<GV> {
     return Object.values(this.vertices$);
@@ -75,17 +81,20 @@ export default abstract class Graph<
 
   abstract isDirected(): boolean;
 
-  abstract insertVertex(key: string, value: V, notifyObservers?: boolean): GV;
+  abstract insertVertex(
+    data: VertexData<V>,
+    animationSettings?: AnimationSettings | null
+  ): GV;
 
   abstract insertEdge(
-    key: string,
-    value: E,
-    sourceKey: string,
-    targetKey: string,
-    notifyObservers?: boolean
+    data: ED,
+    animationSettings?: AnimationSettings | null
   ): GE;
 
-  abstract removeEdge(key: string, notifyObservers?: boolean): E;
+  abstract removeEdge(
+    key: string,
+    animationSettings?: AnimationSettings | null
+  ): E;
 
   abstract orderEdgesBetweenVertices(
     edges: Array<GE>
@@ -96,7 +105,7 @@ export default abstract class Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<ED>;
     },
-    notifyObservers?: boolean
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void;
 
   abstract replaceBatch(
@@ -104,7 +113,7 @@ export default abstract class Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<ED>;
     },
-    notifyObservers?: boolean
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void;
 
   removeBatch(
@@ -112,38 +121,51 @@ export default abstract class Graph<
       vertices?: Array<string>;
       edges?: Array<string>;
     },
-    notifyObservers = true
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void {
     // Remove edges and vertices from graph
-    data.edges?.forEach(key => this.removeEdge(key, false));
-    data.vertices?.forEach(key => this.removeVertex(key, false));
+    data.edges?.forEach(key => this.removeEdge(key, null));
+    data.vertices?.forEach(key => this.removeVertex(key, null));
     // Notify observers after all changes to the graph model are made
-    if (notifyObservers) {
-      this.notifyChange();
+    if (animationSettings !== null) {
+      this.notifyChange(
+        createAnimationsSettingsForBatchModification(
+          {
+            edges: data.edges,
+            vertices: data.vertices
+          },
+          animationSettings
+        )
+      );
     }
   }
 
-  clear(notifyObservers = true): void {
+  clear(animationSettings?: BatchModificationAnimationSettings | null): void {
     // Clear the whole graph
     (this.vertices$ as Mutable<typeof this.vertices$>) = {};
     (this.edges$ as Mutable<typeof this.edges$>) = {};
     (this.edgesBetweenVertices$ as Mutable<typeof this.edgesBetweenVertices$>) =
       {};
     // Notify observers after all changes to the graph model are made
-    if (notifyObservers) {
-      this.notifyChange();
+    if (animationSettings !== null) {
+      this.notifyChange(
+        createAnimationsSettingsForBatchModification(
+          {
+            vertices: Object.keys(this.vertices$),
+            edges: Object.keys(this.edges$)
+          },
+          animationSettings
+        )
+      );
     }
   }
 
   addObserver(observer: GraphObserver): void {
-    this.observers.push(observer);
+    this.observers.add(observer);
   }
 
   removeObserver(observer: GraphObserver): void {
-    const index = this.observers.indexOf(observer);
-    if (index > -1) {
-      this.observers.splice(index, 1);
-    }
+    this.observers.delete(observer);
   }
 
   hasVertex(key: string): boolean {
@@ -167,7 +189,7 @@ export default abstract class Graph<
     return res ? [...res] : []; // Create a copy of the array
   }
 
-  removeVertex(key: string, notifyObservers = true): V {
+  removeVertex(key: string, animationsSettings?: AnimationsSettings | null): V {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
     }
@@ -178,26 +200,32 @@ export default abstract class Graph<
     });
     delete this.vertices$[key];
     // Notify change if notifyObservers is set to true
-    if (notifyObservers) {
-      this.notifyChange();
+    if (animationsSettings !== null) {
+      this.notifyChange(animationsSettings);
     }
 
     return vertex.value;
   }
 
-  protected insertVertexObject(vertex: GV, notifyObservers = true): GV {
+  protected insertVertexObject(
+    vertex: GV,
+    animationSettings?: AnimationsSettings | null
+  ): GV {
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
     // Notify change if notifyObservers is set to true
-    if (notifyObservers) {
-      this.notifyChange();
+    if (animationSettings !== null) {
+      this.notifyChange(animationSettings);
     }
     return vertex;
   }
 
-  protected insertEdgeObject(edge: GE, notifyObservers = true): GE {
+  protected insertEdgeObject(
+    edge: GE,
+    animationsSettings?: AnimationsSettings | null
+  ): GE {
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
@@ -220,13 +248,16 @@ export default abstract class Graph<
     // Add edge to edges
     this.edges$[edge.key] = edge;
     // Notify change if notifyObservers is set to true
-    if (notifyObservers) {
-      this.notifyChange();
+    if (animationsSettings !== null) {
+      this.notifyChange(animationsSettings);
     }
     return edge;
   }
 
-  protected removeEdgeObject(edge: GE, notifyObservers = true): void {
+  protected removeEdgeObject(
+    edge: GE,
+    animationsSettings?: AnimationsSettings | null
+  ): void {
     // Remove edge from edges between vertices
     const [vertex1, vertex2] = edge.vertices;
     this.edgesBetweenVertices$[vertex1.key]![vertex2.key]?.splice(
@@ -246,14 +277,19 @@ export default abstract class Graph<
     // Remove the edge from edges
     delete this.edges$[edge.key];
     // Notify change if notifyObservers is set to true
-    if (notifyObservers) {
-      this.notifyChange();
+    if (animationsSettings !== null) {
+      this.notifyChange(animationsSettings);
     }
   }
 
-  protected notifyChange(): void {
+  protected notifyChange(animationsSettings?: AnimationsSettings): void {
     this.observers.forEach(observer => {
-      observer.graphChanged();
+      observer.graphChanged(
+        animationsSettings || {
+          vertices: {},
+          edges: {}
+        }
+      );
     });
   }
 

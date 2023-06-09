@@ -1,66 +1,66 @@
-import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
-import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
-import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
-import PannableScalableView from '@/views/PannableScalableView';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
+import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
+import { DirectedGraph } from '@/models/graphs';
+import PannableScalableView from '@/views/PannableScalableView';
 
 export default function App() {
   const graph = new DirectedGraph({
     vertices: [
-      { key: 'A', data: 'A' },
-      { key: 'B', data: 'B' },
-      { key: 'C', data: 'C' },
-      { key: 'D', data: 'D' },
-      { key: 'E', data: 'E' },
-      { key: 'F', data: 'F' },
-      { key: 'G', data: 'G' },
-      { key: 'H', data: 'H' },
-      { key: 'I', data: 'I' },
-      { key: 'J', data: 'J' },
-      { key: 'L', data: 'L' },
-      { key: 'M', data: 'M' },
-      { key: 'N', data: 'N' },
-      { key: 'O', data: 'O' },
-      { key: 'P', data: 'P' },
-      { key: 'Q', data: 'Q' },
-      { key: 'R', data: 'R' },
-      { key: 'S', data: 'S' },
-      { key: 'T', data: 'T' },
-      { key: 'U', data: 'U' },
-      { key: 'V', data: 'V' },
-      { key: 'W', data: 'W' },
-      { key: 'X', data: 'X' },
-      { key: 'Y', data: 'Y' },
-      { key: 'Z', data: 'Z' },
-      { key: 'AA', data: 'AA' },
-      { key: 'AB', data: 'AB' },
-      { key: 'AC', data: 'AC' },
-      { key: 'AD', data: 'AD' },
-      { key: 'AE', data: 'AE' },
-      { key: 'AF', data: 'AF' },
-      { key: 'AG', data: 'AG' },
-      { key: 'AH', data: 'AH' },
-      { key: 'AI', data: 'AI' },
-      { key: 'AJ', data: 'AJ' },
-      { key: 'AK', data: 'AK' },
-      { key: 'AL', data: 'AL' },
-      { key: 'AM', data: 'AM' },
-      { key: 'AN', data: 'AN' },
-      { key: 'AO', data: 'AO' },
-      { key: 'AP', data: 'AP' }
+      { key: 'A', value: 'A' },
+      { key: 'B', value: 'B' },
+      { key: 'C', value: 'C' },
+      { key: 'D', value: 'D' },
+      { key: 'E', value: 'E' },
+      { key: 'F', value: 'F' },
+      { key: 'G', value: 'G' },
+      { key: 'H', value: 'H' },
+      { key: 'I', value: 'I' },
+      { key: 'J', value: 'J' },
+      { key: 'L', value: 'L' },
+      { key: 'M', value: 'M' },
+      { key: 'N', value: 'N' },
+      { key: 'O', value: 'O' },
+      { key: 'P', value: 'P' },
+      { key: 'Q', value: 'Q' },
+      { key: 'R', value: 'R' },
+      { key: 'S', value: 'S' },
+      { key: 'T', value: 'T' },
+      { key: 'U', value: 'U' },
+      { key: 'V', value: 'V' },
+      { key: 'W', value: 'W' },
+      { key: 'X', value: 'X' },
+      { key: 'Y', value: 'Y' },
+      { key: 'Z', value: 'Z' },
+      { key: 'AA', value: 'AA' },
+      { key: 'AB', value: 'AB' },
+      { key: 'AC', value: 'AC' },
+      { key: 'AD', value: 'AD' },
+      { key: 'AE', value: 'AE' },
+      { key: 'AF', value: 'AF' },
+      { key: 'AG', value: 'AG' },
+      { key: 'AH', value: 'AH' },
+      { key: 'AI', value: 'AI' },
+      { key: 'AJ', value: 'AJ' },
+      { key: 'AK', value: 'AK' },
+      { key: 'AL', value: 'AL' },
+      { key: 'AM', value: 'AM' },
+      { key: 'AN', value: 'AN' },
+      { key: 'AO', value: 'AO' },
+      { key: 'AP', value: 'AP' }
     ],
     edges: [
-      { key: 'AB', from: 'A', to: 'B', data: 'AB' },
-      { key: 'AC', from: 'A', to: 'C', data: 'AC' },
-      { key: 'CF', from: 'C', to: 'F', data: 'CF' },
-      { key: 'CE', from: 'C', to: 'E', data: 'CE' },
-      { key: 'CD', from: 'C', to: 'D', data: 'CD' },
-      // { key: 'DH', from: 'D', to: 'H', data: 'DH' },
-      { key: 'EL', from: 'E', to: 'L', data: 'EL' },
-      { key: 'FG', from: 'F', to: 'G', data: 'FG' },
-      { key: 'LJ', from: 'L', to: 'J', data: 'LJ' }
+      { key: 'AB', from: 'A', to: 'B', value: 'AB' },
+      { key: 'AC', from: 'A', to: 'C', value: 'AC' },
+      { key: 'CF', from: 'C', to: 'F', value: 'CF' },
+      { key: 'CE', from: 'C', to: 'E', value: 'CE' },
+      { key: 'CD', from: 'C', to: 'D', value: 'CD' },
+      // { key: 'DH', from: 'D', to: 'H', value: 'DH' },
+      { key: 'EL', from: 'E', to: 'L', value: 'EL' },
+      { key: 'FG', from: 'F', to: 'G', value: 'FG' },
+      { key: 'LJ', from: 'L', to: 'J', value: 'LJ' }
     ]
   });
 
