@@ -1,12 +1,10 @@
-/* eslint-disable import/no-unused-modules */
 import { Vector } from '@shopify/react-native-skia';
-import { runOnJS, withTiming } from 'react-native-reanimated';
+import { runOnJS, SharedValue, withTiming } from 'react-native-reanimated';
 
 import {
   AnimationSettings,
   AnimationSettingsWithDefaults,
   AnimationsSettings,
-  AnimationsSettingsWithDefaults,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/animations';
@@ -66,6 +64,9 @@ const isBatchModificationSettingsObjectWithEdgesAndVertices = (
     BATCH_MODIFICATION_WITH_EDGES_AND_VERTICES_SETTINGS_KEYS.has(key)
   );
 
+// In functions below onComplete callback is passed only to single animation
+// to ensure that it will be called only once
+
 export const createAnimationsSettingsForSingleModification = (
   component: { vertex?: string; edge?: string },
   animationsSettings?: SingleModificationAnimationSettings
@@ -81,19 +82,33 @@ export const createAnimationsSettingsForSingleModification = (
     return {
       layout: animationsSettings,
       vertices: component.vertex
-        ? { [component.vertex]: animationsSettings }
+        ? {
+            [component.vertex]: { ...animationsSettings, onComplete: undefined }
+          }
         : {},
-      edges: component.edge ? { [component.edge]: animationsSettings } : {}
+      edges: component.edge
+        ? { [component.edge]: { ...animationsSettings, onComplete: undefined } }
+        : {}
     };
   }
 
   return {
     layout: animationsSettings.layout,
     vertices: component.vertex
-      ? { [component.vertex]: animationsSettings.component }
+      ? {
+          [component.vertex]: {
+            ...animationsSettings.component,
+            onComplete: undefined
+          }
+        }
       : {},
     edges: component.edge
-      ? { [component.edge]: animationsSettings.component }
+      ? {
+          [component.edge]: {
+            ...animationsSettings.component,
+            onComplete: undefined
+          }
+        }
       : {}
   };
 };
@@ -113,10 +128,16 @@ export const createAnimationsSettingsForBatchModification = (
     return {
       layout: animationsSettings,
       vertices: Object.fromEntries(
-        components.vertices?.map(key => [key, animationsSettings]) || []
+        components.vertices?.map(key => [
+          key,
+          { ...animationsSettings, onComplete: undefined }
+        ]) || []
       ),
       edges: Object.fromEntries(
-        components.edges?.map(key => [key, animationsSettings]) || []
+        components.edges?.map(key => [
+          key,
+          { ...animationsSettings, onComplete: undefined }
+        ]) || []
       )
     };
   }
@@ -146,63 +167,51 @@ export const createAnimationsSettingsForBatchModification = (
     vertices: Object.fromEntries(
       components.vertices?.map(key => [
         key,
-        (animationsSettings as { components?: AnimationSettings }).components
+        {
+          ...(animationsSettings as { components?: AnimationSettings })
+            .components,
+          onComplete: undefined
+        }
       ]) || []
     ),
     edges: Object.fromEntries(
       components.edges?.map(key => [
         key,
-        (animationsSettings as { components?: AnimationSettings }).components
+        {
+          ...(animationsSettings as { components?: AnimationSettings })
+            .components,
+          onComplete: undefined
+        }
       ]) || []
     )
   };
 };
 
-export const updateAnimationsSettingsWithDefaults = (
-  animationsSettings: AnimationsSettings,
-  defaultAnimationSettings: AnimationSettingsWithDefaults
-): AnimationsSettingsWithDefaults => ({
-  layout: {
-    ...defaultAnimationSettings,
-    ...animationsSettings.layout,
-    onComplete: createAnimationCallback(animationsSettings.layout?.onComplete)
-  },
-  vertices: Object.fromEntries(
-    Object.entries(animationsSettings.vertices).map(([key, settings]) => [
-      key,
-      {
-        ...defaultAnimationSettings,
-        ...settings,
-        onComplete: createAnimationCallback(settings?.onComplete)
+export const updateComponentAnimationState = (
+  key: string,
+  animationProgress: SharedValue<number>,
+  animationSettings: AnimationSettingsWithDefaults,
+  removed: boolean,
+  onRemove: (k: string) => void
+): void => {
+  // ANimate vertex on mount
+  if (!removed) {
+    // Animate vertex on mount
+    animationProgress.value = withTiming(1, animationSettings, finished => {
+      if (finished && animationSettings.onComplete) {
+        runOnJS(animationSettings.onComplete)();
       }
-    ])
-  ),
-  edges: Object.fromEntries(
-    Object.entries(animationsSettings.edges).map(([key, settings]) => [
-      key,
-      {
-        ...defaultAnimationSettings,
-        ...settings,
-        onComplete: createAnimationCallback(settings?.onComplete)
-      }
-    ])
-  )
-});
-
-export const createAnimationCallback = (
-  callback?: () => void
-): (() => void) => {
-  if (!callback) {
-    return () => undefined;
+    });
   }
-
-  // TODO - fix this
-  return callback;
-  // return function () {
-  //   if (this.wasCalled) {
-  //     return;
-  //   }
-  //   callback();
-  //   this.wasCalled = true;
-  // };
+  // Animate vertex removal
+  else {
+    animationProgress.value = withTiming(0, animationSettings, finished => {
+      if (finished) {
+        runOnJS(onRemove)(key);
+        if (animationSettings.onComplete) {
+          runOnJS(animationSettings.onComplete)();
+        }
+      }
+    });
+  }
 };

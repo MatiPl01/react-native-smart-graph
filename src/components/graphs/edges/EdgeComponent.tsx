@@ -1,5 +1,5 @@
 import { memo, useEffect } from 'react';
-import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
 
 import {
   DirectedCurvedEdgeComponentProps,
@@ -8,6 +8,7 @@ import {
   UndirectedCurvedEdgeComponentProps,
   UndirectedStraightEdgeComponentProps
 } from '@/types/components/edges';
+import { updateComponentAnimationState } from '@/utils/animations';
 
 import DirectedCurvedEdgeComponent from './curved/DirectedCurvedEdgeComponent';
 import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponent';
@@ -23,7 +24,6 @@ function EdgeComponent<E, V>({
   animationSettings,
   ...restProps
 }: EdgeComponentProps<E, V>) {
-  const key = edge.key;
   // ANIMATION
   // Edge render animation progress
   const animationProgress = useSharedValue(0);
@@ -34,25 +34,23 @@ function EdgeComponent<E, V>({
 
   // Edge mount/unmount animation
   useEffect(() => {
-    // ANimate vertex on mount
-    if (!removed) {
-      // Animate vertex on mount
-      animationProgress.value = withTiming(1, animationSettings);
-    }
-    // Animate vertex removal
-    else {
-      animationProgress.value = withTiming(0, animationSettings, finished => {
-        if (finished) {
-          runOnJS(onRemove)(key);
-        }
-      });
-    }
-  }, [removed]);
+    updateComponentAnimationState(
+      edge.key,
+      animationProgress,
+      animationSettings,
+      removed,
+      onRemove
+    );
+  }, [removed, animationSettings]);
 
   // Edge ordering animation
   useEffect(() => {
-    animatedOrder.value = withTiming(order, animationSettings);
-    animatedEdgesCount.value = withTiming(edgesCount, animationSettings);
+    const settingsWithoutCallback = {
+      ...animationSettings,
+      onComplete: () => undefined
+    };
+    animatedOrder.value = withTiming(order, settingsWithoutCallback);
+    animatedEdgesCount.value = withTiming(edgesCount, settingsWithoutCallback);
   }, [order, edgesCount]);
 
   const sharedProps = {

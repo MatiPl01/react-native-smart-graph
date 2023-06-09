@@ -1,5 +1,7 @@
 import { EasingFunctionFactory } from 'react-native-reanimated';
 
+import { DeepRequired } from './utils';
+
 export type AnimationSettings = {
   duration?: number;
   easing?: EasingFunctionFactory;
@@ -31,7 +33,10 @@ export type AnimationsSettings = {
   edges: Record<string, AnimationSettings | undefined>;
 };
 
-export type AnimationSettingsWithDefaults = Required<AnimationSettings>;
+export type AnimationSettingsWithDefaults = DeepRequired<
+  AnimationSettings,
+  ['duration' | 'easing']
+>;
 
 export type AnimationsSettingsWithDefaults = {
   layout: AnimationSettingsWithDefaults;

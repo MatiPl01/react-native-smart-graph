@@ -1,11 +1,12 @@
 import { memo, useEffect } from 'react';
-import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 
 import { AnimationSettingsWithDefaults } from '@/types/animations';
 import { Vertex } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
 import { VertexSettings } from '@/types/settings';
+import { updateComponentAnimationState } from '@/utils/animations';
 
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
@@ -43,25 +44,14 @@ function VertexComponent<V, E>({
   }, [key]);
 
   useEffect(() => {
-    // ANimate vertex on mount
-    if (!removed) {
-      // Animate vertex on mount
-      animationProgress.value = withTiming(1, animationSettings, finished => {
-        if (finished) {
-          // runOnJS(animationSettings.onComplete)(); // TODO - fix callback function
-        }
-      });
-    }
-    // Animate vertex removal
-    else {
-      animationProgress.value = withTiming(0, animationSettings, finished => {
-        if (finished) {
-          runOnJS(onRemove)(key);
-          // runOnJS(animationSettings.onComplete)(); // TODO - fix callback function
-        }
-      });
-    }
-  }, [removed]);
+    updateComponentAnimationState(
+      key,
+      animationProgress,
+      animationSettings,
+      removed,
+      onRemove
+    );
+  }, [removed, animationSettings]);
 
   // Render the vertex component
   return renderer({

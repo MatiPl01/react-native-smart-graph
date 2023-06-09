@@ -22,7 +22,7 @@ export default function App() {
           graph.insertEdge(
             { key: 'AB', value: 'AB', from: 'A', to: 'B' },
             {
-              duration: 5000
+              duration: 100
             }
           );
           graph.insertVertex(

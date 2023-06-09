@@ -1,6 +1,6 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { AnimationSettings } from '@/types/animations';
+import { AnimationSettingsWithDefaults } from '@/types/animations';
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import {
@@ -26,7 +26,7 @@ type SharedEdgeComponentProps = {
   onLabelRender?: (key: string, position: AnimatedVector) => void;
   animatedOrder: SharedValue<number>;
   animatedEdgesCount: SharedValue<number>;
-  animationSettings: AnimationSettings;
+  animationSettings: AnimationSettingsWithDefaults;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =

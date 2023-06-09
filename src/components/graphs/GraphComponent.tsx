@@ -15,7 +15,7 @@ import { GraphEventsContextType } from '@/context/graphEvents';
 import { useGraphObserver } from '@/hooks';
 import {
   AnimationSettingsWithDefaults,
-  AnimationsSettingsWithDefaults
+  AnimationsSettings
 } from '@/types/animations';
 import { EdgeComponentProps } from '@/types/components';
 import { Edge, Graph, Vertex } from '@/types/graphs';
@@ -33,10 +33,8 @@ import {
   GraphSettingsWithDefaults,
   RandomPlacementSettings
 } from '@/types/settings';
-import {
-  animateVerticesToFinalPositions,
-  updateAnimationsSettingsWithDefaults
-} from '@/utils/animations';
+import { GraphAnimationsSettingsWithDefaults } from '@/types/settings/animations';
+import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 import DefaultEdgeArrowRenderer from './arrows/renderers/DefaultEdgeArrowRenderer';
@@ -78,7 +76,7 @@ export default function GraphComponent<
   graphEventsContext
 }: GraphComponentProps<V, E, S, R> & GraphComponentPrivateProps<V, E>) {
   // GRAPH OBSERVER
-  const [data] = useGraphObserver(graph);
+  const [graphData] = useGraphObserver(graph);
 
   // HELPER REFS
   const isFirstRenderRef = useRef(true);
@@ -152,6 +150,20 @@ export default function GraphComponent<
             ...settings?.components?.edge?.label
           }
         }
+      },
+      animations: {
+        layout: {
+          ...DEFAULT_ANIMATION_SETTINGS,
+          ...settings?.animations?.layout
+        },
+        vertices: {
+          ...DEFAULT_ANIMATION_SETTINGS,
+          ...settings?.animations?.vertices
+        },
+        edges: {
+          ...DEFAULT_ANIMATION_SETTINGS,
+          ...settings?.animations?.edges
+        }
       }
     };
 
@@ -175,22 +187,24 @@ export default function GraphComponent<
     [graph, settings, renderers]
   );
 
-  const memoGraphLayoutWithAnimations = useMemo<{
+  const memoGraphData = useMemo<{
+    vertices: Array<Vertex<V, E>>;
+    edges: Array<Edge<E, V>>;
     layout: GraphLayout;
-    animations: AnimationsSettingsWithDefaults;
+    animations: AnimationsSettings;
+    defaultAnimations: GraphAnimationsSettingsWithDefaults;
   }>(
     () => ({
+      ...graphData,
       layout: placeVertices(
         graph,
         memoSettings.components.vertex.radius,
         memoSettings.placement
       ),
-      animations: updateAnimationsSettingsWithDefaults(
-        data.animationsSettings,
-        DEFAULT_ANIMATION_SETTINGS
-      )
+      animations: graphData.animationsSettings,
+      defaultAnimations: memoSettings.animations
     }),
-    [data]
+    [graphData, memoSettings]
   );
 
   useEffect(() => {
@@ -201,9 +215,9 @@ export default function GraphComponent<
     // UPDATE VERTICES DATA
     const newVerticesData = { ...verticesData };
     // Add new vertices to vertex data
-    data.vertices.forEach(vertex => {
+    graphData.vertices.forEach(vertex => {
       const targetPlacementPosition =
-        memoGraphLayoutWithAnimations.layout.verticesPositions[vertex.key];
+        memoGraphData.layout.verticesPositions[vertex.key];
       if (
         targetPlacementPosition &&
         (!newVerticesData[vertex.key] || newVerticesData[vertex.key]?.removed)
@@ -211,9 +225,8 @@ export default function GraphComponent<
         newVerticesData[vertex.key] = {
           vertex,
           animationSettings: {
-            ...DEFAULT_ANIMATION_SETTINGS,
-            ...(memoGraphLayoutWithAnimations.animations.vertices[vertex.key] ||
-              {})
+            ...memoGraphData.defaultAnimations.vertices,
+            ...memoGraphData.animations.vertices[vertex.key]
           },
           targetPlacementPosition,
           removed: false
@@ -228,27 +241,27 @@ export default function GraphComponent<
           ...newVerticesData[key]!,
           removed: true,
           animationSettings: {
-            ...DEFAULT_ANIMATION_SETTINGS,
-            ...(memoGraphLayoutWithAnimations.animations.vertices[key] || {})
+            ...memoGraphData.defaultAnimations.vertices,
+            ...memoGraphData.animations.vertices[key]
           }
         };
       }
     });
-    // Set new vertices data
+    // Set new vertices graphData
     setVerticesData(newVerticesData);
 
     // Call onRender callback on the first render
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
-      onRender(memoGraphLayoutWithAnimations.layout.boundingRect);
+      onRender(memoGraphData.layout.boundingRect);
     }
-  }, [memoGraphLayoutWithAnimations]);
+  }, [memoGraphData]);
 
   useEffect(() => {
     // UPDATE EDGES DATA
     // Add new edges to edges data
     const newEdgesData = { ...edgesData };
-    data.orderedEdges.forEach(({ edge, order, edgesCount }) => {
+    graphData.orderedEdges.forEach(({ edge, order, edgesCount }) => {
       if (
         !newEdgesData[edge.key] ||
         newEdgesData[edge.key]?.removed ||
@@ -260,8 +273,8 @@ export default function GraphComponent<
           edgesCount,
           removed: false,
           animationSettings: {
-            ...DEFAULT_ANIMATION_SETTINGS,
-            ...(memoGraphLayoutWithAnimations.animations.edges[edge.key] || {})
+            ...memoGraphData.defaultAnimations.edges,
+            ...memoGraphData.animations.edges[edge.key]
           }
         };
       }
@@ -274,15 +287,15 @@ export default function GraphComponent<
           ...newEdgesData[key]!,
           removed: true,
           animationSettings: {
-            ...DEFAULT_ANIMATION_SETTINGS,
-            ...(memoGraphLayoutWithAnimations.animations.edges[key] || {})
+            ...memoGraphData.defaultAnimations.edges,
+            ...memoGraphData.animations.edges[key]
           }
         };
       }
     });
-    // Set the new edges data
+    // Set the new edges graphData
     setEdgesData(newEdgesData);
-  }, [memoGraphLayoutWithAnimations]);
+  }, [memoGraphData]);
 
   useEffect(() => {
     graphEventsContext.setAnimatedVerticesPositions(animatedVerticesPositions);
@@ -331,11 +344,14 @@ export default function GraphComponent<
     () => {
       animateVerticesToFinalPositions(
         animatedVerticesPositions,
-        memoGraphLayoutWithAnimations.layout.verticesPositions,
-        memoGraphLayoutWithAnimations.animations.layout
+        memoGraphData.layout.verticesPositions,
+        {
+          ...memoGraphData.defaultAnimations.layout,
+          ...memoGraphData.animations.layout
+        }
       );
     },
-    [animatedVerticesPositions, memoGraphLayoutWithAnimations]
+    [animatedVerticesPositions, memoGraphData]
   );
 
   const handleVertexRender = useCallback(
@@ -358,7 +374,7 @@ export default function GraphComponent<
   );
 
   const handleVertexRemove = useCallback((key: string) => {
-    // Remove vertex from the vertices data
+    // Remove vertex from the vertices graphData
     setVerticesData(prev =>
       Object.fromEntries(
         Object.entries(prev).filter(([vertexKey]) => vertexKey !== key)
@@ -373,7 +389,7 @@ export default function GraphComponent<
   }, []);
 
   const handleEdgeRemove = useCallback((key: string) => {
-    // Remove edge from the edges data
+    // Remove edge from the edges graphData
     setEdgesData(prev =>
       Object.fromEntries(
         Object.entries(prev).filter(([edgeKey]) => edgeKey !== key)
