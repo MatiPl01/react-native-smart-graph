@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 
 import {
@@ -8,7 +8,7 @@ import {
   UndirectedCurvedEdgeComponentProps,
   UndirectedStraightEdgeComponentProps
 } from '@/types/components/edges';
-import { updateComponentAnimationState } from '@/utils/animations';
+import { updateComponentAnimationState } from '@/utils/components';
 
 import DirectedCurvedEdgeComponent from './curved/DirectedCurvedEdgeComponent';
 import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponent';
@@ -22,11 +22,31 @@ function EdgeComponent<E, V>({
   removed,
   onRemove,
   animationSettings,
+  edgeRenderer,
+  arrowRenderer,
+  labelRenderer,
   ...restProps
 }: EdgeComponentProps<E, V>) {
+  // RENDERERS
+  const edgeRenderers = useMemo(
+    () =>
+      arrowRenderer
+        ? {
+            edge: edgeRenderer,
+            arrow: arrowRenderer,
+            label: labelRenderer
+          }
+        : {
+            edge: edgeRenderer,
+            label: labelRenderer
+          },
+    [edgeRenderer, arrowRenderer, labelRenderer]
+  );
+
   // ANIMATION
   // Edge render animation progress
   const animationProgress = useSharedValue(0);
+
   // EDGE ORDERING
   // Target edge order
   const animatedOrder = useSharedValue(order);
@@ -58,7 +78,8 @@ function EdgeComponent<E, V>({
     edge,
     animationProgress,
     animatedOrder,
-    animatedEdgesCount
+    animatedEdgesCount,
+    renderers: edgeRenderers
   };
 
   switch (sharedProps.settings.type) {

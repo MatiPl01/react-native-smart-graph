@@ -5,6 +5,8 @@ import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import {
   DirectedStraightEdgeRenderers,
+  EdgeArrowRenderFunction,
+  EdgeLabelRendererFunction,
   UndirectedStraightEdgeRenderers
 } from '@/types/renderer';
 import {
@@ -17,6 +19,8 @@ import {
   EdgeLabelSettings,
   StraightEdgeSettings
 } from '@/types/settings';
+
+import { EdgeRenderFunction } from '../../../dist/types/types/renderer/index';
 
 type SharedEdgeComponentProps = {
   v1Position: AnimatedVectorCoordinates;
@@ -72,10 +76,13 @@ export type EdgeComponentProps<E, V> = Omit<
   | DirectedCurvedEdgeComponentProps<E, V>
   | UndirectedStraightEdgeComponentProps<E, V>
   | DirectedStraightEdgeComponentProps<E, V>,
-  'animationProgress'
+  'animationProgress' | 'renderers'
 > & {
   order: number;
   edgesCount: number;
   removed: boolean;
+  edgeRenderer: EdgeRenderFunction<E>;
+  arrowRenderer?: EdgeArrowRenderFunction;
+  labelRenderer?: EdgeLabelRendererFunction<E>;
   onRemove: (key: string) => void;
 };
