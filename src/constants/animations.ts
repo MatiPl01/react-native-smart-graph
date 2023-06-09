@@ -1,4 +1,4 @@
-import { AnimationSettingsWithDefaults } from '@/types/animations';
+import { AnimationSettingsWithDefaults } from '@/types/settings';
 
 import EASING from './easings';
 

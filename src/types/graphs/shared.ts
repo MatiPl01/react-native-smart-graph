@@ -1,9 +1,9 @@
+import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   AnimationsSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
-} from '@/types/animations';
-import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
+} from '@/types/settings/animations';
 
 export interface Vertex<V, E> {
   get key(): string;

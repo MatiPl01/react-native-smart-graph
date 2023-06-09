@@ -1,6 +1,5 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { AnimationSettingsWithDefaults } from '@/types/animations';
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import {
@@ -20,6 +19,7 @@ import {
   EdgeLabelSettings,
   StraightEdgeSettings
 } from '@/types/settings';
+import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
 
 type SharedEdgeComponentProps = {
   v1Position: AnimatedVectorCoordinates;

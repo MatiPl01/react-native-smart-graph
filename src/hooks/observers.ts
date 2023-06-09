@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { AnimationsSettings } from '@/types/animations';
 import { Edge, Graph, GraphObserver, Vertex } from '@/types/graphs';
+import { AnimationsSettings } from '@/types/settings/animations';
 
 type State<V, E> = {
   vertices: Array<Vertex<V, E>>;

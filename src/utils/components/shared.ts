@@ -1,6 +1,6 @@
 import { runOnJS, SharedValue, withTiming } from 'react-native-reanimated';
 
-import { AnimationSettingsWithDefaults } from '@/types/animations';
+import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
 
 export const updateComponentAnimationState = (
   key: string,

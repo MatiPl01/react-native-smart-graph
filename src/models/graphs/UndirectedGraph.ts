@@ -1,10 +1,10 @@
 import UndirectedEdge from '@/models/edges/UndirectedEdge';
 import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
+import { UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   AnimationSettings,
   SingleModificationAnimationSettings
-} from '@/types/animations';
-import { UndirectedEdgeData, VertexData } from '@/types/data';
+} from '@/types/settings';
 import { createAnimationsSettingsForSingleModification } from '@/utils/animations';
 
 import Graph from './Graph';

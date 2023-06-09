@@ -1,13 +1,13 @@
 import { Vector } from '@shopify/react-native-skia';
 import { runOnJS, withTiming } from 'react-native-reanimated';
 
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   AnimationSettings,
   AnimationsSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
-} from '@/types/animations';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+} from '@/types/settings/animations';
 
 export function animateVerticesToFinalPositions(
   animatedPositions: Record<string, AnimatedVectorCoordinates>,

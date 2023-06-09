@@ -1,11 +1,13 @@
 import { memo, useEffect } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
-import { AnimationSettingsWithDefaults } from '@/types/animations';
 import { Vertex } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
-import { VertexSettings } from '@/types/settings';
+import {
+  AnimationSettingsWithDefaults,
+  VertexSettings
+} from '@/types/settings';
 import { updateComponentAnimationState } from '@/utils/components';
 
 type VertexComponentProps<V, E> = {

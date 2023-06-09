@@ -1,12 +1,12 @@
 import { Vector } from '@shopify/react-native-skia';
 
+import { Edge, OrderedEdges, Vertex } from '@/types/graphs';
+import { GraphLayout } from '@/types/settings';
 import {
   AnimationSettingsWithDefaults,
   AnimationsSettings
-} from '@/types/animations';
-import { Edge, OrderedEdges, Vertex } from '@/types/graphs';
-import { GraphLayout } from '@/types/settings';
-import { GraphAnimationsSettingsWithDefaults } from '@/types/settings/animations';
+} from '@/types/settings/animations';
+import { GraphAnimationsSettingsWithDefaults } from '@/types/settings/graph/animations';
 
 export type GraphVertexData<V, E> = {
   vertex: Vertex<V, E>;

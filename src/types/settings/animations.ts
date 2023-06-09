@@ -1,16 +1,39 @@
-import {
-  AnimationSettings,
-  AnimationSettingsWithDefaults
-} from '@/types/animations';
+import { EasingFunctionFactory } from 'react-native-reanimated';
 
-export type GraphAnimationsSettings = {
+import { DeepRequired } from '@/types/utils';
+
+export type AnimationSettings = {
+  duration?: number;
+  easing?: EasingFunctionFactory;
+  onComplete?: () => void;
+};
+
+export type SingleModificationAnimationSettings =
+  | AnimationSettings
+  | {
+      component?: AnimationSettings;
+      layout?: AnimationSettings;
+    };
+
+export type BatchModificationAnimationSettings =
+  | AnimationSettings
+  | {
+      components?: AnimationSettings;
+      layout?: AnimationSettings;
+    }
+  | {
+      edges?: Record<string, AnimationSettings>;
+      vertices?: Record<string, AnimationSettings>;
+      layout?: AnimationSettings;
+    };
+
+export type AnimationsSettings = {
   layout?: AnimationSettings;
-  vertices?: AnimationSettings;
-  edges?: AnimationSettings;
+  vertices: Record<string, AnimationSettings | undefined>;
+  edges: Record<string, AnimationSettings | undefined>;
 };
 
-export type GraphAnimationsSettingsWithDefaults = {
-  layout: AnimationSettingsWithDefaults;
-  vertices: AnimationSettingsWithDefaults;
-  edges: AnimationSettingsWithDefaults;
-};
+export type AnimationSettingsWithDefaults = DeepRequired<
+  AnimationSettings,
+  ['duration' | 'easing']
+>;

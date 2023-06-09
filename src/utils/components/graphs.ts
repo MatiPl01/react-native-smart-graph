@@ -10,6 +10,7 @@ import {
   STRAIGHT_EDGE_COMPONENT_SETTINGS,
   VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
+import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
 import { RANDOM_PLACEMENT_SETTING } from '@/constants/placement';
 import { GraphData, GraphEdgeData, GraphVertexData } from '@/types/components';
 import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
@@ -19,6 +20,10 @@ import {
   GraphSettingsWithDefaults,
   RandomPlacementSettings
 } from '@/types/settings';
+import {
+  GraphLayoutSettings,
+  GraphLayoutSettingsWithDefaults
+} from '@/types/settings/graph/layout';
 
 export const updateGraphSettingsWithDefaults = <V, E>(
   isGraphDirected: boolean,
@@ -68,8 +73,27 @@ export const updateGraphSettingsWithDefaults = <V, E>(
       ...DEFAULT_ANIMATION_SETTINGS,
       ...settings?.animations?.edges
     }
-  }
+  },
+  layout: updateGraphLayoutSettingsWithDefaults(settings?.layout)
 });
+
+const updateGraphLayoutSettingsWithDefaults = (
+  settings?: GraphLayoutSettings
+): GraphLayoutSettingsWithDefaults => {
+  switch (settings?.type) {
+    case 'forces':
+      return {
+        type: 'forces',
+        settings: {
+          ...DEFAULT_FORCES_STRATEGY_SETTINGS,
+          ...settings
+        }
+      };
+    case 'auto':
+    default:
+      return { type: 'auto', ...settings };
+  }
+};
 
 export const updateGraphRenderersWithDefaults = <V, E>(
   isGraphDirected: boolean,

@@ -103,6 +103,9 @@ export default function App() {
                   edge: {
                     type: 'curved'
                   }
+                },
+                layout: {
+                  type: 'forces'
                 }
               }}
               renderers={{
