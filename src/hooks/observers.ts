@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
-import { AnimationSettingWithDefaults } from '@/types/animations';
+import { AnimationsSettings } from '@/types/animations';
 import { Edge, Graph, GraphObserver, Vertex } from '@/types/graphs';
 
 type State<V, E> = {
@@ -12,7 +11,7 @@ type State<V, E> = {
     order: number;
     edgesCount: number;
   }>;
-  animationSettings: AnimationSettingWithDefaults;
+  animationsSettings: AnimationsSettings;
 };
 
 export const useGraphObserver = <V, E>(
@@ -23,18 +22,21 @@ export const useGraphObserver = <V, E>(
     vertices: graph.vertices,
     edges: graph.edges,
     orderedEdges: graph.orderedEdges,
-    animationSettings: DEFAULT_ANIMATION_SETTINGS
+    animationsSettings: {
+      vertices: {},
+      edges: {}
+    }
   });
 
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
   const observerRef = useRef<GraphObserver>({
-    graphChanged(animationSettings) {
+    graphChanged(animationsSettings) {
       setState({
         vertices: graph.vertices,
         edges: graph.edges,
         orderedEdges: graph.orderedEdges,
-        animationSettings
+        animationsSettings
       });
     }
   });

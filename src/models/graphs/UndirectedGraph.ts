@@ -1,7 +1,11 @@
 import UndirectedEdge from '@/models/edges/UndirectedEdge';
 import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
-import { AnimationSettings } from '@/types/animations';
+import {
+  BatchModificationAnimationSettings,
+  SingleModificationAnimationSettings
+} from '@/types/animations';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
+import { createAnimationsSettingsForSingleModification } from '@/utils/animations';
 
 import Graph from './Graph';
 
@@ -26,17 +30,21 @@ export default class UndirectedGraph<V, E> extends Graph<
 
   override insertVertex(
     { key, value }: VertexData<V>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): UndirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new UndirectedGraphVertex<V, E>(key, value),
-      animationSettings
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        )
     );
   }
 
   override insertEdge(
     { key, value, vertices: [vertex1key, vertex2key] }: UndirectedEdgeData<E>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): UndirectedEdge<E, V> {
     if (!vertex1key || !vertex2key) {
       throw new Error(`Edge ${key} must have two vertices`);
@@ -59,14 +67,21 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (vertex1key !== vertex2key) {
       vertex2.addEdge(edge);
     }
-    this.insertEdgeObject(edge, animationSettings);
+    this.insertEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge;
   }
 
   override removeEdge(
     key: string,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): E {
     const edge = this.getEdge(key);
 
@@ -78,18 +93,16 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (!edge.isLoop) {
       edge.vertices[1].removeEdge(key);
     }
-    this.removeEdgeObject(edge, animationSettings);
+    this.removeEdgeObject(
+      edge,
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
+    );
 
     return edge.value;
-  }
-
-  override orderEdgesBetweenVertices(
-    edges: Array<UndirectedEdge<E, V>>
-  ): Array<{ edge: UndirectedEdge<E, V>; order: number }> {
-    return edges.map((edge, index) => ({
-      edge,
-      order: index
-    }));
   }
 
   override insertBatch(
@@ -100,7 +113,7 @@ export default class UndirectedGraph<V, E> extends Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<UndirectedEdgeData<E>>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void {
     // Insert edges and vertices to the graph model
     vertices?.forEach(data => this.insertVertex(data, null));
@@ -116,11 +129,20 @@ export default class UndirectedGraph<V, E> extends Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<UndirectedEdgeData<E>>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void {
     this.clear();
     setTimeout(() => {
       this.insertBatch(batchData, animationSettings);
     }, 0);
+  }
+
+  override orderEdgesBetweenVertices(
+    edges: Array<UndirectedEdge<E, V>>
+  ): Array<{ edge: UndirectedEdge<E, V>; order: number }> {
+    return edges.map((edge, index) => ({
+      edge,
+      order: index
+    }));
   }
 }

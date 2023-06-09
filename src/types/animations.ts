@@ -1,7 +1,6 @@
 import { EasingFunctionFactory } from 'react-native-reanimated';
 
-import { DirectedGraph, UndirectedGraph } from '..';
-import { DirectedEdgeData, UndirectedEdgeData } from './data';
+import { DeepRequired } from './utils';
 
 export type AnimationSettings = {
   duration?: number;
@@ -9,15 +8,32 @@ export type AnimationSettings = {
   onComplete?: () => void;
 };
 
-export type AnimationSettingWithDefaults = Required<AnimationSettings>;
+export type SingleModificationAnimationSettings =
+  | AnimationSettings
+  | {
+      component?: AnimationSettings;
+      layout?: AnimationSettings;
+    };
 
-export type TimelineAnimationSettings = {
-  easing: EasingFunctionFactory;
-  onComplete?: () => void;
+export type BatchModificationAnimationSettings =
+  | AnimationSettings
+  | {
+      components?: AnimationSettings;
+      layout?: AnimationSettings;
+    }
+  | {
+      edges?: Record<string, AnimationSettings>;
+      vertices?: Record<string, AnimationSettings>;
+      layout?: AnimationSettings;
+    };
+
+export type AnimationsSettings = {
+  layout?: AnimationSettings;
+  vertices: Record<string, AnimationSettings | undefined>;
+  edges: Record<string, AnimationSettings | undefined>;
 };
 
-export type EdgeDataType<V, E, G> = G extends DirectedGraph<V, E>
-  ? DirectedEdgeData<E>
-  : G extends UndirectedGraph<V, E>
-  ? UndirectedEdgeData<E>
-  : never;
+export type AnimationSettingsWithDefaults = DeepRequired<
+  AnimationSettings,
+  ['duration' | 'easing']
+>;

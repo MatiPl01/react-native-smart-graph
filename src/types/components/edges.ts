@@ -1,9 +1,13 @@
 import { SharedValue } from 'react-native-reanimated';
 
+import { AnimationSettingsWithDefaults } from '@/types/animations';
 import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 import {
   DirectedStraightEdgeRenderers,
+  EdgeArrowRenderFunction,
+  EdgeLabelRendererFunction,
+  EdgeRenderFunction,
   UndirectedStraightEdgeRenderers
 } from '@/types/renderer';
 import {
@@ -25,6 +29,7 @@ type SharedEdgeComponentProps = {
   onLabelRender?: (key: string, position: AnimatedVector) => void;
   animatedOrder: SharedValue<number>;
   animatedEdgesCount: SharedValue<number>;
+  animationSettings: AnimationSettingsWithDefaults;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =
@@ -70,10 +75,13 @@ export type EdgeComponentProps<E, V> = Omit<
   | DirectedCurvedEdgeComponentProps<E, V>
   | UndirectedStraightEdgeComponentProps<E, V>
   | DirectedStraightEdgeComponentProps<E, V>,
-  'animationProgress'
+  'animationProgress' | 'renderers'
 > & {
   order: number;
   edgesCount: number;
   removed: boolean;
+  edgeRenderer: EdgeRenderFunction<E>;
+  arrowRenderer?: EdgeArrowRenderFunction;
+  labelRenderer?: EdgeLabelRendererFunction<E>;
   onRemove: (key: string) => void;
 };

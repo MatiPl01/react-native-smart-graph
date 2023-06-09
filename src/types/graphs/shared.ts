@@ -1,8 +1,7 @@
-// TODO - add documentation to all interfaces
-
 import {
-  AnimationSettings,
-  AnimationSettingWithDefaults
+  AnimationsSettings,
+  BatchModificationAnimationSettings,
+  SingleModificationAnimationSettings
 } from '@/types/animations';
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 
@@ -24,17 +23,19 @@ export interface Edge<E, V> {
 export type GraphConnections = Record<string, Array<string>>;
 
 export type GraphObserver = {
-  graphChanged(animationSettings: AnimationSettingWithDefaults): void;
+  graphChanged(animationsSettings: AnimationsSettings): void;
 };
+
+export type OrderedEdges<E, V> = Array<{
+  edge: Edge<E, V>;
+  order: number;
+  edgesCount: number;
+}>;
 
 export interface Graph<V, E> {
   get vertices(): Array<Vertex<V, E>>;
   get edges(): Array<Edge<E, V>>;
-  get orderedEdges(): Array<{
-    edge: Edge<E, V>;
-    order: number;
-    edgesCount: number;
-  }>;
+  get orderedEdges(): OrderedEdges<E, V>;
   get connections(): GraphConnections;
   isDirected(): boolean;
   addObserver(observer: GraphObserver): void;
@@ -46,13 +47,40 @@ export interface Graph<V, E> {
   getEdge(key: string): Edge<E, V> | null;
   insertVertex(
     data: VertexData<V>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): Vertex<V, E>;
   insertEdge(
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): Edge<E, V>;
-  removeVertex(key: string, animationSettings?: AnimationSettings | null): V;
-  removeEdge(key: string, animationSettings?: AnimationSettings | null): E;
-  clear(animationSettings?: AnimationSettings | null): void;
+  removeVertex(
+    key: string,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): V;
+  removeEdge(
+    key: string,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): E;
+  insertBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
+  removeBatch(
+    data: {
+      vertices: Array<string>;
+      edges: Array<string>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
+  replaceBatch(
+    data: {
+      vertices?: Array<VertexData<V>>;
+      edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
+  clear(animationSettings?: BatchModificationAnimationSettings | null): void;
 }

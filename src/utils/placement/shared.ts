@@ -1,17 +1,18 @@
 import potpack from 'potpack';
 
 import { Vertex } from '@/types/graphs';
-import { Dimensions } from '@/types/layout';
+import { BoundingRect } from '@/types/layout';
 import {
   GraphLayout,
   PlacedVerticesPositions
 } from '@/types/settings/placement';
 
-export const calcContainerDimensions = (
+export const calcContainerBoundingRect = (
   placedVertices: PlacedVerticesPositions,
   minVertexSpacing: number,
   vertexRadius: number
-): Dimensions => {
+): BoundingRect => {
+  'worklet';
   let minX = 0;
   let maxX = 0;
   let minY = 0;
@@ -25,8 +26,10 @@ export const calcContainerDimensions = (
   }
 
   return {
-    width: maxX - minX + 2 * vertexRadius + minVertexSpacing,
-    height: maxY - minY + 2 * vertexRadius + minVertexSpacing
+    top: minY - vertexRadius - minVertexSpacing / 2,
+    bottom: maxY + vertexRadius + minVertexSpacing / 2,
+    left: minX - vertexRadius - minVertexSpacing / 2,
+    right: maxX + vertexRadius + minVertexSpacing / 2
   };
 };
 
@@ -44,13 +47,14 @@ export const defaultSortComparator = <V, E>(
 };
 
 export const arrangeGraphComponents = (
-  graphComponents: Array<GraphLayout>
+  graphComponents: Array<GraphLayout>,
+  vertexRadius: number
 ): GraphLayout => {
   // Prepare graph components for packing
   const preparedComponents = graphComponents.map(
-    ({ width: w, height: h, verticesPositions }) => ({
-      w,
-      h,
+    ({ boundingRect: { top, bottom, left, right }, verticesPositions }) => ({
+      w: right - left,
+      h: bottom - top,
       x: 0,
       y: 0,
       verticesPositions
@@ -59,19 +63,20 @@ export const arrangeGraphComponents = (
   // Pack graph components on the screen
   const packed = potpack(preparedComponents);
   // Translate graph components to correct positions on the screen
-  return {
-    width: packed.w,
-    height: packed.h,
-    verticesPositions: Object.fromEntries(
-      preparedComponents.flatMap(({ verticesPositions, x, y, w, h }) =>
-        Object.entries(verticesPositions).map(([key, { x: vx, y: vy }]) => [
-          key,
-          {
-            x: vx + x + (w - packed.w) / 2,
-            y: vy + y + (h - packed.h) / 2
-          }
-        ])
-      )
+  const verticesPositions = Object.fromEntries(
+    preparedComponents.flatMap(({ verticesPositions: positions, x, y, w, h }) =>
+      Object.entries(positions).map(([key, { x: vx, y: vy }]) => [
+        key,
+        {
+          x: vx + x + (w - packed.w) / 2,
+          y: vy + y + (h - packed.h) / 2
+        }
+      ])
     )
+  );
+
+  return {
+    verticesPositions,
+    boundingRect: calcContainerBoundingRect(verticesPositions, 0, vertexRadius)
   };
 };

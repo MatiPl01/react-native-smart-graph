@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
-import { AnimationSettings } from '@/types/animations';
+import {
+  AnimationsSettings,
+  BatchModificationAnimationSettings
+} from '@/types/animations';
+import { SingleModificationAnimationSettings } from '@/types/animations';
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
@@ -10,6 +13,7 @@ import {
   Vertex
 } from '@/types/graphs';
 import { Mutable } from '@/types/utils';
+import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 
 export default abstract class Graph<
   V,
@@ -79,17 +83,17 @@ export default abstract class Graph<
 
   abstract insertVertex(
     data: VertexData<V>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): GV;
 
   abstract insertEdge(
     data: ED,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): GE;
 
   abstract removeEdge(
     key: string,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: SingleModificationAnimationSettings | null
   ): E;
 
   abstract orderEdgesBetweenVertices(
@@ -101,7 +105,7 @@ export default abstract class Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<ED>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void;
 
   abstract replaceBatch(
@@ -109,7 +113,7 @@ export default abstract class Graph<
       vertices?: Array<VertexData<V>>;
       edges?: Array<ED>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void;
 
   removeBatch(
@@ -117,18 +121,26 @@ export default abstract class Graph<
       vertices?: Array<string>;
       edges?: Array<string>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: BatchModificationAnimationSettings | null
   ): void {
     // Remove edges and vertices from graph
     data.edges?.forEach(key => this.removeEdge(key, null));
     data.vertices?.forEach(key => this.removeVertex(key, null));
     // Notify observers after all changes to the graph model are made
     if (animationSettings !== null) {
-      this.notifyChange(animationSettings);
+      this.notifyChange(
+        createAnimationsSettingsForBatchModification(
+          {
+            edges: data.edges,
+            vertices: data.vertices
+          },
+          animationSettings
+        )
+      );
     }
   }
 
-  clear(animationSettings?: AnimationSettings | null): void {
+  clear(animationSettings?: BatchModificationAnimationSettings | null): void {
     // Clear the whole graph
     (this.vertices$ as Mutable<typeof this.vertices$>) = {};
     (this.edges$ as Mutable<typeof this.edges$>) = {};
@@ -136,7 +148,15 @@ export default abstract class Graph<
       {};
     // Notify observers after all changes to the graph model are made
     if (animationSettings !== null) {
-      this.notifyChange(animationSettings);
+      this.notifyChange(
+        createAnimationsSettingsForBatchModification(
+          {
+            vertices: Object.keys(this.vertices$),
+            edges: Object.keys(this.edges$)
+          },
+          animationSettings
+        )
+      );
     }
   }
 
@@ -169,7 +189,7 @@ export default abstract class Graph<
     return res ? [...res] : []; // Create a copy of the array
   }
 
-  removeVertex(key: string, animationSettings?: AnimationSettings | null): V {
+  removeVertex(key: string, animationsSettings?: AnimationsSettings | null): V {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
     }
@@ -180,8 +200,8 @@ export default abstract class Graph<
     });
     delete this.vertices$[key];
     // Notify change if notifyObservers is set to true
-    if (animationSettings !== null) {
-      this.notifyChange(animationSettings);
+    if (animationsSettings !== null) {
+      this.notifyChange(animationsSettings);
     }
 
     return vertex.value;
@@ -189,7 +209,7 @@ export default abstract class Graph<
 
   protected insertVertexObject(
     vertex: GV,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: AnimationsSettings | null
   ): GV {
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
@@ -204,7 +224,7 @@ export default abstract class Graph<
 
   protected insertEdgeObject(
     edge: GE,
-    animationSettings?: AnimationSettings | null
+    animationsSettings?: AnimationsSettings | null
   ): GE {
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
@@ -228,15 +248,15 @@ export default abstract class Graph<
     // Add edge to edges
     this.edges$[edge.key] = edge;
     // Notify change if notifyObservers is set to true
-    if (animationSettings !== null) {
-      this.notifyChange(animationSettings);
+    if (animationsSettings !== null) {
+      this.notifyChange(animationsSettings);
     }
     return edge;
   }
 
   protected removeEdgeObject(
     edge: GE,
-    animationSettings?: AnimationSettings | null
+    animationsSettings?: AnimationsSettings | null
   ): void {
     // Remove edge from edges between vertices
     const [vertex1, vertex2] = edge.vertices;
@@ -257,16 +277,19 @@ export default abstract class Graph<
     // Remove the edge from edges
     delete this.edges$[edge.key];
     // Notify change if notifyObservers is set to true
-    if (animationSettings !== null) {
-      this.notifyChange(animationSettings);
+    if (animationsSettings !== null) {
+      this.notifyChange(animationsSettings);
     }
   }
 
-  protected notifyChange(animationSettings?: AnimationSettings): void {
-    const settings = { ...DEFAULT_ANIMATION_SETTINGS, ...animationSettings };
-
+  protected notifyChange(animationsSettings?: AnimationsSettings): void {
     this.observers.forEach(observer => {
-      observer.graphChanged(settings);
+      observer.graphChanged(
+        animationsSettings || {
+          vertices: {},
+          edges: {}
+        }
+      );
     });
   }
 
