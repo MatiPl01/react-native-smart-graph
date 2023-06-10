@@ -1,3 +1,5 @@
+import { DeepRequiredAll } from '@/types/utils';
+
 export type ForcesStrategy = 'default';
 
 export type DefaultForcesStrategySettings = {
@@ -8,3 +10,9 @@ export type DefaultForcesStrategySettings = {
 };
 
 export type ForcesSettings = DefaultForcesStrategySettings;
+
+export type DefaultForcesStrategySettingsWithDefaults =
+  DeepRequiredAll<DefaultForcesStrategySettings>;
+
+export type ForcesSettingsWithDefaults =
+  DefaultForcesStrategySettingsWithDefaults;

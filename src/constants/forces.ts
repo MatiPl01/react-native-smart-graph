@@ -5,6 +5,6 @@ export const DEFAULT_FORCES_STRATEGY_SETTINGS: DeepRequiredAll<DefaultForcesStra
   {
     strategy: 'default',
     attractionScale: 1,
-    attractionForceFactor: 1,
-    repulsionScale: 1
+    attractionForceFactor: 3,
+    repulsionScale: 100000
   };

@@ -194,7 +194,7 @@ export const updateGraphEdgesData = <V, E>(
   const currentEdgesKeys = new Set(currentEdges.map(e => e.edge.key));
 
   // Mark edges as removed if there were removed from the graph model
-  Object.keys(currentEdgesKeys).forEach(key => {
+  Object.keys(oldEdgesData).forEach(key => {
     if (!currentEdgesKeys.has(key)) {
       updatedEdgesData[key] = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

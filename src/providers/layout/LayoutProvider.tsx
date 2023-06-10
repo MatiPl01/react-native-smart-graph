@@ -4,8 +4,6 @@ import { Graph } from '@/types/graphs';
 import { GraphAnimationsSettingsWithDefaults } from '@/types/settings/graph/animations';
 import { GraphLayoutSettingsWithDefaults } from '@/types/settings/graph/layout';
 
-type GraphLayoutContextType = {};
-
 type GraphLayoutProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   layoutSettings: GraphLayoutSettingsWithDefaults;

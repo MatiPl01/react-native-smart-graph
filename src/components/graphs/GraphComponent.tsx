@@ -1,9 +1,9 @@
 /* eslint-disable import/no-unused-modules */
 import { Group, Rect } from '@shopify/react-native-skia';
-import { useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
-import { useComponentsDataContext } from '@/contexts/ComponentsDataContext';
+import { useComponentsDataContext } from '@/providers/ComponentsDataProvider';
 import { EdgeComponentProps } from '@/types/components';
 import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { calcContainerBoundingRect } from '@/utils/placement';
@@ -16,7 +16,7 @@ export type GraphComponentProps = {
   onRender: (containerBounds: BoundingRect) => void;
 };
 
-export default function GraphComponent<E, V>({
+export default memo(function GraphComponent<E, V>({
   boundingRect,
   onRender
 }: GraphComponentProps) {
@@ -135,4 +135,4 @@ export default function GraphComponent<E, V>({
       {renderVertices()}
     </Group>
   );
-}
+});

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/no-unused-modules */
 import {
   createContext,
@@ -22,7 +23,10 @@ import {
 } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
-import { GraphSettingsWithDefaults } from '@/types/settings';
+import {
+  AnimationSettingsWithDefaults,
+  GraphSettingsWithDefaults
+} from '@/types/settings';
 import {
   updateGraphEdgesData,
   updateGraphVerticesData
@@ -33,6 +37,7 @@ type ComponentsDataContextType<V, E> = {
   edgesData: Record<string, EdgeComponentData<E, V>>;
   verticesRenderData: Record<string, VertexComponentRenderData>;
   edgesRenderData: Record<string, EdgeComponentRenderData>;
+  layoutAnimationSettings: AnimationSettingsWithDefaults;
   handleVertexRender: VertexRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
@@ -119,45 +124,47 @@ export default function ComponentsDataProvider<V, E>({
     );
   }, [orderedEdges]);
 
+  const layoutAnimationSettings = useMemo<AnimationSettingsWithDefaults>(
+    () => ({
+      ...settings.animations.layout,
+      ...animationsSettings.layout
+    }),
+    [animationsSettings, settings.animations.layout]
+  );
+
   const handleVertexRender = useCallback<VertexRenderHandler>(
     (key, renderValues) => {
-      setVerticesRenderData(prev => {
-        prev[key] = renderValues;
-        return { ...prev };
-      });
+      setVerticesRenderData(prev => ({ ...prev, [key]: renderValues }));
     },
     []
   );
 
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
     setVerticesData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
     setVerticesRenderData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
   }, []);
 
   const handleEdgeRender = useCallback<EdgeRenderHandler>(
     (key, renderValues) => {
-      setEdgesRenderData(prev => {
-        prev[key] = renderValues;
-        return { ...prev };
-      });
+      setEdgesRenderData(prev => ({ ...prev, [key]: renderValues }));
     },
     []
   );
 
   const handleEdgeRemove = useCallback<EdgeRemoveHandler>(key => {
     setEdgesData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
     setEdgesRenderData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
   }, []);
 
@@ -167,12 +174,13 @@ export default function ComponentsDataProvider<V, E>({
       edgesData,
       verticesRenderData,
       edgesRenderData,
+      layoutAnimationSettings,
       handleVertexRender,
       handleEdgeRender,
       handleVertexRemove,
       handleEdgeRemove
     }),
-    [verticesData, edgesData]
+    [verticesData, edgesData, verticesRenderData, edgesRenderData]
   );
 
   return (

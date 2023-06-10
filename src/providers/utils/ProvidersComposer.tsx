@@ -1,14 +1,14 @@
 import React, { cloneElement, PropsWithChildren } from 'react';
 
-type ContextProviderComposerProps = PropsWithChildren<{
+type ProvidersComposerProps = PropsWithChildren<{
   providers: Array<JSX.Element>;
 }>;
 
 // https://frontendbyte.com/how-to-use-react-context-api-usereducer-hooks/
-export default function ContextProviderComposer({
+export default function ProvidersComposer({
   providers,
   children: initialChildren
-}: ContextProviderComposerProps) {
+}: ProvidersComposerProps) {
   return (
     <>
       {providers.reduceRight(

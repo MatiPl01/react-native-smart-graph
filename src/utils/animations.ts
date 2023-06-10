@@ -32,7 +32,9 @@ export function animateVerticesToFinalPositions(
         },
         // Call onComplete only once, when the last vertex animation is complete
         onComplete && idx === finalPositionsEntries.length - 1
-          ? () => {
+          ? finished => {
+              'worklet';
+              if (!finished) return;
               runOnJS(onComplete)();
             }
           : undefined
@@ -79,10 +81,10 @@ export const createAnimationsSettingsForSingleModification = (
 
   if (isAnimationSettingsObject(animationsSettings)) {
     return {
-      layout: animationsSettings,
+      layout: { ...animationsSettings, onComplete: undefined },
       vertices: component.vertex
         ? {
-            [component.vertex]: { ...animationsSettings, onComplete: undefined }
+            [component.vertex]: animationsSettings
           }
         : {},
       edges: component.edge
@@ -92,13 +94,10 @@ export const createAnimationsSettingsForSingleModification = (
   }
 
   return {
-    layout: animationsSettings.layout,
+    layout: { ...animationsSettings.layout, onComplete: undefined },
     vertices: component.vertex
       ? {
-          [component.vertex]: {
-            ...animationsSettings.component,
-            onComplete: undefined
-          }
+          [component.vertex]: animationsSettings.component
         }
       : {},
     edges: component.edge
@@ -125,11 +124,13 @@ export const createAnimationsSettingsForBatchModification = (
 
   if (isAnimationSettingsObject(animationsSettings)) {
     return {
-      layout: animationsSettings,
+      layout: { ...animationsSettings, onComplete: undefined },
       vertices: Object.fromEntries(
-        components.vertices?.map(key => [
+        components.vertices?.map((key, idx) => [
           key,
-          { ...animationsSettings, onComplete: undefined }
+          idx === components.vertices.length - 1
+            ? animationsSettings
+            : { ...animationsSettings, onComplete: undefined }
         ]) || []
       ),
       edges: Object.fromEntries(
@@ -145,7 +146,7 @@ export const createAnimationsSettingsForBatchModification = (
     isBatchModificationSettingsObjectWithEdgesAndVertices(animationsSettings)
   ) {
     return {
-      layout: animationsSettings.layout,
+      layout: animationsSettings.layout, // TODO
       vertices: Object.fromEntries(
         components.vertices?.map(key => [
           key,

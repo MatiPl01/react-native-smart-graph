@@ -13,16 +13,30 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
-export const updateVerticesPositions = (
-  forces: Record<string, Vector>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>
-) => {
+const calcRepellingForce = (
+  from: Vector,
+  to: Vector,
+  repellingFactorGetter: (distance: number) => number
+): Vector => {
   'worklet';
-  Object.entries(verticesPositions).forEach(([vertexKey, vertexPosition]) => {
-    const force = forces[vertexKey] as Vector;
-    vertexPosition.x.value += force.x;
-    vertexPosition.y.value += force.y;
-  });
+  const distance = distanceBetweenVectors(from, to);
+  const directionVector = calcUnitVector(from, to);
+  const factor = repellingFactorGetter(distance);
+
+  return multiplyVector(directionVector, factor);
+};
+
+const calcAttractiveForce = (
+  from: Vector,
+  to: Vector,
+  attractionFactorGetter: (distance: number) => number
+): Vector => {
+  'worklet';
+  const distance = distanceBetweenVectors(from, to);
+  const directionVector = calcUnitVector(from, to);
+  const factor = attractionFactorGetter(distance);
+
+  return multiplyVector(directionVector, factor);
 };
 
 const calcResultantAttractionForce = (
@@ -93,28 +107,14 @@ export const calcForces = (
   return forces;
 };
 
-const calcAttractiveForce = (
-  from: Vector,
-  to: Vector,
-  attractionFactorGetter: (distance: number) => number
-): Vector => {
+export const updateVerticesPositions = (
+  forces: Record<string, Vector>,
+  verticesPositions: Record<string, AnimatedVectorCoordinates>
+) => {
   'worklet';
-  const distance = distanceBetweenVectors(from, to);
-  const directionVector = calcUnitVector(from, to);
-  const factor = attractionFactorGetter(distance);
-
-  return multiplyVector(directionVector, factor);
-};
-
-const calcRepellingForce = (
-  from: Vector,
-  to: Vector,
-  repellingFactorGetter: (distance: number) => number
-): Vector => {
-  'worklet';
-  const distance = distanceBetweenVectors(from, to);
-  const directionVector = calcUnitVector(from, to);
-  const factor = repellingFactorGetter(distance);
-
-  return multiplyVector(directionVector, factor);
+  Object.entries(verticesPositions).forEach(([vertexKey, vertexPosition]) => {
+    const force = forces[vertexKey] as Vector;
+    vertexPosition.x.value += force.x;
+    vertexPosition.y.value += force.y;
+  });
 };
