@@ -25,6 +25,6 @@ export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };
 
-export type DeepRequiredAll<T> = T extends object
-  ? Required<{ [K in keyof T]: NonNullable<DeepRequiredAll<T[K]>> }>
-  : T;
+export type DeepRequiredAll<T> = {
+  [K in keyof T]: DeepRequiredAll<T[K]>;
+} & Required<T>;

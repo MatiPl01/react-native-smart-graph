@@ -1,8 +1,8 @@
 import { memo, useEffect } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
+import { VertexRemoveHandler, VertexRenderHandler } from '@/types/components';
 import { Vertex } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
 import { VertexRenderFunction } from '@/types/renderer';
 import {
   AnimationSettingsWithDefaults,
@@ -12,37 +12,44 @@ import { updateComponentAnimationState } from '@/utils/components';
 
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
-  settings: Required<VertexSettings>;
   renderer: VertexRenderFunction<V>;
+  componentSettings: Required<VertexSettings>;
   animationSettings: AnimationSettingsWithDefaults;
   removed: boolean;
-  onRender: (key: string, position: AnimatedVectorCoordinates) => void;
-  onRemove: (key: string) => void;
+  onRender: VertexRenderHandler;
+  onRemove: VertexRemoveHandler;
 };
 
 function VertexComponent<V, E>({
   vertex,
-  settings,
   renderer,
   removed,
   onRender,
   onRemove,
+  componentSettings,
   animationSettings
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
-  // POSITION
   // Current vertex position
   const positionX = useSharedValue(0);
   const positionY = useSharedValue(0);
-
-  // ANIMATION
+  // Current vertex scale
+  // used to change vertex scale from the outside (e.g. when vertex is selected)
+  const scale = useSharedValue(1);
+  // Current vertex radius
+  // must be updated by the renderer (used to properly position edge arrows, etc.)
+  const currentRadius = useSharedValue(0);
   // Vertex render animation progress
   const animationProgress = useSharedValue(0);
 
   useEffect(() => {
     // Call onRender callback on mount
-    onRender(key, { x: positionX, y: positionY });
+    onRender(key, {
+      position: { x: positionX, y: positionY },
+      scale,
+      currentRadius
+    });
   }, [key]);
 
   useEffect(() => {
@@ -59,7 +66,9 @@ function VertexComponent<V, E>({
   return renderer({
     key,
     data: vertex.value,
-    radius: settings.radius,
+    scale,
+    radius: componentSettings.radius,
+    currentRadius,
     position: { x: positionX, y: positionY },
     animationProgress
   });

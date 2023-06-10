@@ -4,11 +4,11 @@ import { DeepRequiredAll } from '@/types/utils';
 export type GraphLayoutType = 'auto' | 'forces';
 
 export type AutoLayoutSettings = {
-  type: 'auto';
+  managedBy: 'placement';
 };
 
 export type ForcesLayoutSettings = {
-  type: 'forces';
+  managedBy: 'forces';
   settings?: ForcesSettings;
 };
 

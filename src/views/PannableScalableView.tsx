@@ -1,7 +1,8 @@
 import { Canvas, Group, Vector } from '@shopify/react-native-skia';
-import {
+import React, {
   Children,
   cloneElement,
+  memo,
   PropsWithChildren,
   ReactElement,
   useCallback,
@@ -20,16 +21,17 @@ import {
 } from 'react-native-reanimated';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { GraphComponentPrivateProps } from '@/components/graphs/GraphComponent';
+import { GraphComponentProps } from '@/components/graphs/GraphComponent';
 import {
   AUTO_SIZING_TIMEOUT,
   DEFAULT_SCALES,
   INITIAL_SCALE
 } from '@/constants/views';
-import { useGraphEventsContext } from '@/context/graphEvents';
+import { useGraphEventsContext } from '@/contexts/events';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
+import { deepMemoComparator } from '@/utils/equality';
 import { fixedWithDecay } from '@/utils/reanimated';
 import {
   calcContainerScale,
@@ -47,7 +49,7 @@ type PannableScalableViewProps = PropsWithChildren<{
   controls?: boolean;
 }>;
 
-export default function PannableScalableView<V, E>({
+function PannableScalableView({
   children,
   scales = DEFAULT_SCALES,
   initialScale = INITIAL_SCALE,
@@ -467,15 +469,15 @@ export default function PannableScalableView<V, E>({
       )
     : canvasGestureHandler;
 
+  console.log('PannableScalableView');
+
   return (
     <View style={styles.container}>
       <GestureDetector gesture={gestureHandler}>
         <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
           <Group transform={transform}>
             {Children.map(children, child => {
-              const childElement = child as ReactElement<
-                GraphComponentPrivateProps<V, E>
-              >;
+              const childElement = child as ReactElement<GraphComponentProps>;
               return cloneElement(childElement, {
                 boundingRect: {
                   left: containerLeft,
@@ -483,9 +485,9 @@ export default function PannableScalableView<V, E>({
                   top: containerTop,
                   bottom: containerBottom
                 },
-                onRender: handleGraphRender,
+                onRender: handleGraphRender
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                graphEventsContext: graphEventsContext!
+                // graphEventsContext: graphEventsContext!
               });
             })}
           </Group>
@@ -510,3 +512,15 @@ const styles = StyleSheet.create({
     flex: 1
   }
 });
+
+// Rerender only on prop changes
+export default memo(
+  PannableScalableView,
+  deepMemoComparator({
+    // shallow compare the graph object property of the child component
+    // to prevent deep checking a large graph model structure
+    // (graph should be memoized using the useMemo hook to prevent
+    // unnecessary rerenders)
+    shallow: ['children.graph']
+  })
+) as typeof PannableScalableView;

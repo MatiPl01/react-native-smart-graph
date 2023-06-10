@@ -7,7 +7,8 @@ import { EdgeLabelRendererProps } from '@/types/renderer';
 
 export default function DefaultEdgeLabelRenderer<E>({
   key,
-  centerPosition,
+  centerX,
+  centerY,
   height,
   edgeRotation,
   animationProgress
@@ -16,8 +17,8 @@ export default function DefaultEdgeLabelRenderer<E>({
   const font = useFont(FONTS.rubikFont, FONT_SIZE);
 
   const wrapperTransform = useDerivedValue(() => [
-    { translateX: centerPosition.value.x },
-    { translateY: centerPosition.value.y },
+    { translateX: centerX.value },
+    { translateY: centerY.value },
     { rotate: edgeRotation.value },
     { scale: height.value / FONT_SIZE }
   ]);

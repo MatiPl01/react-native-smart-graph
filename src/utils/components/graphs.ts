@@ -80,18 +80,18 @@ export const updateGraphSettingsWithDefaults = <V, E>(
 const updateGraphLayoutSettingsWithDefaults = (
   settings?: GraphLayoutSettings
 ): GraphLayoutSettingsWithDefaults => {
-  switch (settings?.type) {
+  switch (settings?.managedBy) {
     case 'forces':
       return {
-        type: 'forces',
+        managedBy: 'forces',
         settings: {
           ...DEFAULT_FORCES_STRATEGY_SETTINGS,
           ...settings
         }
       };
-    case 'auto':
+    case 'placement':
     default:
-      return { type: 'auto', ...settings };
+      return { managedBy: 'placement', ...settings };
   }
 };
 

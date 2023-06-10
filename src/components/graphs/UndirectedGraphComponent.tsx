@@ -1,8 +1,12 @@
+import { memo } from 'react';
+
+import GraphProvider from '@/contexts/GraphContext';
 import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
+import { deepMemoComparator } from '@/utils/equality';
 
-import GraphComponent, { GraphComponentPrivateProps } from './GraphComponent';
+import GraphComponent, { GraphComponentProps } from './GraphComponent';
 
 type UndirectedGraphComponentProps<V, E> = {
   graph: UndirectedGraph<V, E>;
@@ -10,17 +14,29 @@ type UndirectedGraphComponentProps<V, E> = {
   renderers?: UndirectedGraphRenderers<V, E>;
 };
 
-function UndirectedGraphComponent<V, E>(
-  props: UndirectedGraphComponentProps<V, E> & GraphComponentPrivateProps<V, E>
-) {
-  return <GraphComponent {...props} />;
+function UndirectedGraphComponent<V, E>({
+  boundingRect,
+  onRender,
+  ...providerProps
+}: UndirectedGraphComponentProps<V, E> & GraphComponentProps) {
+  return (
+    <GraphProvider {...providerProps}>
+      <GraphComponent boundingRect={boundingRect} onRender={onRender} />
+    </GraphProvider>
+  );
 }
 
-export default <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
-  return (
-    <UndirectedGraphComponent
-      {...(props as UndirectedGraphComponentProps<V, E> &
-        GraphComponentPrivateProps<V, E>)}
-    />
-  );
-};
+export default memo(
+  <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
+    return (
+      <UndirectedGraphComponent
+        {...(props as UndirectedGraphComponentProps<V, E> &
+          GraphComponentProps)}
+      />
+    );
+  },
+  deepMemoComparator({
+    shallow: ['graph'],
+    exclude: ['boundingRect']
+  })
+);

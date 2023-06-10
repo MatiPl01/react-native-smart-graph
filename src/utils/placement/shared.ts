@@ -2,10 +2,7 @@ import potpack from 'potpack';
 
 import { Vertex } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
-import {
-  GraphLayout,
-  PlacedVerticesPositions
-} from '@/types/settings/placement';
+import { GraphLayout, PlacedVerticesPositions } from '@/types/settings';
 
 export const calcContainerBoundingRect = (
   placedVertices: PlacedVerticesPositions,
