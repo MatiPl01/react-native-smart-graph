@@ -1,36 +1,31 @@
 import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
 
-import { useGraphObserver } from '@/hooks';
 import {
+  EdgeRemoveHandler,
+  EdgeRenderHandler,
   GraphEdgeData,
   GraphVertexData,
   VertexRemoveHandler,
   VertexRenderHandler
 } from '@/types/components';
 import { Graph } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
-import { GraphSettings, GraphSettingsWithDefaults } from '@/types/settings';
+import { GraphRenderers } from '@/types/renderer';
+import { GraphSettings } from '@/types/settings';
 import {
   updateGraphRenderersWithDefaults,
   updateGraphSettingsWithDefaults
 } from '@/utils/components';
 
-import GraphPlacementLayoutProvider, {
-  useGraphPlacementLayoutContext
-} from './layout/PlacementLayoutContext';
+import ComponentsDataProvider from './ComponentsDataContext';
 import ContextProviderComposer from './utils/ContextProviderComposer';
 
 export type GraphContextType<V, E> = {
   vertices: Record<string, GraphVertexData<V, E>>;
   edges: Record<string, GraphEdgeData<E, V>>;
   handleVertexRender: VertexRenderHandler;
-  handleEdgeRender: (
-    key: string,
-    labelPosition: AnimatedVectorCoordinates
-  ) => void;
+  handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
-  handleEdgeRemove: (key: string) => void;
+  handleEdgeRemove: EdgeRemoveHandler;
 };
 
 const GraphContext = createContext({});
@@ -60,7 +55,7 @@ export default function GraphProvider<V, E>({
 }: GraphProviderProps<V, E>) {
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
-    [settings]
+    [graph, settings]
   );
 
   const memoRenderers = useMemo(
@@ -75,50 +70,23 @@ export default function GraphProvider<V, E>({
 
   const providers = useMemo(
     () => [
-      <GraphPlacementLayoutProvider
-        animationsSettings={memoSettings.animations}
+      <ComponentsDataProvider
+        graph={graph}
+        settings={memoSettings}
+        renderers={memoRenderers}
       />
+      // <GraphLayoutProvider
+      //   graph={graph}
+      //   layoutSettings={memoSettings.layout}
+      //   animationsSettings={memoSettings.animations}
+      // />
     ],
-    [settings]
+    [memoSettings]
   );
 
   return (
     <ContextProviderComposer providers={providers}>
-      <InnerGraphProvider
-        graph={graph}
-        settings={memoSettings}
-        renderers={memoRenderers}>
-        {children}
-      </InnerGraphProvider>
+      {children}
     </ContextProviderComposer>
-  );
-}
-
-type InnerGraphProviderProps<V, E> = PropsWithChildren<{
-  graph: Graph<V, E>;
-  settings: GraphSettingsWithDefaults<V, E>;
-  renderers: GraphRenderersWithDefaults<V, E>;
-}>;
-
-function InnerGraphProvider<V, E>({
-  children,
-  ...data
-}: InnerGraphProviderProps<V, E>) {
-  // GRAPH OBSERVER
-  const [graphData] = useGraphObserver(data.graph);
-  // LAYOUT
-  // Placement
-  const placementSetters = useGraphPlacementLayoutContext();
-
-  const value: GraphContextType<V, E> = useMemo(
-    () => ({
-      data,
-      setters: placementSetters
-    }),
-    [data]
-  );
-
-  return (
-    <GraphContext.Provider value={value}>{children}</GraphContext.Provider>
   );
 }

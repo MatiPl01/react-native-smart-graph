@@ -1,4 +1,3 @@
-import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
 import { Vertex } from '@/types/graphs';
@@ -9,24 +8,23 @@ import {
   VertexSettingsWithDefaults
 } from '@/types/settings';
 
-export type GraphVertexData<V, E> = {
+export type VertexComponentData<V, E> = {
   vertex: Vertex<V, E>;
   removed: boolean;
-  targetPosition: Vector;
-  animatedPosition: AnimatedVectorCoordinates;
-  currentRadius: SharedValue<number>;
   componentSettings: VertexSettingsWithDefaults;
   animationSettings: AnimationSettingsWithDefaults;
   renderer: VertexRenderFunction<V>;
 };
 
+export type VertexComponentRenderData = {
+  scale: SharedValue<number>;
+  position: AnimatedVectorCoordinates;
+  currentRadius: SharedValue<number>;
+};
+
 export type VertexRenderHandler = (
   key: string,
-  animatedValues: {
-    position: AnimatedVectorCoordinates;
-    scale: SharedValue<number>;
-    currentRadius: SharedValue<number>;
-  }
+  renderData: VertexComponentRenderData
 ) => void;
 
 export type VertexRemoveHandler = (key: string) => void;

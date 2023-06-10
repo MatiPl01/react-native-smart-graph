@@ -59,7 +59,9 @@ function UndirectedStraightEdgeComponent<E, V>({
   const v2Key = edge.vertices[1].key;
 
   useEffect(() => {
-    onRender?.(edge.key, { x: centerX, y: centerY });
+    onRender(edge.key, {
+      labelPosition: { x: centerX, y: centerY }
+    });
   }, [edge.key]);
 
   useAnimatedReaction(

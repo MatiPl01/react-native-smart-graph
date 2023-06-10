@@ -1,6 +1,6 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { DirectedEdge, UndirectedEdge } from '@/types/graphs';
+import { DirectedEdge, Edge, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   DirectedStraightEdgeRenderers,
@@ -17,6 +17,7 @@ import {
   CurvedEdgeSettings,
   EdgeArrowSettings,
   EdgeLabelSettings,
+  GraphSettingsWithDefaults,
   StraightEdgeSettings
 } from '@/types/settings';
 import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
@@ -30,7 +31,7 @@ type SharedEdgeComponentProps = {
   animatedOrder: SharedValue<number>;
   animatedEdgesCount: SharedValue<number>;
   animationSettings: AnimationSettingsWithDefaults;
-  onRender?: (key: string, labelPosition: AnimatedVectorCoordinates) => void;
+  onRender: EdgeRenderHandler;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =
@@ -87,14 +88,25 @@ export type EdgeComponentProps<E, V> = Omit<
   onRemove: (key: string) => void;
 };
 
-export type GraphEdgeData<E, V> = {
-  edge: EdgeComponentProps<E, V>['edge'];
+export type EdgeComponentData<E, V> = {
+  edge: Edge<E, V>;
   removed: boolean;
   order: number;
   edgesCount: number;
-  componentSettings: EdgeComponentProps<E, V>['componentSettings'];
+  componentSettings: GraphSettingsWithDefaults<V, E>['components']['edge'];
   animationSettings: AnimationSettingsWithDefaults;
   edgeRenderer: EdgeRenderFunction<E>;
   arrowRenderer?: EdgeArrowRenderFunction;
   labelRenderer?: EdgeLabelRendererFunction<E>;
 };
+
+export type EdgeComponentRenderData = {
+  labelPosition: AnimatedVectorCoordinates;
+};
+
+export type EdgeRenderHandler = (
+  key: string,
+  renderData: EdgeComponentRenderData
+) => void;
+
+export type EdgeRemoveHandler = (key: string) => void;

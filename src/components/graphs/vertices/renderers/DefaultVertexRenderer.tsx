@@ -18,10 +18,6 @@ export default function DefaultVertexRenderer<V>({
     radius * DEFAULT_VERTEX_RENDERER_SETTINGS.font.sizeRatio
   );
 
-  if (font === null) {
-    return null;
-  }
-
   useAnimatedReaction(
     () => ({
       currentProgress: animationProgress.value,
@@ -35,8 +31,12 @@ export default function DefaultVertexRenderer<V>({
   const transform = useDerivedValue(() => [
     { translateX: x.value - currentRadius.value },
     { translateY: y.value - currentRadius.value },
-    { scale: currentRadius.value / radius }
+    { scale: Math.max(0, currentRadius.value / radius) }
   ]);
+
+  if (font === null) {
+    return null;
+  }
 
   return (
     <Group transform={transform}>

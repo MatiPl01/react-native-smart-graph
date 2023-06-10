@@ -62,7 +62,9 @@ function DirectedStraightEdgeComponent<E, V>({
   const labelHeight = useSharedValue(0);
 
   useEffect(() => {
-    onRender?.(edge.key, { x: centerX, y: centerY });
+    onRender(edge.key, {
+      labelPosition: { x: centerX, y: centerY }
+    });
   }, [edge.key]);
 
   useAnimatedReaction(

@@ -70,7 +70,9 @@ function DirectedCurvedEdgeComponent<E, V>({
   });
 
   useEffect(() => {
-    onRender?.(edge.key, { x: parabolaX, y: parabolaY });
+    onRender(edge.key, {
+      labelPosition: { x: parabolaX, y: parabolaY }
+    });
   }, [edge.key]);
 
   useAnimatedReaction(

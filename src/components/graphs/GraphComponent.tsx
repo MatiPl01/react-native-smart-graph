@@ -1,8 +1,10 @@
+/* eslint-disable import/no-unused-modules */
 import { Group, Rect } from '@shopify/react-native-skia';
-import { memo, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
-import { useGraphContext } from '@/contexts/GraphContext';
+import { useComponentsDataContext } from '@/contexts/ComponentsDataContext';
+import { EdgeComponentProps } from '@/types/components';
 import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { calcContainerBoundingRect } from '@/utils/placement';
 
@@ -14,16 +16,20 @@ export type GraphComponentProps = {
   onRender: (containerBounds: BoundingRect) => void;
 };
 
-function GraphComponent<V, E>({ boundingRect, onRender }: GraphComponentProps) {
+export default function GraphComponent<E, V>({
+  boundingRect,
+  onRender
+}: GraphComponentProps) {
   // GRAPH CONTEXT
   const {
-    vertices,
-    edges,
+    verticesData,
+    edgesData,
+    verticesRenderData,
     handleVertexRender,
-    handleEdgeRender,
     handleVertexRemove,
+    handleEdgeRender,
     handleEdgeRemove
-  } = useGraphContext<V, E>();
+  } = useComponentsDataContext();
 
   // GRAPH LAYOUT
   const isFirstRenderRef = useRef(true);
@@ -44,11 +50,11 @@ function GraphComponent<V, E>({ boundingRect, onRender }: GraphComponentProps) {
   useAnimatedReaction(
     () => ({
       positions: Object.fromEntries(
-        Object.entries(vertices).map(([key, { animatedPosition }]) => [
+        Object.entries(verticesRenderData).map(([key, { position }]) => [
           key,
           {
-            x: animatedPosition.x.value,
-            y: animatedPosition.y.value
+            x: position.x.value,
+            y: position.y.value
           }
         ])
       )
@@ -70,10 +76,10 @@ function GraphComponent<V, E>({ boundingRect, onRender }: GraphComponentProps) {
   );
 
   const renderEdges = useCallback(() => {
-    return Object.values(edges).map(data => {
+    return Object.values(edgesData).map(data => {
       const [v1, v2] = data.edge.vertices;
-      const v1Data = vertices[v1.key];
-      const v2Data = vertices[v2.key];
+      const v1Data = verticesRenderData[v1.key];
+      const v2Data = verticesRenderData[v2.key];
 
       if (!v1Data || !v2Data) {
         return null;
@@ -81,22 +87,24 @@ function GraphComponent<V, E>({ boundingRect, onRender }: GraphComponentProps) {
 
       return (
         <EdgeComponent
-          {...data}
-          key={data.edge.key}
-          v1Position={v1Data.animatedPosition}
-          v2Position={v2Data.animatedPosition}
-          v1Radius={v1Data.currentRadius}
-          v2Radius={v2Data.currentRadius}
-          onRender={handleEdgeRender}
-          onRemove={handleEdgeRemove}
+          {...({
+            ...data,
+            key: data.edge.key,
+            v1Position: v1Data.position,
+            v2Position: v2Data.position,
+            v1Radius: v1Data.currentRadius,
+            v2Radius: v2Data.currentRadius,
+            onRender: handleEdgeRender,
+            onRemove: handleEdgeRemove
+          } as unknown as EdgeComponentProps<E, V>)}
         />
       );
     });
-  }, [edges]);
+  }, [edgesData]);
 
   const renderVertices = useCallback(
     () =>
-      Object.values(vertices).map(data => (
+      Object.values(verticesData).map(data => (
         <VertexComponent
           {...data}
           key={data.vertex.key}
@@ -104,7 +112,7 @@ function GraphComponent<V, E>({ boundingRect, onRender }: GraphComponentProps) {
           onRemove={handleVertexRemove}
         />
       )),
-    [vertices]
+    [verticesData]
   );
 
   const containerWidth = useDerivedValue(() => {
@@ -128,7 +136,3 @@ function GraphComponent<V, E>({ boundingRect, onRender }: GraphComponentProps) {
     </Group>
   );
 }
-
-export default memo(GraphComponent) as (
-  props: GraphComponentProps
-) => JSX.Element;

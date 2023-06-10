@@ -8,12 +8,13 @@ import {
   AnimationSettingsWithDefaults,
   VertexSettings
 } from '@/types/settings';
+import { DeepRequiredAll } from '@/types/utils';
 import { updateComponentAnimationState } from '@/utils/components';
 
 type VertexComponentProps<V, E> = {
   vertex: Vertex<V, E>;
   renderer: VertexRenderFunction<V>;
-  componentSettings: Required<VertexSettings>;
+  componentSettings: DeepRequiredAll<VertexSettings>;
   animationSettings: AnimationSettingsWithDefaults;
   removed: boolean;
   onRender: VertexRenderHandler;
@@ -26,22 +27,25 @@ function VertexComponent<V, E>({
   removed,
   onRender,
   onRemove,
-  componentSettings,
-  animationSettings
+  animationSettings,
+  componentSettings
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
+  // ANIMATION
+  // Vertex render animation progress
+  const animationProgress = useSharedValue(0);
+
+  // POSITION
   // Current vertex position
   const positionX = useSharedValue(0);
   const positionY = useSharedValue(0);
+
+  // SCALE AND RADIUS
   // Current vertex scale
-  // used to change vertex scale from the outside (e.g. when vertex is selected)
   const scale = useSharedValue(1);
   // Current vertex radius
-  // must be updated by the renderer (used to properly position edge arrows, etc.)
   const currentRadius = useSharedValue(0);
-  // Vertex render animation progress
-  const animationProgress = useSharedValue(0);
 
   useEffect(() => {
     // Call onRender callback on mount
@@ -65,11 +69,11 @@ function VertexComponent<V, E>({
   // Render the vertex component
   return renderer({
     key,
-    data: vertex.value,
     scale,
-    radius: componentSettings.radius,
-    currentRadius,
     position: { x: positionX, y: positionY },
+    currentRadius,
+    data: vertex.value,
+    radius: componentSettings.radius,
     animationProgress
   });
 }
