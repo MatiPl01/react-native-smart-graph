@@ -1,10 +1,10 @@
 import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
 
 import {
+  EdgeComponentData,
   EdgeRemoveHandler,
   EdgeRenderHandler,
-  GraphEdgeData,
-  GraphVertexData,
+  VertexComponentData,
   VertexRemoveHandler,
   VertexRenderHandler
 } from '@/types/components';
@@ -20,8 +20,8 @@ import ComponentsDataProvider from './ComponentsDataContext';
 import ContextProviderComposer from './utils/ContextProviderComposer';
 
 export type GraphContextType<V, E> = {
-  vertices: Record<string, GraphVertexData<V, E>>;
-  edges: Record<string, GraphEdgeData<E, V>>;
+  vertices: Record<string, VertexComponentData<V, E>>;
+  edges: Record<string, EdgeComponentData<E, V>>;
   handleVertexRender: VertexRenderHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
