@@ -9,6 +9,7 @@ export type EdgeArrowRendererProps = SharedRenderersProps & {
   height: SharedValue<number>;
   tipPosition: AnimatedVector;
   centerPosition: AnimatedVector;
+  vertexRadius: SharedValue<number>;
   rotation: SharedValue<number>;
 };
 

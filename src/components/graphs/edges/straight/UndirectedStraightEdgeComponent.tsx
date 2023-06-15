@@ -14,17 +14,32 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
+const calcTranslationOffset = (
+  order: number,
+  edgesCount: number,
+  maxOffsetFactor: number,
+  vertexRadius: number
+): number => {
+  'worklet';
+  const maxTranslationOffset = maxOffsetFactor * vertexRadius;
+  const edgesPerSide = (edgesCount - 1) / 2;
+  return edgesCount > 1
+    ? (maxTranslationOffset * (order - edgesPerSide)) / edgesPerSide
+    : 0;
+};
+
 function UndirectedStraightEdgeComponent<E, V>({
+  edge,
   v1Position,
   v2Position,
-  vertexRadius,
-  edge,
+  v1Radius,
+  v2Radius,
+  componentSettings,
   animatedOrder,
   animatedEdgesCount,
-  settings,
   animationProgress,
   renderers,
-  onLabelRender
+  onRender
 }: UndirectedStraightEdgeComponentProps<E, V>) {
   // Edge line
   const p1 = useSharedValue({
@@ -36,17 +51,17 @@ function UndirectedStraightEdgeComponent<E, V>({
     y: v2Position.y.value
   });
   // Edge label
-  const center = useDerivedValue(() => ({
-    x: (p1.value.x + p2.value.x) / 2,
-    y: (p1.value.y + p2.value.y) / 2
-  }));
+  const centerX = useDerivedValue(() => (p1.value.x + p2.value.x) / 2);
+  const centerY = useDerivedValue(() => (p1.value.y + p2.value.y) / 2);
   const labelHeight = useSharedValue(0);
 
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
 
   useEffect(() => {
-    onLabelRender?.(edge.key, center);
+    onRender(edge.key, {
+      labelPosition: { x: centerX, y: centerY }
+    });
   }, [edge.key]);
 
   useAnimatedReaction(
@@ -67,36 +82,46 @@ function UndirectedStraightEdgeComponent<E, V>({
       return {
         v1: animatedVectorCoordinatesToVector(v1),
         v2: animatedVectorCoordinatesToVector(v2),
+        r1: v1Radius.value,
+        r2: v2Radius.value,
         order: animatedOrder.value,
         edgesCount: animatedEdgesCount.value
       };
     },
-    ({ v1, v2, order, edgesCount }) => {
-      const maxTranslationOffset = settings.maxOffsetFactor * vertexRadius;
-      const edgesPerSide = (edgesCount - 1) / 2;
-      const translationOffset =
-        edgesCount > 1
-          ? (maxTranslationOffset * (order - edgesPerSide)) / edgesPerSide
-          : 0;
-      const translationVector = multiplyVector(
+    ({ v1, v2, r1, r2, order, edgesCount }) => {
+      const calcOffset = calcTranslationOffset.bind(
+        null,
+        order,
+        edgesCount,
+        componentSettings.maxOffsetFactor
+      );
+
+      const p1Offset = calcOffset(r1);
+      const p2Offset = calcOffset(r2);
+
+      const p1Translation = multiplyVector(
         calcOrthogonalUnitVector(v1, v2),
-        translationOffset
+        p1Offset
+      );
+      const p2Translation = multiplyVector(
+        calcOrthogonalUnitVector(v2, v1),
+        p2Offset
       );
       // Update edge line points positions
       p1.value = {
-        x: v1.x + translationVector.x,
-        y: v1.y + translationVector.y
+        x: v1.x + p1Translation.x,
+        y: v1.y + p1Translation.y
       };
       p2.value = {
-        x: v2.x + translationVector.x,
-        y: v2.y + translationVector.y
+        x: v2.x + p2Translation.x,
+        y: v2.y + p2Translation.y
       };
       // Update edge label max size
-      labelHeight.value =
-        2 *
-        (edgesCount === 1
-          ? maxTranslationOffset
-          : maxTranslationOffset / (edgesCount - 1));
+      if (componentSettings.label?.sizeRatio) {
+        const avgOffset = (p1Offset + p2Offset) / 2;
+        labelHeight.value =
+          2 * (edgesCount === 1 ? avgOffset : avgOffset / (edgesCount - 1));
+      }
     }
   );
 
@@ -114,8 +139,8 @@ function UndirectedStraightEdgeComponent<E, V>({
           edge={edge}
           v1Position={v1Position}
           v2Position={v2Position}
-          vertexRadius={vertexRadius}
-          centerPosition={center}
+          centerX={centerX}
+          centerY={centerY}
           height={labelHeight}
           renderer={renderers.label}
           animationProgress={animationProgress}

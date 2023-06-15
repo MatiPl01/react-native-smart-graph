@@ -1,92 +1,65 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
-import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
-import { UndirectedGraph } from '@/models/graphs';
+import { DirectedGraph } from '@/models/graphs';
 import PannableScalableView from '@/views/PannableScalableView';
 
+import { DirectedGraphComponent } from '..';
+
 const ADDED_COMPONENTS = [
-  { key: 'B', data: 'B' },
-  {
-    key: 'AB',
-    from: 'A',
-    to: 'B',
-    data: 'AB'
-  },
-  { key: 'C', data: 'C' },
-  {
-    key: 'AC',
-    from: 'A',
-    to: 'C',
-    data: 'AC'
-  },
-  { key: 'D', data: 'D' },
-  { key: 'E', data: 'E' },
-  {
-    key: 'CD',
-    from: 'C',
-    to: 'D',
-    data: 'CD'
-  },
-  {
-    key: 'CE',
-    from: 'C',
-    to: 'E',
-    data: 'CE'
-  },
-  { key: 'F', data: 'F' },
-  { key: 'G', data: 'G' },
-  { key: 'H', data: 'H' },
-  { key: 'I', data: 'I' },
-  { key: 'J', data: 'J' },
-  { key: 'K', data: 'K' },
-  { key: 'L', data: 'L' },
+  { key: 'F', value: 'F' },
+  { key: 'G', value: 'G' },
+  { key: 'H', value: 'H' },
+  { key: 'I', value: 'I' },
+  { key: 'J', value: 'J' },
+  { key: 'K', value: 'K' },
+  { key: 'L', value: 'L' },
   {
     key: 'EK',
     from: 'E',
     to: 'K',
-    data: 'EK'
+    value: 'EK'
   },
   {
     key: 'EL',
     from: 'E',
     to: 'L',
-    data: 'EL'
+    value: 'EL'
   },
   {
     key: 'CF',
     from: 'C',
     to: 'F',
-    data: 'CF'
+    value: 'CF'
   },
-  { key: 'M', data: 'M' },
-  { key: 'N', data: 'N' },
-  { key: 'O', data: 'O' },
+  { key: 'M', value: 'M' },
+  { key: 'N', value: 'N' },
+  { key: 'O', value: 'O' },
   {
     key: 'CG',
     from: 'C',
     to: 'G',
-    data: 'CG'
+    value: 'CG'
   },
   {
     key: 'CH',
     from: 'C',
     to: 'H',
-    data: 'CH'
+    value: 'CH'
   },
   {
     key: 'CI',
     from: 'C',
     to: 'I',
-    data: 'CI'
+    value: 'CI'
   },
   {
     key: 'CJ',
     from: 'C',
     to: 'J',
-    data: 'CJ'
+    value: 'CJ'
   }
 ];
 
@@ -94,8 +67,41 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const graph = new UndirectedGraph({
-    vertices: [{ key: 'A', data: 'A' }]
+  const graph = new DirectedGraph({
+    vertices: [
+      { key: 'A', value: 'A' },
+      { key: 'B', value: 'B' },
+      { key: 'C', value: 'C' },
+      { key: 'D', value: 'D' },
+      { key: 'E', value: 'E' }
+    ],
+    edges: [
+      {
+        key: 'AB',
+        from: 'A',
+        to: 'B',
+        value: 'AB'
+      },
+
+      {
+        key: 'AC',
+        from: 'A',
+        to: 'C',
+        value: 'AC'
+      },
+      {
+        key: 'CD',
+        from: 'C',
+        to: 'D',
+        value: 'CD'
+      },
+      {
+        key: 'CE',
+        from: 'C',
+        to: 'E',
+        value: 'CE'
+      }
+    ]
   });
 
   useEffect(() => {
@@ -110,14 +116,9 @@ export default function App() {
       try {
         if (mode === 0) {
           if (component.from && component.to) {
-            graph.insertEdge(
-              component.key,
-              component.data,
-              component.from,
-              component.to
-            );
+            graph.insertEdge(component);
           } else {
-            graph.insertVertex(component.key, component.data);
+            graph.insertVertex(component);
           }
           idx++;
         } else {
@@ -143,17 +144,20 @@ export default function App() {
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
           <PannableScalableView objectFit='contain' controls>
-            <UndirectedGraphComponent
+            <DirectedGraphComponent
               graph={graph}
               settings={{
                 placement: {
-                  strategy: 'orbits',
-                  minVertexSpacing: 100
+                  strategy: 'circle',
+                  minVertexSpacing: 120 // count
                 },
                 components: {
                   edge: {
                     type: 'curved'
                   }
+                },
+                layout: {
+                  managedBy: 'forces'
                 }
               }}
               renderers={{

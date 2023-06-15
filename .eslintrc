@@ -227,7 +227,8 @@
     "no-relative-import-paths/no-relative-import-paths": [
       "warn",
       { "allowSameFolder": true, "rootDir": "src", "prefix": "@" }
-    ]
+    ],
+    "react/jsx-curly-brace-presence": ["error", "never"]
   },
   "env": {
     "es2020": true
