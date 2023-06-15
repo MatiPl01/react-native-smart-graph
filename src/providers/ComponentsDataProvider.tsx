@@ -39,7 +39,6 @@ export type ComponentsDataContextType<V, E> = {
   handleVertexRemove: VertexRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleEdgeRemove: EdgeRemoveHandler;
-  a: number;
 };
 
 const ComponentsDataContext = createContext({});
@@ -108,14 +107,6 @@ export default function ComponentsDataProvider<V, E>({
     );
   }, [orderedEdges, verticesRenderData]);
 
-  const [a, setA] = useState(0);
-
-  useEffect(() => {
-    setInterval(() => {
-      setA(prev => prev + 1);
-    }, 10);
-  }, []);
-
   const handleVertexRender = useCallback<VertexRenderHandler>(
     (key, renderValues) => {
       setVerticesRenderData(prev => {
@@ -167,10 +158,9 @@ export default function ComponentsDataProvider<V, E>({
       handleVertexRender,
       handleEdgeRender,
       handleVertexRemove,
-      handleEdgeRemove,
-      a
+      handleEdgeRemove
     }),
-    [verticesData, edgesData, verticesRenderData, edgesRenderData, a]
+    [verticesData, edgesData, verticesRenderData, edgesRenderData]
   );
 
   return (
