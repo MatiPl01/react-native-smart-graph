@@ -12,7 +12,11 @@ import {
 } from '@/constants/components';
 import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
 import { RANDOM_PLACEMENT_SETTING } from '@/constants/placement';
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
+import {
+  EdgeComponentData,
+  VertexComponentData,
+  VertexComponentRenderData
+} from '@/types/components';
 import { OrderedEdges, Vertex } from '@/types/graphs';
 import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
 import {
@@ -160,6 +164,7 @@ export const updateGraphVerticesData = <V, E>(
 export const updateGraphEdgesData = <V, E>(
   oldEdgesData: Record<string, EdgeComponentData<E, V>>,
   currentEdges: OrderedEdges<E, V>,
+  verticesRenderData: Record<string, VertexComponentRenderData>,
   currentAnimationsSettings: AnimationsSettings,
   settings: GraphSettingsWithDefaults<V, E>,
   renderers: GraphRenderersWithDefaults<V, E>
@@ -168,20 +173,30 @@ export const updateGraphEdgesData = <V, E>(
 
   // Add new edges to edges data
   currentEdges.forEach(({ edge, order, edgesCount }) => {
+    const [v1, v2] = edge.vertices;
+    const v1Data = verticesRenderData[v1.key];
+    const v2Data = verticesRenderData[v2.key];
+
     if (
-      !updatedEdgesData[edge.key] ||
-      updatedEdgesData[edge.key]?.removed ||
-      updatedEdgesData[edge.key]?.edgesCount !== edgesCount
+      v1Data &&
+      v2Data &&
+      (!updatedEdgesData[edge.key] ||
+        updatedEdgesData[edge.key]?.removed ||
+        updatedEdgesData[edge.key]?.edgesCount !== edgesCount)
     ) {
       updatedEdgesData[edge.key] = {
         edge,
         order,
         edgesCount,
         removed: false,
-        componentSettings: settings.components.edge,
         edgeRenderer: renderers.edge,
         arrowRenderer: renderers.arrow,
         labelRenderer: renderers.label,
+        v1Position: v1Data.position,
+        v2Position: v2Data.position,
+        v1Radius: v1Data.currentRadius,
+        v2Radius: v2Data.currentRadius,
+        componentSettings: settings.components.edge,
         animationSettings: {
           ...settings.animations.edges,
           ...currentAnimationsSettings.edges[edge.key]

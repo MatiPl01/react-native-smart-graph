@@ -25,7 +25,7 @@ export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/
 export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
 
 // PROVIDERS
-export { default as GraphEventsProvider } from '@/contexts/events';
+export { default as GraphEventsProvider } from '@/providers/events';
 
 // EXAMPLES
 export * from '@/examples';

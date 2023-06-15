@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
-import GraphProvider from '@/contexts/GraphContext';
 import { UndirectedGraph } from '@/models/graphs';
+import GraphProvider from '@/providers/GraphProvider';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';

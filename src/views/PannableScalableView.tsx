@@ -27,7 +27,7 @@ import {
   DEFAULT_SCALES,
   INITIAL_SCALE
 } from '@/constants/views';
-import { useGraphEventsContext } from '@/contexts/events';
+import { useGraphEventsContext } from '@/providers/events';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
@@ -468,8 +468,6 @@ function PannableScalableView({
         longPressGestureHandler
       )
     : canvasGestureHandler;
-
-  console.log('PannableScalableView');
 
   return (
     <View style={styles.container}>

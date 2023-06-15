@@ -93,6 +93,10 @@ export type EdgeComponentData<E, V> = {
   removed: boolean;
   order: number;
   edgesCount: number;
+  v1Position: AnimatedVectorCoordinates;
+  v2Position: AnimatedVectorCoordinates;
+  v1Radius: SharedValue<number>;
+  v2Radius: SharedValue<number>;
   componentSettings: GraphSettingsWithDefaults<V, E>['components']['edge'];
   animationSettings: AnimationSettingsWithDefaults;
   edgeRenderer: EdgeRenderFunction<E>;

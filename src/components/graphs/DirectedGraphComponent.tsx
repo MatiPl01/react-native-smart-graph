@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
-import GraphProvider from '@/contexts/GraphContext';
 import { DirectedGraph } from '@/models/graphs';
+import GraphProvider from '@/providers/GraphProvider';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
@@ -19,8 +19,6 @@ function DirectedGraphComponent<V, E>({
   onRender,
   ...providerProps
 }: DirectedGraphComponentProps<V, E> & GraphComponentProps) {
-  console.log('DirectedGraphComponent');
-
   return (
     <GraphProvider {...providerProps}>
       <GraphComponent boundingRect={boundingRect} onRender={onRender} />

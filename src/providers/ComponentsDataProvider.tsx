@@ -1,9 +1,9 @@
 /* eslint-disable import/no-unused-modules */
 import {
+  Context,
   createContext,
   PropsWithChildren,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState
@@ -27,8 +27,9 @@ import {
   updateGraphEdgesData,
   updateGraphVerticesData
 } from '@/utils/components';
+import { withMemoContext } from '@/utils/contexts';
 
-type ComponentsDataContextType<V, E> = {
+export type ComponentsDataContextType<V, E> = {
   verticesData: Record<string, VertexComponentData<V, E>>;
   edgesData: Record<string, EdgeComponentData<E, V>>;
   verticesRenderData: Record<string, VertexComponentRenderData>;
@@ -37,24 +38,10 @@ type ComponentsDataContextType<V, E> = {
   handleVertexRemove: VertexRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleEdgeRemove: EdgeRemoveHandler;
+  a: number;
 };
 
 const ComponentsDataContext = createContext({});
-
-export const useComponentsDataContext = <V, E>(): ComponentsDataContextType<
-  V,
-  E
-> => {
-  const context = useContext(ComponentsDataContext);
-
-  if (!context) {
-    throw new Error(
-      'useComponentsDataContext must be used within a ComponentsDataProvider'
-    );
-  }
-
-  return context as ComponentsDataContextType<V, E>;
-};
 
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
@@ -112,12 +99,21 @@ export default function ComponentsDataProvider<V, E>({
       updateGraphEdgesData(
         edgesData,
         orderedEdges,
+        verticesRenderData,
         animationsSettings,
         settings,
         renderers
       )
     );
-  }, [orderedEdges]);
+  }, [orderedEdges, verticesRenderData]);
+
+  const [a, setA] = useState(0);
+
+  useEffect(() => {
+    setInterval(() => {
+      setA(prev => prev + 1);
+    }, 10);
+  }, []);
 
   const handleVertexRender = useCallback<VertexRenderHandler>(
     (key, renderValues) => {
@@ -170,9 +166,10 @@ export default function ComponentsDataProvider<V, E>({
       handleVertexRender,
       handleEdgeRender,
       handleVertexRemove,
-      handleEdgeRemove
+      handleEdgeRemove,
+      a
     }),
-    [verticesData, edgesData]
+    [verticesData, edgesData, verticesRenderData, edgesRenderData, a]
   );
 
   return (
@@ -183,3 +180,20 @@ export default function ComponentsDataProvider<V, E>({
     </>
   );
 }
+
+export const withGraphData = <
+  V,
+  E,
+  P extends object,
+  R extends Partial<ComponentsDataContextType<V, E>> & Partial<P>
+>(
+  Component: React.ComponentType<P>,
+  selector: (contextValue: ComponentsDataContextType<V, E>) => R
+): React.ComponentType<Omit<P, keyof R>> =>
+  withMemoContext(
+    Component,
+    ComponentsDataContext as unknown as Context<
+      ComponentsDataContextType<V, E>
+    >,
+    selector
+  );
