@@ -24,3 +24,17 @@ type ShiftUnion<
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };
+
+export type DeepRequiredAll<T> = {
+  [K in keyof T]: DeepRequiredAll<T[K]>;
+} & Required<T>;
+
+type CommonKeys<A, B> = keyof A & keyof B;
+
+export type CommonTypes<A, B> = {
+  [K in CommonKeys<A, B>]: A[K] extends B[K]
+    ? B[K] extends A[K]
+      ? A[K]
+      : never
+    : never;
+};

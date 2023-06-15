@@ -8,6 +8,8 @@ import placeVerticesOnOrbits from './strategies/orbits.placement';
 import placeVerticesRandomly from './strategies/random.placement';
 import placeVerticesOnTrees from './strategies/trees.placement';
 
+export * from './shared';
+
 export const placeVertices = <V, E>(
   graph: Graph<V, E>,
   vertexRadius: number,

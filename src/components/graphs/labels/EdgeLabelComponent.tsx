@@ -5,7 +5,7 @@ import {
 } from 'react-native-reanimated';
 
 import { Edge } from '@/types/graphs';
-import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   EdgeLabelRendererFunction,
   SharedRenderersProps
@@ -15,8 +15,8 @@ type EdgeLabelComponentProps<E, V> = SharedRenderersProps & {
   edge: Edge<E, V>;
   v1Position: AnimatedVectorCoordinates;
   v2Position: AnimatedVectorCoordinates;
-  vertexRadius: number;
-  centerPosition: AnimatedVector;
+  centerX: SharedValue<number>;
+  centerY: SharedValue<number>;
   height: SharedValue<number>;
   renderer: EdgeLabelRendererFunction<E>;
 };
@@ -25,7 +25,6 @@ export default function EdgeLabelComponent<E, V>({
   edge,
   v1Position,
   v2Position,
-  centerPosition,
   height,
   renderer,
   ...restProps
@@ -87,7 +86,6 @@ export default function EdgeLabelComponent<E, V>({
   return renderer({
     key: edge.key,
     data: edge.value,
-    centerPosition,
     height,
     edgeRotation,
     edgeLength,

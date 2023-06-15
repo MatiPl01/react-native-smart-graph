@@ -1,14 +1,14 @@
 import { memo, useEffect } from 'react';
-import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
 
-import EASING from '@/constants/easings';
 import {
   DirectedCurvedEdgeComponentProps,
   DirectedStraightEdgeComponentProps,
   EdgeComponentProps,
   UndirectedCurvedEdgeComponentProps,
   UndirectedStraightEdgeComponentProps
-} from '@/types/components/edges';
+} from '@/types/components';
+import { updateComponentAnimationState } from '@/utils/components';
 
 import DirectedCurvedEdgeComponent from './curved/DirectedCurvedEdgeComponent';
 import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponent';
@@ -20,13 +20,17 @@ function EdgeComponent<E, V>({
   order,
   edgesCount,
   removed,
+  animationSettings,
+  edgeRenderer,
+  arrowRenderer,
+  labelRenderer,
   onRemove,
   ...restProps
 }: EdgeComponentProps<E, V>) {
-  const key = edge.key;
   // ANIMATION
   // Edge render animation progress
   const animationProgress = useSharedValue(0);
+
   // EDGE ORDERING
   // Target edge order
   const animatedOrder = useSharedValue(order);
@@ -34,39 +38,23 @@ function EdgeComponent<E, V>({
 
   // Edge mount/unmount animation
   useEffect(() => {
-    // ANimate vertex on mount
-    if (!removed) {
-      // Animate vertex on mount
-      animationProgress.value = withTiming(1, {
-        // TODO - make this a setting
-        duration: 500,
-        easing: EASING.bounce
-      });
-    }
-    // Animate vertex removal
-    else {
-      animationProgress.value = withTiming(
-        0,
-        {
-          duration: 250
-        },
-        finished => {
-          if (finished) {
-            runOnJS(onRemove)(key);
-          }
-        }
-      );
-    }
-  }, [removed]);
+    updateComponentAnimationState(
+      edge.key,
+      animationProgress,
+      animationSettings,
+      removed,
+      onRemove
+    );
+  }, [removed, animationSettings]);
 
   // Edge ordering animation
   useEffect(() => {
-    animatedOrder.value = withTiming(order, {
-      duration: 500 // TODO - make this a setting
-    });
-    animatedEdgesCount.value = withTiming(edgesCount, {
-      duration: 500 // TODO - make this a setting
-    });
+    const settingsWithoutCallback = {
+      ...animationSettings,
+      onComplete: () => undefined
+    };
+    animatedOrder.value = withTiming(order, settingsWithoutCallback);
+    animatedEdgesCount.value = withTiming(edgesCount, settingsWithoutCallback);
   }, [order, edgesCount]);
 
   const sharedProps = {
@@ -74,10 +62,20 @@ function EdgeComponent<E, V>({
     edge,
     animationProgress,
     animatedOrder,
-    animatedEdgesCount
+    animatedEdgesCount,
+    renderers: arrowRenderer
+      ? {
+          edge: edgeRenderer,
+          arrow: arrowRenderer,
+          label: labelRenderer
+        }
+      : {
+          edge: edgeRenderer,
+          label: labelRenderer
+        }
   };
 
-  switch (sharedProps.settings.type) {
+  switch (sharedProps.componentSettings.type) {
     case 'straight':
       return edge.isDirected() ? (
         <DirectedStraightEdgeComponent

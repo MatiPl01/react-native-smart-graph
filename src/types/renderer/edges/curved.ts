@@ -1,4 +1,6 @@
-import { AnimatedPath, AnimatedVector } from '@/types/layout';
+import { SharedValue } from 'react-native-reanimated';
+
+import { AnimatedPath } from '@/types/layout';
 import {
   EdgeLabelRendererFunction,
   SharedRenderersProps
@@ -9,7 +11,8 @@ import { EdgeArrowRenderFunction } from './shared';
 export type CurvedEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
   data: E;
-  parabolaVertex: AnimatedVector;
+  parabolaX: SharedValue<number>;
+  parabolaY: SharedValue<number>;
   path: AnimatedPath;
 };
 
