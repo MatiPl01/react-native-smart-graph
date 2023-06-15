@@ -13,7 +13,7 @@ jobs:
   validate_pr_title:
     name: 👌 Validate PR title
     # Don't run on dependabot PRs
-    if: github.actor!= 'dependabot-preview[bot]'
+    if: github.actor != 'dependabot-preview[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: amannn/action-semantic-pull-request@v5
