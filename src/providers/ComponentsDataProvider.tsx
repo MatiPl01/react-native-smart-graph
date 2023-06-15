@@ -1,9 +1,9 @@
 /* eslint-disable import/no-unused-modules */
 import {
+  Context,
   createContext,
   PropsWithChildren,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState
@@ -23,12 +23,14 @@ import {
 import { Graph } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
 import { GraphSettingsWithDefaults } from '@/types/settings';
+import { CommonTypes } from '@/types/utils';
 import {
   updateGraphEdgesData,
   updateGraphVerticesData
 } from '@/utils/components';
+import { withMemoContext } from '@/utils/contexts';
 
-type ComponentsDataContextType<V, E> = {
+export type ComponentsDataContextType<V, E> = {
   verticesData: Record<string, VertexComponentData<V, E>>;
   edgesData: Record<string, EdgeComponentData<E, V>>;
   verticesRenderData: Record<string, VertexComponentRenderData>;
@@ -40,21 +42,6 @@ type ComponentsDataContextType<V, E> = {
 };
 
 const ComponentsDataContext = createContext({});
-
-export const useComponentsDataContext = <V, E>(): ComponentsDataContextType<
-  V,
-  E
-> => {
-  const context = useContext(ComponentsDataContext);
-
-  if (!context) {
-    throw new Error(
-      'useComponentsDataContext must be used within a ComponentsDataProvider'
-    );
-  }
-
-  return context as ComponentsDataContextType<V, E>;
-};
 
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
@@ -112,12 +99,13 @@ export default function ComponentsDataProvider<V, E>({
       updateGraphEdgesData(
         edgesData,
         orderedEdges,
+        verticesRenderData,
         animationsSettings,
         settings,
         renderers
       )
     );
-  }, [orderedEdges]);
+  }, [orderedEdges, verticesRenderData]);
 
   const handleVertexRender = useCallback<VertexRenderHandler>(
     (key, renderValues) => {
@@ -172,7 +160,7 @@ export default function ComponentsDataProvider<V, E>({
       handleVertexRemove,
       handleEdgeRemove
     }),
-    [verticesData, edgesData]
+    [verticesData, edgesData, verticesRenderData, edgesRenderData]
   );
 
   return (
@@ -183,3 +171,22 @@ export default function ComponentsDataProvider<V, E>({
     </>
   );
 }
+
+export const withGraphData = <
+  P extends object,
+  V extends CommonTypes<ComponentsDataContextType<unknown, unknown>, P>
+>(
+  Component: React.ComponentType<P>,
+  selector: (contextValue: V) => Partial<V>
+) =>
+  withMemoContext(
+    Component,
+    ComponentsDataContext as unknown as Context<
+      ComponentsDataContextType<unknown, unknown>
+    >,
+    selector
+  ) as <
+    C extends object = P // This workaround allows passing generic prop types
+  >(
+    props: Omit<C, keyof V>
+  ) => JSX.Element;

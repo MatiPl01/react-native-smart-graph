@@ -3,8 +3,17 @@ import { Group, Rect } from '@shopify/react-native-skia';
 import { useCallback, useEffect, useRef } from 'react';
 import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
-import { useComponentsDataContext } from '@/contexts/ComponentsDataContext';
-import { EdgeComponentProps } from '@/types/components';
+import { withGraphData } from '@/providers';
+import {
+  EdgeComponentData,
+  EdgeComponentProps,
+  EdgeRemoveHandler,
+  EdgeRenderHandler,
+  VertexComponentData,
+  VertexComponentRenderData,
+  VertexRemoveHandler,
+  VertexRenderHandler
+} from '@/types/components';
 import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { calcContainerBoundingRect } from '@/utils/placement';
 
@@ -16,21 +25,29 @@ export type GraphComponentProps = {
   onRender: (containerBounds: BoundingRect) => void;
 };
 
-export default function GraphComponent<E, V>({
-  boundingRect,
-  onRender
-}: GraphComponentProps) {
-  // GRAPH CONTEXT
-  const {
-    verticesData,
-    edgesData,
-    verticesRenderData,
-    handleVertexRender,
-    handleVertexRemove,
-    handleEdgeRender,
-    handleEdgeRemove
-  } = useComponentsDataContext();
+type GraphComponentPropsWithGraphData<V, E> = GraphComponentProps & {
+  verticesData: Record<string, VertexComponentData<V, E>>;
+  edgesData: Record<string, EdgeComponentData<E, V>>;
+  verticesRenderData: Record<string, VertexComponentRenderData>;
+  handleVertexRender: VertexRenderHandler;
+  handleVertexRemove: VertexRemoveHandler;
+  handleEdgeRender: EdgeRenderHandler;
+  handleEdgeRemove: EdgeRemoveHandler;
+};
 
+function GraphComponent<V, E>({
+  // Graph component props
+  boundingRect,
+  onRender,
+  // Graph context props
+  verticesData,
+  edgesData,
+  verticesRenderData,
+  handleVertexRender,
+  handleVertexRemove,
+  handleEdgeRender,
+  handleEdgeRemove
+}: GraphComponentPropsWithGraphData<V, E>) {
   // GRAPH LAYOUT
   const isFirstRenderRef = useRef(true);
 
@@ -76,30 +93,16 @@ export default function GraphComponent<E, V>({
   );
 
   const renderEdges = useCallback(() => {
-    return Object.values(edgesData).map(data => {
-      const [v1, v2] = data.edge.vertices;
-      const v1Data = verticesRenderData[v1.key];
-      const v2Data = verticesRenderData[v2.key];
-
-      if (!v1Data || !v2Data) {
-        return null;
-      }
-
-      return (
-        <EdgeComponent
-          {...({
-            ...data,
-            key: data.edge.key,
-            v1Position: v1Data.position,
-            v2Position: v2Data.position,
-            v1Radius: v1Data.currentRadius,
-            v2Radius: v2Data.currentRadius,
-            onRender: handleEdgeRender,
-            onRemove: handleEdgeRemove
-          } as unknown as EdgeComponentProps<E, V>)}
-        />
-      );
-    });
+    return Object.values(edgesData).map(data => (
+      <EdgeComponent
+        {...({
+          ...data,
+          key: data.edge.key,
+          onRender: handleEdgeRender,
+          onRemove: handleEdgeRemove
+        } as unknown as EdgeComponentProps<E, V>)}
+      />
+    ));
   }, [edgesData]);
 
   const renderVertices = useCallback(
@@ -136,3 +139,24 @@ export default function GraphComponent<E, V>({
     </Group>
   );
 }
+
+export default withGraphData(
+  GraphComponent,
+  ({
+    verticesData,
+    edgesData,
+    verticesRenderData,
+    handleVertexRender,
+    handleVertexRemove,
+    handleEdgeRender,
+    handleEdgeRemove
+  }) => ({
+    verticesData,
+    edgesData,
+    verticesRenderData,
+    handleVertexRender,
+    handleVertexRemove,
+    handleEdgeRender,
+    handleEdgeRemove
+  })
+);
