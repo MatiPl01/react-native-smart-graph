@@ -186,7 +186,7 @@ export const withGraphData = <
     >,
     selector
   ) as <
-    C extends object // This workaround allows passing generic prop types
+    C extends object = P // This workaround allows passing generic prop types
   >(
     props: Omit<C, keyof V>
   ) => JSX.Element;
