@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { AnimationsSettings } from '@/types/animations';
-import { Edge, Graph, GraphObserver, Vertex } from '@/types/graphs';
+import {
+  Edge,
+  Graph,
+  GraphObserver,
+  OrderedEdges,
+  Vertex
+} from '@/types/graphs';
+import { AnimationsSettings } from '@/types/settings/animations';
 
 type State<V, E> = {
   vertices: Array<Vertex<V, E>>;
   edges: Array<Edge<E, V>>;
-  orderedEdges: Array<{
-    edge: Edge<E, V>;
-    order: number;
-    edgesCount: number;
-  }>;
+  orderedEdges: OrderedEdges<E, V>;
   animationsSettings: AnimationsSettings;
 };
 

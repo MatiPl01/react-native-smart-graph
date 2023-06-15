@@ -24,3 +24,7 @@ type ShiftUnion<
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };
+
+export type DeepRequiredAll<T> = {
+  [K in keyof T]: DeepRequiredAll<T[K]>;
+} & Required<T>;

@@ -10,8 +10,10 @@ import {
   STRAIGHT_EDGE_COMPONENT_SETTINGS,
   VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
+import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
 import { RANDOM_PLACEMENT_SETTING } from '@/constants/placement';
-import { GraphData, GraphEdgeData, GraphVertexData } from '@/types/components';
+import { EdgeComponentData, VertexComponentData } from '@/types/components';
+import { OrderedEdges, Vertex } from '@/types/graphs';
 import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
 import {
   DirectedEdgeSettings,
@@ -19,6 +21,11 @@ import {
   GraphSettingsWithDefaults,
   RandomPlacementSettings
 } from '@/types/settings';
+import { AnimationsSettings } from '@/types/settings/animations';
+import {
+  GraphLayoutSettings,
+  GraphLayoutSettingsWithDefaults
+} from '@/types/settings/graph/layout';
 
 export const updateGraphSettingsWithDefaults = <V, E>(
   isGraphDirected: boolean,
@@ -68,8 +75,27 @@ export const updateGraphSettingsWithDefaults = <V, E>(
       ...DEFAULT_ANIMATION_SETTINGS,
       ...settings?.animations?.edges
     }
-  }
+  },
+  layout: updateGraphLayoutSettingsWithDefaults(settings?.layout)
 });
+
+const updateGraphLayoutSettingsWithDefaults = (
+  settings?: GraphLayoutSettings
+): GraphLayoutSettingsWithDefaults => {
+  switch (settings?.managedBy) {
+    case 'forces':
+      return {
+        managedBy: 'forces',
+        settings: {
+          ...DEFAULT_FORCES_STRATEGY_SETTINGS,
+          ...settings
+        }
+      };
+    case 'placement':
+    default:
+      return { managedBy: 'placement', ...settings };
+  }
+};
 
 export const updateGraphRenderersWithDefaults = <V, E>(
   isGraphDirected: boolean,
@@ -86,45 +112,43 @@ export const updateGraphRenderersWithDefaults = <V, E>(
 });
 
 export const updateGraphVerticesData = <V, E>(
-  oldVerticesData: Record<string, GraphVertexData<V, E>>,
-  currentGraphData: GraphData<V, E>
-): Record<string, GraphVertexData<V, E>> => {
+  oldVerticesData: Record<string, VertexComponentData<V, E>>,
+  currentVertices: Array<Vertex<V, E>>,
+  currentAnimationsSettings: AnimationsSettings,
+  settings: GraphSettingsWithDefaults<V, E>,
+  renderers: GraphRenderersWithDefaults<V, E>
+): Record<string, VertexComponentData<V, E>> => {
   const updatedVerticesData = { ...oldVerticesData };
 
   // Add new vertices
-  currentGraphData.vertices.forEach(vertex => {
-    const targetPlacementPosition =
-      currentGraphData.layout.verticesPositions[vertex.key];
-    if (
-      targetPlacementPosition &&
-      (!updatedVerticesData[vertex.key] ||
-        updatedVerticesData[vertex.key]?.removed)
-    ) {
+  currentVertices.forEach(vertex => {
+    if (!oldVerticesData[vertex.key] || oldVerticesData[vertex.key]?.removed) {
       updatedVerticesData[vertex.key] = {
         vertex,
+        componentSettings: settings.components.vertex,
         animationSettings: {
-          ...currentGraphData.defaultAnimations.vertices,
-          ...currentGraphData.animations.vertices[vertex.key]
+          ...settings.animations.vertices,
+          ...currentAnimationsSettings.vertices[vertex.key]
         },
-        targetPlacementPosition,
-        removed: false
+        removed: false,
+        renderer: renderers.vertex
       };
     }
   });
 
   // Keys of vertices that are currently in the graph
-  const currentVerticesKeys = new Set(Object.keys(currentGraphData.vertices));
+  const currentVerticesKeys = new Set(currentVertices.map(v => v.key));
 
   // Mark vertices as removed if there were removed from the graph model
   Object.keys(oldVerticesData).forEach(key => {
-    if (currentVerticesKeys.has(key)) {
+    if (!currentVerticesKeys.has(key)) {
       updatedVerticesData[key] = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...updatedVerticesData[key]!,
         removed: true,
         animationSettings: {
-          ...currentGraphData.defaultAnimations.vertices,
-          ...currentGraphData.animations.vertices[key]
+          ...settings.animations.vertices,
+          ...currentAnimationsSettings.vertices[key]
         }
       };
     }
@@ -134,13 +158,16 @@ export const updateGraphVerticesData = <V, E>(
 };
 
 export const updateGraphEdgesData = <V, E>(
-  oldEdgesData: Record<string, GraphEdgeData<E, V>>,
-  currentGraphData: GraphData<V, E>
-): Record<string, GraphEdgeData<E, V>> => {
+  oldEdgesData: Record<string, EdgeComponentData<E, V>>,
+  currentEdges: OrderedEdges<E, V>,
+  currentAnimationsSettings: AnimationsSettings,
+  settings: GraphSettingsWithDefaults<V, E>,
+  renderers: GraphRenderersWithDefaults<V, E>
+): Record<string, EdgeComponentData<E, V>> => {
   const updatedEdgesData = { ...oldEdgesData };
 
   // Add new edges to edges data
-  currentGraphData.orderedEdges.forEach(({ edge, order, edgesCount }) => {
+  currentEdges.forEach(({ edge, order, edgesCount }) => {
     if (
       !updatedEdgesData[edge.key] ||
       updatedEdgesData[edge.key]?.removed ||
@@ -151,16 +178,20 @@ export const updateGraphEdgesData = <V, E>(
         order,
         edgesCount,
         removed: false,
+        componentSettings: settings.components.edge,
+        edgeRenderer: renderers.edge,
+        arrowRenderer: renderers.arrow,
+        labelRenderer: renderers.label,
         animationSettings: {
-          ...currentGraphData.defaultAnimations.edges,
-          ...currentGraphData.animations.edges[edge.key]
+          ...settings.animations.edges,
+          ...currentAnimationsSettings.edges[edge.key]
         }
       };
     }
   });
 
   // Keys of edges that are currently in the graph
-  const currentEdgesKeys = new Set(Object.keys(currentGraphData.edges));
+  const currentEdgesKeys = new Set(currentEdges.map(e => e.edge.key));
 
   // Mark edges as removed if there were removed from the graph model
   Object.keys(currentEdgesKeys).forEach(key => {
@@ -170,8 +201,8 @@ export const updateGraphEdgesData = <V, E>(
         ...updatedEdgesData[key]!,
         removed: true,
         animationSettings: {
-          ...currentGraphData.defaultAnimations.edges,
-          ...currentGraphData.animations.edges[key]
+          ...settings.animations.edges,
+          ...currentAnimationsSettings.edges[key]
         }
       };
     }

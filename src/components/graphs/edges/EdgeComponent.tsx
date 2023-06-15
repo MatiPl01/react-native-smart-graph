@@ -7,7 +7,7 @@ import {
   EdgeComponentProps,
   UndirectedCurvedEdgeComponentProps,
   UndirectedStraightEdgeComponentProps
-} from '@/types/components/edges';
+} from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
 
 import DirectedCurvedEdgeComponent from './curved/DirectedCurvedEdgeComponent';
@@ -20,11 +20,11 @@ function EdgeComponent<E, V>({
   order,
   edgesCount,
   removed,
-  onRemove,
   animationSettings,
   edgeRenderer,
   arrowRenderer,
   labelRenderer,
+  onRemove,
   ...restProps
 }: EdgeComponentProps<E, V>) {
   // ANIMATION
@@ -75,7 +75,7 @@ function EdgeComponent<E, V>({
         }
   };
 
-  switch (sharedProps.settings.type) {
+  switch (sharedProps.componentSettings.type) {
     case 'straight':
       return edge.isDirected() ? (
         <DirectedStraightEdgeComponent

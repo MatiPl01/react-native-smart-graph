@@ -1,10 +1,12 @@
-import { DeepRequired } from '@/types/utils';
+import { DeepRequired, DeepRequiredAll } from '@/types/utils';
 
 type SharedVertexSettings = {
   radius?: number;
 };
 
 export type VertexSettings = SharedVertexSettings;
+
+export type VertexSettingsWithDefaults = DeepRequiredAll<VertexSettings>;
 
 export type StraightEdgeSettings = {
   type: 'straight';

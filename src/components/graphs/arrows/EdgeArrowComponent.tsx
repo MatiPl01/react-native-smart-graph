@@ -11,7 +11,7 @@ import { translateAlongVector } from '@/utils/vectors';
 type EdgeArrowComponentProps = SharedRenderersProps & {
   directionVector: AnimatedVector;
   tipPosition: AnimatedVector;
-  vertexRadius: number;
+  vertexRadius: SharedValue<number>;
   width: SharedValue<number>;
   height: SharedValue<number>;
   renderer: EdgeArrowRenderFunction;

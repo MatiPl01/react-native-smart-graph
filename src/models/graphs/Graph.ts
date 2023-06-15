@@ -1,9 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  AnimationSettings,
-  AnimationsSettings,
-  BatchModificationAnimationSettings
-} from '@/types/animations';
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
@@ -12,6 +7,11 @@ import {
   GraphObserver,
   Vertex
 } from '@/types/graphs';
+import {
+  AnimationSettings,
+  AnimationsSettings,
+  BatchModificationAnimationSettings
+} from '@/types/settings';
 import { Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 

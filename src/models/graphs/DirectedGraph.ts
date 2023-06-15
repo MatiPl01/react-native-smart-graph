@@ -1,11 +1,11 @@
 import DirectedEdge from '@/models/edges/DirectedEdge';
 import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
+import { DirectedEdgeData, VertexData } from '@/types/data';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
-} from '@/types/animations';
-import { DirectedEdgeData, VertexData } from '@/types/data';
+} from '@/types/settings';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
