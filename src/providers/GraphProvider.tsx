@@ -9,6 +9,9 @@ import {
 } from '@/utils/components';
 
 import ComponentsDataProvider from './ComponentsDataProvider';
+import PlacementLayoutProvider, {
+  GraphPlacementLayoutProviderProps
+} from './layout/PlacementLayoutProvider';
 import ContextProviderComposer from './utils/ContextProviderComposer';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
@@ -45,13 +48,11 @@ export default function GraphProvider<V, E>({
         graph={graph}
         settings={memoSettings}
         renderers={memoRenderers}
+      />,
+      <PlacementLayoutProvider<GraphPlacementLayoutProviderProps<V, E>>
+        graph={graph}
+        settings={memoSettings}
       />
-
-      // <GraphLayoutProvider
-      //   graph={graph}
-      //   layoutSettings={memoSettings.layout}
-      //   animationsSettings={memoSettings.animations}
-      // />
     ],
     [memoSettings]
   );

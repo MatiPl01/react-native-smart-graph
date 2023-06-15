@@ -1,69 +1,32 @@
-import { Vector } from '@shopify/react-native-skia';
-import { createContext, PropsWithChildren, useContext, useState } from 'react';
-import { useAnimatedReaction } from 'react-native-reanimated';
+import { PropsWithChildren } from 'react';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import { GraphAnimationsSettingsWithDefaults } from '@/types/settings/graph/animations';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
+import { withGraphData } from '@/providers/ComponentsDataProvider';
+import {
+  EdgeComponentRenderData,
+  VertexComponentRenderData
+} from '@/types/components';
+import { Graph } from '@/types/graphs';
+import { GraphSettingsWithDefaults } from '@/types/settings';
 
-export type PlacementLayoutContextType = {
-  setTargetVerticesPositions: (positions: Record<string, Vector>) => void;
-  setAnimatedVerticesPositions: (
-    positions: Record<string, AnimatedVectorCoordinates>
-  ) => void;
-};
-
-const GraphPlacementLayoutContext = createContext<PlacementLayoutContextType>({
-  setTargetVerticesPositions: () => undefined,
-  setAnimatedVerticesPositions: () => undefined
-});
-
-export const useGraphPlacementLayoutContext = () => {
-  const context = useContext(GraphPlacementLayoutContext);
-
-  if (!context) {
-    return null;
-  }
-
-  return context;
-};
-
-type GraphPlacementLayoutProviderProps = PropsWithChildren<{
-  animationsSettings: GraphAnimationsSettingsWithDefaults;
+export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
+  // Component props
+  graph: Graph<V, E>;
+  settings: GraphSettingsWithDefaults<V, E>;
+  // Injected props
+  verticesRenderData: Record<string, VertexComponentRenderData>;
+  edgesRenderData: Record<string, EdgeComponentRenderData>;
 }>;
 
-export default function GraphPlacementLayoutProvider({
-  animationsSettings,
+function GraphPlacementLayoutProvider<V, E>({
   children
-}: GraphPlacementLayoutProviderProps) {
-  const [animatedVerticesPositions, setAnimatedVerticesPositions] = useState<
-    Record<string, AnimatedVectorCoordinates>
-  >({});
-  const [targetVerticesPositions, setTargetVerticesPositions] = useState<
-    Record<string, Vector>
-  >({});
-
-  const value = {
-    setTargetVerticesPositions,
-    setAnimatedVerticesPositions
-  };
-
-  useAnimatedReaction(
-    () => ({}),
-    () => {
-      console.log('here');
-      animateVerticesToFinalPositions(
-        animatedVerticesPositions,
-        targetVerticesPositions,
-        animationsSettings.layout // TODO - add a possibility to change the animation settings
-      );
-    },
-    [animatedVerticesPositions, targetVerticesPositions]
-  );
-
-  return (
-    <GraphPlacementLayoutContext.Provider value={value}>
-      {children}
-    </GraphPlacementLayoutContext.Provider>
-  );
+}: GraphPlacementLayoutProviderProps<V, E>) {
+  return <>{children}</>;
 }
+
+export default withGraphData(
+  GraphPlacementLayoutProvider,
+  ({ verticesRenderData, edgesRenderData }) => ({
+    verticesRenderData,
+    edgesRenderData
+  })
+);

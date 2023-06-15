@@ -23,6 +23,7 @@ import {
 import { Graph } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
 import { GraphSettingsWithDefaults } from '@/types/settings';
+import { CommonTypes } from '@/types/utils';
 import {
   updateGraphEdgesData,
   updateGraphVerticesData
@@ -182,18 +183,20 @@ export default function ComponentsDataProvider<V, E>({
 }
 
 export const withGraphData = <
-  V,
-  E,
   P extends object,
-  R extends Partial<ComponentsDataContextType<V, E>> & Partial<P>
+  V extends CommonTypes<ComponentsDataContextType<unknown, unknown>, P>
 >(
   Component: React.ComponentType<P>,
-  selector: (contextValue: ComponentsDataContextType<V, E>) => R
-): React.ComponentType<Omit<P, keyof R>> =>
+  selector: (contextValue: V) => Partial<V>
+) =>
   withMemoContext(
     Component,
     ComponentsDataContext as unknown as Context<
-      ComponentsDataContextType<V, E>
+      ComponentsDataContextType<unknown, unknown>
     >,
     selector
-  );
+  ) as <
+    C extends object // This workaround allows passing generic prop types
+  >(
+    props: Omit<C, keyof V>
+  ) => JSX.Element;
