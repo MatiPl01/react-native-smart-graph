@@ -2,7 +2,8 @@
 /**
  * This file is the entry point for the library.
  *
- * It exports all the public API of the library.
+ * It exports all the components, models, and types that are available to the
+ * library's users.
  */
 
 // VIEWS
@@ -24,7 +25,7 @@ export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/
 export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
 
 // PROVIDERS
-export { default as GraphEventsProvider } from '@/context/graphEvents';
+export { default as GraphEventsProvider } from '@/providers/events';
 
 // EXAMPLES
 export * from '@/examples';

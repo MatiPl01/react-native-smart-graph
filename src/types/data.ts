@@ -1,17 +1,17 @@
 export type VertexData<V> = {
   key: string;
-  data: V;
+  value: V;
 };
 
 export type DirectedEdgeData<E> = {
   key: string;
   from: string;
   to: string;
-  data: E;
+  value: E;
 };
 
 export type UndirectedEdgeData<E> = {
   key: string;
   vertices: string[];
-  data: E;
+  value: E;
 };

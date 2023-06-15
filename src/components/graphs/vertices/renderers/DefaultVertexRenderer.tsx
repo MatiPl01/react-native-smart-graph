@@ -1,5 +1,5 @@
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
-import { useDerivedValue } from 'react-native-reanimated';
+import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
 import { DEFAULT_VERTEX_RENDERER_SETTINGS } from '@/constants/renderers';
@@ -8,6 +8,8 @@ import { VertexRendererProps } from '@/types/renderer';
 export default function DefaultVertexRenderer<V>({
   key,
   radius,
+  scale,
+  currentRadius,
   position: { x, y },
   animationProgress
 }: VertexRendererProps<V>) {
@@ -15,18 +17,21 @@ export default function DefaultVertexRenderer<V>({
     FONTS.rubikFont,
     radius * DEFAULT_VERTEX_RENDERER_SETTINGS.font.sizeRatio
   );
-  const outerRadius = useDerivedValue(() => radius * animationProgress.value);
-  const innerRadius = useDerivedValue(
-    () =>
-      radius *
-      animationProgress.value *
-      (1 - DEFAULT_VERTEX_RENDERER_SETTINGS.border.sizeRatio)
+
+  useAnimatedReaction(
+    () => ({
+      currentProgress: animationProgress.value,
+      currentScale: scale.value
+    }),
+    ({ currentProgress, currentScale }) => {
+      currentRadius.value = currentProgress * currentScale * radius;
+    }
   );
-  // TODO - fix text position (make centered)
-  const textTransform = useDerivedValue(() => [
-    { scale: Math.max(animationProgress.value, 0) },
-    { translateX: x.value },
-    { translateY: y.value }
+
+  const transform = useDerivedValue(() => [
+    { translateX: x.value - currentRadius.value },
+    { translateY: y.value - currentRadius.value },
+    { scale: Math.max(0, currentRadius.value / radius) }
   ]);
 
   if (font === null) {
@@ -34,28 +39,25 @@ export default function DefaultVertexRenderer<V>({
   }
 
   return (
-    <Group>
+    <Group transform={transform}>
       <Circle
-        cx={x}
-        cy={y}
-        r={outerRadius}
+        r={radius}
         color={DEFAULT_VERTEX_RENDERER_SETTINGS.border.color}
       />
       <Circle
-        cx={x}
-        cy={y}
-        r={innerRadius}
+        r={radius}
         color={DEFAULT_VERTEX_RENDERER_SETTINGS.color}
+        transform={[
+          { scale: 1 - DEFAULT_VERTEX_RENDERER_SETTINGS.border.sizeRatio }
+        ]}
       />
-      <Group transform={textTransform}>
-        <Text
-          x={0}
-          y={0}
-          text={key}
-          font={font}
-          color={DEFAULT_VERTEX_RENDERER_SETTINGS.font.color}
-        />
-      </Group>
+      <Text
+        x={0}
+        y={0}
+        text={key}
+        font={font}
+        color={DEFAULT_VERTEX_RENDERER_SETTINGS.font.color}
+      />
     </Group>
   );
 }
