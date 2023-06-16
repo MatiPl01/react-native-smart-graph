@@ -39,7 +39,7 @@ function GraphComponent<V, E>({
   // Graph component props
   boundingRect,
   onRender,
-  // Graph context props
+  // Injected graph data
   verticesData,
   edgesData,
   verticesRenderData,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/no-unused-modules */
 import {
   Context,
@@ -22,7 +23,10 @@ import {
 } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
-import { GraphSettingsWithDefaults } from '@/types/settings';
+import {
+  AnimationSettingsWithDefaults,
+  GraphSettingsWithDefaults
+} from '@/types/settings';
 import { CommonTypes } from '@/types/utils';
 import {
   updateGraphEdgesData,
@@ -35,6 +39,7 @@ export type ComponentsDataContextType<V, E> = {
   edgesData: Record<string, EdgeComponentData<E, V>>;
   verticesRenderData: Record<string, VertexComponentRenderData>;
   edgesRenderData: Record<string, EdgeComponentRenderData>;
+  layoutAnimationSettings: AnimationSettingsWithDefaults;
   handleVertexRender: VertexRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
@@ -82,6 +87,18 @@ export default function ComponentsDataProvider<V, E>({
     Record<string, EdgeComponentRenderData>
   >({});
 
+  // ANIMATION SETTINGS
+  // Graph layout animation settings
+  // (animation settings related to vertices and edges are stored
+  // in their respective data objects)
+  const layoutAnimationSettings = useMemo<AnimationSettingsWithDefaults>(
+    () => ({
+      ...settings.animations.layout,
+      ...animationsSettings.layout
+    }),
+    [animationsSettings, settings.animations.layout]
+  );
+
   useEffect(() => {
     setVerticesData(
       updateGraphVerticesData(
@@ -92,7 +109,12 @@ export default function ComponentsDataProvider<V, E>({
         renderers
       )
     );
-  }, [vertices]);
+  }, [
+    vertices,
+    settings.components.vertex,
+    settings.animations.vertices,
+    renderers.vertex
+  ]);
 
   useEffect(() => {
     setEdgesData(
@@ -105,47 +127,49 @@ export default function ComponentsDataProvider<V, E>({
         renderers
       )
     );
-  }, [orderedEdges, verticesRenderData]);
+  }, [
+    orderedEdges,
+    verticesRenderData,
+    settings.components.edge,
+    settings.animations.edges,
+    renderers.edge,
+    renderers.label,
+    renderers.arrow
+  ]);
 
   const handleVertexRender = useCallback<VertexRenderHandler>(
     (key, renderValues) => {
-      setVerticesRenderData(prev => {
-        prev[key] = renderValues;
-        return { ...prev };
-      });
+      setVerticesRenderData(prev => ({ ...prev, [key]: renderValues }));
     },
     []
   );
 
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
     setVerticesData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
     setVerticesRenderData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
   }, []);
 
   const handleEdgeRender = useCallback<EdgeRenderHandler>(
     (key, renderValues) => {
-      setEdgesRenderData(prev => {
-        prev[key] = renderValues;
-        return { ...prev };
-      });
+      setEdgesRenderData(prev => ({ ...prev, [key]: renderValues }));
     },
     []
   );
 
   const handleEdgeRemove = useCallback<EdgeRemoveHandler>(key => {
     setEdgesData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
     setEdgesRenderData(prev => {
-      delete prev[key];
-      return { ...prev };
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
   }, []);
 
@@ -155,12 +179,19 @@ export default function ComponentsDataProvider<V, E>({
       edgesData,
       verticesRenderData,
       edgesRenderData,
+      layoutAnimationSettings,
       handleVertexRender,
       handleEdgeRender,
       handleVertexRemove,
       handleEdgeRemove
     }),
-    [verticesData, edgesData, verticesRenderData, edgesRenderData]
+    [
+      verticesData,
+      edgesData,
+      verticesRenderData,
+      edgesRenderData,
+      layoutAnimationSettings
+    ]
   );
 
   return (
