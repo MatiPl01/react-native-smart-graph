@@ -29,8 +29,8 @@ export default function DefaultVertexRenderer<V>({
   );
 
   const transform = useDerivedValue(() => [
-    { translateX: x.value - currentRadius.value },
-    { translateY: y.value - currentRadius.value },
+    { translateX: x.value },
+    { translateY: y.value },
     { scale: Math.max(0, currentRadius.value / radius) }
   ]);
 
