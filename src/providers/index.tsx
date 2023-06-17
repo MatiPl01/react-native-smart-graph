@@ -1,5 +1,5 @@
 export {
   type ComponentsDataContextType,
   withGraphData
-} from './ComponentsDataProvider';
+} from './data/ComponentsDataProvider';
 export { default as GraphProvider } from './GraphProvider';

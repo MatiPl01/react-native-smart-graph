@@ -50,7 +50,7 @@ export default abstract class Graph<
       }
       const [v1, v2] = edge.vertices;
       const edgesBetweenVertices =
-        this.edgesBetweenVertices$[v1.key]?.[v2.key] || [];
+        this.edgesBetweenVertices$[v1.key]?.[v2.key] ?? [];
       this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
         ({ edge: e, order }) => {
           result.push({
@@ -285,7 +285,7 @@ export default abstract class Graph<
   protected notifyChange(animationsSettings?: AnimationsSettings): void {
     this.observers.forEach(observer => {
       observer.graphChanged(
-        animationsSettings || {
+        animationsSettings ?? {
           vertices: {},
           edges: {}
         }

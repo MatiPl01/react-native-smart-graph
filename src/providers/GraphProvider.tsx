@@ -8,13 +8,14 @@ import {
   updateGraphSettingsWithDefaults
 } from '@/utils/components';
 
-import ComponentsDataProvider from './ComponentsDataProvider';
-import ForcesLayoutProvider from './layout/forces/ForcesLayoutProvider';
-import ForcesPlacementProvider from './layout/forces/ForcesPlacementProvider';
-import PlacementLayoutProvider, {
-  GraphPlacementLayoutProviderProps
-} from './layout/PlacementLayoutProvider';
-import ContextProviderComposer from './utils/ContextProviderComposer';
+import { ComponentsDataProvider } from './data';
+import {
+  ForcesLayoutProvider,
+  ForcesPlacementProvider,
+  GraphPlacementLayoutProviderProps,
+  PlacementLayoutProvider
+} from './layout';
+import { ContextProviderComposer } from './utils';
 
 const getLayoutProviders = <V, E>(
   graph: Graph<V, E>,

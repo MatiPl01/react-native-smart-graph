@@ -1,7 +1,7 @@
 import { PropsWithChildren, useMemo } from 'react';
 import { useAnimatedReaction } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/ComponentsDataProvider';
+import { withGraphData } from '@/providers/data/ComponentsDataProvider';
 import {
   EdgeComponentRenderData,
   VertexComponentRenderData

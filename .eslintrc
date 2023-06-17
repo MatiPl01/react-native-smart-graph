@@ -228,7 +228,8 @@
       "warn",
       { "allowSameFolder": true, "rootDir": "src", "prefix": "@" }
     ],
-    "react/jsx-curly-brace-presence": ["error", "never"]
+    "react/jsx-curly-brace-presence": ["error", "never"],
+    "@typescript-eslint/prefer-nullish-coalescing": ["error"]
   },
   "env": {
     "es2020": true

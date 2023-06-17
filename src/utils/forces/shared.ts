@@ -13,7 +13,7 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
-const calcAttractiveForce = (
+const calcAttractionForce = (
   from: Vector,
   to: Vector,
   attractionFactorGetter: (distance: number) => number
@@ -26,15 +26,15 @@ const calcAttractiveForce = (
   return multiplyVector(directionVector, factor);
 };
 
-const calcRepellingForce = (
+const calcRepulsiveForce = (
   from: Vector,
   to: Vector,
-  repellingFactorGetter: (distance: number) => number
+  repulsiveFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
   const distance = distanceBetweenVectors(from, to);
   const directionVector = calcUnitVector(from, to);
-  const factor = repellingFactorGetter(distance);
+  const factor = repulsiveFactorGetter(distance);
 
   return multiplyVector(directionVector, factor);
 };
@@ -52,7 +52,7 @@ const calcResultantAttractionForce = (
   }
   return addVectorsArray(
     vertexConnections.map(neighborKey =>
-      calcAttractiveForce(
+      calcAttractionForce(
         animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
         animatedVectorCoordinatesToVector(verticesPositions[neighborKey]),
         attractionFactorGetter
@@ -61,10 +61,27 @@ const calcResultantAttractionForce = (
   );
 };
 
-const calcResultantRepellingForce = (
+export const calcResultantRepulsiveForceOnCoordinates = (
+  coordinates: Vector,
+  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  repulsiveFactorGetter: (distance: number) => number
+): Vector => {
+  'worklet';
+  return addVectorsArray(
+    Object.keys(verticesPositions).map(otherVertexKey => {
+      return calcRepulsiveForce(
+        coordinates,
+        animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
+        repulsiveFactorGetter
+      );
+    })
+  );
+};
+
+const calcResultantRepulsiveForce = (
   vertexKey: string,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
-  repellingFactorGetter: (distance: number) => number
+  repulsiveFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
   return addVectorsArray(
@@ -73,10 +90,10 @@ const calcResultantRepellingForce = (
         return { x: 0, y: 0 };
       }
 
-      return calcRepellingForce(
+      return calcRepulsiveForce(
         animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
         animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
-        repellingFactorGetter
+        repulsiveFactorGetter
       );
     })
   );
@@ -86,7 +103,7 @@ export const calcForces = (
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   attractionFactorGetter: (distance: number) => number,
-  repellingFactorGetter: (distance: number) => number
+  repulsiveFactorGetter: (distance: number) => number
 ): Record<string, Vector> => {
   'worklet';
   const forces: Record<string, Vector> = {};
@@ -97,12 +114,12 @@ export const calcForces = (
       verticesPositions,
       attractionFactorGetter
     );
-    const repellingForce = calcResultantRepellingForce(
+    const repulsiveForce = calcResultantRepulsiveForce(
       vertexKey,
       verticesPositions,
-      repellingFactorGetter
+      repulsiveFactorGetter
     );
-    forces[vertexKey] = addVectors(attractionForce, repellingForce);
+    forces[vertexKey] = addVectors(attractionForce, repulsiveForce);
   }
   return forces;
 };

@@ -1,7 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-// Vectors
 export type AnimatedVector = SharedValue<Vector>;
 
 export type AnimatedVectorCoordinates = {
@@ -9,18 +8,23 @@ export type AnimatedVectorCoordinates = {
   y: SharedValue<number>;
 };
 
-// Dimensions
 export type Dimensions = {
   width: number;
   height: number;
 };
 
-// Bounding rect
 export type BoundingRect = {
   top: number;
   bottom: number;
   right: number;
   left: number;
+};
+
+export type BoundingVertices = {
+  top?: string;
+  bottom?: string;
+  right?: string;
+  left?: string;
 };
 
 export type AnimatedBoundingRect = {

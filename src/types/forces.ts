@@ -6,7 +6,7 @@ export type DefaultForcesStrategySettings = {
     attractionScale?: number;
     attractionForceFactor?: number;
   };
-  repellingForce?: {
+  repulsiveForce?: {
     repulsionScale?: number;
   };
 };

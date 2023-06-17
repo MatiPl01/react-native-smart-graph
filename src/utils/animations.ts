@@ -130,13 +130,13 @@ export const createAnimationsSettingsForBatchModification = (
         components.vertices?.map(key => [
           key,
           { ...animationsSettings, onComplete: undefined }
-        ]) || []
+        ]) ?? []
       ),
       edges: Object.fromEntries(
         components.edges?.map(key => [
           key,
           { ...animationsSettings, onComplete: undefined }
-        ]) || []
+        ]) ?? []
       )
     };
   }
@@ -150,13 +150,13 @@ export const createAnimationsSettingsForBatchModification = (
         components.vertices?.map(key => [
           key,
           animationsSettings.edges?.[key]
-        ]) || []
+        ]) ?? []
       ),
       edges: Object.fromEntries(
         components.edges?.map(key => [
           key,
           animationsSettings.vertices?.[key]
-        ]) || []
+        ]) ?? []
       )
     };
   }
@@ -171,7 +171,7 @@ export const createAnimationsSettingsForBatchModification = (
             .components,
           onComplete: undefined
         }
-      ]) || []
+      ]) ?? []
     ),
     edges: Object.fromEntries(
       components.edges?.map(key => [
@@ -181,7 +181,7 @@ export const createAnimationsSettingsForBatchModification = (
             .components,
           onComplete: undefined
         }
-      ]) || []
+      ]) ?? []
     )
   };
 };
