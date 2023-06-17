@@ -21,7 +21,7 @@ import {
   VertexRemoveHandler,
   VertexRenderHandler
 } from '@/types/components';
-import { Graph } from '@/types/graphs';
+import { Graph, GraphConnections } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
 import {
   AnimationSettingsWithDefaults,
@@ -35,6 +35,7 @@ import {
 import { withMemoContext } from '@/utils/contexts';
 
 export type ComponentsDataContextType<V, E> = {
+  connections: GraphConnections;
   verticesData: Record<string, VertexComponentData<V, E>>;
   edgesData: Record<string, EdgeComponentData<E, V>>;
   verticesRenderData: Record<string, VertexComponentRenderData>;
@@ -99,6 +100,14 @@ export default function ComponentsDataProvider<V, E>({
     [animationsSettings, settings.animations.layout]
   );
 
+  // GRAPH CONNECTIONS
+  // Graph connections (used to pass information about graph to
+  // worklets which are not able to access graph object directly)
+  const connections = useMemo<GraphConnections>(
+    () => graph.connections,
+    [vertices, orderedEdges]
+  );
+
   useEffect(() => {
     setVerticesData(
       updateGraphVerticesData(
@@ -117,16 +126,17 @@ export default function ComponentsDataProvider<V, E>({
   ]);
 
   useEffect(() => {
-    setEdgesData(
-      updateGraphEdgesData(
-        edgesData,
-        orderedEdges,
-        verticesRenderData,
-        animationsSettings,
-        settings,
-        renderers
-      )
+    const { data, wasUpdated } = updateGraphEdgesData(
+      edgesData,
+      orderedEdges,
+      verticesRenderData,
+      animationsSettings,
+      settings,
+      renderers
     );
+    if (wasUpdated) {
+      setEdgesData(data);
+    }
   }, [
     orderedEdges,
     verticesRenderData,
@@ -175,6 +185,7 @@ export default function ComponentsDataProvider<V, E>({
 
   const contextValue = useMemo<ComponentsDataContextType<V, E>>(
     () => ({
+      connections,
       verticesData,
       edgesData,
       verticesRenderData,
@@ -186,6 +197,7 @@ export default function ComponentsDataProvider<V, E>({
       handleEdgeRemove
     }),
     [
+      connections,
       verticesData,
       edgesData,
       verticesRenderData,

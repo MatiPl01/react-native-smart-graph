@@ -168,8 +168,12 @@ export const updateGraphEdgesData = <V, E>(
   currentAnimationsSettings: AnimationsSettings,
   settings: GraphSettingsWithDefaults<V, E>,
   renderers: GraphRenderersWithDefaults<V, E>
-): Record<string, EdgeComponentData<E, V>> => {
+): {
+  data: Record<string, EdgeComponentData<E, V>>;
+  wasUpdated: boolean;
+} => {
   const updatedEdgesData = { ...oldEdgesData };
+  let wasUpdated = false; // Flag to indicate if edges data was updated
 
   // Add new edges to edges data
   currentEdges.forEach(({ edge, order, edgesCount }) => {
@@ -184,6 +188,7 @@ export const updateGraphEdgesData = <V, E>(
         updatedEdgesData[edge.key]?.removed ||
         updatedEdgesData[edge.key]?.edgesCount !== edgesCount)
     ) {
+      wasUpdated = true;
       updatedEdgesData[edge.key] = {
         edge,
         order,
@@ -211,6 +216,7 @@ export const updateGraphEdgesData = <V, E>(
   // Mark edges as removed if there were removed from the graph model
   Object.keys(oldEdgesData).forEach(key => {
     if (!currentEdgesKeys.has(key)) {
+      wasUpdated = true;
       updatedEdgesData[key] = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...updatedEdgesData[key]!,
@@ -223,5 +229,8 @@ export const updateGraphEdgesData = <V, E>(
     }
   });
 
-  return updatedEdgesData;
+  return {
+    data: updatedEdgesData,
+    wasUpdated
+  };
 };
