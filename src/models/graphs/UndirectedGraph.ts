@@ -17,29 +17,30 @@ export default class UndirectedGraph<V, E> extends Graph<
   UndirectedEdgeData<E>
 > {
   constructor(data: {
-    vertices: Array<VertexData<V>>;
     edges?: Array<UndirectedEdgeData<E>>;
+    vertices: Array<VertexData<V>>;
   }) {
     super();
     this.insertBatch(data);
   }
 
-  override isDirected() {
-    return false;
-  }
-
-  override insertVertex(
-    { key, value }: VertexData<V>,
-    animationSettings?: SingleModificationAnimationSettings | null
-  ): UndirectedGraphVertex<V, E> {
-    return this.insertVertexObject(
-      new UndirectedGraphVertex<V, E>(key, value),
-      animationSettings &&
-        createAnimationsSettingsForSingleModification(
-          { vertex: key },
-          animationSettings
-        )
-    );
+  override insertBatch(
+    {
+      edges,
+      vertices
+    }: {
+      edges?: Array<UndirectedEdgeData<E>>;
+      vertices?: Array<VertexData<V>>;
+    },
+    animationSettings?: AnimationSettings | null
+  ): void {
+    // Insert edges and vertices to the graph model
+    vertices?.forEach(data => this.insertVertex(data, null));
+    edges?.forEach(data => this.insertEdge(data, null));
+    // Notify observers after all changes to the graph model are made
+    if (animationSettings !== null) {
+      this.notifyChange();
+    }
   }
 
   override insertEdge(
@@ -79,6 +80,33 @@ export default class UndirectedGraph<V, E> extends Graph<
     return edge;
   }
 
+  override insertVertex(
+    { key, value }: VertexData<V>,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): UndirectedGraphVertex<V, E> {
+    return this.insertVertexObject(
+      new UndirectedGraphVertex<V, E>(key, value),
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        )
+    );
+  }
+
+  override isDirected() {
+    return false;
+  }
+
+  override orderEdgesBetweenVertices(
+    edges: Array<UndirectedEdge<E, V>>
+  ): Array<{ edge: UndirectedEdge<E, V>; order: number }> {
+    return edges.map((edge, index) => ({
+      edge,
+      order: index
+    }));
+  }
+
   override removeEdge(
     key: string,
     animationSettings?: AnimationSettings | null
@@ -105,38 +133,10 @@ export default class UndirectedGraph<V, E> extends Graph<
     return edge.value;
   }
 
-  override orderEdgesBetweenVertices(
-    edges: Array<UndirectedEdge<E, V>>
-  ): Array<{ edge: UndirectedEdge<E, V>; order: number }> {
-    return edges.map((edge, index) => ({
-      edge,
-      order: index
-    }));
-  }
-
-  override insertBatch(
-    {
-      vertices,
-      edges
-    }: {
-      vertices?: Array<VertexData<V>>;
-      edges?: Array<UndirectedEdgeData<E>>;
-    },
-    animationSettings?: AnimationSettings | null
-  ): void {
-    // Insert edges and vertices to the graph model
-    vertices?.forEach(data => this.insertVertex(data, null));
-    edges?.forEach(data => this.insertEdge(data, null));
-    // Notify observers after all changes to the graph model are made
-    if (animationSettings !== null) {
-      this.notifyChange();
-    }
-  }
-
   override replaceBatch(
     batchData: {
-      vertices?: Array<VertexData<V>>;
       edges?: Array<UndirectedEdgeData<E>>;
+      vertices?: Array<VertexData<V>>;
     },
     animationSettings?: AnimationSettings | null
   ): void {

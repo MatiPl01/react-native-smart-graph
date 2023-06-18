@@ -6,11 +6,11 @@ import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
 import { EdgeArrowRendererProps } from '@/types/renderer';
 
 export default function DefaultEdgeArrowRenderer({
-  width,
-  height,
+  animationProgress,
   centerPosition,
+  height,
   rotation,
-  animationProgress
+  width
 }: EdgeArrowRendererProps) {
   const color = DEFAULT_EDGE_RENDERER_SETTINGS.color;
   const colors = [color, color, color];
@@ -32,7 +32,7 @@ export default function DefaultEdgeArrowRenderer({
 
   return (
     <Group transform={transform}>
-      <Vertices vertices={vertices} colors={colors} />
+      <Vertices colors={colors} vertices={vertices} />
     </Group>
   );
 }

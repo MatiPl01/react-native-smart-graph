@@ -19,9 +19,9 @@ const sample = <T>(arr: Array<T>, size: number): Array<T> => {
 };
 
 const random = {
-  shuffle,
   choice,
-  sample
+  sample,
+  shuffle
 };
 
 export default random;

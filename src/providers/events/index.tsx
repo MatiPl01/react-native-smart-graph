@@ -9,26 +9,26 @@ import { GraphSettings } from '@/types/settings';
 import { findPressedEdgeLabel, findPressedVertex } from '@/utils/graphs/layout';
 
 export type GraphEventsContextType<V, E> = {
+  handleLongPress: (position: Vector) => void;
+  handlePress: (position: Vector) => void;
   setAnimatedEdgeLabelsPositions: (
     positions: Record<string, AnimatedVector>
   ) => void;
   setAnimatedVerticesPositions: (
     positions: Record<string, AnimatedVectorCoordinates>
   ) => void;
-  setGraphSettings: (settings: GraphSettings<V, E>) => void;
   setGraphModel: (graph: Graph<V, E>) => void;
-  handlePress: (position: Vector) => void;
-  handleLongPress: (position: Vector) => void;
+  setGraphSettings: (settings: GraphSettings<V, E>) => void;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GraphEventsContext = createContext<GraphEventsContextType<any, any>>({
+  handleLongPress: () => undefined,
+  handlePress: () => undefined,
   setAnimatedEdgeLabelsPositions: () => undefined,
   setAnimatedVerticesPositions: () => undefined,
-  setGraphSettings: () => undefined,
   setGraphModel: () => undefined,
-  handlePress: () => undefined,
-  handleLongPress: () => undefined
+  setGraphSettings: () => undefined
 });
 
 export const useGraphEventsContext = () => {
@@ -45,11 +45,11 @@ type PressHandler = (data: { key: string; position: Vector }) => void;
 
 type GraphEventsProviderProps = PropsWithChildren<{
   edgeLabelHitSlop?: number;
-  vertexHitSlop?: number;
-  onVertexPress?: PressHandler;
-  onVertexLongPress?: PressHandler;
-  onEdgePress?: PressHandler;
   onEdgeLongPress?: PressHandler;
+  onEdgePress?: PressHandler;
+  onVertexLongPress?: PressHandler;
+  onVertexPress?: PressHandler;
+  vertexHitSlop?: number;
 }>;
 
 export default function GraphEventsProvider<V, E>({
@@ -90,8 +90,8 @@ export default function GraphEventsProvider<V, E>({
   const handlePressHelper = (
     position: Vector,
     pressHandlers: {
-      vertex?: PressHandler;
       edge?: PressHandler;
+      vertex?: PressHandler;
     }
   ) => {
     if (pressHandlers.vertex) {
@@ -123,24 +123,24 @@ export default function GraphEventsProvider<V, E>({
 
   const handlePress = (position: Vector) =>
     handlePressHelper(position, {
-      vertex: eventHandlers.onVertexPress,
-      edge: eventHandlers.onEdgePress
+      edge: eventHandlers.onEdgePress,
+      vertex: eventHandlers.onVertexPress
     });
 
   const handleLongPress = (position: Vector) => {
     return handlePressHelper(position, {
-      vertex: eventHandlers.onVertexLongPress,
-      edge: eventHandlers.onEdgeLongPress
+      edge: eventHandlers.onEdgeLongPress,
+      vertex: eventHandlers.onVertexLongPress
     });
   };
 
   const contextValue: GraphEventsContextType<V, E> = {
+    handleLongPress,
+    handlePress,
     setAnimatedEdgeLabelsPositions,
     setAnimatedVerticesPositions,
-    setGraphSettings,
     setGraphModel,
-    handlePress,
-    handleLongPress
+    setGraphSettings
   };
 
   return (

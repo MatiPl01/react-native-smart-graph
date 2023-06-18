@@ -37,6 +37,7 @@ module.exports = {
         }
       }
     ],
+    'transform-remove-console',
     'react-require'
   ],
   comments: false

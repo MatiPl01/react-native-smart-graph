@@ -10,10 +10,10 @@ import {
 import { AnimationsSettings } from '@/types/settings/animations';
 
 type State<V, E> = {
-  vertices: Array<Vertex<V, E>>;
+  animationsSettings: AnimationsSettings;
   edges: Array<Edge<E, V>>;
   orderedEdges: OrderedEdges<E, V>;
-  animationsSettings: AnimationsSettings;
+  vertices: Array<Vertex<V, E>>;
 };
 
 export const useGraphObserver = <V, E>(
@@ -21,13 +21,13 @@ export const useGraphObserver = <V, E>(
   active = true
 ): [State<V, E>, (value: boolean) => void] => {
   const [state, setState] = useState<State<V, E>>({
-    vertices: graph.vertices,
+    animationsSettings: {
+      edges: {},
+      vertices: {}
+    },
     edges: graph.edges,
     orderedEdges: graph.orderedEdges,
-    animationsSettings: {
-      vertices: {},
-      edges: {}
-    }
+    vertices: graph.vertices
   });
 
   const isObservingRef = useRef(false);
@@ -35,10 +35,10 @@ export const useGraphObserver = <V, E>(
   const observerRef = useRef<GraphObserver>({
     graphChanged(animationsSettings) {
       setState({
-        vertices: graph.vertices,
+        animationsSettings,
         edges: graph.edges,
         orderedEdges: graph.orderedEdges,
-        animationsSettings
+        vertices: graph.vertices
       });
     }
   });

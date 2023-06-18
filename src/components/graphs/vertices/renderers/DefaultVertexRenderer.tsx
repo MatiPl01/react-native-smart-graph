@@ -6,12 +6,12 @@ import { DEFAULT_VERTEX_RENDERER_SETTINGS } from '@/constants/renderers';
 import { VertexRendererProps } from '@/types/renderer';
 
 export default function DefaultVertexRenderer<V>({
-  key,
-  radius,
-  scale,
+  animationProgress,
   currentRadius,
+  key,
   position: { x, y },
-  animationProgress
+  radius,
+  scale
 }: VertexRendererProps<V>) {
   const font = useFont(
     FONTS.rubikFont,
@@ -41,22 +41,22 @@ export default function DefaultVertexRenderer<V>({
   return (
     <Group transform={transform}>
       <Circle
-        r={radius}
         color={DEFAULT_VERTEX_RENDERER_SETTINGS.border.color}
+        r={radius}
       />
       <Circle
-        r={radius}
-        color={DEFAULT_VERTEX_RENDERER_SETTINGS.color}
         transform={[
           { scale: 1 - DEFAULT_VERTEX_RENDERER_SETTINGS.border.sizeRatio }
         ]}
+        color={DEFAULT_VERTEX_RENDERER_SETTINGS.color}
+        r={radius}
       />
       <Text
+        color={DEFAULT_VERTEX_RENDERER_SETTINGS.font.color}
+        font={font}
+        text={key}
         x={0}
         y={0}
-        text={key}
-        font={font}
-        color={DEFAULT_VERTEX_RENDERER_SETTINGS.font.color}
       />
     </Group>
   );

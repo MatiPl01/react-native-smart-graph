@@ -4,22 +4,22 @@ import { Vertex } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
 
 export type PlacementStrategy =
-  | 'random'
   | 'circle'
   | 'circles'
   | 'orbits'
+  | 'random'
   | 'trees';
 
 export type DirectedGraphPlacementSettings<V, E> =
-  | RandomPlacementSettings
   | CircularPlacementSettings<V, E>
   | OrbitsPlacementSettings
+  | RandomPlacementSettings
   | TreesPlacementSettings;
 
 export type UndirectedGraphPlacementSettings<V, E> =
-  | RandomPlacementSettings
   | CircularPlacementSettings<V, E>
-  | OrbitsPlacementSettings;
+  | OrbitsPlacementSettings
+  | RandomPlacementSettings;
 
 export type PlacementSettings<V, E> =
   | DirectedGraphPlacementSettings<V, E>
@@ -30,33 +30,33 @@ type SharedPlacementSettings = {
 };
 
 type SortablePlacementSettings<V, E> = {
-  sortVertices?: boolean;
   sortComparator?: (u: Vertex<V, E>, v: Vertex<V, E>) => number;
+  sortVertices?: boolean;
 };
 
-export type RandomLayoutType = 'grid' | 'triangles' | 'random';
+export type RandomLayoutType = 'grid' | 'random' | 'triangles';
 
 export type RandomPlacementSettings = {
   strategy: 'random';
 } & (
   | {
-      layoutType: Exclude<RandomLayoutType, 'random'>;
-      density?: number;
-      minVertexSpacing?: number;
+      containerHeight: number;
+      containerWidth: number;
+      layoutType: 'random';
     }
   | {
-      layoutType: 'random';
-      containerWidth: number;
-      containerHeight: number;
+      density?: number;
+      layoutType: Exclude<RandomLayoutType, 'random'>;
+      minVertexSpacing?: number;
     }
 );
 
 export type OrbitsLayerSizing =
   | 'auto'
+  | 'custom'
   | 'equal'
-  | 'quad-increasing'
   | 'non-decreasing'
-  | 'custom';
+  | 'quad-increasing';
 
 export type GetLayerRadiusFunction = (props: {
   layerIndex: number;
@@ -69,18 +69,18 @@ export type OrbitsSharedLayerSizingSettings = {
 };
 
 export type OrbitsCustomLayerSizingSettings = {
-  layerSizing: 'custom';
   getLayerRadius: GetLayerRadiusFunction;
+  layerSizing: 'custom';
 };
 
 export type OrbitsLayerSizingSettings =
-  | OrbitsSharedLayerSizingSettings
-  | OrbitsCustomLayerSizingSettings;
+  | OrbitsCustomLayerSizingSettings
+  | OrbitsSharedLayerSizingSettings;
 
 // TODO - maybe add orbits vertices sorting
 export type OrbitsPlacementSettings = (SharedPlacementSettings & {
-  strategy: 'orbits';
   roots?: Array<string>;
+  strategy: 'orbits';
 }) &
   OrbitsLayerSizingSettings;
 
@@ -90,8 +90,8 @@ export type CircularPlacementSettings<V, E> = SharedPlacementSettings &
   };
 
 export type TreesPlacementSettings = SharedPlacementSettings & {
-  strategy: 'trees';
   roots?: Array<string>;
+  strategy: 'trees';
 };
 
 export type PlacedVerticesPositions = Record<string, Vector>;

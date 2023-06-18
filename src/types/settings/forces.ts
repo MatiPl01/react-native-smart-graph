@@ -3,10 +3,10 @@ import { DeepRequiredAll } from '@/types/utils';
 export type ForcesStrategy = 'default';
 
 export type DefaultForcesStrategySettings = {
-  strategy: 'default';
-  attractionScale?: number;
   attractionForceFactor?: number;
+  attractionScale?: number;
   repulsionScale?: number;
+  strategy: 'default';
 };
 
 export type ForcesSettings = DefaultForcesStrategySettings;

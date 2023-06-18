@@ -17,20 +17,20 @@ const ADDED_COMPONENTS = [
   { key: 'K', value: 'K' },
   { key: 'L', value: 'L' },
   {
-    key: 'EK',
     from: 'E',
+    key: 'EK',
     to: 'K',
     value: 'EK'
   },
   {
-    key: 'EL',
     from: 'E',
+    key: 'EL',
     to: 'L',
     value: 'EL'
   },
   {
-    key: 'CF',
     from: 'C',
+    key: 'CF',
     to: 'F',
     value: 'CF'
   },
@@ -38,26 +38,26 @@ const ADDED_COMPONENTS = [
   { key: 'N', value: 'N' },
   { key: 'O', value: 'O' },
   {
-    key: 'CG',
     from: 'C',
+    key: 'CG',
     to: 'G',
     value: 'CG'
   },
   {
-    key: 'CH',
     from: 'C',
+    key: 'CH',
     to: 'H',
     value: 'CH'
   },
   {
-    key: 'CI',
     from: 'C',
+    key: 'CI',
     to: 'I',
     value: 'CI'
   },
   {
-    key: 'CJ',
     from: 'C',
+    key: 'CJ',
     to: 'J',
     value: 'CJ'
   }
@@ -68,39 +68,39 @@ let mode = 0;
 
 export default function App() {
   const graph = new DirectedGraph({
+    edges: [
+      {
+        from: 'A',
+        key: 'AB',
+        to: 'B',
+        value: 'AB'
+      },
+
+      {
+        from: 'A',
+        key: 'AC',
+        to: 'C',
+        value: 'AC'
+      },
+      {
+        from: 'C',
+        key: 'CD',
+        to: 'D',
+        value: 'CD'
+      },
+      {
+        from: 'C',
+        key: 'CE',
+        to: 'E',
+        value: 'CE'
+      }
+    ],
     vertices: [
       { key: 'A', value: 'A' },
       { key: 'B', value: 'B' },
       { key: 'C', value: 'C' },
       { key: 'D', value: 'D' },
       { key: 'E', value: 'E' }
-    ],
-    edges: [
-      {
-        key: 'AB',
-        from: 'A',
-        to: 'B',
-        value: 'AB'
-      },
-
-      {
-        key: 'AC',
-        from: 'A',
-        to: 'C',
-        value: 'AC'
-      },
-      {
-        key: 'CD',
-        from: 'C',
-        to: 'D',
-        value: 'CD'
-      },
-      {
-        key: 'CE',
-        from: 'C',
-        to: 'E',
-        value: 'CE'
-      }
     ]
   });
 
@@ -143,14 +143,12 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
-          <PannableScalableView objectFit='contain' controls>
+          <PannableScalableView controls objectFit='contain'>
             <DirectedGraphComponent
-              graph={graph}
+              renderers={{
+                label: DefaultEdgeLabelRenderer
+              }}
               settings={{
-                placement: {
-                  strategy: 'circle',
-                  minVertexSpacing: 120 // count
-                },
                 components: {
                   edge: {
                     type: 'curved'
@@ -158,11 +156,13 @@ export default function App() {
                 },
                 layout: {
                   managedBy: 'forces'
+                },
+                placement: {
+                  minVertexSpacing: 120, // count
+                  strategy: 'circle'
                 }
               }}
-              renderers={{
-                label: DefaultEdgeLabelRenderer
-              }}
+              graph={graph}
             />
           </PannableScalableView>
         </View>
@@ -172,14 +172,14 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  background: {
+    backgroundColor: 'black',
+    flex: 1
+  },
   container: {
     flex: 1
   },
   gestureHandler: {
     flex: 1
-  },
-  background: {
-    flex: 1,
-    backgroundColor: 'black'
   }
 });

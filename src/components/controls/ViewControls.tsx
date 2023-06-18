@@ -13,9 +13,9 @@ export default function ViewControls({ onReset }: ViewControlsProps) {
     <View style={styles.container}>
       <TouchableOpacity onPress={onReset}>
         <FontAwesomeIcon
-          style={styles.icon}
           icon={faArrowsToCircle as IconProp}
           size={32}
+          style={styles.icon}
         />
       </TouchableOpacity>
     </View>
@@ -24,12 +24,12 @@ export default function ViewControls({ onReset }: ViewControlsProps) {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, .5)',
     borderRadius: 8,
-    backgroundColor: 'rgba(0, 0, 0, .5)'
+    padding: 8,
+    position: 'absolute',
+    right: 12,
+    top: 12
   },
   icon: {
     color: 'white'

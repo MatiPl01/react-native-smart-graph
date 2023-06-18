@@ -35,8 +35,8 @@ type ForcesPlacementProviderProps = PropsWithChildren<{
 }>;
 
 function ForcesPlacementProvider({
-  verticesRenderData,
-  children
+  children,
+  verticesRenderData
 }: ForcesPlacementProviderProps) {
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't

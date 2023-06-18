@@ -10,8 +10,8 @@ import GraphComponent, { GraphComponentProps } from './GraphComponent';
 
 type DirectedGraphComponentProps<V, E> = {
   graph: DirectedGraph<V, E>;
-  settings?: DirectedGraphSettings<V, E>;
   renderers?: DirectedGraphRenderers<V, E>;
+  settings?: DirectedGraphSettings<V, E>;
 };
 
 function DirectedGraphComponent<V, E>({
@@ -35,7 +35,7 @@ export default memo(
     );
   },
   deepMemoComparator({
-    shallow: ['graph'],
-    exclude: ['boundingRect']
+    exclude: ['boundingRect'],
+    shallow: ['graph']
   })
 );

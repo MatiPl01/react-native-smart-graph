@@ -12,23 +12,23 @@ import { DeepRequiredAll } from '@/types/utils';
 import { updateComponentAnimationState } from '@/utils/components';
 
 type VertexComponentProps<V, E> = {
-  vertex: Vertex<V, E>;
-  renderer: VertexRenderFunction<V>;
-  componentSettings: DeepRequiredAll<VertexSettings>;
   animationSettings: AnimationSettingsWithDefaults;
-  removed: boolean;
-  onRender: VertexRenderHandler;
+  componentSettings: DeepRequiredAll<VertexSettings>;
   onRemove: VertexRemoveHandler;
+  onRender: VertexRenderHandler;
+  removed: boolean;
+  renderer: VertexRenderFunction<V>;
+  vertex: Vertex<V, E>;
 };
 
 function VertexComponent<V, E>({
-  vertex,
-  renderer,
-  removed,
-  onRender,
-  onRemove,
   animationSettings,
-  componentSettings
+  componentSettings,
+  onRemove,
+  onRender,
+  removed,
+  renderer,
+  vertex
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
@@ -50,9 +50,9 @@ function VertexComponent<V, E>({
   useEffect(() => {
     // Call onRender callback on mount
     onRender(key, {
+      currentRadius,
       position: { x: positionX, y: positionY },
-      scale,
-      currentRadius
+      scale
     });
   }, [key]);
 
@@ -68,13 +68,13 @@ function VertexComponent<V, E>({
 
   // Render the vertex component
   return renderer({
-    key,
-    scale,
-    position: { x: positionX, y: positionY },
+    animationProgress,
     currentRadius,
     data: vertex.value,
+    key,
+    position: { x: positionX, y: positionY },
     radius: componentSettings.radius,
-    animationProgress
+    scale
   });
 }
 

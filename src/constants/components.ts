@@ -12,8 +12,8 @@ export const VERTEX_COMPONENT_SETTINGS: Required<VertexSettings> = {
 
 export const STRAIGHT_EDGE_COMPONENT_SETTINGS: Required<StraightEdgeSettings> =
   {
-    type: 'straight',
-    maxOffsetFactor: 0.5
+    maxOffsetFactor: 0.5,
+    type: 'straight'
   };
 
 export const CURVED_EDGE_COMPONENT_SETTINGS: Required<CurvedEdgeSettings> = {

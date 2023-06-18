@@ -34,11 +34,11 @@ export default function DefaultStraightEdgeRenderer<E>({
 
   return (
     <Line
+      color={DEFAULT_EDGE_RENDERER_SETTINGS.color}
       p1={p1}
       p2={p2}
-      color={DEFAULT_EDGE_RENDERER_SETTINGS.color}
-      style='stroke'
       strokeWidth={1}
+      style='stroke'
     />
   );
 }

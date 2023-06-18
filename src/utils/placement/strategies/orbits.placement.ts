@@ -17,7 +17,7 @@ import {
 
 type ArrangedVertices = Record<
   string,
-  { layer: number; angle: number; sectorAngle: number }
+  { angle: number; layer: number; sectorAngle: number }
 >;
 
 const placeVerticesOnOrbits = <V, E>(
@@ -71,15 +71,15 @@ const placeVerticesOnOrbits = <V, E>(
 const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
   const layersAndChildren: Record<
     string,
-    { layer: number; children: Array<Vertex<V, E>> }
+    { children: Array<Vertex<V, E>>; layer: number }
   > = {};
 
   // Use BFS algorithm to traverse the graph and create layers
-  bfs([rootVertex], ({ vertex, parent, depth }) => {
+  bfs([rootVertex], ({ depth, parent, vertex }) => {
     if (!layersAndChildren[vertex.key]) {
       layersAndChildren[vertex.key] = {
-        layer: depth,
-        children: []
+        children: [],
+        layer: depth
       };
     }
     if (parent) {
@@ -90,9 +90,9 @@ const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
 
   // Transform layersAndChildren to arranged vertices
   const arrangedVertices: ArrangedVertices = {
-    [rootVertex.key]: { layer: 0, angle: 0, sectorAngle: 2 * Math.PI }
+    [rootVertex.key]: { angle: 0, layer: 0, sectorAngle: 2 * Math.PI }
   };
-  for (const [key, { layer, children }] of Object.entries(layersAndChildren)) {
+  for (const [key, { children, layer }] of Object.entries(layersAndChildren)) {
     if (!children.length) {
       continue;
     }
@@ -104,8 +104,8 @@ const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
 
     for (const child of children) {
       arrangedVertices[child.key] = {
-        layer: layer + 1,
         angle: childStartAngle,
+        layer: layer + 1,
         sectorAngle: childSectorAngle
       };
       childStartAngle += childSectorAngle;
@@ -152,7 +152,7 @@ const placeVertices = (
   arrangedVertices: ArrangedVertices,
   layerRadiuses: Record<number, number>
 ): PlacedVerticesPositions =>
-  Object.entries(arrangedVertices).reduce((acc, [key, { layer, angle }]) => {
+  Object.entries(arrangedVertices).reduce((acc, [key, { angle, layer }]) => {
     const radius = layerRadiuses[layer]!;
     acc[key] = {
       x: radius * Math.cos(angle),

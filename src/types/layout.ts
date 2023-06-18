@@ -11,23 +11,23 @@ export type AnimatedVectorCoordinates = {
 
 // Dimensions
 export type Dimensions = {
-  width: number;
   height: number;
+  width: number;
 };
 
 // Bounding rect
 export type BoundingRect = {
-  top: number;
   bottom: number;
-  right: number;
   left: number;
+  right: number;
+  top: number;
 };
 
 export type AnimatedBoundingRect = {
-  top: SharedValue<number>;
   bottom: SharedValue<number>;
-  right: SharedValue<number>;
   left: SharedValue<number>;
+  right: SharedValue<number>;
+  top: SharedValue<number>;
 };
 
 export type AnimatedPath = SharedValue<string>;

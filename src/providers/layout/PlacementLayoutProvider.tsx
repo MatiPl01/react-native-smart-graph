@@ -16,22 +16,22 @@ import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
+  edgesRenderData: Record<string, EdgeComponentRenderData>;
   // Component props
   graph: Graph<V, E>;
+  layoutAnimationSettings: AnimationSettingsWithDefaults;
   settings: GraphSettingsWithDefaults<V, E>;
   // Injected props
   verticesRenderData: Record<string, VertexComponentRenderData>;
-  edgesRenderData: Record<string, EdgeComponentRenderData>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
-  graph,
-  settings,
-  verticesRenderData,
+  children,
   edgesRenderData,
+  graph,
   layoutAnimationSettings,
-  children
+  settings,
+  verticesRenderData
 }: GraphPlacementLayoutProviderProps<V, E>) {
   const graphLayout = useMemo<GraphLayout>(
     () =>
@@ -72,9 +72,9 @@ function GraphPlacementLayoutProvider<V, E>({
 
 export default withGraphData(
   GraphPlacementLayoutProvider,
-  ({ verticesRenderData, edgesRenderData, layoutAnimationSettings }) => ({
-    verticesRenderData,
+  ({ edgesRenderData, layoutAnimationSettings, verticesRenderData }) => ({
     edgesRenderData,
-    layoutAnimationSettings
+    layoutAnimationSettings,
+    verticesRenderData
   })
 );

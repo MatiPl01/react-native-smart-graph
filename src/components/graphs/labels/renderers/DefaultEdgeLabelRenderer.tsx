@@ -6,12 +6,12 @@ import { DEFAULT_LABEL_RENDERER_SETTINGS } from '@/constants/renderers';
 import { EdgeLabelRendererProps } from '@/types/renderer';
 
 export default function DefaultEdgeLabelRenderer<E>({
-  key,
+  animationProgress,
   centerX,
   centerY,
-  height,
   edgeRotation,
-  animationProgress
+  height,
+  key
 }: EdgeLabelRendererProps<E>) {
   const FONT_SIZE = 16;
   const font = useFont(FONTS.rubikFont, FONT_SIZE);
@@ -36,11 +36,11 @@ export default function DefaultEdgeLabelRenderer<E>({
       <Group transform={wrapperTransform}>
         <Group transform={labelTransform}>
           <Text
-            x={0}
-            y={0}
+            color={DEFAULT_LABEL_RENDERER_SETTINGS.fontColor}
             font={font}
             text={key}
-            color={DEFAULT_LABEL_RENDERER_SETTINGS.fontColor}
+            x={0}
+            y={0}
           />
         </Group>
       </Group>
