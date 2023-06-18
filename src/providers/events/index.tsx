@@ -97,7 +97,7 @@ export default function GraphEventsProvider<V, E>({
     if (pressHandlers.vertex) {
       const vertexKey = findPressedVertex(
         position,
-        graphSettingsRef.current.components?.vertex?.radius ||
+        graphSettingsRef.current.components?.vertex?.radius ??
           VERTEX_COMPONENT_SETTINGS.radius,
         vertexHitSlop,
         animatedVerticesPositionsRef.current

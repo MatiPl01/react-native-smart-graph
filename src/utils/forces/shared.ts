@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import 'react-native-reanimated';
 
 import { Vector } from '@shopify/react-native-skia';
@@ -26,20 +27,20 @@ const calcAttractiveForce = (
   return multiplyVector(directionVector, factor);
 };
 
-const calcRepellingForce = (
+const calcRepulsiveForce = (
   from: Vector,
   to: Vector,
-  repellingFactorGetter: (distance: number) => number
+  repulsiveFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
   const distance = distanceBetweenVectors(from, to);
   const directionVector = calcUnitVector(from, to);
-  const factor = repellingFactorGetter(distance);
+  const factor = repulsiveFactorGetter(distance);
 
   return multiplyVector(directionVector, factor);
 };
 
-const calcResultantAttractionForce = (
+const calcResultantAttractiveForce = (
   vertexKey: string,
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
@@ -61,10 +62,10 @@ const calcResultantAttractionForce = (
   );
 };
 
-const calcResultantRepellingForce = (
+const calcResultantRepulsiveForce = (
   vertexKey: string,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
-  repellingFactorGetter: (distance: number) => number
+  repulsiveFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
   return addVectorsArray(
@@ -73,10 +74,10 @@ const calcResultantRepellingForce = (
         return { x: 0, y: 0 };
       }
 
-      return calcRepellingForce(
+      return calcRepulsiveForce(
         animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
         animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
-        repellingFactorGetter
+        repulsiveFactorGetter
       );
     })
   );
@@ -86,23 +87,23 @@ export const calcForces = (
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   attractionFactorGetter: (distance: number) => number,
-  repellingFactorGetter: (distance: number) => number
+  repulsiveFactorGetter: (distance: number) => number
 ): Record<string, Vector> => {
   'worklet';
   const forces: Record<string, Vector> = {};
   for (const vertexKey in verticesPositions) {
-    const attractionForce = calcResultantAttractionForce(
+    const attractiveForce = calcResultantAttractiveForce(
       vertexKey,
       connections,
       verticesPositions,
       attractionFactorGetter
     );
-    const repellingForce = calcResultantRepellingForce(
+    const repulsiveForce = calcResultantRepulsiveForce(
       vertexKey,
       verticesPositions,
-      repellingFactorGetter
+      repulsiveFactorGetter
     );
-    forces[vertexKey] = addVectors(attractionForce, repellingForce);
+    forces[vertexKey] = addVectors(attractiveForce, repulsiveForce);
   }
   return forces;
 };

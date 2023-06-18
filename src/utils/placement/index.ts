@@ -1,5 +1,5 @@
 import { Graph } from '@/types/graphs';
-import { GraphLayout, PlacementSettings } from '@/types/settings';
+import { GraphLayout, GraphPlacementSettings } from '@/types/settings';
 import { findGraphComponents } from '@/utils/algorithms/graphs';
 
 import placeVerticesOnCircle from './strategies/circle.placement';
@@ -13,7 +13,7 @@ export * from './shared';
 export const placeVertices = <V, E>(
   graph: Graph<V, E>,
   vertexRadius: number,
-  settings?: PlacementSettings<V, E>
+  settings?: GraphPlacementSettings<V, E>
 ): GraphLayout => {
   switch (settings?.strategy) {
     case 'circle':

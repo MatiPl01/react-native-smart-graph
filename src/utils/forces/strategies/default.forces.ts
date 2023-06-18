@@ -10,19 +10,21 @@ const createAttractionFactorGetter = (
   'worklet';
   return (distance: number) => {
     'worklet';
-    return attractionForceFactor * Math.log(distance / attractionScale);
+    return distance > 0
+      ? attractionForceFactor * Math.log(distance / attractionScale)
+      : 0;
   };
 };
 
-const createRepellingFactorGetter = (repulsionScale: number) => {
+const createRepulsionFactorGetter = (repulsionScale: number) => {
   'worklet';
   return (distance: number) => {
     'worklet';
-    return -repulsionScale / distance ** 2;
+    return distance > 0 ? -repulsionScale / distance ** 2 : 0;
   };
 };
 
-export default function applyDefaultForces(
+export function applyDefaultForces(
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   {
@@ -36,7 +38,7 @@ export default function applyDefaultForces(
     connections,
     verticesPositions,
     createAttractionFactorGetter(attractionScale, attractionForceFactor),
-    createRepellingFactorGetter(repulsionScale)
+    createRepulsionFactorGetter(repulsionScale)
   );
   updateVerticesPositions(forces, verticesPositions);
 }

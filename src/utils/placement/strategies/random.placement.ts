@@ -1,7 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
 import {
-  RANDOM_PLACEMENT_SETTING,
+  RANDOM_PLACEMENT_SETTINGS,
   SHARED_PLACEMENT_SETTINGS
 } from '@/constants/placement';
 import { Vertex } from '@/types/graphs';
@@ -29,9 +29,9 @@ const placeVerticesRandomly = <V, E>(
   }
 
   const props: CalcVerticesPositionsProps<V, E> = {
-    density: settings.density ?? RANDOM_PLACEMENT_SETTING.density,
+    density: settings.density ?? RANDOM_PLACEMENT_SETTINGS.density,
     minVertexSpacing:
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
+      settings.minVertexSpacing ?? RANDOM_PLACEMENT_SETTINGS.minVertexSpacing,
     vertexRadius,
     vertices
   };

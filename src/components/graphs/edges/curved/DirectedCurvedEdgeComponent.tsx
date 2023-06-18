@@ -42,7 +42,7 @@ function DirectedCurvedEdgeComponent<E, V>({
   const labelHeight = useDerivedValue(
     () =>
       ((v1Radius.value + v2Radius.value) / 2) *
-      (componentSettings.label?.sizeRatio || LABEL_COMPONENT_SETTINGS.sizeRatio)
+      (componentSettings.label?.sizeRatio ?? LABEL_COMPONENT_SETTINGS.sizeRatio)
   );
   // Edge arrow
   const arrowHeight = useDerivedValue(

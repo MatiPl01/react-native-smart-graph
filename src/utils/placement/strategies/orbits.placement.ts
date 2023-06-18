@@ -127,7 +127,7 @@ const calcLayerRadiuses = (
 
   for (const { layer, sectorAngle } of Object.values(arrangedVertices)) {
     minLayerRadiuses[layer] = Math.max(
-      minLayerRadiuses[layer] || 0,
+      minLayerRadiuses[layer] ?? 0,
       calcVertexCenterDistance(minDistanceBetweenVerticesCenters, sectorAngle)
     );
   }

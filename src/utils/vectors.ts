@@ -8,7 +8,7 @@ export const calcUnitVector = (from: Vector, to: Vector): Vector => {
   const dy = to.y - from.y;
   const mag = Math.sqrt(dx ** 2 + dy ** 2);
 
-  return { x: dx / mag, y: dy / mag };
+  return mag > 0 ? { x: dx / mag, y: dy / mag } : { x: 0, y: 0 };
 };
 
 export const calcOrthogonalUnitVector = (from: Vector, to: Vector): Vector => {
@@ -93,6 +93,14 @@ export const distanceBetweenVectors = (
 ): number => {
   'worklet';
   return vectorLength(subtractVectors(vector1, vector2));
+};
+
+export const getLineCenter = (vector1: Vector, vector2: Vector): Vector => {
+  'worklet';
+  return {
+    x: (vector1.x + vector2.x) / 2,
+    y: (vector1.y + vector2.y) / 2
+  };
 };
 
 // answer with great explanation - https://stackoverflow.com/a/6853926

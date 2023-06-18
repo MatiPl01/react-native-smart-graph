@@ -237,6 +237,7 @@
       { "allowSameFolder": true, "rootDir": "src", "prefix": "@" }
     ],
     "react/jsx-curly-brace-presence": ["error", "never"],
+    "@typescript-eslint/prefer-nullish-coalescing": ["error"],
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "perfectionist/sort-imports": "off",

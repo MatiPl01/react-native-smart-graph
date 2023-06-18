@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react';
 import { useFrameCallback } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/ComponentsDataProvider';
+import { withGraphData } from '@/providers/data';
 import { GraphConnections } from '@/types/graphs';
 import { ForcesSettingsWithDefaults } from '@/types/settings';
 import { applyForces } from '@/utils/forces';
@@ -9,9 +9,7 @@ import { applyForces } from '@/utils/forces';
 import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
-  // Injected props
   connections: GraphConnections;
-  // Component props
   forcesSettings: ForcesSettingsWithDefaults;
 }>;
 

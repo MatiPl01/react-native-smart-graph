@@ -149,17 +149,8 @@ export default function App() {
                 label: DefaultEdgeLabelRenderer
               }}
               settings={{
-                components: {
-                  edge: {
-                    type: 'curved'
-                  }
-                },
                 layout: {
                   managedBy: 'forces'
-                },
-                placement: {
-                  minVertexSpacing: 120, // count
-                  strategy: 'circle'
                 }
               }}
               graph={graph}

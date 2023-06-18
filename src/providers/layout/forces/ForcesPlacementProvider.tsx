@@ -6,12 +6,15 @@ import {
   useMemo,
   useState
 } from 'react';
+import { runOnUI } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/ComponentsDataProvider';
+import { withGraphData } from '@/providers/data';
 import { VertexComponentRenderData } from '@/types/components';
+import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { updateNewVerticesPositions } from '@/utils/forces';
 
-export type ForcesPlacementContextType = {
+type ForcesPlacementContextType = {
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>;
 };
 
@@ -30,13 +33,16 @@ export const useForcesPlacementContext = () => {
 };
 
 type ForcesPlacementProviderProps = PropsWithChildren<{
-  // Injected props
-  verticesRenderData: Record<string, VertexComponentRenderData>;
+  connections: GraphConnections;
+  renderedVerticesData: Record<string, VertexComponentRenderData>;
+  vertexRadius: number;
 }>;
 
 function ForcesPlacementProvider({
   children,
-  verticesRenderData
+  connections,
+  renderedVerticesData,
+  vertexRadius
 }: ForcesPlacementProviderProps) {
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
@@ -49,33 +55,23 @@ function ForcesPlacementProvider({
   >({});
 
   useEffect(() => {
-    // Find vertices that are not yet placed
-    const notPlacedVertices = Object.entries(verticesRenderData).filter(
-      ([key]) => !placedVerticesPositions[key]
+    runOnUI(updateNewVerticesPositions)(
+      placedVerticesPositions,
+      renderedVerticesData,
+      connections,
+      vertexRadius
     );
 
-    // TODO - replace this random placement with a proper one
-    // Set random positions to all not placed vertices
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    notPlacedVertices.forEach(([_, { position }]) => {
-      position.x.value = Math.random() * 1000;
-      position.y.value = Math.random() * 1000;
-    });
-
-    // Update placed vertices data
-    setPlacedVerticesPositions({
-      // Remove vertices that no longer exist
-      ...Object.fromEntries(
-        Object.entries(placedVerticesPositions).filter(
-          ([key]) => verticesRenderData[key]
-        )
-      ),
-      // Add new vertices
-      ...Object.fromEntries(
-        notPlacedVertices.map(([key, { position }]) => [key, position])
+    // Update the state
+    setPlacedVerticesPositions(
+      Object.fromEntries(
+        Object.entries(renderedVerticesData).map(([key, { position }]) => [
+          key,
+          position
+        ])
       )
-    });
-  }, [verticesRenderData]);
+    );
+  }, [renderedVerticesData]);
 
   const contextValue = useMemo<ForcesPlacementContextType>(
     () => ({
@@ -93,7 +89,8 @@ function ForcesPlacementProvider({
 
 export default withGraphData(
   ForcesPlacementProvider,
-  ({ verticesRenderData }) => ({
-    verticesRenderData
+  ({ connections, renderedVerticesData }) => ({
+    connections,
+    renderedVerticesData
   })
 );
