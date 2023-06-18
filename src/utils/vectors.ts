@@ -95,6 +95,14 @@ export const distanceBetweenVectors = (
   return vectorLength(subtractVectors(vector1, vector2));
 };
 
+export const getLineCenter = (vector1: Vector, vector2: Vector): Vector => {
+  'worklet';
+  return {
+    x: (vector1.x + vector2.x) / 2,
+    y: (vector1.y + vector2.y) / 2
+  };
+};
+
 // answer with great explanation - https://stackoverflow.com/a/6853926
 export const distanceBetweenPointAndSegment = (
   point: Vector,

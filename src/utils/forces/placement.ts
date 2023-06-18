@@ -3,74 +3,65 @@ import { Vector } from '@shopify/react-native-skia';
 
 import { VertexComponentRenderData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
-import { AnimatedVectorCoordinates, BoundingVertices } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import { ForcesSettingsWithDefaults } from '@/types/settings';
+import { grahamScan } from '@/utils/algorithms';
 import {
-  addVectors,
   animatedVectorCoordinatesToVector,
-  multiplyVector
+  calcUnitVector,
+  distanceBetweenVectors,
+  getLineCenter,
+  translateAlongVector
 } from '@/utils/vectors';
 
-import { calcRepulsiveForce } from './forces';
-
-const findBoundingVertices = (
-  verticesPositions: Record<string, Vector>
-): BoundingVertices => {
+const placeVertexOnCircle = (
+  centerPosition: Vector,
+  vertexRadius: number
+): Vector => {
   'worklet';
-  let top: string | undefined;
-  let bottom: string | undefined;
-  let right: string | undefined;
-  let left: string | undefined;
-
-  for (const [key, { x, y }] of Object.entries(verticesPositions)) {
-    if (!top || y < (verticesPositions[top]?.y || -Infinity)) {
-      top = key;
-    }
-    if (!bottom || y > (verticesPositions[bottom]?.y || Infinity)) {
-      bottom = key;
-    }
-    if (!right || x > (verticesPositions[right]?.x || Infinity)) {
-      right = key;
-    }
-    if (!left || x < (verticesPositions[left]?.x || -Infinity)) {
-      left = key;
-    }
-  }
-
+  const angle = Math.random() * 2 * Math.PI;
+  const radius = 4 * vertexRadius + Math.random() * 2 * vertexRadius;
   return {
-    bottom,
-    left,
-    right,
-    top
+    x: centerPosition.x + radius * Math.cos(angle),
+    y: centerPosition.y + radius * Math.sin(angle)
   };
 };
 
-const placeVertexNearBounds = (
-  boundingVertices: BoundingVertices,
+const placeVertexOnConvexHull = (
   placedVerticesPositions: Record<string, Vector>,
-  vertexRadius: number,
-  settings: ForcesSettingsWithDefaults
+  vertexRadius: number
 ): Vector => {
   'worklet';
-  // Select a random vertex from the bounding vertices
-  const boundingVerticesKeys = Object.keys(boundingVertices);
-  const randomBoundingVertex = boundingVerticesKeys[
-    Math.floor(Math.random() * boundingVerticesKeys.length)
-  ]! as keyof BoundingVertices;
-  const randomBoundingVertexPosition =
-    placedVerticesPositions[boundingVertices[randomBoundingVertex]!]!;
+  // Find the convex hull of the placed vertices
+  const hull = grahamScan(Object.values(placedVerticesPositions));
 
-  // Calc repulsion force
-  const repulsiveForce = calcRepulsiveForce(
-    randomBoundingVertexPosition,
-    placedVerticesPositions,
-    settings
+  // Find 2 random neighboring vertices on the hull and place the
+  // new vertex near the center of the line between them
+  const center: { x: number; y: number } = hull.reduce(
+    (acc: { x: number; y: number }, vertex) => {
+      acc.x += vertex.x;
+      acc.y += vertex.y;
+      return acc;
+    },
+    { x: 0, y: 0 }
   );
-  // Calc new position
-  return addVectors(
-    randomBoundingVertexPosition,
-    multiplyVector(repulsiveForce, 5 * vertexRadius)
-  );
+  center.x /= hull.length;
+  center.y /= hull.length;
+
+  // Find the two vertices on the hull that are closest to the center
+  let closestVertex = getLineCenter(hull[0]!, hull[1]!);
+  const closestDistance = distanceBetweenVectors(closestVertex, center);
+  for (let i = 1; i < hull.length; i++) {
+    const vertex = getLineCenter(hull[i]!, hull[(i + 1) % hull.length]!);
+    const distance = distanceBetweenVectors(vertex, center);
+    if (distance < closestDistance) {
+      closestVertex = vertex;
+    }
+  }
+
+  // Move the vertex a bit away from the center of the hull
+  const directionVector = calcUnitVector(center, closestVertex);
+  return translateAlongVector(closestVertex, directionVector, 2 * vertexRadius);
 };
 
 const findForcesPlacementPosition = (
@@ -80,22 +71,33 @@ const findForcesPlacementPosition = (
   settings: ForcesSettingsWithDefaults
 ): Vector => {
   'worklet';
-  const boundingVertices = findBoundingVertices(placedVerticesPositions);
+  const placedVerticesCount = Object.keys(placedVerticesPositions).length;
 
-  // 1. If there are no vertices placed yet, place the vertex on the
+  // If there are no vertices placed yet, place the vertex in the
   // center of the canvas
-  if (Object.keys(placedVerticesPositions).length === 0) {
+  if (placedVerticesCount === 0) {
     return { x: 0, y: 0 };
   }
-  // 2. If there are no neighbors, place the vertex near the bounds of the graph
-  if (neighbors.length === 0) {
-    return placeVertexNearBounds(
-      boundingVertices,
-      placedVerticesPositions,
-      vertexRadius,
-      settings
+  // If there is only one vertex placed, place the vertex randomly on
+  // the circle around the placed vertex
+  if (placedVerticesCount === 1) {
+    return placeVertexOnCircle(
+      Object.values(placedVerticesPositions)[0]!,
+      vertexRadius
     );
   }
+  // If the current vertex is disjoint, find the convex hull of the placed
+  // vertices and place the vertex near the hull
+  if (neighbors.length === 0) {
+    return placeVertexOnConvexHull(placedVerticesPositions, vertexRadius);
+  }
+  // If the current vertex is connected to only one other vertex,
+  // place a vertex based on repulsion force from other vertices
+  // TODO
+  // If the current vertex is connected to many other vertices,
+  // place a vertex in the center of the placed vertices translated
+  // based on the repulsion force from other vertices
+  // TODO
 
   return {
     x: Math.random() * 1000,

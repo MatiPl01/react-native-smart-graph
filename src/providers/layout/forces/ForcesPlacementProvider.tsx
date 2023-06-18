@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { runOnUI } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/data/ComponentsDataProvider';
+import { withGraphData } from '@/providers/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
