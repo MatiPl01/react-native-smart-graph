@@ -23,119 +23,24 @@ export default abstract class Graph<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
-  protected readonly vertices$: Record<string, GV> = {};
+  private readonly observers: Set<GraphObserver> = new Set();
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
     string,
     Record<string, Array<GE>>
   > = {};
 
-  private readonly observers: Set<GraphObserver> = new Set();
+  protected readonly vertices$: Record<string, GV> = {};
 
-  get vertices(): Array<GV> {
-    return Object.values(this.vertices$);
+  addObserver(observer: GraphObserver): void {
+    this.observers.add(observer);
   }
 
-  get edges(): Array<GE> {
-    return Object.values(this.edges$);
-  }
-
-  get orderedEdges(): Array<{ edge: GE; order: number; edgesCount: number }> {
-    const addedEdgesKeys = new Set<string>();
-    const result: Array<{ edge: GE; order: number; edgesCount: number }> = [];
-
-    this.edges.forEach(edge => {
-      if (addedEdgesKeys.has(edge.key)) {
-        return;
-      }
-      const [v1, v2] = edge.vertices;
-      const edgesBetweenVertices =
-        this.edgesBetweenVertices$[v1.key]?.[v2.key] || [];
-      this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
-        ({ edge: e, order }) => {
-          result.push({
-            edge: e,
-            order,
-            edgesCount: edgesBetweenVertices.length
-          });
-          addedEdgesKeys.add(edge.key);
-        }
-      );
-    });
-
-    return result;
-  }
-
-  get connections(): GraphConnections {
-    return Object.fromEntries(
-      Object.values(this.vertices$).map(vertex => [
-        vertex.key,
-        vertex.edges.map(edge =>
-          edge.vertices[0].key === vertex.key
-            ? edge.vertices[1].key
-            : edge.vertices[0].key
-        )
-      ])
-    );
-  }
-
-  abstract isDirected(): boolean;
-
-  abstract insertVertex(
-    data: VertexData<V>,
-    animationSettings?: AnimationSettings | null
-  ): GV;
-
-  abstract insertEdge(
-    data: ED,
-    animationSettings?: AnimationSettings | null
-  ): GE;
-
-  abstract removeEdge(
-    key: string,
-    animationSettings?: AnimationSettings | null
-  ): E;
-
-  abstract orderEdgesBetweenVertices(
-    edges: Array<GE>
-  ): Array<{ edge: GE; order: number }>;
-
-  abstract insertBatch(
-    data: {
-      vertices?: Array<VertexData<V>>;
-      edges?: Array<ED>;
-    },
-    animationSettings?: BatchModificationAnimationSettings | null
-  ): void;
-
-  abstract replaceBatch(
-    data: {
-      vertices?: Array<VertexData<V>>;
-      edges?: Array<ED>;
-    },
-    animationSettings?: BatchModificationAnimationSettings | null
-  ): void;
-
-  removeBatch(
-    data: {
-      vertices?: Array<string>;
-      edges?: Array<string>;
-    },
-    animationSettings?: BatchModificationAnimationSettings | null
-  ): void {
-    // Remove edges and vertices from graph
-    data.edges?.forEach(key => this.removeEdge(key, null));
-    data.vertices?.forEach(key => this.removeVertex(key, null));
-    // Notify observers after all changes to the graph model are made
-    if (animationSettings !== null) {
-      this.notifyChange(
-        createAnimationsSettingsForBatchModification(
-          {
-            edges: data.edges,
-            vertices: data.vertices
-          },
-          animationSettings
-        )
+  // TODO - remove this method after adding self-loop edges support
+  protected checkSelfLoop(vertex1key: string, vertex2key: string): void {
+    if (vertex1key === vertex2key) {
+      throw new Error(
+        `Self-loop edges are not yet supported. Vertex key: ${vertex1key}`
       );
     }
   }
@@ -151,8 +56,8 @@ export default abstract class Graph<
       this.notifyChange(
         createAnimationsSettingsForBatchModification(
           {
-            vertices: Object.keys(this.vertices$),
-            edges: Object.keys(this.edges$)
+            edges: Object.keys(this.edges$),
+            vertices: Object.keys(this.vertices$)
           },
           animationSettings
         )
@@ -160,24 +65,21 @@ export default abstract class Graph<
     }
   }
 
-  addObserver(observer: GraphObserver): void {
-    this.observers.add(observer);
+  get connections(): GraphConnections {
+    return Object.fromEntries(
+      Object.values(this.vertices$).map(vertex => [
+        vertex.key,
+        vertex.edges.map(edge =>
+          edge.vertices[0].key === vertex.key
+            ? edge.vertices[1].key
+            : edge.vertices[0].key
+        )
+      ])
+    );
   }
 
-  removeObserver(observer: GraphObserver): void {
-    this.observers.delete(observer);
-  }
-
-  hasVertex(key: string): boolean {
-    return !!this.vertices$[key];
-  }
-
-  hasEdge(key: string): boolean {
-    return !!this.edges$[key];
-  }
-
-  getVertex(key: string): GV | null {
-    return this.vertices$[key] ?? null;
+  get edges(): Array<GE> {
+    return Object.values(this.edges$);
   }
 
   getEdge(key: string): GE | null {
@@ -189,37 +91,16 @@ export default abstract class Graph<
     return res ? [...res] : []; // Create a copy of the array
   }
 
-  removeVertex(key: string, animationsSettings?: AnimationsSettings | null): V {
-    if (!this.vertices$[key]) {
-      throw new Error(`Vertex with key ${key} does not exist.`);
-    }
-
-    const vertex = this.vertices$[key] as GV;
-    vertex.edges.forEach(edge => {
-      this.removeEdge(edge.key);
-    });
-    delete this.vertices$[key];
-    // Notify change if notifyObservers is set to true
-    if (animationsSettings !== null) {
-      this.notifyChange(animationsSettings);
-    }
-
-    return vertex.value;
+  getVertex(key: string): GV | null {
+    return this.vertices$[key] ?? null;
   }
 
-  protected insertVertexObject(
-    vertex: GV,
-    animationSettings?: AnimationsSettings | null
-  ): GV {
-    if (this.vertices$[vertex.key]) {
-      throw new Error(`Vertex with key ${vertex.key} already exists.`);
-    }
-    this.vertices$[vertex.key] = vertex;
-    // Notify change if notifyObservers is set to true
-    if (animationSettings !== null) {
-      this.notifyChange(animationSettings);
-    }
-    return vertex;
+  hasEdge(key: string): boolean {
+    return !!this.edges$[key];
+  }
+
+  hasVertex(key: string): boolean {
+    return !!this.vertices$[key];
   }
 
   protected insertEdgeObject(
@@ -254,6 +135,82 @@ export default abstract class Graph<
     return edge;
   }
 
+  protected insertVertexObject(
+    vertex: GV,
+    animationSettings?: AnimationsSettings | null
+  ): GV {
+    if (this.vertices$[vertex.key]) {
+      throw new Error(`Vertex with key ${vertex.key} already exists.`);
+    }
+    this.vertices$[vertex.key] = vertex;
+    // Notify change if notifyObservers is set to true
+    if (animationSettings !== null) {
+      this.notifyChange(animationSettings);
+    }
+    return vertex;
+  }
+
+  protected notifyChange(animationsSettings?: AnimationsSettings): void {
+    this.observers.forEach(observer => {
+      observer.graphChanged(
+        animationsSettings || {
+          edges: {},
+          vertices: {}
+        }
+      );
+    });
+  }
+
+  get orderedEdges(): Array<{ edge: GE; edgesCount: number; order: number }> {
+    const addedEdgesKeys = new Set<string>();
+    const result: Array<{ edge: GE; edgesCount: number; order: number }> = [];
+
+    this.edges.forEach(edge => {
+      if (addedEdgesKeys.has(edge.key)) {
+        return;
+      }
+      const [v1, v2] = edge.vertices;
+      const edgesBetweenVertices =
+        this.edgesBetweenVertices$[v1.key]?.[v2.key] || [];
+      this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
+        ({ edge: e, order }) => {
+          result.push({
+            edge: e,
+            edgesCount: edgesBetweenVertices.length,
+            order
+          });
+          addedEdgesKeys.add(edge.key);
+        }
+      );
+    });
+
+    return result;
+  }
+
+  removeBatch(
+    data: {
+      edges?: Array<string>;
+      vertices?: Array<string>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void {
+    // Remove edges and vertices from graph
+    data.edges?.forEach(key => this.removeEdge(key, null));
+    data.vertices?.forEach(key => this.removeVertex(key, null));
+    // Notify observers after all changes to the graph model are made
+    if (animationSettings !== null) {
+      this.notifyChange(
+        createAnimationsSettingsForBatchModification(
+          {
+            edges: data.edges,
+            vertices: data.vertices
+          },
+          animationSettings
+        )
+      );
+    }
+  }
+
   protected removeEdgeObject(
     edge: GE,
     animationsSettings?: AnimationsSettings | null
@@ -282,23 +239,66 @@ export default abstract class Graph<
     }
   }
 
-  protected notifyChange(animationsSettings?: AnimationsSettings): void {
-    this.observers.forEach(observer => {
-      observer.graphChanged(
-        animationsSettings || {
-          vertices: {},
-          edges: {}
-        }
-      );
-    });
+  removeObserver(observer: GraphObserver): void {
+    this.observers.delete(observer);
   }
 
-  // TODO - remove this method after adding self-loop edges support
-  protected checkSelfLoop(vertex1key: string, vertex2key: string): void {
-    if (vertex1key === vertex2key) {
-      throw new Error(
-        `Self-loop edges are not yet supported. Vertex key: ${vertex1key}`
-      );
+  removeVertex(key: string, animationsSettings?: AnimationsSettings | null): V {
+    if (!this.vertices$[key]) {
+      throw new Error(`Vertex with key ${key} does not exist.`);
     }
+
+    const vertex = this.vertices$[key] as GV;
+    vertex.edges.forEach(edge => {
+      this.removeEdge(edge.key);
+    });
+    delete this.vertices$[key];
+    // Notify change if notifyObservers is set to true
+    if (animationsSettings !== null) {
+      this.notifyChange(animationsSettings);
+    }
+
+    return vertex.value;
   }
+
+  get vertices(): Array<GV> {
+    return Object.values(this.vertices$);
+  }
+
+  abstract insertBatch(
+    data: {
+      edges?: Array<ED>;
+      vertices?: Array<VertexData<V>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
+
+  abstract insertEdge(
+    data: ED,
+    animationSettings?: AnimationSettings | null
+  ): GE;
+
+  abstract insertVertex(
+    data: VertexData<V>,
+    animationSettings?: AnimationSettings | null
+  ): GV;
+
+  abstract isDirected(): boolean;
+
+  abstract orderEdgesBetweenVertices(
+    edges: Array<GE>
+  ): Array<{ edge: GE; order: number }>;
+
+  abstract removeEdge(
+    key: string,
+    animationSettings?: AnimationSettings | null
+  ): E;
+
+  abstract replaceBatch(
+    data: {
+      edges?: Array<ED>;
+      vertices?: Array<VertexData<V>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void;
 }

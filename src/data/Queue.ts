@@ -3,8 +3,8 @@ import LinkedList from './LinkedList';
 export default class Queue<T> {
   protected linkedList: LinkedList<T> = new LinkedList();
 
-  public isEmpty(): boolean {
-    return !this.linkedList.head;
+  public dequeue(): T | null {
+    return this.linkedList.popLeft();
   }
 
   public enqueue(value: T): void {
@@ -15,8 +15,12 @@ export default class Queue<T> {
     values.forEach(value => this.enqueue(value));
   }
 
-  public dequeue(): T | null {
-    return this.linkedList.popLeft();
+  public isEmpty(): boolean {
+    return !this.linkedList.head;
+  }
+
+  public get length(): number {
+    return this.linkedList.length;
   }
 
   public peek(): T | null {
@@ -25,9 +29,5 @@ export default class Queue<T> {
     }
 
     return this.linkedList.head.value;
-  }
-
-  public get length(): number {
-    return this.linkedList.length;
   }
 }

@@ -29,11 +29,11 @@ const placeVerticesRandomly = <V, E>(
   }
 
   const props: CalcVerticesPositionsProps<V, E> = {
-    vertices,
     density: settings.density ?? RANDOM_PLACEMENT_SETTING.density,
     minVertexSpacing:
       settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
-    vertexRadius
+    vertexRadius,
+    vertices
   };
 
   switch (settings.layoutType) {
@@ -45,16 +45,16 @@ const placeVerticesRandomly = <V, E>(
 };
 
 type CalcVerticesPositionsProps<V, E> = {
-  vertices: Array<Vertex<V, E>>;
   density: number;
-  vertexRadius: number;
   minVertexSpacing: number;
+  vertexRadius: number;
+  vertices: Array<Vertex<V, E>>;
 };
 
 const calcVerticesGridPositions = <V, E>(
   props: CalcVerticesPositionsProps<V, E>
 ): GraphLayout => {
-  const { vertices, density, vertexRadius, minVertexSpacing } = props;
+  const { density, minVertexSpacing, vertexRadius, vertices } = props;
   const verticesCount = vertices.length;
 
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
@@ -77,19 +77,19 @@ const calcVerticesGridPositions = <V, E>(
   }, {} as PlacedVerticesPositions);
 
   return {
-    verticesPositions,
     boundingRect: calcContainerBoundingRect(
       verticesPositions,
       minVertexSpacing,
       vertexRadius
-    )
+    ),
+    verticesPositions
   };
 };
 
 const calcVerticesTrianglesPositions = <V, E>(
   props: CalcVerticesPositionsProps<V, E>
 ): GraphLayout => {
-  const { vertices, density, vertexRadius, minVertexSpacing } = props;
+  const { density, minVertexSpacing, vertexRadius, vertices } = props;
   const verticesCount = vertices.length;
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
   const triangleHeight = (minVertexCenterDistance * Math.sqrt(3)) / 2;
@@ -181,12 +181,12 @@ const calcVerticesRandomPositions = <V, E>(
   }, {} as PlacedVerticesPositions);
 
   return {
-    verticesPositions,
     boundingRect: calcContainerBoundingRect(
       verticesPositions,
       SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
       vertexRadius
-    )
+    ),
+    verticesPositions
   };
 };
 

@@ -10,19 +10,19 @@ import { translateAlongVector } from '@/utils/vectors';
 
 type EdgeArrowComponentProps = SharedRenderersProps & {
   directionVector: AnimatedVector;
-  tipPosition: AnimatedVector;
-  vertexRadius: SharedValue<number>;
-  width: SharedValue<number>;
   height: SharedValue<number>;
   renderer: EdgeArrowRenderFunction;
   settings?: EdgeArrowSettings;
+  tipPosition: AnimatedVector;
+  vertexRadius: SharedValue<number>;
+  width: SharedValue<number>;
 };
 
 export default function EdgeArrowComponent({
   directionVector,
-  tipPosition,
   height,
   renderer,
+  tipPosition,
   ...restProps
 }: EdgeArrowComponentProps) {
   const centerPosition = useDerivedValue(() =>
@@ -40,8 +40,8 @@ export default function EdgeArrowComponent({
   return renderer({
     ...restProps,
     centerPosition,
-    tipPosition,
+    height,
     rotation,
-    height
+    tipPosition
   });
 }

@@ -36,33 +36,33 @@ import { withMemoContext } from '@/utils/contexts';
 
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
-  verticesData: Record<string, VertexComponentData<V, E>>;
   edgesData: Record<string, EdgeComponentData<E, V>>;
-  verticesRenderData: Record<string, VertexComponentRenderData>;
   edgesRenderData: Record<string, EdgeComponentRenderData>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  handleVertexRender: VertexRenderHandler;
-  handleVertexRemove: VertexRemoveHandler;
-  handleEdgeRender: EdgeRenderHandler;
   handleEdgeRemove: EdgeRemoveHandler;
+  handleEdgeRender: EdgeRenderHandler;
+  handleVertexRemove: VertexRemoveHandler;
+  handleVertexRender: VertexRenderHandler;
+  layoutAnimationSettings: AnimationSettingsWithDefaults;
+  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesRenderData: Record<string, VertexComponentRenderData>;
 };
 
 const ComponentsDataContext = createContext({});
 
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
-  settings: GraphSettingsWithDefaults<V, E>;
   renderers: GraphRenderersWithDefaults<V, E>;
+  settings: GraphSettingsWithDefaults<V, E>;
 }>;
 
 export default function ComponentsDataProvider<V, E>({
+  children,
   graph,
-  settings,
   renderers,
-  children
+  settings
 }: ComponentsDataProviderProps<V, E>) {
   // GRAPH CHANGES OBSERVER
-  const [{ vertices, orderedEdges, animationsSettings }] =
+  const [{ animationsSettings, orderedEdges, vertices }] =
     useGraphObserver(graph);
 
   // GRAPH COMPONENTS DATA (necessary to render graph components)
@@ -186,15 +186,15 @@ export default function ComponentsDataProvider<V, E>({
   const contextValue = useMemo<ComponentsDataContextType<V, E>>(
     () => ({
       connections,
-      verticesData,
       edgesData,
-      verticesRenderData,
       edgesRenderData,
-      layoutAnimationSettings,
-      handleVertexRender,
+      handleEdgeRemove,
       handleEdgeRender,
       handleVertexRemove,
-      handleEdgeRemove
+      handleVertexRender,
+      layoutAnimationSettings,
+      verticesData,
+      verticesRenderData
     }),
     [
       connections,

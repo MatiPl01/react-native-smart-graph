@@ -23,13 +23,13 @@ type SharedGraphSettings = {
 };
 
 export type DirectedGraphSettings<V, E> = SharedGraphSettings & {
-  placement?: DirectedGraphPlacementSettings<V, E>;
   components?: DirectedGraphComponentsSettings;
+  placement?: DirectedGraphPlacementSettings<V, E>;
 };
 
 export type UndirectedGraphSettings<V, E> = SharedGraphSettings & {
-  placement?: UndirectedGraphPlacementSettings<V, E>;
   components?: UndirectedGraphComponentsSettings;
+  placement?: UndirectedGraphPlacementSettings<V, E>;
 };
 
 export type GraphSettings<V, E> =

@@ -9,8 +9,8 @@ export type VertexSettings = SharedVertexSettings;
 export type VertexSettingsWithDefaults = DeepRequiredAll<VertexSettings>;
 
 export type StraightEdgeSettings = {
-  type: 'straight';
   maxOffsetFactor?: number; // 0.5 is a good value
+  type: 'straight';
 };
 
 export type CurvedEdgeSettings = {
@@ -22,9 +22,9 @@ export type EdgeLabelSettings = {
 };
 
 type SharedEdgeSettings = (
+  | CurvedEdgeSettings
   | Record<string, never>
   | StraightEdgeSettings
-  | CurvedEdgeSettings
 ) & {
   label?: EdgeLabelSettings;
 };
@@ -54,10 +54,10 @@ export type UndirectedGraphComponentsSettings =
 
 export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   DirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'sizeRatio']
+  ['edge', 'type'] | ['label', 'sizeRatio'] | ['vertex', 'radius']
 >;
 
 export type UndirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   UndirectedGraphComponentsSettings,
-  ['vertex', 'radius'] | ['edge', 'type'] | ['label', 'sizeRatio']
+  ['edge', 'type'] | ['label', 'sizeRatio'] | ['vertex', 'radius']
 >;

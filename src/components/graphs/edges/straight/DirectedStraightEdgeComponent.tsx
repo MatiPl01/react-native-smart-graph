@@ -30,17 +30,17 @@ const calcTranslationOffset = (
 };
 
 function DirectedStraightEdgeComponent<E, V>({
-  edge,
-  v1Position,
-  v2Position,
-  v1Radius,
-  v2Radius,
-  componentSettings,
-  animatedOrder,
   animatedEdgesCount,
+  animatedOrder,
   animationProgress,
+  componentSettings,
+  edge,
+  onRender,
   renderers,
-  onRender
+  v1Position,
+  v1Radius,
+  v2Position,
+  v2Radius
 }: DirectedStraightEdgeComponentProps<E, V>) {
   // Edge line
   const p1 = useSharedValue({
@@ -69,14 +69,14 @@ function DirectedStraightEdgeComponent<E, V>({
 
   useAnimatedReaction(
     () => ({
-      v1: animatedVectorCoordinatesToVector(v1Position),
-      v2: animatedVectorCoordinatesToVector(v2Position),
+      edgesCount: animatedEdgesCount.value,
+      order: animatedOrder.value,
       r1: v1Radius.value,
       r2: v2Radius.value,
-      order: animatedOrder.value,
-      edgesCount: animatedEdgesCount.value
+      v1: animatedVectorCoordinatesToVector(v1Position),
+      v2: animatedVectorCoordinatesToVector(v2Position)
     }),
-    ({ v1, v2, r1, r2, order, edgesCount }) => {
+    ({ edgesCount, order, r1, r2, v1, v2 }) => {
       const calcOffset = calcTranslationOffset.bind(
         null,
         order,
@@ -130,31 +130,31 @@ function DirectedStraightEdgeComponent<E, V>({
   return (
     <>
       {renderers.edge({
-        key: edge.key,
+        animationProgress,
         data: edge.value,
+        key: edge.key,
         p1,
-        p2,
-        animationProgress
+        p2
       })}
       <EdgeArrowComponent
+        animationProgress={animationProgress}
         directionVector={dirVec}
-        tipPosition={arrowTipPosition}
+        height={arrowHeight}
         renderer={renderers.arrow}
+        tipPosition={arrowTipPosition}
         vertexRadius={v2Radius}
         width={arrowWidth}
-        height={arrowHeight}
-        animationProgress={animationProgress}
       />
       {renderers.label && (
         <EdgeLabelComponent
-          edge={edge}
-          v1Position={v1Position}
-          v2Position={v2Position}
+          animationProgress={animationProgress}
           centerX={centerX}
           centerY={centerY}
+          edge={edge}
           height={labelHeight}
           renderer={renderers.label}
-          animationProgress={animationProgress}
+          v1Position={v1Position}
+          v2Position={v2Position}
         />
       )}
     </>

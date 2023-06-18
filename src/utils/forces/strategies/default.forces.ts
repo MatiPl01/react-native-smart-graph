@@ -26,8 +26,8 @@ export default function applyDefaultForces(
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   {
-    attractionScale,
     attractionForceFactor,
+    attractionScale,
     repulsionScale
   }: DefaultForcesStrategySettingsWithDefaults
 ): void {

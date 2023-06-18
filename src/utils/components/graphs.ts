@@ -36,16 +36,22 @@ export const updateGraphSettingsWithDefaults = <V, E>(
   settings?: GraphSettings<V, E>
 ): GraphSettingsWithDefaults<V, E> => ({
   ...settings,
-  placement: {
-    ...(RANDOM_PLACEMENT_SETTING as RandomPlacementSettings),
-    ...settings?.placement
+  animations: {
+    edges: {
+      ...DEFAULT_ANIMATION_SETTINGS,
+      ...settings?.animations?.edges
+    },
+    layout: {
+      ...DEFAULT_ANIMATION_SETTINGS,
+      ...settings?.animations?.layout
+    },
+    vertices: {
+      ...DEFAULT_ANIMATION_SETTINGS,
+      ...settings?.animations?.vertices
+    }
   },
   components: {
     ...settings?.components,
-    vertex: {
-      ...VERTEX_COMPONENT_SETTINGS,
-      ...settings?.components?.vertex
-    },
     edge: {
       ...(settings?.components?.edge?.type === 'straight'
         ? STRAIGHT_EDGE_COMPONENT_SETTINGS
@@ -64,23 +70,17 @@ export const updateGraphSettingsWithDefaults = <V, E>(
         ...LABEL_COMPONENT_SETTINGS,
         ...settings?.components?.edge?.label
       }
+    },
+    vertex: {
+      ...VERTEX_COMPONENT_SETTINGS,
+      ...settings?.components?.vertex
     }
   },
-  animations: {
-    layout: {
-      ...DEFAULT_ANIMATION_SETTINGS,
-      ...settings?.animations?.layout
-    },
-    vertices: {
-      ...DEFAULT_ANIMATION_SETTINGS,
-      ...settings?.animations?.vertices
-    },
-    edges: {
-      ...DEFAULT_ANIMATION_SETTINGS,
-      ...settings?.animations?.edges
-    }
-  },
-  layout: updateGraphLayoutSettingsWithDefaults(settings?.layout)
+  layout: updateGraphLayoutSettingsWithDefaults(settings?.layout),
+  placement: {
+    ...(RANDOM_PLACEMENT_SETTING as RandomPlacementSettings),
+    ...settings?.placement
+  }
 });
 
 const updateGraphLayoutSettingsWithDefaults = (
@@ -103,15 +103,15 @@ const updateGraphLayoutSettingsWithDefaults = (
 
 export const updateGraphRenderersWithDefaults = <V, E>(
   isGraphDirected: boolean,
-  edgeType: 'straight' | 'curved',
+  edgeType: 'curved' | 'straight',
   renderers?: GraphRenderers<V, E>
 ): GraphRenderersWithDefaults<V, E> => ({
-  vertex: DefaultVertexRenderer,
+  arrow: isGraphDirected ? DefaultEdgeArrowRenderer : undefined,
   edge:
     edgeType === 'straight'
       ? DefaultStraightEdgeRenderer
       : DefaultCurvedEdgeRenderer,
-  arrow: isGraphDirected ? DefaultEdgeArrowRenderer : undefined,
+  vertex: DefaultVertexRenderer,
   ...renderers
 });
 
@@ -128,14 +128,14 @@ export const updateGraphVerticesData = <V, E>(
   currentVertices.forEach(vertex => {
     if (!oldVerticesData[vertex.key] || oldVerticesData[vertex.key]?.removed) {
       updatedVerticesData[vertex.key] = {
-        vertex,
-        componentSettings: settings.components.vertex,
         animationSettings: {
           ...settings.animations.vertices,
           ...currentAnimationsSettings.vertices[vertex.key]
         },
+        componentSettings: settings.components.vertex,
         removed: false,
-        renderer: renderers.vertex
+        renderer: renderers.vertex,
+        vertex
       };
     }
   });
@@ -149,11 +149,11 @@ export const updateGraphVerticesData = <V, E>(
       updatedVerticesData[key] = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...updatedVerticesData[key]!,
-        removed: true,
         animationSettings: {
           ...settings.animations.vertices,
           ...currentAnimationsSettings.vertices[key]
-        }
+        },
+        removed: true
       };
     }
   });
@@ -176,7 +176,7 @@ export const updateGraphEdgesData = <V, E>(
   let wasUpdated = false; // Flag to indicate if edges data was updated
 
   // Add new edges to edges data
-  currentEdges.forEach(({ edge, order, edgesCount }) => {
+  currentEdges.forEach(({ edge, edgesCount, order }) => {
     const [v1, v2] = edge.vertices;
     const v1Data = verticesRenderData[v1.key];
     const v2Data = verticesRenderData[v2.key];
@@ -190,22 +190,22 @@ export const updateGraphEdgesData = <V, E>(
     ) {
       wasUpdated = true;
       updatedEdgesData[edge.key] = {
-        edge,
-        order,
-        edgesCount,
-        removed: false,
-        edgeRenderer: renderers.edge,
-        arrowRenderer: renderers.arrow,
-        labelRenderer: renderers.label,
-        v1Position: v1Data.position,
-        v2Position: v2Data.position,
-        v1Radius: v1Data.currentRadius,
-        v2Radius: v2Data.currentRadius,
-        componentSettings: settings.components.edge,
         animationSettings: {
           ...settings.animations.edges,
           ...currentAnimationsSettings.edges[edge.key]
-        }
+        },
+        arrowRenderer: renderers.arrow,
+        componentSettings: settings.components.edge,
+        edge,
+        edgeRenderer: renderers.edge,
+        edgesCount,
+        labelRenderer: renderers.label,
+        order,
+        removed: false,
+        v1Position: v1Data.position,
+        v1Radius: v1Data.currentRadius,
+        v2Position: v2Data.position,
+        v2Radius: v2Data.currentRadius
       };
     }
   });
@@ -220,11 +220,11 @@ export const updateGraphEdgesData = <V, E>(
       updatedEdgesData[key] = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...updatedEdgesData[key]!,
-        removed: true,
         animationSettings: {
           ...settings.animations.edges,
           ...currentAnimationsSettings.edges[key]
-        }
+        },
+        removed: true
       };
     }
   });

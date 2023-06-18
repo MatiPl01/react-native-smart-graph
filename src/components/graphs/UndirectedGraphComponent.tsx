@@ -10,8 +10,8 @@ import GraphComponent, { GraphComponentProps } from './GraphComponent';
 
 type UndirectedGraphComponentProps<V, E> = {
   graph: UndirectedGraph<V, E>;
-  settings?: UndirectedGraphSettings<V, E>;
   renderers?: UndirectedGraphRenderers<V, E>;
+  settings?: UndirectedGraphSettings<V, E>;
 };
 
 function UndirectedGraphComponent<V, E>({
@@ -36,7 +36,7 @@ export default memo(
     );
   },
   deepMemoComparator({
-    shallow: ['graph'],
-    exclude: ['boundingRect']
+    exclude: ['boundingRect'],
+    shallow: ['graph']
   })
 );

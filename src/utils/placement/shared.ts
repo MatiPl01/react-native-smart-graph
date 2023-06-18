@@ -23,10 +23,10 @@ export const calcContainerBoundingRect = (
   }
 
   return {
-    top: minY - vertexRadius - minVertexSpacing / 2,
     bottom: maxY + vertexRadius + minVertexSpacing / 2,
     left: minX - vertexRadius - minVertexSpacing / 2,
-    right: maxX + vertexRadius + minVertexSpacing / 2
+    right: maxX + vertexRadius + minVertexSpacing / 2,
+    top: minY - vertexRadius - minVertexSpacing / 2
   };
 };
 
@@ -49,12 +49,12 @@ export const arrangeGraphComponents = (
 ): GraphLayout => {
   // Prepare graph components for packing
   const preparedComponents = graphComponents.map(
-    ({ boundingRect: { top, bottom, left, right }, verticesPositions }) => ({
-      w: right - left,
+    ({ boundingRect: { bottom, left, right, top }, verticesPositions }) => ({
       h: bottom - top,
+      verticesPositions,
+      w: right - left,
       x: 0,
-      y: 0,
-      verticesPositions
+      y: 0
     })
   );
   // Pack graph components on the screen
@@ -62,8 +62,8 @@ export const arrangeGraphComponents = (
   // Translate graph components to correct positions on the screen
   const verticesPositions = Object.fromEntries(
     preparedComponents.flatMap(
-      ({ verticesPositions: positions, x, y, w, h }) => {
-        const { left, right, top, bottom } =
+      ({ h, verticesPositions: positions, w, x, y }) => {
+        const { bottom, left, right, top } =
           calcContainerBoundingRect(positions);
 
         // calculate the shift of graph center relative to component center
@@ -82,7 +82,7 @@ export const arrangeGraphComponents = (
   );
 
   return {
-    verticesPositions,
-    boundingRect: calcContainerBoundingRect(verticesPositions, 0, vertexRadius)
+    boundingRect: calcContainerBoundingRect(verticesPositions, 0, vertexRadius),
+    verticesPositions
   };
 };

@@ -14,10 +14,10 @@ export const fixedWithDecay = (
   }
 
   return withDecay({
-    velocity: newVelocity,
     clamp: [clampMin, clampMax],
-    rubberBandEffect: true,
     deceleration: 0.98,
-    rubberBandFactor: 3
+    rubberBandEffect: true,
+    rubberBandFactor: 3,
+    velocity: newVelocity
   });
 };

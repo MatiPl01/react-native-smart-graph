@@ -5,7 +5,7 @@ export const SHARED_PLACEMENT_SETTINGS = {
 };
 
 export const RANDOM_PLACEMENT_SETTING = {
-  strategy: 'random',
+  density: 0.5,
   layoutType: 'triangles' as RandomLayoutType,
-  density: 0.5
+  strategy: 'random'
 };

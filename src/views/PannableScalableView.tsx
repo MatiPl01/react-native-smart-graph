@@ -42,20 +42,20 @@ import {
 } from '@/utils/views';
 
 type PannableScalableViewProps = PropsWithChildren<{
-  scales?: number[];
-  initialScale?: number;
-  objectFit?: ObjectFit;
   autoSizingTimeout?: number;
   controls?: boolean;
+  initialScale?: number;
+  objectFit?: ObjectFit;
+  scales?: number[];
 }>;
 
 function PannableScalableView({
+  autoSizingTimeout = AUTO_SIZING_TIMEOUT,
   children,
-  scales = DEFAULT_SCALES,
+  controls = false,
   initialScale = INITIAL_SCALE,
   objectFit = 'none',
-  autoSizingTimeout = AUTO_SIZING_TIMEOUT,
-  controls = false
+  scales = DEFAULT_SCALES
 }: PannableScalableViewProps) {
   // Validate parameters
   if (scales.length === 0) {
@@ -113,7 +113,7 @@ function PannableScalableView({
   const handleCanvasRender = useCallback(
     ({
       nativeEvent: {
-        layout: { width, height }
+        layout: { height, width }
       }
     }: LayoutChangeEvent) => {
       canvasWidth.value = width;
@@ -123,8 +123,8 @@ function PannableScalableView({
         resetContainerPosition(
           {
             canvasDimensions: {
-              width,
-              height
+              height,
+              width
             },
             containerBoundingRect: initialBoundingRectRef.current
           },
@@ -151,22 +151,22 @@ function PannableScalableView({
   const resetContainerPosition = useCallback(
     (
       settings?: {
-        containerBoundingRect?: BoundingRect;
-        canvasDimensions?: Dimensions;
         animated?: boolean;
+        canvasDimensions?: Dimensions;
+        containerBoundingRect?: BoundingRect;
       },
       userTriggered = true
     ) => {
       const containerBoundingRect = settings?.containerBoundingRect ?? {
+        bottom: containerBottom.value,
         left: containerLeft.value,
         right: containerRight.value,
-        top: containerTop.value,
-        bottom: containerBottom.value
+        top: containerTop.value
       };
 
       const canvasDimensions = settings?.canvasDimensions ?? {
-        width: canvasWidth.value,
-        height: canvasHeight.value
+        height: canvasHeight.value,
+        width: canvasWidth.value
       };
 
       if (userTriggered) disableAutoSizing();
@@ -175,8 +175,8 @@ function PannableScalableView({
         calcContainerScale(
           'contain',
           {
-            width: containerBoundingRect.right - containerBoundingRect.left,
-            height: containerBoundingRect.bottom - containerBoundingRect.top
+            height: containerBoundingRect.bottom - containerBoundingRect.top,
+            width: containerBoundingRect.right - containerBoundingRect.left
           },
           canvasDimensions
         ),
@@ -324,14 +324,14 @@ function PannableScalableView({
   useAnimatedReaction(
     () => ({
       boundingRect: {
+        bottom: containerBottom.value,
         left: containerLeft.value,
         right: containerRight.value,
-        top: containerTop.value,
-        bottom: containerBottom.value
+        top: containerTop.value
       },
       canvasDimensions: {
-        width: canvasWidth.value,
-        height: canvasHeight.value
+        height: canvasHeight.value,
+        width: canvasWidth.value
       },
       enabled: autoSizingEnabled.value,
       startScale: autoSizingStartScale.value,
@@ -357,8 +357,8 @@ function PannableScalableView({
             calcContainerScale(
               objectFit,
               {
-                width: boundingRect.right - boundingRect.left,
-                height: boundingRect.bottom - boundingRect.top
+                height: boundingRect.bottom - boundingRect.top,
+                width: boundingRect.right - boundingRect.left
               },
               canvasDimensions
             ),
@@ -472,16 +472,16 @@ function PannableScalableView({
   return (
     <View style={styles.container}>
       <GestureDetector gesture={gestureHandler}>
-        <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
+        <Canvas onLayout={handleCanvasRender} style={styles.canvas}>
           <Group transform={transform}>
             {Children.map(children, child => {
               const childElement = child as ReactElement<GraphComponentProps>;
               return cloneElement(childElement, {
                 boundingRect: {
+                  bottom: containerBottom,
                   left: containerLeft,
                   right: containerRight,
-                  top: containerTop,
-                  bottom: containerBottom
+                  top: containerTop
                 },
                 onRender: handleGraphRender
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -501,13 +501,13 @@ function PannableScalableView({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: 'relative',
-    overflow: 'hidden'
-  },
   canvas: {
     flex: 1
+  },
+  container: {
+    flex: 1,
+    overflow: 'hidden',
+    position: 'relative'
   }
 });
 

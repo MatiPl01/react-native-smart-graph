@@ -11,8 +11,8 @@ import {
 export const findClosestVertex = (
   position: Vector,
   animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
-): { key: string | null; distance: number } => {
-  let closestVertexKey: string | null = null;
+): { distance: number; key: null | string } => {
+  let closestVertexKey: null | string = null;
   let closestVertexDistance = Infinity;
 
   Object.entries(animatedVerticesPositions).forEach(
@@ -29,8 +29,8 @@ export const findClosestVertex = (
   );
 
   return {
-    key: closestVertexKey,
-    distance: closestVertexDistance
+    distance: closestVertexDistance,
+    key: closestVertexKey
   };
 };
 
@@ -39,8 +39,8 @@ export const findPressedVertex = (
   vertexRadius: number,
   hitSlop: number,
   animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
-): string | null => {
-  const { key: closestVertexKey, distance } = findClosestVertex(
+): null | string => {
+  const { distance, key: closestVertexKey } = findClosestVertex(
     position,
     animatedVerticesPositions
   );
@@ -57,8 +57,8 @@ export const findClosestEdgeLabel = <E, V>(
   position: Vector,
   edges: Array<Edge<E, V>>,
   animatedEdgeLabelsPositions: Record<string, AnimatedVector>
-): { key: string | null; distance: number } => {
-  let closestEdgeLabelKey: string | null = null;
+): { distance: number; key: null | string } => {
+  let closestEdgeLabelKey: null | string = null;
   let closestEdgeLabelDistance = Infinity;
 
   edges.forEach(edge => {
@@ -75,8 +75,8 @@ export const findClosestEdgeLabel = <E, V>(
   });
 
   return {
-    key: closestEdgeLabelKey,
-    distance: closestEdgeLabelDistance
+    distance: closestEdgeLabelDistance,
+    key: closestEdgeLabelKey
   };
 };
 
@@ -85,8 +85,8 @@ export const findPressedEdgeLabel = <E, V>(
   graph: Graph<V, E>,
   hitSlop: number,
   animatedEdgeLabelsPositions: Record<string, AnimatedVector>
-): string | null => {
-  const { key: closestEdgeLabelKey, distance } = findClosestEdgeLabel(
+): null | string => {
+  const { distance, key: closestEdgeLabelKey } = findClosestEdgeLabel(
     position,
     graph.edges,
     animatedEdgeLabelsPositions

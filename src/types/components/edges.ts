@@ -23,85 +23,85 @@ import {
 import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
 
 type SharedEdgeComponentProps = {
-  v1Position: AnimatedVectorCoordinates;
-  v2Position: AnimatedVectorCoordinates;
-  v1Radius: SharedValue<number>;
-  v2Radius: SharedValue<number>;
-  animationProgress: SharedValue<number>;
-  animatedOrder: SharedValue<number>;
   animatedEdgesCount: SharedValue<number>;
+  animatedOrder: SharedValue<number>;
+  animationProgress: SharedValue<number>;
   animationSettings: AnimationSettingsWithDefaults;
   onRender: EdgeRenderHandler;
+  v1Position: AnimatedVectorCoordinates;
+  v1Radius: SharedValue<number>;
+  v2Position: AnimatedVectorCoordinates;
+  v2Radius: SharedValue<number>;
 };
 
 export type DirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    edge: DirectedEdge<E, V>;
-    renderers: DirectedCurvedEdgeRenderers<E>;
     componentSettings: Required<CurvedEdgeSettings> & {
       arrow: Required<EdgeArrowSettings>;
       label?: EdgeLabelSettings;
     };
+    edge: DirectedEdge<E, V>;
+    renderers: DirectedCurvedEdgeRenderers<E>;
   };
 
 export type UndirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    edge: UndirectedEdge<E, V>;
-    renderers: UndirectedCurvedEdgeRenderers<E>;
     componentSettings: Required<CurvedEdgeSettings> & {
       label?: EdgeLabelSettings;
     };
+    edge: UndirectedEdge<E, V>;
+    renderers: UndirectedCurvedEdgeRenderers<E>;
   };
 
 export type DirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    edge: DirectedEdge<E, V>;
-    renderers: DirectedStraightEdgeRenderers<E>;
     componentSettings: Required<StraightEdgeSettings> & {
       arrow: Required<EdgeArrowSettings>;
       label?: EdgeLabelSettings;
     };
+    edge: DirectedEdge<E, V>;
+    renderers: DirectedStraightEdgeRenderers<E>;
   };
 
 export type UndirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    edge: UndirectedEdge<E, V>;
-    renderers: UndirectedStraightEdgeRenderers<E>;
     componentSettings: Required<StraightEdgeSettings> & {
       label?: EdgeLabelSettings;
     };
+    edge: UndirectedEdge<E, V>;
+    renderers: UndirectedStraightEdgeRenderers<E>;
   };
 
 export type EdgeComponentProps<E, V> = Omit<
-  | UndirectedCurvedEdgeComponentProps<E, V>
   | DirectedCurvedEdgeComponentProps<E, V>
-  | UndirectedStraightEdgeComponentProps<E, V>
-  | DirectedStraightEdgeComponentProps<E, V>,
-  'animationProgress' | 'animatedOrder' | 'animatedEdgesCount' | 'renderers'
+  | DirectedStraightEdgeComponentProps<E, V>
+  | UndirectedCurvedEdgeComponentProps<E, V>
+  | UndirectedStraightEdgeComponentProps<E, V>,
+  'animatedEdgesCount' | 'animatedOrder' | 'animationProgress' | 'renderers'
 > & {
-  order: number;
-  edgesCount: number;
-  removed: boolean;
-  edgeRenderer: EdgeRenderFunction<E>;
   arrowRenderer?: EdgeArrowRenderFunction;
+  edgeRenderer: EdgeRenderFunction<E>;
+  edgesCount: number;
   labelRenderer?: EdgeLabelRendererFunction<E>;
   onRemove: (key: string) => void;
+  order: number;
+  removed: boolean;
 };
 
 export type EdgeComponentData<E, V> = {
-  edge: Edge<E, V>;
-  removed: boolean;
-  order: number;
-  edgesCount: number;
-  v1Position: AnimatedVectorCoordinates;
-  v2Position: AnimatedVectorCoordinates;
-  v1Radius: SharedValue<number>;
-  v2Radius: SharedValue<number>;
-  componentSettings: GraphSettingsWithDefaults<V, E>['components']['edge'];
   animationSettings: AnimationSettingsWithDefaults;
-  edgeRenderer: EdgeRenderFunction<E>;
   arrowRenderer?: EdgeArrowRenderFunction;
+  componentSettings: GraphSettingsWithDefaults<V, E>['components']['edge'];
+  edge: Edge<E, V>;
+  edgeRenderer: EdgeRenderFunction<E>;
+  edgesCount: number;
   labelRenderer?: EdgeLabelRendererFunction<E>;
+  order: number;
+  removed: boolean;
+  v1Position: AnimatedVectorCoordinates;
+  v1Radius: SharedValue<number>;
+  v2Position: AnimatedVectorCoordinates;
+  v2Radius: SharedValue<number>;
 };
 
 export type EdgeComponentRenderData = {

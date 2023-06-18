@@ -45,7 +45,7 @@ const deepEqual = (value1: any, value2: any): boolean => {
 };
 
 export const deepMemoComparator =
-  (settings?: { shallow?: string[]; exclude?: string[] }) =>
+  (settings?: { exclude?: string[]; shallow?: string[] }) =>
   (prevProps: Record<string, any>, nextProps: Record<string, any>): boolean => {
     const shallowComparisonSet = new Set(settings?.shallow ?? []);
     const excludedSet = new Set(settings?.exclude ?? []);
