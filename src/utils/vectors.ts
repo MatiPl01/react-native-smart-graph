@@ -8,7 +8,7 @@ export const calcUnitVector = (from: Vector, to: Vector): Vector => {
   const dy = to.y - from.y;
   const mag = Math.sqrt(dx ** 2 + dy ** 2);
 
-  return { x: dx / mag, y: dy / mag };
+  return mag > 0 ? { x: dx / mag, y: dy / mag } : { x: 0, y: 0 };
 };
 
 export const calcOrthogonalUnitVector = (from: Vector, to: Vector): Vector => {

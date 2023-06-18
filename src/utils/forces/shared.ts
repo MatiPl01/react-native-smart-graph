@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import 'react-native-reanimated';
 
 import { Vector } from '@shopify/react-native-skia';
@@ -13,7 +14,7 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
-const calcAttractionForce = (
+const calcAttractiveForce = (
   from: Vector,
   to: Vector,
   attractionFactorGetter: (distance: number) => number
@@ -39,7 +40,7 @@ const calcRepulsiveForce = (
   return multiplyVector(directionVector, factor);
 };
 
-const calcResultantAttractionForce = (
+const calcResultantAttractiveForce = (
   vertexKey: string,
   connections: GraphConnections,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
@@ -52,7 +53,7 @@ const calcResultantAttractionForce = (
   }
   return addVectorsArray(
     vertexConnections.map(neighborKey =>
-      calcAttractionForce(
+      calcAttractiveForce(
         animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
         animatedVectorCoordinatesToVector(verticesPositions[neighborKey]),
         attractionFactorGetter
@@ -63,7 +64,7 @@ const calcResultantAttractionForce = (
 
 export const calcResultantRepulsiveForceOnCoordinates = (
   coordinates: Vector,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  verticesPositions: Record<string, Vector>,
   repulsiveFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
@@ -71,7 +72,7 @@ export const calcResultantRepulsiveForceOnCoordinates = (
     Object.keys(verticesPositions).map(otherVertexKey => {
       return calcRepulsiveForce(
         coordinates,
-        animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
+        verticesPositions[otherVertexKey]!,
         repulsiveFactorGetter
       );
     })
@@ -108,7 +109,7 @@ export const calcForces = (
   'worklet';
   const forces: Record<string, Vector> = {};
   for (const vertexKey in verticesPositions) {
-    const attractionForce = calcResultantAttractionForce(
+    const attractiveForce = calcResultantAttractiveForce(
       vertexKey,
       connections,
       verticesPositions,
@@ -119,7 +120,7 @@ export const calcForces = (
       verticesPositions,
       repulsiveFactorGetter
     );
-    forces[vertexKey] = addVectors(attractionForce, repulsiveForce);
+    forces[vertexKey] = addVectors(attractiveForce, repulsiveForce);
   }
   return forces;
 };

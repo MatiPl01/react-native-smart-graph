@@ -1,9 +1,17 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vector } from '@shopify/react-native-skia';
 
 import { VertexComponentRenderData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates, BoundingVertices } from '@/types/layout';
-import { animatedVectorCoordinatesToVector } from '@/utils/vectors';
+import { ForcesSettingsWithDefaults } from '@/types/settings';
+import {
+  addVectors,
+  animatedVectorCoordinatesToVector,
+  multiplyVector
+} from '@/utils/vectors';
+
+import { calcRepulsiveForce } from './forces';
 
 const findBoundingVertices = (
   verticesPositions: Record<string, Vector>
@@ -39,33 +47,54 @@ const findBoundingVertices = (
 
 const placeVertexNearBounds = (
   boundingVertices: BoundingVertices,
-  placedVerticesPositions: Record<string, Vector>
+  placedVerticesPositions: Record<string, Vector>,
+  vertexRadius: number,
+  settings: ForcesSettingsWithDefaults
 ): Vector => {
   'worklet';
   // Select a random vertex from the bounding vertices
   const boundingVerticesKeys = Object.keys(boundingVertices);
-  const randomBoundingVertexKey =
-    boundingVerticesKeys[
-      Math.floor(Math.random() * boundingVerticesKeys.length)
-    ];
+  const randomBoundingVertex = boundingVerticesKeys[
+    Math.floor(Math.random() * boundingVerticesKeys.length)
+  ]! as keyof BoundingVertices;
+  const randomBoundingVertexPosition =
+    placedVerticesPositions[boundingVertices[randomBoundingVertex]!]!;
 
-  // TODO
-  return {
-    x: Math.random() * 1000,
-    y: Math.random() * 1000
-  };
+  // Calc repulsion force
+  const repulsiveForce = calcRepulsiveForce(
+    randomBoundingVertexPosition,
+    placedVerticesPositions,
+    settings
+  );
+  // Calc new position
+  return addVectors(
+    randomBoundingVertexPosition,
+    multiplyVector(repulsiveForce, 5 * vertexRadius)
+  );
 };
 
 const findForcesPlacementPosition = (
   placedVerticesPositions: Record<string, Vector>,
-  neighbors: Array<string>
+  neighbors: Array<string>,
+  vertexRadius: number,
+  settings: ForcesSettingsWithDefaults
 ): Vector => {
   'worklet';
   const boundingVertices = findBoundingVertices(placedVerticesPositions);
 
-  // 1. If there are no neighbors, place the vertex near the bounds of the graph
+  // 1. If there are no vertices placed yet, place the vertex on the
+  // center of the canvas
+  if (Object.keys(placedVerticesPositions).length === 0) {
+    return { x: 0, y: 0 };
+  }
+  // 2. If there are no neighbors, place the vertex near the bounds of the graph
   if (neighbors.length === 0) {
-    // TODO
+    return placeVertexNearBounds(
+      boundingVertices,
+      placedVerticesPositions,
+      vertexRadius,
+      settings
+    );
   }
 
   return {
@@ -76,7 +105,9 @@ const findForcesPlacementPosition = (
 
 const findForcesPlacementPositions = (
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
-  connections: GraphConnections
+  connections: GraphConnections,
+  vertexRadius: number,
+  settings: ForcesSettingsWithDefaults
 ): Record<string, Vector> => {
   'worklet';
   const allVerticesPositions = Object.fromEntries(
@@ -95,7 +126,9 @@ const findForcesPlacementPositions = (
   return unplacedVertices.reduce((acc, key) => {
     acc[key] = allVerticesPositions[key] = findForcesPlacementPosition(
       allVerticesPositions,
-      connections[key] ?? []
+      connections[key] ?? [],
+      vertexRadius,
+      settings
     );
     return acc;
   }, {} as Record<string, Vector>);
@@ -104,13 +137,17 @@ const findForcesPlacementPositions = (
 export const updateNewVerticesPositions = (
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
   verticesRenderData: Record<string, VertexComponentRenderData>,
-  connections: GraphConnections
+  connections: GraphConnections,
+  vertexRadius: number,
+  settings: ForcesSettingsWithDefaults
 ): void => {
   'worklet';
   // Calculate new vertices placement positions
   const newVerticesPositions = findForcesPlacementPositions(
     placedVerticesPositions,
-    connections
+    connections,
+    vertexRadius,
+    settings
   );
   // Update positions of new vertices
   Object.entries(newVerticesPositions).forEach(([key, position]) => {

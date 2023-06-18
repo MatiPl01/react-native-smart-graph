@@ -12,6 +12,7 @@ import { withGraphData } from '@/providers/data/ComponentsDataProvider';
 import { VertexComponentRenderData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { ForcesSettingsWithDefaults } from '@/types/settings';
 import { updateNewVerticesPositions } from '@/utils/forces';
 
 type ForcesPlacementContextType = {
@@ -33,12 +34,17 @@ export const useForcesPlacementContext = () => {
 };
 
 type ForcesPlacementProviderProps = PropsWithChildren<{
+  // Component props
+  vertexRadius: number;
+  forcesSettings: ForcesSettingsWithDefaults;
   // Injected props
   connections: GraphConnections;
   verticesRenderData: Record<string, VertexComponentRenderData>;
 }>;
 
 function ForcesPlacementProvider({
+  vertexRadius,
+  forcesSettings,
   connections,
   verticesRenderData,
   children
@@ -57,7 +63,9 @@ function ForcesPlacementProvider({
     runOnUI(updateNewVerticesPositions)(
       placedVerticesPositions,
       verticesRenderData,
-      connections
+      connections,
+      vertexRadius,
+      forcesSettings
     );
 
     // Update the state

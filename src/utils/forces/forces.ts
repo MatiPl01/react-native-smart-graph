@@ -23,18 +23,19 @@ export const applyForces = (
   }
 };
 
-export const calcRepulsionForce = (
+export const calcRepulsiveForce = (
   coordinates: Vector,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  verticesPositions: Record<string, Vector>,
   settings: ForcesSettingsWithDefaults
 ): Vector => {
+  'worklet';
   switch (settings.strategy) {
     default:
     case 'default':
       return calcDefaultRepulsiveForceOnCoordinates(
         coordinates,
         verticesPositions,
-        settings
+        settings.repulsionScale
       );
   }
 };

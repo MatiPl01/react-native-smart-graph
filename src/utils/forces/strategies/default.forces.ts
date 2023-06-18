@@ -16,7 +16,9 @@ const createAttractionFactorGetter = (
   'worklet';
   return (distance: number) => {
     'worklet';
-    return attractionForceFactor * Math.log(distance / attractionScale);
+    return distance > 0
+      ? attractionForceFactor * Math.log(distance / attractionScale)
+      : 0;
   };
 };
 
@@ -24,7 +26,7 @@ const createRepulsionFactorGetter = (repulsionScale: number) => {
   'worklet';
   return (distance: number) => {
     'worklet';
-    return -repulsionScale / distance ** 2;
+    return distance > 0 ? -repulsionScale / distance ** 2 : 0;
   };
 };
 
@@ -49,8 +51,8 @@ export function applyDefaultForces(
 
 export function calcDefaultRepulsiveForceOnCoordinates(
   coordinates: Vector,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
-  { repulsionScale }: DefaultForcesStrategySettingsWithDefaults
+  verticesPositions: Record<string, Vector>,
+  repulsionScale: number
 ): Vector {
   'worklet';
   return calcResultantRepulsiveForceOnCoordinates(
