@@ -37,14 +37,14 @@ import { withMemoContext } from '@/utils/contexts';
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
   edgesData: Record<string, EdgeComponentData<E, V>>;
-  edgesRenderData: Record<string, EdgeComponentRenderData>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
   handleVertexRender: VertexRenderHandler;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
+  renderedEdgesData: Record<string, EdgeComponentRenderData>;
+  renderedVerticesData: Record<string, VertexComponentRenderData>;
   verticesData: Record<string, VertexComponentData<V, E>>;
-  verticesRenderData: Record<string, VertexComponentRenderData>;
 };
 
 const ComponentsDataContext = createContext({});
@@ -80,11 +80,11 @@ export default function ComponentsDataProvider<V, E>({
   // after they have been rendered)
   //(This data is managed by rendered components)
   // Store render data for graph vertex components
-  const [verticesRenderData, setVerticesRenderData] = useState<
+  const [renderedVerticesData, setRenderedVerticesData] = useState<
     Record<string, VertexComponentRenderData>
   >({});
   // Store render data for graph edge components
-  const [edgesRenderData, setEdgesRenderData] = useState<
+  const [renderedEdgesData, setRenderedEdgesData] = useState<
     Record<string, EdgeComponentRenderData>
   >({});
 
@@ -129,7 +129,7 @@ export default function ComponentsDataProvider<V, E>({
     const { data, wasUpdated } = updateGraphEdgesData(
       edgesData,
       orderedEdges,
-      verticesRenderData,
+      renderedVerticesData,
       animationsSettings,
       settings,
       renderers
@@ -139,7 +139,7 @@ export default function ComponentsDataProvider<V, E>({
     }
   }, [
     orderedEdges,
-    verticesRenderData,
+    renderedVerticesData,
     settings.components.edge,
     settings.animations.edges,
     renderers.edge,
@@ -149,7 +149,7 @@ export default function ComponentsDataProvider<V, E>({
 
   const handleVertexRender = useCallback<VertexRenderHandler>(
     (key, renderValues) => {
-      setVerticesRenderData(prev => ({ ...prev, [key]: renderValues }));
+      setRenderedVerticesData(prev => ({ ...prev, [key]: renderValues }));
     },
     []
   );
@@ -159,7 +159,7 @@ export default function ComponentsDataProvider<V, E>({
       const { [key]: _, ...rest } = prev;
       return rest;
     });
-    setVerticesRenderData(prev => {
+    setRenderedVerticesData(prev => {
       const { [key]: _, ...rest } = prev;
       return rest;
     });
@@ -167,7 +167,7 @@ export default function ComponentsDataProvider<V, E>({
 
   const handleEdgeRender = useCallback<EdgeRenderHandler>(
     (key, renderValues) => {
-      setEdgesRenderData(prev => ({ ...prev, [key]: renderValues }));
+      setRenderedEdgesData(prev => ({ ...prev, [key]: renderValues }));
     },
     []
   );
@@ -177,7 +177,7 @@ export default function ComponentsDataProvider<V, E>({
       const { [key]: _, ...rest } = prev;
       return rest;
     });
-    setEdgesRenderData(prev => {
+    setRenderedEdgesData(prev => {
       const { [key]: _, ...rest } = prev;
       return rest;
     });
@@ -187,21 +187,21 @@ export default function ComponentsDataProvider<V, E>({
     () => ({
       connections,
       edgesData,
-      edgesRenderData,
       handleEdgeRemove,
       handleEdgeRender,
       handleVertexRemove,
       handleVertexRender,
       layoutAnimationSettings,
-      verticesData,
-      verticesRenderData
+      renderedEdgesData,
+      renderedVerticesData,
+      verticesData
     }),
     [
       connections,
       verticesData,
       edgesData,
-      verticesRenderData,
-      edgesRenderData,
+      renderedVerticesData,
+      renderedEdgesData,
       layoutAnimationSettings
     ]
   );

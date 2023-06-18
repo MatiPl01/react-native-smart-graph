@@ -16,22 +16,20 @@ import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
-  edgesRenderData: Record<string, EdgeComponentRenderData>;
-  // Component props
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
+  renderedEdgesData: Record<string, EdgeComponentRenderData>;
+  renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphSettingsWithDefaults<V, E>;
-  // Injected props
-  verticesRenderData: Record<string, VertexComponentRenderData>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
   children,
-  edgesRenderData,
   graph,
   layoutAnimationSettings,
-  settings,
-  verticesRenderData
+  renderedEdgesData,
+  renderedVerticesData,
+  settings
 }: GraphPlacementLayoutProviderProps<V, E>) {
   const graphLayout = useMemo<GraphLayout>(
     () =>
@@ -41,8 +39,8 @@ function GraphPlacementLayoutProvider<V, E>({
         settings.placement
       ),
     [
-      verticesRenderData,
-      edgesRenderData,
+      renderedVerticesData,
+      renderedEdgesData,
       settings.components.vertex.radius,
       settings.placement
     ]
@@ -55,7 +53,7 @@ function GraphPlacementLayoutProvider<V, E>({
     ({ finalPositions }) => {
       animateVerticesToFinalPositions(
         Object.fromEntries(
-          Object.entries(verticesRenderData).map(([key, { position }]) => [
+          Object.entries(renderedVerticesData).map(([key, { position }]) => [
             key,
             position
           ])
@@ -72,9 +70,9 @@ function GraphPlacementLayoutProvider<V, E>({
 
 export default withGraphData(
   GraphPlacementLayoutProvider,
-  ({ edgesRenderData, layoutAnimationSettings, verticesRenderData }) => ({
-    edgesRenderData,
+  ({ layoutAnimationSettings, renderedEdgesData, renderedVerticesData }) => ({
     layoutAnimationSettings,
-    verticesRenderData
+    renderedEdgesData,
+    renderedVerticesData
   })
 );

@@ -9,9 +9,7 @@ import { applyForces } from '@/utils/forces';
 import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
-  // Injected props
   connections: GraphConnections;
-  // Component props
   forcesSettings: ForcesSettingsWithDefaults;
 }>;
 

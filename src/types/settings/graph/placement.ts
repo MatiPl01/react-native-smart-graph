@@ -2,6 +2,7 @@ import { Vector } from '@shopify/react-native-skia';
 
 import { Vertex } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
+import { DeepRequiredAll } from '@/types/utils';
 
 export type PlacementStrategy =
   | 'circle'
@@ -10,24 +11,11 @@ export type PlacementStrategy =
   | 'random'
   | 'trees';
 
-export type DirectedGraphPlacementSettings<V, E> =
+export type GraphPlacementSettings<V, E> =
   | CircularPlacementSettings<V, E>
   | OrbitsPlacementSettings
   | RandomPlacementSettings
   | TreesPlacementSettings;
-
-export type UndirectedGraphPlacementSettings<V, E> =
-  | CircularPlacementSettings<V, E>
-  | OrbitsPlacementSettings
-  | RandomPlacementSettings;
-
-export type PlacementSettings<V, E> =
-  | DirectedGraphPlacementSettings<V, E>
-  | UndirectedGraphPlacementSettings<V, E>;
-
-type SharedPlacementSettings = {
-  minVertexSpacing?: number;
-};
 
 type SortablePlacementSettings<V, E> = {
   sortComparator?: (u: Vertex<V, E>, v: Vertex<V, E>) => number;
@@ -36,20 +24,27 @@ type SortablePlacementSettings<V, E> = {
 
 export type RandomLayoutType = 'grid' | 'random' | 'triangles';
 
+type SharedPlacementSettings = {
+  minVertexSpacing?: number;
+};
+
+type BoundRandomPlacementSettings = {
+  containerHeight: number;
+  containerWidth: number;
+  layoutType: 'random';
+};
+
+type UnboundRandomPlacementSettings = {
+  density?: number;
+  layoutType: Exclude<RandomLayoutType, 'random'>;
+  minVertexSpacing?: number;
+};
+export type UnboundRandomPlacementSettingsWithDefaults =
+  DeepRequiredAll<UnboundRandomPlacementSettings>;
+
 export type RandomPlacementSettings = {
   strategy: 'random';
-} & (
-  | {
-      containerHeight: number;
-      containerWidth: number;
-      layoutType: 'random';
-    }
-  | {
-      density?: number;
-      layoutType: Exclude<RandomLayoutType, 'random'>;
-      minVertexSpacing?: number;
-    }
-);
+} & (BoundRandomPlacementSettings | UnboundRandomPlacementSettings);
 
 export type OrbitsLayerSizing =
   | 'auto'

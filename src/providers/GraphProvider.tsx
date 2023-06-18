@@ -23,13 +23,11 @@ const getLayoutProviders = <V, E>(
 ) => {
   switch (settings.layout.managedBy) {
     case 'forces':
-      const forcesSettings = settings.layout.settings;
       return [
         <ForcesPlacementProvider
-          forcesSettings={forcesSettings}
           vertexRadius={settings.components.vertex.radius}
         />,
-        <ForcesLayoutProvider forcesSettings={forcesSettings} />
+        <ForcesLayoutProvider forcesSettings={settings.layout.settings} />
       ];
     case 'placement':
     default:

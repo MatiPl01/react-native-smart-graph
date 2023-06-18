@@ -12,7 +12,6 @@ import { withGraphData } from '@/providers/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { ForcesSettingsWithDefaults } from '@/types/settings';
 import { updateNewVerticesPositions } from '@/utils/forces';
 
 type ForcesPlacementContextType = {
@@ -34,20 +33,16 @@ export const useForcesPlacementContext = () => {
 };
 
 type ForcesPlacementProviderProps = PropsWithChildren<{
-  // Injected props
   connections: GraphConnections;
-  forcesSettings: ForcesSettingsWithDefaults;
-  // Component props
+  renderedVerticesData: Record<string, VertexComponentRenderData>;
   vertexRadius: number;
-  verticesRenderData: Record<string, VertexComponentRenderData>;
 }>;
 
 function ForcesPlacementProvider({
   children,
   connections,
-  forcesSettings,
-  vertexRadius,
-  verticesRenderData
+  renderedVerticesData,
+  vertexRadius
 }: ForcesPlacementProviderProps) {
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
@@ -62,22 +57,21 @@ function ForcesPlacementProvider({
   useEffect(() => {
     runOnUI(updateNewVerticesPositions)(
       placedVerticesPositions,
-      verticesRenderData,
+      renderedVerticesData,
       connections,
-      vertexRadius,
-      forcesSettings
+      vertexRadius
     );
 
     // Update the state
     setPlacedVerticesPositions(
       Object.fromEntries(
-        Object.entries(verticesRenderData).map(([key, { position }]) => [
+        Object.entries(renderedVerticesData).map(([key, { position }]) => [
           key,
           position
         ])
       )
     );
-  }, [verticesRenderData]);
+  }, [renderedVerticesData]);
 
   const contextValue = useMemo<ForcesPlacementContextType>(
     () => ({
@@ -95,8 +89,8 @@ function ForcesPlacementProvider({
 
 export default withGraphData(
   ForcesPlacementProvider,
-  ({ connections, verticesRenderData }) => ({
+  ({ connections, renderedVerticesData }) => ({
     connections,
-    verticesRenderData
+    renderedVerticesData
   })
 );

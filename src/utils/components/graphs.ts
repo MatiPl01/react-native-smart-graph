@@ -11,7 +11,7 @@ import {
   VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
 import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
-import { RANDOM_PLACEMENT_SETTING } from '@/constants/placement';
+import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
 import {
   EdgeComponentData,
   VertexComponentData,
@@ -22,8 +22,7 @@ import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
 import {
   DirectedEdgeSettings,
   GraphSettings,
-  GraphSettingsWithDefaults,
-  RandomPlacementSettings
+  GraphSettingsWithDefaults
 } from '@/types/settings';
 import { AnimationsSettings } from '@/types/settings/animations';
 import {
@@ -77,9 +76,9 @@ export const updateGraphSettingsWithDefaults = <V, E>(
     }
   },
   layout: updateGraphLayoutSettingsWithDefaults(settings?.layout),
-  placement: {
-    ...(RANDOM_PLACEMENT_SETTING as RandomPlacementSettings),
-    ...settings?.placement
+  placement: settings?.placement ?? {
+    strategy: 'random',
+    ...RANDOM_PLACEMENT_SETTINGS
   }
 });
 
@@ -164,7 +163,7 @@ export const updateGraphVerticesData = <V, E>(
 export const updateGraphEdgesData = <V, E>(
   oldEdgesData: Record<string, EdgeComponentData<E, V>>,
   currentEdges: OrderedEdges<E, V>,
-  verticesRenderData: Record<string, VertexComponentRenderData>,
+  renderedVerticesData: Record<string, VertexComponentRenderData>,
   currentAnimationsSettings: AnimationsSettings,
   settings: GraphSettingsWithDefaults<V, E>,
   renderers: GraphRenderersWithDefaults<V, E>
@@ -178,8 +177,8 @@ export const updateGraphEdgesData = <V, E>(
   // Add new edges to edges data
   currentEdges.forEach(({ edge, edgesCount, order }) => {
     const [v1, v2] = edge.vertices;
-    const v1Data = verticesRenderData[v1.key];
-    const v2Data = verticesRenderData[v2.key];
+    const v1Data = renderedVerticesData[v1.key];
+    const v2Data = renderedVerticesData[v2.key];
 
     if (
       v1Data &&

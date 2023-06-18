@@ -31,12 +31,11 @@ type GraphComponentPropsWithGraphData<V, E> = GraphComponentProps & {
   handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
   handleVertexRender: VertexRenderHandler;
+  renderedVerticesData: Record<string, VertexComponentRenderData>;
   verticesData: Record<string, VertexComponentData<V, E>>;
-  verticesRenderData: Record<string, VertexComponentRenderData>;
 };
 
 function GraphComponent<V, E>({
-  // Graph component props
   boundingRect,
   edgesData,
   handleEdgeRemove,
@@ -44,9 +43,8 @@ function GraphComponent<V, E>({
   handleVertexRemove,
   handleVertexRender,
   onRender,
-  // Injected graph data
-  verticesData,
-  verticesRenderData
+  renderedVerticesData,
+  verticesData
 }: GraphComponentPropsWithGraphData<V, E>) {
   // GRAPH LAYOUT
   const isFirstRenderRef = useRef(true);
@@ -67,7 +65,7 @@ function GraphComponent<V, E>({
   useAnimatedReaction(
     () => ({
       positions: Object.fromEntries(
-        Object.entries(verticesRenderData).map(([key, { position }]) => [
+        Object.entries(renderedVerticesData).map(([key, { position }]) => [
           key,
           {
             x: position.x.value,
@@ -148,15 +146,15 @@ export default withGraphData(
     handleEdgeRender,
     handleVertexRemove,
     handleVertexRender,
-    verticesData,
-    verticesRenderData
+    renderedVerticesData,
+    verticesData
   }) => ({
     edgesData,
     handleEdgeRemove,
     handleEdgeRender,
     handleVertexRemove,
     handleVertexRender,
-    verticesData,
-    verticesRenderData
+    renderedVerticesData,
+    verticesData
   })
 );

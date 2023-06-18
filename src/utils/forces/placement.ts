@@ -4,15 +4,21 @@ import { Vector } from '@shopify/react-native-skia';
 import { VertexComponentRenderData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { ForcesSettingsWithDefaults } from '@/types/settings';
 import { grahamScan } from '@/utils/algorithms';
+import { findCenterOfPoints } from '@/utils/coordinates';
 import {
   animatedVectorCoordinatesToVector,
+  calcOrthogonalUnitVector,
   calcUnitVector,
   distanceBetweenVectors,
   getLineCenter,
   translateAlongVector
 } from '@/utils/vectors';
+
+const getRandomDistance = (vertexRadius: number): number => {
+  'worklet';
+  return 4 * vertexRadius + Math.random() * 2 * vertexRadius;
+};
 
 const placeVertexOnCircle = (
   centerPosition: Vector,
@@ -20,55 +26,72 @@ const placeVertexOnCircle = (
 ): Vector => {
   'worklet';
   const angle = Math.random() * 2 * Math.PI;
-  const radius = 4 * vertexRadius + Math.random() * 2 * vertexRadius;
+  const radius = getRandomDistance(vertexRadius);
   return {
     x: centerPosition.x + radius * Math.cos(angle),
     y: centerPosition.y + radius * Math.sin(angle)
   };
 };
 
-const placeVertexOnConvexHull = (
+const placceVertexOnPerpendicularLine = (
   placedVerticesPositions: Record<string, Vector>,
   vertexRadius: number
 ): Vector => {
   'worklet';
+  const verticesPositions = Object.values(placedVerticesPositions);
+  const lineCenter = getLineCenter(
+    verticesPositions[0]!,
+    verticesPositions[1]!
+  );
+  const orthogonalVector = calcOrthogonalUnitVector(
+    verticesPositions[0]!,
+    verticesPositions[1]!
+  );
+  const distance = getRandomDistance(vertexRadius);
+  return translateAlongVector(lineCenter, orthogonalVector, distance);
+};
+
+const placeVertexOnConvexHull = (
+  placedVerticesPositions: Record<string, Vector>,
+  vertexRadius: number,
+  closestTo?: Vector
+): Vector => {
+  'worklet';
+  let closestVertex = closestTo;
   // Find the convex hull of the placed vertices
   const hull = grahamScan(Object.values(placedVerticesPositions));
 
-  // Find 2 random neighboring vertices on the hull and place the
-  // new vertex near the center of the line between them
-  const center: { x: number; y: number } = hull.reduce(
-    (acc: { x: number; y: number }, vertex) => {
-      acc.x += vertex.x;
-      acc.y += vertex.y;
-      return acc;
-    },
-    { x: 0, y: 0 }
-  );
-  center.x /= hull.length;
-  center.y /= hull.length;
+  // Get the center point of the hull if the closest vertex to the
+  // new vertex was not provided
+  if (!closestVertex) {
+    closestVertex = findCenterOfPoints(hull) ?? { x: 0, y: 0 };
+  }
 
-  // Find the two vertices on the hull that are closest to the center
-  let closestVertex = getLineCenter(hull[0]!, hull[1]!);
-  const closestDistance = distanceBetweenVectors(closestVertex, center);
+  // Find the center of the line between the two neighboring vertices
+  // on the hull that is closest to the closestVertex position
+  let lineCenter = getLineCenter(hull[0]!, hull[1]!);
+  const closestDistance = distanceBetweenVectors(closestVertex, lineCenter);
   for (let i = 1; i < hull.length; i++) {
     const vertex = getLineCenter(hull[i]!, hull[(i + 1) % hull.length]!);
-    const distance = distanceBetweenVectors(vertex, center);
+    const distance = distanceBetweenVectors(vertex, lineCenter);
     if (distance < closestDistance) {
-      closestVertex = vertex;
+      lineCenter = vertex;
     }
   }
 
   // Move the vertex a bit away from the center of the hull
-  const directionVector = calcUnitVector(center, closestVertex);
-  return translateAlongVector(closestVertex, directionVector, 2 * vertexRadius);
+  const directionVector = calcUnitVector(closestVertex, lineCenter);
+  return translateAlongVector(
+    lineCenter,
+    directionVector,
+    getRandomDistance(vertexRadius)
+  );
 };
 
 const findForcesPlacementPosition = (
   placedVerticesPositions: Record<string, Vector>,
   neighbors: Array<string>,
-  vertexRadius: number,
-  settings: ForcesSettingsWithDefaults
+  vertexRadius: number
 ): Vector => {
   'worklet';
   const placedVerticesCount = Object.keys(placedVerticesPositions).length;
@@ -86,30 +109,34 @@ const findForcesPlacementPosition = (
       vertexRadius
     );
   }
-  // If the current vertex is disjoint, find the convex hull of the placed
-  // vertices and place the vertex near the hull
-  if (neighbors.length === 0) {
-    return placeVertexOnConvexHull(placedVerticesPositions, vertexRadius);
+  // If there are only 2 vertices placed, place the vertex on the
+  // line perpendicular to the line between the two vertices
+  if (placedVerticesCount === 2) {
+    return placceVertexOnPerpendicularLine(
+      placedVerticesPositions,
+      vertexRadius
+    );
   }
-  // If the current vertex is connected to only one other vertex,
-  // place a vertex based on repulsion force from other vertices
-  // TODO
-  // If the current vertex is connected to many other vertices,
-  // place a vertex in the center of the placed vertices translated
-  // based on the repulsion force from other vertices
-  // TODO
+  // Otherwise, find the convex hull of placed vertices and place the
+  // vertex closest to the center of its neighbors that are already
+  // placed (if there are no placed vertices, place the vertex near
+  // the center of the hull)
+  const neighborsPositions = neighbors
+    .map(key => placedVerticesPositions[key])
+    .filter(Boolean) as Vector[];
+  const neighborsCenter = findCenterOfPoints(neighborsPositions)!;
 
-  return {
-    x: Math.random() * 1000,
-    y: Math.random() * 1000
-  };
+  return placeVertexOnConvexHull(
+    placedVerticesPositions,
+    vertexRadius,
+    neighborsCenter
+  );
 };
 
 const findForcesPlacementPositions = (
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
   connections: GraphConnections,
-  vertexRadius: number,
-  settings: ForcesSettingsWithDefaults
+  vertexRadius: number
 ): Record<string, Vector> => {
   'worklet';
   const allVerticesPositions = Object.fromEntries(
@@ -129,8 +156,7 @@ const findForcesPlacementPositions = (
     acc[key] = allVerticesPositions[key] = findForcesPlacementPosition(
       allVerticesPositions,
       connections[key] ?? [],
-      vertexRadius,
-      settings
+      vertexRadius
     );
     return acc;
   }, {} as Record<string, Vector>);
@@ -138,22 +164,26 @@ const findForcesPlacementPositions = (
 
 export const updateNewVerticesPositions = (
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
-  verticesRenderData: Record<string, VertexComponentRenderData>,
+  renderedVerticesData: Record<string, VertexComponentRenderData>,
   connections: GraphConnections,
-  vertexRadius: number,
-  settings: ForcesSettingsWithDefaults
+  vertexRadius: number
 ): void => {
   'worklet';
+  // Filter out vertices that were removed from the graph
+  const filteredVertices = Object.fromEntries(
+    Object.entries(placedVerticesPositions).filter(
+      ([key]) => renderedVerticesData[key]
+    )
+  );
   // Calculate new vertices placement positions
   const newVerticesPositions = findForcesPlacementPositions(
-    placedVerticesPositions,
+    filteredVertices,
     connections,
-    vertexRadius,
-    settings
+    vertexRadius
   );
   // Update positions of new vertices
   Object.entries(newVerticesPositions).forEach(([key, position]) => {
-    const vertexPosition = verticesRenderData[key]?.position;
+    const vertexPosition = renderedVerticesData[key]?.position;
     if (!vertexPosition) {
       return;
     }

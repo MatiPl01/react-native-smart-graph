@@ -62,23 +62,6 @@ const calcResultantAttractiveForce = (
   );
 };
 
-export const calcResultantRepulsiveForceOnCoordinates = (
-  coordinates: Vector,
-  verticesPositions: Record<string, Vector>,
-  repulsiveFactorGetter: (distance: number) => number
-): Vector => {
-  'worklet';
-  return addVectorsArray(
-    Object.keys(verticesPositions).map(otherVertexKey => {
-      return calcRepulsiveForce(
-        coordinates,
-        verticesPositions[otherVertexKey]!,
-        repulsiveFactorGetter
-      );
-    })
-  );
-};
-
 const calcResultantRepulsiveForce = (
   vertexKey: string,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,

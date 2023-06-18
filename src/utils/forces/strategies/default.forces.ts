@@ -1,13 +1,7 @@
-import { Vector } from '@shopify/react-native-skia';
-
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { DefaultForcesStrategySettingsWithDefaults } from '@/types/settings/forces';
-import {
-  calcForces,
-  calcResultantRepulsiveForceOnCoordinates,
-  updateVerticesPositions
-} from '@/utils/forces/shared';
+import { calcForces, updateVerticesPositions } from '@/utils/forces/shared';
 
 const createAttractionFactorGetter = (
   attractionForceFactor: number,
@@ -47,17 +41,4 @@ export function applyDefaultForces(
     createRepulsionFactorGetter(repulsionScale)
   );
   updateVerticesPositions(forces, verticesPositions);
-}
-
-export function calcDefaultRepulsiveForceOnCoordinates(
-  coordinates: Vector,
-  verticesPositions: Record<string, Vector>,
-  repulsionScale: number
-): Vector {
-  'worklet';
-  return calcResultantRepulsiveForceOnCoordinates(
-    coordinates,
-    verticesPositions,
-    createRepulsionFactorGetter(repulsionScale)
-  );
 }
