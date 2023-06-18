@@ -1,15 +1,15 @@
 class Node<T> {
-  public next: Node<T> | null = null;
+  next: Node<T> | null = null;
 
   constructor(public value: T) {}
 }
 
 export default class LinkedList<T> {
   private length$ = 0;
-  public head: Node<T> | null = null;
-  public tail: Node<T> | null = null;
+  head: Node<T> | null = null;
+  tail: Node<T> | null = null;
 
-  public append(value: T): void {
+  append(value: T): void {
     const node = new Node(value);
 
     if (!this.tail) {
@@ -23,11 +23,11 @@ export default class LinkedList<T> {
     this.length$++;
   }
 
-  public get length(): number {
+  get length(): number {
     return this.length$;
   }
 
-  public popLeft(): T | null {
+  popLeft(): T | null {
     if (!this.head) {
       return null;
     }
@@ -43,7 +43,7 @@ export default class LinkedList<T> {
     return value;
   }
 
-  public prepend(value: T): void {
+  prepend(value: T): void {
     const node = new Node(value);
 
     if (!this.head) {
