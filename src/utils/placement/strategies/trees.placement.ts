@@ -39,12 +39,12 @@ const placeVerticesOnTrees = <V, E>(
     );
     // Calculate container dimensions
     componentsLayouts.push({
-      verticesPositions,
       boundingRect: calcContainerBoundingRect(
         verticesPositions,
         minVertexSpacing,
         vertexRadius
-      )
+      ),
+      verticesPositions
     });
   }
 
@@ -53,20 +53,20 @@ const placeVerticesOnTrees = <V, E>(
 
 const arrangeVertices = <V, E>(
   rootVertex: Vertex<V, E>
-): Record<string, { row: number; col: number }> => {
-  const arrangedVertices: Record<string, { row: number; col: number }> = {};
+): Record<string, { col: number; row: number }> => {
+  const arrangedVertices: Record<string, { col: number; row: number }> = {};
   const treeWidth = arrangeVerticesRecur(arrangedVertices, rootVertex);
 
   arrangedVertices[rootVertex.key] = {
-    row: 0,
-    col: treeWidth / 2 - 0.5
+    col: treeWidth / 2 - 0.5,
+    row: 0
   };
 
   return arrangedVertices;
 };
 
 const arrangeVerticesRecur = <V, E>(
-  arrangedVertices: Record<string, { row: number; col: number }>,
+  arrangedVertices: Record<string, { col: number; row: number }>,
   vertex: Vertex<V, E>,
   visitedVertices: Set<string> = new Set(),
   currentColumn = 0,
@@ -103,8 +103,8 @@ const arrangeVerticesRecur = <V, E>(
     subtreeWidth += childSubtreeWidth;
 
     arrangedVertices[neighbor.key] = {
-      row: currentDepth + 1,
-      col: currentColumn + oldSubtreeWidth + childSubtreeWidth / 2 - 0.5
+      col: currentColumn + oldSubtreeWidth + childSubtreeWidth / 2 - 0.5,
+      row: currentDepth + 1
     };
   });
 
@@ -112,7 +112,7 @@ const arrangeVerticesRecur = <V, E>(
 };
 
 const placeVertices = (
-  arrangedVertices: Record<string, { row: number; col: number }>,
+  arrangedVertices: Record<string, { col: number; row: number }>,
   minVertexSpacing: number,
   vertexRadius: number
 ): PlacedVerticesPositions => {
@@ -121,12 +121,12 @@ const placeVertices = (
   const minVertexCenterDistance = padding + minVertexSpacing;
 
   // determine the width and height of the grid
-  const { numRows, numCols } = Object.values(arrangedVertices).reduce(
-    (acc, { row, col }) => ({
-      numRows: Math.max(acc.numRows, row + 1),
-      numCols: Math.max(acc.numCols, col + 1)
+  const { numCols, numRows } = Object.values(arrangedVertices).reduce(
+    (acc, { col, row }) => ({
+      numCols: Math.max(acc.numCols, col + 1),
+      numRows: Math.max(acc.numRows, row + 1)
     }),
-    { numRows: 0, numCols: 0 }
+    { numCols: 0, numRows: 0 }
   );
 
   // calculate the width and height of the grid as well as the padding
@@ -135,7 +135,7 @@ const placeVertices = (
 
   // calculate the positions of the vertices based on the grid
   return Object.entries(arrangedVertices).reduce(
-    (acc, [key, { row, col }]) => ({
+    (acc, [key, { col, row }]) => ({
       ...acc,
       [key]: {
         x: vertexRadius + col * minVertexCenterDistance - width / 2,

@@ -1,13 +1,13 @@
 import { Edge, Vertex } from './shared';
 
 export interface DirectedGraphVertex<V, E> extends Vertex<V, E> {
-  get inEdges(): Array<DirectedEdge<E, V>>;
-  get outEdges(): Array<DirectedEdge<E, V>>;
-  get inDegree(): number;
-  get outDegree(): number;
-  get neighbors(): Array<DirectedGraphVertex<V, E>>;
   addInEdge(edge: DirectedEdge<E, V>): void;
   addOutEdge(edge: DirectedEdge<E, V>): void;
+  get inDegree(): number;
+  get inEdges(): Array<DirectedEdge<E, V>>;
+  get neighbors(): Array<DirectedGraphVertex<V, E>>;
+  get outDegree(): number;
+  get outEdges(): Array<DirectedEdge<E, V>>;
   removeInEdge(key: string): DirectedEdge<E, V>;
   removeOutEdge(key: string): DirectedEdge<E, V>;
 }

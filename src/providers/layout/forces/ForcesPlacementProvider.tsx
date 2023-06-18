@@ -34,20 +34,20 @@ export const useForcesPlacementContext = () => {
 };
 
 type ForcesPlacementProviderProps = PropsWithChildren<{
-  // Component props
-  vertexRadius: number;
-  forcesSettings: ForcesSettingsWithDefaults;
   // Injected props
   connections: GraphConnections;
+  forcesSettings: ForcesSettingsWithDefaults;
+  // Component props
+  vertexRadius: number;
   verticesRenderData: Record<string, VertexComponentRenderData>;
 }>;
 
 function ForcesPlacementProvider({
-  vertexRadius,
-  forcesSettings,
+  children,
   connections,
-  verticesRenderData,
-  children
+  forcesSettings,
+  vertexRadius,
+  verticesRenderData
 }: ForcesPlacementProviderProps) {
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't

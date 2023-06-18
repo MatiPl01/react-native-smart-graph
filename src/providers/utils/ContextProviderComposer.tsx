@@ -6,8 +6,8 @@ type ContextProviderComposerProps = PropsWithChildren<{
 
 // https://frontendbyte.com/how-to-use-react-context-api-usereducer-hooks/
 export default function ContextProviderComposer({
-  providers,
-  children: initialChildren
+  children: initialChildren,
+  providers
 }: ContextProviderComposerProps) {
   return (
     <>

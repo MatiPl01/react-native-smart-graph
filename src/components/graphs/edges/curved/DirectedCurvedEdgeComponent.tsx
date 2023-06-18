@@ -19,17 +19,17 @@ import {
 } from '@/utils/vectors';
 
 function DirectedCurvedEdgeComponent<E, V>({
-  edge,
-  v1Position,
-  v2Position,
-  v1Radius,
-  v2Radius,
-  componentSettings,
-  animatedOrder,
   animatedEdgesCount,
+  animatedOrder,
   animationProgress,
+  componentSettings,
+  edge,
+  onRender,
   renderers,
-  onRender
+  v1Position,
+  v1Radius,
+  v2Position,
+  v2Radius
 }: DirectedCurvedEdgeComponentProps<E, V>) {
   // Parabola vertex
   const parabolaX = useSharedValue(
@@ -42,7 +42,7 @@ function DirectedCurvedEdgeComponent<E, V>({
   const labelHeight = useDerivedValue(
     () =>
       ((v1Radius.value + v2Radius.value) / 2) *
-      (componentSettings.label?.sizeRatio || LABEL_COMPONENT_SETTINGS.sizeRatio)
+      (componentSettings.label?.sizeRatio ?? LABEL_COMPONENT_SETTINGS.sizeRatio)
   );
   // Edge arrow
   const arrowHeight = useDerivedValue(
@@ -81,19 +81,19 @@ function DirectedCurvedEdgeComponent<E, V>({
       const p2 = animatedVectorCoordinatesToVector(v2Position);
 
       return {
-        p1,
-        p2,
-        r2: v2Radius.value,
         center: {
           x: (p1.x + p2.x) / 2,
           y: (p1.y + p2.y) / 2
         },
+        edgesCount: animatedEdgesCount.value,
         labelSize: labelHeight.value,
         order: animatedOrder.value,
-        edgesCount: animatedEdgesCount.value
+        p1,
+        p2,
+        r2: v2Radius.value
       };
     },
-    ({ p1, p2, r2, center, labelSize, order, edgesCount }) => {
+    ({ center, edgesCount, labelSize, order, p1, p2, r2 }) => {
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(
         animatedVectorCoordinatesToVector(v1Position),
@@ -168,32 +168,32 @@ function DirectedCurvedEdgeComponent<E, V>({
   return (
     <>
       {renderers.edge({
-        key: edge.key,
+        animationProgress,
         data: edge.value,
+        key: edge.key,
         parabolaX,
         parabolaY,
-        path,
-        animationProgress
+        path
       })}
       <EdgeArrowComponent
+        animationProgress={animationProgress}
         directionVector={dirVec}
-        tipPosition={arrowTipPosition}
+        height={arrowHeight}
         renderer={renderers.arrow}
+        tipPosition={arrowTipPosition}
         vertexRadius={v2Radius}
         width={arrowWidth}
-        height={arrowHeight}
-        animationProgress={animationProgress}
       />
       {renderers.label && (
         <EdgeLabelComponent
-          edge={edge}
-          v1Position={v1Position}
-          v2Position={v2Position}
+          animationProgress={animationProgress}
           centerX={parabolaX}
           centerY={parabolaY}
+          edge={edge}
           height={labelHeight}
           renderer={renderers.label}
-          animationProgress={animationProgress}
+          v1Position={v1Position}
+          v2Position={v2Position}
         />
       )}
     </>

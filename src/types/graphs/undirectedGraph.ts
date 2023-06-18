@@ -6,6 +6,6 @@ export interface UndirectedGraphVertex<V, E> extends Vertex<V, E> {
 }
 
 export interface UndirectedEdge<E, V> extends Edge<E, V> {
-  get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>];
   get isLoop(): boolean;
+  get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>];
 }

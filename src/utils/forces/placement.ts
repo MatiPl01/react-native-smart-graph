@@ -38,10 +38,10 @@ const findBoundingVertices = (
   }
 
   return {
-    top,
     bottom,
     left,
-    right
+    right,
+    top
   };
 };
 

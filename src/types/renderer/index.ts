@@ -9,13 +9,13 @@ export * from './edges/straight';
 export * from './shared';
 
 export type EdgeRenderFunction<E> =
-  | StraightEdgeRenderFunction<E>
-  | CurvedEdgeRenderFunction<E>;
+  | CurvedEdgeRenderFunction<E>
+  | StraightEdgeRenderFunction<E>;
 
 type SharedGraphRenderers<V, E> = {
-  vertex?: VertexRenderFunction<V>;
   edge?: EdgeRenderFunction<E>;
   label?: EdgeLabelRendererFunction<E>;
+  vertex?: VertexRenderFunction<V>;
 };
 
 export type DirectedGraphRenderers<V, E> = SharedGraphRenderers<V, E> & {
@@ -29,8 +29,8 @@ export type GraphRenderers<V, E> =
   | UndirectedGraphRenderers<V, E>;
 
 export type GraphRenderersWithDefaults<V, E> = {
-  vertex: VertexRenderFunction<V>;
-  edge: EdgeRenderFunction<E>;
   arrow?: EdgeArrowRenderFunction;
+  edge: EdgeRenderFunction<E>;
   label?: EdgeLabelRendererFunction<E>;
+  vertex: VertexRenderFunction<V>;
 };

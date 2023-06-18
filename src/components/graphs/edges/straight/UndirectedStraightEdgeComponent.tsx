@@ -29,17 +29,17 @@ const calcTranslationOffset = (
 };
 
 function UndirectedStraightEdgeComponent<E, V>({
-  edge,
-  v1Position,
-  v2Position,
-  v1Radius,
-  v2Radius,
-  componentSettings,
-  animatedOrder,
   animatedEdgesCount,
+  animatedOrder,
   animationProgress,
+  componentSettings,
+  edge,
+  onRender,
   renderers,
-  onRender
+  v1Position,
+  v1Radius,
+  v2Position,
+  v2Radius
 }: UndirectedStraightEdgeComponentProps<E, V>) {
   // Edge line
   const p1 = useSharedValue({
@@ -80,15 +80,15 @@ function UndirectedStraightEdgeComponent<E, V>({
       }
 
       return {
-        v1: animatedVectorCoordinatesToVector(v1),
-        v2: animatedVectorCoordinatesToVector(v2),
+        edgesCount: animatedEdgesCount.value,
+        order: animatedOrder.value,
         r1: v1Radius.value,
         r2: v2Radius.value,
-        order: animatedOrder.value,
-        edgesCount: animatedEdgesCount.value
+        v1: animatedVectorCoordinatesToVector(v1),
+        v2: animatedVectorCoordinatesToVector(v2)
       };
     },
-    ({ v1, v2, r1, r2, order, edgesCount }) => {
+    ({ edgesCount, order, r1, r2, v1, v2 }) => {
       const calcOffset = calcTranslationOffset.bind(
         null,
         order,
@@ -128,22 +128,22 @@ function UndirectedStraightEdgeComponent<E, V>({
   return (
     <>
       {renderers.edge({
-        key: edge.key,
+        animationProgress,
         data: edge.value,
+        key: edge.key,
         p1,
-        p2,
-        animationProgress
+        p2
       })}
       {renderers.label && (
         <EdgeLabelComponent
-          edge={edge}
-          v1Position={v1Position}
-          v2Position={v2Position}
+          animationProgress={animationProgress}
           centerX={centerX}
           centerY={centerY}
+          edge={edge}
           height={labelHeight}
           renderer={renderers.label}
-          animationProgress={animationProgress}
+          v1Position={v1Position}
+          v2Position={v2Position}
         />
       )}
     </>

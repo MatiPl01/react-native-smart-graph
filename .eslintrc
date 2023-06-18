@@ -3,9 +3,11 @@
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:import/recommended",
     "plugin:no-unsanitized/DOM",
-    "plugin:import/typescript"
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:perfectionist/recommended-natural",
+    "plugin:markdown/recommended"
   ],
   "plugins": [
     "react",
@@ -14,7 +16,15 @@
     "unused-imports",
     "simple-import-sort",
     "no-relative-import-paths",
+    "perfectionist",
     "prettier"
+  ],
+  "overrides": [
+    {
+      // Enable the Markdown processor for all .md files.
+      "files": ["**/*.md"],
+      "processor": "markdown/markdown"
+    }
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -219,8 +229,6 @@
     "react/react-in-jsx-scope": "off",
     "react-hooks/exhaustive-deps": "off",
     "prettier/prettier": "error",
-    "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error",
     "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
     "import/no-unused-modules": ["warn", { "unusedExports": true }],
@@ -229,7 +237,13 @@
       { "allowSameFolder": true, "rootDir": "src", "prefix": "@" }
     ],
     "react/jsx-curly-brace-presence": ["error", "never"],
-    "@typescript-eslint/prefer-nullish-coalescing": ["error"]
+    "@typescript-eslint/prefer-nullish-coalescing": ["error"],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "perfectionist/sort-imports": "off",
+    "perfectionist/sort-exports": "off",
+    "perfectionist/sort-named-imports": "off",
+    "perfectionist/sort-named-exports": "off"
   },
   "env": {
     "es2020": true

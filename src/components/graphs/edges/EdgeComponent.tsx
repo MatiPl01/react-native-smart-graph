@@ -16,15 +16,15 @@ import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeCompon
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
 function EdgeComponent<E, V>({
-  edge,
-  order,
-  edgesCount,
-  removed,
   animationSettings,
-  edgeRenderer,
   arrowRenderer,
+  edge,
+  edgeRenderer,
+  edgesCount,
   labelRenderer,
   onRemove,
+  order,
+  removed,
   ...restProps
 }: EdgeComponentProps<E, V>) {
   // ANIMATION
@@ -59,14 +59,14 @@ function EdgeComponent<E, V>({
 
   const sharedProps = {
     ...restProps,
-    edge,
-    animationProgress,
-    animatedOrder,
     animatedEdgesCount,
+    animatedOrder,
+    animationProgress,
+    edge,
     renderers: arrowRenderer
       ? {
-          edge: edgeRenderer,
           arrow: arrowRenderer,
+          edge: edgeRenderer,
           label: labelRenderer
         }
       : {

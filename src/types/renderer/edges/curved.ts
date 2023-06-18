@@ -9,8 +9,8 @@ import {
 import { EdgeArrowRenderFunction } from './shared';
 
 export type CurvedEdgeRendererProps<E> = SharedRenderersProps & {
-  key: string;
   data: E;
+  key: string;
   parabolaX: SharedValue<number>;
   parabolaY: SharedValue<number>;
   path: AnimatedPath;
@@ -28,7 +28,7 @@ export type UndirectedCurvedEdgeRenderers<E> = {
 
 // Directed edges
 export type DirectedCurvedEdgeRenderers<E> = {
-  edge: CurvedEdgeRenderFunction<E>;
   arrow: EdgeArrowRenderFunction;
+  edge: CurvedEdgeRenderFunction<E>;
   label?: EdgeLabelRendererFunction<E>;
 };

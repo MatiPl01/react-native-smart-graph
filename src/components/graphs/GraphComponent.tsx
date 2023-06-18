@@ -26,27 +26,27 @@ export type GraphComponentProps = {
 };
 
 type GraphComponentPropsWithGraphData<V, E> = GraphComponentProps & {
-  verticesData: Record<string, VertexComponentData<V, E>>;
   edgesData: Record<string, EdgeComponentData<E, V>>;
-  verticesRenderData: Record<string, VertexComponentRenderData>;
-  handleVertexRender: VertexRenderHandler;
-  handleVertexRemove: VertexRemoveHandler;
-  handleEdgeRender: EdgeRenderHandler;
   handleEdgeRemove: EdgeRemoveHandler;
+  handleEdgeRender: EdgeRenderHandler;
+  handleVertexRemove: VertexRemoveHandler;
+  handleVertexRender: VertexRenderHandler;
+  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesRenderData: Record<string, VertexComponentRenderData>;
 };
 
 function GraphComponent<V, E>({
   // Graph component props
   boundingRect,
+  edgesData,
+  handleEdgeRemove,
+  handleEdgeRender,
+  handleVertexRemove,
+  handleVertexRender,
   onRender,
   // Injected graph data
   verticesData,
-  edgesData,
-  verticesRenderData,
-  handleVertexRender,
-  handleVertexRemove,
-  handleEdgeRender,
-  handleEdgeRemove
+  verticesRenderData
 }: GraphComponentPropsWithGraphData<V, E>) {
   // GRAPH LAYOUT
   const isFirstRenderRef = useRef(true);
@@ -56,10 +56,10 @@ function GraphComponent<V, E>({
       isFirstRenderRef.current = false;
       // TODO - fix this call to onRender
       onRender({
-        top: -100,
+        bottom: 100,
         left: -100,
         right: 100,
-        bottom: 100
+        top: -100
       });
     }
   }, [boundingRect, onRender]);
@@ -98,8 +98,8 @@ function GraphComponent<V, E>({
         {...({
           ...data,
           key: data.edge.key,
-          onRender: handleEdgeRender,
-          onRemove: handleEdgeRemove
+          onRemove: handleEdgeRemove,
+          onRender: handleEdgeRender
         } as unknown as EdgeComponentProps<E, V>)}
       />
     ));
@@ -111,8 +111,8 @@ function GraphComponent<V, E>({
         <VertexComponent
           {...data}
           key={data.vertex.key}
-          onRender={handleVertexRender}
           onRemove={handleVertexRemove}
+          onRender={handleVertexRender}
         />
       )),
     [verticesData]
@@ -128,11 +128,11 @@ function GraphComponent<V, E>({
   return (
     <Group>
       <Rect
+        color='#222'
+        height={containerHeight}
+        width={containerWidth}
         x={boundingRect.left}
         y={boundingRect.top}
-        width={containerWidth}
-        height={containerHeight}
-        color='#222'
       />
       {renderEdges()}
       {renderVertices()}
@@ -143,20 +143,20 @@ function GraphComponent<V, E>({
 export default withGraphData(
   GraphComponent,
   ({
-    verticesData,
     edgesData,
-    verticesRenderData,
-    handleVertexRender,
-    handleVertexRemove,
+    handleEdgeRemove,
     handleEdgeRender,
-    handleEdgeRemove
+    handleVertexRemove,
+    handleVertexRender,
+    verticesData,
+    verticesRenderData
   }) => ({
-    verticesData,
     edgesData,
-    verticesRenderData,
-    handleVertexRender,
-    handleVertexRemove,
+    handleEdgeRemove,
     handleEdgeRender,
-    handleEdgeRemove
+    handleVertexRemove,
+    handleVertexRender,
+    verticesData,
+    verticesRenderData
   })
 );

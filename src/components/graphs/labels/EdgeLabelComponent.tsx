@@ -12,21 +12,21 @@ import {
 } from '@/types/renderer';
 
 type EdgeLabelComponentProps<E, V> = SharedRenderersProps & {
-  edge: Edge<E, V>;
-  v1Position: AnimatedVectorCoordinates;
-  v2Position: AnimatedVectorCoordinates;
   centerX: SharedValue<number>;
   centerY: SharedValue<number>;
+  edge: Edge<E, V>;
   height: SharedValue<number>;
   renderer: EdgeLabelRendererFunction<E>;
+  v1Position: AnimatedVectorCoordinates;
+  v2Position: AnimatedVectorCoordinates;
 };
 
 export default function EdgeLabelComponent<E, V>({
   edge,
-  v1Position,
-  v2Position,
   height,
   renderer,
+  v1Position,
+  v2Position,
   ...restProps
 }: EdgeLabelComponentProps<E, V>) {
   const edgeLength = useDerivedValue(() =>
@@ -84,11 +84,11 @@ export default function EdgeLabelComponent<E, V>({
   });
 
   return renderer({
-    key: edge.key,
     data: edge.value,
-    height,
-    edgeRotation,
     edgeLength,
+    edgeRotation,
+    height,
+    key: edge.key,
     ...restProps
   });
 }

@@ -9,17 +9,17 @@ import {
 } from '@/types/settings';
 
 export type VertexComponentData<V, E> = {
-  vertex: Vertex<V, E>;
-  removed: boolean;
-  componentSettings: VertexSettingsWithDefaults;
   animationSettings: AnimationSettingsWithDefaults;
+  componentSettings: VertexSettingsWithDefaults;
+  removed: boolean;
   renderer: VertexRenderFunction<V>;
+  vertex: Vertex<V, E>;
 };
 
 export type VertexComponentRenderData = {
-  scale: SharedValue<number>;
-  position: AnimatedVectorCoordinates;
   currentRadius: SharedValue<number>;
+  position: AnimatedVectorCoordinates;
+  scale: SharedValue<number>;
 };
 
 export type VertexRenderHandler = (

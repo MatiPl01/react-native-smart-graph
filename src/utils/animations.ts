@@ -56,8 +56,8 @@ const isBatchModificationSettingsObjectWithEdgesAndVertices = (
   obj: object
 ): obj is {
   edges: Record<string, AnimationSettings>;
-  vertices: Record<string, AnimationSettings>;
   layout: AnimationSettings;
+  vertices: Record<string, AnimationSettings>;
 } =>
   Object.keys(obj).every(key =>
     BATCH_MODIFICATION_WITH_EDGES_AND_VERTICES_SETTINGS_KEYS.has(key)
@@ -67,43 +67,43 @@ const isBatchModificationSettingsObjectWithEdgesAndVertices = (
 // to ensure that it will be called only once
 
 export const createAnimationsSettingsForSingleModification = (
-  component: { vertex?: string; edge?: string },
+  component: { edge?: string; vertex?: string },
   animationsSettings?: SingleModificationAnimationSettings
 ): AnimationsSettings => {
   if (!animationsSettings) {
     return {
-      vertices: {},
-      edges: {}
+      edges: {},
+      vertices: {}
     };
   }
 
   if (isAnimationSettingsObject(animationsSettings)) {
     return {
+      edges: component.edge
+        ? { [component.edge]: { ...animationsSettings, onComplete: undefined } }
+        : {},
       layout: animationsSettings,
       vertices: component.vertex
         ? {
             [component.vertex]: { ...animationsSettings, onComplete: undefined }
           }
-        : {},
-      edges: component.edge
-        ? { [component.edge]: { ...animationsSettings, onComplete: undefined } }
         : {}
     };
   }
 
   return {
-    layout: animationsSettings.layout,
-    vertices: component.vertex
+    edges: component.edge
       ? {
-          [component.vertex]: {
+          [component.edge]: {
             ...animationsSettings.component,
             onComplete: undefined
           }
         }
       : {},
-    edges: component.edge
+    layout: animationsSettings.layout,
+    vertices: component.vertex
       ? {
-          [component.edge]: {
+          [component.vertex]: {
             ...animationsSettings.component,
             onComplete: undefined
           }
@@ -113,27 +113,27 @@ export const createAnimationsSettingsForSingleModification = (
 };
 
 export const createAnimationsSettingsForBatchModification = (
-  components: { vertices?: string[]; edges?: string[] },
+  components: { edges?: string[]; vertices?: string[] },
   animationsSettings?: BatchModificationAnimationSettings
 ): AnimationsSettings => {
   if (!animationsSettings) {
     return {
-      vertices: {},
-      edges: {}
+      edges: {},
+      vertices: {}
     };
   }
 
   if (isAnimationSettingsObject(animationsSettings)) {
     return {
-      layout: animationsSettings,
-      vertices: Object.fromEntries(
-        components.vertices?.map(key => [
+      edges: Object.fromEntries(
+        components.edges?.map(key => [
           key,
           { ...animationsSettings, onComplete: undefined }
         ]) ?? []
       ),
-      edges: Object.fromEntries(
-        components.edges?.map(key => [
+      layout: animationsSettings,
+      vertices: Object.fromEntries(
+        components.vertices?.map(key => [
           key,
           { ...animationsSettings, onComplete: undefined }
         ]) ?? []
@@ -145,26 +145,25 @@ export const createAnimationsSettingsForBatchModification = (
     isBatchModificationSettingsObjectWithEdgesAndVertices(animationsSettings)
   ) {
     return {
+      edges: Object.fromEntries(
+        components.edges?.map(key => [
+          key,
+          animationsSettings.vertices?.[key]
+        ]) ?? []
+      ),
       layout: animationsSettings.layout,
       vertices: Object.fromEntries(
         components.vertices?.map(key => [
           key,
           animationsSettings.edges?.[key]
         ]) ?? []
-      ),
-      edges: Object.fromEntries(
-        components.edges?.map(key => [
-          key,
-          animationsSettings.vertices?.[key]
-        ]) ?? []
       )
     };
   }
 
   return {
-    layout: animationsSettings.layout,
-    vertices: Object.fromEntries(
-      components.vertices?.map(key => [
+    edges: Object.fromEntries(
+      components.edges?.map(key => [
         key,
         {
           ...(animationsSettings as { components?: AnimationSettings })
@@ -173,8 +172,9 @@ export const createAnimationsSettingsForBatchModification = (
         }
       ]) ?? []
     ),
-    edges: Object.fromEntries(
-      components.edges?.map(key => [
+    layout: animationsSettings.layout,
+    vertices: Object.fromEntries(
+      components.vertices?.map(key => [
         key,
         {
           ...(animationsSettings as { components?: AnimationSettings })

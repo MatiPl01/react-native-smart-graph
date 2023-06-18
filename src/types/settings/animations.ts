@@ -9,28 +9,28 @@ export type AnimationSettings = {
 };
 
 export type SingleModificationAnimationSettings =
-  | AnimationSettings
   | {
       component?: AnimationSettings;
       layout?: AnimationSettings;
-    };
+    }
+  | AnimationSettings;
 
 export type BatchModificationAnimationSettings =
-  | AnimationSettings
   | {
       components?: AnimationSettings;
       layout?: AnimationSettings;
     }
   | {
       edges?: Record<string, AnimationSettings>;
-      vertices?: Record<string, AnimationSettings>;
       layout?: AnimationSettings;
-    };
+      vertices?: Record<string, AnimationSettings>;
+    }
+  | AnimationSettings;
 
 export type AnimationsSettings = {
+  edges: Record<string, AnimationSettings | undefined>;
   layout?: AnimationSettings;
   vertices: Record<string, AnimationSettings | undefined>;
-  edges: Record<string, AnimationSettings | undefined>;
 };
 
 export type AnimationSettingsWithDefaults = DeepRequired<

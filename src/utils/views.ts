@@ -5,8 +5,8 @@ import { ObjectFit } from '@/types/views';
 
 export const calcContainerScale = (
   objectFit: ObjectFit,
-  { width: containerWidth, height: containerHeight }: Dimensions,
-  { width: canvasWidth, height: canvasHeight }: Dimensions
+  { height: containerHeight, width: containerWidth }: Dimensions,
+  { height: canvasHeight, width: canvasWidth }: Dimensions
 ): number => {
   'worklet';
   let scale = 1;
@@ -36,8 +36,8 @@ export const calcContainerScale = (
 
 export const calcContainerTranslation = (
   objectFit: ObjectFit,
-  { left, right, top, bottom }: BoundingRect,
-  { width: canvasWidth, height: canvasHeight }: Dimensions
+  { bottom, left, right, top }: BoundingRect,
+  { height: canvasHeight, width: canvasWidth }: Dimensions
 ): { x: number; y: number } => {
   'worklet';
   let x = 0;

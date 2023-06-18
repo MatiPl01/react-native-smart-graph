@@ -26,8 +26,8 @@ const getLayoutProviders = <V, E>(
       const forcesSettings = settings.layout.settings;
       return [
         <ForcesPlacementProvider
-          vertexRadius={settings.components.vertex.radius}
           forcesSettings={forcesSettings}
+          vertexRadius={settings.components.vertex.radius}
         />,
         <ForcesLayoutProvider forcesSettings={forcesSettings} />
       ];
@@ -44,16 +44,16 @@ const getLayoutProviders = <V, E>(
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
-  settings?: GraphSettings<V, E>;
   renderers?: GraphRenderers<V, E>;
+  settings?: GraphSettings<V, E>;
 }>;
 
 // eslint-disable-next-line import/no-unused-modules
 export default function GraphProvider<V, E>({
+  children,
   graph,
-  settings,
   renderers,
-  children
+  settings
 }: GraphProviderProps<V, E>) {
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
@@ -76,8 +76,8 @@ export default function GraphProvider<V, E>({
       // components data accordingly
       <ComponentsDataProvider
         graph={graph}
-        settings={memoSettings}
         renderers={memoRenderers}
+        settings={memoSettings}
       />,
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions

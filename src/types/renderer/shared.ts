@@ -7,12 +7,12 @@ export type SharedRenderersProps = {
 };
 
 export type VertexRendererProps<V> = SharedRenderersProps & {
-  key: string;
-  data: V;
-  radius: number;
   currentRadius: SharedValue<number>;
-  scale: SharedValue<number>;
+  data: V;
+  key: string;
   position: AnimatedVectorCoordinates;
+  radius: number;
+  scale: SharedValue<number>;
 };
 
 export type VertexRenderFunction<V> = (
@@ -20,13 +20,13 @@ export type VertexRenderFunction<V> = (
 ) => JSX.Element | null;
 
 export type EdgeLabelRendererProps<E> = SharedRenderersProps & {
-  key: string;
-  data: E;
   centerX: SharedValue<number>;
   centerY: SharedValue<number>;
-  height: SharedValue<number>;
-  edgeRotation: SharedValue<number>;
+  data: E;
   edgeLength: SharedValue<number>;
+  edgeRotation: SharedValue<number>;
+  height: SharedValue<number>;
+  key: string;
 };
 
 export type EdgeLabelRendererFunction<E> = (

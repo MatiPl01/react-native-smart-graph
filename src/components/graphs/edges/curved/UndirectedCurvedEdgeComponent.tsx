@@ -15,17 +15,17 @@ import {
 } from '@/utils/vectors';
 
 function UndirectedCurvedEdgeComponent<E, V>({
-  edge,
-  v1Position,
-  v2Position,
-  v1Radius,
-  v2Radius,
-  componentSettings,
-  animatedOrder,
   animatedEdgesCount,
+  animatedOrder,
   animationProgress,
+  componentSettings,
+  edge,
+  onRender,
   renderers,
-  onRender
+  v1Position,
+  v1Radius,
+  v2Position,
+  v2Radius
 }: UndirectedCurvedEdgeComponentProps<E, V>) {
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
@@ -99,23 +99,23 @@ function UndirectedCurvedEdgeComponent<E, V>({
   return (
     <>
       {renderers.edge({
-        key: edge.key,
+        animationProgress,
         data: edge.value,
+        key: edge.key,
         parabolaX,
         parabolaY,
-        path,
-        animationProgress
+        path
       })}
       {renderers.label && (
         <EdgeLabelComponent
-          edge={edge}
-          v1Position={v1Position}
-          v2Position={v2Position}
+          animationProgress={animationProgress}
           centerX={parabolaX}
           centerY={parabolaY}
+          edge={edge}
           height={labelHeight}
           renderer={renderers.label}
-          animationProgress={animationProgress}
+          v1Position={v1Position}
+          v2Position={v2Position}
         />
       )}
     </>

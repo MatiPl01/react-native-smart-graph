@@ -9,16 +9,16 @@ import { applyForces } from '@/utils/forces';
 import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
-  // Component props
-  forcesSettings: ForcesSettingsWithDefaults;
   // Injected props
   connections: GraphConnections;
+  // Component props
+  forcesSettings: ForcesSettingsWithDefaults;
 }>;
 
 function ForcesLayoutProvider({
-  forcesSettings,
+  children,
   connections,
-  children
+  forcesSettings
 }: ForcesLayoutProviderProps) {
   const { placedVerticesPositions } = useForcesPlacementContext();
 

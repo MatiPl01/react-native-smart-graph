@@ -9,29 +9,29 @@ export type AnimatedVectorCoordinates = {
 };
 
 export type Dimensions = {
-  width: number;
   height: number;
+  width: number;
 };
 
 export type BoundingRect = {
-  top: number;
   bottom: number;
-  right: number;
   left: number;
+  right: number;
+  top: number;
 };
 
 export type BoundingVertices = {
-  top?: string;
   bottom?: string;
-  right?: string;
   left?: string;
+  right?: string;
+  top?: string;
 };
 
 export type AnimatedBoundingRect = {
-  top: SharedValue<number>;
   bottom: SharedValue<number>;
-  right: SharedValue<number>;
   left: SharedValue<number>;
+  right: SharedValue<number>;
+  top: SharedValue<number>;
 };
 
 export type AnimatedPath = SharedValue<string>;

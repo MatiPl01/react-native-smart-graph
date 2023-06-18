@@ -21,33 +21,39 @@ export default class DirectedGraph<V, E> extends Graph<
   DirectedEdgeData<E>
 > {
   constructor(data: {
-    vertices: Array<VertexData<V>>;
     edges?: Array<DirectedEdgeData<E>>;
+    vertices: Array<VertexData<V>>;
   }) {
     super();
     this.insertBatch(data);
   }
 
-  override isDirected(): this is DirectedGraph<V, E> {
-    return true;
-  }
-
-  override insertVertex(
-    { key, value }: VertexData<V>,
-    animationSettings?: SingleModificationAnimationSettings | null
-  ): DirectedGraphVertex<V, E> {
-    return this.insertVertexObject(
-      new DirectedGraphVertex<V, E>(key, value),
-      animationSettings &&
-        createAnimationsSettingsForSingleModification(
-          { vertex: key },
-          animationSettings
-        )
-    );
+  override insertBatch(
+    {
+      edges,
+      vertices
+    }: {
+      edges?: Array<DirectedEdgeData<E>>;
+      vertices?: Array<VertexData<V>>;
+    },
+    animationSettings?: BatchModificationAnimationSettings | null
+  ): void {
+    // Insert edges and vertices to the graph model
+    vertices?.forEach(data => this.insertVertex(data, null));
+    edges?.forEach(data => this.insertEdge(data, null));
+    // Notify observers after all changes to the graph model are made
+    if (animationSettings) {
+      this.notifyChange(
+        createAnimationsSettingsForBatchModification({
+          edges: edges?.map(({ key }) => key),
+          vertices: vertices?.map(({ key }) => key)
+        })
+      );
+    }
   }
 
   override insertEdge(
-    { key, value, from: sourceKey, to: targetKey }: DirectedEdgeData<E>,
+    { from: sourceKey, key, to: targetKey, value }: DirectedEdgeData<E>,
     animationSettings?: SingleModificationAnimationSettings | null
   ): DirectedEdge<E, V> {
     this.checkSelfLoop(sourceKey, targetKey);
@@ -76,6 +82,39 @@ export default class DirectedGraph<V, E> extends Graph<
     return edge;
   }
 
+  override insertVertex(
+    { key, value }: VertexData<V>,
+    animationSettings?: SingleModificationAnimationSettings | null
+  ): DirectedGraphVertex<V, E> {
+    return this.insertVertexObject(
+      new DirectedGraphVertex<V, E>(key, value),
+      animationSettings &&
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        )
+    );
+  }
+
+  override isDirected(): this is DirectedGraph<V, E> {
+    return true;
+  }
+
+  override orderEdgesBetweenVertices(
+    edges: Array<DirectedEdge<E, V>>
+  ): Array<{ edge: DirectedEdge<E, V>; order: number }> {
+    // Display edges that have the same direction next to each other
+    let order = 0;
+    let oppositeOrder = 0; // For edges in the opposite direction
+
+    return edges.map(edge => {
+      if (edge.source.key < edge.target.key) {
+        return { edge, order: order++ };
+      }
+      return { edge, order: oppositeOrder++ };
+    });
+  }
+
   override removeEdge(
     key: string,
     animationSettings?: SingleModificationAnimationSettings | null
@@ -100,34 +139,10 @@ export default class DirectedGraph<V, E> extends Graph<
     return edge.value;
   }
 
-  override insertBatch(
-    {
-      vertices,
-      edges
-    }: {
-      vertices?: Array<VertexData<V>>;
-      edges?: Array<DirectedEdgeData<E>>;
-    },
-    animationSettings?: BatchModificationAnimationSettings | null
-  ): void {
-    // Insert edges and vertices to the graph model
-    vertices?.forEach(data => this.insertVertex(data, null));
-    edges?.forEach(data => this.insertEdge(data, null));
-    // Notify observers after all changes to the graph model are made
-    if (animationSettings) {
-      this.notifyChange(
-        createAnimationsSettingsForBatchModification({
-          vertices: vertices?.map(({ key }) => key),
-          edges: edges?.map(({ key }) => key)
-        })
-      );
-    }
-  }
-
   override replaceBatch(
     batchData: {
-      vertices?: Array<VertexData<V>>;
       edges?: Array<DirectedEdgeData<E>>;
+      vertices?: Array<VertexData<V>>;
     },
     animationSettings?: AnimationSettings | null
   ): void {
@@ -135,20 +150,5 @@ export default class DirectedGraph<V, E> extends Graph<
     setTimeout(() => {
       this.insertBatch(batchData, animationSettings);
     }, 0);
-  }
-
-  override orderEdgesBetweenVertices(
-    edges: Array<DirectedEdge<E, V>>
-  ): Array<{ edge: DirectedEdge<E, V>; order: number }> {
-    // Display edges that have the same direction next to each other
-    let order = 0;
-    let oppositeOrder = 0; // For edges in the opposite direction
-
-    return edges.map(edge => {
-      if (edge.source.key < edge.target.key) {
-        return { edge, order: order++ };
-      }
-      return { edge, order: oppositeOrder++ };
-    });
   }
 }

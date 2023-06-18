@@ -4,14 +4,14 @@ export type VertexData<V> = {
 };
 
 export type DirectedEdgeData<E> = {
-  key: string;
   from: string;
+  key: string;
   to: string;
   value: E;
 };
 
 export type UndirectedEdgeData<E> = {
   key: string;
-  vertices: string[];
   value: E;
+  vertices: string[];
 };
