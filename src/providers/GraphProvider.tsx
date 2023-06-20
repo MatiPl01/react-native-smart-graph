@@ -1,5 +1,6 @@
 import { PropsWithChildren, useMemo } from 'react';
 
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings, GraphSettingsWithDefaults } from '@/types/settings';
@@ -9,6 +10,9 @@ import {
 } from '@/utils/components';
 
 import { ComponentsDataProvider } from './data';
+import PressEventsProvider, {
+  PressEventsProviderProps
+} from './events/PressEventsProvider';
 import {
   ForcesLayoutProvider,
   ForcesPlacementProvider,
@@ -17,9 +21,13 @@ import {
 } from './layout';
 import { ContextProviderComposer } from './utils';
 
-const getLayoutProviders = <V, E>(
+const getLayoutProviders = <
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>(
   graph: Graph<V, E>,
-  settings: GraphSettingsWithDefaults<V, E>
+  settings: GraphSettingsWithDefaults<V, E, ED>
 ) => {
   switch (settings.layout.managedBy) {
     case 'forces':
@@ -40,19 +48,39 @@ const getLayoutProviders = <V, E>(
   }
 };
 
-type GraphProviderProps<V, E> = PropsWithChildren<{
+const getEventsProviders = <
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>(
+  settings: GraphSettingsWithDefaults<V, E, ED>
+) => {
+  if (settings.events) {
+    return [
+      <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
+        callbacks={settings.events}
+      />
+    ];
+  }
+  return [];
+};
+
+type GraphProviderProps<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = PropsWithChildren<{
   graph: Graph<V, E>;
   renderers?: GraphRenderers<V, E>;
-  settings?: GraphSettings<V, E>;
+  settings?: GraphSettings<V, E, ED>;
 }>;
 
 // eslint-disable-next-line import/no-unused-modules
-export default function GraphProvider<V, E>({
-  children,
-  graph,
-  renderers,
-  settings
-}: GraphProviderProps<V, E>) {
+export default function GraphProvider<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>({ children, graph, renderers, settings }: GraphProviderProps<V, E, ED>) {
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
     [graph, settings]
@@ -70,6 +98,7 @@ export default function GraphProvider<V, E>({
 
   const providers = useMemo(
     () => [
+      // DATA
       // The main provider used to react on graph changes and update
       // components data accordingly
       <ComponentsDataProvider
@@ -77,9 +106,13 @@ export default function GraphProvider<V, E>({
         renderers={memoRenderers}
         settings={memoSettings}
       />,
+      // LAYOUT
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
-      ...getLayoutProviders(graph, memoSettings)
+      ...getLayoutProviders(graph, memoSettings),
+      // EVENTS
+      // Press events provider
+      ...getEventsProviders(memoSettings)
     ],
     [memoSettings]
   );

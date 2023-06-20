@@ -21,6 +21,7 @@ import {
   VertexRemoveHandler,
   VertexRenderHandler
 } from '@/types/components';
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph, GraphConnections } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
 import {
@@ -49,18 +50,26 @@ export type ComponentsDataContextType<V, E> = {
 
 const ComponentsDataContext = createContext({});
 
-type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
+type ComponentsDataProviderProps<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = PropsWithChildren<{
   graph: Graph<V, E>;
   renderers: GraphRenderersWithDefaults<V, E>;
-  settings: GraphSettingsWithDefaults<V, E>;
+  settings: GraphSettingsWithDefaults<V, E, ED>;
 }>;
 
-export default function ComponentsDataProvider<V, E>({
+export default function ComponentsDataProvider<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>({
   children,
   graph,
   renderers,
   settings
-}: ComponentsDataProviderProps<V, E>) {
+}: ComponentsDataProviderProps<V, E, ED>) {
   // GRAPH CHANGES OBSERVER
   const [{ animationsSettings, orderedEdges, vertices }] =
     useGraphObserver(graph);

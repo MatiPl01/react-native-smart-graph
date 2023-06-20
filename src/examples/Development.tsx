@@ -134,7 +134,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 100);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
@@ -149,8 +149,8 @@ export default function App() {
                 label: DefaultEdgeLabelRenderer
               }}
               settings={{
-                layout: {
-                  managedBy: 'forces'
+                placement: {
+                  strategy: 'circle'
                 }
               }}
               graph={graph}

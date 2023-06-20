@@ -27,10 +27,8 @@ import {
   DEFAULT_SCALES,
   INITIAL_SCALE
 } from '@/constants/views';
-import { useGraphEventsContext } from '@/providers/events';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
-import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
 import { deepMemoComparator } from '@/utils/equality';
 import { fixedWithDecay } from '@/utils/reanimated';
 import {
@@ -69,9 +67,6 @@ function PannableScalableView({
   if (initialScaleIndex < 0) {
     throw new Error('Initial scale must be included in scales');
   }
-
-  // CONTEXT
-  const graphEventsContext = useGraphEventsContext();
 
   // CANVAS
   const canvasWidth = useSharedValue(0);
@@ -430,48 +425,14 @@ function PannableScalableView({
       runOnJS(startAutoSizingTimeout)();
     });
 
-  const handlePress = (
-    { x, y }: Vector,
-    pressHandler?: (position: Vector) => void
-  ) => {
-    'worklet';
-    if (pressHandler) {
-      runOnJS(pressHandler)(
-        canvasCoordinatesToContainerCoordinates(
-          { x, y },
-          { x: translateX.value, y: translateY.value },
-          currentScale.value
-        )
-      );
-    }
-  };
-
-  const pressGestureHandler = Gesture.Tap()
-    .numberOfTaps(1)
-    .onEnd(({ x, y }) =>
-      handlePress({ x, y }, graphEventsContext?.handlePress)
-    );
-
-  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) =>
-    handlePress({ x, y }, graphEventsContext?.handleLongPress)
-  );
-
   const canvasGestureHandler = Gesture.Race(
     Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
     doubleTapGestureHandler
   );
 
-  const gestureHandler = graphEventsContext
-    ? Gesture.Exclusive(
-        canvasGestureHandler,
-        pressGestureHandler,
-        longPressGestureHandler
-      )
-    : canvasGestureHandler;
-
   return (
     <View style={styles.container}>
-      <GestureDetector gesture={gestureHandler}>
+      <GestureDetector gesture={canvasGestureHandler}>
         <Canvas onLayout={handleCanvasRender} style={styles.canvas}>
           <Group transform={transform}>
             {Children.map(children, child => {
@@ -484,8 +445,6 @@ function PannableScalableView({
                   top: containerTop
                 },
                 onRender: handleGraphRender
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                // graphEventsContext: graphEventsContext!
               });
             })}
           </Group>
