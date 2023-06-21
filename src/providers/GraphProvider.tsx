@@ -1,5 +1,6 @@
 import { PropsWithChildren, useMemo } from 'react';
 
+import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
 import { GraphRenderers } from '@/types/renderer';
@@ -40,7 +41,7 @@ const getLayoutProviders = <
     case 'placement':
     default:
       return [
-        <PlacementLayoutProvider<GraphPlacementLayoutProviderProps<V, E>>
+        <PlacementLayoutProvider<GraphPlacementLayoutProviderProps<V, E, ED>>
           graph={graph}
           settings={settings}
         />
@@ -53,12 +54,14 @@ const getEventsProviders = <
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >(
+  renderLayer: (zIndex: number, layer: JSX.Element) => void,
   settings: GraphSettingsWithDefaults<V, E, ED>
 ) => {
   if (settings.events) {
     return [
       <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
         callbacks={settings.events}
+        renderLayer={renderLayer}
       />
     ];
   }
@@ -69,18 +72,26 @@ type GraphProviderProps<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = PropsWithChildren<{
-  graph: Graph<V, E>;
-  renderers?: GraphRenderers<V, E>;
-  settings?: GraphSettings<V, E, ED>;
-}>;
+> = PropsWithChildren<
+  {
+    graph: Graph<V, E>;
+    renderers?: GraphRenderers<V, E>;
+    settings?: GraphSettings<V, E, ED>;
+  } & AccessibleOverlayContextType
+>;
 
 // eslint-disable-next-line import/no-unused-modules
 export default function GraphProvider<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({ children, graph, renderers, settings }: GraphProviderProps<V, E, ED>) {
+>({
+  children,
+  graph,
+  renderLayer,
+  renderers,
+  settings
+}: GraphProviderProps<V, E, ED>) {
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
     [graph, settings]
@@ -112,7 +123,7 @@ export default function GraphProvider<
       ...getLayoutProviders(graph, memoSettings),
       // EVENTS
       // Press events provider
-      ...getEventsProviders(memoSettings)
+      ...getEventsProviders(renderLayer, memoSettings)
     ],
     [memoSettings]
   );

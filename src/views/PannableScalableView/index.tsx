@@ -1,10 +1,7 @@
-import { Canvas, Group, Vector } from '@shopify/react-native-skia';
+import { Vector } from '@shopify/react-native-skia';
 import React, {
-  Children,
-  cloneElement,
   memo,
   PropsWithChildren,
-  ReactElement,
   useCallback,
   useMemo,
   useRef
@@ -21,12 +18,12 @@ import {
 } from 'react-native-reanimated';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { GraphComponentProps } from '@/components/graphs/GraphComponent';
 import {
   AUTO_SIZING_TIMEOUT,
   DEFAULT_SCALES,
   INITIAL_SCALE
 } from '@/constants/views';
+import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
@@ -38,6 +35,8 @@ import {
   calcTranslationOnProgress,
   clamp
 } from '@/utils/views';
+
+import CanvasComponent from './CanvasComponent';
 
 type PannableScalableViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
@@ -432,24 +431,26 @@ function PannableScalableView({
 
   return (
     <View style={styles.container}>
-      <GestureDetector gesture={canvasGestureHandler}>
-        <Canvas onLayout={handleCanvasRender} style={styles.canvas}>
-          <Group transform={transform}>
-            {Children.map(children, child => {
-              const childElement = child as ReactElement<GraphComponentProps>;
-              return cloneElement(childElement, {
-                boundingRect: {
-                  bottom: containerBottom,
-                  left: containerLeft,
-                  right: containerRight,
-                  top: containerTop
-                },
-                onRender: handleGraphRender
-              });
-            })}
-          </Group>
-        </Canvas>
-      </GestureDetector>
+      <OverlayProvider>
+        <GestureDetector gesture={canvasGestureHandler}>
+          <CanvasComponent
+            graphComponentProps={{
+              boundingRect: {
+                bottom: containerBottom,
+                left: containerLeft,
+                right: containerRight,
+                top: containerTop
+              },
+              onRender: handleGraphRender
+            }}
+            onRender={handleCanvasRender}
+            transform={transform}>
+            {children}
+          </CanvasComponent>
+        </GestureDetector>
+        {/* Renders overlay layers set using the OverlayContext */}
+        <OverlayOutlet />
+      </OverlayProvider>
       {controls && (
         <ViewControls
           onReset={() => resetContainerPosition({ animated: true })}
@@ -460,9 +461,6 @@ function PannableScalableView({
 }
 
 const styles = StyleSheet.create({
-  canvas: {
-    flex: 1
-  },
   container: {
     flex: 1,
     overflow: 'hidden',

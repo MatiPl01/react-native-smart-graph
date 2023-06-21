@@ -1,4 +1,5 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
+import { View } from 'react-native';
 
 import { withGraphData } from '@/providers/data';
 import { VertexComponentRenderData } from '@/types/components';
@@ -11,6 +12,7 @@ export type PressEventsProviderProps<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > = PropsWithChildren<{
   callbacks: PressEventsCallbacks<V, E, ED>;
+  renderLayer: (zIndex: number, layer: JSX.Element) => void;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
 }>;
 
@@ -21,8 +23,13 @@ function PressEventsProvider<
 >({
   callbacks,
   children,
+  renderLayer,
   renderedVerticesData
 }: PressEventsProviderProps<V, E, ED>) {
+  useEffect(() => {
+    renderLayer(1, <View style={{ backgroundColor: 'red', flex: 1 }} />);
+  }, []);
+
   return <>{children}</>;
 }
 

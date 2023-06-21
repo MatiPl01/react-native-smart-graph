@@ -14,6 +14,7 @@ import {
   VertexRemoveHandler,
   VertexRenderHandler
 } from '@/types/components';
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { calcContainerBoundingRect } from '@/utils/placement';
 
@@ -25,8 +26,12 @@ export type GraphComponentProps = {
   onRender: (containerBounds: BoundingRect) => void;
 };
 
-type GraphComponentPropsWithGraphData<V, E> = GraphComponentProps & {
-  edgesData: Record<string, EdgeComponentData<E, V>>;
+type GraphComponentPropsWithGraphData<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = GraphComponentProps & {
+  edgesData: Record<string, EdgeComponentData<E, V, ED>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
@@ -35,7 +40,11 @@ type GraphComponentPropsWithGraphData<V, E> = GraphComponentProps & {
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
-function GraphComponent<V, E>({
+function GraphComponent<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>({
   boundingRect,
   edgesData,
   handleEdgeRemove,
@@ -45,7 +54,7 @@ function GraphComponent<V, E>({
   onRender,
   renderedVerticesData,
   verticesData
-}: GraphComponentPropsWithGraphData<V, E>) {
+}: GraphComponentPropsWithGraphData<V, E, ED>) {
   // GRAPH LAYOUT
   const isFirstRenderRef = useRef(true);
 

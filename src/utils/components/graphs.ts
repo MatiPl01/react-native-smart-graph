@@ -174,14 +174,14 @@ export const updateGraphEdgesData = <
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >(
-  oldEdgesData: Record<string, EdgeComponentData<E, V>>,
+  oldEdgesData: Record<string, EdgeComponentData<E, V, ED>>,
   currentEdges: OrderedEdges<E, V>,
   renderedVerticesData: Record<string, VertexComponentRenderData>,
   currentAnimationsSettings: AnimationsSettings,
   settings: GraphSettingsWithDefaults<V, E, ED>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): {
-  data: Record<string, EdgeComponentData<E, V>>;
+  data: Record<string, EdgeComponentData<E, V, ED>>;
   wasUpdated: boolean;
 } => {
   const updatedEdgesData = { ...oldEdgesData };

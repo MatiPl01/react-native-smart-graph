@@ -35,9 +35,13 @@ import {
 } from '@/utils/components';
 import { withMemoContext } from '@/utils/contexts';
 
-export type ComponentsDataContextType<V, E> = {
+export type ComponentsDataContextType<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = {
   connections: GraphConnections;
-  edgesData: Record<string, EdgeComponentData<E, V>>;
+  edgesData: Record<string, EdgeComponentData<E, V, ED>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
@@ -82,7 +86,7 @@ export default function ComponentsDataProvider<
   >({});
   // Store data for graph edge components
   const [edgesData, setEdgesData] = useState<
-    Record<string, EdgeComponentData<E, V>>
+    Record<string, EdgeComponentData<E, V, ED>>
   >({});
 
   // GRAPH COMPONENTS RENDER DATA (received from graph components
@@ -192,7 +196,7 @@ export default function ComponentsDataProvider<
     });
   }, []);
 
-  const contextValue = useMemo<ComponentsDataContextType<V, E>>(
+  const contextValue = useMemo<ComponentsDataContextType<V, E, ED>>(
     () => ({
       connections,
       edgesData,
@@ -226,7 +230,7 @@ export default function ComponentsDataProvider<
 
 export const withGraphData = <
   P extends object,
-  V extends CommonTypes<ComponentsDataContextType<unknown, unknown>, P>
+  V extends CommonTypes<ComponentsDataContextType<unknown, unknown, never>, P>
 >(
   Component: React.ComponentType<P>,
   selector: (contextValue: V) => Partial<V>
@@ -234,7 +238,7 @@ export const withGraphData = <
   withMemoContext(
     Component,
     ComponentsDataContext as unknown as Context<
-      ComponentsDataContextType<unknown, unknown>
+      ComponentsDataContextType<unknown, unknown, never>
     >,
     selector
   ) as <

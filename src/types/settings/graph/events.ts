@@ -1,12 +1,12 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
-type EdgePressHandler<
+export type EdgePressHandler<
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > = (data: { edge: ED; position: AnimatedVectorCoordinates }) => void;
 
-type VertexPressHandler<V> = (data: {
+export type VertexPressHandler<V> = (data: {
   position: AnimatedVectorCoordinates;
   vertex: VertexData<V>;
 }) => void;

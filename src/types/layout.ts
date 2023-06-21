@@ -13,6 +13,11 @@ export type Dimensions = {
   width: number;
 };
 
+export type AnimatedDimensions = {
+  height: SharedValue<number>;
+  width: SharedValue<number>;
+};
+
 export type BoundingRect = {
   bottom: number;
   left: number;

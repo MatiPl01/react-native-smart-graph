@@ -149,6 +149,9 @@ export default function App() {
                 label: DefaultEdgeLabelRenderer
               }}
               settings={{
+                events: {
+                  onVertexPress: console.log
+                },
                 placement: {
                   strategy: 'circle'
                 }
