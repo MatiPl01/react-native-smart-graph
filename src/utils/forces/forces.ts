@@ -6,6 +6,7 @@ import { applyDefaultForces } from './strategies/default.forces';
 
 export const applyForces = (
   connections: GraphConnections,
+  lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   settings: ForcesSettingsWithDefaults
 ): void => {
@@ -13,7 +14,12 @@ export const applyForces = (
   switch (settings.strategy) {
     default:
     case 'default':
-      applyDefaultForces(connections, verticesPositions, settings);
+      applyDefaultForces(
+        connections,
+        lockedVertices,
+        verticesPositions,
+        settings
+      );
       break;
   }
 };

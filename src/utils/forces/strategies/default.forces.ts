@@ -26,6 +26,7 @@ const createRepulsionFactorGetter = (repulsionScale: number) => {
 
 export function applyDefaultForces(
   connections: GraphConnections,
+  lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   {
     attractionForceFactor,
@@ -36,9 +37,10 @@ export function applyDefaultForces(
   'worklet';
   const forces = calcForces(
     connections,
+    lockedVertices,
     verticesPositions,
     createAttractionFactorGetter(attractionScale, attractionForceFactor),
     createRepulsionFactorGetter(repulsionScale)
   );
-  updateVerticesPositions(forces, verticesPositions);
+  updateVerticesPositions(forces, lockedVertices, verticesPositions);
 }

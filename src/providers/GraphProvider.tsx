@@ -21,6 +21,7 @@ import {
   PlacementLayoutProvider
 } from './layout';
 import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
+import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
 import { ContextProviderComposer } from './utils';
 
 const getLayoutProviders = <
@@ -34,8 +35,9 @@ const getLayoutProviders = <
   switch (settings.layout.managedBy) {
     case 'forces':
       return [
-        <ForcesPlacementProvider
-          vertexRadius={settings.components.vertex.radius}
+        <ForcesPlacementProvider<ForcesPlacementProviderProps<V, E, ED>>
+          graph={graph}
+          settings={settings}
         />,
         <ForcesLayoutProvider forcesSettings={settings.layout.settings} />
       ];

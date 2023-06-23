@@ -43,6 +43,7 @@ const calcRepulsiveForce = (
 const calcResultantAttractiveForce = (
   vertexKey: string,
   connections: GraphConnections,
+  lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   attractionFactorGetter: (distance: number) => number
 ): Vector => {
@@ -52,39 +53,44 @@ const calcResultantAttractiveForce = (
     return { x: 0, y: 0 };
   }
   return addVectorsArray(
-    vertexConnections.map(neighborKey =>
-      calcAttractiveForce(
-        animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
-        animatedVectorCoordinatesToVector(verticesPositions[neighborKey]),
-        attractionFactorGetter
+    vertexConnections
+      .filter(neighborKey => !lockedVertices[neighborKey])
+      .map(neighborKey =>
+        calcAttractiveForce(
+          animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
+          animatedVectorCoordinatesToVector(verticesPositions[neighborKey]),
+          attractionFactorGetter
+        )
       )
-    )
   );
 };
 
 const calcResultantRepulsiveForce = (
   vertexKey: string,
+  lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   repulsiveFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
   return addVectorsArray(
-    Object.keys(verticesPositions).map(otherVertexKey => {
-      if (otherVertexKey === vertexKey) {
-        return { x: 0, y: 0 };
-      }
-
-      return calcRepulsiveForce(
-        animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
-        animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
-        repulsiveFactorGetter
-      );
-    })
+    Object.keys(verticesPositions)
+      .filter(
+        otherVertexKey =>
+          !lockedVertices[otherVertexKey] && otherVertexKey !== vertexKey
+      )
+      .map(otherVertexKey =>
+        calcRepulsiveForce(
+          animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
+          animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
+          repulsiveFactorGetter
+        )
+      )
   );
 };
 
 export const calcForces = (
   connections: GraphConnections,
+  lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
   attractionFactorGetter: (distance: number) => number,
   repulsiveFactorGetter: (distance: number) => number
@@ -95,11 +101,13 @@ export const calcForces = (
     const attractiveForce = calcResultantAttractiveForce(
       vertexKey,
       connections,
+      lockedVertices,
       verticesPositions,
       attractionFactorGetter
     );
     const repulsiveForce = calcResultantRepulsiveForce(
       vertexKey,
+      lockedVertices,
       verticesPositions,
       repulsiveFactorGetter
     );
@@ -110,10 +118,14 @@ export const calcForces = (
 
 export const updateVerticesPositions = (
   forces: Record<string, Vector>,
+  lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>
 ) => {
   'worklet';
   Object.entries(verticesPositions).forEach(([vertexKey, vertexPosition]) => {
+    if (lockedVertices[vertexKey]) {
+      return;
+    }
     const force = forces[vertexKey] as Vector;
     vertexPosition.x.value += force.x;
     vertexPosition.y.value += force.y;

@@ -2,7 +2,10 @@ import DefaultEdgeArrowRenderer from '@/components/graphs/arrows/renderers/Defau
 import DefaultCurvedEdgeRenderer from '@/components/graphs/edges/curved/renderers/DefaultCurvedEdgeRenderer';
 import DefaultStraightEdgeRenderer from '@/components/graphs/edges/straight/renderers/DefaultStraightEdgeRenderer';
 import DefaultVertexRenderer from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
-import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
+import {
+  DEFAULT_ANIMATION_SETTINGS,
+  DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
+} from '@/constants/animations';
 import {
   ARROW_COMPONENT_SETTINGS,
   CURVED_EDGE_COMPONENT_SETTINGS,
@@ -46,7 +49,9 @@ export const updateGraphSettingsWithDefaults = <
       ...settings?.animations?.edges
     },
     layout: {
-      ...DEFAULT_ANIMATION_SETTINGS,
+      ...(settings?.layout?.managedBy === 'forces'
+        ? DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
+        : DEFAULT_ANIMATION_SETTINGS),
       ...settings?.animations?.layout
     },
     vertices: {
