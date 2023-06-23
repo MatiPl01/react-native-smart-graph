@@ -1,37 +1,52 @@
 import { memo } from 'react';
 
 import { DirectedGraph } from '@/models/graphs';
-import GraphProvider from '@/providers/GraphProvider';
+import GraphProvider, {
+  GraphProviderAdditionalProps
+} from '@/providers/GraphProvider';
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
 
 import GraphComponent, { GraphComponentProps } from './GraphComponent';
 
-type DirectedGraphComponentProps<V, E> = {
+type DirectedGraphComponentProps<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = {
   graph: DirectedGraph<V, E>;
   renderers?: DirectedGraphRenderers<V, E>;
-  settings?: DirectedGraphSettings<V, E>;
+  settings?: DirectedGraphSettings<V, E, ED>;
 };
 
-function DirectedGraphComponent<V, E>({
-  boundingRect,
-  onRender,
-  ...providerProps
-}: DirectedGraphComponentProps<V, E> & GraphComponentProps) {
+type ClonedComponentProps<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = DirectedGraphComponentProps<V, E, ED> & {
+  graphComponentProps: GraphComponentProps;
+} & GraphProviderAdditionalProps;
+
+function DirectedGraphComponent<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>({ graphComponentProps, ...providerProps }: ClonedComponentProps<V, E, ED>) {
   return (
     <GraphProvider {...providerProps}>
-      <GraphComponent boundingRect={boundingRect} onRender={onRender} />
+      <GraphComponent {...graphComponentProps} />
     </GraphProvider>
   );
 }
 
 export default memo(
-  <V, E>(props: DirectedGraphComponentProps<V, E>) => {
+  <V, E, ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>>(
+    props: DirectedGraphComponentProps<V, E, ED>
+  ) => {
     return (
-      <DirectedGraphComponent
-        {...(props as DirectedGraphComponentProps<V, E> & GraphComponentProps)}
-      />
+      <DirectedGraphComponent {...(props as ClonedComponentProps<V, E, ED>)} />
     );
   },
   deepMemoComparator({

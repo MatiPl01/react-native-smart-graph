@@ -18,6 +18,9 @@ export const withMemoContext = <
 
   return (props: Omit<P, keyof V>) => {
     const contextValue = useContext(context);
+
+    if (!contextValue) throw new Error('Context value is undefined');
+
     const selectedValues = selector(contextValue as unknown as V);
 
     return <MemoComponent {...props} {...selectedValues} />;

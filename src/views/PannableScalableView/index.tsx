@@ -1,36 +1,30 @@
-import { Canvas, Group, Vector } from '@shopify/react-native-skia';
+import { Vector } from '@shopify/react-native-skia';
 import React, {
-  Children,
-  cloneElement,
   memo,
   PropsWithChildren,
-  ReactElement,
   useCallback,
   useMemo,
   useRef
 } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture } from 'react-native-gesture-handler';
 import {
   Easing,
   runOnJS,
   useAnimatedReaction,
-  useDerivedValue,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { GraphComponentProps } from '@/components/graphs/GraphComponent';
 import {
   AUTO_SIZING_TIMEOUT,
   DEFAULT_SCALES,
   INITIAL_SCALE
 } from '@/constants/views';
-import { useGraphEventsContext } from '@/providers/events';
+import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
-import { canvasCoordinatesToContainerCoordinates } from '@/utils/coordinates';
 import { deepMemoComparator } from '@/utils/equality';
 import { fixedWithDecay } from '@/utils/reanimated';
 import {
@@ -40,6 +34,8 @@ import {
   calcTranslationOnProgress,
   clamp
 } from '@/utils/views';
+
+import CanvasComponent from './CanvasComponent';
 
 type PannableScalableViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
@@ -70,9 +66,6 @@ function PannableScalableView({
     throw new Error('Initial scale must be included in scales');
   }
 
-  // CONTEXT
-  const graphEventsContext = useGraphEventsContext();
-
   // CANVAS
   const canvasWidth = useSharedValue(0);
   const canvasHeight = useSharedValue(0);
@@ -97,18 +90,9 @@ function PannableScalableView({
   const autoSizingStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
   const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // CONTAINER TRANSFORM
+  // CONTAINER TRANSLATION
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-
-  const transform = useDerivedValue(
-    () => [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: currentScale.value }
-    ],
-    [translateX, translateY, currentScale]
-  );
 
   const handleCanvasRender = useCallback(
     ({
@@ -430,67 +414,35 @@ function PannableScalableView({
       runOnJS(startAutoSizingTimeout)();
     });
 
-  const handlePress = (
-    { x, y }: Vector,
-    pressHandler?: (position: Vector) => void
-  ) => {
-    'worklet';
-    if (pressHandler) {
-      runOnJS(pressHandler)(
-        canvasCoordinatesToContainerCoordinates(
-          { x, y },
-          { x: translateX.value, y: translateY.value },
-          currentScale.value
-        )
-      );
-    }
-  };
-
-  const pressGestureHandler = Gesture.Tap()
-    .numberOfTaps(1)
-    .onEnd(({ x, y }) =>
-      handlePress({ x, y }, graphEventsContext?.handlePress)
-    );
-
-  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) =>
-    handlePress({ x, y }, graphEventsContext?.handleLongPress)
-  );
-
   const canvasGestureHandler = Gesture.Race(
     Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
     doubleTapGestureHandler
   );
 
-  const gestureHandler = graphEventsContext
-    ? Gesture.Exclusive(
-        canvasGestureHandler,
-        pressGestureHandler,
-        longPressGestureHandler
-      )
-    : canvasGestureHandler;
-
   return (
     <View style={styles.container}>
-      <GestureDetector gesture={gestureHandler}>
-        <Canvas onLayout={handleCanvasRender} style={styles.canvas}>
-          <Group transform={transform}>
-            {Children.map(children, child => {
-              const childElement = child as ReactElement<GraphComponentProps>;
-              return cloneElement(childElement, {
-                boundingRect: {
-                  bottom: containerBottom,
-                  left: containerLeft,
-                  right: containerRight,
-                  top: containerTop
-                },
-                onRender: handleGraphRender
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                // graphEventsContext: graphEventsContext!
-              });
-            })}
-          </Group>
-        </Canvas>
-      </GestureDetector>
+      <OverlayProvider>
+        <CanvasComponent
+          boundingRect={{
+            bottom: containerBottom,
+            left: containerLeft,
+            right: containerRight,
+            top: containerTop
+          }}
+          graphComponentProps={{
+            onRender: handleGraphRender
+          }}
+          transform={{
+            scale: currentScale,
+            translateX,
+            translateY
+          }}
+          onRender={handleCanvasRender}>
+          {children}
+        </CanvasComponent>
+        {/* Renders overlay layers set using the OverlayContext */}
+        <OverlayOutlet gesture={canvasGestureHandler} />
+      </OverlayProvider>
       {controls && (
         <ViewControls
           onReset={() => resetContainerPosition({ animated: true })}
@@ -501,9 +453,6 @@ function PannableScalableView({
 }
 
 const styles = StyleSheet.create({
-  canvas: {
-    flex: 1
-  },
   container: {
     flex: 1,
     overflow: 'hidden',

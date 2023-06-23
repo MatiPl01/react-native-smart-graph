@@ -134,7 +134,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 100);
+    }, 500);
 
     return () => clearInterval(interval);
   }, []);
@@ -149,8 +149,19 @@ export default function App() {
                 label: DefaultEdgeLabelRenderer
               }}
               settings={{
+                events: {
+                  onVertexLongPress({ vertex: { key } }) {
+                    console.log(`Vertex ${key} long pressed`);
+                  },
+                  onVertexPress({ vertex: { key } }) {
+                    console.log(`Vertex ${key} pressed`);
+                  }
+                },
                 layout: {
                   managedBy: 'forces'
+                },
+                placement: {
+                  strategy: 'circle'
                 }
               }}
               graph={graph}

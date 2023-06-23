@@ -1,37 +1,53 @@
 import { memo } from 'react';
 
 import { UndirectedGraph } from '@/models/graphs';
-import GraphProvider from '@/providers/GraphProvider';
+import GraphProvider, {
+  GraphProviderAdditionalProps
+} from '@/providers/GraphProvider';
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
 
 import GraphComponent, { GraphComponentProps } from './GraphComponent';
 
-type UndirectedGraphComponentProps<V, E> = {
+type UndirectedGraphComponentProps<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = {
   graph: UndirectedGraph<V, E>;
   renderers?: UndirectedGraphRenderers<V, E>;
-  settings?: UndirectedGraphSettings<V, E>;
+  settings?: UndirectedGraphSettings<V, E, ED>;
 };
 
-function UndirectedGraphComponent<V, E>({
-  boundingRect,
-  onRender,
-  ...providerProps
-}: UndirectedGraphComponentProps<V, E> & GraphComponentProps) {
+type ClonedComponentProps<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = UndirectedGraphComponentProps<V, E, ED> & {
+  graphComponentProps: GraphComponentProps;
+} & GraphProviderAdditionalProps;
+
+function UndirectedGraphComponent<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>({ graphComponentProps, ...providerProps }: ClonedComponentProps<V, E, ED>) {
   return (
     <GraphProvider {...providerProps}>
-      <GraphComponent boundingRect={boundingRect} onRender={onRender} />
+      <GraphComponent {...graphComponentProps} />
     </GraphProvider>
   );
 }
 
 export default memo(
-  <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
+  <V, E, ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>>(
+    props: UndirectedGraphComponentProps<V, E, ED>
+  ) => {
     return (
       <UndirectedGraphComponent
-        {...(props as UndirectedGraphComponentProps<V, E> &
-          GraphComponentProps)}
+        {...(props as ClonedComponentProps<V, E, ED>)}
       />
     );
   },

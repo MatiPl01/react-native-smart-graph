@@ -21,15 +21,15 @@ type ForcesPlacementContextType = {
 const ForcesPlacementContext = createContext({});
 
 export const useForcesPlacementContext = () => {
-  const value = useContext(ForcesPlacementContext);
+  const contextValue = useContext(ForcesPlacementContext);
 
-  if (!value) {
+  if (!contextValue) {
     throw new Error(
       'useForcesPlacementContext must be used within a ForcesPlacementProvider'
     );
   }
 
-  return value as ForcesPlacementContextType;
+  return contextValue as ForcesPlacementContextType;
 };
 
 type ForcesPlacementProviderProps = PropsWithChildren<{

@@ -1,5 +1,6 @@
 import { SharedValue } from 'react-native-reanimated';
 
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { DirectedEdge, Edge, UndirectedEdge } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
@@ -88,10 +89,14 @@ export type EdgeComponentProps<E, V> = Omit<
   removed: boolean;
 };
 
-export type EdgeComponentData<E, V> = {
+export type EdgeComponentData<
+  E,
+  V,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = {
   animationSettings: AnimationSettingsWithDefaults;
   arrowRenderer?: EdgeArrowRenderFunction;
-  componentSettings: GraphSettingsWithDefaults<V, E>['components']['edge'];
+  componentSettings: GraphSettingsWithDefaults<V, E, ED>['components']['edge'];
   edge: Edge<E, V>;
   edgeRenderer: EdgeRenderFunction<E>;
   edgesCount: number;

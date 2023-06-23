@@ -17,6 +17,7 @@ import {
   VertexComponentData,
   VertexComponentRenderData
 } from '@/types/components';
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { OrderedEdges, Vertex } from '@/types/graphs';
 import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
 import {
@@ -30,10 +31,14 @@ import {
   GraphLayoutSettingsWithDefaults
 } from '@/types/settings/graph/layout';
 
-export const updateGraphSettingsWithDefaults = <V, E>(
+export const updateGraphSettingsWithDefaults = <
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>(
   isGraphDirected: boolean,
-  settings?: GraphSettings<V, E>
-): GraphSettingsWithDefaults<V, E> => ({
+  settings?: GraphSettings<V, E, ED>
+): GraphSettingsWithDefaults<V, E, ED> => ({
   ...settings,
   animations: {
     edges: {
@@ -114,11 +119,15 @@ export const updateGraphRenderersWithDefaults = <V, E>(
   ...renderers
 });
 
-export const updateGraphVerticesData = <V, E>(
+export const updateGraphVerticesData = <
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>(
   oldVerticesData: Record<string, VertexComponentData<V, E>>,
   currentVertices: Array<Vertex<V, E>>,
   currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V, E, ED>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): Record<string, VertexComponentData<V, E>> => {
   const updatedVerticesData = { ...oldVerticesData };
@@ -160,15 +169,19 @@ export const updateGraphVerticesData = <V, E>(
   return updatedVerticesData;
 };
 
-export const updateGraphEdgesData = <V, E>(
-  oldEdgesData: Record<string, EdgeComponentData<E, V>>,
+export const updateGraphEdgesData = <
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>(
+  oldEdgesData: Record<string, EdgeComponentData<E, V, ED>>,
   currentEdges: OrderedEdges<E, V>,
   renderedVerticesData: Record<string, VertexComponentRenderData>,
   currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V, E, ED>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): {
-  data: Record<string, EdgeComponentData<E, V>>;
+  data: Record<string, EdgeComponentData<E, V, ED>>;
   wasUpdated: boolean;
 } => {
   const updatedEdgesData = { ...oldEdgesData };

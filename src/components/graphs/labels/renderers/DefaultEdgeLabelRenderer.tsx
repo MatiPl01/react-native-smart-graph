@@ -28,7 +28,7 @@ export default function DefaultEdgeLabelRenderer<E>({
       translateX: ((-key.length * FONT_SIZE) / 3.25) * animationProgress.value
     },
     { translateY: (FONT_SIZE / 3) * animationProgress.value },
-    { scale: animationProgress.value }
+    { scale: Math.max(animationProgress.value, 0) }
   ]);
 
   return (
