@@ -158,7 +158,7 @@ export default function App() {
                   }
                 },
                 layout: {
-                  // managedBy: 'forces'
+                  managedBy: 'forces'
                 },
                 placement: {
                   strategy: 'circle'
