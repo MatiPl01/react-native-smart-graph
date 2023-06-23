@@ -18,6 +18,7 @@ import {
 } from './placement';
 
 export * from './components';
+export * from './events';
 export * from './placement';
 
 type SharedGraphSettings<

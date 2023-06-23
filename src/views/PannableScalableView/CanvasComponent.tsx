@@ -1,11 +1,12 @@
-import { Canvas, Group, Transforms2d } from '@shopify/react-native-skia';
+import { Canvas, Group } from '@shopify/react-native-skia';
 import { Children, cloneElement, PropsWithChildren, ReactElement } from 'react';
 import { LayoutChangeEvent, StyleSheet } from 'react-native';
-import { SharedValue } from 'react-native-reanimated';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponentProps } from '@/components/graphs/GraphComponent';
 import { withOverlay } from '@/contexts/OverlayProvider';
 import { GraphProviderAdditionalProps } from '@/providers/GraphProvider';
+import { AnimatedCanvasTransform } from '@/types/canvas';
 import { AnimatedBoundingRect } from '@/types/layout';
 
 type CanvasComponentProps = PropsWithChildren<{
@@ -14,7 +15,7 @@ type CanvasComponentProps = PropsWithChildren<{
   onRender: (event: LayoutChangeEvent) => void;
   removeLayer: (zIndex: number) => void;
   renderLayer: (zIndex: number, layer: JSX.Element) => void;
-  transform: SharedValue<Transforms2d>;
+  transform: AnimatedCanvasTransform;
 }>;
 
 function CanvasComponent({
@@ -26,9 +27,15 @@ function CanvasComponent({
   renderLayer,
   transform
 }: CanvasComponentProps) {
+  const containerTransform = useDerivedValue(() => [
+    { translateX: transform.translateX.value },
+    { translateY: transform.translateY.value },
+    { scale: transform.scale.value }
+  ]);
+
   return (
     <Canvas onLayout={onRender} style={styles.canvas}>
-      <Group transform={transform}>
+      <Group transform={containerTransform}>
         {Children.map(children, child => {
           const childElement = child as ReactElement<
             {
@@ -39,7 +46,8 @@ function CanvasComponent({
             boundingRect,
             graphComponentProps,
             removeLayer,
-            renderLayer
+            renderLayer,
+            transform
           });
         })}
       </Group>

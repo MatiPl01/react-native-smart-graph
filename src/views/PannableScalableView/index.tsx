@@ -12,7 +12,6 @@ import {
   Easing,
   runOnJS,
   useAnimatedReaction,
-  useDerivedValue,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
@@ -91,18 +90,9 @@ function PannableScalableView({
   const autoSizingStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
   const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // CONTAINER TRANSFORM
+  // CONTAINER TRANSLATION
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-
-  const transform = useDerivedValue(
-    () => [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: currentScale.value }
-    ],
-    [translateX, translateY, currentScale]
-  );
 
   const handleCanvasRender = useCallback(
     ({
@@ -442,8 +432,12 @@ function PannableScalableView({
           graphComponentProps={{
             onRender: handleGraphRender
           }}
-          onRender={handleCanvasRender}
-          transform={transform}>
+          transform={{
+            scale: currentScale,
+            translateX,
+            translateY
+          }}
+          onRender={handleCanvasRender}>
           {children}
         </CanvasComponent>
         {/* Renders overlay layers set using the OverlayContext */}

@@ -21,9 +21,6 @@ export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/r
 export { default as DirectedGraph } from '@/models/graphs/DirectedGraph';
 export { default as UndirectedGraph } from '@/models/graphs/UndirectedGraph';
 
-// PROVIDERS
-export { default as GraphEventsProvider } from '@/providers/events/PressEventsProvider';
-
 // VIEWS
 export { default as PannableScalableView } from '@/views/PannableScalableView';
 

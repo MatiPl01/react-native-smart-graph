@@ -1,6 +1,7 @@
 import { PropsWithChildren, useMemo } from 'react';
 
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
+import { AnimatedCanvasTransform } from '@/types/canvas';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
 import { AnimatedBoundingRect } from '@/types/layout';
@@ -12,9 +13,7 @@ import {
 } from '@/utils/components';
 
 import { ComponentsDataProvider } from './data';
-import PressEventsProvider, {
-  PressEventsProviderProps
-} from './events/PressEventsProvider';
+import { PressEventsProvider, PressEventsProviderProps } from './events';
 import {
   ForcesLayoutProvider,
   ForcesPlacementProvider,
@@ -56,6 +55,7 @@ const getEventsProviders = <
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >(
+  transform: AnimatedCanvasTransform,
   boundingRect: AnimatedBoundingRect,
   settings: GraphSettingsWithDefaults<V, E, ED>,
   renderLayer: (zIndex: number, layer: JSX.Element) => void
@@ -65,7 +65,8 @@ const getEventsProviders = <
       <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
         boundingRect={boundingRect}
         renderLayer={renderLayer}
-        settings={settings}
+        settings={settings.events}
+        transform={transform}
       />
     ];
   }
@@ -75,6 +76,7 @@ const getEventsProviders = <
 export type GraphProviderAdditionalProps =
   | {
       boundingRect: AnimatedBoundingRect;
+      transform: AnimatedCanvasTransform;
     } & AccessibleOverlayContextType;
 
 type GraphProviderProps<
@@ -100,7 +102,8 @@ export default function GraphProvider<
   graph,
   renderLayer,
   renderers,
-  settings
+  settings,
+  transform
 }: GraphProviderProps<V, E, ED>) {
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
@@ -135,7 +138,7 @@ export default function GraphProvider<
       ...getLayoutProviders(graph, memoSettings),
       // EVENTS
       // Press events provider
-      ...getEventsProviders(boundingRect, memoSettings, renderLayer)
+      ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer)
     ],
     [memoSettings]
   );

@@ -143,7 +143,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
-          <PannableScalableView controls objectFit='contain'>
+          <PannableScalableView controls>
             <DirectedGraphComponent
               renderers={{
                 label: DefaultEdgeLabelRenderer
