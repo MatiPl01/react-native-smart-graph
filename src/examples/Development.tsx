@@ -157,6 +157,9 @@ export default function App() {
                     console.log(`Vertex ${key} pressed`);
                   }
                 },
+                layout: {
+                  managedBy: 'forces'
+                },
                 placement: {
                   strategy: 'circle'
                 }

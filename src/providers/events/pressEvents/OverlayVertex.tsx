@@ -16,6 +16,7 @@ import { VertexPressHandler } from '@/types/settings/graph/events';
 type VertexOverlayProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   data: VertexComponentData<V, E>;
+  debug?: boolean;
   onLongPress?: VertexPressHandler<V>;
   onPress?: VertexPressHandler<V>;
   position: AnimatedVectorCoordinates;
@@ -27,6 +28,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 function OverlayVertex<V, E>({
   boundingRect,
   data: { vertex },
+  debug,
   onLongPress,
   onPress,
   position,
@@ -68,9 +70,15 @@ function OverlayVertex<V, E>({
 
   return (
     <AnimatedPressable
+      style={[
+        style,
+        {
+          position: 'absolute',
+          ...(debug ? { backgroundColor: '#cc8c01' } : {})
+        }
+      ]}
       onLongPress={handleLongPress}
       onPress={handlePress}
-      style={[{ position: 'absolute' }, style]}
     />
   );
 }
