@@ -4,17 +4,26 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react';
 import { runOnUI } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/data';
 import { VertexComponentRenderData } from '@/types/components';
-import { GraphConnections } from '@/types/graphs';
+import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
+import { Graph } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import {
+  AnimationSettingsWithDefaults,
+  GraphSettingsWithDefaults
+} from '@/types/settings';
+import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { updateNewVerticesPositions } from '@/utils/forces';
+import { placeVertices } from '@/utils/placement';
 
 type ForcesPlacementContextType = {
+  lockedVertices: Record<string, boolean>;
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>;
 };
 
@@ -32,18 +41,28 @@ export const useForcesPlacementContext = () => {
   return contextValue as ForcesPlacementContextType;
 };
 
-type ForcesPlacementProviderProps = PropsWithChildren<{
-  connections: GraphConnections;
+export type ForcesPlacementProviderProps<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = PropsWithChildren<{
+  graph: Graph<V, E>;
+  layoutAnimationSettings: AnimationSettingsWithDefaults;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  vertexRadius: number;
+  settings: GraphSettingsWithDefaults<V, E, ED>;
 }>;
 
-function ForcesPlacementProvider({
+function ForcesPlacementProvider<
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>({
   children,
-  connections,
+  graph,
+  layoutAnimationSettings,
   renderedVerticesData,
-  vertexRadius
-}: ForcesPlacementProviderProps) {
+  settings
+}: ForcesPlacementProviderProps<V, E, ED>) {
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
   // correctly positioned yet (By default vertices are positioned at
@@ -53,31 +72,96 @@ function ForcesPlacementProvider({
   const [placedVerticesPositions, setPlacedVerticesPositions] = useState<
     Record<string, AnimatedVectorCoordinates>
   >({});
+  // Set of vertices that should not be moved by the forces
+  // (Use record instead of set because set cannot be used with reanimated)
+  const [lockedVertices, setLockedVertices] = useState<Record<string, boolean>>(
+    {}
+  );
+  // Ref to track if the component is rendered for the first time
+  const isFirstRenderRef = useRef(true);
+  // Ref to track if the component is rendered for the second time
+  const isSecondRenderRef = useRef(false);
 
   useEffect(() => {
+    // Skip the first render (when renderedVerticesData is empty)
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      isSecondRenderRef.current = true;
+      return;
+    }
+    // Get animated vertices positions
+    const animatedVerticesPositions = Object.fromEntries(
+      Object.entries(renderedVerticesData).map(([key, { position }]) => [
+        key,
+        position
+      ])
+    );
+    // Animate vertices to their final positions on the second render
+    if (isSecondRenderRef.current) {
+      handleFirstGraphRender(animatedVerticesPositions);
+    }
+    // Otherwise, calculate the optimal render positions for the vertices
+    // and add them to the state
+    else {
+      handleNextGraphRender();
+    }
+    // Update the state
+    setPlacedVerticesPositions(animatedVerticesPositions);
+  }, [renderedVerticesData]);
+
+  const handleFirstGraphRender = (
+    animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
+  ) => {
+    isSecondRenderRef.current = false;
+
+    const { verticesPositions } = placeVertices(
+      graph,
+      settings.components.vertex.radius,
+      settings.placement
+    );
+
+    animateVerticesToFinalPositions(
+      animatedVerticesPositions,
+      verticesPositions,
+      {
+        ...layoutAnimationSettings,
+        onComplete: createFirstAnimationCompleteHandler(
+          layoutAnimationSettings.onComplete
+        )
+      }
+    );
+
+    // Mark vertices as locked until the animation is complete
+    setLockedVertices(
+      Object.fromEntries(
+        Object.keys(animatedVerticesPositions).map(key => [key, true])
+      )
+    );
+  };
+
+  const handleNextGraphRender = () => {
     runOnUI(updateNewVerticesPositions)(
       placedVerticesPositions,
       renderedVerticesData,
-      connections,
-      vertexRadius
+      graph.connections,
+      settings.components.vertex.radius
     );
+  };
 
-    // Update the state
-    setPlacedVerticesPositions(
-      Object.fromEntries(
-        Object.entries(renderedVerticesData).map(([key, { position }]) => [
-          key,
-          position
-        ])
-      )
-    );
-  }, [renderedVerticesData]);
+  const createFirstAnimationCompleteHandler =
+    (onComplete?: () => void) => () => {
+      // Unlock vertices
+      setLockedVertices({});
+      // Call the original onComplete handler
+      onComplete?.();
+    };
 
   const contextValue = useMemo<ForcesPlacementContextType>(
     () => ({
+      lockedVertices,
       placedVerticesPositions
     }),
-    [placedVerticesPositions]
+    [placedVerticesPositions, lockedVertices]
   );
 
   return (
@@ -89,8 +173,8 @@ function ForcesPlacementProvider({
 
 export default withGraphData(
   ForcesPlacementProvider,
-  ({ connections, renderedVerticesData }) => ({
-    connections,
+  ({ layoutAnimationSettings, renderedVerticesData }) => ({
+    layoutAnimationSettings,
     renderedVerticesData
   })
 );

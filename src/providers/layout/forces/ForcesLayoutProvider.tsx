@@ -18,10 +18,16 @@ function ForcesLayoutProvider({
   connections,
   forcesSettings
 }: ForcesLayoutProviderProps) {
-  const { placedVerticesPositions } = useForcesPlacementContext();
+  const { lockedVertices, placedVerticesPositions } =
+    useForcesPlacementContext();
 
   useFrameCallback(() => {
-    applyForces(connections, placedVerticesPositions, forcesSettings);
+    applyForces(
+      connections,
+      lockedVertices,
+      placedVerticesPositions,
+      forcesSettings
+    );
   });
 
   return <>{children}</>;
