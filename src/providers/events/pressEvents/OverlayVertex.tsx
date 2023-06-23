@@ -3,7 +3,9 @@ import { Pressable } from 'react-native';
 // eslint-disable-next-line import/default
 import Animated, {
   SharedValue,
-  useAnimatedStyle
+  useAnimatedStyle,
+  withSequence,
+  withTiming
 } from 'react-native-reanimated';
 
 import { VertexComponentData } from '@/types/components';
@@ -13,6 +15,14 @@ import {
 } from '@/types/layout';
 import { VertexPressHandler } from '@/types/settings/graph/events';
 
+const pulseAnimation = (activeScale: number): number => {
+  'worklet';
+  return withSequence(
+    withTiming(activeScale, { duration: 100 }),
+    withTiming(1, { duration: 100 })
+  );
+};
+
 type VertexOverlayProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   data: VertexComponentData<V, E>;
@@ -21,6 +31,7 @@ type VertexOverlayProps<V, E> = {
   onPress?: VertexPressHandler<V>;
   position: AnimatedVectorCoordinates;
   radius: SharedValue<number>;
+  scale: SharedValue<number>;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -32,7 +43,8 @@ function OverlayVertex<V, E>({
   onLongPress,
   onPress,
   position,
-  radius
+  radius,
+  scale
 }: VertexOverlayProps<V, E>) {
   const style = useAnimatedStyle(() => {
     const size = 2 * radius.value;
@@ -61,6 +73,7 @@ function OverlayVertex<V, E>({
   );
 
   const handlePress = () => {
+    scale.value = pulseAnimation(1.2);
     onPress?.(pressEventData);
   };
 
