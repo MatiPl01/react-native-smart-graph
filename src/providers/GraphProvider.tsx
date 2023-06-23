@@ -3,6 +3,7 @@ import { PropsWithChildren, useMemo } from 'react';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
+import { AnimatedBoundingRect } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings, GraphSettingsWithDefaults } from '@/types/settings';
 import {
@@ -20,6 +21,7 @@ import {
   GraphPlacementLayoutProviderProps,
   PlacementLayoutProvider
 } from './layout';
+import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
 import { ContextProviderComposer } from './utils';
 
 const getLayoutProviders = <
@@ -54,19 +56,26 @@ const getEventsProviders = <
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >(
-  renderLayer: (zIndex: number, layer: JSX.Element) => void,
-  settings: GraphSettingsWithDefaults<V, E, ED>
+  boundingRect: AnimatedBoundingRect,
+  settings: GraphSettingsWithDefaults<V, E, ED>,
+  renderLayer: (zIndex: number, layer: JSX.Element) => void
 ) => {
   if (settings.events) {
     return [
       <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
-        callbacks={settings.events}
+        boundingRect={boundingRect}
         renderLayer={renderLayer}
+        settings={settings}
       />
     ];
   }
   return [];
 };
+
+export type GraphProviderAdditionalProps =
+  | {
+      boundingRect: AnimatedBoundingRect;
+    } & AccessibleOverlayContextType;
 
 type GraphProviderProps<
   V,
@@ -77,7 +86,7 @@ type GraphProviderProps<
     graph: Graph<V, E>;
     renderers?: GraphRenderers<V, E>;
     settings?: GraphSettings<V, E, ED>;
-  } & AccessibleOverlayContextType
+  } & GraphProviderAdditionalProps
 >;
 
 // eslint-disable-next-line import/no-unused-modules
@@ -86,6 +95,7 @@ export default function GraphProvider<
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >({
+  boundingRect,
   children,
   graph,
   renderLayer,
@@ -118,12 +128,14 @@ export default function GraphProvider<
         settings={memoSettings}
       />,
       // LAYOUT
+      // Provider used to compute the dimensions of the container
+      <ContainerDimensionsProvider boundingRect={boundingRect} />,
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
       ...getLayoutProviders(graph, memoSettings),
       // EVENTS
       // Press events provider
-      ...getEventsProviders(renderLayer, memoSettings)
+      ...getEventsProviders(boundingRect, memoSettings, renderLayer)
     ],
     [memoSettings]
   );

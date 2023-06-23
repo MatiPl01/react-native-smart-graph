@@ -7,7 +7,7 @@ import React, {
   useRef
 } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture } from 'react-native-gesture-handler';
 import {
   Easing,
   runOnJS,
@@ -432,24 +432,22 @@ function PannableScalableView({
   return (
     <View style={styles.container}>
       <OverlayProvider>
-        <GestureDetector gesture={canvasGestureHandler}>
-          <CanvasComponent
-            graphComponentProps={{
-              boundingRect: {
-                bottom: containerBottom,
-                left: containerLeft,
-                right: containerRight,
-                top: containerTop
-              },
-              onRender: handleGraphRender
-            }}
-            onRender={handleCanvasRender}
-            transform={transform}>
-            {children}
-          </CanvasComponent>
-        </GestureDetector>
+        <CanvasComponent
+          boundingRect={{
+            bottom: containerBottom,
+            left: containerLeft,
+            right: containerRight,
+            top: containerTop
+          }}
+          graphComponentProps={{
+            onRender: handleGraphRender
+          }}
+          onRender={handleCanvasRender}
+          transform={transform}>
+          {children}
+        </CanvasComponent>
         {/* Renders overlay layers set using the OverlayContext */}
-        <OverlayOutlet />
+        <OverlayOutlet gesture={canvasGestureHandler} />
       </OverlayProvider>
       {controls && (
         <ViewControls

@@ -1,8 +1,9 @@
 import { memo } from 'react';
 
-import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { UndirectedGraph } from '@/models/graphs';
-import GraphProvider from '@/providers/GraphProvider';
+import GraphProvider, {
+  GraphProviderAdditionalProps
+} from '@/providers/GraphProvider';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
@@ -24,22 +25,18 @@ type ClonedComponentProps<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = UndirectedGraphComponentProps<V, E, ED> &
-  GraphComponentProps &
-  AccessibleOverlayContextType;
+> = UndirectedGraphComponentProps<V, E, ED> & {
+  graphComponentProps: GraphComponentProps;
+} & GraphProviderAdditionalProps;
 
 function UndirectedGraphComponent<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
-  boundingRect,
-  onRender,
-  ...providerProps
-}: ClonedComponentProps<V, E, ED>) {
+>({ graphComponentProps, ...providerProps }: ClonedComponentProps<V, E, ED>) {
   return (
     <GraphProvider {...providerProps}>
-      <GraphComponent boundingRect={boundingRect} onRender={onRender} />
+      <GraphComponent {...graphComponentProps} />
     </GraphProvider>
   );
 }

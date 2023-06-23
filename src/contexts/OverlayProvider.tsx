@@ -6,6 +6,7 @@ import {
   useState
 } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { ComposedGesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { CommonTypes } from '@/types/utils';
 import { withMemoContext } from '@/utils/contexts';
@@ -33,7 +34,6 @@ export default function OverlayProvider({
   const [layers, setLayers] = useState<Record<number, JSX.Element>>({});
 
   const renderLayer = useCallback((zIndex: number, layer: JSX.Element) => {
-    console.log('renderLayer');
     setLayers(prevLayers => ({
       ...prevLayers,
       [zIndex]: layer
@@ -60,7 +60,11 @@ export default function OverlayProvider({
   );
 }
 
-export const OverlayOutlet = () => {
+type OverlayOutletProps = {
+  gesture: ComposedGesture;
+};
+
+export const OverlayOutlet = ({ gesture }: OverlayOutletProps) => {
   const contextValue = useContext(OverlayContext);
 
   if (!contextValue) {
@@ -70,13 +74,15 @@ export const OverlayOutlet = () => {
   const { layers } = contextValue;
 
   return (
-    <View style={StyleSheet.absoluteFillObject}>
-      {Object.entries(layers)
-        .sort(([zIndexA], [zIndexB]) => Number(zIndexA) - Number(zIndexB))
-        .map(([idx, layer]) => (
-          <Fragment key={idx}>{layer}</Fragment>
-        ))}
-    </View>
+    <GestureDetector gesture={gesture}>
+      <View style={StyleSheet.absoluteFillObject}>
+        {Object.entries(layers)
+          .sort(([zIndexA], [zIndexB]) => Number(zIndexA) - Number(zIndexB))
+          .map(([idx, layer]) => (
+            <Fragment key={idx}>{layer}</Fragment>
+          ))}
+      </View>
+    </GestureDetector>
   );
 };
 

@@ -4,12 +4,12 @@ import { LayoutChangeEvent, StyleSheet } from 'react-native';
 import { SharedValue } from 'react-native-reanimated';
 
 import { GraphComponentProps } from '@/components/graphs/GraphComponent';
-import {
-  AccessibleOverlayContextType,
-  withOverlay
-} from '@/contexts/OverlayProvider';
+import { withOverlay } from '@/contexts/OverlayProvider';
+import { GraphProviderAdditionalProps } from '@/providers/GraphProvider';
+import { AnimatedBoundingRect } from '@/types/layout';
 
 type CanvasComponentProps = PropsWithChildren<{
+  boundingRect: AnimatedBoundingRect;
   graphComponentProps: GraphComponentProps;
   onRender: (event: LayoutChangeEvent) => void;
   removeLayer: (zIndex: number) => void;
@@ -18,6 +18,7 @@ type CanvasComponentProps = PropsWithChildren<{
 }>;
 
 function CanvasComponent({
+  boundingRect,
   children,
   graphComponentProps,
   onRender,
@@ -30,12 +31,15 @@ function CanvasComponent({
       <Group transform={transform}>
         {Children.map(children, child => {
           const childElement = child as ReactElement<
-            GraphComponentProps & AccessibleOverlayContextType
+            {
+              graphComponentProps: GraphComponentProps;
+            } & GraphProviderAdditionalProps
           >;
           return cloneElement(childElement, {
+            boundingRect,
+            graphComponentProps,
             removeLayer,
-            renderLayer,
-            ...graphComponentProps
+            renderLayer
           });
         })}
       </Group>
