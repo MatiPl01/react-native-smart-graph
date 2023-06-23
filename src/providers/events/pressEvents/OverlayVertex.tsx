@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Pressable } from 'react-native';
 // eslint-disable-next-line import/default
 import Animated, {
@@ -6,14 +6,16 @@ import Animated, {
   useAnimatedStyle
 } from 'react-native-reanimated';
 
+import { VertexComponentData } from '@/types/components';
 import {
   AnimatedBoundingRect,
   AnimatedVectorCoordinates
 } from '@/types/layout';
 import { VertexPressHandler } from '@/types/settings/graph/events';
 
-type VertexOverlayProps<V> = {
+type VertexOverlayProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
+  data: VertexComponentData<V, E>;
   onLongPress?: VertexPressHandler<V>;
   onPress?: VertexPressHandler<V>;
   position: AnimatedVectorCoordinates;
@@ -22,13 +24,14 @@ type VertexOverlayProps<V> = {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function OverlayVertex<V>({
+function OverlayVertex<V, E>({
   boundingRect,
+  data: { vertex },
   onLongPress,
   onPress,
   position,
   radius
-}: VertexOverlayProps<V>) {
+}: VertexOverlayProps<V, E>) {
   const style = useAnimatedStyle(() => {
     const size = 2 * radius.value;
 
@@ -39,26 +42,35 @@ function OverlayVertex<V>({
           translateX: position.x.value - boundingRect.left.value - radius.value
         },
         { translateY: position.y.value - boundingRect.top.value - radius.value }
-      ],
+      ] as never[], // this is a fix wor incorrectly inferred types,
       width: size
     };
   }, [position.x, position.y, radius]);
 
+  const pressEventData = useMemo(
+    () => ({
+      position,
+      vertex: {
+        key: vertex.key,
+        value: vertex.value
+      }
+    }),
+    []
+  );
+
   const handlePress = () => {
-    // TODO
-    console.log('handlePress');
+    onPress?.(pressEventData);
   };
 
   const handleLongPress = () => {
-    // TODO
-    console.log('handleLongPress');
+    onLongPress?.(pressEventData);
   };
 
   return (
     <AnimatedPressable
       onLongPress={handleLongPress}
       onPress={handlePress}
-      style={[{ backgroundColor: 'red', position: 'absolute' }, style]}
+      style={[{ position: 'absolute' }, style]}
     />
   );
 }

@@ -3,7 +3,10 @@ import React from 'react';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import { VertexComponentRenderData } from '@/types/components';
+import {
+  VertexComponentData,
+  VertexComponentRenderData
+} from '@/types/components';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { AnimatedBoundingRect } from '@/types/layout';
 import { GraphEventsSettings } from '@/types/settings';
@@ -19,6 +22,7 @@ type OverlayLayerProps<
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphEventsSettings<V, E, ED>;
   transform: AnimatedCanvasTransform;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
 export default function OverlayLayer<
@@ -29,7 +33,8 @@ export default function OverlayLayer<
   boundingRect,
   renderedVerticesData,
   settings,
-  transform
+  transform,
+  verticesData
 }: OverlayLayerProps<V, E, ED>) {
   const style = useAnimatedStyle(() => ({
     height: boundingRect.bottom.value - boundingRect.top.value,
@@ -37,25 +42,33 @@ export default function OverlayLayer<
       { translateX: transform.translateX.value + boundingRect.left.value },
       { translateY: transform.translateY.value + boundingRect.top.value },
       { scale: transform.scale.value }
-    ],
+    ] as never[], // this is a fix wor incorrectly inferred types
     width: boundingRect.right.value - boundingRect.left.value
   }));
 
   return (
-    <Animated.View
-      style={[style, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+    <Animated.View style={style}>
       {(settings?.onVertexPress || settings?.onVertexLongPress) &&
         Object.entries(renderedVerticesData).map(
-          ([key, { currentRadius, position }]) => (
-            <OverlayVertex
-              boundingRect={boundingRect}
-              key={key}
-              onLongPress={settings?.onVertexLongPress}
-              onPress={settings?.onVertexPress}
-              position={position}
-              radius={currentRadius}
-            />
-          )
+          ([key, { currentRadius, position }]) => {
+            const data = verticesData[key];
+
+            if (!data) {
+              return null;
+            }
+
+            return (
+              <OverlayVertex<V, E>
+                boundingRect={boundingRect}
+                data={data}
+                key={key}
+                onLongPress={settings?.onVertexLongPress}
+                onPress={settings?.onVertexPress}
+                position={position}
+                radius={currentRadius}
+              />
+            );
+          }
         )}
     </Animated.View>
   );

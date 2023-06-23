@@ -3,7 +3,10 @@ import { PropsWithChildren, useEffect } from 'react';
 // eslint-disable-next-line import/default
 import { withGraphData } from '@/providers/data';
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import { VertexComponentRenderData } from '@/types/components';
+import {
+  VertexComponentData,
+  VertexComponentRenderData
+} from '@/types/components';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { AnimatedBoundingRect } from '@/types/layout';
 import { GraphEventsSettings } from '@/types/settings';
@@ -20,6 +23,7 @@ export type PressEventsProviderProps<
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphEventsSettings<V, E, ED>;
   transform: AnimatedCanvasTransform;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function PressEventsProvider<
@@ -32,7 +36,8 @@ function PressEventsProvider<
   renderLayer,
   renderedVerticesData,
   settings,
-  transform
+  transform,
+  verticesData
 }: PressEventsProviderProps<V, E, ED>) {
   useEffect(() => {
     renderLayer(
@@ -42,6 +47,7 @@ function PressEventsProvider<
         renderedVerticesData={renderedVerticesData}
         settings={settings}
         transform={transform}
+        verticesData={verticesData}
       />
     );
   }, [
@@ -55,7 +61,8 @@ function PressEventsProvider<
 
 export default withGraphData(
   PressEventsProvider,
-  ({ renderedVerticesData }) => ({
-    renderedVerticesData
+  ({ renderedVerticesData, verticesData }) => ({
+    renderedVerticesData,
+    verticesData
   })
 );

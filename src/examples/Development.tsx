@@ -143,14 +143,19 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
-          <PannableScalableView controls>
+          <PannableScalableView controls objectFit='contain'>
             <DirectedGraphComponent
               renderers={{
                 label: DefaultEdgeLabelRenderer
               }}
               settings={{
                 events: {
-                  onVertexPress: console.log
+                  onVertexLongPress({ vertex: { key } }) {
+                    console.log(`Vertex ${key} long pressed`);
+                  },
+                  onVertexPress({ vertex: { key } }) {
+                    console.log(`Vertex ${key} pressed`);
+                  }
                 },
                 placement: {
                   strategy: 'circle'
