@@ -3,8 +3,8 @@ import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
+import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
-import PannableScalableView from '@/views/PannableScalableView';
 
 import { DirectedGraphComponent } from '..';
 
@@ -143,7 +143,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
-          <PannableScalableView controls objectFit='contain'>
+          <GraphView controls objectFit='contain'>
             <DirectedGraphComponent
               renderers={{
                 label: DefaultEdgeLabelRenderer
@@ -166,7 +166,7 @@ export default function App() {
               }}
               graph={graph}
             />
-          </PannableScalableView>
+          </GraphView>
         </View>
       </GestureHandlerRootView>
     </SafeAreaView>

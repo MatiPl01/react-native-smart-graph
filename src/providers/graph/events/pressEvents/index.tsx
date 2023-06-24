@@ -1,7 +1,7 @@
 import { PropsWithChildren, useEffect } from 'react';
 
 // eslint-disable-next-line import/default
-import { withGraphData } from '@/providers/data';
+import { withGraphData } from '@/providers/graph/data';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import {
   VertexComponentData,

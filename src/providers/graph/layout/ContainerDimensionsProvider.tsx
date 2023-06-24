@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react';
 import { useAnimatedReaction } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/data';
+import { withGraphData } from '@/providers/graph/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { AnimatedBoundingRect } from '@/types/layout';
 import { calcContainerBoundingRect } from '@/utils/placement';

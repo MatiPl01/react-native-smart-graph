@@ -2,4 +2,7 @@ export {
   type ComponentsDataContextType,
   withGraphData
 } from './data/ComponentsDataProvider';
-export { default as GraphProvider } from './GraphProvider';
+export {
+  default as GraphProvider,
+  type GraphProviderAdditionalProps
+} from './GraphProvider';

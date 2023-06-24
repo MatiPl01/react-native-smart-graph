@@ -1,9 +1,7 @@
 import { memo } from 'react';
 
 import { DirectedGraph } from '@/models/graphs';
-import GraphProvider, {
-  GraphProviderAdditionalProps
-} from '@/providers/GraphProvider';
+import { GraphProvider, GraphProviderAdditionalProps } from '@/providers/graph';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';

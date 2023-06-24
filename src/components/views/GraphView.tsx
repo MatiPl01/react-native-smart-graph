@@ -23,6 +23,7 @@ import {
   INITIAL_SCALE
 } from '@/constants/views';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
+import ViewProvider from '@/providers/view/ViewProvider';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
@@ -35,9 +36,9 @@ import {
   clamp
 } from '@/utils/views';
 
-import CanvasComponent from './CanvasComponent';
+import CanvasComponent from './canvas/CanvasComponent';
 
-type PannableScalableViewProps = PropsWithChildren<{
+type GraphViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
   controls?: boolean;
   initialScale?: number;
@@ -45,14 +46,14 @@ type PannableScalableViewProps = PropsWithChildren<{
   scales?: number[];
 }>;
 
-function PannableScalableView({
+function GraphView({
   autoSizingTimeout = AUTO_SIZING_TIMEOUT,
   children,
   controls = false,
   initialScale = INITIAL_SCALE,
   objectFit = 'none',
   scales = DEFAULT_SCALES
-}: PannableScalableViewProps) {
+}: GraphViewProps) {
   // Validate parameters
   if (scales.length === 0) {
     throw new Error('At least one scale must be provided');
@@ -422,24 +423,26 @@ function PannableScalableView({
   return (
     <View style={styles.container}>
       <OverlayProvider>
-        <CanvasComponent
-          boundingRect={{
-            bottom: containerBottom,
-            left: containerLeft,
-            right: containerRight,
-            top: containerTop
-          }}
-          graphComponentProps={{
-            onRender: handleGraphRender
-          }}
-          transform={{
-            scale: currentScale,
-            translateX,
-            translateY
-          }}
-          onRender={handleCanvasRender}>
-          {children}
-        </CanvasComponent>
+        <ViewProvider objectFit={objectFit}>
+          <CanvasComponent
+            boundingRect={{
+              bottom: containerBottom,
+              left: containerLeft,
+              right: containerRight,
+              top: containerTop
+            }}
+            graphComponentProps={{
+              onRender: handleGraphRender
+            }}
+            transform={{
+              scale: currentScale,
+              translateX,
+              translateY
+            }}
+            onRender={handleCanvasRender}>
+            {children}
+          </CanvasComponent>
+        </ViewProvider>
         {/* Renders overlay layers set using the OverlayContext */}
         <OverlayOutlet gesture={canvasGestureHandler} />
       </OverlayProvider>
@@ -462,7 +465,7 @@ const styles = StyleSheet.create({
 
 // Rerender only on prop changes
 export default memo(
-  PannableScalableView,
+  GraphView,
   deepMemoComparator({
     // shallow compare the graph object property of the child component
     // to prevent deep checking a large graph model structure
@@ -470,4 +473,4 @@ export default memo(
     // unnecessary rerenders)
     shallow: ['children.graph']
   })
-) as typeof PannableScalableView;
+) as typeof GraphView;
