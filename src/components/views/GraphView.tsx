@@ -23,7 +23,7 @@ import {
   INITIAL_SCALE
 } from '@/constants/views';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import ViewProvider from '@/providers/view/ViewProvider';
+import ViewProvider from '@/providers/canvas/ViewProvider';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
