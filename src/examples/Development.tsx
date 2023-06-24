@@ -1,63 +1,66 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import DefaultEdgeLabelRenderer from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
+import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
-import PannableScalableView from '@/views/PannableScalableView';
 
-import { DirectedGraphComponent } from '..';
+import { DefaultEdgeLabelRenderer, DirectedGraphComponent } from '..';
 
 export default function App() {
-  const graph = new DirectedGraph({
-    edges: [
-      {
-        from: 'A',
-        key: 'AB',
-        to: 'B',
-        value: 'AB'
-      },
+  const graph = useMemo(
+    () =>
+      new DirectedGraph({
+        edges: [
+          {
+            from: 'A',
+            key: 'AB',
+            to: 'B',
+            value: 'AB'
+          },
 
-      {
-        from: 'A',
-        key: 'AC',
-        to: 'C',
-        value: 'AC'
-      },
-      {
-        from: 'C',
-        key: 'CD',
-        to: 'D',
-        value: 'CD'
-      },
-      {
-        from: 'C',
-        key: 'CE',
-        to: 'E',
-        value: 'CE'
-      },
-      {
-        from: 'B',
-        key: 'BF',
-        to: 'F',
-        value: 'BF'
-      }
-    ],
-    vertices: [
-      { key: 'A', value: 'A' },
-      { key: 'B', value: 'B' },
-      { key: 'C', value: 'C' },
-      { key: 'D', value: 'D' },
-      { key: 'E', value: 'E' },
-      { key: 'F', value: 'F' }
-    ]
-  });
+          {
+            from: 'A',
+            key: 'AC',
+            to: 'C',
+            value: 'AC'
+          },
+          {
+            from: 'C',
+            key: 'CD',
+            to: 'D',
+            value: 'CD'
+          },
+          {
+            from: 'C',
+            key: 'CE',
+            to: 'E',
+            value: 'CE'
+          },
+          {
+            from: 'B',
+            key: 'BF',
+            to: 'F',
+            value: 'BF'
+          }
+        ],
+        vertices: [
+          { key: 'A', value: 'A' },
+          { key: 'B', value: 'B' },
+          { key: 'C', value: 'C' },
+          { key: 'D', value: 'D' },
+          { key: 'E', value: 'E' },
+          { key: 'F', value: 'F' }
+        ]
+      }),
+    []
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <GestureHandlerRootView style={styles.gestureHandler}>
         <View style={styles.background}>
-          <PannableScalableView controls objectFit='contain'>
+          <GraphView controls objectFit='contain'>
             <DirectedGraphComponent
               renderers={{
                 label: DefaultEdgeLabelRenderer
@@ -80,7 +83,7 @@ export default function App() {
               }}
               graph={graph}
             />
-          </PannableScalableView>
+          </GraphView>
         </View>
       </GestureHandlerRootView>
     </SafeAreaView>

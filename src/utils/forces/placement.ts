@@ -17,7 +17,7 @@ import {
 
 const getRandomDistance = (vertexRadius: number): number => {
   'worklet';
-  return 4 * vertexRadius + Math.random() * 2 * vertexRadius;
+  return 6 * vertexRadius + Math.random() * 4 * vertexRadius;
 };
 
 const placeVertexOnCircle = (

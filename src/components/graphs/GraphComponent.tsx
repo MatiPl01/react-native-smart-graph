@@ -2,7 +2,7 @@
 import { Group } from '@shopify/react-native-skia';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { withGraphData } from '@/providers';
+import { withGraphData } from '@/providers/graph';
 import {
   EdgeComponentData,
   EdgeComponentProps,

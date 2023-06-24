@@ -52,7 +52,9 @@ export type ComponentsDataContextType<
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
-const ComponentsDataContext = createContext({});
+// The initial value must be falsy to ensure that the context is
+// not used outside of a provider
+const ComponentsDataContext = createContext(null);
 
 type ComponentsDataProviderProps<
   V,
@@ -221,7 +223,8 @@ export default function ComponentsDataProvider<
 
   return (
     <>
-      <ComponentsDataContext.Provider value={contextValue}>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */}
+      <ComponentsDataContext.Provider value={contextValue as any}>
         {children}
       </ComponentsDataContext.Provider>
     </>

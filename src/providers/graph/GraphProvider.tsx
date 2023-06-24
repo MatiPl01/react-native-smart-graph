@@ -1,6 +1,7 @@
 import { PropsWithChildren, useMemo } from 'react';
 
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
+import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
@@ -22,7 +23,6 @@ import {
 } from './layout';
 import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
 import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
-import { ContextProviderComposer } from './utils';
 
 const getLayoutProviders = <
   V,
