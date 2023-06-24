@@ -1,1 +1,4 @@
-export { default as CanvasDataProvider } from './CanvasDataProvider';
+export {
+  default as CanvasDataProvider,
+  useCanvasDataContext
+} from './CanvasDataProvider';

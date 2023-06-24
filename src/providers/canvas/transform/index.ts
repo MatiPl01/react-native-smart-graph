@@ -1,1 +1,4 @@
-export { default as TransformProvider } from './TransformProvider';
+export {
+  default as TransformProvider,
+  useTransformContext
+} from './TransformProvider';

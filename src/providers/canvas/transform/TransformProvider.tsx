@@ -10,6 +10,7 @@ import { LayoutChangeEvent } from 'react-native';
 import { withTiming } from 'react-native-reanimated';
 
 import EASING from '@/constants/easings';
+import { useCanvasDataContext } from '@/providers/canvas/data';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import {
@@ -18,9 +19,11 @@ import {
   clamp
 } from '@/utils/views';
 
-import { useCanvasDataContext } from '../data/CanvasDataProvider';
-
-type TranslationContextType = {
+type TransformContextType = {
+  getTranslateClamp: (scale: number) => {
+    x: [number, number];
+    y: [number, number];
+  };
   handleCanvasRender: (event: LayoutChangeEvent) => void;
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
   resetContainerPosition: (
@@ -43,18 +46,18 @@ type TranslationContextType = {
   ) => void;
 };
 
-const TranslationContext = createContext(null);
+const TransformContext = createContext(null);
 
-export const useTranslationContext = () => {
-  const contextValue = useContext(TranslationContext);
+export const useTransformContext = () => {
+  const contextValue = useContext(TransformContext);
 
   if (!contextValue) {
     throw new Error(
-      'useTranslationContext must be used within a TransformProvider'
+      'useTransformContext must be used within a TransformProvider'
     );
   }
 
-  return contextValue as TranslationContextType;
+  return contextValue as TransformContextType;
 };
 
 type TransformProviderProps = PropsWithChildren<{
@@ -69,7 +72,8 @@ export default function TransformProvider({
   minScale,
   objectFit
 }: TransformProviderProps) {
-  // Context values
+  // CONTEXT VALUES
+  // Canvas data
   const {
     boundingRect: {
       bottom: containerBottom,
@@ -81,6 +85,7 @@ export default function TransformProvider({
     currentScale,
     currentTranslation: { x: translateX, y: translateY }
   } = useCanvasDataContext();
+
   // Other values
   const initialBoundingRectRef = useRef<BoundingRect | null>(null);
 
@@ -167,7 +172,7 @@ export default function TransformProvider({
         settings?.animated
       );
 
-      // if (userTriggered) startAutoSizingTimeout(); // TODO
+      // if (userTriggered) enableAutoSizingAfterTimeout(); // TODO
     },
     [objectFit]
   );
@@ -262,7 +267,8 @@ export default function TransformProvider({
     }
   };
 
-  const contextValue: TranslationContextType = {
+  const contextValue: TransformContextType = {
+    getTranslateClamp,
     handleCanvasRender,
     handleGraphRender,
     resetContainerPosition,
@@ -272,8 +278,8 @@ export default function TransformProvider({
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <TranslationContext.Provider value={contextValue as any}>
+    <TransformContext.Provider value={contextValue as any}>
       {children}
-    </TranslationContext.Provider>
+    </TransformContext.Provider>
   );
 }

@@ -1,10 +1,11 @@
 import { createContext, PropsWithChildren, useContext } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
-import { runOnJS, SharedValue, useSharedValue } from 'react-native-reanimated';
+import { runOnJS, useSharedValue } from 'react-native-reanimated';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { useAutoSizingContext } from '@/providers/canvas/auto';
+import { useCanvasDataContext } from '@/providers/canvas/data';
+import { useTransformContext } from '@/providers/canvas/transform';
 import { fixedWithDecay } from '@/utils/reanimated';
-import { getTranslationClamp } from '@/utils/views';
 
 type GesturesContextType = {
   gestureHandler: ComposedGesture;
@@ -25,42 +26,47 @@ export const useGesturesContext = () => {
 };
 
 type GesturesProviderProps = PropsWithChildren<{
-  currentScale: SharedValue<number>;
-  onEnd?: () => void;
-  onStart?: () => void;
-  translation: AnimatedVectorCoordinates;
+  initialScale: number;
+  maxScale: number;
+  minScale: number;
+  scaleValues: number[];
 }>;
 
 export default function GesturesProvider({
   children,
-  currentScale,
-  onEnd,
-  onStart,
-  translation
+  initialScale,
+  maxScale,
+  minScale,
+  scaleValues
 }: GesturesProviderProps) {
+  // CONTEXT VALUES
+  // Canvas data context values
+  const {
+    currentScale,
+    currentTranslation: { x: translateX, y: translateY }
+  } = useCanvasDataContext();
+  // Transform context values
+  const { getTranslateClamp, scaleContentTo } = useTransformContext();
+  // Auto sizing context values
+  const { disableAutoSizing, enableAutoSizingAfterTimeout } =
+    useAutoSizingContext();
+
+  // OTHER VALUES
   const pinchStartScale = useSharedValue(1);
 
   const panGestureHandler = Gesture.Pan()
     .onStart(() => {
-      if (onStart) runOnJS(onStart)();
+      runOnJS(disableAutoSizing)();
     })
     .onChange(e => {
-      translation.x.value += e.changeX;
-      translation.x.value += e.changeY;
+      translateX.value += e.changeX;
+      translateY.value += e.changeY;
     })
     .onEnd(({ velocityX, velocityY }) => {
-      const { x: clampX, y: clampY } = getTranslationClamp(currentScale.value);
-      translation.x.value = fixedWithDecay(
-        velocityX,
-        translation.x.value,
-        clampX
-      );
-      translation.y.value = fixedWithDecay(
-        velocityY,
-        translation.y.value,
-        clampY
-      );
-      if (onEnd) runOnJS(onEnd)();
+      const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
+      translateX.value = fixedWithDecay(velocityX, translateX.value, clampX);
+      translateY.value = fixedWithDecay(velocityY, translateY.value, clampY);
+      runOnJS(enableAutoSizingAfterTimeout)();
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -79,7 +85,7 @@ export default function GesturesProvider({
         minScale,
         maxScale
       ]);
-      runOnJS(startAutoSizingTimeout)();
+      runOnJS(enableAutoSizingAfterTimeout)();
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -97,18 +103,19 @@ export default function GesturesProvider({
         const newScale = scaleValues.find(scale => scale > currentScale.value);
         scaleContentTo(newScale ?? maxScale, origin, true);
       }
-      runOnJS(startAutoSizingTimeout)();
+      runOnJS(enableAutoSizingAfterTimeout)();
     });
 
-  const canvasGestureHandler = Gesture.Race(
-    Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
-    doubleTapGestureHandler
-  );
-
-  const contextValue: GesturesContextType = {};
+  const contextValue: GesturesContextType = {
+    gestureHandler: Gesture.Race(
+      Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
+      doubleTapGestureHandler
+    )
+  };
 
   return (
-    <GesturesContext.Provider value={contextValue}>
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    <GesturesContext.Provider value={contextValue as any}>
       {children}
     </GesturesContext.Provider>
   );
