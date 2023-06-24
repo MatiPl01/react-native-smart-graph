@@ -46,10 +46,21 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   const { handleCanvasRender, handleGraphRender, resetContainerPosition } =
     useTransformContext();
   // Auto sizing context
-  const { disableAutoSizing, enableAutoSizingAfterTimeout } =
-    useAutoSizingContext();
+  const autoSizingContext = useAutoSizingContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
+
+  const handleReset = () => {
+    resetContainerPosition({
+      animated: true,
+      autoSizing: autoSizingContext
+        ? {
+            disable: autoSizingContext.disableAutoSizing,
+            enableAfterTimeout: autoSizingContext.enableAutoSizingAfterTimeout
+          }
+        : undefined
+    });
+  };
 
   return (
     <>
@@ -70,19 +81,8 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
         {/* Renders overlay layers set using the OverlayContext */}
         <OverlayOutlet gesture={gestureHandler} />
       </OverlayProvider>
-      {controls && (
-        <ViewControls
-          onReset={() =>
-            resetContainerPosition({
-              animated: true,
-              autoSizing: {
-                disable: disableAutoSizing,
-                enableAfterTimeout: enableAutoSizingAfterTimeout
-              }
-            })
-          }
-        />
-      )}
+      {/* Display graph controls */}
+      {controls && <ViewControls onReset={handleReset} />}
     </>
   );
 };

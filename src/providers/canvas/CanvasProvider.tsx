@@ -53,15 +53,19 @@ export default function CanvasProvider({
         minScale={minScale}
         objectFit={objectFit}
       />,
-      // AUTO SIZING
+      // AUTO SIZING (optional)
       // The provider used to handle canvas auto sizing based on
       // the object fit property
-      <AutoSizingProvider
-        autoSizingTimeout={autoSizingTimeout}
-        maxScale={maxScale}
-        minScale={minScale}
-        objectFit={objectFit}
-      />,
+      ...(objectFit !== 'none'
+        ? [
+            <AutoSizingProvider
+              autoSizingTimeout={autoSizingTimeout}
+              maxScale={maxScale}
+              minScale={minScale}
+              objectFit={objectFit}
+            />
+          ]
+        : []),
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
       <GesturesProvider

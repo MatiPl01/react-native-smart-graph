@@ -48,15 +48,14 @@ export default function GesturesProvider({
   // Transform context values
   const { getTranslateClamp, scaleContentTo } = useTransformContext();
   // Auto sizing context values
-  const { disableAutoSizing, enableAutoSizingAfterTimeout } =
-    useAutoSizingContext();
+  const autoSizingContext = useAutoSizingContext();
 
   // OTHER VALUES
   const pinchStartScale = useSharedValue(1);
 
   const panGestureHandler = Gesture.Pan()
     .onStart(() => {
-      runOnJS(disableAutoSizing)();
+      if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
     })
     .onChange(e => {
       translateX.value += e.changeX;
@@ -66,13 +65,15 @@ export default function GesturesProvider({
       const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
       translateX.value = fixedWithDecay(velocityX, translateX.value, clampX);
       translateY.value = fixedWithDecay(velocityY, translateY.value, clampY);
-      runOnJS(enableAutoSizingAfterTimeout)();
+      if (autoSizingContext) {
+        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
+      }
     });
 
   const pinchGestureHandler = Gesture.Pinch()
     .onStart(() => {
       pinchStartScale.value = currentScale.value;
-      runOnJS(disableAutoSizing)();
+      if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
     })
     .onChange(e => {
       scaleContentTo(pinchStartScale.value * e.scale, {
@@ -85,13 +86,15 @@ export default function GesturesProvider({
         minScale,
         maxScale
       ]);
-      runOnJS(enableAutoSizingAfterTimeout)();
+      if (autoSizingContext) {
+        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
+      }
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
     .numberOfTaps(2)
     .onStart(() => {
-      runOnJS(disableAutoSizing)();
+      if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
     })
     .onEnd(({ x, y }) => {
       const origin = { x, y };
@@ -103,7 +106,9 @@ export default function GesturesProvider({
         const newScale = scaleValues.find(scale => scale > currentScale.value);
         scaleContentTo(newScale ?? maxScale, origin, true);
       }
-      runOnJS(enableAutoSizingAfterTimeout)();
+      if (autoSizingContext) {
+        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
+      }
     });
 
   const contextValue: GesturesContextType = {

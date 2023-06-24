@@ -26,17 +26,10 @@ type AutoSizingContextType = {
 
 const AutoSizingContext = createContext(null);
 
-export const useAutoSizingContext = () => {
-  const contextValue = useContext(AutoSizingContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useAutoSizingContext must be used within a AutoSizingProvider'
-    );
-  }
-
-  return contextValue as AutoSizingContextType;
-};
+export const useAutoSizingContext = () =>
+  // The auto sizing context is optional, so we need to check if it exists
+  // before using it (it is used only for specific objectFit values)
+  useContext(AutoSizingContext) as AutoSizingContextType | null;
 
 type AutoSizingProviderProps = PropsWithChildren<{
   autoSizingTimeout: number;
