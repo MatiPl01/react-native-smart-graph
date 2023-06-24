@@ -23,7 +23,8 @@ export interface Edge<E, V> {
 export type GraphConnections = Record<string, Array<string>>;
 
 export type GraphObserver = {
-  graphChanged(animationsSettings: AnimationsSettings): void;
+  focusChanged?: (vertexKey: null | string) => void;
+  graphChanged?: (animationsSettings: AnimationsSettings) => void;
 };
 
 export type OrderedEdges<E, V> = Array<{
@@ -34,9 +35,12 @@ export type OrderedEdges<E, V> = Array<{
 
 export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
+  blur(): void;
   clear(animationSettings?: BatchModificationAnimationSettings | null): void;
+  focus(vertexKey: string): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<E, V>>;
+  get focusedVertex(): Vertex<V, E> | null;
   get orderedEdges(): OrderedEdges<E, V>;
   get vertices(): Array<Vertex<V, E>>;
   getEdge(key: string): Edge<E, V> | null;
