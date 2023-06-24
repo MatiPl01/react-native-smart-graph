@@ -5,7 +5,7 @@ import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponentProps } from '@/components/graphs/GraphComponent';
 import { withOverlay } from '@/contexts/OverlayProvider';
-import { GraphProviderAdditionalProps } from '@/providers/GraphProvider';
+import { GraphProviderAdditionalProps } from '@/providers/graph';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { AnimatedBoundingRect } from '@/types/layout';
 

@@ -16,8 +16,9 @@ const deepEqual = (value1: any, value2: any): boolean => {
   }
 
   // If value1 and value2 are Date objects and their time values are equal, they are deeply equal
-  if (value1 instanceof Date && value2 instanceof Date) {
-    return value1.getTime() === value2.getTime();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  if (Object.hasOwn(value1, 'getTime') && Object.hasOwn(value2, 'getTime')) {
+    return (value1 as Date).getTime() === (value2 as Date).getTime();
   }
 
   const keys1 = Object.keys(value1 as object);
@@ -44,6 +45,22 @@ const deepEqual = (value1: any, value2: any): boolean => {
   return true;
 };
 
+const updateSettings = (
+  key: string,
+  settings?: { exclude?: string[]; shallow?: string[] }
+) => {
+  const regex = new RegExp(`^${key}.`);
+
+  return {
+    exclude: settings?.exclude
+      ?.filter(prop => prop.match(regex))
+      .map(prop => prop.replace(regex, '')),
+    shallow: settings?.shallow
+      ?.filter(prop => prop.match(regex))
+      .map(prop => prop.replace(regex, ''))
+  };
+};
+
 export const deepMemoComparator =
   (settings?: { exclude?: string[]; shallow?: string[] }) =>
   (prevProps: Record<string, any>, nextProps: Record<string, any>): boolean => {
@@ -60,12 +77,13 @@ export const deepMemoComparator =
 
     // Deeply compare every prop except the ones in the excluded list
     for (const key of Object.keys(prevProps)) {
-      if (excludedSet.has(key)) {
+      if (excludedSet.has(key) || excludedSet.has('*')) {
         continue;
       }
 
-      if (shallowComparisonSet.has(key) && prevProps[key] !== nextProps[key]) {
-        return false;
+      if (shallowComparisonSet.has(key) || shallowComparisonSet.has('*')) {
+        if (prevProps[key] !== nextProps[key]) return false;
+        continue;
       }
 
       const isPrevPropReactElement = React.isValidElement(
@@ -75,18 +93,28 @@ export const deepMemoComparator =
         nextProps[key] as object
       );
 
+      // If the prop is a React component, compare the component's type and props
       if (isPrevPropReactElement && isNextPropReactElement) {
-        // If the prop is a React component, compare the component's type and props
-        const regex = new RegExp(`^${key}.`);
         if (
           prevProps[key].type !== nextProps[key].type ||
-          !deepMemoComparator({
-            shallow: settings?.shallow
-              ?.filter(prop => prop.match(regex))
-              .map(prop => prop.replace(regex, ''))
-          })(
+          !deepMemoComparator(updateSettings(key, settings))(
             prevProps[key].props as Record<string, any>,
             nextProps[key].props as Record<string, any>
+          )
+        ) {
+          return false;
+        }
+      } else if (
+        // If the beginning of the excluded prop matches the current prop,
+        // recursively call deepMemoComparator for nested properties
+        settings?.exclude?.some(
+          prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
+        )
+      ) {
+        if (
+          !deepMemoComparator(updateSettings(key, settings))(
+            prevProps[key] as Record<string, any>,
+            nextProps[key] as Record<string, any>
           )
         ) {
           return false;
