@@ -5,7 +5,6 @@ import { GraphProvider, GraphProviderAdditionalProps } from '@/providers/graph';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/equality';
 
 import GraphComponent, { GraphComponentProps } from './GraphComponent';
 
@@ -47,8 +46,9 @@ export default memo(
       <DirectedGraphComponent {...(props as ClonedComponentProps<V, E, ED>)} />
     );
   },
-  deepMemoComparator({
-    exclude: ['boundingRect'],
-    shallow: ['graph']
-  })
+  () => true
+  // deepMemoComparator({
+  //   exclude: ['boundingRect'],
+  //   shallow: ['graph']
+  // })
 );

@@ -13,20 +13,20 @@ import { CanvasDataProvider } from './data';
 import { GesturesProvider } from './gestures';
 import { TransformProvider } from './transform';
 
-type ViewProviderProps = PropsWithChildren<{
+type CanvasProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
   initialScale?: number;
-  objectFit: ObjectFit;
+  objectFit?: ObjectFit;
   scales?: number[];
 }>;
 
-export default function ViewProvider({
+export default function CanvasProvider({
   autoSizingTimeout = AUTO_SIZING_TIMEOUT,
   children,
   initialScale = INITIAL_SCALE,
   objectFit = 'none',
   scales = DEFAULT_SCALES
-}: ViewProviderProps) {
+}: CanvasProviderProps) {
   // Validate parameters
   if (scales.length === 0) {
     throw new Error('At least one scale must be provided');

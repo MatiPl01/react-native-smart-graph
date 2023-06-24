@@ -51,7 +51,7 @@ export default function CanvasDataProvider({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   // AUTO SIZING
-  const autoSizingEnabled = useSharedValue(false);
+  const autoSizingEnabled = useSharedValue(true);
 
   const contextValue: CanvasDataContextType = {
     autoSizingEnabled,

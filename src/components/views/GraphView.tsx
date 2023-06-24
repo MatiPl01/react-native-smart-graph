@@ -2,13 +2,13 @@ import React, { memo, PropsWithChildren } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
-import {
-  AUTO_SIZING_TIMEOUT,
-  DEFAULT_SCALES,
-  INITIAL_SCALE
-} from '@/constants/views';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import ViewProvider from '@/providers/canvas/ViewProvider';
+import {
+  useCanvasDataContext,
+  useGesturesContext,
+  useTransformContext
+} from '@/providers/canvas';
+import CanvasProvider from '@/providers/canvas/CanvasProvider';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
 
@@ -22,48 +22,58 @@ type GraphViewProps = PropsWithChildren<{
   scales?: number[];
 }>;
 
-function GraphView({
-  autoSizingTimeout = AUTO_SIZING_TIMEOUT,
-  children,
-  controls = false,
-  initialScale = INITIAL_SCALE,
-  objectFit = 'none',
-  scales = DEFAULT_SCALES
-}: GraphViewProps) {
+function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
   return (
     <View style={styles.container}>
+      <CanvasProvider {...providerProps}>
+        <GraphViewComposer controls={controls}>{children}</GraphViewComposer>
+      </CanvasProvider>
+    </View>
+  );
+}
+
+type GraphViewComposerProps = PropsWithChildren<{
+  controls?: boolean;
+}>;
+
+const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
+  // CONTEXTS
+  // Canvas data context
+  const { boundingRect, currentScale, currentTranslation } =
+    useCanvasDataContext();
+  // Transform context
+  const { handleCanvasRender, handleGraphRender, resetContainerPosition } =
+    useTransformContext();
+  // Gestures context
+  const { gestureHandler } = useGesturesContext();
+
+  return (
+    <>
       <OverlayProvider>
-        <ViewProvider objectFit={objectFit}>
-          <CanvasComponent
-            boundingRect={{
-              bottom: containerBottom,
-              left: containerLeft,
-              right: containerRight,
-              top: containerTop
-            }}
-            graphComponentProps={{
-              onRender: handleGraphRender
-            }}
-            transform={{
-              scale: currentScale,
-              translateX,
-              translateY
-            }}
-            onRender={handleCanvasRender}>
-            {children}
-          </CanvasComponent>
-          {/* Renders overlay layers set using the OverlayContext */}
-          <OverlayOutlet gesture={canvasGestureHandler} />
-        </ViewProvider>
+        <CanvasComponent
+          graphComponentProps={{
+            onRender: handleGraphRender
+          }}
+          transform={{
+            scale: currentScale,
+            translateX: currentTranslation.x,
+            translateY: currentTranslation.y
+          }}
+          boundingRect={boundingRect}
+          onRender={handleCanvasRender}>
+          {children}
+        </CanvasComponent>
+        {/* Renders overlay layers set using the OverlayContext */}
+        <OverlayOutlet gesture={gestureHandler} />
       </OverlayProvider>
       {controls && (
         <ViewControls
           onReset={() => resetContainerPosition({ animated: true })}
         />
       )}
-    </View>
+    </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -77,6 +87,8 @@ const styles = StyleSheet.create({
 export default memo(
   GraphView,
   deepMemoComparator({
+    // Exclude events callback functions from the comparison
+    exclude: ['children.settings.events'],
     // shallow compare the graph object property of the child component
     // to prevent deep checking a large graph model structure
     // (graph should be memoized using the useMemo hook to prevent

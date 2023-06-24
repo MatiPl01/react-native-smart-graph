@@ -1,1 +1,4 @@
-export { default as GesturesProvider } from './GesturesProvider';
+export {
+  default as GesturesProvider,
+  useGesturesContext
+} from './GesturesProvider';
