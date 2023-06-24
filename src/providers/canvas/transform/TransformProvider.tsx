@@ -26,14 +26,15 @@ type TransformContextType = {
   };
   handleCanvasRender: (event: LayoutChangeEvent) => void;
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
-  resetContainerPosition: (
-    settings?: {
-      animated?: boolean;
-      canvasDimensions?: Dimensions;
-      containerBoundingRect?: BoundingRect;
-    },
-    userTriggered?: boolean
-  ) => void;
+  resetContainerPosition: (settings?: {
+    animated?: boolean;
+    autoSizing?: {
+      disable: () => void;
+      enableAfterTimeout: () => void;
+    };
+    canvasDimensions?: Dimensions;
+    containerBoundingRect?: BoundingRect;
+  }) => void;
   scaleContentTo: (
     newScale: number,
     origin?: Vector,
@@ -99,16 +100,13 @@ export default function TransformProvider({
       canvasHeight.value = height;
 
       if (initialBoundingRectRef.current) {
-        resetContainerPosition(
-          {
-            canvasDimensions: {
-              height,
-              width
-            },
-            containerBoundingRect: initialBoundingRectRef.current
+        resetContainerPosition({
+          canvasDimensions: {
+            height,
+            width
           },
-          false
-        );
+          containerBoundingRect: initialBoundingRectRef.current
+        });
       }
     },
     []
@@ -117,25 +115,23 @@ export default function TransformProvider({
   const handleGraphRender = useCallback(
     (containerBoundingRect: BoundingRect) => {
       initialBoundingRectRef.current ??= containerBoundingRect;
-      resetContainerPosition(
-        {
-          containerBoundingRect
-        },
-        false
-      );
+      resetContainerPosition({
+        containerBoundingRect
+      });
     },
     []
   );
 
   const resetContainerPosition = useCallback(
-    (
-      settings?: {
-        animated?: boolean;
-        canvasDimensions?: Dimensions;
-        containerBoundingRect?: BoundingRect;
-      },
-      userTriggered = true
-    ) => {
+    (settings?: {
+      animated?: boolean;
+      autoSizing?: {
+        disable: () => void;
+        enableAfterTimeout: () => void;
+      };
+      canvasDimensions?: Dimensions;
+      containerBoundingRect?: BoundingRect;
+    }) => {
       const containerBoundingRect = settings?.containerBoundingRect ?? {
         bottom: containerBottom.value,
         left: containerLeft.value,
@@ -148,7 +144,8 @@ export default function TransformProvider({
         width: canvasWidth.value
       };
 
-      // if (userTriggered) disableAutoSizing(); // TODO
+      // Disable auto sizing while resetting container position
+      settings?.autoSizing?.disable();
 
       const scale = clamp(
         calcContainerScale(
@@ -172,7 +169,8 @@ export default function TransformProvider({
         settings?.animated
       );
 
-      // if (userTriggered) enableAutoSizingAfterTimeout(); // TODO
+      // Enable auto sizing after resetting container position
+      settings?.autoSizing?.enableAfterTimeout();
     },
     [objectFit]
   );

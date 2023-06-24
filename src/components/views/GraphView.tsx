@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import ViewControls from '@/components/controls/ViewControls';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import {
+  useAutoSizingContext,
   useCanvasDataContext,
   useGesturesContext,
   useTransformContext
@@ -44,6 +45,9 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   // Transform context
   const { handleCanvasRender, handleGraphRender, resetContainerPosition } =
     useTransformContext();
+  // Auto sizing context
+  const { disableAutoSizing, enableAutoSizingAfterTimeout } =
+    useAutoSizingContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
 
@@ -68,7 +72,15 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
       </OverlayProvider>
       {controls && (
         <ViewControls
-          onReset={() => resetContainerPosition({ animated: true })}
+          onReset={() =>
+            resetContainerPosition({
+              animated: true,
+              autoSizing: {
+                disable: disableAutoSizing,
+                enableAfterTimeout: enableAutoSizingAfterTimeout
+              }
+            })
+          }
         />
       )}
     </>
