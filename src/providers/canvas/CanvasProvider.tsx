@@ -11,11 +11,12 @@ import { ObjectFit } from '@/types/views';
 import { AutoSizingProvider } from './auto';
 import { CanvasDataProvider } from './data';
 import { GesturesProvider } from './gestures';
-import { TransformProvider } from './transform';
+import { FocusProvider, TransformProvider } from './transform';
 
 type CanvasProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
   initialScale?: number;
+  isRefProvided: boolean;
   objectFit?: ObjectFit;
   scales?: number[];
 }>;
@@ -24,6 +25,7 @@ export default function CanvasProvider({
   autoSizingTimeout = AUTO_SIZING_TIMEOUT,
   children,
   initialScale = INITIAL_SCALE,
+  isRefProvided,
   objectFit = 'none',
   scales = DEFAULT_SCALES
 }: CanvasProviderProps) {
@@ -73,7 +75,10 @@ export default function CanvasProvider({
         maxScale={maxScale}
         minScale={minScale}
         scaleValues={scales}
-      />
+      />,
+      // FOCUS (optional)
+      // The provider used to handle focusing vertices
+      ...(isRefProvided ? [<FocusProvider />] : [])
     ],
     [objectFit]
   );

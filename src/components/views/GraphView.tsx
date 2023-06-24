@@ -1,4 +1,10 @@
-import React, { memo, PropsWithChildren } from 'react';
+import React, {
+  ForwardedRef,
+  forwardRef,
+  memo,
+  PropsWithChildren,
+  useImperativeHandle
+} from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
@@ -23,11 +29,20 @@ type GraphViewProps = PropsWithChildren<{
   scales?: number[];
 }>;
 
-function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
+export type GraphViewRef = {
+  focus(vertexKey: string): void;
+};
+
+function GraphView(
+  { children, controls, ...providerProps }: GraphViewProps,
+  ref: ForwardedRef<GraphViewRef>
+) {
   return (
     <View style={styles.container}>
-      <CanvasProvider {...providerProps}>
-        <GraphViewComposer controls={controls}>{children}</GraphViewComposer>
+      <CanvasProvider {...providerProps} isRefProvided={!!ref}>
+        <GraphViewComposer controls={controls} forwardedRef={ref}>
+          {children}
+        </GraphViewComposer>
       </CanvasProvider>
     </View>
   );
@@ -35,9 +50,14 @@ function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
 
 type GraphViewComposerProps = PropsWithChildren<{
   controls?: boolean;
+  forwardedRef: ForwardedRef<GraphViewRef>;
 }>;
 
-const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
+const GraphViewComposer = ({
+  children,
+  controls,
+  forwardedRef
+}: GraphViewComposerProps) => {
   // CONTEXTS
   // Canvas data context
   const { boundingRect, currentScale, currentTranslation } =
@@ -49,6 +69,16 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   const autoSizingContext = useAutoSizingContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
+
+  useImperativeHandle(
+    forwardedRef,
+    () => ({
+      focus: (vertexKey: string) => {
+        console.log('focus', vertexKey);
+      }
+    }),
+    []
+  );
 
   const handleReset = () => {
     resetContainerPosition({
@@ -97,7 +127,7 @@ const styles = StyleSheet.create({
 
 // Rerender only on prop changes
 export default memo(
-  GraphView,
+  forwardRef(GraphView),
   deepMemoComparator({
     // Exclude events callback functions from the comparison
     exclude: ['children.settings.events'],
@@ -107,4 +137,4 @@ export default memo(
     // unnecessary rerenders)
     shallow: ['children.graph']
   })
-) as typeof GraphView;
+);
