@@ -96,7 +96,8 @@ VertexFocusProviderProps<V, E>) {
         renderedVerticesData,
         renderedEdgesData
       );
-    }
+    },
+    [focusedVertexKey]
   );
 
   return <>{children}</>;
