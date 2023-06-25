@@ -12,6 +12,7 @@ import {
   AnimationsSettings,
   BatchModificationAnimationSettings
 } from '@/types/settings';
+import { FocusSettings } from '@/types/settings/focus';
 import { Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 
@@ -37,9 +38,9 @@ export default abstract class Graph<
     this.observers.add(observer);
   }
 
-  blur(animationSettings?: AnimationSettings | null): void {
+  blur(settings?: FocusSettings): void {
     this.focusedVertexKey = null;
-    this.notifyFocusChange(null, animationSettings);
+    this.notifyFocusChange(null, settings);
   }
 
   // TODO - remove this method after adding self-loop edges support
@@ -88,9 +89,9 @@ export default abstract class Graph<
     return Object.values(this.edges$);
   }
 
-  focus(vertexKey: string, animationSettings?: AnimationSettings | null): void {
+  focus(vertexKey: string, settings?: FocusSettings): void {
     this.focusedVertexKey = vertexKey;
-    this.notifyFocusChange(vertexKey, animationSettings);
+    this.notifyFocusChange(vertexKey, settings);
   }
 
   get focusedVertex(): GV | null {
@@ -169,10 +170,10 @@ export default abstract class Graph<
 
   protected notifyFocusChange(
     vertexKey: null | string,
-    animationSettings?: AnimationSettings | null
+    settings?: FocusSettings
   ): void {
     this.observers.forEach(observer => {
-      observer.focusChanged?.(vertexKey, animationSettings);
+      observer.focusChanged?.(vertexKey, settings);
     });
   }
 

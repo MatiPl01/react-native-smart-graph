@@ -1,58 +1,70 @@
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect, useMemo } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useFocusObserver } from '@/hooks';
 import { withGraphData } from '@/providers/graph/data';
 import {
   EdgeComponentRenderData,
-  VertexComponentData,
   VertexComponentRenderData
 } from '@/types/components';
 import { FocusSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import { AnimatedDimensions } from '@/types/layout';
-import { updateComponentsFocusFocus } from '@/utils/animations';
+import { FocusedVertexData } from '@/types/settings/focus';
+import { updateComponentsFocus } from '@/utils/animations';
+import { getFocusedVertexData } from '@/utils/focus';
+import {
+  getAlignedVertexAbsolutePosition,
+  getCoordinatesRelativeToCenter
+} from '@/utils/layout';
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
+  availableScales: number[];
   canvasDimensions: AnimatedDimensions;
   graph: Graph<V, E>;
+  initialScale: number;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   setFocus: FocusSetter;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  vertexRadius: number;
 }>;
 
 function VertexFocusProvider<V, E>({
-  // canvasDimensions,
+  availableScales,
+  canvasDimensions,
   children,
   graph,
+  initialScale,
   renderedEdgesData,
   renderedVerticesData,
-  setFocus
-}: // verticesData
-VertexFocusProviderProps<V, E>) {
+  setFocus,
+  vertexRadius
+}: VertexFocusProviderProps<V, E>) {
   // OBSERVER
   // Vertex focus observer
-  const [{ animationSettings, focusedVertexKey }] = useFocusObserver(graph);
-  const vertexData =
-    (focusedVertexKey && renderedVerticesData[focusedVertexKey]) || null;
+  const [data] = useFocusObserver(graph);
+  // Updated focused vertex data
+  const focusedVertexData = useMemo<FocusedVertexData>(
+    () =>
+      getFocusedVertexData(
+        data.focusedVertexKey,
+        renderedVerticesData,
+        vertexRadius,
+        availableScales,
+        initialScale,
+        data.settings
+      ),
+    [data]
+  );
+
   // OTHER VALUES
   const focusX = useSharedValue(0);
   const focusY = useSharedValue(0);
   const focusScale = useSharedValue(1);
 
   useEffect(() => {
-    const updatedAnimationSettings =
-      animationSettings !== null
-        ? {
-            ...DEFAULT_FOCUS_ANIMATION_SETTINGS,
-            ...animationSettings
-          }
-        : null;
-
-    if (!vertexData) {
-      setFocus(null, updatedAnimationSettings);
+    if (!focusedVertexData.vertex) {
+      setFocus(null, focusedVertexData.animation);
       return;
     }
     setFocus(
@@ -63,41 +75,57 @@ VertexFocusProviderProps<V, E>) {
         },
         scale: focusScale
       },
-      updatedAnimationSettings
+      focusedVertexData.animation
     );
-  }, [vertexData]);
+  }, [focusedVertexData]);
 
   useAnimatedReaction(
-    () =>
-      vertexData
-        ? {
-            scale: vertexData.scale.value,
-            x: vertexData.position.x.value,
-            y: vertexData.position.y.value
-          }
-        : null,
-    data => {
-      if (!data) return;
-      // TODO - add some more settings (position relatively to the canvas, etc.)
-      focusX.value = data.x;
-      focusY.value = data.y;
-      focusScale.value = 3;
+    () => {
+      if (!focusedVertexData.vertex) return null;
+
+      const { vertex } = focusedVertexData;
+      return {
+        alignment: vertex.alignment,
+        canvasDimensions: {
+          height: canvasDimensions.height.value,
+          width: canvasDimensions.width.value
+        },
+        radius: vertex.radius,
+        scale: vertex.scale,
+        x: vertex.position.x.value,
+        y: vertex.position.y.value
+      };
+    },
+    vertexData => {
+      if (!vertexData) return;
+      // Calculate vertex position based on the alignment settings
+      const { x: dx, y: dy } = getCoordinatesRelativeToCenter(
+        vertexData.canvasDimensions,
+        getAlignedVertexAbsolutePosition(
+          vertexData.canvasDimensions,
+          vertexData.alignment,
+          vertexData.radius * vertexData.scale
+        )
+      );
+      focusX.value = vertexData.x - dx / vertexData.scale;
+      focusY.value = vertexData.y - dy / vertexData.scale;
+      focusScale.value = vertexData.scale;
     }
   );
 
   useAnimatedReaction(
     () => ({
-      vertexKey: focusedVertexKey
+      vertexKey: data.focusedVertexKey
     }),
     ({ vertexKey }) => {
       // Update focusProgress of all graph components
-      updateComponentsFocusFocus(
+      updateComponentsFocus(
         vertexKey ? { vertices: [vertexKey] } : null,
         renderedVerticesData,
         renderedEdgesData
       );
     },
-    [focusedVertexKey]
+    [data.focusedVertexKey]
   );
 
   return <>{children}</>;
@@ -105,9 +133,8 @@ VertexFocusProviderProps<V, E>) {
 
 export default withGraphData(
   VertexFocusProvider,
-  ({ renderedEdgesData, renderedVerticesData, verticesData }) => ({
+  ({ renderedEdgesData, renderedVerticesData }) => ({
     renderedEdgesData,
-    renderedVerticesData,
-    verticesData
+    renderedVerticesData
   })
 );

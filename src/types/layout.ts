@@ -40,3 +40,13 @@ export type AnimatedBoundingRect = {
 };
 
 export type AnimatedPath = SharedValue<string>;
+
+export type VerticalAlignment = 'bottom' | 'center' | 'top';
+export type HorizontalAlignment = 'center' | 'left' | 'right';
+
+export type Alignment = {
+  horizontalAlignment?: HorizontalAlignment;
+  horizontalOffset?: number;
+  verticalAlignment?: VerticalAlignment;
+  verticalOffset?: number;
+};

@@ -31,7 +31,7 @@ function CanvasComponent({
 }: CanvasComponentProps) {
   // CONTEXTS
   // Canvas data context
-  const { canvasDimensions } = useCanvasDataContext();
+  const { canvasDimensions, initialScale, scales } = useCanvasDataContext();
   // Focus context
   const { setFocus } = useFocusContext();
 
@@ -53,7 +53,9 @@ function CanvasComponent({
           return cloneElement(childElement, {
             boundingRect,
             canvasDimensions,
+            canvasScales: scales,
             graphComponentProps,
+            initialCanvasScale: initialScale,
             removeLayer,
             renderLayer,
             setFocus,

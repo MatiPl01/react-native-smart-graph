@@ -74,7 +74,7 @@ const updateComponentsFocusProgress = <
   }
 };
 
-export const updateComponentsFocusFocus = (
+export const updateComponentsFocus = (
   focusedComponents: {
     edges?: string[];
     vertices?: string[];

@@ -7,10 +7,8 @@ import {
   OrderedEdges,
   Vertex
 } from '@/types/graphs';
-import {
-  AnimationSettings,
-  AnimationsSettings
-} from '@/types/settings/animations';
+import { AnimationsSettings } from '@/types/settings/animations';
+import { FocusSettings } from '@/types/settings/focus';
 
 type GraphState<V, E> = {
   animationsSettings: AnimationsSettings;
@@ -74,8 +72,8 @@ export const useGraphObserver = <V, E>(
 };
 
 type FocusState = {
-  animationSettings?: AnimationSettings | null;
   focusedVertexKey: null | string;
+  settings?: FocusSettings;
 };
 
 export const useFocusObserver = <V, E>(
@@ -83,17 +81,16 @@ export const useFocusObserver = <V, E>(
   active = true
 ): [FocusState, (isActive: boolean) => void] => {
   const [state, setState] = useState<FocusState>({
-    animationSettings: {},
     focusedVertexKey: graph.focusedVertex?.key ?? null
   });
 
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
   const observerRef = useRef<GraphObserver>({
-    focusChanged(vertexKey, animationSettings) {
+    focusChanged(vertexKey, settings) {
       setState({
-        animationSettings,
-        focusedVertexKey: vertexKey
+        focusedVertexKey: vertexKey,
+        settings
       });
     }
   });
