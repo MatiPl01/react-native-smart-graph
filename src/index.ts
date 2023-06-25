@@ -22,7 +22,78 @@ export { default as DirectedGraph } from '@/models/graphs/DirectedGraph';
 export { default as UndirectedGraph } from '@/models/graphs/UndirectedGraph';
 
 // VIEWS
-export { default as PannableScalableView } from '@/components/views/GraphView';
+export { default as GraphView } from '@/components/views/GraphView';
 
 // EXAMPLES
 export * from '@/examples';
+
+// TYPES
+export {
+  type DirectedEdgeData,
+  type UndirectedEdgeData,
+  type VertexData
+} from '@/types/data';
+export {
+  type DirectedEdge,
+  type DirectedGraphVertex,
+  type Edge,
+  type Graph,
+  type GraphConnections,
+  type GraphObserver,
+  type UndirectedEdge,
+  type Vertex
+} from '@/types/graphs';
+export {
+  type Alignment,
+  type HorizontalAlignment,
+  type VerticalAlignment
+} from '@/types/layout';
+export {
+  type CurvedEdgeRendererProps,
+  type DirectedGraphRenderers,
+  type EdgeArrowRendererProps,
+  type EdgeLabelRendererProps,
+  type StraightEdgeRendererProps,
+  type UndirectedGraphRenderers,
+  type VertexRendererProps
+} from '@/types/renderer';
+export {
+  type AnimationSettings,
+  type AnimationsSettings,
+  type AutoLayoutSettings,
+  type BatchModificationAnimationSettings,
+  type BoundRandomPlacementSettings,
+  type CircularPlacementSettings,
+  type DefaultForcesStrategySettings,
+  type DirectedEdgeSettings,
+  type DirectedGraphComponentsSettings,
+  type DirectedGraphSettings,
+  type EdgeLabelSettings,
+  type EdgePressEvent,
+  type EdgePressHandler,
+  type FocusSettings,
+  type ForcesLayoutSettings,
+  type ForcesSettings,
+  type ForcesStrategy,
+  type GraphAnimationsSettings,
+  type GraphEventsSettings,
+  type GraphLayoutSettings,
+  type GraphLayoutType,
+  type GraphPlacementSettings,
+  type OrbitsLayerSizing,
+  type OrbitsLayerSizingSettings,
+  type OrbitsPlacementSettings,
+  type PlacementStrategy,
+  type RandomLayoutType,
+  type RandomPlacementSettings,
+  type SingleModificationAnimationSettings,
+  type TreesPlacementSettings,
+  type UnboundRandomPlacementSettings,
+  type UndirectedEdgeSettings,
+  type UndirectedGraphComponentsSettings,
+  type UndirectedGraphSettings,
+  type VertexPressEvent,
+  type VertexPressHandler,
+  type VertexSettings
+} from '@/types/settings';
+export { type ObjectFit } from '@/types/views';

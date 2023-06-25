@@ -61,10 +61,10 @@ export default function OverlayProvider({
 }
 
 type OverlayOutletProps = {
-  gesture: ComposedGesture;
+  gestureHandler: ComposedGesture;
 };
 
-export const OverlayOutlet = ({ gesture }: OverlayOutletProps) => {
+export const OverlayOutlet = ({ gestureHandler }: OverlayOutletProps) => {
   const contextValue = useContext(OverlayContext);
 
   if (!contextValue) {
@@ -74,7 +74,7 @@ export const OverlayOutlet = ({ gesture }: OverlayOutletProps) => {
   const { layers } = contextValue;
 
   return (
-    <GestureDetector gesture={gesture}>
+    <GestureDetector gesture={gestureHandler}>
       <View style={StyleSheet.absoluteFillObject}>
         {Object.entries(layers)
           .sort(([zIndexA], [zIndexB]) => Number(zIndexA) - Number(zIndexB))

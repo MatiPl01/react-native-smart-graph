@@ -20,12 +20,12 @@ export default class DirectedGraph<V, E> extends Graph<
   DirectedEdge<E, V>,
   DirectedEdgeData<E>
 > {
-  constructor(data: {
+  constructor(data?: {
     edges?: Array<DirectedEdgeData<E>>;
     vertices: Array<VertexData<V>>;
   }) {
     super();
-    this.insertBatch(data);
+    if (data) this.insertBatch(data);
   }
 
   override insertBatch(
@@ -42,7 +42,7 @@ export default class DirectedGraph<V, E> extends Graph<
     vertices?.forEach(data => this.insertVertex(data, null));
     edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
-    if (animationSettings) {
+    if (animationSettings !== null) {
       this.notifyGraphChange(
         createAnimationsSettingsForBatchModification({
           edges: edges?.map(({ key }) => key),

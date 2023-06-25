@@ -1,5 +1,10 @@
 import { PropsWithChildren, useEffect, useMemo } from 'react';
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import {
+  runOnJS,
+  SharedValue,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { useFocusObserver } from '@/hooks';
 import { withGraphData } from '@/providers/graph/data';
@@ -23,6 +28,7 @@ type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   canvasDimensions: AnimatedDimensions;
   graph: Graph<V, E>;
   initialScale: number;
+  isFocusing: SharedValue<boolean>;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   setFocus: FocusSetter;
@@ -35,6 +41,7 @@ function VertexFocusProvider<V, E>({
   children,
   graph,
   initialScale,
+  isFocusing,
   renderedEdgesData,
   renderedVerticesData,
   setFocus,
@@ -61,18 +68,23 @@ function VertexFocusProvider<V, E>({
   const focusX = useSharedValue(0);
   const focusY = useSharedValue(0);
   const focusScale = useSharedValue(1);
+  // This method is used to force blur the focused vertex
+  // if the user gesture triggers a blur event
+  const forceBlur = useMemo(() => graph.blur.bind(graph), [graph]);
 
   useEffect(() => {
     if (!focusedVertexData.vertex) {
       setFocus(null, focusedVertexData.animation);
       return;
     }
+
     setFocus(
       {
         centerPosition: {
           x: focusX,
           y: focusY
         },
+        gesturesDisabled: data.settings.disableGestures,
         scale: focusScale
       },
       focusedVertexData.animation
@@ -126,6 +138,15 @@ function VertexFocusProvider<V, E>({
       );
     },
     [data.focusedVertexKey]
+  );
+
+  useAnimatedReaction(
+    () => isFocusing.value,
+    focusing => {
+      if (!focusing) {
+        runOnJS(forceBlur)(null);
+      }
+    }
   );
 
   return <>{children}</>;

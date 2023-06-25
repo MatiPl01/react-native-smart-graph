@@ -28,7 +28,10 @@ import {
   GraphSettings,
   GraphSettingsWithDefaults
 } from '@/types/settings';
-import { AnimationsSettings } from '@/types/settings/animations';
+import {
+  AnimationSettingsWithDefaults,
+  AnimationsSettings
+} from '@/types/settings/animations';
 import {
   GraphLayoutSettings,
   GraphLayoutSettingsWithDefaults
@@ -47,17 +50,17 @@ export const updateGraphSettingsWithDefaults = <
     edges: {
       ...DEFAULT_ANIMATION_SETTINGS,
       ...settings?.animations?.edges
-    },
+    } as unknown as AnimationSettingsWithDefaults,
     layout: {
       ...(settings?.layout?.managedBy === 'forces'
         ? DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
         : DEFAULT_ANIMATION_SETTINGS),
       ...settings?.animations?.layout
-    },
+    } as unknown as AnimationSettingsWithDefaults,
     vertices: {
       ...DEFAULT_ANIMATION_SETTINGS,
       ...settings?.animations?.vertices
-    }
+    } as unknown as AnimationSettingsWithDefaults
   },
   components: {
     ...settings?.components,
@@ -144,7 +147,7 @@ export const updateGraphVerticesData = <
         animationSettings: {
           ...settings.animations.vertices,
           ...currentAnimationsSettings.vertices[vertex.key]
-        },
+        } as unknown as AnimationSettingsWithDefaults,
         componentSettings: settings.components.vertex,
         removed: false,
         renderer: renderers.vertex,
@@ -165,7 +168,7 @@ export const updateGraphVerticesData = <
         animationSettings: {
           ...settings.animations.vertices,
           ...currentAnimationsSettings.vertices[key]
-        },
+        } as unknown as AnimationSettingsWithDefaults,
         removed: true
       };
     }
@@ -210,7 +213,7 @@ export const updateGraphEdgesData = <
         animationSettings: {
           ...settings.animations.edges,
           ...currentAnimationsSettings.edges[edge.key]
-        },
+        } as unknown as AnimationSettingsWithDefaults,
         arrowRenderer: renderers.arrow,
         componentSettings: settings.components.edge,
         edge,
@@ -240,7 +243,7 @@ export const updateGraphEdgesData = <
         animationSettings: {
           ...settings.animations.edges,
           ...currentAnimationsSettings.edges[key]
-        },
+        } as unknown as AnimationSettingsWithDefaults,
         removed: true
       };
     }

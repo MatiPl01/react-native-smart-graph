@@ -1,5 +1,6 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
+  AnimationSettings,
   AnimationsSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
@@ -36,7 +37,7 @@ export type OrderedEdges<E, V> = Array<{
 
 export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
-  blur(settings?: FocusSettings): void;
+  blur(settings?: AnimationSettings | null): void;
   clear(animationSettings?: BatchModificationAnimationSettings | null): void;
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;

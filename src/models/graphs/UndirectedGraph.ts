@@ -5,7 +5,10 @@ import {
   AnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
-import { createAnimationsSettingsForSingleModification } from '@/utils/animations';
+import {
+  createAnimationsSettingsForBatchModification,
+  createAnimationsSettingsForSingleModification
+} from '@/utils/animations';
 
 import Graph from './Graph';
 
@@ -16,12 +19,12 @@ export default class UndirectedGraph<V, E> extends Graph<
   UndirectedEdge<E, V>,
   UndirectedEdgeData<E>
 > {
-  constructor(data: {
+  constructor(data?: {
     edges?: Array<UndirectedEdgeData<E>>;
     vertices: Array<VertexData<V>>;
   }) {
     super();
-    this.insertBatch(data);
+    if (data) this.insertBatch(data);
   }
 
   override insertBatch(
@@ -39,7 +42,12 @@ export default class UndirectedGraph<V, E> extends Graph<
     edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
     if (animationSettings !== null) {
-      this.notifyGraphChange();
+      this.notifyGraphChange(
+        createAnimationsSettingsForBatchModification({
+          edges: edges?.map(({ key }) => key),
+          vertices: vertices?.map(({ key }) => key)
+        })
+      );
     }
   }
 

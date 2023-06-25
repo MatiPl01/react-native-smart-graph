@@ -80,7 +80,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
           {children}
         </CanvasComponent>
         {/* Renders overlay layers set using the OverlayContext */}
-        <OverlayOutlet gesture={gestureHandler} />
+        <OverlayOutlet gestureHandler={gestureHandler} />
       </OverlayProvider>
       {/* Display graph controls */}
       {controls && <ViewControls onReset={handleReset} />}

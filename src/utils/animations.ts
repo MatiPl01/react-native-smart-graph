@@ -8,6 +8,7 @@ import {
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   AnimationSettings,
+  AnimationSettingsWithDefaults,
   AnimationsSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
@@ -16,7 +17,7 @@ import {
 export const animateVerticesToFinalPositions = (
   animatedPositions: Record<string, AnimatedVectorCoordinates>,
   finalPositions: Record<string, Vector>,
-  { duration, easing, onComplete }: AnimationSettings
+  { duration, easing, onComplete }: AnimationSettingsWithDefaults
 ) => {
   'worklet';
   const finalPositionsEntries = Object.entries(finalPositions);

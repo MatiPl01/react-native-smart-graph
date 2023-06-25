@@ -1,11 +1,14 @@
-import { createContext, PropsWithChildren, useContext } from 'react';
+import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
 
 import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useAutoSizingContext } from '@/providers/canvas/auto';
 import { useCanvasDataContext } from '@/providers/canvas/data';
-import { useTransformContext } from '@/providers/canvas/transform';
+import {
+  useFocusContext,
+  useTransformContext
+} from '@/providers/canvas/transform';
 import { fixedWithDecay } from '@/utils/reanimated';
 
 type GesturesContextType = {
@@ -50,19 +53,27 @@ export default function GesturesProvider({
   const { getTranslateClamp, scaleContentTo } = useTransformContext();
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
+  // Focus context values
+  const { gesturesDisabled, isFocusing, setFocus } = useFocusContext();
 
   // OTHER VALUES
   const pinchStartScale = useSharedValue(1);
 
   const panGestureHandler = Gesture.Pan()
     .onStart(() => {
+      if (gesturesDisabled.value) return;
+      if (isFocusing.value) {
+        runOnJS(setFocus)(null, null);
+      }
       if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
     })
     .onChange(e => {
+      if (gesturesDisabled.value) return;
       translateX.value += e.changeX;
       translateY.value += e.changeY;
     })
     .onEnd(({ velocityX, velocityY }) => {
+      if (gesturesDisabled.value) return;
       const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
       translateX.value = fixedWithDecay(velocityX, translateX.value, clampX);
       translateY.value = fixedWithDecay(velocityY, translateY.value, clampY);
@@ -73,16 +84,22 @@ export default function GesturesProvider({
 
   const pinchGestureHandler = Gesture.Pinch()
     .onStart(() => {
-      pinchStartScale.value = currentScale.value;
+      if (gesturesDisabled.value) return;
+      if (isFocusing.value) {
+        runOnJS(setFocus)(null, null);
+      }
       if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
+      pinchStartScale.value = currentScale.value;
     })
     .onChange(e => {
+      if (gesturesDisabled.value) return;
       scaleContentTo(pinchStartScale.value * e.scale, {
         x: e.focalX,
         y: e.focalY
       });
     })
     .onEnd(e => {
+      if (gesturesDisabled.value) return;
       currentScale.value = fixedWithDecay(e.velocity, currentScale.value, [
         minScale,
         maxScale
@@ -95,9 +112,14 @@ export default function GesturesProvider({
   const doubleTapGestureHandler = Gesture.Tap()
     .numberOfTaps(2)
     .onStart(() => {
+      if (gesturesDisabled.value) return;
+      if (isFocusing.value) {
+        runOnJS(setFocus)(null, null);
+      }
       if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
     })
     .onEnd(({ x, y }) => {
+      if (gesturesDisabled.value) return;
       const origin = { x, y };
 
       if (currentScale.value === maxScale) {
@@ -120,12 +142,15 @@ export default function GesturesProvider({
       }
     });
 
-  const contextValue: GesturesContextType = {
-    gestureHandler: Gesture.Race(
-      Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
-      doubleTapGestureHandler
-    )
-  };
+  const contextValue = useMemo<GesturesContextType>(
+    () => ({
+      gestureHandler: Gesture.Race(
+        Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
+        doubleTapGestureHandler
+      )
+    }),
+    []
+  );
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any

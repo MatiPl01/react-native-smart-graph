@@ -1,10 +1,9 @@
-import { EasingFunctionFactory } from 'react-native-reanimated';
-
-import { DeepRequired } from '@/types/utils';
+// eslint-disable-next-line import/default
+import Animated, { EasingFunctionFactory } from 'react-native-reanimated';
 
 export type AnimationSettings = {
   duration?: number;
-  easing?: EasingFunctionFactory;
+  easing?: Animated.EasingFunction;
   onComplete?: () => void;
 };
 
@@ -33,7 +32,10 @@ export type AnimationsSettings = {
   vertices: Record<string, AnimationSettings | undefined>;
 };
 
-export type AnimationSettingsWithDefaults = DeepRequired<
-  AnimationSettings,
-  ['duration' | 'easing']
->;
+export type AnimationSettingsWithDefaults = {
+  duration: number;
+  // Change this type from Animated.EasingFunction to EasingFunctionFactory
+  // because of incorrect type definition in react-native-reanimated
+  easing: EasingFunctionFactory;
+  onComplete?: () => void;
+};

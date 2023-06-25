@@ -8,7 +8,7 @@ import {
   Vertex
 } from '@/types/graphs';
 import { AnimationsSettings } from '@/types/settings/animations';
-import { FocusSettings } from '@/types/settings/focus';
+import { FocusSettingsWithDefaults } from '@/types/settings/focus';
 
 type GraphState<V, E> = {
   animationsSettings: AnimationsSettings;
@@ -73,7 +73,7 @@ export const useGraphObserver = <V, E>(
 
 type FocusState = {
   focusedVertexKey: null | string;
-  settings?: FocusSettings;
+  settings: FocusSettingsWithDefaults;
 };
 
 export const useFocusObserver = <V, E>(
@@ -81,7 +81,10 @@ export const useFocusObserver = <V, E>(
   active = true
 ): [FocusState, (isActive: boolean) => void] => {
   const [state, setState] = useState<FocusState>({
-    focusedVertexKey: graph.focusedVertex?.key ?? null
+    focusedVertexKey: graph.focusedVertex?.key ?? null,
+    settings: {
+      disableGestures: true
+    }
   });
 
   const isObservingRef = useRef(false);
@@ -90,7 +93,10 @@ export const useFocusObserver = <V, E>(
     focusChanged(vertexKey, settings) {
       setState({
         focusedVertexKey: vertexKey,
-        settings
+        settings: {
+          disableGestures: true,
+          ...settings
+        }
       });
     }
   });

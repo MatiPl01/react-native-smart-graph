@@ -38,9 +38,11 @@ export default abstract class Graph<
     this.observers.add(observer);
   }
 
-  blur(settings?: FocusSettings): void {
+  blur(settings?: AnimationSettings | null): void {
     this.focusedVertexKey = null;
-    this.notifyFocusChange(null, settings);
+    this.notifyFocusChange(null, {
+      animation: settings
+    });
   }
 
   // TODO - remove this method after adding self-loop edges support

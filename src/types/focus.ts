@@ -6,6 +6,7 @@ import { AnimationSettingsWithDefaults } from './settings';
 
 export type FocusData = {
   centerPosition: AnimatedVectorCoordinates;
+  gesturesDisabled: boolean;
   scale: SharedValue<number>;
 };
 

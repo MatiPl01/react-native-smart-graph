@@ -66,6 +66,9 @@ export default function CanvasProvider({
             />
           ]
         : []),
+      // FOCUS
+      // The provider used to handle canvas focus operations
+      <FocusProvider />,
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
       <GesturesProvider
@@ -73,10 +76,7 @@ export default function CanvasProvider({
         maxScale={maxScale}
         minScale={minScale}
         scaleValues={scales}
-      />,
-      // FOCUS
-      // The provider used to handle canvas focus operations
-      <FocusProvider />
+      />
     ],
     [objectFit]
   );

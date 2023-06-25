@@ -17,8 +17,10 @@ import {
   UnboundRandomPlacementSettingsWithDefaults
 } from './placement';
 
+export * from './animations';
 export * from './components';
 export * from './events';
+export * from './layout';
 export * from './placement';
 
 type SharedGraphSettings<
@@ -59,10 +61,10 @@ export type GraphSettingsWithDefaults<
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > = (
-  | (DirectedGraphSettings<V, E, ED> & {
+  | (Omit<DirectedGraphSettings<V, E, ED>, 'animations'> & {
       components: DirectedGraphComponentsSettingsWithDefaults;
     })
-  | (UndirectedGraphSettings<V, E, ED> & {
+  | (Omit<UndirectedGraphSettings<V, E, ED>, 'animations'> & {
       components: UndirectedGraphComponentsSettingsWithDefaults;
     })
 ) & {
