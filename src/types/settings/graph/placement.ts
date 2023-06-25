@@ -28,17 +28,18 @@ type SharedPlacementSettings = {
   minVertexSpacing?: number;
 };
 
-type BoundRandomPlacementSettings = {
+export type BoundRandomPlacementSettings = {
   containerHeight: number;
   containerWidth: number;
   layoutType: 'random';
 };
 
-type UnboundRandomPlacementSettings = {
+export type UnboundRandomPlacementSettings = {
   density?: number;
   layoutType: Exclude<RandomLayoutType, 'random'>;
   minVertexSpacing?: number;
 };
+
 export type UnboundRandomPlacementSettingsWithDefaults =
   DeepRequiredAll<UnboundRandomPlacementSettings>;
 

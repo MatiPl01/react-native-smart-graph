@@ -17,8 +17,10 @@ import {
   UnboundRandomPlacementSettingsWithDefaults
 } from './placement';
 
+export * from './animations';
 export * from './components';
 export * from './events';
+export * from './layout';
 export * from './placement';
 
 type SharedGraphSettings<

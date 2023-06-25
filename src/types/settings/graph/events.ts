@@ -1,15 +1,25 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
-type EdgePressHandler<
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = (data: { edge: ED; position: AnimatedVectorCoordinates }) => void;
-
-export type VertexPressHandler<V> = (data: {
+export type VertexPressEvent<V> = {
   position: AnimatedVectorCoordinates;
   vertex: VertexData<V>;
-}) => void;
+};
+
+export type EdgePressEvent<
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = {
+  edge: ED;
+  position: AnimatedVectorCoordinates;
+};
+
+export type EdgePressHandler<
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+> = (data: EdgePressEvent<E, ED>) => void;
+
+export type VertexPressHandler<V> = (data: VertexPressEvent<V>) => void;
 
 type PressEventsCallbacks<
   V,
