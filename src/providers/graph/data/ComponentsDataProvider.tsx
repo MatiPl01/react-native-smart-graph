@@ -108,10 +108,11 @@ export default function ComponentsDataProvider<
   // (animation settings related to vertices and edges are stored
   // in their respective data objects)
   const layoutAnimationSettings = useMemo<AnimationSettingsWithDefaults>(
-    () => ({
-      ...settings.animations.layout,
-      ...animationsSettings.layout
-    }),
+    () =>
+      ({
+        ...settings.animations.layout,
+        ...animationsSettings.layout
+      } as unknown as AnimationSettingsWithDefaults),
     [animationsSettings, settings.animations.layout]
   );
 

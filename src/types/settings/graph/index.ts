@@ -61,10 +61,10 @@ export type GraphSettingsWithDefaults<
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > = (
-  | (DirectedGraphSettings<V, E, ED> & {
+  | (Omit<DirectedGraphSettings<V, E, ED>, 'animations'> & {
       components: DirectedGraphComponentsSettingsWithDefaults;
     })
-  | (UndirectedGraphSettings<V, E, ED> & {
+  | (Omit<UndirectedGraphSettings<V, E, ED>, 'animations'> & {
       components: UndirectedGraphComponentsSettingsWithDefaults;
     })
 ) & {
