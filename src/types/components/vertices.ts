@@ -18,6 +18,7 @@ export type VertexComponentData<V, E> = {
 
 export type VertexComponentRenderData = {
   currentRadius: SharedValue<number>;
+  focusProgress: SharedValue<number>;
   position: AnimatedVectorCoordinates;
   scale: SharedValue<number>;
 };

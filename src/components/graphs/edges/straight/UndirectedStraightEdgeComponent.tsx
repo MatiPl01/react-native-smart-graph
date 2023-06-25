@@ -34,6 +34,7 @@ function UndirectedStraightEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
+  focusProgress,
   onRender,
   renderers,
   v1Position,
@@ -60,6 +61,7 @@ function UndirectedStraightEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
+      focusProgress,
       labelPosition: { x: centerX, y: centerY }
     });
   }, [edge.key]);
@@ -130,6 +132,7 @@ function UndirectedStraightEdgeComponent<E, V>({
       {renderers.edge({
         animationProgress,
         data: edge.value,
+        focusProgress,
         key: edge.key,
         p1,
         p2
@@ -140,6 +143,7 @@ function UndirectedStraightEdgeComponent<E, V>({
           centerX={centerX}
           centerY={centerY}
           edge={edge}
+          focusProgress={focusProgress}
           height={labelHeight}
           renderer={renderers.label}
           v1Position={v1Position}

@@ -5,16 +5,19 @@ import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useFocusObserver } from '@/hooks';
 import { withGraphData } from '@/providers/graph/data';
 import {
+  EdgeComponentRenderData,
   VertexComponentData,
   VertexComponentRenderData
 } from '@/types/components';
 import { FocusSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import { AnimatedDimensions } from '@/types/layout';
+import { updateComponentsFocusFocus } from '@/utils/animations';
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   canvasDimensions: AnimatedDimensions;
   graph: Graph<V, E>;
+  renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   setFocus: FocusSetter;
   verticesData: Record<string, VertexComponentData<V, E>>;
@@ -24,6 +27,7 @@ function VertexFocusProvider<V, E>({
   // canvasDimensions,
   children,
   graph,
+  renderedEdgesData,
   renderedVerticesData,
   setFocus
 }: // verticesData
@@ -81,12 +85,27 @@ VertexFocusProviderProps<V, E>) {
     }
   );
 
+  useAnimatedReaction(
+    () => ({
+      vertexKey: focusedVertexKey
+    }),
+    ({ vertexKey }) => {
+      // Update focusProgress of all graph components
+      updateComponentsFocusFocus(
+        vertexKey ? { vertices: [vertexKey] } : null,
+        renderedVerticesData,
+        renderedEdgesData
+      );
+    }
+  );
+
   return <>{children}</>;
 }
 
 export default withGraphData(
   VertexFocusProvider,
-  ({ renderedVerticesData, verticesData }) => ({
+  ({ renderedEdgesData, renderedVerticesData, verticesData }) => ({
+    renderedEdgesData,
     renderedVerticesData,
     verticesData
   })

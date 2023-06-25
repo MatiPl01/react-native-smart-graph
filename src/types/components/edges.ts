@@ -28,6 +28,7 @@ type SharedEdgeComponentProps = {
   animatedOrder: SharedValue<number>;
   animationProgress: SharedValue<number>;
   animationSettings: AnimationSettingsWithDefaults;
+  focusProgress: SharedValue<number>;
   onRender: EdgeRenderHandler;
   v1Position: AnimatedVectorCoordinates;
   v1Radius: SharedValue<number>;
@@ -110,6 +111,7 @@ export type EdgeComponentData<
 };
 
 export type EdgeComponentRenderData = {
+  focusProgress: SharedValue<number>;
   labelPosition: AnimatedVectorCoordinates;
 };
 

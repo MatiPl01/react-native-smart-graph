@@ -36,6 +36,10 @@ function EdgeComponent<E, V>({
   const animatedOrder = useSharedValue(order);
   const animatedEdgesCount = useSharedValue(edgesCount);
 
+  // EDGE FOCUS
+  // Edge focus progress
+  const focusProgress = useSharedValue(0);
+
   // Edge mount/unmount animation
   useEffect(() => {
     updateComponentAnimationState(
@@ -63,6 +67,7 @@ function EdgeComponent<E, V>({
     animatedOrder,
     animationProgress,
     edge,
+    focusProgress,
     renderers: arrowRenderer
       ? {
           arrow: arrowRenderer,

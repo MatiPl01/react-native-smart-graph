@@ -16,7 +16,7 @@ export const DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS: AnimationSettingsWithDefa
   };
 
 export const DEFAULT_FOCUS_ANIMATION_SETTINGS: AnimationSettingsWithDefaults = {
-  duration: 250,
+  duration: 500,
   easing: EASING.ease
 };
 

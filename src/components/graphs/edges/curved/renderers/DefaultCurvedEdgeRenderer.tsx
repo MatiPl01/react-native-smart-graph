@@ -6,14 +6,20 @@ import { CurvedEdgeRendererProps } from '@/types/renderer';
 
 export default function DefaultCurvedEdgeRenderer<E>({
   animationProgress,
+  focusProgress,
   path
 }: CurvedEdgeRendererProps<E>) {
   const end = useDerivedValue(() => Math.min(1, animationProgress.value));
+
+  const opacity = useDerivedValue(() =>
+    focusProgress.value >= 0 ? 1 : 1 + 0.75 * focusProgress.value
+  );
 
   return (
     <Path
       color={DEFAULT_EDGE_RENDERER_SETTINGS.color}
       end={end}
+      opacity={opacity}
       path={path}
       strokeWidth={1}
       style='stroke'

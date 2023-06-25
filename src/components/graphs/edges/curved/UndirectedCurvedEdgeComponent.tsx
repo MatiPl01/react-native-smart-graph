@@ -20,6 +20,7 @@ function UndirectedCurvedEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
+  focusProgress,
   onRender,
   renderers,
   v1Position,
@@ -79,6 +80,7 @@ function UndirectedCurvedEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
+      focusProgress,
       labelPosition: { x: parabolaX, y: parabolaY }
     });
   }, [edge.key]);
@@ -101,6 +103,7 @@ function UndirectedCurvedEdgeComponent<E, V>({
       {renderers.edge({
         animationProgress,
         data: edge.value,
+        focusProgress,
         key: edge.key,
         parabolaX,
         parabolaY,
@@ -112,6 +115,7 @@ function UndirectedCurvedEdgeComponent<E, V>({
           centerX={parabolaX}
           centerY={parabolaY}
           edge={edge}
+          focusProgress={focusProgress}
           height={labelHeight}
           renderer={renderers.label}
           v1Position={v1Position}

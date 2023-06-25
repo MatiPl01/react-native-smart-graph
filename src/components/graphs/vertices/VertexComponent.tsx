@@ -47,10 +47,15 @@ function VertexComponent<V, E>({
   // Current vertex radius
   const currentRadius = useSharedValue(0);
 
+  // FOCUS
+  // Vertex focus progress
+  const focusProgress = useSharedValue(0);
+
   useEffect(() => {
     // Call onRender callback on mount
     onRender(key, {
       currentRadius,
+      focusProgress,
       position: { x: positionX, y: positionY },
       scale
     });
@@ -71,6 +76,7 @@ function VertexComponent<V, E>({
     animationProgress,
     currentRadius,
     data: vertex.value,
+    focusProgress,
     key,
     position: { x: positionX, y: positionY },
     radius: componentSettings.radius,
