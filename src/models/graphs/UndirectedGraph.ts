@@ -16,12 +16,12 @@ export default class UndirectedGraph<V, E> extends Graph<
   UndirectedEdge<E, V>,
   UndirectedEdgeData<E>
 > {
-  constructor(data: {
+  constructor(data?: {
     edges?: Array<UndirectedEdgeData<E>>;
     vertices: Array<VertexData<V>>;
   }) {
     super();
-    this.insertBatch(data);
+    if (data) this.insertBatch(data);
   }
 
   override insertBatch(
