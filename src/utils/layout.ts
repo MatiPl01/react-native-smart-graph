@@ -1,5 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
+import { Alignment, Dimensions } from '@/types/layout';
+
 export const findCenterOfPoints = (positions: Array<Vector>): Vector | null => {
   'worklet';
   if (positions.length === 0) {
@@ -11,4 +13,12 @@ export const findCenterOfPoints = (positions: Array<Vector>): Vector | null => {
     x: xSum / positions.length,
     y: ySum / positions.length
   };
+};
+
+export const getAlignedVertexAbsolutePosition = (
+  canvasDimensions: Dimensions,
+  alignment: Alignment,
+  vertexRadius: number
+): Vector => {
+  'worklet';
 };

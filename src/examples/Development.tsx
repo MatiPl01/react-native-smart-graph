@@ -58,10 +58,22 @@ export default function App() {
 
   useEffect(() => {
     setTimeout(() => {
-      graph.focus('A');
+      graph.focus('A', {
+        alignment: {
+          horizontalAlignment: 'left',
+          horizontalOffset: 25
+        }
+      });
     }, 1000);
     setTimeout(() => {
-      graph.focus('E');
+      graph.focus('E', {
+        alignment: {
+          horizontalAlignment: 'right',
+          horizontalOffset: 25,
+          verticalAlignment: 'bottom',
+          verticalOffset: 50
+        }
+      });
     }, 3000);
     setTimeout(() => {
       graph.blur();

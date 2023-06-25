@@ -1,10 +1,10 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
-  AnimationSettings,
   AnimationsSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings/animations';
+import { FocusSettings } from '@/types/settings/focus';
 
 export interface Vertex<V, E> {
   get degree(): number;
@@ -24,10 +24,7 @@ export interface Edge<E, V> {
 export type GraphConnections = Record<string, Array<string>>;
 
 export type GraphObserver = {
-  focusChanged?: (
-    vertexKey: null | string,
-    animationSettings?: AnimationSettings | null
-  ) => void;
+  focusChanged?: (vertexKey: null | string, settings?: FocusSettings) => void;
   graphChanged?: (animationsSettings: AnimationsSettings) => void;
 };
 
@@ -39,9 +36,9 @@ export type OrderedEdges<E, V> = Array<{
 
 export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
-  blur(animationSettings?: AnimationSettings | null): void;
+  blur(settings?: FocusSettings): void;
   clear(animationSettings?: BatchModificationAnimationSettings | null): void;
-  focus(vertexKey: string, animationSettings?: AnimationSettings | null): void;
+  focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<E, V>>;
   get focusedVertex(): Vertex<V, E> | null;

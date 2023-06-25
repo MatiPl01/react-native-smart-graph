@@ -81,6 +81,8 @@ export type GraphProviderAdditionalProps =
   | {
       boundingRect: AnimatedBoundingRect;
       canvasDimensions: AnimatedDimensions;
+      canvasScales: number[];
+      initialCanvasScale: number;
       setFocus: FocusSetter;
       transform: AnimatedCanvasTransform;
     } & AccessibleOverlayContextType;
@@ -105,8 +107,10 @@ export default function GraphProvider<
 >({
   boundingRect,
   canvasDimensions,
+  canvasScales,
   children,
   graph,
+  initialCanvasScale,
   renderLayer,
   renderers,
   setFocus,
@@ -150,9 +154,12 @@ export default function GraphProvider<
       // FOCUS
       // Provider used to focus on a specific vertex
       <VertexFocusProvider
+        availableScales={canvasScales}
         canvasDimensions={canvasDimensions}
         graph={graph}
+        initialScale={initialCanvasScale}
         setFocus={setFocus}
+        vertexRadius={memoSettings.components.vertex.radius}
       />
     ],
     [memoSettings]

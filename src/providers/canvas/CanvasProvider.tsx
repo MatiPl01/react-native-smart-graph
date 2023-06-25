@@ -44,7 +44,7 @@ export default function CanvasProvider({
       // DATA
       // The main provider used to store canvas related data shared
       // across other providers
-      <CanvasDataProvider initialScale={initialScale} />,
+      <CanvasDataProvider initialScale={initialScale} scales={scales} />,
       // TRANSLATION
       // The provider used to handle canvas translation and scale
       // operations

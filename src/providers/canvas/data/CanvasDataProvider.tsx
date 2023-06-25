@@ -1,4 +1,9 @@
-import React, { createContext, PropsWithChildren, useContext } from 'react';
+import React, {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useMemo
+} from 'react';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import {
@@ -7,19 +12,17 @@ import {
   AnimatedVectorCoordinates
 } from '@/types/layout';
 
-export type CanvasDataContextType = {
+type CanvasDataContextType = {
   autoSizingEnabled: SharedValue<boolean>;
   boundingRect: AnimatedBoundingRect;
   canvasDimensions: AnimatedDimensions;
   currentScale: SharedValue<number>;
   currentTranslation: AnimatedVectorCoordinates;
+  initialScale: number;
+  scales: number[];
 };
 
 const CanvasDataContext = createContext(null);
-
-type CanvasDataProviderProps = PropsWithChildren<{
-  initialScale: number;
-}>;
 
 export const useCanvasDataContext = () => {
   const contextValue = useContext(CanvasDataContext);
@@ -33,9 +36,15 @@ export const useCanvasDataContext = () => {
   return contextValue as CanvasDataContextType;
 };
 
+type CanvasDataProviderProps = PropsWithChildren<{
+  initialScale: number;
+  scales: number[];
+}>;
+
 export default function CanvasDataProvider({
   children,
-  initialScale
+  initialScale,
+  scales
 }: CanvasDataProviderProps) {
   // CANVAS
   const canvasWidth = useSharedValue(0);
@@ -53,24 +62,29 @@ export default function CanvasDataProvider({
   // AUTO SIZING
   const autoSizingEnabled = useSharedValue(true);
 
-  const contextValue: CanvasDataContextType = {
-    autoSizingEnabled,
-    boundingRect: {
-      bottom: containerBottom,
-      left: containerLeft,
-      right: containerRight,
-      top: containerTop
-    },
-    canvasDimensions: {
-      height: canvasHeight,
-      width: canvasWidth
-    },
-    currentScale,
-    currentTranslation: {
-      x: translateX,
-      y: translateY
-    }
-  };
+  const contextValue: CanvasDataContextType = useMemo(
+    () => ({
+      autoSizingEnabled,
+      boundingRect: {
+        bottom: containerBottom,
+        left: containerLeft,
+        right: containerRight,
+        top: containerTop
+      },
+      canvasDimensions: {
+        height: canvasHeight,
+        width: canvasWidth
+      },
+      currentScale,
+      currentTranslation: {
+        x: translateX,
+        y: translateY
+      },
+      initialScale,
+      scales
+    }),
+    [scales]
+  );
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any

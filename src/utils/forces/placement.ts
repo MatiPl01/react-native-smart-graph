@@ -5,7 +5,7 @@ import { VertexComponentRenderData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { grahamScan } from '@/utils/algorithms';
-import { findCenterOfPoints } from '@/utils/coordinates';
+import { findCenterOfPoints } from '@/utils/layout';
 import {
   animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,

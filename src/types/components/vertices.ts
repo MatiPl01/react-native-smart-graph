@@ -23,12 +23,6 @@ export type VertexComponentRenderData = {
   scale: SharedValue<number>;
 };
 
-export type FocusedVertexData = {
-  position: AnimatedVectorCoordinates;
-  radius: number;
-  scale: SharedValue<number>;
-};
-
 export type VertexRenderHandler = (
   key: string,
   renderData: VertexComponentRenderData
