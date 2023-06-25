@@ -9,6 +9,7 @@ import {
 import EASING from '@/constants/easings';
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { useTransformContext } from '@/providers/canvas/transform';
+import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,
@@ -20,7 +21,9 @@ import {
 
 type AutoSizingContextType = {
   disableAutoSizing: () => void;
-  enableAutoSizing: () => void;
+  enableAutoSizing: (
+    animationSettings?: AnimationSettingsWithDefaults | null
+  ) => void;
   enableAutoSizingAfterTimeout: () => void;
 };
 
@@ -77,13 +80,27 @@ export default function AutoSizingProvider({
     );
   };
 
-  const enableAutoSizing = () => {
-    autoSizingTimeoutRef.current = null;
-    autoSizingEnabled.value = true;
-    autoSizingTransitionProgress.value = withTiming(1, {
+  const enableAutoSizing = (
+    animationSettings: AnimationSettingsWithDefaults | null = {
       duration: 150,
       easing: EASING.ease
-    });
+    }
+  ) => {
+    autoSizingTimeoutRef.current = null;
+    autoSizingEnabled.value = true;
+    // Crete a smooth transition between the current state and the auto-layout state
+    if (animationSettings) {
+      const { onComplete, ...timingConfig } = animationSettings;
+      autoSizingTransitionProgress.value = withTiming(
+        1,
+        timingConfig,
+        onComplete
+      );
+    }
+    // Otherwise, if animationSettings is null, set the transition progress to 1 immediately
+    else {
+      autoSizingTransitionProgress.value = 1;
+    }
     autoSizingStartScale.value = currentScale.value;
     autoSizingStartTranslation.value = {
       x: translateX.value,
@@ -100,10 +117,7 @@ export default function AutoSizingProvider({
 
   const disableAutoSizing = () => {
     autoSizingEnabled.value = false;
-    autoSizingTransitionProgress.value = withTiming(0, {
-      duration: 150,
-      easing: EASING.ease
-    });
+    autoSizingTransitionProgress.value = 0;
     clearAutoSizingTimeout();
   };
 

@@ -7,11 +7,11 @@ import {
   useRef
 } from 'react';
 import { LayoutChangeEvent } from 'react-native';
-import { withTiming } from 'react-native-reanimated';
+import { runOnJS, withTiming } from 'react-native-reanimated';
 
-import EASING from '@/constants/easings';
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { BoundingRect, Dimensions } from '@/types/layout';
+import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,
@@ -27,7 +27,7 @@ type TransformContextType = {
   handleCanvasRender: (event: LayoutChangeEvent) => void;
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
   resetContainerPosition: (settings?: {
-    animated?: boolean;
+    animationSettings?: AnimationSettingsWithDefaults;
     autoSizing?: {
       disable: () => void;
       enableAfterTimeout: () => void;
@@ -38,12 +38,12 @@ type TransformContextType = {
   scaleContentTo: (
     newScale: number,
     origin?: Vector,
-    animated?: boolean
+    animationSettings?: AnimationSettingsWithDefaults
   ) => void;
   translateContentTo: (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animated?: boolean
+    animationSettings?: AnimationSettingsWithDefaults
   ) => void;
 };
 
@@ -124,7 +124,7 @@ export default function TransformProvider({
 
   const resetContainerPosition = useCallback(
     (settings?: {
-      animated?: boolean;
+      animationSettings?: AnimationSettingsWithDefaults;
       autoSizing?: {
         disable: () => void;
         enableAfterTimeout: () => void;
@@ -158,7 +158,7 @@ export default function TransformProvider({
         ),
         [minScale, maxScale]
       );
-      scaleContentTo(scale, undefined, settings?.animated);
+      scaleContentTo(scale, undefined, settings?.animationSettings);
       translateContentTo(
         calcContainerTranslation(
           objectFit,
@@ -166,7 +166,7 @@ export default function TransformProvider({
           canvasDimensions
         ),
         undefined,
-        settings?.animated
+        settings?.animationSettings
       );
 
       // Enable auto sizing after resetting container position
@@ -210,7 +210,7 @@ export default function TransformProvider({
   const translateContentTo = (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animated?: boolean
+    animationSettings?: AnimationSettingsWithDefaults
   ) => {
     'worklet';
 
@@ -221,11 +221,18 @@ export default function TransformProvider({
       ? clamp(translate.y, clampTo.y)
       : translate.y;
 
-    if (animated) {
-      const timingConfig = { duration: 150, easing: EASING.ease };
+    if (animationSettings) {
+      const { onComplete, ...timingConfig } = animationSettings;
 
       translateX.value = withTiming(newTranslateX, timingConfig);
-      translateY.value = withTiming(newTranslateY, timingConfig);
+      translateY.value = withTiming(
+        newTranslateY,
+        timingConfig,
+        onComplete &&
+          (() => {
+            runOnJS(onComplete)();
+          })
+      );
     } else {
       translateX.value = newTranslateX;
       translateY.value = newTranslateY;
@@ -235,7 +242,7 @@ export default function TransformProvider({
   const scaleContentTo = (
     newScale: number,
     origin?: Vector,
-    animated = false
+    animationSettings?: AnimationSettingsWithDefaults
   ) => {
     'worklet';
     if (origin) {
@@ -251,15 +258,21 @@ export default function TransformProvider({
             (origin.y - translateY.value) * (relativeScale - 1)
         },
         getTranslateClamp(newScale),
-        animated
+        animationSettings
       );
     }
 
-    if (animated) {
-      currentScale.value = withTiming(newScale, {
-        duration: 150,
-        easing: EASING.ease
-      });
+    if (animationSettings) {
+      const { onComplete, ...timingConfig } = animationSettings;
+
+      currentScale.value = withTiming(
+        newScale,
+        timingConfig,
+        onComplete &&
+          (() => {
+            runOnJS(onComplete)();
+          })
+      );
     } else {
       currentScale.value = newScale;
     }

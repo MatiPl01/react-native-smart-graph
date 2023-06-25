@@ -23,6 +23,7 @@ export default abstract class Graph<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
+  private focusedVertexKey: null | string = null;
   private readonly observers: Set<GraphObserver> = new Set();
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
@@ -34,6 +35,11 @@ export default abstract class Graph<
 
   addObserver(observer: GraphObserver): void {
     this.observers.add(observer);
+  }
+
+  blur(animationSettings?: AnimationSettings | null): void {
+    this.focusedVertexKey = null;
+    this.notifyFocusChange(null, animationSettings);
   }
 
   // TODO - remove this method after adding self-loop edges support
@@ -53,7 +59,7 @@ export default abstract class Graph<
       {};
     // Notify observers after all changes to the graph model are made
     if (animationSettings !== null) {
-      this.notifyChange(
+      this.notifyGraphChange(
         createAnimationsSettingsForBatchModification(
           {
             edges: Object.keys(this.edges$),
@@ -80,6 +86,17 @@ export default abstract class Graph<
 
   get edges(): Array<GE> {
     return Object.values(this.edges$);
+  }
+
+  focus(vertexKey: string, animationSettings?: AnimationSettings | null): void {
+    this.focusedVertexKey = vertexKey;
+    this.notifyFocusChange(vertexKey, animationSettings);
+  }
+
+  get focusedVertex(): GV | null {
+    return (
+      (this.focusedVertexKey && this.vertices$[this.focusedVertexKey]) || null
+    );
   }
 
   getEdge(key: string): GE | null {
@@ -130,7 +147,7 @@ export default abstract class Graph<
     this.edges$[edge.key] = edge;
     // Notify change if notifyObservers is set to true
     if (animationsSettings !== null) {
-      this.notifyChange(animationsSettings);
+      this.notifyGraphChange(animationsSettings);
     }
     return edge;
   }
@@ -145,14 +162,23 @@ export default abstract class Graph<
     this.vertices$[vertex.key] = vertex;
     // Notify change if notifyObservers is set to true
     if (animationSettings !== null) {
-      this.notifyChange(animationSettings);
+      this.notifyGraphChange(animationSettings);
     }
     return vertex;
   }
 
-  protected notifyChange(animationsSettings?: AnimationsSettings): void {
+  protected notifyFocusChange(
+    vertexKey: null | string,
+    animationSettings?: AnimationSettings | null
+  ): void {
     this.observers.forEach(observer => {
-      observer.graphChanged(
+      observer.focusChanged?.(vertexKey, animationSettings);
+    });
+  }
+
+  protected notifyGraphChange(animationsSettings?: AnimationsSettings): void {
+    this.observers.forEach(observer => {
+      observer.graphChanged?.(
         animationsSettings ?? {
           edges: {},
           vertices: {}
@@ -199,7 +225,7 @@ export default abstract class Graph<
     data.vertices?.forEach(key => this.removeVertex(key, null));
     // Notify observers after all changes to the graph model are made
     if (animationSettings !== null) {
-      this.notifyChange(
+      this.notifyGraphChange(
         createAnimationsSettingsForBatchModification(
           {
             edges: data.edges,
@@ -235,7 +261,7 @@ export default abstract class Graph<
     delete this.edges$[edge.key];
     // Notify change if notifyObservers is set to true
     if (animationsSettings !== null) {
-      this.notifyChange(animationsSettings);
+      this.notifyGraphChange(animationsSettings);
     }
   }
 
@@ -255,7 +281,7 @@ export default abstract class Graph<
     delete this.vertices$[key];
     // Notify change if notifyObservers is set to true
     if (animationsSettings !== null) {
-      this.notifyChange(animationsSettings);
+      this.notifyGraphChange(animationsSettings);
     }
 
     return vertex.value;

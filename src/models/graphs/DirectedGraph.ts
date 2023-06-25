@@ -43,7 +43,7 @@ export default class DirectedGraph<V, E> extends Graph<
     edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
     if (animationSettings) {
-      this.notifyChange(
+      this.notifyGraphChange(
         createAnimationsSettingsForBatchModification({
           edges: edges?.map(({ key }) => key),
           vertices: vertices?.map(({ key }) => key)

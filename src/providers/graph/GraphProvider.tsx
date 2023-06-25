@@ -4,8 +4,9 @@ import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
+import { FocusSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
-import { AnimatedBoundingRect } from '@/types/layout';
+import { AnimatedBoundingRect, AnimatedDimensions } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings, GraphSettingsWithDefaults } from '@/types/settings';
 import {
@@ -23,6 +24,7 @@ import {
 } from './layout';
 import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
 import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
+import VertexFocusProvider from './transform/VertexFocusProvider';
 
 const getLayoutProviders = <
   V,
@@ -78,6 +80,8 @@ const getEventsProviders = <
 export type GraphProviderAdditionalProps =
   | {
       boundingRect: AnimatedBoundingRect;
+      canvasDimensions: AnimatedDimensions;
+      setFocus: FocusSetter;
       transform: AnimatedCanvasTransform;
     } & AccessibleOverlayContextType;
 
@@ -100,10 +104,12 @@ export default function GraphProvider<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >({
   boundingRect,
+  canvasDimensions,
   children,
   graph,
   renderLayer,
   renderers,
+  setFocus,
   settings,
   transform
 }: GraphProviderProps<V, E, ED>) {
@@ -140,7 +146,14 @@ export default function GraphProvider<
       ...getLayoutProviders(graph, memoSettings),
       // EVENTS
       // Press events provider
-      ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer)
+      ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
+      // FOCUS
+      // Provider used to focus on a specific vertex
+      <VertexFocusProvider
+        canvasDimensions={canvasDimensions}
+        graph={graph}
+        setFocus={setFocus}
+      />
     ],
     [memoSettings]
   );

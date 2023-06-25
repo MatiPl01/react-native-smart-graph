@@ -2,6 +2,7 @@ import React, { memo, PropsWithChildren } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
+import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import {
   useAutoSizingContext,
@@ -52,7 +53,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
 
   const handleReset = () => {
     resetContainerPosition({
-      animated: true,
+      animationSettings: DEFAULT_GESTURE_ANIMATION_SETTINGS,
       autoSizing: autoSizingContext
         ? {
             disable: autoSizingContext.disableAutoSizing,
