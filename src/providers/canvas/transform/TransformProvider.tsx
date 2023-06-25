@@ -65,13 +65,15 @@ type TransformProviderProps = PropsWithChildren<{
   maxScale: number;
   minScale: number;
   objectFit: ObjectFit;
+  padding: BoundingRect;
 }>;
 
 export default function TransformProvider({
   children,
   maxScale,
   minScale,
-  objectFit
+  objectFit,
+  padding
 }: TransformProviderProps) {
   // CONTEXT VALUES
   // Canvas data
@@ -154,7 +156,8 @@ export default function TransformProvider({
             height: containerBoundingRect.bottom - containerBoundingRect.top,
             width: containerBoundingRect.right - containerBoundingRect.left
           },
-          canvasDimensions
+          canvasDimensions,
+          padding
         ),
         [minScale, maxScale]
       );
@@ -163,7 +166,8 @@ export default function TransformProvider({
         calcContainerTranslation(
           objectFit,
           containerBoundingRect,
-          canvasDimensions
+          canvasDimensions,
+          padding
         ),
         undefined,
         settings?.animationSettings
@@ -183,27 +187,16 @@ export default function TransformProvider({
   } => {
     'worklet';
 
+    const leftLimit = (-containerLeft.value + padding.left) * scale;
+    const rightLimit =
+      canvasWidth.value - (containerRight.value + padding.right) * scale;
+    const topLimit = (-containerTop.value + padding.top) * scale;
+    const bottomLimit =
+      canvasHeight.value - (containerBottom.value + padding.bottom) * scale;
+
     return {
-      x: [
-        Math.min(
-          -containerLeft.value * scale,
-          canvasWidth.value - containerRight.value * scale
-        ),
-        Math.max(
-          canvasWidth.value - containerRight.value * scale,
-          -containerLeft.value * scale
-        )
-      ],
-      y: [
-        Math.min(
-          -containerTop.value * scale,
-          canvasHeight.value - containerBottom.value * scale
-        ),
-        Math.max(
-          canvasHeight.value - containerBottom.value * scale,
-          -containerTop.value * scale
-        )
-      ]
+      x: [Math.min(leftLimit, rightLimit), Math.max(rightLimit, leftLimit)],
+      y: [Math.min(topLimit, bottomLimit), Math.max(bottomLimit, topLimit)]
     };
   };
 

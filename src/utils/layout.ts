@@ -1,6 +1,12 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { Alignment, Dimensions } from '@/types/layout';
+import {
+  Alignment,
+  AxisSpacing,
+  BoundingRect,
+  Dimensions,
+  Spacing
+} from '@/types/layout';
 
 export const findCenterOfPoints = (positions: Array<Vector>): Vector | null => {
   'worklet';
@@ -53,4 +59,39 @@ export const getAlignedVertexAbsolutePosition = (
       : canvasDimensions.height / 2;
 
   return { x, y };
+};
+
+const ALL_SPACING_KEYS = new Set(['bottom', 'left', 'right', 'top']);
+
+const isAllSpacing = (spacing: Spacing): spacing is BoundingRect =>
+  typeof spacing === 'object' &&
+  Object.keys(spacing).every(value => ALL_SPACING_KEYS.has(value));
+
+export const updateSpacing = (spacing?: Spacing): BoundingRect => {
+  if (!spacing) {
+    return { bottom: 0, left: 0, right: 0, top: 0 };
+  }
+  if (!isNaN(spacing as number)) {
+    return {
+      bottom: spacing as number,
+      left: spacing as number,
+      right: spacing as number,
+      top: spacing as number
+    };
+  }
+  if (isAllSpacing(spacing)) {
+    return Object.fromEntries(
+      ([...ALL_SPACING_KEYS] as (keyof BoundingRect)[]).map(key => [
+        key,
+        spacing[key] ?? 0
+      ])
+    ) as BoundingRect;
+  }
+  const { horizontal, vertical } = spacing as AxisSpacing;
+  return {
+    bottom: vertical ?? 0,
+    left: horizontal ?? 0,
+    right: horizontal ?? 0,
+    top: vertical ?? 0
+  };
 };

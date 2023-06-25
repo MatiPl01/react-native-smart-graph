@@ -9,6 +9,7 @@ import {
 import EASING from '@/constants/easings';
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { useTransformContext } from '@/providers/canvas/transform';
+import { BoundingRect } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { ObjectFit } from '@/types/views';
 import {
@@ -39,6 +40,7 @@ type AutoSizingProviderProps = PropsWithChildren<{
   maxScale: number;
   minScale: number;
   objectFit: ObjectFit;
+  padding: BoundingRect;
 }>;
 
 export default function AutoSizingProvider({
@@ -46,7 +48,8 @@ export default function AutoSizingProvider({
   children,
   maxScale,
   minScale,
-  objectFit
+  objectFit,
+  padding
 }: AutoSizingProviderProps) {
   // CONTEXT VALUES
   // Canvas data context values
@@ -160,7 +163,8 @@ export default function AutoSizingProvider({
                 height: boundingRect.bottom - boundingRect.top,
                 width: boundingRect.right - boundingRect.left
               },
-              canvasDimensions
+              canvasDimensions,
+              padding
             ),
             [minScale, maxScale]
           )
@@ -171,7 +175,12 @@ export default function AutoSizingProvider({
         calcTranslationOnProgress(
           transitionProgress,
           startTranslation,
-          calcContainerTranslation(objectFit, boundingRect, canvasDimensions)
+          calcContainerTranslation(
+            objectFit,
+            boundingRect,
+            canvasDimensions,
+            padding
+          )
         )
       );
     },
