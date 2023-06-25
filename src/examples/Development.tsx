@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -55,6 +55,18 @@ export default function App() {
       }),
     []
   );
+
+  useEffect(() => {
+    setTimeout(() => {
+      graph.focus('A');
+    }, 1000);
+    setTimeout(() => {
+      graph.focus('E');
+    }, 3000);
+    setTimeout(() => {
+      graph.blur();
+    }, 5000);
+  }, [graph]);
 
   return (
     <SafeAreaView style={styles.container}>

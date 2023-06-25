@@ -2,6 +2,7 @@ import { createContext, PropsWithChildren, useContext } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
 
+import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useAutoSizingContext } from '@/providers/canvas/auto';
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { useTransformContext } from '@/providers/canvas/transform';
@@ -100,11 +101,19 @@ export default function GesturesProvider({
       const origin = { x, y };
 
       if (currentScale.value === maxScale) {
-        scaleContentTo(initialScale, origin, true);
+        scaleContentTo(
+          initialScale,
+          origin,
+          DEFAULT_GESTURE_ANIMATION_SETTINGS
+        );
       } else {
         // Find first scale that is bigger than current scale
         const newScale = scaleValues.find(scale => scale > currentScale.value);
-        scaleContentTo(newScale ?? maxScale, origin, true);
+        scaleContentTo(
+          newScale ?? maxScale,
+          origin,
+          DEFAULT_GESTURE_ANIMATION_SETTINGS
+        );
       }
       if (autoSizingContext) {
         runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();

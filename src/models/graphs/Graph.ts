@@ -37,9 +37,9 @@ export default abstract class Graph<
     this.observers.add(observer);
   }
 
-  blur(): void {
+  blur(animationSettings?: AnimationSettings | null): void {
     this.focusedVertexKey = null;
-    this.notifyFocusChange(null);
+    this.notifyFocusChange(null, animationSettings);
   }
 
   // TODO - remove this method after adding self-loop edges support
@@ -88,9 +88,9 @@ export default abstract class Graph<
     return Object.values(this.edges$);
   }
 
-  focus(vertexKey: string): void {
+  focus(vertexKey: string, animationSettings?: AnimationSettings | null): void {
     this.focusedVertexKey = vertexKey;
-    this.notifyFocusChange(vertexKey);
+    this.notifyFocusChange(vertexKey, animationSettings);
   }
 
   get focusedVertex(): GV | null {
@@ -167,9 +167,12 @@ export default abstract class Graph<
     return vertex;
   }
 
-  protected notifyFocusChange(vertexKey: null | string): void {
+  protected notifyFocusChange(
+    vertexKey: null | string,
+    animationSettings?: AnimationSettings | null
+  ): void {
     this.observers.forEach(observer => {
-      observer.focusChanged?.(vertexKey);
+      observer.focusChanged?.(vertexKey, animationSettings);
     });
   }
 

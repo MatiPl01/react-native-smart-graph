@@ -11,7 +11,7 @@ import { ObjectFit } from '@/types/views';
 import { AutoSizingProvider } from './auto';
 import { CanvasDataProvider } from './data';
 import { GesturesProvider } from './gestures';
-import { TransformProvider } from './transform';
+import { FocusProvider, TransformProvider } from './transform';
 
 type CanvasProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
@@ -73,7 +73,10 @@ export default function CanvasProvider({
         maxScale={maxScale}
         minScale={minScale}
         scaleValues={scales}
-      />
+      />,
+      // FOCUS
+      // The provider used to handle canvas focus operations
+      <FocusProvider />
     ],
     [objectFit]
   );
