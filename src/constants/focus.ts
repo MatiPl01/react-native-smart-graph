@@ -7,4 +7,4 @@ export const DEFAULT_ALIGNMENT_SETTINGS: Required<Alignment> = {
   verticalOffset: 0
 };
 
-export const DEFAULT_FOCUS_SCALE_MULTIPLIER = 2;
+export const DEFAULT_FOCUS_SCALE_MULTIPLIER = 4;

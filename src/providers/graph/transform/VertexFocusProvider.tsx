@@ -13,7 +13,10 @@ import { AnimatedDimensions } from '@/types/layout';
 import { FocusedVertexData } from '@/types/settings/focus';
 import { updateComponentsFocus } from '@/utils/animations';
 import { getFocusedVertexData } from '@/utils/focus';
-import { getAlignedVertexAbsolutePosition } from '@/utils/layout';
+import {
+  getAlignedVertexAbsolutePosition,
+  getCoordinatesRelativeToCenter
+} from '@/utils/layout';
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   availableScales: number[];
@@ -96,13 +99,16 @@ function VertexFocusProvider<V, E>({
     vertexData => {
       if (!vertexData) return;
       // Calculate vertex position based on the alignment settings
-      const { x: dx, y: dy } = getAlignedVertexAbsolutePosition(
+      const { x: dx, y: dy } = getCoordinatesRelativeToCenter(
         vertexData.canvasDimensions,
-        vertexData.alignment,
-        vertexData.radius
+        getAlignedVertexAbsolutePosition(
+          vertexData.canvasDimensions,
+          vertexData.alignment,
+          vertexData.radius * vertexData.scale
+        )
       );
-      focusX.value = vertexData.x + dx;
-      focusY.value = vertexData.y + dy;
+      focusX.value = vertexData.x - dx / vertexData.scale;
+      focusY.value = vertexData.y - dy / vertexData.scale;
       focusScale.value = vertexData.scale;
     }
   );

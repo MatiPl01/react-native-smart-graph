@@ -61,17 +61,18 @@ export default function App() {
       graph.focus('A', {
         alignment: {
           horizontalAlignment: 'left',
-          horizontalOffset: 25
-        }
+          horizontalOffset: 50
+        },
+        vertexScale: 3
       });
     }, 1000);
     setTimeout(() => {
       graph.focus('E', {
         alignment: {
           horizontalAlignment: 'right',
-          horizontalOffset: 25,
+          horizontalOffset: 50,
           verticalAlignment: 'bottom',
-          verticalOffset: 50
+          verticalOffset: 150
         }
       });
     }, 3000);
