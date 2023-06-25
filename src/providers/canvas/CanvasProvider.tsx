@@ -6,7 +6,9 @@ import {
   INITIAL_SCALE
 } from '@/constants/views';
 import { ContextProviderComposer } from '@/providers/utils';
+import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
+import { updateSpacing } from '@/utils/layout';
 
 import { AutoSizingProvider } from './auto';
 import { CanvasDataProvider } from './data';
@@ -17,6 +19,7 @@ type CanvasProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
   initialScale?: number;
   objectFit?: ObjectFit;
+  padding?: Spacing;
   scales?: number[];
 }>;
 
@@ -25,6 +28,7 @@ export default function CanvasProvider({
   children,
   initialScale = INITIAL_SCALE,
   objectFit = 'none',
+  padding,
   scales = DEFAULT_SCALES
 }: CanvasProviderProps) {
   // Validate parameters
@@ -38,6 +42,7 @@ export default function CanvasProvider({
   const minScale = scales[0]!;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const maxScale = scales[scales.length - 1]!;
+  const updatedPadding = useMemo(() => updateSpacing(padding), [padding]);
 
   const providers = useMemo(
     () => [
@@ -52,6 +57,7 @@ export default function CanvasProvider({
         maxScale={maxScale}
         minScale={minScale}
         objectFit={objectFit}
+        padding={updatedPadding}
       />,
       // AUTO SIZING (optional)
       // The provider used to handle canvas auto sizing based on
@@ -63,6 +69,7 @@ export default function CanvasProvider({
               maxScale={maxScale}
               minScale={minScale}
               objectFit={objectFit}
+              padding={updatedPadding}
             />
           ]
         : []),

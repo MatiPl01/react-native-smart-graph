@@ -50,3 +50,12 @@ export type Alignment = {
   verticalAlignment?: VerticalAlignment;
   verticalOffset?: number;
 };
+
+export type AllSpacing = Partial<BoundingRect>;
+
+export type AxisSpacing = {
+  horizontal?: number;
+  vertical?: number;
+};
+
+export type Spacing = AllSpacing | AxisSpacing | number;

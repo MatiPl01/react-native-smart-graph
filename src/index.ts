@@ -46,6 +46,7 @@ export {
 export {
   type Alignment,
   type HorizontalAlignment,
+  type Spacing,
   type VerticalAlignment
 } from '@/types/layout';
 export {

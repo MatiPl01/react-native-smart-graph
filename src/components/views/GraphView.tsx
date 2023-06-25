@@ -11,6 +11,7 @@ import {
   useTransformContext
 } from '@/providers/canvas';
 import CanvasProvider from '@/providers/canvas/CanvasProvider';
+import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
 
@@ -21,6 +22,7 @@ type GraphViewProps = PropsWithChildren<{
   controls?: boolean;
   initialScale?: number;
   objectFit?: ObjectFit;
+  padding?: Spacing;
   scales?: number[];
 }>;
 

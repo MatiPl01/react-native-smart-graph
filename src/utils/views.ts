@@ -5,11 +5,17 @@ import { ObjectFit } from '@/types/views';
 
 export const calcContainerScale = (
   objectFit: ObjectFit,
-  { height: containerHeight, width: containerWidth }: Dimensions,
-  { height: canvasHeight, width: canvasWidth }: Dimensions
+  containerDimensions: Dimensions,
+  { height: canvasHeight, width: canvasWidth }: Dimensions,
+  padding: BoundingRect
 ): number => {
   'worklet';
   let scale = 1;
+
+  const containerWidth =
+    containerDimensions.width + padding.left + padding.right;
+  const containerHeight =
+    containerDimensions.height + padding.top + padding.bottom;
 
   switch (objectFit) {
     case 'contain':
@@ -37,7 +43,8 @@ export const calcContainerScale = (
 export const calcContainerTranslation = (
   objectFit: ObjectFit,
   { bottom, left, right, top }: BoundingRect,
-  { height: canvasHeight, width: canvasWidth }: Dimensions
+  { height: canvasHeight, width: canvasWidth }: Dimensions,
+  padding: BoundingRect
 ): { x: number; y: number } => {
   'worklet';
   let x = 0;
@@ -46,8 +53,10 @@ export const calcContainerTranslation = (
   switch (objectFit) {
     case 'contain':
     case 'cover':
-      x = (-left / (right - left)) * canvasWidth;
-      y = (-top / (bottom - top)) * canvasHeight;
+      const containerWidth = right - left + padding.left + padding.right;
+      const containerHeight = bottom - top + padding.top + padding.bottom;
+      x = ((-left + padding.left) / containerWidth) * canvasWidth;
+      y = ((-top + padding.top) / containerHeight) * canvasHeight;
       break;
   }
 
