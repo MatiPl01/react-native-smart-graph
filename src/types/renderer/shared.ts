@@ -4,6 +4,7 @@ import { AnimatedVectorCoordinates } from '@/types/layout';
 
 export type SharedRenderersProps = {
   animationProgress: SharedValue<number>;
+  focusProgress: SharedValue<number>;
 };
 
 export type VertexRendererProps<V> = SharedRenderersProps & {

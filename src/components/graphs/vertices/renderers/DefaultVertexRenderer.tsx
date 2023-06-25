@@ -8,6 +8,7 @@ import { VertexRendererProps } from '@/types/renderer';
 export default function DefaultVertexRenderer<V>({
   animationProgress,
   currentRadius,
+  focusProgress,
   key,
   position: { x, y },
   radius,
@@ -34,12 +35,16 @@ export default function DefaultVertexRenderer<V>({
     { scale: Math.max(0, currentRadius.value / radius) }
   ]);
 
+  const opacity = useDerivedValue(() =>
+    focusProgress.value >= 0 ? 1 : 1 + 0.75 * focusProgress.value
+  );
+
   if (font === null) {
     return null;
   }
 
   return (
-    <Group transform={transform}>
+    <Group opacity={opacity} transform={transform}>
       <Circle
         color={DEFAULT_VERTEX_RENDERER_SETTINGS.border.color}
         r={radius}

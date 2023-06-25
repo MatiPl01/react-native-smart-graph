@@ -24,6 +24,7 @@ function DirectedCurvedEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
+  focusProgress,
   onRender,
   renderers,
   v1Position,
@@ -71,6 +72,7 @@ function DirectedCurvedEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
+      focusProgress,
       labelPosition: { x: parabolaX, y: parabolaY }
     });
   }, [edge.key]);
@@ -170,6 +172,7 @@ function DirectedCurvedEdgeComponent<E, V>({
       {renderers.edge({
         animationProgress,
         data: edge.value,
+        focusProgress,
         key: edge.key,
         parabolaX,
         parabolaY,
@@ -178,6 +181,7 @@ function DirectedCurvedEdgeComponent<E, V>({
       <EdgeArrowComponent
         animationProgress={animationProgress}
         directionVector={dirVec}
+        focusProgress={focusProgress}
         height={arrowHeight}
         renderer={renderers.arrow}
         tipPosition={arrowTipPosition}
@@ -190,6 +194,7 @@ function DirectedCurvedEdgeComponent<E, V>({
           centerX={parabolaX}
           centerY={parabolaY}
           edge={edge}
+          focusProgress={focusProgress}
           height={labelHeight}
           renderer={renderers.label}
           v1Position={v1Position}
