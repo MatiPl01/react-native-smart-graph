@@ -329,7 +329,7 @@ PODS:
   - React-jsinspector (0.71.11)
   - React-logger (0.71.11):
     - glog
-  - react-native-skia (0.1.193):
+  - react-native-skia (0.1.195):
     - React
     - React-callinvoker
     - React-Core
@@ -419,11 +419,12 @@ PODS:
     - React-perflogger (= 0.71.11)
   - RNGestureHandler (2.10.2):
     - React-Core
-  - RNReanimated (3.2.0):
+  - RNReanimated (3.3.0):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
     - glog
+    - hermes-engine
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -433,6 +434,7 @@ PODS:
     - React-Core/RCTWebSocket
     - React-CoreModules
     - React-cxxreact
+    - React-hermes
     - React-jsi
     - React-jsiexecutor
     - React-jsinspector
@@ -648,7 +650,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 18b5b33c5f2687a784a61bc8176611b73524ae77
   React-jsinspector: b6ed4cb3ffa27a041cd440300503dc512b761450
   React-logger: 186dd536128ae5924bc38ed70932c00aa740cd5b
-  react-native-skia: e92aaf74c38d71feb315deed516a91d211f90553
+  react-native-skia: a9100697e223b7c62218e6eb7ccb5bf23fd3b0d6
   React-perflogger: e706562ab7eb8eb590aa83a224d26fa13963d7f2
   React-RCTActionSheet: 57d4bd98122f557479a3359ad5dad8e109e20c5a
   React-RCTAnimation: ccf3ef00101ea74bda73a045d79a658b36728a60
@@ -663,7 +665,7 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: 4817d63dbc9d658f8dc0ec56bd9b83ce531129f0
   ReactCommon: 08723d2ed328c5cbcb0de168f231bc7bae7f8aa1
   RNGestureHandler: f75d81410b40aaa99e71ae8f8bb7a88620c95042
-  RNReanimated: c931b356bda56c0196110bdc462e48e4c2668dc3
+  RNReanimated: 9976fbaaeb8a188c36026154c844bf374b3b7eeb
   RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   Yoga: f7decafdc5e8c125e6fa0da38a687e35238420fa

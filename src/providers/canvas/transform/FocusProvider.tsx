@@ -7,11 +7,13 @@ import {
   useState
 } from 'react';
 import {
+  SharedValue,
   useAnimatedReaction,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
 
+import { DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useAutoSizingContext } from '@/providers/canvas/auto';
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { FocusData, FocusSetter } from '@/types/focus';
@@ -21,6 +23,8 @@ import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 import { useTransformContext } from './TransformProvider';
 
 type FocusContextType = {
+  gesturesDisabled: SharedValue<boolean>;
+  isFocusing: SharedValue<boolean>;
   setFocus: FocusSetter;
 };
 
@@ -54,11 +58,16 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // OTHER VALUES
   // Focused point data
   const [focusData, setFocusData] = useState<FocusData | null>(null);
+  // Helper value for disabling gestures
+  const gesturesDisabled = useSharedValue(false);
   // Helper values for focus animation
   const focusStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
   const focusStartScale = useSharedValue<number>(0);
   const focusTransitionProgress = useSharedValue(0);
   const focusEnabled = useSharedValue(false);
+  // This value is used to trigger graph model change on blur
+  // after the user event that triggered the focus end
+  const isFocusing = useSharedValue(true);
 
   const setFocus = useCallback(
     (
@@ -66,8 +75,12 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       animationSettings: AnimationSettingsWithDefaults | null
     ) => {
       if (data) {
+        isFocusing.value = true;
+        gesturesDisabled.value = data.gesturesDisabled;
         startFocusing(data, animationSettings);
       } else {
+        isFocusing.value = false;
+        gesturesDisabled.value = false;
         stopFocusing(animationSettings);
       }
     },
@@ -106,20 +119,20 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   ) => {
     setFocusData(null);
     focusEnabled.value = false;
-    // Re-enable auto sizing if it was disabled
+    // Don't do anything if there is no animation settings
+    if (animationSettings === null) return;
     if (autoSizingContext) {
-      autoSizingContext.enableAutoSizing(animationSettings);
+      // Re-enable auto sizing if it was disabled
+      autoSizingContext.enableAutoSizing(
+        animationSettings ?? DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
+      );
     }
     // If auto sizing is not used, reset the content position and scale
     // to default values
     else {
-      resetContainerPosition(
+      resetContainerPosition({
         animationSettings
-          ? {
-              animationSettings
-            }
-          : undefined
-      );
+      });
     }
   };
 
@@ -166,7 +179,10 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     }
   );
 
-  const contextValue = useMemo<FocusContextType>(() => ({ setFocus }), []);
+  const contextValue = useMemo<FocusContextType>(
+    () => ({ gesturesDisabled, isFocusing, setFocus }),
+    []
+  );
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any

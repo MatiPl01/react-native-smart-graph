@@ -1,129 +1,118 @@
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useMemo } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import {
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity
+} from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Easing } from 'react-native-reanimated';
 
 import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
 
-import { DefaultEdgeLabelRenderer, DirectedGraphComponent } from '..';
+import {
+  DirectedEdgeData,
+  DirectedGraphComponent,
+  FocusSettings,
+  VertexData
+} from '..';
+
+const FOCUS_SETTINGS: FocusSettings = {
+  alignment: {
+    horizontalAlignment: 'left',
+    horizontalOffset: 25
+  },
+  animation: {
+    duration: 250,
+    easing: Easing.inOut(Easing.ease)
+  },
+  disableGestures: false
+};
+
+const ACHIEVEMENTS_GRAPH: {
+  edges: DirectedEdgeData<string>[];
+  vertices: VertexData<string>[];
+} = {
+  edges: [
+    { from: 'root', key: 'root-sport', to: 'sport', value: '' },
+    { from: 'root', key: 'root-diet', to: 'diet', value: '' },
+    { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
+    { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
+    { from: 'root', key: 'root-reading', to: 'reading', value: '' }
+  ],
+  vertices: [
+    { key: 'root', value: 'Root' },
+    { key: 'sport', value: 'Sport' },
+    { key: 'diet', value: 'Diet' },
+    { key: 'sleep', value: 'Sleep' },
+    { key: 'meditation', value: 'Meditation' },
+    { key: 'reading', value: 'Reading' }
+  ]
+};
 
 export default function App() {
-  const graph = useMemo(
-    () =>
-      new DirectedGraph({
-        edges: [
-          {
-            from: 'A',
-            key: 'AB',
-            to: 'B',
-            value: 'AB'
-          },
-
-          {
-            from: 'A',
-            key: 'AC',
-            to: 'C',
-            value: 'AC'
-          },
-          {
-            from: 'C',
-            key: 'CD',
-            to: 'D',
-            value: 'CD'
-          },
-          {
-            from: 'C',
-            key: 'CE',
-            to: 'E',
-            value: 'CE'
-          },
-          {
-            from: 'B',
-            key: 'BF',
-            to: 'F',
-            value: 'BF'
-          }
-        ],
-        vertices: [
-          { key: 'A', value: 'A' },
-          { key: 'B', value: 'B' },
-          { key: 'C', value: 'C' },
-          { key: 'D', value: 'D' },
-          { key: 'E', value: 'E' },
-          { key: 'F', value: 'F' }
-        ]
-      }),
-    []
-  );
+  const graph = useMemo(() => new DirectedGraph(), []);
 
   useEffect(() => {
-    setTimeout(() => {
-      graph.focus('A', {
-        alignment: {
-          horizontalAlignment: 'left',
-          horizontalOffset: 50
-        },
-        vertexScale: 3
-      });
-    }, 1000);
-    setTimeout(() => {
-      graph.focus('E', {
-        alignment: {
-          horizontalAlignment: 'right',
-          horizontalOffset: 50,
-          verticalAlignment: 'bottom',
-          verticalOffset: 150
-        }
-      });
-    }, 3000);
-    setTimeout(() => {
-      graph.blur();
-    }, 5000);
+    graph.insertBatch(ACHIEVEMENTS_GRAPH);
   }, [graph]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <GestureHandlerRootView style={styles.gestureHandler}>
-        <View style={styles.background}>
-          <GraphView controls objectFit='contain'>
-            <DirectedGraphComponent
-              renderers={{
-                label: DefaultEdgeLabelRenderer
-              }}
-              settings={{
-                events: {
-                  onVertexLongPress({ vertex: { key } }) {
-                    console.log(`Vertex ${key} long pressed`);
-                  },
-                  onVertexPress({ vertex: { key } }) {
-                    console.log(`Vertex ${key} pressed`);
-                  }
-                },
-                layout: {
-                  managedBy: 'forces'
-                },
-                placement: {
-                  strategy: 'circle'
-                }
-              }}
-              graph={graph}
-            />
-          </GraphView>
-        </View>
-      </GestureHandlerRootView>
-    </SafeAreaView>
+    <GestureHandlerRootView style={styles.background}>
+      <StatusBar
+        backgroundColor='transparent'
+        barStyle='light-content'
+        translucent
+      />
+      <SafeAreaView style={styles.container}>
+        <GraphView objectFit='contain'>
+          <DirectedGraphComponent
+            settings={{
+              events: {
+                onVertexPress: ({ vertex: { key } }) =>
+                  graph.focus(key, FOCUS_SETTINGS)
+              },
+              placement: {
+                minVertexSpacing: 100,
+                strategy: 'orbits'
+              }
+            }}
+            graph={graph}
+          />
+        </GraphView>
+        <TouchableOpacity
+          onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
+          style={styles.backButton}>
+          <FontAwesomeIcon
+            icon={faChevronLeft}
+            size={32}
+            style={{ color: 'white' }}
+          />
+        </TouchableOpacity>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignItems: 'center',
+    height: 32,
+    justifyContent: 'center',
+    left: 16,
+    position: 'absolute',
+    top: 64,
+    width: 32
+  },
   background: {
     backgroundColor: 'black',
     flex: 1
   },
   container: {
-    flex: 1
-  },
-  gestureHandler: {
-    flex: 1
+    flex: 1,
+    position: 'relative'
   }
 });

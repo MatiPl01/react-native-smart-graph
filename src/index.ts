@@ -52,8 +52,10 @@ export {
   type CurvedEdgeRendererProps,
   type DirectedGraphRenderers,
   type EdgeArrowRendererProps,
+  type EdgeLabelRendererProps,
   type StraightEdgeRendererProps,
-  type UndirectedGraphRenderers
+  type UndirectedGraphRenderers,
+  type VertexRendererProps
 } from '@/types/renderer';
 export {
   type AnimationSettings,

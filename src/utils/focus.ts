@@ -4,6 +4,7 @@ import {
   DEFAULT_FOCUS_SCALE_MULTIPLIER
 } from '@/constants/focus';
 import { VertexComponentRenderData } from '@/types/components';
+import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
 
 export const getFocusedVertexData = (
@@ -14,10 +15,13 @@ export const getFocusedVertexData = (
   initialScale: number,
   settings?: FocusSettings
 ): FocusedVertexData => {
-  const animationSettings = {
-    ...DEFAULT_FOCUS_ANIMATION_SETTINGS,
-    ...settings?.animation
-  };
+  const animationSettings =
+    settings?.animation !== null
+      ? ({
+          ...DEFAULT_FOCUS_ANIMATION_SETTINGS,
+          ...settings?.animation
+        } as AnimationSettingsWithDefaults)
+      : null;
 
   const focusedVertexData =
     focusedVertexKey && renderedVerticesData[focusedVertexKey];

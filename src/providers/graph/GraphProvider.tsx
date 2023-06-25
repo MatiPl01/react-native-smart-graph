@@ -1,4 +1,5 @@
 import { PropsWithChildren, useMemo } from 'react';
+import { SharedValue } from 'react-native-reanimated';
 
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
@@ -83,6 +84,7 @@ export type GraphProviderAdditionalProps =
       canvasDimensions: AnimatedDimensions;
       canvasScales: number[];
       initialCanvasScale: number;
+      isFocusing: SharedValue<boolean>;
       setFocus: FocusSetter;
       transform: AnimatedCanvasTransform;
     } & AccessibleOverlayContextType;
@@ -111,6 +113,7 @@ export default function GraphProvider<
   children,
   graph,
   initialCanvasScale,
+  isFocusing,
   renderLayer,
   renderers,
   setFocus,
@@ -158,6 +161,7 @@ export default function GraphProvider<
         canvasDimensions={canvasDimensions}
         graph={graph}
         initialScale={initialCanvasScale}
+        isFocusing={isFocusing}
         setFocus={setFocus}
         vertexRadius={memoSettings.components.vertex.radius}
       />
