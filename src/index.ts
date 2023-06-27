@@ -27,6 +27,9 @@ export { default as GraphView } from '@/components/views/GraphView';
 // EXAMPLES
 export * from '@/examples';
 
+// HOOKS
+export * from '@/hooks';
+
 // TYPES
 export {
   type DirectedEdgeData,

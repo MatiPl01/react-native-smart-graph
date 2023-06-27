@@ -68,11 +68,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView
-          padding={{
-            horizontal: 100
-          }}
-          objectFit='contain'>
+        <GraphView objectFit='contain' padding={100}>
           <DirectedGraphComponent
             settings={{
               events: {
