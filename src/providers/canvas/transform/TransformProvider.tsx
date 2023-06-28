@@ -38,7 +38,8 @@ type TransformContextType = {
   scaleContentTo: (
     newScale: number,
     origin?: Vector,
-    animationSettings?: AnimationSettingsWithDefaults
+    animationSettings?: AnimationSettingsWithDefaults,
+    withClamping?: boolean
   ) => void;
   translateContentTo: (
     translate: Vector,
@@ -218,14 +219,10 @@ export default function TransformProvider({
       const { onComplete, ...timingConfig } = animationSettings;
 
       translateX.value = withTiming(newTranslateX, timingConfig);
-      translateY.value = withTiming(
-        newTranslateY,
-        timingConfig,
-        onComplete &&
-          (() => {
-            runOnJS(onComplete)();
-          })
-      );
+      translateY.value = withTiming(newTranslateY, timingConfig, () => {
+        'worklet';
+        if (onComplete) runOnJS(onComplete)();
+      });
     } else {
       translateX.value = newTranslateX;
       translateY.value = newTranslateY;
@@ -235,7 +232,8 @@ export default function TransformProvider({
   const scaleContentTo = (
     newScale: number,
     origin?: Vector,
-    animationSettings?: AnimationSettingsWithDefaults
+    animationSettings?: AnimationSettingsWithDefaults,
+    withClamping = true
   ) => {
     'worklet';
     if (origin) {
@@ -250,13 +248,13 @@ export default function TransformProvider({
             translateY.value -
             (origin.y - translateY.value) * (relativeScale - 1)
         },
-        getTranslateClamp(newScale),
-        animationSettings
+        withClamping ? getTranslateClamp(newScale) : undefined,
+        animationSettings && { ...animationSettings, onComplete: undefined }
       );
     }
 
     if (animationSettings) {
-      const { onComplete, ...timingConfig } = animationSettings;
+      const { onComplete, ...timingConfig } = animationSettings ?? {};
 
       currentScale.value = withTiming(
         newScale,

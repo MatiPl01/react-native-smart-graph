@@ -1,4 +1,10 @@
-import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo
+} from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
 
@@ -54,23 +60,57 @@ export default function GesturesProvider({
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
   // Focus context values
-  const { gesturesDisabled, isFocusing, setFocus } = useFocusContext();
+  const { endFocus, focusStatus, gesturesDisabled } = useFocusContext();
 
   // OTHER VALUES
   const pinchStartScale = useSharedValue(1);
+  const panStartScale = useSharedValue(1);
+  const panTranslateX = useSharedValue(0);
+  const panTranslateY = useSharedValue(0);
+  const isPanning = useSharedValue(false);
+
+  const handleGestureStart = useCallback(
+    (withPosition?: boolean) => {
+      if (focusStatus.value) {
+        endFocus(
+          withPosition
+            ? {
+                isPanning,
+                position: {
+                  x: panTranslateX,
+                  y: panTranslateY
+                }
+              }
+            : undefined
+        );
+      } else if (autoSizingContext) {
+        autoSizingContext.disableAutoSizing();
+      }
+    },
+    [endFocus, autoSizingContext?.disableAutoSizing]
+  );
 
   const panGestureHandler = Gesture.Pan()
-    .onStart(() => {
+    .onStart(({ x, y }) => {
       if (gesturesDisabled.value) return;
-      if (isFocusing.value) {
-        runOnJS(setFocus)(null, null);
-      }
-      if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
+      panStartScale.value = currentScale.value;
+      panTranslateX.value = x;
+      panTranslateY.value = y;
+      runOnJS(handleGestureStart)(true);
+      isPanning.value = true;
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
-      translateX.value += e.changeX;
-      translateY.value += e.changeY;
+      // The focus provider will handle canvas translation when focusing
+      if (focusStatus.value) {
+        panTranslateX.value += e.changeX;
+        panTranslateY.value += e.changeY;
+      }
+      // Otherwise, translate canvas normally
+      else {
+        translateX.value += e.changeX;
+        translateY.value += e.changeY;
+      }
     })
     .onEnd(({ velocityX, velocityY }) => {
       if (gesturesDisabled.value) return;
@@ -80,16 +120,14 @@ export default function GesturesProvider({
       if (autoSizingContext) {
         runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
       }
+      isPanning.value = false;
     });
 
   const pinchGestureHandler = Gesture.Pinch()
     .onStart(() => {
       if (gesturesDisabled.value) return;
-      if (isFocusing.value) {
-        runOnJS(setFocus)(null, null);
-      }
-      if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
       pinchStartScale.value = currentScale.value;
+      runOnJS(handleGestureStart)();
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
@@ -113,10 +151,7 @@ export default function GesturesProvider({
     .numberOfTaps(2)
     .onStart(() => {
       if (gesturesDisabled.value) return;
-      if (isFocusing.value) {
-        runOnJS(setFocus)(null, null);
-      }
-      if (autoSizingContext) runOnJS(autoSizingContext.disableAutoSizing)();
+      runOnJS(handleGestureStart)();
     })
     .onEnd(({ x, y }) => {
       if (gesturesDisabled.value) return;

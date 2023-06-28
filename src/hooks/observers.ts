@@ -81,7 +81,7 @@ export const useFocusObserver = <V, E>(
   active = true
 ): [FocusState, (isActive: boolean) => void] => {
   const [state, setState] = useState<FocusState>({
-    focusedVertexKey: graph.focusedVertex?.key ?? null,
+    focusedVertexKey: null,
     settings: {
       disableGestures: true
     }
