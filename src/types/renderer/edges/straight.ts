@@ -8,10 +8,10 @@ import { EdgeArrowRenderFunction } from './shared';
 
 // STRAIGHT
 export type StraightEdgeRendererProps<E> = SharedRenderersProps & {
-  data: E;
   key: string;
   p1: AnimatedVector;
   p2: AnimatedVector;
+  value: E;
 };
 
 export type StraightEdgeRenderFunction<E> = (

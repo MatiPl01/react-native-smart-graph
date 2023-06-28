@@ -75,12 +75,12 @@ function VertexComponent<V, E>({
   return renderer({
     animationProgress,
     currentRadius,
-    data: vertex.value,
     focusProgress,
     key,
     position: { x: positionX, y: positionY },
     radius: componentSettings.radius,
-    scale
+    scale,
+    value: vertex.value
   });
 }
 
