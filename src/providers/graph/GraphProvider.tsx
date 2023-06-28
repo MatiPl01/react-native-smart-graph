@@ -5,7 +5,7 @@ import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
-import { FocusSetter } from '@/types/focus';
+import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import { AnimatedBoundingRect, AnimatedDimensions } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
@@ -83,9 +83,10 @@ export type GraphProviderAdditionalProps =
       boundingRect: AnimatedBoundingRect;
       canvasDimensions: AnimatedDimensions;
       canvasScales: number[];
+      endFocus: FocusEndSetter;
+      focusStatus: SharedValue<number>;
       initialCanvasScale: number;
-      isFocusing: SharedValue<boolean>;
-      setFocus: FocusSetter;
+      startFocus: FocusStartSetter;
       transform: AnimatedCanvasTransform;
     } & AccessibleOverlayContextType;
 
@@ -111,13 +112,14 @@ export default function GraphProvider<
   canvasDimensions,
   canvasScales,
   children,
+  endFocus,
+  focusStatus,
   graph,
   initialCanvasScale,
-  isFocusing,
   renderLayer,
   renderers,
-  setFocus,
   settings,
+  startFocus,
   transform
 }: GraphProviderProps<V, E, ED>) {
   const memoSettings = useMemo(
@@ -159,14 +161,15 @@ export default function GraphProvider<
       <VertexFocusProvider
         availableScales={canvasScales}
         canvasDimensions={canvasDimensions}
+        endFocus={endFocus}
+        focusStatus={focusStatus}
         graph={graph}
         initialScale={initialCanvasScale}
-        isFocusing={isFocusing}
-        setFocus={setFocus}
+        startFocus={startFocus}
         vertexRadius={memoSettings.components.vertex.radius}
       />
     ],
-    [memoSettings]
+    [memoRenderers]
   );
 
   return (

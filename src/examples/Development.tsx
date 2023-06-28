@@ -68,7 +68,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView objectFit='contain' padding={100}>
+        <GraphView objectFit='contain' padding={25}>
           <DirectedGraphComponent
             settings={{
               events: {
@@ -76,7 +76,7 @@ export default function App() {
                   graph.focus(key, FOCUS_SETTINGS)
               },
               placement: {
-                minVertexSpacing: 100,
+                minVertexSpacing: 50,
                 strategy: 'orbits'
               }
             }}

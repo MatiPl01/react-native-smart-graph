@@ -2,6 +2,11 @@ import { vec, Vector } from '@shopify/react-native-skia';
 
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 
+export const oppositeVector = (vector: Vector): Vector => {
+  'worklet';
+  return { x: -vector.x, y: -vector.y };
+};
+
 export const calcUnitVector = (from: Vector, to: Vector): Vector => {
   'worklet';
   const dx = to.x - from.x;

@@ -24,7 +24,6 @@ export default abstract class Graph<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
-  private focusedVertexKey: null | string = null;
   private readonly observers: Set<GraphObserver> = new Set();
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
@@ -39,7 +38,6 @@ export default abstract class Graph<
   }
 
   blur(settings?: AnimationSettings | null): void {
-    this.focusedVertexKey = null;
     this.notifyFocusChange(null, {
       animation: settings
     });
@@ -92,14 +90,7 @@ export default abstract class Graph<
   }
 
   focus(vertexKey: string, settings?: FocusSettings): void {
-    this.focusedVertexKey = vertexKey;
     this.notifyFocusChange(vertexKey, settings);
-  }
-
-  get focusedVertex(): GV | null {
-    return (
-      (this.focusedVertexKey && this.vertices$[this.focusedVertexKey]) || null
-    );
   }
 
   getEdge(key: string): GE | null {

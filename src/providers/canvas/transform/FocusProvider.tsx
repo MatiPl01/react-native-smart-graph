@@ -1,31 +1,40 @@
-import { Vector } from '@shopify/react-native-skia';
 import {
   createContext,
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState
 } from 'react';
 import {
+  runOnJS,
   SharedValue,
   useAnimatedReaction,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
 
-import { DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS } from '@/constants/animations';
+import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useAutoSizingContext } from '@/providers/canvas/auto';
 import { useCanvasDataContext } from '@/providers/canvas/data';
-import { FocusData, FocusSetter } from '@/types/focus';
+import {
+  FocusData,
+  FocusEndSetter,
+  FocusStartSetter,
+  PanGestureData
+} from '@/types/focus';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
+import { fixedWithDecay } from '@/utils/reanimated';
 import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
 
 type FocusContextType = {
+  endFocus: FocusEndSetter;
+  focusStatus: SharedValue<number>;
   gesturesDisabled: SharedValue<boolean>;
-  isFocusing: SharedValue<boolean>;
-  setFocus: FocusSetter;
+  startFocus: FocusStartSetter;
 };
 
 const FocusContext = createContext(null);
@@ -50,95 +59,177 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const { canvasDimensions, currentScale, currentTranslation } =
     useCanvasDataContext();
   // Canvas transform context values
-  const { resetContainerPosition, scaleContentTo, translateContentTo } =
-    useTransformContext();
+  const {
+    getTranslateClamp,
+    resetContainerPosition,
+    scaleContentTo,
+    translateContentTo
+  } = useTransformContext();
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
 
   // OTHER VALUES
   // Focused point data
   const [focusData, setFocusData] = useState<FocusData | null>(null);
+  // Target translation position when blur animation is running
+  // which was triggered by the user panning the canvas
+  const [panGestureData, setPanGestureData] = useState<PanGestureData | null>(
+    null
+  );
   // Helper value for disabling gestures
   const gesturesDisabled = useSharedValue(false);
   // Helper values for focus animation
-  const focusStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
-  const focusStartScale = useSharedValue<number>(0);
+  const focusStartTranslation = useSharedValue({ x: 0, y: 0 });
+  const focusStartScale = useSharedValue(0);
   const focusTransitionProgress = useSharedValue(0);
-  const focusEnabled = useSharedValue(false);
-  // This value is used to trigger graph model change on blur
-  // after the user event that triggered the focus end
-  const isFocusing = useSharedValue(true);
+  const focusStartAnimationSettingsRef =
+    useRef<AnimationSettingsWithDefaults | null>(null);
+  // This value is used to indicate whether the focus animation is running
+  // or a vertex is being focused
+  // 0 - not focusing
+  // 1 - focusing
+  // -1 - blurring
+  const focusStatus = useSharedValue(1);
+  const blurStartScale = useSharedValue(0);
 
-  const setFocus = useCallback(
+  const startFocus = useCallback(
     (
-      data: FocusData | null,
-      animationSettings: AnimationSettingsWithDefaults | null
+      data: FocusData,
+      animationSettings?: AnimationSettingsWithDefaults | null
     ) => {
-      if (data) {
-        isFocusing.value = true;
-        gesturesDisabled.value = data.gesturesDisabled;
-        startFocusing(data, animationSettings);
-      } else {
-        isFocusing.value = false;
-        gesturesDisabled.value = false;
-        stopFocusing(animationSettings);
+      // Set the focus data
+      focusStatus.value = 1;
+      gesturesDisabled.value = data.gesturesDisabled;
+      const animSettings =
+        animationSettings === undefined
+          ? DEFAULT_FOCUS_ANIMATION_SETTINGS
+          : animationSettings;
+      focusStartAnimationSettingsRef.current = animSettings;
+      focusStartTranslation.value = {
+        x: currentTranslation.x.value,
+        y: currentTranslation.y.value
+      };
+      focusStartScale.value = currentScale.value;
+      setFocusData(data);
+
+      // Disable auto sizing when focusing
+      if (autoSizingContext) {
+        autoSizingContext.disableAutoSizing();
+      }
+
+      // Animate to the focus point's position and scale
+      // if the animation settings are provided
+      if (animSettings) {
+        startProgressTransition(animSettings);
+      }
+      // Otherwise, set the progress to 1 to set the focus point's position
+      // (change the scale immediately)
+      else {
+        focusTransitionProgress.value = 1;
       }
     },
     []
   );
 
-  const startFocusing = (
-    data: FocusData,
-    animationSettings: AnimationSettingsWithDefaults | null
-  ) => {
-    if (autoSizingContext) {
-      autoSizingContext.disableAutoSizing();
-    }
-    if (animationSettings) {
-      const { onComplete, ...timingConfig } = animationSettings;
-      // The following 2 lines are needed when focus changes to another point
-      // (we have to reset the progress to 0 and prevent animating the
-      // old focus point's position and scale)
-      focusEnabled.value = false;
-      focusTransitionProgress.value = 0;
-      // Update the progress value to 1 to animate the new focus point's
-      // position and scale
-      focusTransitionProgress.value = withTiming(1, timingConfig, onComplete);
-    }
-    focusStartTranslation.value = {
-      x: currentTranslation.x.value,
-      y: currentTranslation.y.value
-    };
-    focusStartScale.value = currentScale.value;
-    focusEnabled.value = true;
-    setFocusData(data);
-  };
+  const endFocus = useCallback(
+    (
+      data?: {
+        isPanning: SharedValue<boolean>;
+        position: AnimatedVectorCoordinates;
+      },
+      animationSettings?: AnimationSettingsWithDefaults | null
+    ) => {
+      // Reset the focus data
+      setFocusData(null);
+      // Change state to blurring
+      focusStatus.value = -1;
+      gesturesDisabled.value = false;
+      blurStartScale.value = currentScale.value;
+      const animSettings = createEndFocusAnimationSettings(animationSettings);
+      if (!animSettings) focusStatus.value = 0;
 
-  const stopFocusing = (
-    animationSettings: AnimationSettingsWithDefaults | null
-  ) => {
-    setFocusData(null);
-    focusEnabled.value = false;
-    // Don't do anything if there is no animation settings
-    if (animationSettings === null) return;
-    if (autoSizingContext) {
+      if (data) {
+        setPanGestureData(data);
+
+        if (animSettings) {
+          startProgressTransition(animSettings);
+        } else {
+          focusTransitionProgress.value = 0;
+        }
+      }
+
       // Re-enable auto sizing if it was disabled
-      autoSizingContext.enableAutoSizing(
-        animationSettings ?? DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
-      );
-    }
-    // If auto sizing is not used, reset the content position and scale
-    // to default values
-    else {
-      resetContainerPosition({
-        animationSettings
-      });
-    }
+      if (autoSizingContext) {
+        if (data) {
+          autoSizingContext.enableAutoSizingAfterTimeout(animSettings);
+        } else {
+          autoSizingContext.enableAutoSizing(animSettings);
+        }
+      }
+      // Otherwise, if the auto sizing is not used, reset the
+      // container position to default
+      else {
+        resetContainerPosition({
+          animationSettings: animSettings ?? undefined
+        });
+      }
+    },
+    []
+  );
+
+  const startProgressTransition = (
+    animSettings: AnimationSettingsWithDefaults
+  ) => {
+    const { onComplete, ...timingConfig } = animSettings;
+    focusTransitionProgress.value = 0;
+    focusTransitionProgress.value = withTiming(1, timingConfig, onComplete);
   };
 
+  const onBlurAnimationComplete = (onComplete?: () => void) => {
+    focusStatus.value = 0;
+    setPanGestureData(null);
+    onComplete?.();
+
+    const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
+    currentTranslation.x.value = fixedWithDecay(
+      0,
+      currentTranslation.x.value,
+      clampX
+    );
+    currentTranslation.y.value = fixedWithDecay(
+      0,
+      currentTranslation.y.value,
+      clampY
+    );
+  };
+
+  const createEndFocusAnimationSettings = (
+    animationSettings?: AnimationSettingsWithDefaults | null
+  ): AnimationSettingsWithDefaults | null => {
+    const animSettings =
+      animationSettings === undefined
+        ? // Use the animation settings that were passed to the startFocus
+          // if animationSettings were not passed to the endFocus
+          focusStartAnimationSettingsRef.current
+        : animationSettings;
+
+    if (!animSettings) return null;
+
+    const { onComplete, ...timingConfig } = animSettings;
+    return {
+      ...timingConfig,
+      onComplete: () => {
+        'worklet';
+        runOnJS(onBlurAnimationComplete)(onComplete);
+      }
+    };
+  };
+
+  // Focus animation (from unfocused to focused state) and
+  // translation when vertex moves
   useAnimatedReaction(
     () =>
-      focusData && focusEnabled.value
+      focusData
         ? {
             finalScale: focusData.scale.value,
             finalTranslation: {
@@ -179,8 +270,46 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     }
   );
 
+  // Blur animation (from focused to unfocused state)
+  // (when the user pans the canvas)
+  useAnimatedReaction(
+    () =>
+      panGestureData && !focusData
+        ? {
+            finalScale: focusStartScale.value,
+            gesturePosition: {
+              x: panGestureData.position.x.value,
+              y: panGestureData.position.y.value
+            },
+            isPanning: panGestureData.isPanning.value,
+            startScale: blurStartScale.value,
+            transitionProgress: focusTransitionProgress.value
+          }
+        : null,
+    data => {
+      // Don't do anything if there is no data
+      if (!data) return;
+      const {
+        finalScale,
+        gesturePosition: position,
+        isPanning,
+        startScale,
+        transitionProgress
+      } = data;
+      // Scale the content to the previous scale before focusing
+      scaleContentTo(
+        calcScaleOnProgress(transitionProgress, startScale, finalScale),
+        // Don't translate the content if the user is not panning
+        // (the content will be translated automatically by the pan gesture)
+        isPanning ? position : undefined,
+        undefined,
+        false
+      );
+    }
+  );
+
   const contextValue = useMemo<FocusContextType>(
-    () => ({ gesturesDisabled, isFocusing, setFocus }),
+    () => ({ endFocus, focusStatus, gesturesDisabled, startFocus }),
     []
   );
 

@@ -42,7 +42,6 @@ export interface Graph<V, E> {
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<E, V>>;
-  get focusedVertex(): Vertex<V, E> | null;
   get orderedEdges(): OrderedEdges<E, V>;
   get vertices(): Array<Vertex<V, E>>;
   getEdge(key: string): Edge<E, V> | null;

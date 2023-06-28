@@ -1,12 +1,19 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, PropsWithChildren, useContext, useRef } from 'react';
 import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useMemo,
+  useRef
+} from 'react';
+import {
+  runOnJS,
   useAnimatedReaction,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
 
-import EASING from '@/constants/easings';
+import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { useTransformContext } from '@/providers/canvas/transform';
 import { BoundingRect } from '@/types/layout';
@@ -25,7 +32,9 @@ type AutoSizingContextType = {
   enableAutoSizing: (
     animationSettings?: AnimationSettingsWithDefaults | null
   ) => void;
-  enableAutoSizingAfterTimeout: () => void;
+  enableAutoSizingAfterTimeout: (
+    animationSettings?: AnimationSettingsWithDefaults | null
+  ) => void;
 };
 
 const AutoSizingContext = createContext(null);
@@ -75,19 +84,23 @@ export default function AutoSizingProvider({
   const autoSizingStartScale = useSharedValue<number>(0);
   const autoSizingTransitionProgress = useSharedValue(1);
 
-  const enableAutoSizingAfterTimeout = () => {
+  const startAutoSizingTimeout = (
+    animationSettings?: AnimationSettingsWithDefaults | null
+  ) => {
+    autoSizingTimeoutRef.current = setTimeout(() => {
+      enableAutoSizing(animationSettings);
+    }, autoSizingTimeout);
+  };
+
+  const enableAutoSizingAfterTimeout = (
+    animationSettings?: AnimationSettingsWithDefaults | null
+  ) => {
     clearAutoSizingTimeout();
-    autoSizingTimeoutRef.current = setTimeout(
-      enableAutoSizing,
-      autoSizingTimeout
-    );
+    startAutoSizingTimeout(animationSettings);
   };
 
   const enableAutoSizing = (
-    animationSettings: AnimationSettingsWithDefaults | null = {
-      duration: 150,
-      easing: EASING.ease
-    }
+    animationSettings: AnimationSettingsWithDefaults | null = DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
   ) => {
     autoSizingTimeoutRef.current = null;
     autoSizingEnabled.value = true;
@@ -113,7 +126,7 @@ export default function AutoSizingProvider({
 
   const clearAutoSizingTimeout = () => {
     if (autoSizingTimeoutRef.current) {
-      clearTimeout(autoSizingTimeoutRef.current);
+      runOnJS(clearTimeout)(autoSizingTimeoutRef.current);
       autoSizingTimeoutRef.current = null;
     }
   };
@@ -187,11 +200,14 @@ export default function AutoSizingProvider({
     [objectFit]
   );
 
-  const contextValue: AutoSizingContextType = {
-    disableAutoSizing,
-    enableAutoSizing,
-    enableAutoSizingAfterTimeout
-  };
+  const contextValue = useMemo<AutoSizingContextType>(
+    () => ({
+      disableAutoSizing,
+      enableAutoSizing,
+      enableAutoSizingAfterTimeout
+    }),
+    []
+  );
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
