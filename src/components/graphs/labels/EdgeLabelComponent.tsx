@@ -84,11 +84,11 @@ export default function EdgeLabelComponent<E, V>({
   });
 
   return renderer({
-    data: edge.value,
     edgeLength,
     edgeRotation,
     height,
     key: edge.key,
+    value: edge.value,
     ...restProps
   });
 }

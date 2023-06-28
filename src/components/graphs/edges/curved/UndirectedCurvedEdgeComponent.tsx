@@ -102,12 +102,12 @@ function UndirectedCurvedEdgeComponent<E, V>({
     <>
       {renderers.edge({
         animationProgress,
-        data: edge.value,
         focusProgress,
         key: edge.key,
         parabolaX,
         parabolaY,
-        path
+        path,
+        value: edge.value
       })}
       {renderers.label && (
         <EdgeLabelComponent

@@ -9,11 +9,11 @@ export type SharedRenderersProps = {
 
 export type VertexRendererProps<V> = SharedRenderersProps & {
   currentRadius: SharedValue<number>;
-  data: V;
   key: string;
   position: AnimatedVectorCoordinates;
   radius: number;
   scale: SharedValue<number>;
+  value: V;
 };
 
 export type VertexRenderFunction<V> = (
@@ -23,11 +23,11 @@ export type VertexRenderFunction<V> = (
 export type EdgeLabelRendererProps<E> = SharedRenderersProps & {
   centerX: SharedValue<number>;
   centerY: SharedValue<number>;
-  data: E;
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   height: SharedValue<number>;
   key: string;
+  value: E;
 };
 
 export type EdgeLabelRendererFunction<E> = (

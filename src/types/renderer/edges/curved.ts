@@ -9,11 +9,11 @@ import {
 import { EdgeArrowRenderFunction } from './shared';
 
 export type CurvedEdgeRendererProps<E> = SharedRenderersProps & {
-  data: E;
   key: string;
   parabolaX: SharedValue<number>;
   parabolaY: SharedValue<number>;
   path: AnimatedPath;
+  value: E;
 };
 
 export type CurvedEdgeRenderFunction<E> = (

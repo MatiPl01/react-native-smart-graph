@@ -133,11 +133,11 @@ function DirectedStraightEdgeComponent<E, V>({
     <>
       {renderers.edge({
         animationProgress,
-        data: edge.value,
         focusProgress,
         key: edge.key,
         p1,
-        p2
+        p2,
+        value: edge.value
       })}
       <EdgeArrowComponent
         animationProgress={animationProgress}
