@@ -53,4 +53,6 @@ export default memo(
     exclude: ['boundingRect'],
     shallow: ['graph']
   })
-);
+) as <V, E, ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>>(
+  props: UndirectedGraphComponentProps<V, E, ED>
+) => JSX.Element;

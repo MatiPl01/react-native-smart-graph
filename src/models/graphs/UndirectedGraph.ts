@@ -42,12 +42,15 @@ export default class UndirectedGraph<V, E> extends Graph<
     edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
     if (animationSettings !== null) {
-      this.notifyGraphChange(
-        createAnimationsSettingsForBatchModification({
-          edges: edges?.map(({ key }) => key),
-          vertices: vertices?.map(({ key }) => key)
-        })
-      );
+      this.notifyGraphChange({
+        ...createAnimationsSettingsForBatchModification(
+          {
+            edges: edges?.map(({ key }) => key),
+            vertices: vertices?.map(({ key }) => key)
+          },
+          animationSettings
+        )
+      });
     }
   }
 
@@ -118,7 +121,7 @@ export default class UndirectedGraph<V, E> extends Graph<
   override removeEdge(
     key: string,
     animationSettings?: AnimationSettings | null
-  ): E {
+  ): E | undefined {
     const edge = this.getEdge(key);
 
     if (!edge) {

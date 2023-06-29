@@ -1,5 +1,6 @@
 import { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import {
+  runOnJS,
   SharedValue,
   useAnimatedReaction,
   useSharedValue
@@ -128,13 +129,20 @@ function VertexFocusProvider<V, E>({
     }
   );
 
+  const blurGraph = () => {
+    graph.blur();
+  };
+
   useAnimatedReaction(
     () => ({
       status: focusStatus.value,
       vertexKey: data.focusedVertexKey
     }),
     ({ status, vertexKey }) => {
-      if (status === 0) return;
+      if (status === 0) {
+        runOnJS(blurGraph)();
+        return;
+      }
       // Update focusProgress of all graph components
       updateComponentsFocus(
         vertexKey && status === 1 ? { vertices: [vertexKey] } : null,

@@ -11,7 +11,7 @@ export type StraightEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
   p1: AnimatedVector;
   p2: AnimatedVector;
-  value: E;
+  value?: E;
 };
 
 export type StraightEdgeRenderFunction<E> = (

@@ -24,15 +24,19 @@ export { default as UndirectedGraph } from '@/models/graphs/UndirectedGraph';
 // VIEWS
 export { default as GraphView } from '@/components/views/GraphView';
 
-// EXAMPLES
-export * from '@/examples';
-
 // HOOKS
 export * from '@/hooks';
+
+// ALOGRITHMS
+export * from '@/utils/algorithms';
+
+// EXAMPLES
+export * from '@/examples';
 
 // TYPES
 export {
   type DirectedEdgeData,
+  type GraphData,
   type UndirectedEdgeData,
   type VertexData
 } from '@/types/data';

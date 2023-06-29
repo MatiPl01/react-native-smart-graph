@@ -13,7 +13,7 @@ export type CurvedEdgeRendererProps<E> = SharedRenderersProps & {
   parabolaX: SharedValue<number>;
   parabolaY: SharedValue<number>;
   path: AnimatedPath;
-  value: E;
+  value?: E;
 };
 
 export type CurvedEdgeRenderFunction<E> = (
