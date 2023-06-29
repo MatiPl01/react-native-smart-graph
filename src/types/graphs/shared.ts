@@ -12,12 +12,12 @@ export interface Vertex<V, E> {
   get edges(): Array<Edge<E, V>>;
   get key(): string;
   get neighbors(): Array<Vertex<V, E>>;
-  get value(): V;
+  get value(): V | undefined;
 }
 
 export interface Edge<E, V> {
   get key(): string;
-  get value(): E;
+  get value(): E | undefined;
   get vertices(): [Vertex<V, E>, Vertex<V, E>];
   isDirected(): boolean;
 }
@@ -75,12 +75,12 @@ export interface Graph<V, E> {
   removeEdge(
     key: string,
     animationSettings?: SingleModificationAnimationSettings | null
-  ): E;
+  ): E | undefined;
   removeObserver(observer: GraphObserver): void;
   removeVertex(
     key: string,
     animationSettings?: SingleModificationAnimationSettings | null
-  ): V;
+  ): V | undefined;
   replaceBatch(
     data: {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;

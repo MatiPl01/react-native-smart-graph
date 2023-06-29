@@ -1,17 +1,22 @@
 export type VertexData<V> = {
   key: string;
-  value: V;
+  value?: V;
 };
 
 export type DirectedEdgeData<E> = {
   from: string;
   key: string;
   to: string;
-  value: E;
+  value?: E;
 };
 
-export type UndirectedEdgeData<E> = {
+export type UndirectedEdgeData<E = void> = {
   key: string;
-  value: E;
+  value?: E;
   vertices: string[];
+};
+
+export type GraphData<VD, ED> = {
+  edges?: Array<ED>;
+  vertices: Array<VD>;
 };

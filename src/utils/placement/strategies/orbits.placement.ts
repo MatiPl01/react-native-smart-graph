@@ -97,7 +97,10 @@ const arrangeVertices = <V, E>(rootVertex: Vertex<V, E>): ArrangedVertices => {
       continue;
     }
     const vertexArrangedData = arrangedVertices[key]!;
-    const childSectorAngle = vertexArrangedData.sectorAngle / children.length;
+    const childSectorAngle = Math.min(
+      Math.PI,
+      vertexArrangedData.sectorAngle / children.length
+    );
     let childStartAngle =
       vertexArrangedData.angle +
       (childSectorAngle - vertexArrangedData.sectorAngle) / 2;
@@ -126,10 +129,12 @@ const calcLayerRadiuses = (
   const minDistanceBetweenVerticesCenters = 2 * vertexRadius + minVertexSpacing;
 
   for (const { layer, sectorAngle } of Object.values(arrangedVertices)) {
-    minLayerRadiuses[layer] = Math.max(
-      minLayerRadiuses[layer] ?? minDistanceBetweenVerticesCenters,
-      calcVertexCenterDistance(minDistanceBetweenVerticesCenters, sectorAngle)
-    );
+    minLayerRadiuses[layer] =
+      layer &&
+      Math.max(
+        minLayerRadiuses[layer] ?? minDistanceBetweenVerticesCenters,
+        calcVertexCenterDistance(minDistanceBetweenVerticesCenters, sectorAngle)
+      );
   }
 
   // Calc layers radiuses

@@ -44,10 +44,13 @@ export default class DirectedGraph<V, E> extends Graph<
     // Notify observers after all changes to the graph model are made
     if (animationSettings !== null) {
       this.notifyGraphChange(
-        createAnimationsSettingsForBatchModification({
-          edges: edges?.map(({ key }) => key),
-          vertices: vertices?.map(({ key }) => key)
-        })
+        createAnimationsSettingsForBatchModification(
+          {
+            edges: edges?.map(({ key }) => key),
+            vertices: vertices?.map(({ key }) => key)
+          },
+          animationSettings
+        )
       );
     }
   }
@@ -118,7 +121,7 @@ export default class DirectedGraph<V, E> extends Graph<
   override removeEdge(
     key: string,
     animationSettings?: SingleModificationAnimationSettings | null
-  ): E {
+  ): E | undefined {
     const edge = this.getEdge(key);
 
     if (!edge) {

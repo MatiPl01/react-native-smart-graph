@@ -6,7 +6,7 @@ import {
 export default class UndirectedEdge<E, V> implements IUndirectedEdge<E, V> {
   constructor(
     private readonly key$: string,
-    private readonly value$: E,
+    private readonly value$: E | undefined,
     private readonly vertices$: [
       UndirectedGraphVertex<V, E>,
       UndirectedGraphVertex<V, E>
@@ -25,7 +25,7 @@ export default class UndirectedEdge<E, V> implements IUndirectedEdge<E, V> {
     return this.key$;
   }
 
-  get value(): E {
+  get value(): E | undefined {
     return this.value$;
   }
 

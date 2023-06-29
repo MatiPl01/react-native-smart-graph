@@ -24,6 +24,7 @@ export default abstract class Graph<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
+  private focusedVertexKey: null | string = null;
   private readonly observers: Set<GraphObserver> = new Set();
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
@@ -38,6 +39,8 @@ export default abstract class Graph<
   }
 
   blur(settings?: AnimationSettings | null): void {
+    if (!this.focusedVertexKey) return;
+    this.focusedVertexKey = null;
     this.notifyFocusChange(null, {
       animation: settings
     });
@@ -90,6 +93,7 @@ export default abstract class Graph<
   }
 
   focus(vertexKey: string, settings?: FocusSettings): void {
+    this.focusedVertexKey = vertexKey;
     this.notifyFocusChange(vertexKey, settings);
   }
 
@@ -263,7 +267,10 @@ export default abstract class Graph<
     this.observers.delete(observer);
   }
 
-  removeVertex(key: string, animationsSettings?: AnimationsSettings | null): V {
+  removeVertex(
+    key: string,
+    animationsSettings?: AnimationsSettings | null
+  ): V | undefined {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
     }
@@ -312,7 +319,7 @@ export default abstract class Graph<
   abstract removeEdge(
     key: string,
     animationSettings?: AnimationSettings | null
-  ): E;
+  ): E | undefined;
 
   abstract replaceBatch(
     data: {
