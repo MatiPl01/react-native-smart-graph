@@ -97,6 +97,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       data: FocusData,
       animationSettings?: AnimationSettingsWithDefaults | null
     ) => {
+      console.log('start focus');
       // Set the focus data
       focusStatus.value = 1;
       gesturesDisabled.value = data.gesturesDisabled;
@@ -139,6 +140,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       },
       animationSettings?: AnimationSettingsWithDefaults | null
     ) => {
+      console.log('start focus');
       // Reset the focus data
       setFocusData(null);
       // Change state to blurring
@@ -189,6 +191,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     focusStatus.value = 0;
     setPanGestureData(null);
     onComplete?.();
+
+    console.log('<<<>>>');
 
     const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
     currentTranslation.x.value = fixedWithDecay(

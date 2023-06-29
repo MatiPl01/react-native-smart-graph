@@ -4,7 +4,7 @@ import { useAnimatedReaction } from 'react-native-reanimated';
 import { withGraphData } from '@/providers/graph/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { AnimatedBoundingRect } from '@/types/layout';
-import { calcContainerBoundingRect } from '@/utils/placement';
+import { calcAnimatedContainerBoundingRect } from '@/utils/placement';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
   boundingRect: AnimatedBoundingRect;
@@ -16,28 +16,17 @@ function ContainerDimensionsProvider({
   children,
   renderedVerticesData
 }: ContainerDimensionsProviderProps) {
+  const renderedVerticesPositions = Object.fromEntries(
+    Object.entries(renderedVerticesData).map(([key, { position }]) => [
+      key,
+      position
+    ])
+  );
+
   useAnimatedReaction(
-    () => ({
-      positions: Object.fromEntries(
-        Object.entries(renderedVerticesData).map(([key, { position }]) => [
-          key,
-          {
-            x: position.x.value,
-            y: position.y.value
-          }
-        ])
-      )
-    }),
+    () => ({ positions: renderedVerticesPositions }),
     ({ positions }) => {
-      Object.entries(
-        calcContainerBoundingRect(
-          positions,
-          // Padding near the edges of the container
-          // TODO - make this padding configurable
-          20,
-          20
-        )
-      ).forEach(
+      Object.entries(calcAnimatedContainerBoundingRect(positions)).forEach(
         ([key, value]) =>
           (boundingRect[key as keyof AnimatedBoundingRect].value = value)
       );

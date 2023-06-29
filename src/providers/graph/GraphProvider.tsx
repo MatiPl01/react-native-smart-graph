@@ -25,7 +25,6 @@ import {
 } from './layout';
 import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
 import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
-import VertexFocusProvider from './transform/VertexFocusProvider';
 
 const getLayoutProviders = <
   V,
@@ -152,22 +151,22 @@ export default function GraphProvider<
       <ContainerDimensionsProvider boundingRect={boundingRect} />,
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
-      ...getLayoutProviders(graph, memoSettings),
+      ...getLayoutProviders(graph, memoSettings)
       // EVENTS
       // Press events provider
-      ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
-      // FOCUS
-      // Provider used to focus on a specific vertex
-      <VertexFocusProvider
-        availableScales={canvasScales}
-        canvasDimensions={canvasDimensions}
-        endFocus={endFocus}
-        focusStatus={focusStatus}
-        graph={graph}
-        initialScale={initialCanvasScale}
-        startFocus={startFocus}
-        vertexRadius={memoSettings.components.vertex.radius}
-      />
+      // ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
+      // // FOCUS
+      // // Provider used to focus on a specific vertex
+      // <VertexFocusProvider
+      //   availableScales={canvasScales}
+      //   canvasDimensions={canvasDimensions}
+      //   endFocus={endFocus}
+      //   focusStatus={focusStatus}
+      //   graph={graph}
+      //   initialScale={initialCanvasScale}
+      //   startFocus={startFocus}
+      //   vertexRadius={memoSettings.components.vertex.radius}
+      // />
     ],
     [memoRenderers]
   );

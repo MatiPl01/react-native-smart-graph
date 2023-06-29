@@ -41,26 +41,18 @@ export const calcContainerScale = (
 };
 
 export const calcContainerTranslation = (
-  objectFit: ObjectFit,
   { bottom, left, right, top }: BoundingRect,
   { height: canvasHeight, width: canvasWidth }: Dimensions,
   padding: BoundingRect
 ): { x: number; y: number } => {
   'worklet';
-  let x = 0;
-  let y = 0;
+  const containerWidth = right - left + padding.left + padding.right;
+  const containerHeight = bottom - top + padding.top + padding.bottom;
 
-  switch (objectFit) {
-    case 'contain':
-    case 'cover':
-      const containerWidth = right - left + padding.left + padding.right;
-      const containerHeight = bottom - top + padding.top + padding.bottom;
-      x = ((-left + padding.left) / containerWidth) * canvasWidth;
-      y = ((-top + padding.top) / containerHeight) * canvasHeight;
-      break;
-  }
-
-  return { x, y };
+  return {
+    x: ((-left + padding.left) / containerWidth) * canvasWidth,
+    y: ((-top + padding.top) / containerHeight) * canvasHeight
+  };
 };
 
 export const calcScaleOnProgress = (

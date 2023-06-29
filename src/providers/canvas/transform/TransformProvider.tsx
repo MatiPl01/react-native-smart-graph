@@ -99,6 +99,7 @@ export default function TransformProvider({
         layout: { height, width }
       }
     }: LayoutChangeEvent) => {
+      console.log('handleCanvasRender', { height, width });
       canvasWidth.value = width;
       canvasHeight.value = height;
 
@@ -117,6 +118,7 @@ export default function TransformProvider({
 
   const handleGraphRender = useCallback(
     (containerBoundingRect: BoundingRect) => {
+      console.log('handleGraphRender', containerBoundingRect);
       initialBoundingRectRef.current ??= containerBoundingRect;
       resetContainerPosition({
         containerBoundingRect
@@ -165,7 +167,6 @@ export default function TransformProvider({
       scaleContentTo(scale, undefined, settings?.animationSettings);
       translateContentTo(
         calcContainerTranslation(
-          objectFit,
           containerBoundingRect,
           canvasDimensions,
           padding
@@ -207,6 +208,7 @@ export default function TransformProvider({
     animationSettings?: AnimationSettingsWithDefaults
   ) => {
     'worklet';
+    console.log('translateContentTo', translate, clampTo, animationSettings);
 
     const newTranslateX = clampTo?.x
       ? clamp(translate.x, clampTo.x)

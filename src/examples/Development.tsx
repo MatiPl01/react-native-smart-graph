@@ -58,6 +58,7 @@ export default function App() {
 
   useEffect(() => {
     graph.insertBatch(ACHIEVEMENTS_GRAPH);
+    // graph.focus('sport');
   }, [graph]);
 
   return (
@@ -68,7 +69,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView objectFit='contain' padding={25}>
+        <GraphView objectFit='none' padding={25}>
           <DirectedGraphComponent
             settings={{
               events: {

@@ -188,12 +188,7 @@ export default function AutoSizingProvider({
         calcTranslationOnProgress(
           transitionProgress,
           startTranslation,
-          calcContainerTranslation(
-            objectFit,
-            boundingRect,
-            canvasDimensions,
-            padding
-          )
+          calcContainerTranslation(boundingRect, canvasDimensions, padding)
         )
       );
     },
