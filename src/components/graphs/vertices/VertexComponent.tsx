@@ -1,5 +1,5 @@
 import { memo, useEffect } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { VertexRemoveHandler, VertexRenderHandler } from '@/types/components';
 import { Vertex } from '@/types/graphs';
@@ -34,7 +34,11 @@ function VertexComponent<V, E>({
 
   // ANIMATION
   // Vertex render animation progress
-  const animationProgress = useSharedValue(0);
+  // Use a helper value to ensure that the animation progress is never negative
+  const animationProgressHelper = useSharedValue(0);
+  const animationProgress = useDerivedValue(() =>
+    Math.max(0, animationProgressHelper.value)
+  );
 
   // POSITION
   // Current vertex position
@@ -64,7 +68,7 @@ function VertexComponent<V, E>({
   useEffect(() => {
     updateComponentAnimationState(
       key,
-      animationProgress,
+      animationProgressHelper,
       animationSettings,
       removed,
       onRemove

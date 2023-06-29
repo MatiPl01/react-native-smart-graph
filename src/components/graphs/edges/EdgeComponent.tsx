@@ -1,5 +1,9 @@
 import { memo, useEffect } from 'react';
-import { useSharedValue, withTiming } from 'react-native-reanimated';
+import {
+  useDerivedValue,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
 import {
   DirectedCurvedEdgeComponentProps,
@@ -28,8 +32,11 @@ function EdgeComponent<E, V>({
   ...restProps
 }: EdgeComponentProps<E, V>) {
   // ANIMATION
-  // Edge render animation progress
-  const animationProgress = useSharedValue(0);
+  // Use a helper value to ensure that the animation progress is never negative
+  const animationProgressHelper = useSharedValue(0);
+  const animationProgress = useDerivedValue(() =>
+    Math.max(0, animationProgressHelper.value)
+  );
 
   // EDGE ORDERING
   // Target edge order
@@ -44,7 +51,7 @@ function EdgeComponent<E, V>({
   useEffect(() => {
     updateComponentAnimationState(
       edge.key,
-      animationProgress,
+      animationProgressHelper,
       animationSettings,
       removed,
       onRemove
