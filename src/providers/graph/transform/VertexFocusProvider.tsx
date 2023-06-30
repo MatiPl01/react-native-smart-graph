@@ -71,6 +71,7 @@ function VertexFocusProvider<V, E>({
   const focusY = useSharedValue(0);
   const focusScale = useSharedValue(1);
   const isFirstRenderRef = useRef(true);
+  const previousFocusedVertexKey = useRef<null | string>(null);
 
   useEffect(() => {
     if (isFirstRenderRef.current) {
@@ -78,10 +79,14 @@ function VertexFocusProvider<V, E>({
       return;
     }
     if (!focusedVertexData.vertex) {
-      endFocus(undefined, focusedVertexData.animation);
+      if (previousFocusedVertexKey.current && focusStatus.value === 1) {
+        previousFocusedVertexKey.current = null;
+        endFocus(undefined, focusedVertexData.animation);
+      }
       return;
     }
 
+    previousFocusedVertexKey.current = data.focusedVertexKey;
     startFocus(
       {
         centerPosition: {
@@ -150,7 +155,12 @@ function VertexFocusProvider<V, E>({
         renderedEdgesData
       );
     },
-    [focusStatus, data.focusedVertexKey]
+    [
+      focusStatus,
+      data.focusedVertexKey,
+      renderedVerticesData,
+      renderedEdgesData
+    ]
   );
 
   return <>{children}</>;

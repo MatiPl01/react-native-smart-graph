@@ -1,3 +1,4 @@
+import { Vector } from '@shopify/react-native-skia';
 import {
   createContext,
   useCallback,
@@ -79,7 +80,10 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // Helper value for disabling gestures
   const gesturesDisabled = useSharedValue(false);
   // Helper values for focus animation
-  const focusStartTranslation = useSharedValue({ x: 0, y: 0 });
+  // Used to check if the focus target has changed (to trigger focusStartTranslation
+  // and focusStartScale to be set)
+  const focusKey = useSharedValue<null | string>(null);
+  const focusStartTranslation = useSharedValue<Vector | null>(null);
   const focusStartScale = useSharedValue(0);
   const focusTransitionProgress = useSharedValue(0);
   const focusStartAnimationSettingsRef =
@@ -105,11 +109,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
           ? DEFAULT_FOCUS_ANIMATION_SETTINGS
           : animationSettings;
       focusStartAnimationSettingsRef.current = animSettings;
-      focusStartTranslation.value = {
-        x: currentTranslation.x.value,
-        y: currentTranslation.y.value
-      };
-      focusStartScale.value = currentScale.value;
+      focusKey.value = `${data.centerPosition.x.value}${data.centerPosition.y.value}`;
       setFocusData(data);
 
       // Disable auto sizing when focusing
@@ -139,14 +139,20 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       },
       animationSettings?: AnimationSettingsWithDefaults | null
     ) => {
+      // Do nothing if is not focusing
+      if (focusStatus.value !== 1) {
+        return;
+      }
       // Reset the focus data
       setFocusData(null);
-      // Change state to blurring
-      focusStatus.value = -1;
       gesturesDisabled.value = false;
+      focusStartTranslation.value = null;
+      focusKey.value = null;
       blurStartScale.value = currentScale.value;
       const animSettings = createEndFocusAnimationSettings(animationSettings);
-      if (!animSettings) focusStatus.value = 0;
+      // Change state to blurring if this FocusProvider will be used
+      // to handle the blur animation
+      focusStatus.value = data && animSettings ? -1 : 0;
 
       if (data) {
         setPanGestureData(data);
@@ -159,18 +165,21 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       }
 
       // Re-enable auto sizing if it was disabled
-      if (autoSizingContext) {
-        if (data) {
-          autoSizingContext.enableAutoSizingAfterTimeout(animSettings);
-        } else {
-          autoSizingContext.enableAutoSizing(animSettings);
-        }
+      if (data && autoSizingContext) {
+        autoSizingContext.enableAutoSizingAfterTimeout(animSettings);
       }
       // Otherwise, if the auto sizing is not used, reset the
       // container position to default
       else {
         resetContainerPosition({
-          animationSettings: animSettings ?? undefined
+          animationSettings: animSettings ?? undefined,
+          autoSizing: autoSizingContext
+            ? {
+                disable: autoSizingContext.disableAutoSizing,
+                enableAfterTimeout:
+                  autoSizingContext.enableAutoSizingAfterTimeout
+              }
+            : undefined
         });
       }
     },
@@ -225,11 +234,28 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     };
   };
 
+  useAnimatedReaction(
+    () => ({
+      canvasRendered: !!(
+        canvasDimensions.width.value && canvasDimensions.height.value
+      ),
+      key: focusKey.value // This is used to trigger the reaction when the focus target changes
+    }),
+    ({ canvasRendered }) => {
+      if (!canvasRendered) return;
+      focusStartTranslation.value = {
+        x: currentTranslation.x.value,
+        y: currentTranslation.y.value
+      };
+      focusStartScale.value = currentScale.value;
+    }
+  );
+
   // Focus animation (from unfocused to focused state) and
   // translation when vertex moves
   useAnimatedReaction(
     () =>
-      focusData
+      focusStatus.value === 1 && focusData && focusStartTranslation.value
         ? {
             finalScale: focusData.scale.value,
             finalTranslation: {
@@ -274,7 +300,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // (when the user pans the canvas)
   useAnimatedReaction(
     () =>
-      panGestureData && !focusData
+      focusStatus.value === -1 && panGestureData && !focusData
         ? {
             finalScale: focusStartScale.value,
             gesturePosition: {
