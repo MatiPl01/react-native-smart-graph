@@ -7,7 +7,7 @@ import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
 
-import GraphComponent, { GraphComponentProps } from './GraphComponent';
+import GraphComponent from './GraphComponent';
 
 type UndirectedGraphComponentProps<
   V,
@@ -23,18 +23,16 @@ type ClonedComponentProps<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = UndirectedGraphComponentProps<V, E, ED> & {
-  graphComponentProps: GraphComponentProps;
-} & GraphProviderAdditionalProps;
+> = UndirectedGraphComponentProps<V, E, ED> & GraphProviderAdditionalProps;
 
 function UndirectedGraphComponent<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({ graphComponentProps, ...providerProps }: ClonedComponentProps<V, E, ED>) {
+>(providerProps: ClonedComponentProps<V, E, ED>) {
   return (
     <GraphProvider {...providerProps}>
-      <GraphComponent {...graphComponentProps} />
+      <GraphComponent />
     </GraphProvider>
   );
 }

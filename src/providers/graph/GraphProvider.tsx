@@ -7,7 +7,11 @@ import { AnimatedCanvasTransform } from '@/types/canvas';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
-import { AnimatedBoundingRect, AnimatedDimensions } from '@/types/layout';
+import {
+  AnimatedBoundingRect,
+  AnimatedDimensions,
+  BoundingRect
+} from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import { GraphSettings, GraphSettingsWithDefaults } from '@/types/settings';
 import {
@@ -25,6 +29,7 @@ import {
 } from './layout';
 import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
 import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
+import VertexFocusProvider from './transform/VertexFocusProvider';
 
 const getLayoutProviders = <
   V,
@@ -32,13 +37,15 @@ const getLayoutProviders = <
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >(
   graph: Graph<V, E>,
-  settings: GraphSettingsWithDefaults<V, E, ED>
+  settings: GraphSettingsWithDefaults<V, E, ED>,
+  onRender: (boundingRect: BoundingRect) => void
 ) => {
   switch (settings.layout.managedBy) {
     case 'forces':
       return [
         <ForcesPlacementProvider<ForcesPlacementProviderProps<V, E, ED>>
           graph={graph}
+          onRender={onRender}
           settings={settings}
         />,
         <ForcesLayoutProvider forcesSettings={settings.layout.settings} />
@@ -48,6 +55,7 @@ const getLayoutProviders = <
       return [
         <PlacementLayoutProvider<GraphPlacementLayoutProviderProps<V, E, ED>>
           graph={graph}
+          onRender={onRender}
           settings={settings}
         />
       ];
@@ -85,6 +93,7 @@ export type GraphProviderAdditionalProps =
       endFocus: FocusEndSetter;
       focusStatus: SharedValue<number>;
       initialCanvasScale: number;
+      onRender: (containerBounds: BoundingRect) => void;
       startFocus: FocusStartSetter;
       transform: AnimatedCanvasTransform;
     } & AccessibleOverlayContextType;
@@ -115,6 +124,7 @@ export default function GraphProvider<
   focusStatus,
   graph,
   initialCanvasScale,
+  onRender,
   renderLayer,
   renderers,
   settings,
@@ -151,22 +161,22 @@ export default function GraphProvider<
       <ContainerDimensionsProvider boundingRect={boundingRect} />,
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
-      ...getLayoutProviders(graph, memoSettings)
+      ...getLayoutProviders(graph, memoSettings, onRender),
       // EVENTS
       // Press events provider
-      // ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
-      // // FOCUS
-      // // Provider used to focus on a specific vertex
-      // <VertexFocusProvider
-      //   availableScales={canvasScales}
-      //   canvasDimensions={canvasDimensions}
-      //   endFocus={endFocus}
-      //   focusStatus={focusStatus}
-      //   graph={graph}
-      //   initialScale={initialCanvasScale}
-      //   startFocus={startFocus}
-      //   vertexRadius={memoSettings.components.vertex.radius}
-      // />
+      ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
+      // FOCUS
+      // Provider used to focus on a specific vertex
+      <VertexFocusProvider
+        availableScales={canvasScales}
+        canvasDimensions={canvasDimensions}
+        endFocus={endFocus}
+        focusStatus={focusStatus}
+        graph={graph}
+        initialScale={initialCanvasScale}
+        startFocus={startFocus}
+        vertexRadius={memoSettings.components.vertex.radius}
+      />
     ],
     [memoRenderers]
   );

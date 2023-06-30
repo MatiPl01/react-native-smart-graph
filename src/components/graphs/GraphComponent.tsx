@@ -1,6 +1,6 @@
 /* eslint-disable import/no-unused-modules */
 import { Group } from '@shopify/react-native-skia';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 
 import { withGraphData } from '@/providers/graph';
 import {
@@ -13,20 +13,15 @@ import {
   VertexRenderHandler
 } from '@/types/components';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
-import { BoundingRect } from '@/types/layout';
 
 import EdgeComponent from './edges/EdgeComponent';
 import VertexComponent from './vertices/VertexComponent';
-
-export type GraphComponentProps = {
-  onRender: (containerBounds: BoundingRect) => void;
-};
 
 type GraphComponentPropsWithGraphData<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = GraphComponentProps & {
+> = {
   edgesData: Record<string, EdgeComponentData<E, V, ED>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
@@ -45,25 +40,8 @@ function GraphComponent<
   handleEdgeRender,
   handleVertexRemove,
   handleVertexRender,
-  onRender,
   verticesData
 }: GraphComponentPropsWithGraphData<V, E, ED>) {
-  // GRAPH LAYOUT
-  const isFirstRenderRef = useRef(true);
-
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      // TODO - fix this call to onRender
-      onRender({
-        bottom: 100,
-        left: -100,
-        right: 100,
-        top: -100
-      });
-    }
-  }, [onRender]);
-
   const renderEdges = useCallback(() => {
     return Object.values(edgesData).map(data => (
       <EdgeComponent

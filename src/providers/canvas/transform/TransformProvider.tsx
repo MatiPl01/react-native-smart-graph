@@ -7,7 +7,7 @@ import {
   useRef
 } from 'react';
 import { LayoutChangeEvent } from 'react-native';
-import { runOnJS, withTiming } from 'react-native-reanimated';
+import { withTiming } from 'react-native-reanimated';
 
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { BoundingRect, Dimensions } from '@/types/layout';
@@ -99,7 +99,6 @@ export default function TransformProvider({
         layout: { height, width }
       }
     }: LayoutChangeEvent) => {
-      console.log('handleCanvasRender', { height, width });
       canvasWidth.value = width;
       canvasHeight.value = height;
 
@@ -118,7 +117,6 @@ export default function TransformProvider({
 
   const handleGraphRender = useCallback(
     (containerBoundingRect: BoundingRect) => {
-      console.log('handleGraphRender', containerBoundingRect);
       initialBoundingRectRef.current ??= containerBoundingRect;
       resetContainerPosition({
         containerBoundingRect
@@ -164,6 +162,7 @@ export default function TransformProvider({
         ),
         [minScale, maxScale]
       );
+
       scaleContentTo(scale, undefined, settings?.animationSettings);
       translateContentTo(
         calcContainerTranslation(
@@ -172,7 +171,10 @@ export default function TransformProvider({
           padding
         ),
         undefined,
-        settings?.animationSettings
+        settings?.animationSettings && {
+          ...settings.animationSettings,
+          onComplete: undefined
+        }
       );
 
       // Enable auto sizing after resetting container position
@@ -208,8 +210,6 @@ export default function TransformProvider({
     animationSettings?: AnimationSettingsWithDefaults
   ) => {
     'worklet';
-    console.log('translateContentTo', translate, clampTo, animationSettings);
-
     const newTranslateX = clampTo?.x
       ? clamp(translate.x, clampTo.x)
       : translate.x;
@@ -221,10 +221,7 @@ export default function TransformProvider({
       const { onComplete, ...timingConfig } = animationSettings;
 
       translateX.value = withTiming(newTranslateX, timingConfig);
-      translateY.value = withTiming(newTranslateY, timingConfig, () => {
-        'worklet';
-        if (onComplete) runOnJS(onComplete)();
-      });
+      translateY.value = withTiming(newTranslateY, timingConfig, onComplete);
     } else {
       translateX.value = newTranslateX;
       translateY.value = newTranslateY;
@@ -257,15 +254,7 @@ export default function TransformProvider({
 
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings ?? {};
-
-      currentScale.value = withTiming(
-        newScale,
-        timingConfig,
-        onComplete &&
-          (() => {
-            runOnJS(onComplete)();
-          })
-      );
+      currentScale.value = withTiming(newScale, timingConfig, onComplete);
     } else {
       currentScale.value = newScale;
     }
