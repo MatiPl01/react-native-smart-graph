@@ -142,7 +142,6 @@ export default function TransformProvider({
     animationSettings?: AnimationSettingsWithDefaults
   ) => {
     'worklet';
-    console.log('translate');
     const newTranslateX = clampTo?.x
       ? clamp(translate.x, clampTo.x)
       : translate.x;
@@ -168,7 +167,6 @@ export default function TransformProvider({
     withClamping = true
   ) => {
     'worklet';
-    console.log('scale down');
     if (origin) {
       const relativeScale = newScale / currentScale.value;
 
@@ -219,8 +217,6 @@ export default function TransformProvider({
 
       // Disable auto sizing while resetting container position
       settings?.autoSizing?.disable();
-
-      console.log('>>>???');
 
       const scale = clamp(
         calcContainerScale(

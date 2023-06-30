@@ -73,13 +73,6 @@ function VertexFocusProvider<V, E>({
   const isFirstRenderRef = useRef(true);
   const previousFocusedVertexKey = useRef<null | string>(null);
 
-  console.log(
-    data.focusedVertexKey,
-    focusedVertexData.vertex?.position.x.value,
-    data.focusedVertexKey &&
-      renderedVerticesData[data.focusedVertexKey]?.position.x.value
-  );
-
   useEffect(() => {
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
@@ -88,13 +81,11 @@ function VertexFocusProvider<V, E>({
     if (!focusedVertexData.vertex) {
       if (previousFocusedVertexKey.current && focusStatus.value === 1) {
         previousFocusedVertexKey.current = null;
-        console.log('end focus call');
         endFocus(undefined, focusedVertexData.animation);
       }
       return;
     }
 
-    console.log('start focus call');
     previousFocusedVertexKey.current = data.focusedVertexKey;
     startFocus(
       {
@@ -154,11 +145,9 @@ function VertexFocusProvider<V, E>({
     }),
     ({ status, vertexKey }) => {
       if (status === 0) {
-        console.log('blur graph');
         runOnJS(blurGraph)();
         return;
       }
-      console.log('update focus', status, vertexKey);
       // Update focusProgress of all graph components
       updateComponentsFocus(
         vertexKey && status === 1 ? { vertices: [vertexKey] } : null,

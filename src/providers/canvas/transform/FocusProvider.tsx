@@ -171,7 +171,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       // Otherwise, if the auto sizing is not used, reset the
       // container position to default
       else {
-        console.log('>>>', animSettings);
         resetContainerPosition({
           animationSettings: animSettings ?? undefined,
           autoSizing: autoSizingContext
@@ -275,7 +274,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     data => {
       // Don't do anything if there is no data
       if (!data) return;
-      console.log('focus reaction');
       const {
         finalScale,
         finalTranslation,
@@ -324,7 +322,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         startScale,
         transitionProgress
       } = data;
-      console.log('blur reaction');
       // Scale the content to the previous scale before focusing
       scaleContentTo(
         calcScaleOnProgress(transitionProgress, startScale, finalScale),
