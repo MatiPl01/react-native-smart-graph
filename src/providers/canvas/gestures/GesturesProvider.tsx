@@ -9,12 +9,13 @@ import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
 
 import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useAutoSizingContext } from '@/providers/canvas/auto';
-import { useCanvasDataContext } from '@/providers/canvas/data';
 import {
+  FocusStatus,
+  useAutoSizingContext,
+  useCanvasDataContext,
   useFocusContext,
   useTransformContext
-} from '@/providers/canvas/transform';
+} from '@/providers/canvas';
 import { fixedWithDecay } from '@/utils/reanimated';
 
 type GesturesContextType = {
@@ -64,24 +65,23 @@ export default function GesturesProvider({
 
   // OTHER VALUES
   const pinchStartScale = useSharedValue(1);
-  const panTranslateX = useSharedValue(0);
-  const panTranslateY = useSharedValue(0);
-  const isPanning = useSharedValue(false);
+  // const panTranslateX = useSharedValue(0);
+  // const panTranslateY = useSharedValue(0);
+  // const isPanning = useSharedValue(false);
 
   const handleGestureStart = useCallback(
     (withPosition?: boolean) => {
-      if (focusStatus.value) {
-        endFocus(
-          withPosition
-            ? {
-                isPanning,
-                position: {
-                  x: panTranslateX,
-                  y: panTranslateY
-                }
-              }
-            : undefined
-        );
+      if (focusStatus.value !== FocusStatus.BLUR) {
+        endFocus();
+        // withPosition
+        //   ? {
+        //       isPanning,
+        //       position: {
+        //         x: panTranslateX,
+        //         y: panTranslateY
+        //       }
+        //     }
+        //   : undefined
       } else if (autoSizingContext) {
         autoSizingContext.disableAutoSizing();
       }
@@ -92,23 +92,26 @@ export default function GesturesProvider({
   const panGestureHandler = Gesture.Pan()
     .onStart(({ x, y }) => {
       if (gesturesDisabled.value) return;
-      panTranslateX.value = x;
-      panTranslateY.value = y;
+      // panTranslateX.value = x;
+      // panTranslateY.value = y;
       runOnJS(handleGestureStart)(true);
-      isPanning.value = true;
+      // isPanning.value = true;
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
       // The focus provider will handle canvas translation when focusing
-      if (focusStatus.value) {
-        panTranslateX.value += e.changeX;
-        panTranslateY.value += e.changeY;
-      }
-      // Otherwise, translate canvas normally
-      else {
-        translateX.value += e.changeX;
-        translateY.value += e.changeY;
-      }
+      // if (focusStatus.value) {
+      //   panTranslateX.value += e.changeX;
+      //   panTranslateY.value += e.changeY;
+      // }
+      // // Otherwise, translate canvas normally
+      // else {
+      //   translateX.value += e.changeX;
+      //   translateY.value += e.changeY;
+      // }
+
+      translateX.value += e.changeX;
+      translateY.value += e.changeY;
     })
     .onEnd(({ velocityX, velocityY }) => {
       if (gesturesDisabled.value) return;
@@ -118,7 +121,7 @@ export default function GesturesProvider({
       if (autoSizingContext) {
         runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
       }
-      isPanning.value = false;
+      // isPanning.value = false;
     });
 
   const pinchGestureHandler = Gesture.Pinch()

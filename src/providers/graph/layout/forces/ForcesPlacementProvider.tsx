@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { runOnUI } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph/data';
+import { withGraphData } from '@/providers/graph';
 import { VertexComponentRenderData } from '@/types/components';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';

@@ -12,7 +12,10 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
-import { useCanvasDataContext } from '@/providers/canvas/data';
+import {
+  AutoSizingContextType,
+  useCanvasDataContext
+} from '@/providers/canvas';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { ObjectFit } from '@/types/views';
@@ -31,10 +34,7 @@ type TransformContextType = {
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
   resetContainerPosition: (settings?: {
     animationSettings?: AnimationSettingsWithDefaults;
-    autoSizing?: {
-      disable: () => void;
-      enableAfterTimeout: () => void;
-    };
+    autoSizingContext: AutoSizingContextType | null;
     canvasDimensions?: Dimensions;
     containerBoundingRect?: BoundingRect;
   }) => void;
@@ -195,10 +195,7 @@ export default function TransformProvider({
   const resetContainerPosition = useCallback(
     (settings?: {
       animationSettings?: AnimationSettingsWithDefaults;
-      autoSizing?: {
-        disable: () => void;
-        enableAfterTimeout: () => void;
-      };
+      autoSizingContext?: AutoSizingContextType | null;
       canvasDimensions?: Dimensions;
       containerBoundingRect?: BoundingRect;
     }) => {
@@ -216,7 +213,7 @@ export default function TransformProvider({
       };
 
       // Disable auto sizing while resetting container position
-      settings?.autoSizing?.disable();
+      settings?.autoSizingContext?.disableAutoSizing();
 
       const scale = clamp(
         calcContainerScale(
@@ -246,7 +243,7 @@ export default function TransformProvider({
       );
 
       // Enable auto sizing after resetting container position
-      settings?.autoSizing?.enableAfterTimeout();
+      settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
     },
     [objectFit]
   );

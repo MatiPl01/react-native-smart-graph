@@ -1,13 +1,13 @@
 import { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import {
-  runOnJS,
   SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
 
 import { useFocusObserver } from '@/hooks';
-import { withGraphData } from '@/providers/graph/data';
+import { FocusStatus } from '@/providers/canvas';
+import { withGraphData } from '@/providers/graph';
 import {
   EdgeComponentRenderData,
   VertexComponentRenderData
@@ -16,7 +16,6 @@ import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import { AnimatedDimensions } from '@/types/layout';
 import { FocusedVertexData } from '@/types/settings/focus';
-import { updateComponentsFocus } from '@/utils/animations';
 import { getFocusedVertexData } from '@/utils/focus';
 import {
   getAlignedVertexAbsolutePosition,
@@ -52,41 +51,58 @@ function VertexFocusProvider<V, E>({
   // OBSERVER
   // Vertex focus observer
   const [data] = useFocusObserver(graph);
+
+  // FOCUSED VERTEX DATA
+  const focusedVertexPosition = useMemo(
+    () =>
+      (data.focusedVertexKey &&
+        renderedVerticesData[data.focusedVertexKey]?.position) ||
+      null,
+    [renderedVerticesData, data.focusedVertexKey]
+  );
   // Updated focused vertex data
   const focusedVertexData = useMemo<FocusedVertexData>(
     () =>
       getFocusedVertexData(
-        data.focusedVertexKey,
-        renderedVerticesData,
+        focusedVertexPosition,
         vertexRadius,
         availableScales,
         initialScale,
         data.settings
       ),
-    [data, renderedVerticesData]
+    [focusedVertexPosition, data.settings]
   );
 
   // OTHER VALUES
+  // Animated focus position and scale
   const focusX = useSharedValue(0);
   const focusY = useSharedValue(0);
   const focusScale = useSharedValue(1);
+
   const isFirstRenderRef = useRef(true);
-  const previousFocusedVertexKey = useRef<null | string>(null);
+  // const previousFocusedVertexKey = useRef<null | string>(null);
 
   useEffect(() => {
+    // Don't do anything on the first render
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
       return;
     }
+
     if (!focusedVertexData.vertex) {
-      if (previousFocusedVertexKey.current && focusStatus.value === 1) {
-        previousFocusedVertexKey.current = null;
+      // End focus if there is no focused vertex and focus is still active
+      if (
+        focusStatus.value !== FocusStatus.BLUR &&
+        focusStatus.value !== FocusStatus.BLUR_TRANSITION
+      ) {
+        // previousFocusedVertexKey.current = null;
         endFocus(undefined, focusedVertexData.animation);
       }
       return;
     }
+    // previousFocusedVertexKey.current = data.focusedVertexKey;
 
-    previousFocusedVertexKey.current = data.focusedVertexKey;
+    // Start focus if there is a focused vertex and focus is not active
     startFocus(
       {
         centerPosition: {
@@ -100,9 +116,20 @@ function VertexFocusProvider<V, E>({
     );
   }, [focusedVertexData]);
 
+  // Update the focused vertex position and scale on their change
+  // if focus is begin focused or is getting focused/blurred
   useAnimatedReaction(
     () => {
-      if (!focusedVertexData.vertex) return null;
+      if (
+        !focusedVertexData.vertex ||
+        ![
+          FocusStatus.FOCUS_TRANSITION,
+          FocusStatus.FOCUS,
+          FocusStatus.BLUR_TRANSITION
+        ].some(status => status === focusStatus.value)
+      ) {
+        return null;
+      }
 
       const { vertex } = focusedVertexData;
       return {
@@ -134,34 +161,34 @@ function VertexFocusProvider<V, E>({
     }
   );
 
-  const blurGraph = () => {
-    graph.blur();
-  };
+  // const blurGraph = () => {
+  //   graph.blur();
+  // };
 
-  useAnimatedReaction(
-    () => ({
-      status: focusStatus.value,
-      vertexKey: data.focusedVertexKey
-    }),
-    ({ status, vertexKey }) => {
-      if (status === 0) {
-        runOnJS(blurGraph)();
-        return;
-      }
-      // Update focusProgress of all graph components
-      updateComponentsFocus(
-        vertexKey && status === 1 ? { vertices: [vertexKey] } : null,
-        renderedVerticesData,
-        renderedEdgesData
-      );
-    },
-    [
-      focusStatus,
-      data.focusedVertexKey,
-      renderedVerticesData,
-      renderedEdgesData
-    ]
-  );
+  // useAnimatedReaction(
+  //   () => ({
+  //     status: focusStatus.value,
+  //     vertexKey: data.focusedVertexKey
+  //   }),
+  //   ({ status, vertexKey }) => {
+  //     if (status === 0) {
+  //       runOnJS(blurGraph)();
+  //       return;
+  //     }
+  //     // Update focusProgress of all graph components
+  //     updateComponentsFocus(
+  //       vertexKey && status === 1 ? { vertices: [vertexKey] } : null,
+  //       renderedVerticesData,
+  //       renderedEdgesData
+  //     );
+  //   },
+  //   [
+  //     focusStatus,
+  //     data.focusedVertexKey,
+  //     renderedVerticesData,
+  //     renderedEdgesData
+  //   ]
+  // );
 
   return <>{children}</>;
 }

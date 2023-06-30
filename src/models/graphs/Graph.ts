@@ -93,6 +93,9 @@ export default abstract class Graph<
   }
 
   focus(vertexKey: string, settings?: FocusSettings): void {
+    if (!this.vertices$[vertexKey]) {
+      throw new Error(`Vertex with key ${vertexKey} does not exist.`);
+    }
     this.focusedVertexKey = vertexKey;
     this.notifyFocusChange(vertexKey, settings);
   }

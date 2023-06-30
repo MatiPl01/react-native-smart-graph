@@ -1,4 +1,8 @@
-export { default as FocusProvider, useFocusContext } from './FocusProvider';
+export {
+  default as FocusProvider,
+  FocusStatus,
+  useFocusContext
+} from './FocusProvider';
 export {
   default as TransformProvider,
   useTransformContext

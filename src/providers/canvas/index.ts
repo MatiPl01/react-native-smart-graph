@@ -1,4 +1,7 @@
-export { useAutoSizingContext } from './auto';
+import CanvasProvider from './CanvasProvider';
+
+export default CanvasProvider;
+export { type AutoSizingContextType, useAutoSizingContext } from './auto';
 export { useCanvasDataContext } from './data';
 export { useGesturesContext } from './gestures';
-export { useFocusContext, useTransformContext } from './transform';
+export { FocusStatus, useFocusContext, useTransformContext } from './transform';
