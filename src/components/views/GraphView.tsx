@@ -7,6 +7,7 @@ import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import {
   useAutoSizingContext,
   useCanvasDataContext,
+  useFocusContext,
   useGesturesContext,
   useTransformContext
 } from '@/providers/canvas';
@@ -51,17 +52,23 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   const autoSizingContext = useAutoSizingContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
+  // Focus context
+  const { endFocus, focusStatus } = useFocusContext();
 
   const handleReset = () => {
-    resetContainerPosition({
-      animationSettings: DEFAULT_ANIMATION_SETTINGS,
-      autoSizing: autoSizingContext
-        ? {
-            disable: autoSizingContext.disableAutoSizing,
-            enableAfterTimeout: autoSizingContext.enableAutoSizingAfterTimeout
-          }
-        : undefined
-    });
+    if (focusStatus.value === 1) {
+      endFocus(undefined, DEFAULT_ANIMATION_SETTINGS);
+    } else {
+      resetContainerPosition({
+        animationSettings: DEFAULT_ANIMATION_SETTINGS,
+        autoSizing: autoSizingContext
+          ? {
+              disable: autoSizingContext.disableAutoSizing,
+              enableAfterTimeout: autoSizingContext.enableAutoSizingAfterTimeout
+            }
+          : undefined
+      });
+    }
   };
 
   return (

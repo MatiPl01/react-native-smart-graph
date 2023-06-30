@@ -3,11 +3,14 @@ import {
   createContext,
   PropsWithChildren,
   useCallback,
-  useContext,
-  useRef
+  useContext
 } from 'react';
 import { LayoutChangeEvent } from 'react-native';
-import { withTiming } from 'react-native-reanimated';
+import {
+  useAnimatedReaction,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { BoundingRect, Dimensions } from '@/types/layout';
@@ -91,7 +94,8 @@ export default function TransformProvider({
   } = useCanvasDataContext();
 
   // Other values
-  const initialBoundingRectRef = useRef<BoundingRect | null>(null);
+  const initialCanvasDimensions = useSharedValue<Dimensions | null>(null);
+  const initialBoundingRect = useSharedValue<BoundingRect | null>(null);
 
   const handleCanvasRender = useCallback(
     ({
@@ -99,31 +103,96 @@ export default function TransformProvider({
         layout: { height, width }
       }
     }: LayoutChangeEvent) => {
-      canvasWidth.value = width;
-      canvasHeight.value = height;
-
-      if (initialBoundingRectRef.current) {
-        resetContainerPosition({
-          canvasDimensions: {
-            height,
-            width
-          },
-          containerBoundingRect: initialBoundingRectRef.current
-        });
-      }
+      initialCanvasDimensions.value = { height, width };
     },
     []
   );
 
   const handleGraphRender = useCallback(
     (containerBoundingRect: BoundingRect) => {
-      initialBoundingRectRef.current ??= containerBoundingRect;
-      resetContainerPosition({
-        containerBoundingRect
-      });
+      initialBoundingRect.value = containerBoundingRect;
     },
     []
   );
+
+  const getTranslateClamp = (
+    scale: number
+  ): {
+    x: [number, number];
+    y: [number, number];
+  } => {
+    'worklet';
+
+    const leftLimit = (-containerLeft.value + padding.left) * scale;
+    const rightLimit =
+      canvasWidth.value - (containerRight.value + padding.right) * scale;
+    const topLimit = (-containerTop.value + padding.top) * scale;
+    const bottomLimit =
+      canvasHeight.value - (containerBottom.value + padding.bottom) * scale;
+
+    return {
+      x: [Math.min(leftLimit, rightLimit), Math.max(rightLimit, leftLimit)],
+      y: [Math.min(topLimit, bottomLimit), Math.max(bottomLimit, topLimit)]
+    };
+  };
+
+  const translateContentTo = (
+    translate: Vector,
+    clampTo?: { x?: [number, number]; y?: [number, number] },
+    animationSettings?: AnimationSettingsWithDefaults
+  ) => {
+    'worklet';
+    console.log('translate');
+    const newTranslateX = clampTo?.x
+      ? clamp(translate.x, clampTo.x)
+      : translate.x;
+    const newTranslateY = clampTo?.y
+      ? clamp(translate.y, clampTo.y)
+      : translate.y;
+
+    if (animationSettings) {
+      const { onComplete, ...timingConfig } = animationSettings;
+
+      translateX.value = withTiming(newTranslateX, timingConfig);
+      translateY.value = withTiming(newTranslateY, timingConfig, onComplete);
+    } else {
+      translateX.value = newTranslateX;
+      translateY.value = newTranslateY;
+    }
+  };
+
+  const scaleContentTo = (
+    newScale: number,
+    origin?: Vector,
+    animationSettings?: AnimationSettingsWithDefaults,
+    withClamping = true
+  ) => {
+    'worklet';
+    console.log('scale down');
+    if (origin) {
+      const relativeScale = newScale / currentScale.value;
+
+      translateContentTo(
+        {
+          x:
+            translateX.value -
+            (origin.x - translateX.value) * (relativeScale - 1),
+          y:
+            translateY.value -
+            (origin.y - translateY.value) * (relativeScale - 1)
+        },
+        withClamping ? getTranslateClamp(newScale) : undefined,
+        animationSettings && { ...animationSettings, onComplete: undefined }
+      );
+    }
+
+    if (animationSettings) {
+      const { onComplete, ...timingConfig } = animationSettings ?? {};
+      currentScale.value = withTiming(newScale, timingConfig, onComplete);
+    } else {
+      currentScale.value = newScale;
+    }
+  };
 
   const resetContainerPosition = useCallback(
     (settings?: {
@@ -135,6 +204,7 @@ export default function TransformProvider({
       canvasDimensions?: Dimensions;
       containerBoundingRect?: BoundingRect;
     }) => {
+      'worklet';
       const containerBoundingRect = settings?.containerBoundingRect ?? {
         bottom: containerBottom.value,
         left: containerLeft.value,
@@ -150,9 +220,11 @@ export default function TransformProvider({
       // Disable auto sizing while resetting container position
       settings?.autoSizing?.disable();
 
+      console.log('>>>???');
+
       const scale = clamp(
         calcContainerScale(
-          'contain',
+          objectFit,
           {
             height: containerBoundingRect.bottom - containerBoundingRect.top,
             width: containerBoundingRect.right - containerBoundingRect.left
@@ -183,82 +255,26 @@ export default function TransformProvider({
     [objectFit]
   );
 
-  const getTranslateClamp = (
-    scale: number
-  ): {
-    x: [number, number];
-    y: [number, number];
-  } => {
-    'worklet';
-
-    const leftLimit = (-containerLeft.value + padding.left) * scale;
-    const rightLimit =
-      canvasWidth.value - (containerRight.value + padding.right) * scale;
-    const topLimit = (-containerTop.value + padding.top) * scale;
-    const bottomLimit =
-      canvasHeight.value - (containerBottom.value + padding.bottom) * scale;
-
-    return {
-      x: [Math.min(leftLimit, rightLimit), Math.max(rightLimit, leftLimit)],
-      y: [Math.min(topLimit, bottomLimit), Math.max(bottomLimit, topLimit)]
-    };
-  };
-
-  const translateContentTo = (
-    translate: Vector,
-    clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: AnimationSettingsWithDefaults
-  ) => {
-    'worklet';
-    const newTranslateX = clampTo?.x
-      ? clamp(translate.x, clampTo.x)
-      : translate.x;
-    const newTranslateY = clampTo?.y
-      ? clamp(translate.y, clampTo.y)
-      : translate.y;
-
-    if (animationSettings) {
-      const { onComplete, ...timingConfig } = animationSettings;
-
-      translateX.value = withTiming(newTranslateX, timingConfig);
-      translateY.value = withTiming(newTranslateY, timingConfig, onComplete);
-    } else {
-      translateX.value = newTranslateX;
-      translateY.value = newTranslateY;
-    }
-  };
-
-  const scaleContentTo = (
-    newScale: number,
-    origin?: Vector,
-    animationSettings?: AnimationSettingsWithDefaults,
-    withClamping = true
-  ) => {
-    'worklet';
-    if (origin) {
-      const relativeScale = newScale / currentScale.value;
-
-      translateContentTo(
-        {
-          x:
-            translateX.value -
-            (origin.x - translateX.value) * (relativeScale - 1),
-          y:
-            translateY.value -
-            (origin.y - translateY.value) * (relativeScale - 1)
-        },
-        withClamping ? getTranslateClamp(newScale) : undefined,
-        animationSettings && { ...animationSettings, onComplete: undefined }
-      );
-    }
-
-    if (animationSettings) {
-      const { onComplete, ...timingConfig } = animationSettings ?? {};
-      currentScale.value = withTiming(newScale, timingConfig, onComplete);
-    } else {
-      currentScale.value = newScale;
-    }
-  };
+  useAnimatedReaction(
+    () => ({
+      initialDimensions: initialCanvasDimensions.value,
+      initialRect: initialBoundingRect.value
+    }),
+    ({ initialDimensions, initialRect }) => {
+      if (!initialDimensions || !initialRect) {
+        return;
+      }
+      // Translate container to the center
+      resetContainerPosition({
+        canvasDimensions: initialDimensions,
+        containerBoundingRect: initialRect
+      });
+      // Set canvas dimensions
+      canvasWidth.value = initialDimensions.width;
+      canvasHeight.value = initialDimensions.height;
+    },
+    [initialCanvasDimensions, initialBoundingRect]
+  );
 
   const contextValue: TransformContextType = {
     getTranslateClamp,
