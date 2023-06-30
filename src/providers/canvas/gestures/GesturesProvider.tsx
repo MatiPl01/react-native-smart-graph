@@ -64,7 +64,6 @@ export default function GesturesProvider({
 
   // OTHER VALUES
   const pinchStartScale = useSharedValue(1);
-  const panStartScale = useSharedValue(1);
   const panTranslateX = useSharedValue(0);
   const panTranslateY = useSharedValue(0);
   const isPanning = useSharedValue(false);
@@ -93,7 +92,6 @@ export default function GesturesProvider({
   const panGestureHandler = Gesture.Pan()
     .onStart(({ x, y }) => {
       if (gesturesDisabled.value) return;
-      panStartScale.value = currentScale.value;
       panTranslateX.value = x;
       panTranslateY.value = y;
       runOnJS(handleGestureStart)(true);

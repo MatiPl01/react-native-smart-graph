@@ -60,10 +60,7 @@ function EdgeComponent<E, V>({
 
   // Edge ordering animation
   useEffect(() => {
-    const settingsWithoutCallback = {
-      ...animationSettings,
-      onComplete: () => undefined
-    };
+    const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
     animatedOrder.value = withTiming(order, settingsWithoutCallback);
     animatedEdgesCount.value = withTiming(edgesCount, settingsWithoutCallback);
   }, [order, edgesCount]);

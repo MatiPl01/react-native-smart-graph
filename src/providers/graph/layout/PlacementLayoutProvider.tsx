@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import { useAnimatedReaction } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph/data';
@@ -8,6 +8,7 @@ import {
 } from '@/types/components';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
+import { BoundingRect } from '@/types/layout';
 import {
   AnimationSettingsWithDefaults,
   GraphLayout,
@@ -23,6 +24,7 @@ export type GraphPlacementLayoutProviderProps<
 > = PropsWithChildren<{
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
+  onRender: (boundingRect: BoundingRect) => void;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphSettingsWithDefaults<V, E, ED>;
@@ -36,10 +38,12 @@ function GraphPlacementLayoutProvider<
   children,
   graph,
   layoutAnimationSettings,
+  onRender,
   renderedEdgesData,
   renderedVerticesData,
   settings
 }: GraphPlacementLayoutProviderProps<V, E, ED>) {
+  const isfirstRenderRef = useRef(true);
   const graphLayout = useMemo<GraphLayout>(
     () =>
       placeVertices(
@@ -54,6 +58,14 @@ function GraphPlacementLayoutProvider<
       settings.placement
     ]
   );
+
+  useEffect(() => {
+    if (isfirstRenderRef.current) {
+      isfirstRenderRef.current = false;
+      onRender(graphLayout.boundingRect);
+      return;
+    }
+  }, [graphLayout]);
 
   useAnimatedReaction(
     () => ({

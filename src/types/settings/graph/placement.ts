@@ -1,7 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
 import { Vertex } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
+import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
 import { DeepRequiredAll } from '@/types/utils';
 
 export type PlacementStrategy =
@@ -91,6 +91,10 @@ export type TreesPlacementSettings = SharedPlacementSettings & {
 };
 
 export type PlacedVerticesPositions = Record<string, Vector>;
+export type AnimatedPlacedVerticesPositions = Record<
+  string,
+  AnimatedVectorCoordinates
+>;
 
 export type GraphLayout = {
   boundingRect: BoundingRect;

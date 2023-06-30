@@ -13,7 +13,7 @@ import { withGraphData } from '@/providers/graph/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
 import {
   AnimationSettingsWithDefaults,
   GraphSettingsWithDefaults
@@ -48,6 +48,7 @@ export type ForcesPlacementProviderProps<
 > = PropsWithChildren<{
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
+  onRender: (boundingRect: BoundingRect) => void;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphSettingsWithDefaults<V, E, ED>;
 }>;
@@ -60,6 +61,7 @@ function ForcesPlacementProvider<
   children,
   graph,
   layoutAnimationSettings,
+  onRender,
   renderedVerticesData,
   settings
 }: ForcesPlacementProviderProps<V, E, ED>) {
@@ -114,11 +116,12 @@ function ForcesPlacementProvider<
   ) => {
     isSecondRenderRef.current = false;
 
-    const { verticesPositions } = placeVertices(
+    const { boundingRect, verticesPositions } = placeVertices(
       graph,
       settings.components.vertex.radius,
       settings.placement
     );
+    onRender(boundingRect);
 
     animateVerticesToFinalPositions(
       animatedVerticesPositions,

@@ -2,7 +2,11 @@ import potpack from 'potpack';
 
 import { Vertex } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
-import { GraphLayout, PlacedVerticesPositions } from '@/types/settings';
+import {
+  AnimatedPlacedVerticesPositions,
+  GraphLayout,
+  PlacedVerticesPositions
+} from '@/types/settings';
 
 export const calcContainerBoundingRect = (
   placedVertices: PlacedVerticesPositions,
@@ -27,6 +31,30 @@ export const calcContainerBoundingRect = (
     left: minX - vertexRadius - minVertexSpacing / 2,
     right: maxX + vertexRadius + minVertexSpacing / 2,
     top: minY - vertexRadius - minVertexSpacing / 2
+  };
+};
+
+export const calcAnimatedContainerBoundingRect = (
+  placedVertices: AnimatedPlacedVerticesPositions
+): BoundingRect => {
+  'worklet';
+  let left = 0;
+  let right = 0;
+  let top = 0;
+  let bottom = 0;
+
+  for (const { x, y } of Object.values(placedVertices)) {
+    left = Math.min(left, x.value);
+    right = Math.max(right, x.value);
+    top = Math.min(top, y.value);
+    bottom = Math.max(bottom, y.value);
+  }
+
+  return {
+    bottom,
+    left,
+    right,
+    top
   };
 };
 

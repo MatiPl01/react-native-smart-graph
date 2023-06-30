@@ -63,7 +63,7 @@ function VertexFocusProvider<V, E>({
         initialScale,
         data.settings
       ),
-    [data]
+    [data, renderedVerticesData]
   );
 
   // OTHER VALUES

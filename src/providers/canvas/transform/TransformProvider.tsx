@@ -7,7 +7,7 @@ import {
   useRef
 } from 'react';
 import { LayoutChangeEvent } from 'react-native';
-import { runOnJS, withTiming } from 'react-native-reanimated';
+import { withTiming } from 'react-native-reanimated';
 
 import { useCanvasDataContext } from '@/providers/canvas/data';
 import { BoundingRect, Dimensions } from '@/types/layout';
@@ -162,16 +162,19 @@ export default function TransformProvider({
         ),
         [minScale, maxScale]
       );
+
       scaleContentTo(scale, undefined, settings?.animationSettings);
       translateContentTo(
         calcContainerTranslation(
-          objectFit,
           containerBoundingRect,
           canvasDimensions,
           padding
         ),
         undefined,
-        settings?.animationSettings
+        settings?.animationSettings && {
+          ...settings.animationSettings,
+          onComplete: undefined
+        }
       );
 
       // Enable auto sizing after resetting container position
@@ -207,7 +210,6 @@ export default function TransformProvider({
     animationSettings?: AnimationSettingsWithDefaults
   ) => {
     'worklet';
-
     const newTranslateX = clampTo?.x
       ? clamp(translate.x, clampTo.x)
       : translate.x;
@@ -219,10 +221,7 @@ export default function TransformProvider({
       const { onComplete, ...timingConfig } = animationSettings;
 
       translateX.value = withTiming(newTranslateX, timingConfig);
-      translateY.value = withTiming(newTranslateY, timingConfig, () => {
-        'worklet';
-        if (onComplete) runOnJS(onComplete)();
-      });
+      translateY.value = withTiming(newTranslateY, timingConfig, onComplete);
     } else {
       translateX.value = newTranslateX;
       translateY.value = newTranslateY;
@@ -255,15 +254,7 @@ export default function TransformProvider({
 
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings ?? {};
-
-      currentScale.value = withTiming(
-        newScale,
-        timingConfig,
-        onComplete &&
-          (() => {
-            runOnJS(onComplete)();
-          })
-      );
+      currentScale.value = withTiming(newScale, timingConfig, onComplete);
     } else {
       currentScale.value = newScale;
     }

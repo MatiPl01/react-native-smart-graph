@@ -2,7 +2,7 @@ import React, { memo, PropsWithChildren } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
+import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import {
   useAutoSizingContext,
@@ -46,8 +46,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   const { boundingRect, currentScale, currentTranslation } =
     useCanvasDataContext();
   // Transform context
-  const { handleCanvasRender, handleGraphRender, resetContainerPosition } =
-    useTransformContext();
+  const { handleCanvasRender, resetContainerPosition } = useTransformContext();
   // Auto sizing context
   const autoSizingContext = useAutoSizingContext();
   // Gestures context
@@ -55,7 +54,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
 
   const handleReset = () => {
     resetContainerPosition({
-      animationSettings: DEFAULT_GESTURE_ANIMATION_SETTINGS,
+      animationSettings: DEFAULT_ANIMATION_SETTINGS,
       autoSizing: autoSizingContext
         ? {
             disable: autoSizingContext.disableAutoSizing,
@@ -69,9 +68,6 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
     <>
       <OverlayProvider>
         <CanvasComponent
-          graphComponentProps={{
-            onRender: handleGraphRender
-          }}
           transform={{
             scale: currentScale,
             translateX: currentTranslation.x,

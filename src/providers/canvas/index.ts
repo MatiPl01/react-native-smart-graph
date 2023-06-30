@@ -1,4 +1,4 @@
 export { useAutoSizingContext } from './auto';
 export { useCanvasDataContext } from './data';
 export { useGesturesContext } from './gestures';
-export { useTransformContext } from './transform';
+export { useFocusContext, useTransformContext } from './transform';
