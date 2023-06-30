@@ -10,6 +10,11 @@ export type FocusData = {
   scale: SharedValue<number>;
 };
 
+export type BlurData = {
+  isPanning: SharedValue<boolean>;
+  position: AnimatedVectorCoordinates;
+};
+
 export type PanGestureData = {
   isPanning: SharedValue<boolean>;
   position: AnimatedVectorCoordinates;
@@ -17,10 +22,10 @@ export type PanGestureData = {
 
 export type FocusStartSetter = (
   data: FocusData,
-  animationSettings: AnimationSettingsWithDefaults | null
+  animationSettings: Maybe<AnimationSettingsWithDefaults>
 ) => void;
 
 export type FocusEndSetter = (
   data?: PanGestureData,
-  animationSettings?: AnimationSettingsWithDefaults | null
+  animationSettings?: Maybe<AnimationSettingsWithDefaults>
 ) => void;

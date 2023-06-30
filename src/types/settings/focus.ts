@@ -5,7 +5,7 @@ import { AnimationSettings, AnimationSettingsWithDefaults } from './animations';
 
 export type FocusSettings = {
   alignment?: Alignment;
-  animation?: AnimationSettings | null;
+  animation?: Maybe<AnimationSettings>;
   disableGestures?: boolean; // defaults to true
   vertexScale?: number;
 };

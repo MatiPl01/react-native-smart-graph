@@ -13,7 +13,7 @@ import {
   BatchModificationAnimationSettings
 } from '@/types/settings';
 import { FocusSettings } from '@/types/settings/focus';
-import { Mutable } from '@/types/utils';
+import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 
 export default abstract class Graph<
@@ -38,7 +38,7 @@ export default abstract class Graph<
     this.observers.add(observer);
   }
 
-  blur(settings?: AnimationSettings | null): void {
+  blur(settings?: Maybe<AnimationSettings>): void {
     if (!this.focusedVertexKey) return;
     this.focusedVertexKey = null;
     this.notifyFocusChange(null, {
@@ -55,7 +55,7 @@ export default abstract class Graph<
     }
   }
 
-  clear(animationSettings?: BatchModificationAnimationSettings | null): void {
+  clear(animationSettings?: Maybe<BatchModificationAnimationSettings>): void {
     // Clear the whole graph
     (this.vertices$ as Mutable<typeof this.vertices$>) = {};
     (this.edges$ as Mutable<typeof this.edges$>) = {};
@@ -123,7 +123,7 @@ export default abstract class Graph<
 
   protected insertEdgeObject(
     edge: GE,
-    animationsSettings?: AnimationsSettings | null
+    animationsSettings?: Maybe<AnimationsSettings>
   ): GE {
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
@@ -155,7 +155,7 @@ export default abstract class Graph<
 
   protected insertVertexObject(
     vertex: GV,
-    animationSettings?: AnimationsSettings | null
+    animationSettings?: Maybe<AnimationsSettings>
   ): GV {
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
@@ -219,7 +219,7 @@ export default abstract class Graph<
       edges?: Array<string>;
       vertices?: Array<string>;
     },
-    animationSettings?: BatchModificationAnimationSettings | null
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
   ): void {
     // Remove edges and vertices from graph
     data.edges?.forEach(key => this.removeEdge(key, null));
@@ -240,7 +240,7 @@ export default abstract class Graph<
 
   protected removeEdgeObject(
     edge: GE,
-    animationsSettings?: AnimationsSettings | null
+    animationsSettings?: Maybe<AnimationsSettings>
   ): void {
     // Remove edge from edges between vertices
     const [vertex1, vertex2] = edge.vertices;
@@ -272,7 +272,7 @@ export default abstract class Graph<
 
   removeVertex(
     key: string,
-    animationsSettings?: AnimationsSettings | null
+    animationsSettings?: Maybe<AnimationsSettings>
   ): V | undefined {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
@@ -300,17 +300,17 @@ export default abstract class Graph<
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: BatchModificationAnimationSettings | null
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
   ): void;
 
   abstract insertEdge(
     data: ED,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): GE;
 
   abstract insertVertex(
     data: VertexData<V>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): GV;
 
   abstract isDirected(): boolean;
@@ -321,7 +321,7 @@ export default abstract class Graph<
 
   abstract removeEdge(
     key: string,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): E | undefined;
 
   abstract replaceBatch(
@@ -329,6 +329,6 @@ export default abstract class Graph<
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: BatchModificationAnimationSettings | null
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
   ): void;
 }

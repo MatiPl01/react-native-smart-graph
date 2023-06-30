@@ -38,3 +38,5 @@ export type CommonTypes<A, B> = {
       : never
     : never;
 };
+
+export type Maybe<T> = T | null | undefined;

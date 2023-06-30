@@ -78,8 +78,9 @@ function VertexFocusProvider<V, E>({
   const focusX = useSharedValue(0);
   const focusY = useSharedValue(0);
   const focusScale = useSharedValue(1);
-
+  // Helper values
   const isFirstRenderRef = useRef(true);
+  const transitionDisabled = useSharedValue(false);
   // const previousFocusedVertexKey = useRef<null | string>(null);
 
   useEffect(() => {
@@ -102,7 +103,10 @@ function VertexFocusProvider<V, E>({
     }
     // previousFocusedVertexKey.current = data.focusedVertexKey;
 
+    // Disable transitions until the new focus animations starts
+    transitionDisabled.value = true;
     // Start focus if there is a focused vertex and focus is not active
+    console.log('start');
     startFocus(
       {
         centerPosition: {
@@ -116,18 +120,26 @@ function VertexFocusProvider<V, E>({
     );
   }, [focusedVertexData]);
 
+  useAnimatedReaction(
+    () => focusStatus.value,
+    status => {
+      console.log({ status });
+      if (
+        status === FocusStatus.FOCUS_TRANSITION ||
+        // status === FocusStatus.FOCUS ||
+        status === FocusStatus.BLUR_TRANSITION
+      ) {
+        console.log('enable');
+        transitionDisabled.value = false;
+      }
+    }
+  );
+
   // Update the focused vertex position and scale on their change
   // if focus is begin focused or is getting focused/blurred
   useAnimatedReaction(
     () => {
-      if (
-        !focusedVertexData.vertex ||
-        ![
-          FocusStatus.FOCUS_TRANSITION,
-          FocusStatus.FOCUS,
-          FocusStatus.BLUR_TRANSITION
-        ].some(status => status === focusStatus.value)
-      ) {
+      if (!focusedVertexData.vertex || transitionDisabled.value) {
         return null;
       }
 

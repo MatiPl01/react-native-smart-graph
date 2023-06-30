@@ -18,6 +18,7 @@ import {
 } from '@/providers/canvas';
 import { BoundingRect, Dimensions } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,
@@ -33,21 +34,21 @@ type TransformContextType = {
   handleCanvasRender: (event: LayoutChangeEvent) => void;
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
   resetContainerPosition: (settings?: {
-    animationSettings?: AnimationSettingsWithDefaults;
-    autoSizingContext: AutoSizingContextType | null;
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>;
+    autoSizingContext: Maybe<AutoSizingContextType>;
     canvasDimensions?: Dimensions;
     containerBoundingRect?: BoundingRect;
   }) => void;
   scaleContentTo: (
     newScale: number,
     origin?: Vector,
-    animationSettings?: AnimationSettingsWithDefaults,
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
     withClamping?: boolean
   ) => void;
   translateContentTo: (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: AnimationSettingsWithDefaults
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => void;
 };
 
@@ -139,7 +140,7 @@ export default function TransformProvider({
   const translateContentTo = (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: AnimationSettingsWithDefaults
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     'worklet';
     const newTranslateX = clampTo?.x
@@ -151,7 +152,6 @@ export default function TransformProvider({
 
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings;
-
       translateX.value = withTiming(newTranslateX, timingConfig);
       translateY.value = withTiming(newTranslateY, timingConfig, onComplete);
     } else {
@@ -163,7 +163,7 @@ export default function TransformProvider({
   const scaleContentTo = (
     newScale: number,
     origin?: Vector,
-    animationSettings?: AnimationSettingsWithDefaults,
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
     withClamping = true
   ) => {
     'worklet';
@@ -185,7 +185,7 @@ export default function TransformProvider({
     }
 
     if (animationSettings) {
-      const { onComplete, ...timingConfig } = animationSettings ?? {};
+      const { onComplete, ...timingConfig } = animationSettings;
       currentScale.value = withTiming(newScale, timingConfig, onComplete);
     } else {
       currentScale.value = newScale;
@@ -194,8 +194,8 @@ export default function TransformProvider({
 
   const resetContainerPosition = useCallback(
     (settings?: {
-      animationSettings?: AnimationSettingsWithDefaults;
-      autoSizingContext?: AutoSizingContextType | null;
+      animationSettings?: Maybe<AnimationSettingsWithDefaults>;
+      autoSizingContext?: Maybe<AutoSizingContextType>;
       canvasDimensions?: Dimensions;
       containerBoundingRect?: BoundingRect;
     }) => {

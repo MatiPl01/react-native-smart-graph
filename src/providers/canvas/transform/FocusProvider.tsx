@@ -3,6 +3,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState
@@ -17,9 +18,15 @@ import {
 
 import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useAutoSizingContext, useCanvasDataContext } from '@/providers/canvas';
-import { FocusData, FocusEndSetter, FocusStartSetter } from '@/types/focus';
+import {
+  BlurData,
+  FocusData,
+  FocusEndSetter,
+  FocusStartSetter
+} from '@/types/focus';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
@@ -56,6 +63,11 @@ type FocusState = {
   data: FocusData;
 };
 
+type BlurState = {
+  animationSettings: AnimationSettingsWithDefaults | null;
+  data?: BlurData;
+};
+
 type FocusProviderProps = {
   children?: React.ReactNode;
 };
@@ -81,32 +93,36 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // This value is used to indicate what is the current focus status
   const focusStatus = useSharedValue(FocusStatus.BLUR);
 
+  // FOCUS & BLUR
+  // Focus state
+  const [focusState, setFocusState] = useState<FocusState | null>();
+  // Blur state
+  const [blurState, setBlurState] = useState<BlurState | null>();
+  // Focus/Blur transition
+  const transitionProgress = useSharedValue(0);
+  const transitionStartPosition = useSharedValue<Vector>(vec(0, 0));
+  const transitionStartScale = useSharedValue<number>(0);
+
   // HELPER VALUES
-  const [focusState, setFocusState] = useState<FocusState | null>(null);
   const focusStartAnimationSettingsRef =
     useRef<AnimationSettingsWithDefaults | null>(null);
-  // Focus transition
-  const focusTransitionProgress = useSharedValue(0);
-  const focusTransitionStartPosition = useSharedValue<Vector>(vec(0, 0));
-  const focusTransitionStartScale = useSharedValue<number>(0);
 
+  /**
+   * EXPOSED FUNCTIONS
+   */
+
+  // Focus setter
   const startFocus = useCallback(
     (
       data: FocusData,
-      animationSettings?: AnimationSettingsWithDefaults | null
+      animationSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
     ) => {
       // Turn off animated reaction until data is completely set
       focusStatus.value = FocusStatus.FOCUS_PREPARATION;
       // Set focus data
       gesturesDisabled.value = data.gesturesDisabled;
-      const animSettings = (focusStartAnimationSettingsRef.current =
-        animationSettings === undefined
-          ? DEFAULT_FOCUS_ANIMATION_SETTINGS
-          : animationSettings);
-      setFocusState({
-        animationSettings: animSettings,
-        data
-      });
+      focusStartAnimationSettingsRef.current = animationSettings;
+      setFocusState({ animationSettings, data });
 
       // Disable auto sizing when focusing
       if (autoSizingContext) {
@@ -116,50 +132,99 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     []
   );
 
+  // Blur setter
   const endFocus = useCallback(
     (
       data?: {
         isPanning: SharedValue<boolean>;
         position: AnimatedVectorCoordinates;
       },
-      animationSettings?: AnimationSettingsWithDefaults | null
+      animSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
     ) => {
-      // TODO
-    },
-    []
-  );
-
-  const startFocusTransition = useCallback(
-    (animationSettings: AnimationSettingsWithDefaults | null) => {
-      'worklet';
-      // Set initial values for the focus transition
-      focusTransitionStartPosition.value = {
-        x: currentTranslation.x.value,
-        y: currentTranslation.y.value
-      };
-      focusTransitionStartScale.value = currentScale.value;
-      // Turn on the animated reaction that will handle the focus animation
-      focusStatus.value = FocusStatus.FOCUS_TRANSITION;
-      // Update the focus transition progress
-      if (animationSettings) {
-        const { onComplete, ...timingConfig } = animationSettings;
-        focusTransitionProgress.value = 0;
-        focusTransitionProgress.value = withTiming(1, timingConfig, () => {
-          'worklet';
-          focusStatus.value = FocusStatus.FOCUS;
-          if (onComplete) {
-            runOnJS(onComplete)();
-          }
-        });
-      } else {
-        focusTransitionProgress.value = 1;
-        focusStatus.value = FocusStatus.FOCUS;
+      // Do nothing if there is no focus applied
+      if (focusStatus.value === FocusStatus.BLUR) return;
+      const animationSettings =
+        animSettings ?? focusStartAnimationSettingsRef.current;
+      // Set focus data if it is provided
+      if (data) {
+        setBlurState({ animationSettings, data });
+      }
+      // Otherwise, just reset the container position
+      else {
+        handleContainerReset(animSettings);
       }
     },
     []
   );
 
-  // This is used to handle focus animation on initial render
+  /**
+   * PRIVATE FUNCTIONS
+   */
+  const finishTransition = useCallback((finishStatus: FocusStatus) => {
+    'worklet';
+    // Dismiss the transition if the new focus is pending
+    // (the new transition is being prepared or is in progress)
+    if (
+      focusStatus.value !== FocusStatus.FOCUS_TRANSITION ||
+      transitionProgress.value < 1
+    ) {
+      return;
+    }
+    focusStatus.value = finishStatus;
+  }, []);
+
+  const startTransition = useCallback(
+    (
+      transitionType:
+        | FocusStatus.BLUR_TRANSITION
+        | FocusStatus.FOCUS_TRANSITION,
+      animationSettings: AnimationSettingsWithDefaults | null
+    ) => {
+      'worklet';
+      const finishStatus =
+        transitionType === FocusStatus.BLUR_TRANSITION
+          ? FocusStatus.BLUR
+          : FocusStatus.FOCUS;
+      // Set initial values for the transition
+      transitionStartPosition.value = {
+        x: currentTranslation.x.value,
+        y: currentTranslation.y.value
+      };
+      transitionStartScale.value = currentScale.value;
+      // Turn on the animated reaction that will handle the animation
+      focusStatus.value = transitionType;
+      // Update the transition progress
+      if (animationSettings) {
+        const { onComplete, ...timingConfig } = animationSettings;
+        transitionProgress.value = 0;
+        transitionProgress.value = withTiming(1, timingConfig, () => {
+          'worklet';
+          finishTransition(finishStatus);
+          if (onComplete) {
+            runOnJS(onComplete)();
+          }
+        });
+      } else {
+        finishTransition(finishStatus);
+      }
+    },
+    []
+  );
+
+  const handleContainerReset = useCallback(
+    (animationSettings: Maybe<AnimationSettingsWithDefaults>) => {
+      'worklet';
+      focusStatus.value = FocusStatus.BLUR_TRANSITION;
+      resetContainerPosition({
+        animationSettings: animationSettings ?? undefined,
+        autoSizingContext
+      });
+    },
+    []
+  );
+
+  // This is used to start the focus transition
+  // (it checks if canvas is rendered and delays transition until it is)
   useAnimatedReaction(
     () => ({
       canvasRendered: !!(
@@ -168,12 +233,25 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     }),
     ({ canvasRendered }) => {
       if (!canvasRendered || !focusState) return;
-      startFocusTransition(focusState.animationSettings);
+      startTransition(
+        FocusStatus.FOCUS_TRANSITION,
+        focusState.animationSettings
+      );
     },
     [focusState]
   );
 
-  // Focus animation (from unfocused to focused state) and
+  // This is used to start the blur transition
+  useEffect(() => {
+    if (!blurState) return;
+    startTransition(FocusStatus.BLUR_TRANSITION, blurState.animationSettings);
+  }, [blurState]);
+
+  /**
+   * ANIMATION HANDLERS
+   */
+
+  // Focus animation handler (from unfocused to focused state) and
   // translation when vertex moves
   useAnimatedReaction(
     () => {
@@ -191,9 +269,9 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       } = focusState.data;
 
       return {
-        progress: focusTransitionProgress.value,
-        startPosition: focusTransitionStartPosition.value,
-        startScale: focusTransitionStartScale.value,
+        progress: transitionProgress.value,
+        startPosition: transitionStartPosition.value,
+        startScale: transitionStartScale.value,
         targetPosition: {
           x: canvasDimensions.width.value / 2 - x.value * scale.value,
           y: canvasDimensions.height.value / 2 - y.value * scale.value
@@ -217,6 +295,19 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       translateContentTo(
         calcTranslationOnProgress(progress, startPosition, targetPosition)
       );
+    }
+  );
+
+  // Blur animation handler (from focused to unfocused state)
+  useAnimatedReaction(
+    () => {
+      const status = focusStatus.value;
+      if (status !== FocusStatus.BLUR_TRANSITION || !blurState) {
+        return null;
+      }
+    },
+    () => {
+      //TODO
     }
   );
 

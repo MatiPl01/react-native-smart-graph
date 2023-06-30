@@ -17,6 +17,7 @@ import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasDataContext, useTransformContext } from '@/providers/canvas';
 import { BoundingRect } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,
@@ -29,10 +30,10 @@ import {
 export type AutoSizingContextType = {
   disableAutoSizing: () => void;
   enableAutoSizing: (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => void;
   enableAutoSizingAfterTimeout: (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => void;
 };
 
@@ -84,7 +85,7 @@ export default function AutoSizingProvider({
   const autoSizingTransitionProgress = useSharedValue(1);
 
   const startAutoSizingTimeout = (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     autoSizingTimeoutRef.current = setTimeout(() => {
       enableAutoSizing(animationSettings);
@@ -92,7 +93,7 @@ export default function AutoSizingProvider({
   };
 
   const enableAutoSizingAfterTimeout = (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     clearAutoSizingTimeout();
     startAutoSizingTimeout(animationSettings);
