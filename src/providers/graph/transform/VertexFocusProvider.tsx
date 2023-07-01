@@ -217,12 +217,12 @@ function VertexFocusProvider<V, E>({
     }
   );
 
-  useAnimatedReaction(
-    () => focusedVertexKey.value,
-    key => {
-      // TODO - change this in a separate PR
-    }
-  );
+  // useAnimatedReaction(
+  //   () => focusedVertexKey.value,
+  //   key => {
+  //     // TODO - change this in a separate PR
+  //   }
+  // );
 
   const contextValue = useMemo<VertexFocusContextType>(
     () => ({
@@ -232,7 +232,12 @@ function VertexFocusProvider<V, E>({
     []
   );
 
-  return <>{children}</>;
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    <VertexFocusContext.Provider value={contextValue as any}>
+      {children}
+    </VertexFocusContext.Provider>
+  );
 }
 
 export default withGraphData(

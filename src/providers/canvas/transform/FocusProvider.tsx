@@ -82,12 +82,8 @@ export default function FocusProvider({
   const { canvasDimensions, currentScale, currentTranslation } =
     useCanvasDataContext();
   // Canvas transform context values
-  const {
-    getTranslateClamp,
-    resetContainerPosition,
-    scaleContentTo,
-    translateContentTo
-  } = useTransformContext();
+  const { resetContainerPosition, scaleContentTo, translateContentTo } =
+    useTransformContext();
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
 
