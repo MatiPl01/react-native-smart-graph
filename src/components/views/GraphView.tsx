@@ -1,14 +1,12 @@
-import React, { memo, PropsWithChildren } from 'react';
+import React, { Children, memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 
-import ViewControls from '@/components/controls/ViewControls';
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
+import DirectedGraphComponent from '@/components/graphs/DirectedGraphComponent';
+import UndirectedGraphComponent from '@/components/graphs/UndirectedGraphComponent';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, {
-  FocusStatus,
-  useAutoSizingContext,
   useCanvasDataContext,
-  useFocusContext,
   useGesturesContext,
   useTransformContext
 } from '@/providers/canvas';
@@ -20,51 +18,52 @@ import CanvasComponent from './canvas/CanvasComponent';
 
 type GraphViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
-  controls?: boolean;
   initialScale?: number;
   objectFit?: ObjectFit;
   padding?: Spacing;
   scales?: number[];
 }>;
 
-function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
+function GraphView({ children, ...providerProps }: GraphViewProps) {
   return (
     <View style={styles.container}>
       <CanvasProvider {...providerProps}>
-        <GraphViewComposer controls={controls}>{children}</GraphViewComposer>
+        <GraphViewComposer>{children}</GraphViewComposer>
       </CanvasProvider>
     </View>
   );
 }
 
-type GraphViewComposerProps = PropsWithChildren<{
-  controls?: boolean;
-}>;
+const CANVAS_COMPONENTS = [DirectedGraphComponent, UndirectedGraphComponent];
 
-const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
+type GraphViewComposerProps = { children: React.ReactNode };
+
+const GraphViewComposer = ({ children }: GraphViewComposerProps) => {
   // CONTEXTS
   // Canvas data context
   const { boundingRect, currentScale, currentTranslation } =
     useCanvasDataContext();
   // Transform context
-  const { handleCanvasRender, resetContainerPosition } = useTransformContext();
-  // Auto sizing context
-  const autoSizingContext = useAutoSizingContext();
+  const { handleCanvasRender } = useTransformContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
-  // Focus context
-  const { endFocus, focusStatus } = useFocusContext();
 
-  const handleReset = () => {
-    if (focusStatus.value === FocusStatus.BLUR) {
-      resetContainerPosition({
-        animationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS,
-        autoSizingContext
-      });
-    } else {
-      endFocus(undefined, DEFAULT_FOCUS_ANIMATION_SETTINGS);
-    }
-  };
+  const groupedChildren = useMemo(() => {
+    // Group components in 2 categories: overlay components and canvas components
+    const overlayComponents: Array<React.ReactNode> = [];
+    const canvasComponents: Array<React.ReactNode> = [];
+
+    Children.forEach(children, child => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      if (CANVAS_COMPONENTS.includes((child as any)?.type)) {
+        canvasComponents.push(child);
+      } else {
+        overlayComponents.push(child);
+      }
+    });
+
+    return { canvas: canvasComponents, overlay: overlayComponents };
+  }, [children]);
 
   return (
     <>
@@ -77,13 +76,20 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
           }}
           boundingRect={boundingRect}
           onRender={handleCanvasRender}>
-          {children}
+          {/* Render canvas components */}
+          {groupedChildren.canvas}
         </CanvasComponent>
-        {/* Renders overlay layers set using the OverlayContext */}
-        <OverlayOutlet gestureHandler={gestureHandler} />
+
+        {/* Graph overlay layers */}
+        <GestureDetector gesture={gestureHandler}>
+          <View style={StyleSheet.absoluteFill}>
+            {/* Renders overlay layers set using the OverlayContext */}
+            <OverlayOutlet />
+            {/* Render overlay components */}
+            {groupedChildren.overlay}
+          </View>
+        </GestureDetector>
       </OverlayProvider>
-      {/* Display graph controls */}
-      {controls && <ViewControls onReset={handleReset} />}
     </>
   );
 };

@@ -1,15 +1,17 @@
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Easing } from 'react-native-reanimated';
 
+import GraphViewControls from '@/components/controls/GraphViewControls';
 import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
 
@@ -17,6 +19,7 @@ import {
   DirectedEdgeData,
   DirectedGraphComponent,
   FocusSettings,
+  ObjectFit,
   VertexData
 } from '..';
 
@@ -54,6 +57,8 @@ const ACHIEVEMENTS_GRAPH: {
 };
 
 export default function App() {
+  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
+
   const graph = useMemo(() => new DirectedGraph(), []);
 
   useEffect(() => {
@@ -69,11 +74,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView
-          controls
-          objectFit='contain'
-          padding={25}
-          scales={[0.25, 1, 10]}>
+        <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
             settings={{
               events: {
@@ -87,6 +88,9 @@ export default function App() {
             }}
             graph={graph}
           />
+          <View style={styles.controls}>
+            <GraphViewControls onObjectFitChange={setObjectFit} />
+          </View>
         </GraphView>
         <TouchableOpacity
           onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
@@ -119,5 +123,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative'
+  },
+  controls: {
+    marginTop: 40
   }
 });

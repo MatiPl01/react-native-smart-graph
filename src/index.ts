@@ -22,6 +22,7 @@ export { default as DirectedGraph } from '@/models/graphs/DirectedGraph';
 export { default as UndirectedGraph } from '@/models/graphs/UndirectedGraph';
 
 // VIEWS
+export { default as GraphViewControls } from '@/components/controls/GraphViewControls';
 export { default as GraphView } from '@/components/views/GraphView';
 
 // HOOKS

@@ -6,7 +6,6 @@ import {
   useState
 } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { ComposedGesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { CommonTypes } from '@/types/utils';
 import { withMemoContext } from '@/utils/contexts';
@@ -60,11 +59,7 @@ export default function OverlayProvider({
   );
 }
 
-type OverlayOutletProps = {
-  gestureHandler: ComposedGesture;
-};
-
-export const OverlayOutlet = ({ gestureHandler }: OverlayOutletProps) => {
+export const OverlayOutlet = () => {
   const contextValue = useContext(OverlayContext);
 
   if (!contextValue) {
@@ -74,15 +69,13 @@ export const OverlayOutlet = ({ gestureHandler }: OverlayOutletProps) => {
   const { layers } = contextValue;
 
   return (
-    <GestureDetector gesture={gestureHandler}>
-      <View style={StyleSheet.absoluteFillObject}>
-        {Object.entries(layers)
-          .sort(([zIndexA], [zIndexB]) => Number(zIndexA) - Number(zIndexB))
-          .map(([idx, layer]) => (
-            <Fragment key={idx}>{layer}</Fragment>
-          ))}
-      </View>
-    </GestureDetector>
+    <View style={StyleSheet.absoluteFillObject}>
+      {Object.entries(layers)
+        .sort(([zIndexA], [zIndexB]) => Number(zIndexA) - Number(zIndexB))
+        .map(([idx, layer]) => (
+          <Fragment key={idx}>{layer}</Fragment>
+        ))}
+    </View>
   );
 };
 

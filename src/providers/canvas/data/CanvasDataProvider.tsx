@@ -11,6 +11,7 @@ import {
   AnimatedDimensions,
   AnimatedVectorCoordinates
 } from '@/types/layout';
+import { ObjectFit } from '@/types/views';
 
 type CanvasDataContextType = {
   autoSizingEnabled: SharedValue<boolean>;
@@ -19,6 +20,7 @@ type CanvasDataContextType = {
   currentScale: SharedValue<number>;
   currentTranslation: AnimatedVectorCoordinates;
   initialScale: number;
+  objectFit: ObjectFit;
   scales: number[];
 };
 
@@ -38,12 +40,14 @@ export const useCanvasDataContext = () => {
 
 type CanvasDataProviderProps = PropsWithChildren<{
   initialScale: number;
+  objectFit: ObjectFit;
   scales: number[];
 }>;
 
 export default function CanvasDataProvider({
   children,
   initialScale,
+  objectFit,
   scales
 }: CanvasDataProviderProps) {
   // CANVAS
@@ -81,9 +85,10 @@ export default function CanvasDataProvider({
         y: translateY
       },
       initialScale,
+      objectFit,
       scales
     }),
-    [scales]
+    [scales, objectFit, initialScale]
   );
 
   return (

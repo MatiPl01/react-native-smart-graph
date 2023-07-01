@@ -3,7 +3,8 @@ import {
   createContext,
   PropsWithChildren,
   useCallback,
-  useContext
+  useContext,
+  useEffect
 } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 import {
@@ -267,6 +268,10 @@ export default function TransformProvider({
     },
     [initialCanvasDimensions, initialBoundingRect]
   );
+
+  useEffect(() => {
+    resetContainerPosition();
+  }, [objectFit]);
 
   const contextValue: TransformContextType = {
     getTranslateClamp,
