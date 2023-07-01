@@ -5,6 +5,7 @@ import {
   AnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
@@ -35,7 +36,7 @@ export default class UndirectedGraph<V, E> extends Graph<
       edges?: Array<UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): void {
     // Insert edges and vertices to the graph model
     vertices?.forEach(data => this.insertVertex(data, null));
@@ -56,7 +57,7 @@ export default class UndirectedGraph<V, E> extends Graph<
 
   override insertEdge(
     { key, value, vertices: [vertex1key, vertex2key] }: UndirectedEdgeData<E>,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): UndirectedEdge<E, V> {
     if (!vertex1key || !vertex2key) {
       throw new Error(`Edge ${key} must have two vertices`);
@@ -93,7 +94,7 @@ export default class UndirectedGraph<V, E> extends Graph<
 
   override insertVertex(
     { key, value }: VertexData<V>,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): UndirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new UndirectedGraphVertex<V, E>(key, value),
@@ -120,7 +121,7 @@ export default class UndirectedGraph<V, E> extends Graph<
 
   override removeEdge(
     key: string,
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): E | undefined {
     const edge = this.getEdge(key);
 
@@ -149,7 +150,7 @@ export default class UndirectedGraph<V, E> extends Graph<
       edges?: Array<UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): void {
     this.clear();
     setTimeout(() => {

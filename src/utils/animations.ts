@@ -1,10 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
-import { runOnJS, SharedValue, withTiming } from 'react-native-reanimated';
+import { runOnJS, withTiming } from 'react-native-reanimated';
 
-import {
-  EdgeComponentRenderData,
-  VertexComponentRenderData
-} from '@/types/components';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   AnimationSettings,
@@ -45,75 +41,6 @@ export const animateVerticesToFinalPositions = (
       );
     }
   });
-};
-
-const updateComponentsFocusProgress = <
-  D extends { focusProgress: SharedValue<number> }
->(
-  focusedKeysSet: Set<string> | null,
-  renderedComponentsData: Record<string, D>,
-  animationSettings?: AnimationSettings
-) => {
-  'worklet';
-  const { onComplete, ...timingConfig } = animationSettings ?? {};
-
-  // Disable focus for all components
-  if (!focusedKeysSet) {
-    Object.values(renderedComponentsData).forEach(({ focusProgress }) => {
-      focusProgress.value = withTiming(0, timingConfig, onComplete);
-    });
-  } else {
-    Object.entries(renderedComponentsData).forEach(
-      ([key, { focusProgress }]) => {
-        if (focusedKeysSet?.has(key)) {
-          focusProgress.value = withTiming(1, timingConfig, onComplete);
-        } else {
-          focusProgress.value = withTiming(-1, timingConfig, onComplete);
-        }
-      }
-    );
-  }
-};
-
-export const updateComponentsFocus = (
-  focusedComponents: {
-    edges?: string[];
-    vertices?: string[];
-  } | null,
-  renderedVerticesData: Record<string, VertexComponentRenderData>,
-  renderedEdgesData: Record<string, EdgeComponentRenderData>,
-  animationSettings?: AnimationSettings
-) => {
-  'worklet';
-
-  // Turn on focus if there are focused components
-  if (focusedComponents) {
-    const focusedVerticesSet = new Set(focusedComponents.vertices ?? []);
-    const focusedEdgesSet = new Set(focusedComponents.edges ?? []);
-    // Update vertices focusProgress
-    updateComponentsFocusProgress(
-      focusedVerticesSet,
-      renderedVerticesData,
-      animationSettings
-    );
-    // Update edges focusProgress
-    updateComponentsFocusProgress(
-      focusedEdgesSet,
-      renderedEdgesData,
-      animationSettings
-    );
-  }
-  // Otherwise, turn off focus for all components
-  else {
-    // Update vertices focusProgress
-    updateComponentsFocusProgress(
-      null,
-      renderedVerticesData,
-      animationSettings
-    );
-    // Update edges focusProgress
-    updateComponentsFocusProgress(null, renderedEdgesData, animationSettings);
-  }
 };
 
 const ANIMATION_SETTINGS_KEYS = new Set(['duration', 'easing', 'onComplete']);

@@ -4,14 +4,14 @@ import { StyleSheet, View } from 'react-native';
 import ViewControls from '@/components/controls/ViewControls';
 import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import {
+import CanvasProvider, {
+  FocusStatus,
   useAutoSizingContext,
   useCanvasDataContext,
   useFocusContext,
   useGesturesContext,
   useTransformContext
 } from '@/providers/canvas';
-import CanvasProvider from '@/providers/canvas/CanvasProvider';
 import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
@@ -56,18 +56,13 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   const { endFocus, focusStatus } = useFocusContext();
 
   const handleReset = () => {
-    if (focusStatus.value === 1) {
-      endFocus(undefined, DEFAULT_ANIMATION_SETTINGS);
-    } else {
+    if (focusStatus.value === FocusStatus.BLUR) {
       resetContainerPosition({
         animationSettings: DEFAULT_ANIMATION_SETTINGS,
-        autoSizing: autoSizingContext
-          ? {
-              disable: autoSizingContext.disableAutoSizing,
-              enableAfterTimeout: autoSizingContext.enableAutoSizingAfterTimeout
-            }
-          : undefined
+        autoSizingContext
       });
+    } else {
+      endFocus(undefined, DEFAULT_ANIMATION_SETTINGS);
     }
   };
 

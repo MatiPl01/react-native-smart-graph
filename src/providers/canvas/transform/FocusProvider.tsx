@@ -1,8 +1,9 @@
-import { Vector } from '@shopify/react-native-skia';
+import { vec, Vector } from '@shopify/react-native-skia';
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState
@@ -16,17 +17,15 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useAutoSizingContext } from '@/providers/canvas/auto';
-import { useCanvasDataContext } from '@/providers/canvas/data';
+import { useAutoSizingContext, useCanvasDataContext } from '@/providers/canvas';
 import {
+  BlurData,
   FocusData,
   FocusEndSetter,
-  FocusStartSetter,
-  PanGestureData
+  FocusStartSetter
 } from '@/types/focus';
-import { AnimatedVectorCoordinates } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
-import { fixedWithDecay } from '@/utils/reanimated';
+import { Maybe } from '@/types/utils';
 import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
@@ -36,6 +35,7 @@ type FocusContextType = {
   focusStatus: SharedValue<number>;
   gesturesDisabled: SharedValue<boolean>;
   startFocus: FocusStartSetter;
+  transitionProgress: SharedValue<number>;
 };
 
 const FocusContext = createContext(null);
@@ -50,292 +50,346 @@ export const useFocusContext = () => {
   return contextValue as FocusContextType;
 };
 
-type FocusProviderProps = {
-  children?: React.ReactNode;
+export enum FocusStatus {
+  FOCUS_PREPARATION,
+  FOCUS_TRANSITION,
+  FOCUS,
+  BLUR_TRANSITION,
+  BLUR
+}
+
+type FocusState = {
+  animationSettings: AnimationSettingsWithDefaults | null;
+  data: FocusData;
 };
 
-export default function FocusProvider({ children }: FocusProviderProps) {
+type BlurState = {
+  animationSettings: AnimationSettingsWithDefaults | null;
+  data: BlurData;
+};
+
+type FocusProviderProps = {
+  children?: React.ReactNode;
+  initialScale: number;
+};
+
+export default function FocusProvider({
+  children,
+  initialScale
+}: FocusProviderProps) {
   // CONTEXT VALUES
   // Canvas data context values
   const { canvasDimensions, currentScale, currentTranslation } =
     useCanvasDataContext();
   // Canvas transform context values
-  const {
-    getTranslateClamp,
-    resetContainerPosition,
-    scaleContentTo,
-    translateContentTo
-  } = useTransformContext();
+  const { resetContainerPosition, scaleContentTo, translateContentTo } =
+    useTransformContext();
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
 
-  // OTHER VALUES
-  // Focused point data
-  const [focusData, setFocusData] = useState<FocusData | null>(null);
-  // Target translation position when blur animation is running
-  // which was triggered by the user panning the canvas
-  const [panGestureData, setPanGestureData] = useState<PanGestureData | null>(
-    null
-  );
+  // CONTEXT VALUES
   // Helper value for disabling gestures
   const gesturesDisabled = useSharedValue(false);
-  // Helper values for focus animation
-  // Used to check if the focus target has changed (to trigger focusStartTranslation
-  // and focusStartScale to be set)
-  const focusKey = useSharedValue<null | string>(null);
-  const focusStartTranslation = useSharedValue<Vector | null>(null);
-  const focusStartScale = useSharedValue(0);
-  const focusTransitionProgress = useSharedValue(0);
+  // This value is used to indicate what is the current focus status
+  const focusStatus = useSharedValue(FocusStatus.BLUR);
+
+  // FOCUS & BLUR
+  // Focus state
+  const [focusState, setFocusState] = useState<FocusState | null>();
+  // Blur state
+  const [blurState, setBlurState] = useState<BlurState | null>();
+  // Focus/Blur transition
+  const transitionProgress = useSharedValue(0);
+  const transitionStartPosition = useSharedValue<Vector>(vec(0, 0));
+  const transitionStartScale = useSharedValue<number>(0);
+
+  // HELPER VALUES
   const focusStartAnimationSettingsRef =
     useRef<AnimationSettingsWithDefaults | null>(null);
-  // This value is used to indicate whether the focus animation is running
-  // or a vertex is being focused
-  // 0 - not focusing
-  // 1 - focusing
-  // -1 - blurring
-  const focusStatus = useSharedValue(1);
-  const blurStartScale = useSharedValue(0);
 
+  /**
+   * EXPOSED FUNCTIONS
+   */
+
+  // Focus setter
   const startFocus = useCallback(
     (
       data: FocusData,
-      animationSettings?: AnimationSettingsWithDefaults | null
+      animationSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
     ) => {
-      // Set the focus data
-      focusStatus.value = 1;
+      // Turn off animated reaction until data is completely set
+      focusStatus.value = FocusStatus.FOCUS_PREPARATION;
+      // Set focus data
       gesturesDisabled.value = data.gesturesDisabled;
-      const animSettings =
-        animationSettings === undefined
-          ? DEFAULT_FOCUS_ANIMATION_SETTINGS
-          : animationSettings;
-      focusStartAnimationSettingsRef.current = animSettings;
-      focusKey.value = `${data.centerPosition.x.value}${data.centerPosition.y.value}`;
-      setFocusData(data);
+      focusStartAnimationSettingsRef.current = animationSettings;
+      setFocusState({ animationSettings, data });
 
       // Disable auto sizing when focusing
       if (autoSizingContext) {
         autoSizingContext.disableAutoSizing();
       }
-
-      // Animate to the focus point's position and scale
-      // if the animation settings are provided
-      if (animSettings) {
-        startProgressTransition(animSettings);
-      }
-      // Otherwise, set the progress to 1 to set the focus point's position
-      // (change the scale immediately)
-      else {
-        focusTransitionProgress.value = 1;
-      }
     },
     []
   );
 
+  // Blur setter
   const endFocus = useCallback(
     (
-      data?: {
-        isPanning: SharedValue<boolean>;
-        position: AnimatedVectorCoordinates;
-      },
-      animationSettings?: AnimationSettingsWithDefaults | null
+      data?: BlurData,
+      animSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
     ) => {
-      // Do nothing if is not focusing
-      if (focusStatus.value !== 1) {
-        return;
-      }
-      // Reset the focus data
-      setFocusData(null);
-      gesturesDisabled.value = false;
-      focusStartTranslation.value = null;
-      focusKey.value = null;
-      blurStartScale.value = currentScale.value;
-      const animSettings = createEndFocusAnimationSettings(animationSettings);
-      // Change state to blurring if this FocusProvider will be used
-      // to handle the blur animation
-      focusStatus.value = data && animSettings ? -1 : 0;
-
+      // Do nothing if there is no focus applied
+      if (focusStatus.value === FocusStatus.BLUR) return;
+      const animationSettings =
+        animSettings ?? focusStartAnimationSettingsRef.current;
+      // Set focus data if it is provided
       if (data) {
-        setPanGestureData(data);
-
-        if (animSettings) {
-          startProgressTransition(animSettings);
-        } else {
-          focusTransitionProgress.value = 0;
-        }
+        setBlurState({ animationSettings, data });
       }
-
-      // Re-enable auto sizing if it was disabled
-      if (data && autoSizingContext) {
-        autoSizingContext.enableAutoSizingAfterTimeout(animSettings);
-      }
-      // Otherwise, if the auto sizing is not used, reset the
-      // container position to default
+      // Otherwise, just reset the container position
       else {
-        resetContainerPosition({
-          animationSettings: animSettings ?? undefined,
-          autoSizing: autoSizingContext
-            ? {
-                disable: autoSizingContext.disableAutoSizing,
-                enableAfterTimeout:
-                  autoSizingContext.enableAutoSizingAfterTimeout
-              }
-            : undefined
-        });
+        handleContainerReset(animSettings);
       }
     },
     []
   );
 
-  const startProgressTransition = (
-    animSettings: AnimationSettingsWithDefaults
-  ) => {
-    const { onComplete, ...timingConfig } = animSettings;
-    focusTransitionProgress.value = 0;
-    focusTransitionProgress.value = withTiming(1, timingConfig, onComplete);
-  };
+  /**
+   * PRIVATE FUNCTIONS
+   */
+  const finishTransition = useCallback((finishStatus: FocusStatus) => {
+    'worklet';
+    // Dismiss the transition if the new focus is pending
+    // (the new transition is being prepared or is in progress)
+    const currentStatus = focusStatus.value;
+    if (
+      ((finishStatus === FocusStatus.FOCUS &&
+        currentStatus === FocusStatus.FOCUS_TRANSITION) ||
+        (finishStatus === FocusStatus.BLUR &&
+          currentStatus === FocusStatus.BLUR_TRANSITION)) &&
+      transitionProgress.value === 1
+    ) {
+      focusStatus.value = finishStatus;
+    }
+  }, []);
 
-  const onBlurAnimationComplete = (onComplete?: () => void) => {
-    focusStatus.value = 0;
-    setPanGestureData(null);
-    onComplete?.();
+  const updateAnimationSettingsWithFinishCallback = useCallback(
+    (
+      animationSettings: AnimationSettingsWithDefaults,
+      finishStatus: FocusStatus
+    ) => {
+      'worklet';
+      const { onComplete, ...timingConfig } = animationSettings;
+      return {
+        ...timingConfig,
+        onComplete: () => {
+          'worklet';
+          finishTransition(finishStatus);
+          if (onComplete) {
+            runOnJS(onComplete)();
+          }
+        }
+      };
+    },
+    []
+  );
 
-    const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
-    currentTranslation.x.value = fixedWithDecay(
-      0,
-      currentTranslation.x.value,
-      clampX
-    );
-    currentTranslation.y.value = fixedWithDecay(
-      0,
-      currentTranslation.y.value,
-      clampY
-    );
-  };
-
-  const createEndFocusAnimationSettings = (
-    animationSettings?: AnimationSettingsWithDefaults | null
-  ): AnimationSettingsWithDefaults | null => {
-    const animSettings =
-      animationSettings === undefined
-        ? // Use the animation settings that were passed to the startFocus
-          // if animationSettings were not passed to the endFocus
-          focusStartAnimationSettingsRef.current
-        : animationSettings;
-
-    if (!animSettings) return null;
-
-    const { onComplete, ...timingConfig } = animSettings;
-    return {
-      ...timingConfig,
-      onComplete: () => {
-        'worklet';
-        runOnJS(onBlurAnimationComplete)(onComplete);
+  const startTransition = useCallback(
+    (
+      transitionType:
+        | FocusStatus.BLUR_TRANSITION
+        | FocusStatus.FOCUS_TRANSITION,
+      animationSettings: AnimationSettingsWithDefaults | null
+    ) => {
+      'worklet';
+      const finishStatus =
+        transitionType === FocusStatus.BLUR_TRANSITION
+          ? FocusStatus.BLUR
+          : FocusStatus.FOCUS;
+      // Set initial values for the transition
+      transitionStartPosition.value = {
+        x: currentTranslation.x.value,
+        y: currentTranslation.y.value
+      };
+      transitionStartScale.value = currentScale.value;
+      // Turn on the animated reaction that will handle the animation
+      focusStatus.value = transitionType;
+      // Update the transition progress
+      if (animationSettings) {
+        const { onComplete, ...timingConfig } =
+          updateAnimationSettingsWithFinishCallback(
+            animationSettings,
+            finishStatus
+          );
+        transitionProgress.value = 0;
+        transitionProgress.value = withTiming(1, timingConfig, onComplete);
+      } else {
+        finishTransition(finishStatus);
       }
-    };
-  };
+    },
+    []
+  );
 
+  const handleContainerReset = useCallback(
+    (animationSettings: Maybe<AnimationSettingsWithDefaults>) => {
+      'worklet';
+      focusStatus.value = FocusStatus.BLUR_TRANSITION;
+      // Reset the container position with animation if it is provided
+      if (animationSettings) {
+        resetContainerPosition({
+          animationSettings: updateAnimationSettingsWithFinishCallback(
+            animationSettings,
+            FocusStatus.BLUR
+          ),
+          autoSizingContext
+        });
+      }
+      // Otherwise, reset the container position without animation
+      else {
+        resetContainerPosition({ autoSizingContext });
+        finishTransition(FocusStatus.BLUR);
+      }
+    },
+    []
+  );
+
+  // This is used to start the focus transition
+  // (it checks if canvas is rendered and delays transition until it is)
   useAnimatedReaction(
     () => ({
       canvasRendered: !!(
         canvasDimensions.width.value && canvasDimensions.height.value
-      ),
-      key: focusKey.value // This is used to trigger the reaction when the focus target changes
+      )
     }),
     ({ canvasRendered }) => {
-      if (!canvasRendered) return;
-      focusStartTranslation.value = {
-        x: currentTranslation.x.value,
-        y: currentTranslation.y.value
-      };
-      focusStartScale.value = currentScale.value;
-    }
+      if (!focusState || !canvasRendered) return;
+      startTransition(
+        FocusStatus.FOCUS_TRANSITION,
+        focusState.animationSettings
+      );
+      runOnJS(setBlurState)(null);
+    },
+    [focusState]
   );
 
-  // Focus animation (from unfocused to focused state) and
+  // This is used to start the blur transition
+  useEffect(() => {
+    if (!blurState) return;
+    startTransition(FocusStatus.BLUR_TRANSITION, blurState.animationSettings);
+    runOnJS(setFocusState)(null);
+  }, [blurState]);
+
+  /**
+   * ANIMATION HANDLERS
+   */
+
+  // Focus animation handler (from unfocused to focused state) and
   // translation when vertex moves
   useAnimatedReaction(
-    () =>
-      focusStatus.value === 1 && focusData && focusStartTranslation.value
-        ? {
-            finalScale: focusData.scale.value,
-            finalTranslation: {
-              x:
-                canvasDimensions.width.value / 2 -
-                focusData.centerPosition.x.value * focusData.scale.value,
-              y:
-                canvasDimensions.height.value / 2 -
-                focusData.centerPosition.y.value * focusData.scale.value
-            },
-            startScale: focusStartScale.value,
-            startTranslation: focusStartTranslation.value,
-            transitionProgress: focusTransitionProgress.value
-          }
-        : null,
+    () => {
+      const status = focusStatus.value;
+      if (
+        (status !== FocusStatus.FOCUS_TRANSITION &&
+          status !== FocusStatus.FOCUS) ||
+        !focusState
+      ) {
+        return null;
+      }
+
+      const {
+        centerPosition: { x, y },
+        scale
+      } = focusState.data;
+
+      return {
+        progress: transitionProgress.value,
+        startPosition: transitionStartPosition.value,
+        startScale: transitionStartScale.value,
+        targetPosition: {
+          x: canvasDimensions.width.value / 2 - x.value * scale.value,
+          y: canvasDimensions.height.value / 2 - y.value * scale.value
+        },
+        targetScale: scale.value
+      };
+    },
     data => {
       // Don't do anything if there is no data
       if (!data) return;
       const {
-        finalScale,
-        finalTranslation,
+        progress,
+        startPosition,
         startScale,
-        startTranslation,
-        transitionProgress
+        targetPosition,
+        targetScale
       } = data;
       // Scale the content to the focus scale
-      scaleContentTo(
-        calcScaleOnProgress(transitionProgress, startScale, finalScale)
-      );
+      scaleContentTo(calcScaleOnProgress(progress, startScale, targetScale));
       // Translate the content to the focus position
       translateContentTo(
-        calcTranslationOnProgress(
-          transitionProgress,
-          startTranslation,
-          finalTranslation
-        )
+        calcTranslationOnProgress(progress, startPosition, targetPosition)
       );
     }
   );
 
-  // Blur animation (from focused to unfocused state)
-  // (when the user pans the canvas)
+  // Blur animation handler (from focused to unfocused state)
   useAnimatedReaction(
-    () =>
-      focusStatus.value === -1 && panGestureData && !focusData
-        ? {
-            finalScale: focusStartScale.value,
-            gesturePosition: {
-              x: panGestureData.position.x.value,
-              y: panGestureData.position.y.value
-            },
-            isPanning: panGestureData.isPanning.value,
-            startScale: blurStartScale.value,
-            transitionProgress: focusTransitionProgress.value
-          }
-        : null,
+    () => {
+      const status = focusStatus.value;
+      if (status !== FocusStatus.BLUR_TRANSITION || !blurState) {
+        return null;
+      }
+
+      const { x, y } = blurState.data.translation;
+
+      return {
+        origin: blurState.data.origin,
+        progress: transitionProgress.value,
+        startPosition: transitionStartPosition.value,
+        startScale: transitionStartScale.value,
+        targetScale: initialScale,
+        translation: {
+          x: x.value,
+          y: y.value
+        }
+      };
+    },
     data => {
       // Don't do anything if there is no data
       if (!data) return;
       const {
-        finalScale,
-        gesturePosition: position,
-        isPanning,
+        origin,
+        progress,
+        startPosition,
         startScale,
-        transitionProgress
+        targetScale,
+        translation
       } = data;
-      // Scale the content to the previous scale before focusing
-      scaleContentTo(
-        calcScaleOnProgress(transitionProgress, startScale, finalScale),
-        // Don't translate the content if the user is not panning
-        // (the content will be translated automatically by the pan gesture)
-        isPanning ? position : undefined,
-        undefined,
-        false
-      );
+      // Scale the content to the initial scale
+      const newScale = calcScaleOnProgress(progress, startScale, targetScale);
+      scaleContentTo(newScale);
+      // Translate the content to the user's finger position
+      const translateScale = newScale / startScale - 1;
+      translateContentTo({
+        x:
+          startPosition.x -
+          (origin.x - startPosition.x) * translateScale +
+          translation.x,
+        y:
+          startPosition.y -
+          (origin.y - startPosition.y) * translateScale +
+          translation.y
+      });
     }
   );
 
   const contextValue = useMemo<FocusContextType>(
-    () => ({ endFocus, focusStatus, gesturesDisabled, startFocus }),
+    () => ({
+      endFocus,
+      focusStatus,
+      gesturesDisabled,
+      startFocus,
+      transitionProgress
+    }),
     []
   );
 

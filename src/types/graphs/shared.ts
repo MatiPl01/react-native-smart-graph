@@ -6,6 +6,7 @@ import {
   SingleModificationAnimationSettings
 } from '@/types/settings/animations';
 import { FocusSettings } from '@/types/settings/focus';
+import { Maybe } from '@/types/utils';
 
 export interface Vertex<V, E> {
   get degree(): number;
@@ -37,8 +38,8 @@ export type OrderedEdges<E, V> = Array<{
 
 export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
-  blur(settings?: AnimationSettings | null): void;
-  clear(animationSettings?: BatchModificationAnimationSettings | null): void;
+  blur(settings?: Maybe<AnimationSettings>): void;
+  clear(animationSettings?: Maybe<BatchModificationAnimationSettings>): void;
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<E, V>>;
@@ -54,15 +55,15 @@ export interface Graph<V, E> {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: BatchModificationAnimationSettings | null
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
   ): void;
   insertEdge(
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): Edge<E, V>;
   insertVertex(
     data: VertexData<V>,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): Vertex<V, E>;
   isDirected(): boolean;
   removeBatch(
@@ -70,22 +71,22 @@ export interface Graph<V, E> {
       edges: Array<string>;
       vertices: Array<string>;
     },
-    animationSettings?: BatchModificationAnimationSettings | null
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
   ): void;
   removeEdge(
     key: string,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): E | undefined;
   removeObserver(observer: GraphObserver): void;
   removeVertex(
     key: string,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): V | undefined;
   replaceBatch(
     data: {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: BatchModificationAnimationSettings | null
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
   ): void;
 }

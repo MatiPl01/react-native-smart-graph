@@ -149,13 +149,8 @@
     "no-script-url": ["error"],
     "no-self-compare": ["error"],
     "no-sequences": ["error"],
-    "no-shadow": [
-      "error",
-      {
-        "builtinGlobals": true,
-        "hoist": "functions"
-      }
-    ],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "error",
     "no-shadow-restricted-names": ["error"],
     "no-sparse-arrays": ["error"],
     "no-undef-init": ["error"],

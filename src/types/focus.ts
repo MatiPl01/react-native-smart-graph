@@ -1,8 +1,10 @@
+import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
 import { AnimationSettingsWithDefaults } from './settings';
+import { Maybe } from './utils';
 
 export type FocusData = {
   centerPosition: AnimatedVectorCoordinates;
@@ -10,17 +12,17 @@ export type FocusData = {
   scale: SharedValue<number>;
 };
 
-export type PanGestureData = {
-  isPanning: SharedValue<boolean>;
-  position: AnimatedVectorCoordinates;
+export type BlurData = {
+  origin: Vector;
+  translation: AnimatedVectorCoordinates;
 };
 
 export type FocusStartSetter = (
   data: FocusData,
-  animationSettings: AnimationSettingsWithDefaults | null
+  animationSettings: Maybe<AnimationSettingsWithDefaults>
 ) => void;
 
 export type FocusEndSetter = (
-  data?: PanGestureData,
-  animationSettings?: AnimationSettingsWithDefaults | null
+  data?: BlurData,
+  animationSettings?: Maybe<AnimationSettingsWithDefaults>
 ) => void;

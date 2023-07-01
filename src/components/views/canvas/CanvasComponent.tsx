@@ -35,7 +35,12 @@ function CanvasComponent({
   // Transform context
   const { handleGraphRender } = useTransformContext();
   // Focus context
-  const { endFocus, focusStatus, startFocus } = useFocusContext();
+  const {
+    endFocus,
+    focusStatus,
+    startFocus,
+    transitionProgress: focusTransitionProgress
+  } = useFocusContext();
 
   const containerTransform = useDerivedValue(() => [
     { translateX: transform.translateX.value },
@@ -55,6 +60,7 @@ function CanvasComponent({
             canvasScales: scales,
             endFocus,
             focusStatus,
+            focusTransitionProgress,
             initialCanvasScale: initialScale,
             onRender: handleGraphRender,
             removeLayer,

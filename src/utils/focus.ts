@@ -3,13 +3,12 @@ import {
   DEFAULT_ALIGNMENT_SETTINGS,
   DEFAULT_FOCUS_SCALE_MULTIPLIER
 } from '@/constants/focus';
-import { VertexComponentRenderData } from '@/types/components';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
 
 export const getFocusedVertexData = (
-  focusedVertexKey: null | string,
-  renderedVerticesData: Record<string, VertexComponentRenderData>,
+  focusedVertexPosition: AnimatedVectorCoordinates | null,
   vertexRadius: number,
   availableScales: number[],
   initialScale: number,
@@ -23,12 +22,7 @@ export const getFocusedVertexData = (
         } as AnimationSettingsWithDefaults)
       : null;
 
-  const focusedVertexData =
-    focusedVertexKey && renderedVerticesData[focusedVertexKey];
-
-  // Return only animation settings if there is no focused vertex
-  // or the specified vertex does not exist
-  if (!focusedVertexData) {
+  if (!focusedVertexPosition) {
     return { animation: animationSettings };
   }
 
@@ -39,7 +33,7 @@ export const getFocusedVertexData = (
         ...DEFAULT_ALIGNMENT_SETTINGS,
         ...settings?.alignment
       },
-      position: focusedVertexData.position,
+      position: focusedVertexPosition,
       radius: vertexRadius,
       scale:
         settings?.vertexScale ??

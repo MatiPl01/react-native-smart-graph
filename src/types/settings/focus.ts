@@ -1,11 +1,11 @@
 import { Alignment, AnimatedVectorCoordinates } from '@/types/layout';
-import { DeepRequired } from '@/types/utils';
+import { DeepRequired, Maybe } from '@/types/utils';
 
 import { AnimationSettings, AnimationSettingsWithDefaults } from './animations';
 
 export type FocusSettings = {
   alignment?: Alignment;
-  animation?: AnimationSettings | null;
+  animation?: Maybe<AnimationSettings>;
   disableGestures?: boolean; // defaults to true
   vertexScale?: number;
 };

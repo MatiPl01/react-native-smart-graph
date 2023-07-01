@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react';
 import { useFrameCallback } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph/data';
+import { withGraphData } from '@/providers/graph';
 import { GraphConnections } from '@/types/graphs';
 import { ForcesSettingsWithDefaults } from '@/types/settings';
 import { applyForces } from '@/utils/forces';

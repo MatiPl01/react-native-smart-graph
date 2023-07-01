@@ -6,6 +6,7 @@ import {
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
@@ -36,7 +37,7 @@ export default class DirectedGraph<V, E> extends Graph<
       edges?: Array<DirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: BatchModificationAnimationSettings | null
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
   ): void {
     // Insert edges and vertices to the graph model
     vertices?.forEach(data => this.insertVertex(data, null));
@@ -57,7 +58,7 @@ export default class DirectedGraph<V, E> extends Graph<
 
   override insertEdge(
     { from: sourceKey, key, to: targetKey, value }: DirectedEdgeData<E>,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): DirectedEdge<E, V> {
     this.checkSelfLoop(sourceKey, targetKey);
     const source = this.getVertex(sourceKey);
@@ -87,7 +88,7 @@ export default class DirectedGraph<V, E> extends Graph<
 
   override insertVertex(
     { key, value }: VertexData<V>,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): DirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new DirectedGraphVertex<V, E>(key, value),
@@ -120,7 +121,7 @@ export default class DirectedGraph<V, E> extends Graph<
 
   override removeEdge(
     key: string,
-    animationSettings?: SingleModificationAnimationSettings | null
+    animationSettings?: Maybe<SingleModificationAnimationSettings>
   ): E | undefined {
     const edge = this.getEdge(key);
 
@@ -147,7 +148,7 @@ export default class DirectedGraph<V, E> extends Graph<
       edges?: Array<DirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: AnimationSettings | null
+    animationSettings?: Maybe<AnimationSettings>
   ): void {
     this.clear();
     setTimeout(() => {

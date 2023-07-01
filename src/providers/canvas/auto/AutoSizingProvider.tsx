@@ -14,10 +14,10 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useCanvasDataContext } from '@/providers/canvas/data';
-import { useTransformContext } from '@/providers/canvas/transform';
+import { useCanvasDataContext, useTransformContext } from '@/providers/canvas';
 import { BoundingRect } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,
@@ -27,13 +27,13 @@ import {
   clamp
 } from '@/utils/views';
 
-type AutoSizingContextType = {
+export type AutoSizingContextType = {
   disableAutoSizing: () => void;
   enableAutoSizing: (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => void;
   enableAutoSizingAfterTimeout: (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => void;
 };
 
@@ -85,7 +85,7 @@ export default function AutoSizingProvider({
   const autoSizingTransitionProgress = useSharedValue(1);
 
   const startAutoSizingTimeout = (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     autoSizingTimeoutRef.current = setTimeout(() => {
       enableAutoSizing(animationSettings);
@@ -93,7 +93,7 @@ export default function AutoSizingProvider({
   };
 
   const enableAutoSizingAfterTimeout = (
-    animationSettings?: AnimationSettingsWithDefaults | null
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     clearAutoSizingTimeout();
     startAutoSizingTimeout(animationSettings);
@@ -103,10 +103,10 @@ export default function AutoSizingProvider({
     animationSettings: AnimationSettingsWithDefaults | null = DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
   ) => {
     autoSizingTimeoutRef.current = null;
-    autoSizingEnabled.value = true;
     // Crete a smooth transition between the current state and the auto-layout state
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings;
+      autoSizingTransitionProgress.value = 0;
       autoSizingTransitionProgress.value = withTiming(
         1,
         timingConfig,
@@ -122,6 +122,7 @@ export default function AutoSizingProvider({
       x: translateX.value,
       y: translateY.value
     };
+    autoSizingEnabled.value = true;
   };
 
   const clearAutoSizingTimeout = () => {
@@ -138,32 +139,33 @@ export default function AutoSizingProvider({
   };
 
   useAnimatedReaction(
-    () => ({
-      boundingRect: {
-        bottom: containerBottom.value,
-        left: containerLeft.value,
-        right: containerRight.value,
-        top: containerTop.value
-      },
-      canvasDimensions: {
-        height: canvasHeight.value,
-        width: canvasWidth.value
-      },
-      enabled: autoSizingEnabled.value,
-      startScale: autoSizingStartScale.value,
-      startTranslation: autoSizingStartTranslation.value,
-      transitionProgress: autoSizingTransitionProgress.value
-    }),
-    ({
-      boundingRect,
-      canvasDimensions,
-      enabled,
-      startScale,
-      startTranslation,
-      transitionProgress
-    }) => {
-      // Don't auto scale if it's disabled
-      if (!enabled || objectFit === 'none') return;
+    () =>
+      autoSizingEnabled.value
+        ? {
+            boundingRect: {
+              bottom: containerBottom.value,
+              left: containerLeft.value,
+              right: containerRight.value,
+              top: containerTop.value
+            },
+            canvasDimensions: {
+              height: canvasHeight.value,
+              width: canvasWidth.value
+            },
+            startScale: autoSizingStartScale.value,
+            startTranslation: autoSizingStartTranslation.value,
+            transitionProgress: autoSizingTransitionProgress.value
+          }
+        : null,
+    data => {
+      if (!data) return;
+      const {
+        boundingRect,
+        canvasDimensions,
+        startScale,
+        startTranslation,
+        transitionProgress
+      } = data;
       // Scale content to fit container based on objectFit
       scaleContentTo(
         calcScaleOnProgress(
