@@ -68,6 +68,7 @@ function EdgeComponent<E, V>({
 
   // Edge ordering animation
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
     animatedOrder.value = withTiming(order, settingsWithoutCallback);
     animatedEdgesCount.value = withTiming(edgesCount, settingsWithoutCallback);
