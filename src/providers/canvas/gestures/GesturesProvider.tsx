@@ -1,3 +1,4 @@
+import { Vector } from '@shopify/react-native-skia';
 import {
   createContext,
   PropsWithChildren,
@@ -65,53 +66,51 @@ export default function GesturesProvider({
 
   // OTHER VALUES
   const pinchStartScale = useSharedValue(1);
-  // const panTranslateX = useSharedValue(0);
-  // const panTranslateY = useSharedValue(0);
-  // const isPanning = useSharedValue(false);
+  const panStartScale = useSharedValue(1);
+  const panTranslateX = useSharedValue(0);
+  const panTranslateY = useSharedValue(0);
 
   const handleGestureStart = useCallback(
-    (withPosition?: boolean) => {
+    (origin?: Vector) => {
       if (focusStatus.value !== FocusStatus.BLUR) {
-        endFocus();
-        // withPosition
-        //   ? {
-        //       isPanning,
-        //       position: {
-        //         x: panTranslateX,
-        //         y: panTranslateY
-        //       }
-        //     }
-        //   : undefined
+        endFocus(
+          origin
+            ? {
+                origin,
+                translation: {
+                  x: panTranslateX,
+                  y: panTranslateY
+                }
+              }
+            : undefined
+        );
       } else if (autoSizingContext) {
         autoSizingContext.disableAutoSizing();
       }
     },
-    [endFocus, autoSizingContext?.disableAutoSizing]
+    [autoSizingContext?.disableAutoSizing]
   );
 
   const panGestureHandler = Gesture.Pan()
     .onStart(({ x, y }) => {
       if (gesturesDisabled.value) return;
-      // panTranslateX.value = x;
-      // panTranslateY.value = y;
-      runOnJS(handleGestureStart)(true);
-      // isPanning.value = true;
+      panTranslateX.value = 0;
+      panTranslateY.value = 0;
+      panStartScale.value = currentScale.value;
+      runOnJS(handleGestureStart)({ x, y });
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
-      // The focus provider will handle canvas translation when focusing
-      // if (focusStatus.value) {
-      //   panTranslateX.value += e.changeX;
-      //   panTranslateY.value += e.changeY;
-      // }
-      // // Otherwise, translate canvas normally
-      // else {
-      //   translateX.value += e.changeX;
-      //   translateY.value += e.changeY;
-      // }
-
-      translateX.value += e.changeX;
-      translateY.value += e.changeY;
+      // The focus provider will handle canvas translation on blur transition
+      if (focusStatus.value === FocusStatus.BLUR_TRANSITION) {
+        panTranslateX.value += e.changeX; //* relativeScale;
+        panTranslateY.value += e.changeY; //* relativeScale;
+      }
+      // Otherwise, translate canvas normally
+      else {
+        translateX.value += e.changeX;
+        translateY.value += e.changeY;
+      }
     })
     .onEnd(({ velocityX, velocityY }) => {
       if (gesturesDisabled.value) return;
@@ -121,7 +120,6 @@ export default function GesturesProvider({
       if (autoSizingContext) {
         runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
       }
-      // isPanning.value = false;
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -150,6 +148,7 @@ export default function GesturesProvider({
 
   const doubleTapGestureHandler = Gesture.Tap()
     .numberOfTaps(2)
+    .maxDistance(50)
     .onStart(() => {
       if (gesturesDisabled.value) return;
       runOnJS(handleGestureStart)();

@@ -92,6 +92,7 @@ export type GraphProviderAdditionalProps =
       canvasScales: number[];
       endFocus: FocusEndSetter;
       focusStatus: SharedValue<number>;
+      focusTransitionProgress: SharedValue<number>;
       initialCanvasScale: number;
       onRender: (containerBounds: BoundingRect) => void;
       startFocus: FocusStartSetter;
@@ -122,6 +123,7 @@ export default function GraphProvider<
   children,
   endFocus,
   focusStatus,
+  focusTransitionProgress,
   graph,
   initialCanvasScale,
   onRender,
@@ -172,6 +174,7 @@ export default function GraphProvider<
         canvasDimensions={canvasDimensions}
         endFocus={endFocus}
         focusStatus={focusStatus}
+        focusTransitionProgress={focusTransitionProgress}
         graph={graph}
         initialScale={initialCanvasScale}
         startFocus={startFocus}
