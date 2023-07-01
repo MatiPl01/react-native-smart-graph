@@ -19,6 +19,7 @@ export type FocusedVertexData = {
   animation: AnimationSettingsWithDefaults | null;
   vertex?: {
     alignment: Required<Alignment>;
+    key: string;
     position: AnimatedVectorCoordinates;
     radius: number;
     scale: number;

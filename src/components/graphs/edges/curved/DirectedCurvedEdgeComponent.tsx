@@ -24,7 +24,8 @@ function DirectedCurvedEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  focusProgress,
+  focusKey,
+  focusTransitionProgress,
   onRender,
   renderers,
   v1Position,
@@ -72,7 +73,6 @@ function DirectedCurvedEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
-      focusProgress,
       labelPosition: { x: parabolaX, y: parabolaY }
     });
   }, [edge.key]);
@@ -167,11 +167,16 @@ function DirectedCurvedEdgeComponent<E, V>({
     }
   );
 
+  const sharedProps = {
+    animationProgress,
+    focusKey,
+    focusTransitionProgress
+  };
+
   return (
     <>
       {renderers.edge({
-        animationProgress,
-        focusProgress,
+        ...sharedProps,
         key: edge.key,
         parabolaX,
         parabolaY,
@@ -179,26 +184,24 @@ function DirectedCurvedEdgeComponent<E, V>({
         value: edge.value
       })}
       <EdgeArrowComponent
-        animationProgress={animationProgress}
         directionVector={dirVec}
-        focusProgress={focusProgress}
         height={arrowHeight}
         renderer={renderers.arrow}
         tipPosition={arrowTipPosition}
         vertexRadius={v2Radius}
         width={arrowWidth}
+        {...sharedProps}
       />
       {renderers.label && (
         <EdgeLabelComponent
-          animationProgress={animationProgress}
           centerX={parabolaX}
           centerY={parabolaY}
           edge={edge}
-          focusProgress={focusProgress}
           height={labelHeight}
           renderer={renderers.label}
           v1Position={v1Position}
           v2Position={v2Position}
+          {...sharedProps}
         />
       )}
     </>

@@ -6,13 +6,15 @@ import { CurvedEdgeRendererProps } from '@/types/renderer';
 
 export default function DefaultCurvedEdgeRenderer<E>({
   animationProgress,
-  focusProgress,
+  focusTransitionProgress,
   path
 }: CurvedEdgeRendererProps<E>) {
   const end = useDerivedValue(() => Math.min(1, animationProgress.value));
 
   const opacity = useDerivedValue(() =>
-    focusProgress.value >= 0 ? 1 : 1 + 0.75 * focusProgress.value
+    focusTransitionProgress.value >= 0
+      ? 1
+      : 1 + 0.75 * focusTransitionProgress.value
   );
 
   return (

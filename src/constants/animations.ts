@@ -15,11 +15,6 @@ export const DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS: AnimationSettingsWithDefa
     easing: Easing.bezier(0.35, 0, 1, 0.15)
   };
 
-export const DEFAULT_FOCUS_ANIMATION_SETTINGS: AnimationSettingsWithDefaults = {
-  duration: 500,
-  easing: EASING.ease
-};
-
 export const DEFAULT_GESTURE_ANIMATION_SETTINGS: AnimationSettingsWithDefaults =
   {
     duration: 150,
@@ -31,3 +26,8 @@ export const DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS: AnimationSettingsWithDefaul
     duration: 150,
     easing: EASING.ease
   };
+
+export const DEFAULT_FOCUS_ANIMATION_SETTINGS: AnimationSettingsWithDefaults = {
+  duration: 250,
+  easing: EASING.ease
+};

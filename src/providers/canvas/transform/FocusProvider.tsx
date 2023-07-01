@@ -5,7 +5,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState
 } from 'react';
 import {
@@ -16,7 +15,10 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
+import {
+  DEFAULT_FOCUS_ANIMATION_SETTINGS,
+  DEFAULT_GESTURE_ANIMATION_SETTINGS
+} from '@/constants/animations';
 import { useAutoSizingContext, useCanvasDataContext } from '@/providers/canvas';
 import {
   BlurData,
@@ -32,10 +34,11 @@ import { useTransformContext } from './TransformProvider';
 
 type FocusContextType = {
   endFocus: FocusEndSetter;
+  focusKey: SharedValue<null | string>;
   focusStatus: SharedValue<number>;
+  focusTransitionProgress: SharedValue<number>;
   gesturesDisabled: SharedValue<boolean>;
   startFocus: FocusStartSetter;
-  transitionProgress: SharedValue<number>;
 };
 
 const FocusContext = createContext(null);
@@ -82,8 +85,12 @@ export default function FocusProvider({
   const { canvasDimensions, currentScale, currentTranslation } =
     useCanvasDataContext();
   // Canvas transform context values
-  const { resetContainerPosition, scaleContentTo, translateContentTo } =
-    useTransformContext();
+  const {
+    getTranslateClamp,
+    resetContainerPosition,
+    scaleContentTo,
+    translateContentTo
+  } = useTransformContext();
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
 
@@ -92,6 +99,7 @@ export default function FocusProvider({
   const gesturesDisabled = useSharedValue(false);
   // This value is used to indicate what is the current focus status
   const focusStatus = useSharedValue(FocusStatus.BLUR);
+  const focusKey = useSharedValue<null | string>(null);
 
   // FOCUS & BLUR
   // Focus state
@@ -102,10 +110,6 @@ export default function FocusProvider({
   const transitionProgress = useSharedValue(0);
   const transitionStartPosition = useSharedValue<Vector>(vec(0, 0));
   const transitionStartScale = useSharedValue<number>(0);
-
-  // HELPER VALUES
-  const focusStartAnimationSettingsRef =
-    useRef<AnimationSettingsWithDefaults | null>(null);
 
   /**
    * EXPOSED FUNCTIONS
@@ -121,7 +125,6 @@ export default function FocusProvider({
       focusStatus.value = FocusStatus.FOCUS_PREPARATION;
       // Set focus data
       gesturesDisabled.value = data.gesturesDisabled;
-      focusStartAnimationSettingsRef.current = animationSettings;
       setFocusState({ animationSettings, data });
 
       // Disable auto sizing when focusing
@@ -135,20 +138,27 @@ export default function FocusProvider({
   // Blur setter
   const endFocus = useCallback(
     (
-      data?: BlurData,
-      animSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
+      data?: Maybe<BlurData>,
+      animationSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
     ) => {
       // Do nothing if there is no focus applied
-      if (focusStatus.value === FocusStatus.BLUR) return;
-      const animationSettings =
-        animSettings ?? focusStartAnimationSettingsRef.current;
-      // Set focus data if it is provided
-      if (data) {
+      if (focusStatus.value === FocusStatus.BLUR) {
+        return;
+      }
+      // Turn off focus without animation if data is null
+      if (data === null) {
+        focusStatus.value = FocusStatus.BLUR;
+        gesturesDisabled.value = false;
+        focusKey.value = null;
+        updateTransitionProgress(FocusStatus.BLUR, animationSettings);
+      }
+      // Set focus data if it is provided (to prepare for the transition)
+      else if (data) {
         setBlurState({ animationSettings, data });
       }
       // Otherwise, just reset the container position
       else {
-        handleContainerReset(animSettings);
+        handleContainerReset(animationSettings);
       }
     },
     []
@@ -169,7 +179,21 @@ export default function FocusProvider({
           currentStatus === FocusStatus.BLUR_TRANSITION)) &&
       transitionProgress.value === 1
     ) {
+      // Set the finish status
       focusStatus.value = finishStatus;
+      // Enable gestures and change the container position to fit
+      // into the canvas bounds if it's out of them
+      if (finishStatus === FocusStatus.BLUR) {
+        gesturesDisabled.value = false;
+        translateContentTo(
+          {
+            x: currentTranslation.x.value,
+            y: currentTranslation.y.value
+          },
+          getTranslateClamp(currentScale.value),
+          DEFAULT_GESTURE_ANIMATION_SETTINGS
+        );
+      }
     }
   }, []);
 
@@ -194,8 +218,30 @@ export default function FocusProvider({
     []
   );
 
+  const updateTransitionProgress = useCallback(
+    (
+      finishStatus: FocusStatus,
+      animationSettings: AnimationSettingsWithDefaults | null
+    ) => {
+      'worklet';
+      if (animationSettings) {
+        const { onComplete, ...timingConfig } =
+          updateAnimationSettingsWithFinishCallback(
+            animationSettings,
+            finishStatus
+          );
+        transitionProgress.value = 0;
+        transitionProgress.value = withTiming(1, timingConfig, onComplete);
+      } else {
+        finishTransition(finishStatus);
+      }
+    },
+    []
+  );
+
   const startTransition = useCallback(
     (
+      key: null | string,
       transitionType:
         | FocusStatus.BLUR_TRANSITION
         | FocusStatus.FOCUS_TRANSITION,
@@ -214,40 +260,31 @@ export default function FocusProvider({
       transitionStartScale.value = currentScale.value;
       // Turn on the animated reaction that will handle the animation
       focusStatus.value = transitionType;
+      focusKey.value = key;
       // Update the transition progress
-      if (animationSettings) {
-        const { onComplete, ...timingConfig } =
-          updateAnimationSettingsWithFinishCallback(
-            animationSettings,
-            finishStatus
-          );
-        transitionProgress.value = 0;
-        transitionProgress.value = withTiming(1, timingConfig, onComplete);
-      } else {
-        finishTransition(finishStatus);
-      }
+      updateTransitionProgress(finishStatus, animationSettings);
     },
     []
   );
 
   const handleContainerReset = useCallback(
-    (animationSettings: Maybe<AnimationSettingsWithDefaults>) => {
+    (animationSettings: AnimationSettingsWithDefaults | null) => {
       'worklet';
       focusStatus.value = FocusStatus.BLUR_TRANSITION;
+      focusKey.value = null;
+      updateTransitionProgress(FocusStatus.BLUR, animationSettings);
       // Reset the container position with animation if it is provided
       if (animationSettings) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { onComplete: _, ...timingConfig } = animationSettings;
         resetContainerPosition({
-          animationSettings: updateAnimationSettingsWithFinishCallback(
-            animationSettings,
-            FocusStatus.BLUR
-          ),
+          animationSettings: timingConfig,
           autoSizingContext
         });
       }
       // Otherwise, reset the container position without animation
       else {
         resetContainerPosition({ autoSizingContext });
-        finishTransition(FocusStatus.BLUR);
       }
     },
     []
@@ -264,6 +301,7 @@ export default function FocusProvider({
     ({ canvasRendered }) => {
       if (!focusState || !canvasRendered) return;
       startTransition(
+        focusState.data.key,
         FocusStatus.FOCUS_TRANSITION,
         focusState.animationSettings
       );
@@ -274,8 +312,12 @@ export default function FocusProvider({
 
   // This is used to start the blur transition
   useEffect(() => {
-    if (!blurState) return;
-    startTransition(FocusStatus.BLUR_TRANSITION, blurState.animationSettings);
+    if (!focusState || !blurState) return;
+    startTransition(
+      null,
+      FocusStatus.BLUR_TRANSITION,
+      blurState?.animationSettings ?? DEFAULT_FOCUS_ANIMATION_SETTINGS
+    );
     runOnJS(setFocusState)(null);
   }, [blurState]);
 
@@ -385,10 +427,11 @@ export default function FocusProvider({
   const contextValue = useMemo<FocusContextType>(
     () => ({
       endFocus,
+      focusKey,
       focusStatus,
+      focusTransitionProgress: transitionProgress,
       gesturesDisabled,
-      startFocus,
-      transitionProgress
+      startFocus
     }),
     []
   );

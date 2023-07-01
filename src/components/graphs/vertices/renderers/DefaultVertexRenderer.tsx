@@ -1,5 +1,9 @@
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
-import { useAnimatedReaction, useDerivedValue } from 'react-native-reanimated';
+import {
+  interpolate,
+  useAnimatedReaction,
+  useDerivedValue
+} from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
 import { DEFAULT_VERTEX_RENDERER_SETTINGS } from '@/constants/renderers';
@@ -8,7 +12,7 @@ import { VertexRendererProps } from '@/types/renderer';
 export default function DefaultVertexRenderer<V>({
   animationProgress,
   currentRadius,
-  focusProgress,
+  focusTransitionProgress,
   key,
   position: { x, y },
   radius,
@@ -36,7 +40,7 @@ export default function DefaultVertexRenderer<V>({
   ]);
 
   const opacity = useDerivedValue(() =>
-    focusProgress.value >= 0 ? 1 : 1 + 0.75 * focusProgress.value
+    interpolate(focusTransitionProgress.value, [0, 1], [0.5, 1])
   );
 
   if (font === null) {

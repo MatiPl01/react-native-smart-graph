@@ -8,6 +8,7 @@ import {
   EdgeArrowRenderFunction,
   EdgeLabelRendererFunction,
   EdgeRenderFunction,
+  SharedRenderersProps,
   UndirectedStraightEdgeRenderers
 } from '@/types/renderer';
 import {
@@ -23,12 +24,10 @@ import {
 } from '@/types/settings';
 import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
 
-type SharedEdgeComponentProps = {
+type SharedEdgeComponentProps = SharedRenderersProps & {
   animatedEdgesCount: SharedValue<number>;
   animatedOrder: SharedValue<number>;
-  animationProgress: SharedValue<number>;
   animationSettings: AnimationSettingsWithDefaults;
-  focusProgress: SharedValue<number>;
   onRender: EdgeRenderHandler;
   v1Position: AnimatedVectorCoordinates;
   v1Radius: SharedValue<number>;
@@ -111,7 +110,6 @@ export type EdgeComponentData<
 };
 
 export type EdgeComponentRenderData = {
-  focusProgress: SharedValue<number>;
   labelPosition: AnimatedVectorCoordinates;
 };
 
