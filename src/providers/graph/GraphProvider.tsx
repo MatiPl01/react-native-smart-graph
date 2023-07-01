@@ -91,6 +91,7 @@ export type GraphProviderAdditionalProps =
       canvasDimensions: AnimatedDimensions;
       canvasScales: number[];
       endFocus: FocusEndSetter;
+      focusKey: SharedValue<null | string>;
       focusStatus: SharedValue<number>;
       focusTransitionProgress: SharedValue<number>;
       initialCanvasScale: number;
@@ -122,6 +123,7 @@ export default function GraphProvider<
   canvasScales,
   children,
   endFocus,
+  focusKey,
   focusStatus,
   focusTransitionProgress,
   graph,
@@ -173,6 +175,7 @@ export default function GraphProvider<
         availableScales={canvasScales}
         canvasDimensions={canvasDimensions}
         endFocus={endFocus}
+        focusKey={focusKey}
         focusStatus={focusStatus}
         focusTransitionProgress={focusTransitionProgress}
         graph={graph}

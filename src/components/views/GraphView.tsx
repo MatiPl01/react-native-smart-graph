@@ -2,7 +2,7 @@ import React, { memo, PropsWithChildren } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
+import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, {
   FocusStatus,
@@ -58,11 +58,11 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   const handleReset = () => {
     if (focusStatus.value === FocusStatus.BLUR) {
       resetContainerPosition({
-        animationSettings: DEFAULT_ANIMATION_SETTINGS,
+        animationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS,
         autoSizingContext
       });
     } else {
-      endFocus(undefined, DEFAULT_ANIMATION_SETTINGS);
+      endFocus(undefined, DEFAULT_FOCUS_ANIMATION_SETTINGS);
     }
   };
 

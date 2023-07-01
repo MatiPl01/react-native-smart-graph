@@ -9,6 +9,7 @@ import { Maybe } from './utils';
 export type FocusData = {
   centerPosition: AnimatedVectorCoordinates;
   gesturesDisabled: boolean;
+  key: string;
   scale: SharedValue<number>;
 };
 
@@ -23,6 +24,6 @@ export type FocusStartSetter = (
 ) => void;
 
 export type FocusEndSetter = (
-  data?: BlurData,
+  data?: Maybe<BlurData>,
   animationSettings?: Maybe<AnimationSettingsWithDefaults>
 ) => void;

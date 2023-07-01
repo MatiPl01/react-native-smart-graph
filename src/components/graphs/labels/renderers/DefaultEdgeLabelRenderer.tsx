@@ -10,7 +10,7 @@ export default function DefaultEdgeLabelRenderer<E>({
   centerX,
   centerY,
   edgeRotation,
-  focusProgress,
+  focusTransitionProgress,
   height,
   key
 }: EdgeLabelRendererProps<E>) {
@@ -33,7 +33,9 @@ export default function DefaultEdgeLabelRenderer<E>({
   ]);
 
   const opacity = useDerivedValue(() =>
-    focusProgress.value >= 0 ? 1 : 1 + 0.75 * focusProgress.value
+    focusTransitionProgress.value >= 0
+      ? 1
+      : 1 + 0.75 * focusTransitionProgress.value
   );
 
   return (

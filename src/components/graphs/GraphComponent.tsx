@@ -2,7 +2,7 @@
 import { Group } from '@shopify/react-native-skia';
 import { useCallback } from 'react';
 
-import { withGraphData } from '@/providers/graph';
+import { useVertexFocusContext, withGraphData } from '@/providers/graph';
 import {
   EdgeComponentData,
   EdgeComponentProps,
@@ -42,11 +42,14 @@ function GraphComponent<
   handleVertexRender,
   verticesData
 }: GraphComponentPropsWithGraphData<V, E, ED>) {
+  const focusContextValue = useVertexFocusContext();
+
   const renderEdges = useCallback(() => {
     return Object.values(edgesData).map(data => (
       <EdgeComponent
         {...({
           ...data,
+          ...focusContextValue,
           key: data.edge.key,
           onRemove: handleEdgeRemove,
           onRender: handleEdgeRender
@@ -60,6 +63,7 @@ function GraphComponent<
       Object.values(verticesData).map(data => (
         <VertexComponent
           {...data}
+          {...focusContextValue}
           key={data.vertex.key}
           onRemove={handleVertexRemove}
           onRender={handleVertexRender}

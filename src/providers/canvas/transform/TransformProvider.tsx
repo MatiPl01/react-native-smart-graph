@@ -169,7 +169,6 @@ export default function TransformProvider({
     'worklet';
     if (origin) {
       const relativeScale = newScale / currentScale.value;
-
       translateContentTo(
         {
           x:

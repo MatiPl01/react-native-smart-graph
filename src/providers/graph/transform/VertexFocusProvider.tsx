@@ -27,9 +27,9 @@ import {
   getCoordinatesRelativeToCenter
 } from '@/utils/layout';
 
-type VertexFocusContextType = {
+export type VertexFocusContextType = {
+  focusKey: SharedValue<null | string>;
   focusTransitionProgress: SharedValue<number>;
-  focusedVertexKey: SharedValue<null | string>;
 };
 
 const VertexFocusContext = createContext(null);
@@ -50,6 +50,7 @@ type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   availableScales: number[];
   canvasDimensions: AnimatedDimensions;
   endFocus: FocusEndSetter;
+  focusKey: SharedValue<null | string>;
   focusStatus: SharedValue<number>;
   focusTransitionProgress: SharedValue<number>;
   graph: Graph<V, E>;
@@ -64,6 +65,7 @@ function VertexFocusProvider<V, E>({
   canvasDimensions,
   children,
   endFocus,
+  focusKey,
   focusStatus,
   focusTransitionProgress,
   graph,
@@ -77,24 +79,28 @@ function VertexFocusProvider<V, E>({
   const [data] = useFocusObserver(graph);
 
   // FOCUSED VERTEX DATA
-  const focusedVertexPosition = useMemo(
-    () =>
-      (data.focusedVertexKey &&
-        renderedVerticesData[data.focusedVertexKey]?.position) ||
-      null,
-    [renderedVerticesData, data.focusedVertexKey]
-  );
+  const focusedVertexWithPosition = useMemo(() => {
+    const position =
+      data.focusedVertexKey &&
+      renderedVerticesData[data.focusedVertexKey]?.position;
+    return position && data.focusedVertexKey
+      ? {
+          key: data.focusedVertexKey,
+          position
+        }
+      : null;
+  }, [renderedVerticesData, data.focusedVertexKey]);
   // Updated focused vertex data
   const focusedVertexData = useMemo<FocusedVertexData>(
     () =>
       getFocusedVertexData(
-        focusedVertexPosition,
+        focusedVertexWithPosition,
         vertexRadius,
         availableScales,
         initialScale,
         data.settings
       ),
-    [focusedVertexPosition, data.settings]
+    [focusedVertexWithPosition, data.settings]
   );
 
   // OTHER VALUES
@@ -106,9 +112,6 @@ function VertexFocusProvider<V, E>({
   const isFirstRenderRef = useRef(true);
   const isInitialStatus = useSharedValue(true);
   const transitionDisabled = useSharedValue(false);
-
-  // CONTEXT VALUE
-  const focusedVertexKey = useSharedValue<null | string>(null);
 
   useEffect(() => {
     // Don't do anything on the first render
@@ -138,6 +141,7 @@ function VertexFocusProvider<V, E>({
           y: focusY
         },
         gesturesDisabled: data.settings.disableGestures,
+        key: focusedVertexData.vertex.key,
         scale: focusScale
       },
       focusedVertexData.animation
@@ -209,25 +213,15 @@ function VertexFocusProvider<V, E>({
         status === FocusStatus.BLUR_TRANSITION ||
         status === FocusStatus.BLUR
       ) {
-        focusedVertexKey.value = null;
         runOnJS(blurGraph)();
-      } else {
-        focusedVertexKey.value = data.focusedVertexKey;
       }
     }
   );
 
-  // useAnimatedReaction(
-  //   () => focusedVertexKey.value,
-  //   key => {
-  //     // TODO - change this in a separate PR
-  //   }
-  // );
-
   const contextValue = useMemo<VertexFocusContextType>(
     () => ({
-      focusTransitionProgress,
-      focusedVertexKey
+      focusKey,
+      focusTransitionProgress
     }),
     []
   );

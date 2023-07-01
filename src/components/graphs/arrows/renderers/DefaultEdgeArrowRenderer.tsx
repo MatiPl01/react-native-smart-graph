@@ -8,7 +8,7 @@ import { EdgeArrowRendererProps } from '@/types/renderer';
 export default function DefaultEdgeArrowRenderer({
   animationProgress,
   centerPosition,
-  focusProgress,
+  focusTransitionProgress,
   height,
   rotation,
   width
@@ -33,7 +33,9 @@ export default function DefaultEdgeArrowRenderer({
   ]);
 
   const opacity = useDerivedValue(() =>
-    focusProgress.value >= 0 ? 1 : 1 + 0.75 * focusProgress.value
+    focusTransitionProgress.value >= 0
+      ? 1
+      : 1 + 0.75 * focusTransitionProgress.value
   );
 
   return (

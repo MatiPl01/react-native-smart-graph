@@ -20,7 +20,8 @@ function UndirectedCurvedEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  focusProgress,
+  focusKey,
+  focusTransitionProgress,
   onRender,
   renderers,
   v1Position,
@@ -80,7 +81,6 @@ function UndirectedCurvedEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
-      focusProgress,
       labelPosition: { x: parabolaX, y: parabolaY }
     });
   }, [edge.key]);
@@ -98,11 +98,16 @@ function UndirectedCurvedEdgeComponent<E, V>({
     return pathString;
   });
 
+  const sharedProps = {
+    animationProgress,
+    focusKey,
+    focusTransitionProgress
+  };
+
   return (
     <>
       {renderers.edge({
-        animationProgress,
-        focusProgress,
+        ...sharedProps,
         key: edge.key,
         parabolaX,
         parabolaY,
@@ -111,15 +116,14 @@ function UndirectedCurvedEdgeComponent<E, V>({
       })}
       {renderers.label && (
         <EdgeLabelComponent
-          animationProgress={animationProgress}
           centerX={parabolaX}
           centerY={parabolaY}
           edge={edge}
-          focusProgress={focusProgress}
           height={labelHeight}
           renderer={renderers.label}
           v1Position={v1Position}
           v2Position={v2Position}
+          {...sharedProps}
         />
       )}
     </>

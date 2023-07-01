@@ -37,9 +37,10 @@ function CanvasComponent({
   // Focus context
   const {
     endFocus,
+    focusKey,
     focusStatus,
-    startFocus,
-    transitionProgress: focusTransitionProgress
+    focusTransitionProgress,
+    startFocus
   } = useFocusContext();
 
   const containerTransform = useDerivedValue(() => [
@@ -59,6 +60,7 @@ function CanvasComponent({
             canvasDimensions,
             canvasScales: scales,
             endFocus,
+            focusKey,
             focusStatus,
             focusTransitionProgress,
             initialCanvasScale: initialScale,

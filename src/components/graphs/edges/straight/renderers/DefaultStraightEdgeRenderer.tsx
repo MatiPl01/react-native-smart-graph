@@ -6,7 +6,7 @@ import { StraightEdgeRendererProps } from '@/types/renderer';
 
 export default function DefaultStraightEdgeRenderer<E>({
   animationProgress,
-  focusProgress,
+  focusTransitionProgress,
   p1: p1Target,
   p2: p2Target
 }: StraightEdgeRendererProps<E>) {
@@ -34,7 +34,9 @@ export default function DefaultStraightEdgeRenderer<E>({
   }));
 
   const opacity = useDerivedValue(() =>
-    focusProgress.value >= 0 ? 1 : 1 + 0.75 * focusProgress.value
+    focusTransitionProgress.value >= 0
+      ? 1
+      : 1 + 0.75 * focusTransitionProgress.value
   );
 
   return (

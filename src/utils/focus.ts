@@ -8,7 +8,10 @@ import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
 
 export const getFocusedVertexData = (
-  focusedVertexPosition: AnimatedVectorCoordinates | null,
+  focusedVertexWithPosition: {
+    key: string;
+    position: AnimatedVectorCoordinates;
+  } | null,
   vertexRadius: number,
   availableScales: number[],
   initialScale: number,
@@ -22,18 +25,18 @@ export const getFocusedVertexData = (
         } as AnimationSettingsWithDefaults)
       : null;
 
-  if (!focusedVertexPosition) {
+  if (!focusedVertexWithPosition) {
     return { animation: animationSettings };
   }
 
   return {
     animation: animationSettings,
     vertex: {
+      ...focusedVertexWithPosition,
       alignment: {
         ...DEFAULT_ALIGNMENT_SETTINGS,
         ...settings?.alignment
       },
-      position: focusedVertexPosition,
       radius: vertexRadius,
       scale:
         settings?.vertexScale ??

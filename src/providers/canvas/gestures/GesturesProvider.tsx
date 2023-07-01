@@ -17,6 +17,7 @@ import {
   useFocusContext,
   useTransformContext
 } from '@/providers/canvas';
+import { Maybe } from '@/types/utils';
 import { fixedWithDecay } from '@/utils/reanimated';
 
 type GesturesContextType = {
@@ -71,18 +72,16 @@ export default function GesturesProvider({
   const panTranslateY = useSharedValue(0);
 
   const handleGestureStart = useCallback(
-    (origin?: Vector) => {
+    (origin?: Maybe<Vector>) => {
       if (focusStatus.value !== FocusStatus.BLUR) {
         endFocus(
-          origin
-            ? {
-                origin,
-                translation: {
-                  x: panTranslateX,
-                  y: panTranslateY
-                }
-              }
-            : undefined
+          origin && {
+            origin,
+            translation: {
+              x: panTranslateX,
+              y: panTranslateY
+            }
+          }
         );
       } else if (autoSizingContext) {
         autoSizingContext.disableAutoSizing();
@@ -92,19 +91,21 @@ export default function GesturesProvider({
   );
 
   const panGestureHandler = Gesture.Pan()
-    .onStart(({ x, y }) => {
+    .onStart(({ numberOfPointers, x, y }) => {
       if (gesturesDisabled.value) return;
       panTranslateX.value = 0;
       panTranslateY.value = 0;
       panStartScale.value = currentScale.value;
-      runOnJS(handleGestureStart)({ x, y });
+      // If there are multiple pointers, we don't want to end
+      // focus with a blur transition to the origin
+      runOnJS(handleGestureStart)(numberOfPointers > 1 ? null : { x, y });
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
       // The focus provider will handle canvas translation on blur transition
       if (focusStatus.value === FocusStatus.BLUR_TRANSITION) {
-        panTranslateX.value += e.changeX; //* relativeScale;
-        panTranslateY.value += e.changeY; //* relativeScale;
+        panTranslateX.value += e.changeX;
+        panTranslateY.value += e.changeY;
       }
       // Otherwise, translate canvas normally
       else {
@@ -126,14 +127,19 @@ export default function GesturesProvider({
     .onStart(() => {
       if (gesturesDisabled.value) return;
       pinchStartScale.value = currentScale.value;
-      runOnJS(handleGestureStart)();
+      runOnJS(handleGestureStart)(null);
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
-      scaleContentTo(pinchStartScale.value * e.scale, {
-        x: e.focalX,
-        y: e.focalY
-      });
+      scaleContentTo(
+        pinchStartScale.value * e.scale,
+        {
+          x: e.focalX,
+          y: e.focalY
+        },
+        undefined,
+        false
+      );
     })
     .onEnd(e => {
       if (gesturesDisabled.value) return;
