@@ -3,6 +3,7 @@ import { SharedValue } from 'react-native-reanimated';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 
 import { AnimationSettingsWithDefaults } from './settings';
+import { Maybe } from './utils';
 
 export type FocusData = {
   centerPosition: AnimatedVectorCoordinates;

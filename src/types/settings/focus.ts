@@ -1,5 +1,5 @@
 import { Alignment, AnimatedVectorCoordinates } from '@/types/layout';
-import { DeepRequired } from '@/types/utils';
+import { DeepRequired, Maybe } from '@/types/utils';
 
 import { AnimationSettings, AnimationSettingsWithDefaults } from './animations';
 

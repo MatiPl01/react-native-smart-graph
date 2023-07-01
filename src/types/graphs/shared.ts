@@ -6,6 +6,7 @@ import {
   SingleModificationAnimationSettings
 } from '@/types/settings/animations';
 import { FocusSettings } from '@/types/settings/focus';
+import { Maybe } from '@/types/utils';
 
 export interface Vertex<V, E> {
   get degree(): number;
