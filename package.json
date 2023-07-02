@@ -1,7 +1,7 @@
 {
   "name": "react-native-smart-graph",
   "description": "React Native library for creating animated dynamic graphs",
-  "version": "0.0.25-development",
+  "version": "0.0.28-development",
   "author": {
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
   faArrowsToCircle,
   faCompress,
@@ -20,7 +20,7 @@ import {
 } from '@/providers/canvas';
 import { ObjectFit } from '@/types/views';
 
-const OBJECT_FIT_BUTTONS: Array<{ icon: IconProp; type: ObjectFit }> = [
+const OBJECT_FIT_BUTTONS: Array<{ icon: IconDefinition; type: ObjectFit }> = [
   {
     icon: faCompress,
     type: 'contain'
@@ -36,7 +36,7 @@ const OBJECT_FIT_BUTTONS: Array<{ icon: IconProp; type: ObjectFit }> = [
 ];
 
 type GraphViewControlsProps = {
-  onObjectFitChange: (objectFit: ObjectFit) => void;
+  onObjectFitChange?: (objectFit: ObjectFit) => void;
 };
 
 export default memo(function GraphViewControls({
@@ -74,7 +74,7 @@ export default memo(function GraphViewControls({
   const handleObjectFitChange = () => {
     const nextObjectFit = OBJECT_FIT_BUTTONS[nextObjectFitButtonIndex]!.type;
 
-    onObjectFitChange(nextObjectFit);
+    onObjectFitChange?.(nextObjectFit);
   };
 
   const buttons = [
@@ -82,13 +82,16 @@ export default memo(function GraphViewControls({
       icon: faArrowsToCircle,
       key: 'reset',
       onPress: handleReset
-    },
-    {
-      icon: OBJECT_FIT_BUTTONS[nextObjectFitButtonIndex]!.icon,
-      key: 'expand',
-      onPress: handleObjectFitChange
     }
   ];
+
+  if (onObjectFitChange) {
+    buttons.push({
+      icon: OBJECT_FIT_BUTTONS[objectFitButtonIndex]!.icon,
+      key: 'object-fit',
+      onPress: handleObjectFitChange
+    });
+  }
 
   return (
     <View style={styles.container}>
