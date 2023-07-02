@@ -76,6 +76,8 @@ export default function App() {
           <DirectedGraphComponent
             settings={{
               events: {
+                onVertexLongPress: ({ vertex: { key } }) =>
+                  console.log('long press', key),
                 onVertexPress: ({ vertex: { key } }) =>
                   graph.focus(key, FOCUS_SETTINGS)
               },
