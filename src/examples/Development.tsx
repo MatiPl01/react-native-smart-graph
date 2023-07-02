@@ -82,8 +82,9 @@ export default function App() {
                   graph.focus(key, FOCUS_SETTINGS)
               },
               placement: {
+                layoutType: 'random',
                 minVertexSpacing: 50,
-                strategy: 'orbits'
+                strategy: 'random'
               }
             }}
             graph={graph}

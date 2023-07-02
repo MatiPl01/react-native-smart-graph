@@ -7,6 +7,6 @@ export const SHARED_PLACEMENT_SETTINGS = {
 export const RANDOM_PLACEMENT_SETTINGS: UnboundRandomPlacementSettingsWithDefaults =
   {
     density: 0.5,
-    layoutType: 'triangles',
+    layoutType: 'triangular',
     minVertexSpacing: 100
   };

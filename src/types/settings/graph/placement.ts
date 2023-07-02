@@ -22,7 +22,7 @@ type SortablePlacementSettings<V, E> = {
   sortVertices?: boolean;
 };
 
-export type RandomLayoutType = 'grid' | 'random' | 'triangles';
+export type RandomLayoutType = 'grid' | 'random' | 'triangular';
 
 type SharedPlacementSettings = {
   minVertexSpacing?: number;
