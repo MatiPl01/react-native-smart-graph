@@ -40,19 +40,19 @@ const ACHIEVEMENTS_GRAPH: {
   vertices: VertexData<string>[];
 } = {
   edges: [
-    { from: 'root', key: 'root-sport', to: 'sport', value: '' }
-    // { from: 'root', key: 'root-diet', to: 'diet', value: '' },
-    // { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
-    // { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
-    // { from: 'root', key: 'root-reading', to: 'reading', value: '' }
+    { from: 'root', key: 'root-sport', to: 'sport', value: '' },
+    { from: 'root', key: 'root-diet', to: 'diet', value: '' },
+    { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
+    { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
+    { from: 'root', key: 'root-reading', to: 'reading', value: '' }
   ],
   vertices: [
     { key: 'root', value: 'Root' },
-    { key: 'sport', value: 'Sport' }
-    // { key: 'diet', value: 'Diet' },
-    // { key: 'sleep', value: 'Sleep' },
-    // { key: 'meditation', value: 'Meditation' },
-    // { key: 'reading', value: 'Reading' }
+    { key: 'sport', value: 'Sport' },
+    { key: 'diet', value: 'Diet' },
+    { key: 'sleep', value: 'Sleep' },
+    { key: 'meditation', value: 'Meditation' },
+    { key: 'reading', value: 'Reading' }
   ]
 };
 
@@ -63,7 +63,6 @@ export default function App() {
 
   useEffect(() => {
     graph.insertBatch(ACHIEVEMENTS_GRAPH);
-    graph.focus('sport');
   }, [graph]);
 
   return (
@@ -78,12 +77,14 @@ export default function App() {
           <DirectedGraphComponent
             settings={{
               events: {
+                onVertexLongPress: ({ vertex: { key } }) =>
+                  console.log('long press', key),
                 onVertexPress: ({ vertex: { key } }) =>
                   graph.focus(key, FOCUS_SETTINGS)
               },
               placement: {
-                minVertexSpacing: 50,
-                strategy: 'orbits'
+                layoutType: 'random',
+                strategy: 'random'
               }
             }}
             graph={graph}
