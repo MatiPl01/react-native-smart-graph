@@ -12,6 +12,7 @@ import { VertexRendererProps } from '@/types/renderer';
 export default function DefaultVertexRenderer<V>({
   animationProgress,
   currentRadius,
+  focusKey,
   focusTransitionProgress,
   key,
   position: { x, y },
