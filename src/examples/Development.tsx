@@ -58,7 +58,6 @@ export default function App() {
 
   useEffect(() => {
     graph.insertBatch(ACHIEVEMENTS_GRAPH);
-    graph.focus('sport');
   }, [graph]);
 
   return (
@@ -83,8 +82,8 @@ export default function App() {
                   graph.focus(key, FOCUS_SETTINGS)
               },
               placement: {
-                minVertexSpacing: 50,
-                strategy: 'orbits'
+                layoutType: 'random',
+                strategy: 'random'
               }
             }}
             graph={graph}

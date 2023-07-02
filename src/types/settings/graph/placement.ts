@@ -22,15 +22,15 @@ type SortablePlacementSettings<V, E> = {
   sortVertices?: boolean;
 };
 
-export type RandomLayoutType = 'grid' | 'random' | 'triangles';
+export type RandomLayoutType = 'grid' | 'random' | 'triangular';
 
 type SharedPlacementSettings = {
   minVertexSpacing?: number;
 };
 
 export type BoundRandomPlacementSettings = {
-  containerHeight: number;
-  containerWidth: number;
+  containerHeight?: number;
+  containerWidth?: number;
   layoutType: 'random';
 };
 

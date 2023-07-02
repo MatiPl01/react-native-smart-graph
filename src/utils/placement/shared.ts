@@ -114,3 +114,37 @@ export const arrangeGraphComponents = (
     verticesPositions
   };
 };
+
+export const alignPositionsToCenter = (
+  positions: PlacedVerticesPositions
+): {
+  boundingRect: BoundingRect;
+  verticesPositions: PlacedVerticesPositions;
+} => {
+  'worklet';
+  const { bottom, left, right, top } = calcContainerBoundingRect(positions);
+  const width = right - left;
+  const height = bottom - top;
+  const offsetX = width / 2 + left;
+  const offsetY = height / 2 + top;
+
+  const newPositions = Object.fromEntries(
+    Object.entries(positions).map(([key, { x, y }]) => [
+      key,
+      {
+        x: x - offsetX,
+        y: y - offsetY
+      }
+    ])
+  );
+
+  return {
+    boundingRect: {
+      bottom: bottom - offsetY,
+      left: left - offsetX,
+      right: right - offsetX,
+      top: top - offsetY
+    },
+    verticesPositions: newPositions
+  };
+};

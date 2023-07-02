@@ -107,7 +107,7 @@ export default function FocusProvider({
   // Blur state
   const [blurState, setBlurState] = useState<BlurState | null>();
   // Focus/Blur transition
-  const transitionProgress = useSharedValue(0);
+  const transitionProgress = useSharedValue(1);
   const transitionStartPosition = useSharedValue<Vector>(vec(0, 0));
   const transitionStartScale = useSharedValue<number>(0);
 

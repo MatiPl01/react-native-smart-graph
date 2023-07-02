@@ -1,9 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
+import { Dimensions } from 'react-native';
 
-import {
-  RANDOM_PLACEMENT_SETTINGS,
-  SHARED_PLACEMENT_SETTINGS
-} from '@/constants/placement';
+import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { Vertex } from '@/types/graphs';
 import {
   GraphLayout,
@@ -11,7 +9,7 @@ import {
   RandomPlacementSettings
 } from '@/types/settings';
 import { zipArrays } from '@/utils/arrays';
-import { calcContainerBoundingRect } from '@/utils/placement/shared';
+import { alignPositionsToCenter } from '@/utils/placement/shared';
 import random from '@/utils/random';
 
 const placeVerticesRandomly = <V, E>(
@@ -20,11 +18,12 @@ const placeVerticesRandomly = <V, E>(
   settings: RandomPlacementSettings = {} as RandomPlacementSettings
 ): GraphLayout => {
   if (settings.layoutType === 'random') {
+    const { height, width } = Dimensions.get('window');
     return calcVerticesRandomPositions(
       vertices,
       vertexRadius,
-      settings.containerWidth,
-      settings.containerHeight
+      settings.containerWidth ?? width,
+      settings.containerHeight ?? height
     );
   }
 
@@ -37,10 +36,11 @@ const placeVerticesRandomly = <V, E>(
   };
 
   switch (settings.layoutType) {
+    case 'triangular':
+      return calcVerticesTriangularPositions(props);
+    default:
     case 'grid':
       return calcVerticesGridPositions(props);
-    case 'triangles':
-      return calcVerticesTrianglesPositions(props);
   }
 };
 
@@ -76,17 +76,10 @@ const calcVerticesGridPositions = <V, E>(
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return {
-    boundingRect: calcContainerBoundingRect(
-      verticesPositions,
-      minVertexSpacing,
-      vertexRadius
-    ),
-    verticesPositions
-  };
+  return alignPositionsToCenter(verticesPositions);
 };
 
-const calcVerticesTrianglesPositions = <V, E>(
+const calcVerticesTriangularPositions = <V, E>(
   props: CalcVerticesPositionsProps<V, E>
 ): GraphLayout => {
   const { density, minVertexSpacing, vertexRadius, vertices } = props;
@@ -153,14 +146,7 @@ const calcVerticesTrianglesPositions = <V, E>(
     {} as PlacedVerticesPositions
   );
 
-  return {
-    boundingRect: calcContainerBoundingRect(
-      verticesPositions,
-      minVertexSpacing,
-      vertexRadius
-    ),
-    verticesPositions
-  };
+  return alignPositionsToCenter(verticesPositions);
 };
 
 const calcVerticesRandomPositions = <V, E>(
@@ -180,14 +166,7 @@ const calcVerticesRandomPositions = <V, E>(
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return {
-    boundingRect: calcContainerBoundingRect(
-      verticesPositions,
-      SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
-      vertexRadius
-    ),
-    verticesPositions
-  };
+  return alignPositionsToCenter(verticesPositions);
 };
 
 export default placeVerticesRandomly;
