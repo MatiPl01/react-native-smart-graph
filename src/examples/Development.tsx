@@ -1,13 +1,7 @@
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Easing } from 'react-native-reanimated';
 
@@ -72,37 +66,35 @@ export default function App() {
         barStyle='light-content'
         translucent
       />
-      <SafeAreaView style={styles.container}>
-        <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
-          <DirectedGraphComponent
-            settings={{
-              events: {
-                onVertexLongPress: ({ vertex: { key } }) =>
-                  console.log('long press', key),
-                onVertexPress: ({ vertex: { key } }) =>
-                  graph.focus(key, FOCUS_SETTINGS)
-              },
-              placement: {
-                layoutType: 'random',
-                strategy: 'random'
-              }
-            }}
-            graph={graph}
-          />
-          <View style={styles.controls}>
-            <GraphViewControls onObjectFitChange={setObjectFit} />
-          </View>
-        </GraphView>
-        <TouchableOpacity
-          onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
-          style={styles.backButton}>
-          <FontAwesomeIcon
-            icon={faChevronLeft}
-            size={32}
-            style={{ color: 'white' }}
-          />
-        </TouchableOpacity>
-      </SafeAreaView>
+      <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
+        <DirectedGraphComponent
+          settings={{
+            events: {
+              onVertexLongPress: ({ vertex: { key } }) =>
+                console.log('long press', key),
+              onVertexPress: ({ vertex: { key } }) =>
+                graph.focus(key, FOCUS_SETTINGS)
+            },
+            placement: {
+              layoutType: 'random',
+              strategy: 'random'
+            }
+          }}
+          graph={graph}
+        />
+        <View style={styles.controls}>
+          <GraphViewControls onObjectFitChange={setObjectFit} />
+        </View>
+      </GraphView>
+      <TouchableOpacity
+        onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
+        style={styles.backButton}>
+        <FontAwesomeIcon
+          icon={faChevronLeft}
+          size={32}
+          style={{ color: 'white' }}
+        />
+      </TouchableOpacity>
     </GestureHandlerRootView>
   );
 }
@@ -112,7 +104,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 32,
     justifyContent: 'center',
-    left: 16,
+    left: 12,
+    padding: 8,
     position: 'absolute',
     top: 64,
     width: 32
@@ -126,6 +119,7 @@ const styles = StyleSheet.create({
     position: 'relative'
   },
   controls: {
-    marginTop: 40
+    marginTop: 64,
+    right: 12
   }
 });

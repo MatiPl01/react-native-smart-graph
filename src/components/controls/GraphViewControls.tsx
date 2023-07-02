@@ -108,8 +108,8 @@ const styles = StyleSheet.create({
     gap: 20,
     padding: 8,
     position: 'absolute',
-    right: 12,
-    top: 12
+    right: 0,
+    top: 0
   },
   icon: {
     color: 'white'
