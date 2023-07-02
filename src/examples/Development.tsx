@@ -83,7 +83,6 @@ export default function App() {
               },
               placement: {
                 layoutType: 'random',
-                minVertexSpacing: 50,
                 strategy: 'random'
               }
             }}

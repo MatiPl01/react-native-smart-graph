@@ -29,8 +29,8 @@ type SharedPlacementSettings = {
 };
 
 export type BoundRandomPlacementSettings = {
-  containerHeight: number;
-  containerWidth: number;
+  containerHeight?: number;
+  containerWidth?: number;
   layoutType: 'random';
 };
 
