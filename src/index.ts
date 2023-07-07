@@ -27,7 +27,7 @@ export { default as GraphView } from '@/components/views/GraphView';
 // HOOKS
 export * from '@/hooks';
 
-// ALOGRITHMS
+// ALGORITHMS
 export * from '@/utils/algorithms';
 
 // EXAMPLES
