@@ -7,7 +7,11 @@ import {
   useMemo
 } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
-import { runOnJS, useSharedValue } from 'react-native-reanimated';
+import {
+  runOnJS,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import {
@@ -18,7 +22,7 @@ import {
   useTransformContext
 } from '@/providers/canvas';
 import { Maybe } from '@/types/utils';
-import { fixedWithDecay } from '@/utils/reanimated';
+import { withDecayRubberBand } from '@/utils/reanimated';
 
 type GesturesContextType = {
   gestureHandler: ComposedGesture;
@@ -67,8 +71,11 @@ export default function GesturesProvider({
 
   // OTHER VALUES
   // Gestures helper values
-  const pinchStartScale = useSharedValue(1);
+  // Pan
   const panStartScale = useSharedValue(1);
+  // Pinch
+  const pinchStartScale = useSharedValue(1);
+  const pinchClampScale = useSharedValue(1);
   // Values used by the focus provider
   const panTranslateX = useSharedValue(0);
   const panTranslateY = useSharedValue(0);
@@ -93,19 +100,6 @@ export default function GesturesProvider({
       }
     },
     [autoSizingContext?.disableAutoSizing]
-  );
-
-  const handleGestureEnd = useCallback(
-    (velocityX: number, velocityY: number) => {
-      'worklet';
-      const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
-      translateX.value = fixedWithDecay(velocityX, translateX.value, clampX);
-      translateY.value = fixedWithDecay(velocityY, translateY.value, clampY);
-      if (autoSizingContext) {
-        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
-      }
-    },
-    []
   );
 
   const panGestureHandler = Gesture.Pan()
@@ -134,7 +128,12 @@ export default function GesturesProvider({
     .onEnd(({ velocityX, velocityY }) => {
       isGestureActive.value = false;
       if (gesturesDisabled.value) return;
-      handleGestureEnd(velocityX, velocityY);
+      const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
+      translateX.value = withDecayRubberBand(velocityX, clampX);
+      translateY.value = withDecayRubberBand(velocityY, clampY);
+      if (autoSizingContext) {
+        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
+      }
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -158,11 +157,11 @@ export default function GesturesProvider({
     .onEnd(({ velocity }) => {
       isGestureActive.value = false;
       if (gesturesDisabled.value) return;
-      currentScale.value = fixedWithDecay(velocity, currentScale.value, [
+      pinchClampScale.value = currentScale.value;
+      pinchClampScale.value = withDecayRubberBand(velocity, [
         minScale,
         maxScale
       ]);
-      handleGestureEnd(0, 0);
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -191,8 +190,32 @@ export default function GesturesProvider({
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
       }
-      handleGestureEnd(0, 0);
     });
+
+  useAnimatedReaction(
+    () => ({
+      clampedScale: pinchClampScale.value
+    }),
+    ({ clampedScale }) => {
+      console.log(clampedScale);
+      if (gesturesDisabled.value) return;
+      // scaleContentTo(
+      //   clampedScale,
+      //   {
+      //     x: translateX.value,
+      //     y: translateY.value
+      //   },
+      //   null
+      // );
+    }
+  );
+
+  useAnimatedReaction(
+    () => translateX.value,
+    () => {
+      console.log('translateX');
+    }
+  );
 
   const contextValue = useMemo<GesturesContextType>(
     () => ({
