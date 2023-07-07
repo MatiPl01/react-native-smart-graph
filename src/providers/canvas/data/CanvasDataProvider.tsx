@@ -55,7 +55,7 @@ export default function CanvasDataProvider({
   const containerRight = useSharedValue(0);
   const containerBottom = useSharedValue(0);
   // SCALE
-  const currentScale = useSharedValue(initialScale);
+  const currentScale = useSharedValue(0);
   // TRANSLATION
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);

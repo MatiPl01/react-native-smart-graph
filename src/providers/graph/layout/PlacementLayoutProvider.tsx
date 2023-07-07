@@ -43,7 +43,7 @@ function GraphPlacementLayoutProvider<
   renderedVerticesData,
   settings
 }: GraphPlacementLayoutProviderProps<V, E, ED>) {
-  const isfirstRenderRef = useRef(true);
+  const isFirstRenderRef = useRef(true);
   const graphLayout = useMemo<GraphLayout>(
     () =>
       placeVertices(
@@ -60,8 +60,8 @@ function GraphPlacementLayoutProvider<
   );
 
   useEffect(() => {
-    if (isfirstRenderRef.current) {
-      isfirstRenderRef.current = false;
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
       onRender(graphLayout.boundingRect);
       return;
     }

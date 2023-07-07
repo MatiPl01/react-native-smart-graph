@@ -20,11 +20,9 @@ import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { Maybe } from '@/types/utils';
 import { ObjectFit } from '@/types/views';
 import {
-  calcContainerScale,
   calcContainerTranslation,
   calcScaleOnProgress,
-  calcTranslationOnProgress,
-  clamp
+  calcTranslationOnProgress
 } from '@/utils/views';
 
 export type AutoSizingContextType = {
@@ -46,8 +44,6 @@ export const useAutoSizingContext = () =>
 
 type AutoSizingProviderProps = PropsWithChildren<{
   autoSizingTimeout: number;
-  maxScale: number;
-  minScale: number;
   objectFit: ObjectFit;
   padding: BoundingRect;
 }>;
@@ -55,8 +51,6 @@ type AutoSizingProviderProps = PropsWithChildren<{
 export default function AutoSizingProvider({
   autoSizingTimeout,
   children,
-  maxScale,
-  minScale,
   objectFit,
   padding
 }: AutoSizingProviderProps) {
@@ -75,7 +69,8 @@ export default function AutoSizingProvider({
     currentTranslation: { x: translateX, y: translateY }
   } = useCanvasDataContext();
   // Transform context values
-  const { scaleContentTo, translateContentTo } = useTransformContext();
+  const { getIdealScale, scaleContentTo, translateContentTo } =
+    useTransformContext();
 
   // OTHER VALUES
   const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -171,18 +166,7 @@ export default function AutoSizingProvider({
         calcScaleOnProgress(
           transitionProgress,
           startScale,
-          clamp(
-            calcContainerScale(
-              objectFit,
-              {
-                height: boundingRect.bottom - boundingRect.top,
-                width: boundingRect.right - boundingRect.left
-              },
-              canvasDimensions,
-              padding
-            ),
-            [minScale, maxScale]
-          )
+          getIdealScale(boundingRect, canvasDimensions, objectFit)
         )
       );
       // Translate content to fit container based on objectFit

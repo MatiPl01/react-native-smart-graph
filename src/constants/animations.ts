@@ -23,7 +23,7 @@ export const DEFAULT_GESTURE_ANIMATION_SETTINGS: AnimationSettingsWithDefaults =
 
 export const DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS: AnimationSettingsWithDefaults =
   {
-    duration: 150,
+    duration: 250,
     easing: EASING.ease
   };
 

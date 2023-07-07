@@ -44,7 +44,7 @@ type GraphViewComposerProps = PropsWithChildren<{
 const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   // CONTEXTS
   // Canvas data context
-  const { boundingRect, currentScale, currentTranslation } =
+  const { boundingRect, currentScale, currentTranslation, initialScale } =
     useCanvasDataContext();
   // Transform context
   const { handleCanvasRender, resetContainerPosition } = useTransformContext();
@@ -59,7 +59,8 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
     if (focusStatus.value === FocusStatus.BLUR) {
       resetContainerPosition({
         animationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS,
-        autoSizingContext
+        autoSizingContext,
+        scale: initialScale
       });
     } else {
       endFocus(undefined, DEFAULT_FOCUS_ANIMATION_SETTINGS);
