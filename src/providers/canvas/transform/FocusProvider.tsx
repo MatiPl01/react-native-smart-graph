@@ -28,6 +28,11 @@ import {
 } from '@/types/focus';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { Maybe } from '@/types/utils';
+import { ObjectFit } from '@/types/views';
+import {
+  animatedBoundingRectToRect,
+  animatedCanvasDimensionsToDimensions
+} from '@/utils/placement';
 import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
@@ -73,19 +78,25 @@ type BlurState = {
 
 type FocusProviderProps = {
   children?: React.ReactNode;
-  initialScale: number;
+  objectFit: ObjectFit;
 };
 
 export default function FocusProvider({
   children,
-  initialScale
+  objectFit
 }: FocusProviderProps) {
   // CONTEXT VALUES
   // Canvas data context values
-  const { canvasDimensions, currentScale, currentTranslation } =
-    useCanvasDataContext();
+  const {
+    boundingRect,
+    canvasDimensions,
+    currentScale,
+    currentTranslation,
+    initialScale
+  } = useCanvasDataContext();
   // Canvas transform context values
   const {
+    getIdealScale,
     getTranslateClamp,
     resetContainerPosition,
     scaleContentTo,
@@ -293,12 +304,13 @@ export default function FocusProvider({
         const { onComplete: _, ...timingConfig } = animationSettings;
         resetContainerPosition({
           animationSettings: timingConfig,
-          autoSizingContext
+          autoSizingContext,
+          scale: initialScale
         });
       }
       // Otherwise, reset the container position without animation
       else {
-        resetContainerPosition({ autoSizingContext });
+        resetContainerPosition({ autoSizingContext, scale: initialScale });
       }
     },
     []
@@ -403,7 +415,6 @@ export default function FocusProvider({
         progress: transitionProgress.value,
         startPosition: transitionStartPosition.value,
         startScale: transitionStartScale.value,
-        targetScale: initialScale,
         translation: {
           x: x.value,
           y: y.value
@@ -413,14 +424,13 @@ export default function FocusProvider({
     data => {
       // Don't do anything if there is no data
       if (!data) return;
-      const {
-        origin,
-        progress,
-        startPosition,
-        startScale,
-        targetScale,
-        translation
-      } = data;
+      const { origin, progress, startPosition, startScale, translation } = data;
+      // Calc the target scale
+      const targetScale = getIdealScale(
+        animatedBoundingRectToRect(boundingRect),
+        animatedCanvasDimensionsToDimensions(canvasDimensions),
+        objectFit
+      );
       // Scale the content to the initial scale
       const newScale = calcScaleOnProgress(progress, startScale, targetScale);
       scaleContentTo(newScale);

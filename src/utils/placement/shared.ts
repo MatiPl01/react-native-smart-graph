@@ -1,7 +1,12 @@
 import potpack from 'potpack';
 
 import { Vertex } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
+import {
+  AnimatedBoundingRect,
+  AnimatedDimensions,
+  BoundingRect,
+  Dimensions
+} from '@/types/layout';
 import {
   AnimatedPlacedVerticesPositions,
   GraphLayout,
@@ -14,12 +19,23 @@ export const calcContainerBoundingRect = (
   vertexRadius = 0
 ): BoundingRect => {
   'worklet';
-  let minX = 0;
-  let maxX = 0;
-  let minY = 0;
-  let maxY = 0;
+  const vertices = Object.values(placedVertices);
 
-  for (const { x, y } of Object.values(placedVertices)) {
+  if (!vertices.length) {
+    return {
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0
+    };
+  }
+
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const { x, y } of vertices) {
     minX = Math.min(minX, x);
     maxX = Math.max(maxX, x);
     minY = Math.min(minY, y);
@@ -55,6 +71,28 @@ export const calcAnimatedContainerBoundingRect = (
     left,
     right,
     top
+  };
+};
+
+export const animatedBoundingRectToRect = (
+  boundingRect: AnimatedBoundingRect
+): BoundingRect => {
+  'worklet';
+  return {
+    bottom: boundingRect.bottom.value,
+    left: boundingRect.left.value,
+    right: boundingRect.right.value,
+    top: boundingRect.top.value
+  };
+};
+
+export const animatedCanvasDimensionsToDimensions = (
+  canvasDimensions: AnimatedDimensions
+): Dimensions => {
+  'worklet';
+  return {
+    height: canvasDimensions.height.value,
+    width: canvasDimensions.width.value
   };
 };
 

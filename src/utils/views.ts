@@ -5,12 +5,13 @@ import { ObjectFit } from '@/types/views';
 
 export const calcContainerScale = (
   objectFit: ObjectFit,
+  initialScale: number,
   containerDimensions: Dimensions,
   { height: canvasHeight, width: canvasWidth }: Dimensions,
   padding: BoundingRect
 ): number => {
   'worklet';
-  let scale = 1;
+  let scale = initialScale;
 
   const containerWidth =
     containerDimensions.width + padding.left + padding.right;
@@ -30,11 +31,6 @@ export const calcContainerScale = (
         canvasHeight / containerHeight
       );
       break;
-    case 'none':
-      scale = 1;
-      break;
-    default:
-      scale = isNaN(objectFit) ? 1 : objectFit;
   }
 
   return scale;

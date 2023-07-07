@@ -27,6 +27,11 @@ import {
 } from '@/utils/views';
 
 type TransformContextType = {
+  getIdealScale: (
+    boundingRect: BoundingRect,
+    canvasDimensions: Dimensions,
+    objFit: ObjectFit
+  ) => number;
   getTranslateClamp: (scale: number) => {
     x: [number, number];
     y: [number, number];
@@ -38,6 +43,7 @@ type TransformContextType = {
     autoSizingContext: Maybe<AutoSizingContextType>;
     canvasDimensions?: Dimensions;
     containerBoundingRect?: BoundingRect;
+    scale?: number;
   }) => void;
   scaleContentTo: (
     newScale: number,
@@ -91,7 +97,8 @@ export default function TransformProvider({
     },
     canvasDimensions: { height: canvasHeight, width: canvasWidth },
     currentScale,
-    currentTranslation: { x: translateX, y: translateY }
+    currentTranslation: { x: translateX, y: translateY },
+    initialScale
   } = useCanvasDataContext();
 
   // Other values
@@ -136,6 +143,30 @@ export default function TransformProvider({
       y: [Math.min(topLimit, bottomLimit), Math.max(bottomLimit, topLimit)]
     };
   };
+
+  const getIdealScale = useCallback(
+    (
+      boundingRect: BoundingRect,
+      canvasDimensions: Dimensions,
+      objFit: ObjectFit
+    ) => {
+      'worklet';
+      return clamp(
+        calcContainerScale(
+          objFit,
+          initialScale,
+          {
+            height: boundingRect.bottom - boundingRect.top,
+            width: boundingRect.right - boundingRect.left
+          },
+          canvasDimensions,
+          padding
+        ),
+        [minScale, maxScale]
+      );
+    },
+    []
+  );
 
   const translateContentTo = (
     translate: Vector,
@@ -197,6 +228,7 @@ export default function TransformProvider({
       autoSizingContext?: Maybe<AutoSizingContextType>;
       canvasDimensions?: Dimensions;
       containerBoundingRect?: BoundingRect;
+      scale?: number;
     }) => {
       'worklet';
       const containerBoundingRect = settings?.containerBoundingRect ?? {
@@ -214,18 +246,9 @@ export default function TransformProvider({
       // Disable auto sizing while resetting container position
       settings?.autoSizingContext?.disableAutoSizing();
 
-      const scale = clamp(
-        calcContainerScale(
-          objectFit,
-          {
-            height: containerBoundingRect.bottom - containerBoundingRect.top,
-            width: containerBoundingRect.right - containerBoundingRect.left
-          },
-          canvasDimensions,
-          padding
-        ),
-        [minScale, maxScale]
-      );
+      const scale =
+        settings?.scale ??
+        getIdealScale(containerBoundingRect, canvasDimensions, objectFit);
 
       scaleContentTo(scale, undefined, settings?.animationSettings);
       translateContentTo(
@@ -259,7 +282,8 @@ export default function TransformProvider({
       // Translate container to the center
       resetContainerPosition({
         canvasDimensions: initialDimensions,
-        containerBoundingRect: initialRect
+        containerBoundingRect: initialRect,
+        scale: initialScale
       });
       // Set canvas dimensions
       canvasWidth.value = initialDimensions.width;
@@ -269,6 +293,7 @@ export default function TransformProvider({
   );
 
   const contextValue: TransformContextType = {
+    getIdealScale,
     getTranslateClamp,
     handleCanvasRender,
     handleGraphRender,

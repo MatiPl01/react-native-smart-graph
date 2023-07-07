@@ -29,7 +29,8 @@ const FOCUS_SETTINGS: FocusSettings = {
     duration: 250,
     easing: Easing.inOut(Easing.ease)
   },
-  disableGestures: false
+  disableGestures: false,
+  vertexScale: 4
 };
 
 const ACHIEVEMENTS_GRAPH: {
@@ -37,19 +38,19 @@ const ACHIEVEMENTS_GRAPH: {
   vertices: VertexData<string>[];
 } = {
   edges: [
-    { from: 'root', key: 'root-sport', to: 'sport', value: '' },
-    { from: 'root', key: 'root-diet', to: 'diet', value: '' },
-    { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
-    { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
-    { from: 'root', key: 'root-reading', to: 'reading', value: '' }
+    // { from: 'root', key: 'root-sport', to: 'sport', value: '' },
+    // { from: 'root', key: 'root-diet', to: 'diet', value: '' },
+    // { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
+    // { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
+    // { from: 'root', key: 'root-reading', to: 'reading', value: '' }
   ],
   vertices: [
-    { key: 'root', value: 'Root' },
-    { key: 'sport', value: 'Sport' },
-    { key: 'diet', value: 'Diet' },
-    { key: 'sleep', value: 'Sleep' },
-    { key: 'meditation', value: 'Meditation' },
-    { key: 'reading', value: 'Reading' }
+    { key: 'root', value: 'Root' }
+    // { key: 'sport', value: 'Sport' },
+    // { key: 'diet', value: 'Diet' },
+    // { key: 'sleep', value: 'Sleep' },
+    // { key: 'meditation', value: 'Meditation' },
+    // { key: 'reading', value: 'Reading' }
   ]
 };
 
@@ -70,7 +71,7 @@ export default function App() {
       <SafeAreaView style={styles.container}>
         <GraphView
           controls
-          // objectFit='contain'
+          objectFit='contain'
           padding={25}
           scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
@@ -82,8 +83,7 @@ export default function App() {
                   graph.focus(key, FOCUS_SETTINGS)
               },
               placement: {
-                layoutType: 'random',
-                strategy: 'random'
+                strategy: 'circles'
               }
             }}
             graph={graph}

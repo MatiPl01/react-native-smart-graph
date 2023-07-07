@@ -66,8 +66,6 @@ export default function CanvasProvider({
         ? [
             <AutoSizingProvider
               autoSizingTimeout={autoSizingTimeout}
-              maxScale={maxScale}
-              minScale={minScale}
               objectFit={objectFit}
               padding={updatedPadding}
             />
@@ -75,7 +73,7 @@ export default function CanvasProvider({
         : []),
       // FOCUS
       // The provider used to handle canvas focus operations
-      <FocusProvider initialScale={initialScale} />,
+      <FocusProvider objectFit={objectFit} />,
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
       <GesturesProvider
