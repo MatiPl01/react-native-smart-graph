@@ -10,7 +10,8 @@ import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
   useAnimatedReaction,
-  useSharedValue
+  useSharedValue,
+  withDecay
 } from 'react-native-reanimated';
 
 import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
@@ -22,7 +23,6 @@ import {
   useTransformContext
 } from '@/providers/canvas';
 import { Maybe } from '@/types/utils';
-import { withDecayRubberBand } from '@/utils/reanimated';
 
 type GesturesContextType = {
   gestureHandler: ComposedGesture;
@@ -40,6 +40,12 @@ export const useGesturesContext = () => {
   }
 
   return contextValue as GesturesContextType;
+};
+
+const TRANSLATION_DECAY_CONFIG = {
+  deceleration: 0.98,
+  rubberBandEffect: true,
+  rubberBandFactor: 2.75
 };
 
 type GesturesProviderProps = PropsWithChildren<{
@@ -75,7 +81,8 @@ export default function GesturesProvider({
   const panStartScale = useSharedValue(1);
   // Pinch
   const pinchStartScale = useSharedValue(1);
-  const pinchClampScale = useSharedValue(1);
+  const pinchDecayScale = useSharedValue(1);
+  const pinchEndPosition = useSharedValue({ x: 0, y: 0 });
   // Values used by the focus provider
   const panTranslateX = useSharedValue(0);
   const panTranslateY = useSharedValue(0);
@@ -129,8 +136,16 @@ export default function GesturesProvider({
       isGestureActive.value = false;
       if (gesturesDisabled.value) return;
       const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
-      translateX.value = withDecayRubberBand(velocityX, clampX);
-      translateY.value = withDecayRubberBand(velocityY, clampY);
+      translateX.value = withDecay({
+        ...TRANSLATION_DECAY_CONFIG,
+        clamp: clampX,
+        velocity: velocityX
+      });
+      translateY.value = withDecay({
+        ...TRANSLATION_DECAY_CONFIG,
+        clamp: clampY,
+        velocity: velocityY
+      });
       if (autoSizingContext) {
         runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
       }
@@ -142,26 +157,25 @@ export default function GesturesProvider({
       pinchStartScale.value = currentScale.value;
       runOnJS(handleGestureStart)(null);
     })
-    .onChange(e => {
+    .onChange(({ focalX, focalY, scale }) => {
       if (gesturesDisabled.value) return;
       scaleContentTo(
-        pinchStartScale.value * e.scale,
-        {
-          x: e.focalX,
-          y: e.focalY
-        },
+        pinchStartScale.value * scale,
+        { x: focalX, y: focalY },
         undefined,
         false
       );
     })
-    .onEnd(({ velocity }) => {
+    .onEnd(({ focalX, focalY, velocity }) => {
       isGestureActive.value = false;
       if (gesturesDisabled.value) return;
-      pinchClampScale.value = currentScale.value;
-      pinchClampScale.value = withDecayRubberBand(velocity, [
-        minScale,
-        maxScale
-      ]);
+      pinchDecayScale.value = currentScale.value;
+      pinchEndPosition.value = { x: focalX, y: focalY };
+      pinchDecayScale.value = withDecay({
+        clamp: [minScale, maxScale],
+        rubberBandEffect: true,
+        velocity
+      });
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -182,7 +196,7 @@ export default function GesturesProvider({
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
       } else {
-        // Find first scale that is bigger than current scale
+        // Find the first scale that is bigger than current scale
         const newScale = scaleValues.find(scale => scale > currentScale.value);
         scaleContentTo(
           newScale ?? maxScale,
@@ -194,26 +208,11 @@ export default function GesturesProvider({
 
   useAnimatedReaction(
     () => ({
-      clampedScale: pinchClampScale.value
+      decayScale: pinchDecayScale.value,
+      endPosition: pinchEndPosition.value
     }),
-    ({ clampedScale }) => {
-      console.log(clampedScale);
-      if (gesturesDisabled.value) return;
-      // scaleContentTo(
-      //   clampedScale,
-      //   {
-      //     x: translateX.value,
-      //     y: translateY.value
-      //   },
-      //   null
-      // );
-    }
-  );
-
-  useAnimatedReaction(
-    () => translateX.value,
-    () => {
-      console.log('translateX');
+    ({ decayScale, endPosition }) => {
+      scaleContentTo(decayScale, endPosition);
     }
   );
 
