@@ -16,8 +16,8 @@ import {
 } from 'react-native-reanimated';
 
 import {
-  DEFAULT_FOCUS_ANIMATION_SETTINGS,
-  DEFAULT_GESTURE_ANIMATION_SETTINGS
+  DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS,
+  DEFAULT_FOCUS_ANIMATION_SETTINGS
 } from '@/constants/animations';
 import { useAutoSizingContext, useCanvasDataContext } from '@/providers/canvas';
 import {
@@ -167,40 +167,47 @@ export default function FocusProvider({
   /**
    * PRIVATE FUNCTIONS
    */
-  const finishTransition = useCallback((finishStatus: FocusStatus) => {
-    'worklet';
-    // Dismiss the transition if the new focus is pending
-    // (the new transition is being prepared or is in progress)
-    const currentStatus = focusStatus.value;
-    if (
-      ((finishStatus === FocusStatus.FOCUS &&
-        currentStatus === FocusStatus.FOCUS_TRANSITION) ||
-        (finishStatus === FocusStatus.BLUR &&
-          currentStatus === FocusStatus.BLUR_TRANSITION)) &&
-      transitionProgress.value === 1
-    ) {
-      // Set the finish status
-      focusStatus.value = finishStatus;
-      // Enable gestures and change the container position to fit
-      // into the canvas bounds if it's out of them
-      if (finishStatus === FocusStatus.BLUR) {
-        gesturesDisabled.value = false;
-        translateContentTo(
-          {
-            x: currentTranslation.x.value,
-            y: currentTranslation.y.value
-          },
-          getTranslateClamp(currentScale.value),
-          DEFAULT_GESTURE_ANIMATION_SETTINGS
-        );
+  const finishTransition = useCallback(
+    (finishStatus: FocusStatus, isGestureActive?: SharedValue<boolean>) => {
+      'worklet';
+      // Dismiss the transition if the new focus is pending
+      // (the new transition is being prepared or is in progress)
+      const currentStatus = focusStatus.value;
+      if (
+        ((finishStatus === FocusStatus.FOCUS &&
+          currentStatus === FocusStatus.FOCUS_TRANSITION) ||
+          (finishStatus === FocusStatus.BLUR &&
+            currentStatus === FocusStatus.BLUR_TRANSITION)) &&
+        transitionProgress.value === 1
+      ) {
+        // Set the finish status
+        focusStatus.value = finishStatus;
+        // Enable gestures (if they weren't disabled) and change the container
+        // position to fit into the canvas bounds if it's out of them
+        if (finishStatus === FocusStatus.BLUR) {
+          gesturesDisabled.value = false;
+          if (isGestureActive?.value) {
+            return;
+          }
+          translateContentTo(
+            {
+              x: currentTranslation.x.value,
+              y: currentTranslation.y.value
+            },
+            getTranslateClamp(currentScale.value),
+            DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
+          );
+        }
       }
-    }
-  }, []);
+    },
+    []
+  );
 
   const updateAnimationSettingsWithFinishCallback = useCallback(
     (
       animationSettings: AnimationSettingsWithDefaults,
-      finishStatus: FocusStatus
+      finishStatus: FocusStatus,
+      isGestureActive?: SharedValue<boolean>
     ) => {
       'worklet';
       const { onComplete, ...timingConfig } = animationSettings;
@@ -208,7 +215,7 @@ export default function FocusProvider({
         ...timingConfig,
         onComplete: () => {
           'worklet';
-          finishTransition(finishStatus);
+          finishTransition(finishStatus, isGestureActive);
           if (onComplete) {
             runOnJS(onComplete)();
           }
@@ -221,19 +228,21 @@ export default function FocusProvider({
   const updateTransitionProgress = useCallback(
     (
       finishStatus: FocusStatus,
-      animationSettings: AnimationSettingsWithDefaults | null
+      animationSettings: AnimationSettingsWithDefaults | null,
+      isGestureActive?: SharedValue<boolean>
     ) => {
       'worklet';
       if (animationSettings) {
         const { onComplete, ...timingConfig } =
           updateAnimationSettingsWithFinishCallback(
             animationSettings,
-            finishStatus
+            finishStatus,
+            isGestureActive
           );
         transitionProgress.value = 0;
         transitionProgress.value = withTiming(1, timingConfig, onComplete);
       } else {
-        finishTransition(finishStatus);
+        finishTransition(finishStatus, isGestureActive);
       }
     },
     []
@@ -245,7 +254,8 @@ export default function FocusProvider({
       transitionType:
         | FocusStatus.BLUR_TRANSITION
         | FocusStatus.FOCUS_TRANSITION,
-      animationSettings: AnimationSettingsWithDefaults | null
+      animationSettings: AnimationSettingsWithDefaults | null,
+      isGestureActive?: SharedValue<boolean>
     ) => {
       'worklet';
       const finishStatus =
@@ -262,7 +272,11 @@ export default function FocusProvider({
       focusStatus.value = transitionType;
       focusKey.value = key;
       // Update the transition progress
-      updateTransitionProgress(finishStatus, animationSettings);
+      updateTransitionProgress(
+        finishStatus,
+        animationSettings,
+        isGestureActive
+      );
     },
     []
   );
@@ -316,7 +330,8 @@ export default function FocusProvider({
     startTransition(
       null,
       FocusStatus.BLUR_TRANSITION,
-      blurState?.animationSettings ?? DEFAULT_FOCUS_ANIMATION_SETTINGS
+      blurState?.animationSettings ?? DEFAULT_FOCUS_ANIMATION_SETTINGS,
+      blurState.data.isGestureActive
     );
     runOnJS(setFocusState)(null);
   }, [blurState]);

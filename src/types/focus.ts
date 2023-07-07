@@ -14,6 +14,7 @@ export type FocusData = {
 };
 
 export type BlurData = {
+  isGestureActive: SharedValue<boolean>;
   origin: Vector;
   translation: AnimatedVectorCoordinates;
 };

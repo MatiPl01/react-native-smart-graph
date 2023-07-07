@@ -66,16 +66,21 @@ export default function GesturesProvider({
   const { endFocus, focusStatus, gesturesDisabled } = useFocusContext();
 
   // OTHER VALUES
+  // Gestures helper values
   const pinchStartScale = useSharedValue(1);
   const panStartScale = useSharedValue(1);
+  // Values used by the focus provider
   const panTranslateX = useSharedValue(0);
   const panTranslateY = useSharedValue(0);
+  const isGestureActive = useSharedValue(false);
 
   const handleGestureStart = useCallback(
     (origin?: Maybe<Vector>) => {
+      isGestureActive.value = true;
       if (focusStatus.value !== FocusStatus.BLUR) {
         endFocus(
           origin && {
+            isGestureActive,
             origin,
             translation: {
               x: panTranslateX,
@@ -88,6 +93,19 @@ export default function GesturesProvider({
       }
     },
     [autoSizingContext?.disableAutoSizing]
+  );
+
+  const handleGestureEnd = useCallback(
+    (velocityX: number, velocityY: number) => {
+      'worklet';
+      const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
+      translateX.value = fixedWithDecay(velocityX, translateX.value, clampX);
+      translateY.value = fixedWithDecay(velocityY, translateY.value, clampY);
+      if (autoSizingContext) {
+        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
+      }
+    },
+    []
   );
 
   const panGestureHandler = Gesture.Pan()
@@ -107,20 +125,16 @@ export default function GesturesProvider({
         panTranslateX.value += e.changeX;
         panTranslateY.value += e.changeY;
       }
-      // Otherwise, translate canvas normally
+      // Otherwise, translate the canvas normally
       else {
         translateX.value += e.changeX;
         translateY.value += e.changeY;
       }
     })
     .onEnd(({ velocityX, velocityY }) => {
+      isGestureActive.value = false;
       if (gesturesDisabled.value) return;
-      const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
-      translateX.value = fixedWithDecay(velocityX, translateX.value, clampX);
-      translateY.value = fixedWithDecay(velocityY, translateY.value, clampY);
-      if (autoSizingContext) {
-        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
-      }
+      handleGestureEnd(velocityX, velocityY);
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -141,15 +155,14 @@ export default function GesturesProvider({
         false
       );
     })
-    .onEnd(e => {
+    .onEnd(({ velocity }) => {
+      isGestureActive.value = false;
       if (gesturesDisabled.value) return;
-      currentScale.value = fixedWithDecay(e.velocity, currentScale.value, [
+      currentScale.value = fixedWithDecay(velocity, currentScale.value, [
         minScale,
         maxScale
       ]);
-      if (autoSizingContext) {
-        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
-      }
+      handleGestureEnd(0, 0);
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -178,9 +191,7 @@ export default function GesturesProvider({
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
       }
-      if (autoSizingContext) {
-        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
-      }
+      handleGestureEnd(0, 0);
     });
 
   const contextValue = useMemo<GesturesContextType>(
