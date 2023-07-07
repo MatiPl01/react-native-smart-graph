@@ -70,7 +70,7 @@ export default function App() {
       <SafeAreaView style={styles.container}>
         <GraphView
           controls
-          objectFit='contain'
+          // objectFit='contain'
           padding={25}
           scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
