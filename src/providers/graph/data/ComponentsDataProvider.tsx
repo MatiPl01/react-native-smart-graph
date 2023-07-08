@@ -21,6 +21,7 @@ import {
   VertexRemoveHandler,
   VertexRenderHandler
 } from '@/types/components';
+import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph, GraphConnections } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
@@ -30,6 +31,7 @@ import {
 } from '@/types/settings';
 import { CommonTypes } from '@/types/utils';
 import {
+  updateGraphEdgeLabelsData,
   updateGraphEdgesData,
   updateGraphVerticesData
 } from '@/utils/components';
@@ -41,6 +43,7 @@ export type ComponentsDataContextType<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > = {
   connections: GraphConnections;
+  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
   edgesData: Record<string, EdgeComponentData<E, V, ED>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
@@ -89,6 +92,10 @@ export default function ComponentsDataProvider<
   // Store data for graph edge components
   const [edgesData, setEdgesData] = useState<
     Record<string, EdgeComponentData<E, V, ED>>
+  >({});
+  // Store data for edge labels
+  const [edgeLabelsData, setEdgeLabelsData] = useState<
+    Record<string, EdgeLabelComponentData<E>>
   >({});
 
   // GRAPH COMPONENTS RENDER DATA (received from graph components
@@ -199,9 +206,16 @@ export default function ComponentsDataProvider<
     });
   }, []);
 
+  useEffect(() => {
+    setEdgeLabelsData(
+      updateGraphEdgeLabelsData(edgeLabelsData, edgesData, renderedEdgesData)
+    );
+  }, [renderedEdgesData]);
+
   const contextValue = useMemo<ComponentsDataContextType<V, E, ED>>(
     () => ({
       connections,
+      edgeLabelsData,
       edgesData,
       handleEdgeRemove,
       handleEdgeRender,
@@ -218,7 +232,8 @@ export default function ComponentsDataProvider<
       edgesData,
       renderedVerticesData,
       renderedEdgesData,
-      layoutAnimationSettings
+      layoutAnimationSettings,
+      edgeLabelsData
     ]
   );
 

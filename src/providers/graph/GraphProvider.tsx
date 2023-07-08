@@ -1,6 +1,7 @@
-import { PropsWithChildren, useMemo } from 'react';
+import { cloneElement, PropsWithChildren, ReactElement, useMemo } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
+import { GraphComponentPrivateProps } from '@/components/graphs/graph/GraphComponent';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
@@ -189,7 +190,9 @@ export default function GraphProvider<
 
   return (
     <ContextProviderComposer providers={providers}>
-      {children}
+      {cloneElement(children as ReactElement<GraphComponentPrivateProps>, {
+        boundingRect
+      })}
     </ContextProviderComposer>
   );
 }
