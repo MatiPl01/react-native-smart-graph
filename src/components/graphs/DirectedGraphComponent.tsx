@@ -1,5 +1,6 @@
 import { memo } from 'react';
 
+import GraphComponent from '@/components/graphs/graph/GraphComponent';
 import { DirectedGraph } from '@/models/graphs';
 import { GraphProviderAdditionalProps } from '@/providers/graph';
 import GraphProvider from '@/providers/graph/GraphProvider';
@@ -7,8 +8,6 @@ import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
-
-import GraphComponent from './GraphComponent';
 
 type DirectedGraphComponentProps<
   V,
