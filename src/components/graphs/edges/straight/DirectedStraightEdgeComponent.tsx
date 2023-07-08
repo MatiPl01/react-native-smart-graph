@@ -35,8 +35,6 @@ function DirectedStraightEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  focusKey,
-  focusTransitionProgress,
   onRender,
   renderers,
   v1Position,
@@ -125,29 +123,23 @@ function DirectedStraightEdgeComponent<E, V>({
     }
   );
 
-  const sharedProps = {
-    animationProgress,
-    focusKey,
-    focusTransitionProgress
-  };
-
   return (
     <>
       {renderers.edge({
-        ...sharedProps,
+        animationProgress,
         key: edge.key,
         p1,
         p2,
         value: edge.value
       })}
       <EdgeArrowComponent
+        animationProgress={animationProgress}
         directionVector={dirVec}
         height={arrowHeight}
         renderer={renderers.arrow}
         tipPosition={arrowTipPosition}
         vertexRadius={v2Radius}
         width={arrowWidth}
-        {...sharedProps}
       />
     </>
   );

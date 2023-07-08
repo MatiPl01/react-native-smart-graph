@@ -1,6 +1,8 @@
-/* eslint-disable import/no-unused-modules */
 import { Mask } from '@shopify/react-native-skia';
+import { useSharedValue } from 'react-native-reanimated';
 
+import { useComponentFocus } from '@/hooks/focus';
+import { useVertexFocusContext } from '@/providers/graph';
 import { AnimatedBoundingRect } from '@/types/layout';
 
 import GraphEdges from './GraphEdges';
@@ -13,15 +15,21 @@ export type GraphComponentPrivateProps = {
 };
 
 function GraphComponent({ boundingRect }: GraphComponentPrivateProps) {
+  const { focusKey, focusTransitionProgress } = useVertexFocusContext();
+  // Helper value to animate components on vertex focus
+  const focusProgress = useSharedValue(0);
+  // Update the focusProgress
+  useComponentFocus(focusProgress, focusTransitionProgress, focusKey);
+
   return (
     <>
       <Mask
         mask={<GraphEdgesMask boundingRect={boundingRect} />}
         mode='luminance'>
-        <GraphEdges />
+        <GraphEdges focusProgress={focusProgress} />
       </Mask>
       <GraphVertices />
-      <GraphEdgesLabels />
+      <GraphEdgesLabels focusProgress={focusProgress} />
     </>
   );
 }
