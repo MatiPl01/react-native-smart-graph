@@ -29,7 +29,6 @@ function EdgeComponent<E, V>({
   edgesCount,
   focusKey,
   focusTransitionProgress,
-  labelRenderer,
   onRemove,
   order,
   removed,
@@ -85,12 +84,10 @@ function EdgeComponent<E, V>({
     renderers: arrowRenderer
       ? {
           arrow: arrowRenderer,
-          edge: edgeRenderer,
-          label: labelRenderer
+          edge: edgeRenderer
         }
       : {
-          edge: edgeRenderer,
-          label: labelRenderer
+          edge: edgeRenderer
         }
   };
 

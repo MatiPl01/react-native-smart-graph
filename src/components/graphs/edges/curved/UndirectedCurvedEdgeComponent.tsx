@@ -5,7 +5,6 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import {
@@ -81,6 +80,8 @@ function UndirectedCurvedEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
+      animationProgress,
+      labelHeight,
       labelPosition: { x: parabolaX, y: parabolaY }
     });
   }, [edge.key]);
@@ -98,34 +99,18 @@ function UndirectedCurvedEdgeComponent<E, V>({
     return pathString;
   });
 
-  const sharedProps = {
-    animationProgress,
-    focusKey,
-    focusTransitionProgress
-  };
-
   return (
     <>
       {renderers.edge({
-        ...sharedProps,
+        animationProgress,
+        focusKey,
+        focusTransitionProgress,
         key: edge.key,
         parabolaX,
         parabolaY,
         path,
         value: edge.value
       })}
-      {renderers.label && (
-        <EdgeLabelComponent
-          centerX={parabolaX}
-          centerY={parabolaY}
-          edge={edge}
-          height={labelHeight}
-          renderer={renderers.label}
-          v1Position={v1Position}
-          v2Position={v2Position}
-          {...sharedProps}
-        />
-      )}
     </>
   );
 }

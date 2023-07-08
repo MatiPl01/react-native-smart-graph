@@ -1,15 +1,29 @@
 /* eslint-disable import/no-unused-modules */
-import { Group } from '@shopify/react-native-skia';
+import { Mask } from '@shopify/react-native-skia';
+
+import { AnimatedBoundingRect } from '@/types/layout';
 
 import GraphEdges from './GraphEdges';
+import GraphEdgesLabels from './GraphEdgesLabels';
+import GraphEdgesMask from './GraphEdgesMask';
 import GraphVertices from './GraphVertices';
 
-export default function GraphComponent() {
-  console.log('GraphComponent');
+export type GraphComponentPrivateProps = {
+  boundingRect: AnimatedBoundingRect;
+};
+
+function GraphComponent({ boundingRect }: GraphComponentPrivateProps) {
   return (
-    <Group>
-      <GraphEdges />
+    <>
+      <Mask
+        mask={<GraphEdgesMask boundingRect={boundingRect} />}
+        mode='luminance'>
+        <GraphEdges />
+      </Mask>
       <GraphVertices />
-    </Group>
+      <GraphEdgesLabels />
+    </>
   );
 }
+
+export default GraphComponent as () => JSX.Element;

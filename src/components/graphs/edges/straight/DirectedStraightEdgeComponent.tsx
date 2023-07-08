@@ -6,9 +6,9 @@ import {
 } from 'react-native-reanimated';
 
 import EdgeArrowComponent from '@/components/graphs/arrows/EdgeArrowComponent';
-import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import {
+  addVectors,
   animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   calcUnitVector,
@@ -65,6 +65,8 @@ function DirectedStraightEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
+      animationProgress,
+      labelHeight,
       labelPosition: { x: centerX, y: centerY }
     });
   }, [edge.key]);
@@ -98,14 +100,8 @@ function DirectedStraightEdgeComponent<E, V>({
         p2Offset
       );
       // Update edge line points positions
-      p1.value = {
-        x: v1.x + p1Translation.x,
-        y: v1.y + p1Translation.y
-      };
-      p2.value = {
-        x: v2.x + p2Translation.x,
-        y: v2.y + p2Translation.y
-      };
+      p1.value = addVectors(v1, p1Translation);
+      p2.value = addVectors(v2, p2Translation);
       // Update edge arrow tip position
       arrowTipPosition.value = translateAlongVector(
         p2.value,
@@ -153,18 +149,6 @@ function DirectedStraightEdgeComponent<E, V>({
         width={arrowWidth}
         {...sharedProps}
       />
-      {renderers.label && (
-        <EdgeLabelComponent
-          centerX={centerX}
-          centerY={centerY}
-          edge={edge}
-          height={labelHeight}
-          renderer={renderers.label}
-          v1Position={v1Position}
-          v2Position={v2Position}
-          {...sharedProps}
-        />
-      )}
     </>
   );
 }

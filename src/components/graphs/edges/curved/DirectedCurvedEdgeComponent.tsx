@@ -7,7 +7,6 @@ import {
 } from 'react-native-reanimated';
 
 import EdgeArrowComponent from '@/components/graphs/arrows/EdgeArrowComponent';
-import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { calcApproxPointOnParabola } from '@/utils/math';
@@ -73,6 +72,8 @@ function DirectedCurvedEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
+      animationProgress,
+      labelHeight,
       labelPosition: { x: parabolaX, y: parabolaY }
     });
   }, [edge.key]);
@@ -192,18 +193,6 @@ function DirectedCurvedEdgeComponent<E, V>({
         width={arrowWidth}
         {...sharedProps}
       />
-      {renderers.label && (
-        <EdgeLabelComponent
-          centerX={parabolaX}
-          centerY={parabolaY}
-          edge={edge}
-          height={labelHeight}
-          renderer={renderers.label}
-          v1Position={v1Position}
-          v2Position={v2Position}
-          {...sharedProps}
-        />
-      )}
     </>
   );
 }

@@ -17,9 +17,11 @@ import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
 import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
 import {
   EdgeComponentData,
+  EdgeComponentRenderData,
   VertexComponentData,
   VertexComponentRenderData
 } from '@/types/components';
+import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { OrderedEdges, Vertex } from '@/types/graphs';
 import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
@@ -253,4 +255,47 @@ export const updateGraphEdgesData = <
     data: updatedEdgesData,
     wasUpdated
   };
+};
+
+export const updateGraphEdgeLabelsData = <
+  V,
+  E,
+  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
+>(
+  oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
+  edgesData: Record<string, EdgeComponentData<E, V, ED>>,
+  renderedEdgesData: Record<string, EdgeComponentRenderData>
+): Record<string, EdgeLabelComponentData<E>> => {
+  const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
+
+  // Add new labels data
+  Object.entries(renderedEdgesData).forEach(([key, data]) => {
+    const edgeData = edgesData[key];
+
+    if (!updatedEdgeLabelsData[key] && edgeData?.labelRenderer) {
+      updatedEdgeLabelsData[key] = {
+        animationProgress: data.animationProgress,
+        centerX: data.labelPosition.x,
+        centerY: data.labelPosition.y,
+        height: data.labelHeight,
+        renderer: edgeData.labelRenderer,
+        v1Position: edgeData.v1Position,
+        v2Position: edgeData.v2Position,
+        value: edgeData.edge.value
+      };
+    }
+  });
+
+  // Keys of edges that are currently in the graph
+  const currentEdgesKeys = new Set(Object.keys(renderedEdgesData));
+
+  // Remove labels data of edges that are no longer displayed
+  // (their unmount animation is finished)
+  Object.keys(oldEdgeLabelsData).forEach(key => {
+    if (!currentEdgesKeys.has(key)) {
+      delete updatedEdgeLabelsData[key];
+    }
+  });
+
+  return updatedEdgeLabelsData;
 };

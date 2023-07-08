@@ -1,8 +1,5 @@
 import { AnimatedVector } from '@/types/layout';
-import {
-  EdgeLabelRendererFunction,
-  SharedRenderersProps
-} from '@/types/renderer/shared';
+import { SharedRenderersProps } from '@/types/renderer/shared';
 
 import { EdgeArrowRenderFunction } from './shared';
 
@@ -21,12 +18,10 @@ export type StraightEdgeRenderFunction<E> = (
 // Undirected edges
 export type UndirectedStraightEdgeRenderers<E> = {
   edge: StraightEdgeRenderFunction<E>;
-  label?: EdgeLabelRendererFunction<E>;
 };
 
 // Directed edges
 export type DirectedStraightEdgeRenderers<E> = {
   arrow: EdgeArrowRenderFunction;
   edge: StraightEdgeRenderFunction<E>;
-  label?: EdgeLabelRendererFunction<E>;
 };

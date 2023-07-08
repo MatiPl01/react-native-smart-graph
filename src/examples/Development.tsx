@@ -14,6 +14,7 @@ import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
 
 import {
+  DefaultEdgeLabelRenderer,
   DirectedEdgeData,
   DirectedGraphComponent,
   FocusSettings,
@@ -75,6 +76,9 @@ export default function App() {
           padding={25}
           scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
+            renderers={{
+              label: DefaultEdgeLabelRenderer
+            }}
             settings={{
               events: {
                 onVertexLongPress: ({ vertex: { key } }) =>

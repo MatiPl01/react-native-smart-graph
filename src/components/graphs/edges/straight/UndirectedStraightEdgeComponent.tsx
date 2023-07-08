@@ -5,10 +5,10 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
+  addVectors,
   animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   multiplyVector
@@ -62,6 +62,8 @@ function UndirectedStraightEdgeComponent<E, V>({
 
   useEffect(() => {
     onRender(edge.key, {
+      animationProgress,
+      labelHeight,
       labelPosition: { x: centerX, y: centerY }
     });
   }, [edge.key]);
@@ -110,14 +112,8 @@ function UndirectedStraightEdgeComponent<E, V>({
         p2Offset
       );
       // Update edge line points positions
-      p1.value = {
-        x: v1.x + p1Translation.x,
-        y: v1.y + p1Translation.y
-      };
-      p2.value = {
-        x: v2.x + p2Translation.x,
-        y: v2.y + p2Translation.y
-      };
+      p1.value = addVectors(v1, p1Translation);
+      p2.value = addVectors(v2, p2Translation);
       // Update edge label max size
       if (componentSettings.label?.sizeRatio) {
         const avgOffset = (p1Offset + p2Offset) / 2;
@@ -127,33 +123,17 @@ function UndirectedStraightEdgeComponent<E, V>({
     }
   );
 
-  const sharedProps = {
-    animationProgress,
-    focusKey,
-    focusTransitionProgress
-  };
-
   return (
     <>
       {renderers.edge({
-        ...sharedProps,
+        animationProgress,
+        focusKey,
+        focusTransitionProgress,
         key: edge.key,
         p1,
         p2,
         value: edge.value
       })}
-      {renderers.label && (
-        <EdgeLabelComponent
-          centerX={centerX}
-          centerY={centerY}
-          edge={edge}
-          height={labelHeight}
-          renderer={renderers.label}
-          v1Position={v1Position}
-          v2Position={v2Position}
-          {...sharedProps}
-        />
-      )}
     </>
   );
 }

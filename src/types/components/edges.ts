@@ -110,6 +110,8 @@ export type EdgeComponentData<
 };
 
 export type EdgeComponentRenderData = {
+  animationProgress: SharedValue<number>;
+  labelHeight: SharedValue<number>;
   labelPosition: AnimatedVectorCoordinates;
 };
 
