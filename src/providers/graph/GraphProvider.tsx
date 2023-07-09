@@ -90,12 +90,12 @@ export type GraphProviderAdditionalProps =
   | {
       boundingRect: AnimatedBoundingRect;
       canvasDimensions: AnimatedDimensions;
-      canvasScales: number[];
+      canvasScales: SharedValue<number[]>;
       endFocus: FocusEndSetter;
       focusKey: SharedValue<null | string>;
       focusStatus: SharedValue<number>;
       focusTransitionProgress: SharedValue<number>;
-      initialCanvasScale: number;
+      initialCanvasScale: SharedValue<number>;
       onRender: (containerBounds: BoundingRect) => void;
       startFocus: FocusStartSetter;
       transform: AnimatedCanvasTransform;

@@ -47,14 +47,14 @@ export const useVertexFocusContext = () => {
 };
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
-  availableScales: number[];
+  availableScales: SharedValue<number[]>;
   canvasDimensions: AnimatedDimensions;
   endFocus: FocusEndSetter;
   focusKey: SharedValue<null | string>;
   focusStatus: SharedValue<number>;
   focusTransitionProgress: SharedValue<number>;
   graph: Graph<V, E>;
-  initialScale: number;
+  initialScale: SharedValue<number>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   startFocus: FocusStartSetter;
   vertexRadius: number;
@@ -96,8 +96,8 @@ function VertexFocusProvider<V, E>({
       getFocusedVertexData(
         focusedVertexWithPosition,
         vertexRadius,
-        availableScales,
-        initialScale,
+        availableScales.value,
+        initialScale.value,
         data.settings
       ),
     [focusedVertexWithPosition, data.settings]

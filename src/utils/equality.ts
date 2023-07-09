@@ -3,6 +3,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 
+const isSharedValue = (value: unknown): boolean =>
+  typeof value === 'object' && value !== null && Object.hasOwn(value, 'value');
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const deepEqual = (value1: any, value2: any): boolean => {
   // If either value is null or not an object, they are not deeply equal
@@ -29,6 +32,10 @@ const deepEqual = (value1: any, value2: any): boolean => {
     return false;
   }
 
+  if (isSharedValue(value1) && isSharedValue(value2)) {
+    return true;
+  }
+
   // Check if every key of value1 exists in value2, and their values are deeply equal
   for (const key of keys1) {
     if (
@@ -45,11 +52,22 @@ const deepEqual = (value1: any, value2: any): boolean => {
   return true;
 };
 
-const updateSettings = (
+const updateSettings = <S extends ExcludeSettings | IncludeSettings>(
   key: string,
-  settings?: { exclude?: string[]; shallow?: string[] }
-) => {
+  settings?: S
+): S => {
   const regex = new RegExp(`^${key}.`);
+
+  if (isIncludeSettingsObject(settings)) {
+    return {
+      include: settings?.include
+        ?.filter(prop => prop.match(regex))
+        .map(prop => prop.replace(regex, '')),
+      shallow: settings?.shallow
+        ?.filter(prop => prop.match(regex))
+        .map(prop => prop.replace(regex, ''))
+    } as S;
+  }
 
   return {
     exclude: settings?.exclude
@@ -58,14 +76,28 @@ const updateSettings = (
     shallow: settings?.shallow
       ?.filter(prop => prop.match(regex))
       .map(prop => prop.replace(regex, ''))
-  };
+  } as S;
 };
 
+type ExcludeSettings = { exclude?: string[]; shallow?: string[] };
+type IncludeSettings = { include?: string[]; shallow?: string[] };
+
+const isIncludeSettingsObject = (
+  settings?: ExcludeSettings | IncludeSettings
+): settings is IncludeSettings =>
+  !!settings && Object.hasOwn(settings, 'include');
+
 export const deepMemoComparator =
-  (settings?: { exclude?: string[]; shallow?: string[] }) =>
+  (settings?: ExcludeSettings | IncludeSettings) =>
   (prevProps: Record<string, any>, nextProps: Record<string, any>): boolean => {
     const shallowComparisonSet = new Set(settings?.shallow ?? []);
-    const excludedSet = new Set(settings?.exclude ?? []);
+
+    const includeSet = isIncludeSettingsObject(settings)
+      ? new Set(settings?.include ?? [])
+      : null;
+    const excludedSet = !includeSet
+      ? new Set((settings as ExcludeSettings)?.exclude ?? [])
+      : null;
 
     const prevPropsKeys = Object.keys(prevProps);
     const nextPropsKeys = Object.keys(nextProps);
@@ -77,7 +109,9 @@ export const deepMemoComparator =
 
     // Deeply compare every prop except the ones in the excluded list
     for (const key of Object.keys(prevProps)) {
-      if (excludedSet.has(key) || excludedSet.has('*')) {
+      if (excludedSet && (excludedSet.has(key) || excludedSet.has('*'))) {
+        continue;
+      } else if (includeSet && !includeSet.has(key)) {
         continue;
       }
 
@@ -107,9 +141,16 @@ export const deepMemoComparator =
       } else if (
         // If the beginning of the excluded prop matches the current prop,
         // recursively call deepMemoComparator for nested properties
-        settings?.exclude?.some(
-          prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
-        )
+        (excludedSet &&
+          (settings as ExcludeSettings)?.exclude?.some(
+            prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
+          )) ||
+        // If the beginning of the included prop matches the current prop,
+        // recursively call deepMemoComparator for nested properties
+        (includeSet &&
+          (settings as IncludeSettings)?.include?.some(
+            prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
+          ))
       ) {
         if (
           !deepMemoComparator(updateSettings(key, settings))(

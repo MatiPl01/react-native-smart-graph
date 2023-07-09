@@ -1,34 +1,27 @@
 import { memo } from 'react';
 
-import GraphComponent from '@/components/graphs/graph/GraphComponent';
 import { DirectedGraph } from '@/models/graphs';
 import { GraphProviderAdditionalProps } from '@/providers/graph';
 import GraphProvider from '@/providers/graph/GraphProvider';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
+import { DirectedEdgeData } from '@/types/data';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
+import { deepMemoComparator } from '@/utils/equality';
 
-type DirectedGraphComponentProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = {
+import GraphComponent from './graph/GraphComponent';
+
+export type DirectedGraphComponentProps<V, E> = {
   graph: DirectedGraph<V, E>;
   renderers?: DirectedGraphRenderers<V, E>;
-  settings?: DirectedGraphSettings<V, E, ED>;
+  settings?: DirectedGraphSettings<V, E, DirectedEdgeData<E>>;
 };
 
-type ClonedComponentProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = DirectedGraphComponentProps<V, E, ED> & GraphProviderAdditionalProps;
+type ClonedComponentProps<V, E> = DirectedGraphComponentProps<V, E> &
+  GraphProviderAdditionalProps;
 
-function DirectedGraphComponent<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(providerProps: ClonedComponentProps<V, E, ED>) {
+function DirectedGraphComponent<V, E>(
+  providerProps: ClonedComponentProps<V, E>
+) {
   return (
     <GraphProvider {...providerProps}>
       <GraphComponent />
@@ -37,20 +30,13 @@ function DirectedGraphComponent<
 }
 
 export default memo(
-  <V, E, ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>>(
-    props: DirectedGraphComponentProps<V, E, ED>
-  ) => {
+  <V, E>(props: DirectedGraphComponentProps<V, E>) => {
     console.log('DirectedGraphComponent');
-    return null;
     return (
-      <DirectedGraphComponent {...(props as ClonedComponentProps<V, E, ED>)} />
+      <DirectedGraphComponent {...(props as ClonedComponentProps<V, E>)} />
     );
   },
-  // deepMemoComparator({
-  //   exclude: ['boundingRect'],
-  //   shallow: ['graph']
-  // })
-  () => true
-) as <V, E, ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>>(
-  props: DirectedGraphComponentProps<V, E, ED>
-) => JSX.Element;
+  deepMemoComparator({
+    shallow: ['graph']
+  })
+) as <V, E>(props: DirectedGraphComponentProps<V, E>) => JSX.Element;
