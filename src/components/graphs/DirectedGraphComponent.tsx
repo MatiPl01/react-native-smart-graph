@@ -7,7 +7,6 @@ import GraphProvider from '@/providers/graph/GraphProvider';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/equality';
 
 type DirectedGraphComponentProps<
   V,
@@ -41,14 +40,17 @@ export default memo(
   <V, E, ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>>(
     props: DirectedGraphComponentProps<V, E, ED>
   ) => {
+    console.log('DirectedGraphComponent');
+    return null;
     return (
       <DirectedGraphComponent {...(props as ClonedComponentProps<V, E, ED>)} />
     );
   },
-  deepMemoComparator({
-    exclude: ['boundingRect'],
-    shallow: ['graph']
-  })
+  // deepMemoComparator({
+  //   exclude: ['boundingRect'],
+  //   shallow: ['graph']
+  // })
+  () => true
 ) as <V, E, ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>>(
   props: DirectedGraphComponentProps<V, E, ED>
 ) => JSX.Element;

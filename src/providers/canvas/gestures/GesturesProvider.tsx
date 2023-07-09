@@ -1,11 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import {
-  createContext,
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useMemo
-} from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
@@ -48,25 +42,21 @@ const TRANSLATION_DECAY_CONFIG = {
   rubberBandFactor: 2.75
 };
 
-type GesturesProviderProps = PropsWithChildren<{
-  initialScale: number;
-  maxScale: number;
-  minScale: number;
-  scaleValues: number[];
-}>;
-
 export default function GesturesProvider({
-  children,
-  initialScale,
-  maxScale,
-  minScale,
-  scaleValues
-}: GesturesProviderProps) {
+  children
+}: {
+  children?: React.ReactNode;
+}) {
+  console.log('GesturesProvider');
   // CONTEXT VALUES
   // Canvas data context values
   const {
     currentScale,
-    currentTranslation: { x: translateX, y: translateY }
+    currentTranslation: { x: translateX, y: translateY },
+    initialScale,
+    maxScale,
+    minScale,
+    scales
   } = useCanvasDataContext();
   // Transform context values
   const { getTranslateClamp, scaleContentTo } = useTransformContext();
@@ -172,7 +162,7 @@ export default function GesturesProvider({
       pinchDecayScale.value = currentScale.value;
       pinchEndPosition.value = { x: focalX, y: focalY };
       pinchDecayScale.value = withDecay({
-        clamp: [minScale, maxScale],
+        clamp: [minScale.value, maxScale.value],
         rubberBandEffect: true,
         velocity
       });
@@ -189,17 +179,17 @@ export default function GesturesProvider({
       if (gesturesDisabled.value) return;
       const origin = { x, y };
 
-      if (currentScale.value === maxScale) {
+      if (currentScale.value === maxScale.value) {
         scaleContentTo(
-          initialScale,
+          initialScale.value,
           origin,
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
       } else {
         // Find the first scale that is bigger than current scale
-        const newScale = scaleValues.find(scale => scale > currentScale.value);
+        const newScale = scales.value.find(scale => scale > currentScale.value);
         scaleContentTo(
-          newScale ?? maxScale,
+          newScale ?? maxScale.value,
           origin,
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );

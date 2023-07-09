@@ -68,6 +68,7 @@ const isAllSpacing = (spacing: Spacing): spacing is BoundingRect =>
   Object.keys(spacing).every(value => ALL_SPACING_KEYS.has(value));
 
 export const updateSpacing = (spacing?: Spacing): BoundingRect => {
+  'worklet';
   if (!spacing) {
     return { bottom: 0, left: 0, right: 0, top: 0 };
   }

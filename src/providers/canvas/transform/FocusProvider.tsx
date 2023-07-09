@@ -28,7 +28,6 @@ import {
 } from '@/types/focus';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { Maybe } from '@/types/utils';
-import { ObjectFit } from '@/types/views';
 import {
   animatedBoundingRectToRect,
   animatedCanvasDimensionsToDimensions
@@ -76,15 +75,12 @@ type BlurState = {
   data: BlurData;
 };
 
-type FocusProviderProps = {
-  children?: React.ReactNode;
-  objectFit: ObjectFit;
-};
-
 export default function FocusProvider({
-  children,
-  objectFit
-}: FocusProviderProps) {
+  children
+}: {
+  children?: React.ReactNode;
+}) {
+  console.log('FocusProvider');
   // CONTEXT VALUES
   // Canvas data context values
   const {
@@ -92,7 +88,8 @@ export default function FocusProvider({
     canvasDimensions,
     currentScale,
     currentTranslation,
-    initialScale
+    initialScale,
+    objectFit
   } = useCanvasDataContext();
   // Canvas transform context values
   const {
@@ -305,12 +302,15 @@ export default function FocusProvider({
         resetContainerPosition({
           animationSettings: timingConfig,
           autoSizingContext,
-          scale: initialScale
+          scale: initialScale.value
         });
       }
       // Otherwise, reset the container position without animation
       else {
-        resetContainerPosition({ autoSizingContext, scale: initialScale });
+        resetContainerPosition({
+          autoSizingContext,
+          scale: initialScale.value
+        });
       }
     },
     []
@@ -429,7 +429,7 @@ export default function FocusProvider({
       const targetScale = getIdealScale(
         animatedBoundingRectToRect(boundingRect),
         animatedCanvasDimensionsToDimensions(canvasDimensions),
-        objectFit
+        objectFit.value
       );
       // Scale the content to the initial scale
       const newScale = calcScaleOnProgress(progress, startScale, targetScale);

@@ -1,17 +1,9 @@
-import React, { memo, PropsWithChildren } from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import CanvasProvider, {
-  FocusStatus,
-  useAutoSizingContext,
-  useCanvasDataContext,
-  useFocusContext,
-  useGesturesContext,
-  useTransformContext
-} from '@/providers/canvas';
+import CanvasProvider from '@/providers/canvas';
 import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
@@ -28,44 +20,53 @@ type GraphViewProps = PropsWithChildren<{
 }>;
 
 function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
+  console.log('GraphView');
+
+  const providerComposer = useMemo(
+    () => <GraphViewComposer controls={controls} />,
+    [controls] // TODO - improve in https://github.com/MatiPl01/react-native-smart-graph/pull/184
+  );
+
   return (
     <View style={styles.container}>
-      <CanvasProvider {...providerProps}>
-        <GraphViewComposer controls={controls}>{children}</GraphViewComposer>
-      </CanvasProvider>
+      <CanvasProvider {...providerProps}>{providerComposer}</CanvasProvider>
     </View>
   );
 }
 
-type GraphViewComposerProps = PropsWithChildren<{
+type GraphViewComposerProps = {
   controls?: boolean;
-}>;
+};
 
-const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
+const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
+  console.log('GraphViewComposer');
   // CONTEXTS
   // Canvas data context
-  const { boundingRect, currentScale, currentTranslation, initialScale } =
-    useCanvasDataContext();
-  // Transform context
-  const { handleCanvasRender, resetContainerPosition } = useTransformContext();
-  // Auto sizing context
-  const autoSizingContext = useAutoSizingContext();
-  // Gestures context
-  const { gestureHandler } = useGesturesContext();
-  // Focus context
-  const { endFocus, focusStatus } = useFocusContext();
+  // const { boundingRect, currentScale, currentTranslation, initialScale } =
+  //   useCanvasDataContext();
+  // // Transform context
+  // const { handleCanvasRender, resetContainerPosition } =
+  //   useTransformContext();
+  // // Auto sizing context
+  // const autoSizingContext = useAutoSizingContext();
+  // // Gestures context
+  // const { gestureHandler } = useGesturesContext();
+  // // Focus context
+  // const { endFocus, focusStatus } = useFocusContext();
 
-  const handleReset = () => {
-    if (focusStatus.value === FocusStatus.BLUR) {
-      resetContainerPosition({
-        animationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS,
-        autoSizingContext,
-        scale: initialScale
-      });
-    } else {
-      endFocus(undefined, DEFAULT_FOCUS_ANIMATION_SETTINGS);
-    }
-  };
+  // const handleReset = () => {
+  //   if (focusStatus.value === FocusStatus.BLUR) {
+  //     resetContainerPosition({
+  //       animationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS,
+  //       autoSizingContext,
+  //       scale: initialScale
+  //     });
+  //   } else {
+  //     endFocus(undefined, DEFAULT_FOCUS_ANIMATION_SETTINGS);
+  //   }
+  // };
+
+  return null;
 
   return (
     <>
@@ -87,7 +88,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
       {controls && <ViewControls onReset={handleReset} />}
     </>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -101,7 +102,6 @@ const styles = StyleSheet.create({
 export default memo(
   GraphView,
   deepMemoComparator({
-    // Exclude events callback functions from the comparison
     exclude: ['children.settings.events'],
     // shallow compare the graph object property of the child component
     // to prevent deep checking a large graph model structure

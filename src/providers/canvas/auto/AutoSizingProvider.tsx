@@ -1,11 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useMemo,
-  useRef
-} from 'react';
+import { createContext, useContext, useMemo, useRef } from 'react';
 import {
   runOnJS,
   useAnimatedReaction,
@@ -15,10 +9,8 @@ import {
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasDataContext, useTransformContext } from '@/providers/canvas';
-import { BoundingRect } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { Maybe } from '@/types/utils';
-import { ObjectFit } from '@/types/views';
 import {
   calcContainerTranslation,
   calcScaleOnProgress,
@@ -42,22 +34,17 @@ export const useAutoSizingContext = () =>
   // before using it (it is used only for specific objectFit values)
   useContext(AutoSizingContext) as AutoSizingContextType | null;
 
-type AutoSizingProviderProps = PropsWithChildren<{
-  autoSizingTimeout: number;
-  objectFit: ObjectFit;
-  padding: BoundingRect;
-}>;
-
 export default function AutoSizingProvider({
-  autoSizingTimeout,
-  children,
-  objectFit,
-  padding
-}: AutoSizingProviderProps) {
+  children
+}: {
+  children?: React.ReactNode;
+}) {
+  console.log('AutoSizingProvider');
   // CONTEXT VALUES
   // Canvas data context values
   const {
     autoSizingEnabled,
+    autoSizingTimeout,
     boundingRect: {
       bottom: containerBottom,
       left: containerLeft,
@@ -66,7 +53,9 @@ export default function AutoSizingProvider({
     },
     canvasDimensions: { height: canvasHeight, width: canvasWidth },
     currentScale,
-    currentTranslation: { x: translateX, y: translateY }
+    currentTranslation: { x: translateX, y: translateY },
+    objectFit,
+    padding
   } = useCanvasDataContext();
   // Transform context values
   const { getIdealScale, scaleContentTo, translateContentTo } =
@@ -84,7 +73,7 @@ export default function AutoSizingProvider({
   ) => {
     autoSizingTimeoutRef.current = setTimeout(() => {
       enableAutoSizing(animationSettings);
-    }, autoSizingTimeout);
+    }, autoSizingTimeout.value);
   };
 
   const enableAutoSizingAfterTimeout = (
@@ -135,7 +124,7 @@ export default function AutoSizingProvider({
 
   useAnimatedReaction(
     () =>
-      autoSizingEnabled.value
+      objectFit.value !== 'none' && autoSizingEnabled.value
         ? {
             boundingRect: {
               bottom: containerBottom.value,
@@ -166,7 +155,7 @@ export default function AutoSizingProvider({
         calcScaleOnProgress(
           transitionProgress,
           startScale,
-          getIdealScale(boundingRect, canvasDimensions, objectFit)
+          getIdealScale(boundingRect, canvasDimensions, objectFit.value)
         )
       );
       // Translate content to fit container based on objectFit
@@ -174,11 +163,14 @@ export default function AutoSizingProvider({
         calcTranslationOnProgress(
           transitionProgress,
           startTranslation,
-          calcContainerTranslation(boundingRect, canvasDimensions, padding)
+          calcContainerTranslation(
+            boundingRect,
+            canvasDimensions,
+            padding.value
+          )
         )
       );
-    },
-    [objectFit]
+    }
   );
 
   const contextValue = useMemo<AutoSizingContextType>(

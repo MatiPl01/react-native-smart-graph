@@ -1,7 +1,7 @@
 import { cloneElement, PropsWithChildren, ReactElement, useMemo } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
-import { GraphComponentPrivateProps } from '@/components/graphs/graph/GraphComponent';
+import { GraphComponentPrivateProps } from '@/components/graphs';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
@@ -136,6 +136,7 @@ export default function GraphProvider<
   startFocus,
   transform
 }: GraphProviderProps<V, E, ED>) {
+  console.log('GraphProvider');
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
     [graph, settings]

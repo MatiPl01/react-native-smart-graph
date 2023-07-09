@@ -9,17 +9,24 @@ import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import {
   AnimatedBoundingRect,
   AnimatedDimensions,
-  AnimatedVectorCoordinates
+  AnimatedVectorCoordinates,
+  BoundingRect
 } from '@/types/layout';
+import { ObjectFit } from '@/types/views';
 
 type CanvasDataContextType = {
   autoSizingEnabled: SharedValue<boolean>;
+  autoSizingTimeout: SharedValue<number>;
   boundingRect: AnimatedBoundingRect;
   canvasDimensions: AnimatedDimensions;
   currentScale: SharedValue<number>;
   currentTranslation: AnimatedVectorCoordinates;
-  initialScale: number;
-  scales: number[];
+  initialScale: SharedValue<number>;
+  maxScale: SharedValue<number>;
+  minScale: SharedValue<number>;
+  objectFit: SharedValue<ObjectFit>;
+  padding: SharedValue<BoundingRect>;
+  scales: SharedValue<number[]>;
 };
 
 const CanvasDataContext = createContext(null);
@@ -37,15 +44,20 @@ export const useCanvasDataContext = () => {
 };
 
 type CanvasDataProviderProps = PropsWithChildren<{
-  initialScale: number;
-  scales: number[];
+  autoSizingTimeout: SharedValue<number>;
+  initialScale: SharedValue<number>;
+  maxScale: SharedValue<number>;
+  minScale: SharedValue<number>;
+  objectFit: SharedValue<ObjectFit>;
+  padding: SharedValue<BoundingRect>;
+  scales: SharedValue<number[]>;
 }>;
 
 export default function CanvasDataProvider({
   children,
-  initialScale,
-  scales
+  ...canvasSettings
 }: CanvasDataProviderProps) {
+  console.log('CanvasDataProvider');
   // CANVAS
   const canvasWidth = useSharedValue(0);
   const canvasHeight = useSharedValue(0);
@@ -80,10 +92,9 @@ export default function CanvasDataProvider({
         x: translateX,
         y: translateY
       },
-      initialScale,
-      scales
+      ...canvasSettings
     }),
-    [scales]
+    []
   );
 
   return (

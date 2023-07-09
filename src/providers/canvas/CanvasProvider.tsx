@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { PropsWithChildren, useMemo } from 'react';
+import { useDerivedValue } from 'react-native-reanimated';
 
 import {
   AUTO_SIZING_TIMEOUT,
@@ -24,66 +26,70 @@ type CanvasProviderProps = PropsWithChildren<{
 }>;
 
 export default function CanvasProvider({
-  autoSizingTimeout = AUTO_SIZING_TIMEOUT,
+  autoSizingTimeout: autoSizingTimeoutProp = AUTO_SIZING_TIMEOUT,
   children,
-  initialScale = INITIAL_SCALE,
-  objectFit = 'none',
-  padding,
-  scales = DEFAULT_SCALES
+  initialScale: initialScaleProp = INITIAL_SCALE,
+  objectFit: objectFitProp = 'none',
+  padding: paddingProp,
+  scales: scalesProp = DEFAULT_SCALES
 }: CanvasProviderProps) {
   // Validate parameters
-  if (scales.length === 0) {
+  if (scalesProp.length === 0) {
     throw new Error('At least one scale must be provided');
   }
-  if (scales.indexOf(initialScale) < 0) {
+  if (scalesProp.indexOf(initialScaleProp) < 0) {
     throw new Error('Initial scale must be included in scales');
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const minScale = scales[0]!;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const maxScale = scales[scales.length - 1]!;
-  const updatedPadding = useMemo(() => updateSpacing(padding), [padding]);
+  // Store canvas settings in shared values to prevent re-renders
+  const autoSizingTimeout = useDerivedValue(
+    () => autoSizingTimeoutProp,
+    [autoSizingTimeoutProp]
+  );
+  const initialScale = useDerivedValue(
+    () => initialScaleProp,
+    [initialScaleProp]
+  );
+  const objectFit = useDerivedValue(() => objectFitProp, [objectFitProp]);
+  const padding = useDerivedValue(
+    () => updateSpacing(paddingProp),
+    [paddingProp]
+  );
+  const scales = useDerivedValue(() => scalesProp, [scalesProp]);
+  const maxScale = useDerivedValue(
+    () => scales.value[scales.value.length - 1]!
+  );
+  const minScale = useDerivedValue(() => scales.value[0]!);
 
   const providers = useMemo(
     () => [
       // DATA
       // The main provider used to store canvas related data shared
       // across other providers
-      <CanvasDataProvider initialScale={initialScale} scales={scales} />,
-      // TRANSLATION
-      // The provider used to handle canvas translation and scale
-      // operations
-      <TransformProvider
-        maxScale={maxScale}
-        minScale={minScale}
-        objectFit={objectFit}
-        padding={updatedPadding}
-      />,
-      // AUTO SIZING (optional)
-      // The provider used to handle canvas auto sizing based on
-      // the object fit property
-      ...(objectFit !== 'none'
-        ? [
-            <AutoSizingProvider
-              autoSizingTimeout={autoSizingTimeout}
-              objectFit={objectFit}
-              padding={updatedPadding}
-            />
-          ]
-        : []),
-      // FOCUS
-      // The provider used to handle canvas focus operations
-      <FocusProvider objectFit={objectFit} />,
-      // GESTURES
-      // The provider used to handle canvas gestures (pan, pinch, etc.)
-      <GesturesProvider
+      <CanvasDataProvider
+        autoSizingTimeout={autoSizingTimeout}
         initialScale={initialScale}
         maxScale={maxScale}
         minScale={minScale}
-        scaleValues={scales}
-      />
+        objectFit={objectFit}
+        padding={padding}
+        scales={scales}
+      />,
+      // TRANSLATION
+      // The provider used to handle canvas translation and scale
+      // operations
+      <TransformProvider />,
+      // AUTO SIZING
+      // The provider used to handle canvas auto sizing based on
+      // the object fit property
+      <AutoSizingProvider />,
+      // FOCUS
+      // The provider used to handle canvas focus operations
+      <FocusProvider />,
+      // GESTURES
+      // The provider used to handle canvas gestures (pan, pinch, etc.)
+      <GesturesProvider />
     ],
-    [objectFit]
+    []
   );
 
   return (

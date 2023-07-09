@@ -24,7 +24,11 @@ import {
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { OrderedEdges, Vertex } from '@/types/graphs';
-import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
+import {
+  EdgeLabelRendererFunction,
+  GraphRenderers,
+  GraphRenderersWithDefaults
+} from '@/types/renderer';
 import {
   DirectedEdgeSettings,
   GraphSettings,
@@ -221,7 +225,6 @@ export const updateGraphEdgesData = <
         edge,
         edgeRenderer: renderers.edge,
         edgesCount,
-        labelRenderer: renderers.label,
         order,
         removed: false,
         v1Position: v1Data.position,
@@ -264,21 +267,27 @@ export const updateGraphEdgeLabelsData = <
 >(
   oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
   edgesData: Record<string, EdgeComponentData<E, V, ED>>,
-  renderedEdgesData: Record<string, EdgeComponentRenderData>
-): Record<string, EdgeLabelComponentData<E>> => {
+  renderedEdgesData: Record<string, EdgeComponentRenderData>,
+  labelRenderer: EdgeLabelRendererFunction<E>
+): {
+  data: Record<string, EdgeLabelComponentData<E>>;
+  wasUpdated: boolean;
+} => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
+  let wasUpdated = false; // Flag to indicate if edges data was updated
 
   // Add new labels data
   Object.entries(renderedEdgesData).forEach(([key, data]) => {
     const edgeData = edgesData[key];
 
-    if (!updatedEdgeLabelsData[key] && edgeData?.labelRenderer) {
+    if (!updatedEdgeLabelsData[key] && edgeData) {
+      wasUpdated = true;
       updatedEdgeLabelsData[key] = {
         animationProgress: data.animationProgress,
         centerX: data.labelPosition.x,
         centerY: data.labelPosition.y,
         height: data.labelHeight,
-        renderer: edgeData.labelRenderer,
+        renderer: labelRenderer,
         v1Position: edgeData.v1Position,
         v2Position: edgeData.v2Position,
         value: edgeData.edge.value
@@ -293,9 +302,13 @@ export const updateGraphEdgeLabelsData = <
   // (their unmount animation is finished)
   Object.keys(oldEdgeLabelsData).forEach(key => {
     if (!currentEdgesKeys.has(key)) {
+      wasUpdated = true;
       delete updatedEdgeLabelsData[key];
     }
   });
 
-  return updatedEdgeLabelsData;
+  return {
+    data: updatedEdgeLabelsData,
+    wasUpdated
+  };
 };
