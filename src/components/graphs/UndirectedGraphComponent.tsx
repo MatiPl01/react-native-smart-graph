@@ -1,41 +1,31 @@
 import { memo } from 'react';
 
 import { UndirectedGraph } from '@/models/graphs';
-import { GraphProviderAdditionalProps } from '@/providers/graph';
-import GraphProvider from '@/providers/graph/GraphProvider';
-import { UndirectedEdgeData } from '@/types/data';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
 
-import GraphComponent from './graph/GraphComponent';
+import GraphComponentComposer from './GraphComponentComposer';
 
 export type UndirectedGraphComponentProps<V, E> = {
   graph: UndirectedGraph<V, E>;
   renderers?: UndirectedGraphRenderers<V, E>;
-  settings?: UndirectedGraphSettings<V, E, UndirectedEdgeData<E>>;
+  settings?: UndirectedGraphSettings<V, E>;
 };
 
-type ClonedComponentProps<V, E> = UndirectedGraphComponentProps<V, E> &
-  GraphProviderAdditionalProps;
-
 function UndirectedGraphComponent<V, E>(
-  providerProps: ClonedComponentProps<V, E>
+  props: UndirectedGraphComponentProps<V, E>
 ) {
   return (
-    <GraphProvider {...providerProps}>
-      <GraphComponent />
-    </GraphProvider>
+    <GraphComponentComposer<V, E, UndirectedGraphComponentProps<V, E>>
+      {...props}
+    />
   );
 }
 
 export default memo(
-  <V, E>(props: UndirectedGraphComponentProps<V, E>) => {
-    return (
-      <UndirectedGraphComponent {...(props as ClonedComponentProps<V, E>)} />
-    );
-  },
+  UndirectedGraphComponent,
   deepMemoComparator({
     shallow: ['graph']
   })
-) as <V, E>(props: UndirectedGraphComponentProps<V, E>) => JSX.Element;
+) as typeof UndirectedGraphComponent;

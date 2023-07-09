@@ -1,11 +1,9 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
-import GraphComponentProvider, {
-  GraphComponentType
-} from '@/contexts/GraphComponentProvider';
+import GraphViewChildrenProvider from '@/contexts/GraphViewChildrenProvider';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, {
   FocusStatus,
@@ -19,23 +17,18 @@ import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
 
-import CanvasComponent from './canvas/CanvasComponent';
+import CanvasComponent from './CanvasComponent';
 
-type GraphViewProps<V, E, C extends GraphComponentType<V, E>> = {
+type GraphViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
-  children: C;
   controls?: boolean;
   initialScale?: number;
   objectFit?: ObjectFit;
   padding?: Spacing;
   scales?: number[];
-};
+}>;
 
-function GraphView<V, E, C extends GraphComponentType<V, E>>({
-  children,
-  controls,
-  ...providerProps
-}: GraphViewProps<V, E, C>) {
+function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
   console.log('GraphView');
 
   const providerComposer = useMemo(
@@ -45,9 +38,9 @@ function GraphView<V, E, C extends GraphComponentType<V, E>>({
 
   return (
     <View style={styles.container}>
-      <GraphComponentProvider<V, E, C> component={children}>
+      <GraphViewChildrenProvider graphViewChildren={children}>
         <CanvasProvider {...providerProps}>{providerComposer}</CanvasProvider>
-      </GraphComponentProvider>
+      </GraphViewChildrenProvider>
     </View>
   );
 }
@@ -60,10 +53,9 @@ const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
   console.log('GraphViewComposer');
   // CONTEXTS
   // Canvas data context
-  const { boundingRect, currentScale, currentTranslation, initialScale } =
-    useCanvasDataContext();
+  const { initialScale } = useCanvasDataContext();
   // Transform context
-  const { handleCanvasRender, resetContainerPosition } = useTransformContext();
+  const { resetContainerPosition } = useTransformContext();
   // Auto sizing context
   const autoSizingContext = useAutoSizingContext();
   // Gestures context
@@ -86,15 +78,7 @@ const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
   return (
     <>
       <OverlayProvider>
-        <CanvasComponent
-          transform={{
-            scale: currentScale,
-            translateX: currentTranslation.x,
-            translateY: currentTranslation.y
-          }}
-          boundingRect={boundingRect}
-          onRender={handleCanvasRender}
-        />
+        <CanvasComponent />
         {/* Renders overlay layers set using the OverlayContext */}
         <OverlayOutlet gestureHandler={gestureHandler} />
       </OverlayProvider>

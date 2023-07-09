@@ -1,4 +1,5 @@
 import { Mask } from '@shopify/react-native-skia';
+import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
@@ -10,18 +11,16 @@ import GraphEdgesLabels from './GraphEdgesLabels';
 import GraphEdgesMask from './GraphEdgesMask';
 import GraphVertices from './GraphVertices';
 
-export type GraphComponentPrivateProps = {
+type GraphComponentProps = {
   boundingRect: AnimatedBoundingRect;
 };
 
-function GraphComponent({ boundingRect }: GraphComponentPrivateProps) {
+function GraphComponent({ boundingRect }: GraphComponentProps) {
   const { focusKey, focusTransitionProgress } = useVertexFocusContext();
   // Helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
   // Update the focusProgress
   useComponentFocus(focusProgress, focusTransitionProgress, focusKey);
-
-  console.log('GraphComponent');
 
   return (
     <>
@@ -36,4 +35,4 @@ function GraphComponent({ boundingRect }: GraphComponentPrivateProps) {
   );
 }
 
-export default GraphComponent as () => JSX.Element;
+export default memo(GraphComponent);

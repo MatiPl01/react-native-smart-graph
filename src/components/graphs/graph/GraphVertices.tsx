@@ -19,6 +19,8 @@ function GraphVertices<V, E>({
 }: GraphVerticesProps<V, E>) {
   const focusContextValue = useVertexFocusContext();
 
+  console.log('GraphVertices');
+
   return Object.values(verticesData).map(data => (
     <VertexComponent
       {...data}

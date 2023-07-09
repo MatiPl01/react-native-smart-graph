@@ -11,7 +11,6 @@ import { runOnUI } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
 import { VertexComponentRenderData } from '@/types/components';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
 import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
 import {
@@ -41,30 +40,22 @@ export const useForcesPlacementContext = () => {
   return contextValue as ForcesPlacementContextType;
 };
 
-export type ForcesPlacementProviderProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = PropsWithChildren<{
+export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   onRender: (boundingRect: BoundingRect) => void;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphSettingsWithDefaults<V, E, ED>;
+  settings: GraphSettingsWithDefaults<V, E>;
 }>;
 
-function ForcesPlacementProvider<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
+function ForcesPlacementProvider<V, E>({
   children,
   graph,
   layoutAnimationSettings,
   onRender,
   renderedVerticesData,
   settings
-}: ForcesPlacementProviderProps<V, E, ED>) {
+}: ForcesPlacementProviderProps<V, E>) {
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
   // correctly positioned yet (By default vertices are positioned at

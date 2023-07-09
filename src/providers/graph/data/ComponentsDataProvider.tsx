@@ -59,26 +59,17 @@ export type ComponentsDataContextType<
 // not used outside of a provider
 const ComponentsDataContext = createContext(null);
 
-type ComponentsDataProviderProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = PropsWithChildren<{
+type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   renderers: GraphRenderersWithDefaults<V, E>;
-  settings: GraphSettingsWithDefaults<V, E, ED>;
+  settings: GraphSettingsWithDefaults<V, E>;
 }>;
 
 export default function ComponentsDataProvider<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
-  children,
-  graph,
-  renderers,
-  settings
-}: ComponentsDataProviderProps<V, E, ED>) {
+>({ children, graph, renderers, settings }: ComponentsDataProviderProps<V, E>) {
   // GRAPH CHANGES OBSERVER
   const [{ animationsSettings, orderedEdges, vertices }] =
     useGraphObserver(graph);

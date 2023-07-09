@@ -43,14 +43,10 @@ import {
   GraphLayoutSettingsWithDefaults
 } from '@/types/settings/graph/layout';
 
-export const updateGraphSettingsWithDefaults = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+export const updateGraphSettingsWithDefaults = <V, E>(
   isGraphDirected: boolean,
-  settings?: GraphSettings<V, E, ED>
-): GraphSettingsWithDefaults<V, E, ED> => ({
+  settings?: GraphSettings<V, E>
+): GraphSettingsWithDefaults<V, E> => ({
   ...settings,
   animations: {
     edges: {
@@ -133,15 +129,11 @@ export const updateGraphRenderersWithDefaults = <V, E>(
   ...renderers
 });
 
-export const updateGraphVerticesData = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+export const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V, E>>,
   currentVertices: Array<Vertex<V, E>>,
   currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V, E, ED>,
+  settings: GraphSettingsWithDefaults<V, E>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): Record<string, VertexComponentData<V, E>> => {
   const updatedVerticesData = { ...oldVerticesData };
@@ -192,7 +184,7 @@ export const updateGraphEdgesData = <
   currentEdges: OrderedEdges<E, V>,
   renderedVerticesData: Record<string, VertexComponentRenderData>,
   currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V, E, ED>,
+  settings: GraphSettingsWithDefaults<V, E>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): {
   data: Record<string, EdgeComponentData<E, V, ED>>;
