@@ -69,7 +69,7 @@ export default function App() {
   useEffect(() => {
     setInterval(() => {
       setPadding(p => (p === 25 ? 50 : 25));
-      // setVertexSpacing(v => (v === 50 ? 100 : 50));
+      setVertexSpacing(v => (v === 50 ? 100 : 50));
     }, 1000);
   }, []);
 
@@ -86,8 +86,6 @@ export default function App() {
     },
     [graph]
   );
-
-  console.log(vertexSpacing);
 
   return (
     <GestureHandlerRootView style={styles.background}>

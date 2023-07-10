@@ -42,6 +42,7 @@ import {
   GraphLayoutSettings,
   GraphLayoutSettingsWithDefaults
 } from '@/types/settings/graph/layout';
+import { deepEqual } from '@/utils/equality';
 
 export const updateGraphSettingsWithDefaults = <V, E>(
   isGraphDirected: boolean,
@@ -135,12 +136,24 @@ export const updateGraphVerticesData = <V, E>(
   currentAnimationsSettings: AnimationsSettings,
   settings: GraphSettingsWithDefaults<V, E>,
   renderers: GraphRenderersWithDefaults<V, E>
-): Record<string, VertexComponentData<V, E>> => {
+): {
+  data: Record<string, VertexComponentData<V, E>>;
+  wasUpdated: boolean;
+} => {
   const updatedVerticesData = { ...oldVerticesData };
+  let wasUpdated = false;
 
   // Add new vertices
   currentVertices.forEach(vertex => {
-    if (!oldVerticesData[vertex.key] || oldVerticesData[vertex.key]?.removed) {
+    const oldVertex = oldVerticesData[vertex.key];
+    if (
+      !oldVertex ||
+      oldVertex?.removed ||
+      renderers.vertex !== oldVertex.renderer ||
+      !deepEqual(oldVertex.componentSettings, settings.components.vertex) ||
+      !deepEqual(settings.animations.vertices, oldVertex.animationSettings)
+    ) {
+      wasUpdated = true;
       updatedVerticesData[vertex.key] = {
         animationSettings: {
           ...settings.animations.vertices,
@@ -160,6 +173,7 @@ export const updateGraphVerticesData = <V, E>(
   // Mark vertices as removed if there were removed from the graph model
   Object.keys(oldVerticesData).forEach(key => {
     if (!currentVerticesKeys.has(key)) {
+      wasUpdated = true;
       updatedVerticesData[key] = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...updatedVerticesData[key]!,
@@ -172,7 +186,10 @@ export const updateGraphVerticesData = <V, E>(
     }
   });
 
-  return updatedVerticesData;
+  return {
+    data: updatedVerticesData,
+    wasUpdated
+  };
 };
 
 export const updateGraphEdgesData = <
@@ -199,12 +216,18 @@ export const updateGraphEdgesData = <
     const v1Data = renderedVerticesData[v1.key];
     const v2Data = renderedVerticesData[v2.key];
 
+    const oldEdgeData = oldEdgesData[edge.key];
+
     if (
       v1Data &&
       v2Data &&
-      (!updatedEdgesData[edge.key] ||
-        updatedEdgesData[edge.key]?.removed ||
-        updatedEdgesData[edge.key]?.edgesCount !== edgesCount)
+      (!oldEdgeData ||
+        oldEdgeData?.removed ||
+        oldEdgeData?.edgesCount !== edgesCount ||
+        renderers.edge !== oldEdgeData.edgeRenderer ||
+        renderers.arrow !== oldEdgeData.arrowRenderer ||
+        !deepEqual(oldEdgeData.componentSettings, settings.components.edge) ||
+        !deepEqual(settings.animations.edges, oldEdgeData.animationSettings))
     ) {
       wasUpdated = true;
       updatedEdgesData[edge.key] = {
@@ -272,7 +295,12 @@ export const updateGraphEdgeLabelsData = <
   Object.entries(renderedEdgesData).forEach(([key, data]) => {
     const edgeData = edgesData[key];
 
-    if (!updatedEdgeLabelsData[key] && edgeData) {
+    const oldLabelData = oldEdgeLabelsData[key];
+
+    if (
+      edgeData &&
+      (!oldLabelData || labelRenderer !== oldLabelData.renderer)
+    ) {
       wasUpdated = true;
       updatedEdgeLabelsData[key] = {
         animationProgress: data.animationProgress,

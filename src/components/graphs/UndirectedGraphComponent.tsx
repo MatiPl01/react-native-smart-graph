@@ -1,11 +1,10 @@
 import { memo } from 'react';
 
+import GraphComponentComposer from '@/components/views/GraphComponentComposer';
 import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
-
-import GraphComponentComposer from './GraphComponentComposer';
 
 export type UndirectedGraphComponentProps<V, E> = {
   graph: UndirectedGraph<V, E>;

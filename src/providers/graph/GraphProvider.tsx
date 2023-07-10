@@ -88,37 +88,25 @@ const getEventsProviders = <
   return [];
 };
 
-export type GraphProviderAdditionalProps =
-  | {
-      boundingRect: AnimatedBoundingRect;
-      canvasDimensions: AnimatedDimensions;
-      canvasScales: SharedValue<number[]>;
-      endFocus: FocusEndSetter;
-      focusKey: SharedValue<null | string>;
-      focusStatus: SharedValue<number>;
-      focusTransitionProgress: SharedValue<number>;
-      initialCanvasScale: SharedValue<number>;
-      onRender: (containerBounds: BoundingRect) => void;
-      startFocus: FocusStartSetter;
-      transform: AnimatedCanvasTransform;
-    } & AccessibleOverlayContextType;
-
-type GraphProviderProps<
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
-> = PropsWithChildren<P & GraphProviderAdditionalProps>;
+type GraphProviderProps<V, E> = PropsWithChildren<
+  {
+    boundingRect: AnimatedBoundingRect;
+    canvasDimensions: AnimatedDimensions;
+    canvasScales: SharedValue<number[]>;
+    endFocus: FocusEndSetter;
+    focusKey: SharedValue<null | string>;
+    focusStatus: SharedValue<number>;
+    focusTransitionProgress: SharedValue<number>;
+    initialCanvasScale: SharedValue<number>;
+    onRender: (containerBounds: BoundingRect) => void;
+    startFocus: FocusStartSetter;
+    transform: AnimatedCanvasTransform;
+  } & AccessibleOverlayContextType &
+    (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
+>;
 
 // eslint-disable-next-line import/no-unused-modules
-function GraphProvider<
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->({
+function GraphProvider<V, E>({
   boundingRect,
   canvasDimensions,
   canvasScales,
@@ -135,7 +123,7 @@ function GraphProvider<
   settings,
   startFocus,
   transform
-}: GraphProviderProps<V, E, P>) {
+}: GraphProviderProps<V, E>) {
   console.log('GraphProvider');
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),

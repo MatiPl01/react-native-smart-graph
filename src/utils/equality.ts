@@ -7,7 +7,7 @@ const isSharedValue = (value: unknown): boolean =>
   typeof value === 'object' && value !== null && Object.hasOwn(value, 'value');
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const deepEqual = (value1: any, value2: any): boolean => {
+export const deepEqual = (value1: any, value2: any): boolean => {
   // If either value is null or not an object, they are not deeply equal
   if (
     typeof value1 !== 'object' ||

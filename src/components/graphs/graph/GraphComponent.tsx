@@ -22,6 +22,8 @@ function GraphComponent({ boundingRect }: GraphComponentProps) {
   // Update the focusProgress
   useComponentFocus(focusProgress, focusTransitionProgress, focusKey);
 
+  console.log('GraphComponent');
+
   return (
     <>
       <Mask

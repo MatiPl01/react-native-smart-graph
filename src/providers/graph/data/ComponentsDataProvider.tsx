@@ -123,15 +123,16 @@ export default function ComponentsDataProvider<
   );
 
   useEffect(() => {
-    setVerticesData(
-      updateGraphVerticesData(
-        verticesData,
-        vertices,
-        animationsSettings,
-        settings,
-        renderers
-      )
+    const { data, wasUpdated } = updateGraphVerticesData(
+      verticesData,
+      vertices,
+      animationsSettings,
+      settings,
+      renderers
     );
+    if (wasUpdated) {
+      setVerticesData(data);
+    }
   }, [
     vertices,
     settings.components.vertex,

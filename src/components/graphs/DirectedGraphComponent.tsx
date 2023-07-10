@@ -1,11 +1,10 @@
 import { memo } from 'react';
 
+import GraphComponentComposer from '@/components/views/GraphComponentComposer';
 import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/equality';
-
-import GraphComponentComposer from './GraphComponentComposer';
 
 export type DirectedGraphComponentProps<V, E> = {
   graph: DirectedGraph<V, E>;

@@ -3,7 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
-import GraphViewChildrenProvider from '@/contexts/GraphViewChildrenProvider';
+import GraphViewChildrenProvider, {
+  useGraphViewChildrenContext
+} from '@/contexts/GraphViewChildrenProvider';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, {
   FocusStatus,
@@ -16,8 +18,6 @@ import CanvasProvider, {
 import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
-
-import CanvasComponent from './CanvasComponent';
 
 type GraphViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
@@ -52,6 +52,8 @@ type GraphViewComposerProps = {
 const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
   console.log('GraphViewComposer');
   // CONTEXTS
+  // Graph view children context
+  const { canvas } = useGraphViewChildrenContext();
   // Canvas data context
   const { initialScale } = useCanvasDataContext();
   // Transform context
@@ -78,7 +80,7 @@ const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
   return (
     <>
       <OverlayProvider>
-        <CanvasComponent />
+        {canvas}
         {/* Renders overlay layers set using the OverlayContext */}
         <OverlayOutlet gestureHandler={gestureHandler} />
       </OverlayProvider>
