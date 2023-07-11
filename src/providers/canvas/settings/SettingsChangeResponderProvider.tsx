@@ -11,7 +11,7 @@ import {
 export default function SettingsChangeResponderProvider({
   children
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   // CONTEXT VALUES
   // Canvas data context values
@@ -35,9 +35,17 @@ export default function SettingsChangeResponderProvider({
       }
       // Don't reset the container position if there is a focused object
       if (focusKey.value !== null) return;
+      // Disable auto sizing
+      autoSizingContext.disableAutoSizing();
+      // Reset the container position
       resetContainerPosition({
-        animationSettings: DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS,
-        autoSizingContext
+        animationSettings: {
+          ...DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS,
+          onComplete: () => {
+            // Re-enable auto sizing after the container position has been reset
+            autoSizingContext.enableAutoSizing();
+          }
+        }
       });
     }
   );

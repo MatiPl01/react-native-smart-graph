@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
+  runOnUI,
   useAnimatedReaction,
   useSharedValue,
   withDecay
@@ -80,8 +81,9 @@ export default function GesturesProvider({
 
   const handleGestureStart = useCallback((origin?: Maybe<Vector>) => {
     isGestureActive.value = true;
+    runOnUI(autoSizingContext.disableAutoSizing)();
     if (focusStatus.value !== FocusStatus.BLUR) {
-      endFocus(
+      runOnJS(endFocus)(
         origin && {
           isGestureActive,
           origin,
@@ -92,7 +94,6 @@ export default function GesturesProvider({
         }
       );
     }
-    autoSizingContext.disableAutoSizing();
   }, []);
 
   const panGestureHandler = Gesture.Pan()
@@ -132,9 +133,7 @@ export default function GesturesProvider({
         clamp: clampY,
         velocity: velocityY
       });
-      if (autoSizingContext) {
-        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
-      }
+      autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -162,6 +161,8 @@ export default function GesturesProvider({
         rubberBandEffect: true,
         velocity
       });
+      console.log('pinch end');
+      autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -190,6 +191,7 @@ export default function GesturesProvider({
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
       }
+      autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
   useAnimatedReaction(

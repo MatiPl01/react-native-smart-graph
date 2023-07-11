@@ -2,7 +2,6 @@ import { Vector } from '@shopify/react-native-skia';
 import { createContext, useCallback, useContext } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 import {
-  runOnJS,
   useAnimatedReaction,
   useSharedValue,
   withTiming
@@ -236,9 +235,7 @@ export default function TransformProvider({
       };
 
       // Disable auto sizing while resetting container position
-      if (settings?.autoSizingContext) {
-        runOnJS(settings?.autoSizingContext?.disableAutoSizing)();
-      }
+      settings?.autoSizingContext?.disableAutoSizing();
 
       const scale =
         settings?.scale ??
@@ -252,16 +249,11 @@ export default function TransformProvider({
           padding.value
         ),
         undefined,
-        settings?.animationSettings && {
-          ...settings.animationSettings,
-          onComplete: undefined
-        }
+        settings?.animationSettings
       );
 
       // Enable auto sizing after resetting container position
-      if (settings?.autoSizingContext) {
-        runOnJS(settings?.autoSizingContext?.enableAutoSizingAfterTimeout)();
-      }
+      settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
     },
     []
   );

@@ -82,20 +82,24 @@ export default function AutoSizingProvider({
     }, autoSizingTimeout.value);
   };
 
-  const enableAutoSizingAfterTimeout = (
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
-  ) => {
-    clearAutoSizingTimeout();
-    startAutoSizingTimeout(animationSettings);
+  const clearAutoSizingTimeout = () => {
+    if (autoSizingTimeoutRef.current) {
+      clearTimeout(autoSizingTimeoutRef.current);
+      autoSizingTimeoutRef.current = null;
+    }
   };
 
-  const enableAutoSizing = (
-    animationSettings: AnimationSettingsWithDefaults | null = DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
+  const startAutoSizing = (
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     autoSizingTimeoutRef.current = null;
+    const animSettings =
+      animationSettings === undefined
+        ? DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
+        : animationSettings;
     // Crete a smooth transition between the current state and the auto-layout state
-    if (animationSettings) {
-      const { onComplete, ...timingConfig } = animationSettings;
+    if (animSettings) {
+      const { onComplete, ...timingConfig } = animSettings;
       autoSizingTransitionProgress.value = 0;
       autoSizingTransitionProgress.value = withTiming(
         1,
@@ -112,20 +116,30 @@ export default function AutoSizingProvider({
       x: translateX.value,
       y: translateY.value
     };
-    autoSizingEnabled.value = true;
   };
 
-  const clearAutoSizingTimeout = () => {
-    if (autoSizingTimeoutRef.current) {
-      runOnJS(clearTimeout)(autoSizingTimeoutRef.current);
-      autoSizingTimeoutRef.current = null;
-    }
+  const enableAutoSizingAfterTimeout = (
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+  ) => {
+    'worklet';
+    runOnJS(clearAutoSizingTimeout)();
+    runOnJS(startAutoSizingTimeout)(animationSettings);
+  };
+
+  const enableAutoSizing = (
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+  ) => {
+    'worklet';
+    autoSizingEnabled.value = true;
+    runOnJS(clearAutoSizingTimeout)();
+    runOnJS(startAutoSizing)(animationSettings);
   };
 
   const disableAutoSizing = () => {
+    'worklet';
     autoSizingEnabled.value = false;
     autoSizingTransitionProgress.value = 0;
-    clearAutoSizingTimeout();
+    runOnJS(clearAutoSizingTimeout)();
   };
 
   useAnimatedReaction(

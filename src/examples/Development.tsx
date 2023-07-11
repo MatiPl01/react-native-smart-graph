@@ -67,12 +67,10 @@ export default function App() {
     graph.insertBatch(ACHIEVEMENTS_GRAPH);
   }, [graph]);
 
-  const [padding, setPadding] = useState(25);
   const [vertexSpacing, setVertexSpacing] = useState(50);
 
   useEffect(() => {
     setInterval(() => {
-      // setPadding(p => (p === 25 ? 100 : 25));
       setVertexSpacing(v => (v === 50 ? 100 : 50));
     }, 1000);
   }, []);
@@ -99,10 +97,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView
-          objectFit={objectFit}
-          padding={padding}
-          scales={[0.25, 1, 10]}>
+        <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
             renderers={{
               label: DefaultEdgeLabelRenderer
