@@ -1,38 +1,25 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import ViewControls from '@/components/controls/ViewControls';
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import CanvasProvider, {
-  FocusStatus,
-  useAutoSizingContext,
-  useCanvasDataContext,
-  useFocusContext,
-  useGesturesContext,
-  useTransformContext
-} from '@/providers/canvas';
+import CanvasProvider, { useGesturesContext } from '@/providers/canvas';
 import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
 
 type GraphViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
-  controls?: boolean;
   initialScale?: number;
   objectFit?: ObjectFit;
   padding?: Spacing;
   scales?: number[];
 }>;
 
-function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
-  const providerComposer = useMemo(
-    () => <GraphViewComposer controls={controls} />,
-    [controls] // TODO - improve in https://github.com/MatiPl01/react-native-smart-graph/pull/184
-  );
+function GraphView({ children, ...providerProps }: GraphViewProps) {
+  const providerComposer = useMemo(() => <GraphViewComposer />, []);
 
   return (
     <View style={styles.container}>
@@ -43,46 +30,27 @@ function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
   );
 }
 
-type GraphViewComposerProps = {
-  controls?: boolean;
-};
-
-const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
+const GraphViewComposer = memo(function () {
   // CONTEXTS
   // Graph view children context
-  const { canvas } = useGraphViewChildrenContext();
-  // Canvas data context
-  const { initialScale } = useCanvasDataContext();
-  // Transform context
-  const { resetContainerPosition } = useTransformContext();
-  // Auto sizing context
-  const autoSizingContext = useAutoSizingContext();
+  const { canvas, overlay } = useGraphViewChildrenContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
-  // Focus context
-  const { endFocus, focusStatus } = useFocusContext();
 
-  const handleReset = () => {
-    if (focusStatus.value === FocusStatus.BLUR) {
-      resetContainerPosition({
-        animationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS,
-        autoSizingContext,
-        scale: initialScale.value
-      });
-    } else {
-      endFocus(undefined, DEFAULT_FOCUS_ANIMATION_SETTINGS);
-    }
-  };
+  const overlayOutlet = useMemo(
+    () => <OverlayOutlet gestureHandler={gestureHandler} />,
+    [gestureHandler]
+  );
 
   return (
     <>
       <OverlayProvider>
         {canvas}
         {/* Renders overlay layers set using the OverlayContext */}
-        <OverlayOutlet gestureHandler={gestureHandler} />
+        {overlayOutlet}
       </OverlayProvider>
-      {/* Display graph controls */}
-      {controls && <ViewControls onReset={handleReset} />}
+      {/* Render other component than canvas (e.g. graph controls) */}
+      <View style={StyleSheet.absoluteFill}>{overlay}</View>
     </>
   );
 });

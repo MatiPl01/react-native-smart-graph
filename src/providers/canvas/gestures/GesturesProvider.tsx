@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
+  runOnUI,
   useAnimatedReaction,
   useSharedValue,
   withDecay
@@ -66,6 +67,7 @@ export default function GesturesProvider({
 
   // OTHER VALUES
   // Gestures helper values
+  const isInitialRender = useSharedValue(true);
   // Pan
   const panStartScale = useSharedValue(1);
   // Pinch
@@ -77,26 +79,22 @@ export default function GesturesProvider({
   const panTranslateY = useSharedValue(0);
   const isGestureActive = useSharedValue(false);
 
-  const handleGestureStart = useCallback(
-    (origin?: Maybe<Vector>) => {
-      isGestureActive.value = true;
-      if (focusStatus.value !== FocusStatus.BLUR) {
-        endFocus(
-          origin && {
-            isGestureActive,
-            origin,
-            translation: {
-              x: panTranslateX,
-              y: panTranslateY
-            }
+  const handleGestureStart = useCallback((origin?: Maybe<Vector>) => {
+    isGestureActive.value = true;
+    runOnUI(autoSizingContext.disableAutoSizing)();
+    if (focusStatus.value !== FocusStatus.BLUR) {
+      runOnJS(endFocus)(
+        origin && {
+          isGestureActive,
+          origin,
+          translation: {
+            x: panTranslateX,
+            y: panTranslateY
           }
-        );
-      } else if (autoSizingContext) {
-        autoSizingContext.disableAutoSizing();
-      }
-    },
-    [autoSizingContext?.disableAutoSizing]
-  );
+        }
+      );
+    }
+  }, []);
 
   const panGestureHandler = Gesture.Pan()
     .onStart(({ numberOfPointers, x, y }) => {
@@ -135,9 +133,7 @@ export default function GesturesProvider({
         clamp: clampY,
         velocity: velocityY
       });
-      if (autoSizingContext) {
-        runOnJS(autoSizingContext.enableAutoSizingAfterTimeout)();
-      }
+      autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -165,6 +161,8 @@ export default function GesturesProvider({
         rubberBandEffect: true,
         velocity
       });
+      console.log('pinch end');
+      autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -193,6 +191,7 @@ export default function GesturesProvider({
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
       }
+      autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
   useAnimatedReaction(
@@ -201,6 +200,10 @@ export default function GesturesProvider({
       endPosition: pinchEndPosition.value
     }),
     ({ decayScale, endPosition }) => {
+      if (isInitialRender.value) {
+        isInitialRender.value = false;
+        return;
+      }
       scaleContentTo(decayScale, endPosition);
     }
   );

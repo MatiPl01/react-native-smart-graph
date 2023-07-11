@@ -35,7 +35,7 @@ type TransformContextType = {
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
   resetContainerPosition: (settings?: {
     animationSettings?: Maybe<AnimationSettingsWithDefaults>;
-    autoSizingContext: Maybe<AutoSizingContextType>;
+    autoSizingContext?: AutoSizingContextType;
     canvasDimensions?: Dimensions;
     containerBoundingRect?: BoundingRect;
     scale?: number;
@@ -189,7 +189,7 @@ export default function TransformProvider({
     withClamping = true
   ) => {
     'worklet';
-    if (origin) {
+    if (origin && currentScale.value > 0) {
       const relativeScale = newScale / currentScale.value;
       translateContentTo(
         {
@@ -216,7 +216,7 @@ export default function TransformProvider({
   const resetContainerPosition = useCallback(
     (settings?: {
       animationSettings?: Maybe<AnimationSettingsWithDefaults>;
-      autoSizingContext?: Maybe<AutoSizingContextType>;
+      autoSizingContext?: AutoSizingContextType;
       canvasDimensions?: Dimensions;
       containerBoundingRect?: BoundingRect;
       scale?: number;
@@ -249,16 +249,13 @@ export default function TransformProvider({
           padding.value
         ),
         undefined,
-        settings?.animationSettings && {
-          ...settings.animationSettings,
-          onComplete: undefined
-        }
+        settings?.animationSettings
       );
 
       // Enable auto sizing after resetting container position
       settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
     },
-    [objectFit]
+    []
   );
 
   useAnimatedReaction(

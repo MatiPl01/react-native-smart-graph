@@ -120,15 +120,11 @@ export const deepMemoComparator =
         continue;
       }
 
-      const isPrevPropReactElement = React.isValidElement(
-        prevProps[key] as object
-      );
-      const isNextPropReactElement = React.isValidElement(
-        nextProps[key] as object
-      );
-
       // If the prop is a React component, compare the component's type and props
-      if (isPrevPropReactElement && isNextPropReactElement) {
+      if (
+        React.isValidElement(prevProps[key] as object) &&
+        React.isValidElement(nextProps[key] as object)
+      ) {
         if (
           prevProps[key].type !== nextProps[key].type ||
           !deepMemoComparator(updateSettings(key, settings))(
@@ -150,8 +146,27 @@ export const deepMemoComparator =
         (includeSet &&
           (settings as IncludeSettings)?.include?.some(
             prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
-          ))
+          )) ||
+        // If the beginning of the shallow prop matches the current prop,
+        // recursively call deepMemoComparator for nested properties
+        settings?.shallow?.some(
+          prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
+        )
       ) {
+        if (
+          React.isValidElement(prevProps[key] as object) &&
+          React.isValidElement(nextProps[key] as object)
+        ) {
+          if (
+            prevProps[key].type !== nextProps[key].type ||
+            !deepMemoComparator(updateSettings(key, settings))(
+              prevProps[key].props as Record<string, any>,
+              nextProps[key].props as Record<string, any>
+            )
+          ) {
+            return false;
+          }
+        }
         if (
           !deepMemoComparator(updateSettings(key, settings))(
             prevProps[key] as Record<string, any>,

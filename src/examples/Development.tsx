@@ -5,11 +5,13 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Easing } from 'react-native-reanimated';
 
+import GraphViewControls from '@/components/controls/GraphViewControls';
 import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
 
@@ -18,6 +20,7 @@ import {
   DirectedEdgeData,
   DirectedGraphComponent,
   FocusSettings,
+  ObjectFit,
   VertexData,
   VertexPressHandler
 } from '..';
@@ -57,18 +60,17 @@ const ACHIEVEMENTS_GRAPH: {
 };
 
 export default function App() {
+  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
 
   useEffect(() => {
     graph.insertBatch(ACHIEVEMENTS_GRAPH);
   }, [graph]);
 
-  const [padding, setPadding] = useState(25);
   const [vertexSpacing, setVertexSpacing] = useState(50);
 
   useEffect(() => {
     setInterval(() => {
-      setPadding(p => (p === 25 ? 50 : 25));
       setVertexSpacing(v => (v === 50 ? 100 : 50));
     }, 1000);
   }, []);
@@ -95,11 +97,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView
-          controls
-          objectFit='contain'
-          padding={padding}
-          scales={[0.25, 1, 10]}>
+        <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
             renderers={{
               label: DefaultEdgeLabelRenderer
@@ -116,6 +114,9 @@ export default function App() {
             }}
             graph={graph}
           />
+          <View style={styles.controls}>
+            <GraphViewControls onObjectFitChange={setObjectFit} />
+          </View>
         </GraphView>
         <TouchableOpacity
           onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
@@ -148,5 +149,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative'
+  },
+  controls: {
+    marginTop: 64,
+    right: 12
   }
 });

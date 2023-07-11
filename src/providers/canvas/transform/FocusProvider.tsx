@@ -16,8 +16,8 @@ import {
 } from 'react-native-reanimated';
 
 import {
-  DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS,
-  DEFAULT_FOCUS_ANIMATION_SETTINGS
+  DEFAULT_FOCUS_ANIMATION_SETTINGS,
+  DEFAULT_GESTURE_ANIMATION_SETTINGS
 } from '@/constants/animations';
 import { useAutoSizingContext, useCanvasDataContext } from '@/providers/canvas';
 import {
@@ -28,10 +28,6 @@ import {
 } from '@/types/focus';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { Maybe } from '@/types/utils';
-import {
-  animatedBoundingRectToRect,
-  animatedCanvasDimensionsToDimensions
-} from '@/utils/placement';
 import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
@@ -75,24 +71,17 @@ type BlurState = {
   data: BlurData;
 };
 
-export default function FocusProvider({
-  children
-}: {
+type FocusProviderProps = {
   children?: React.ReactNode;
-}) {
+};
+
+export default function FocusProvider({ children }: FocusProviderProps) {
   // CONTEXT VALUES
   // Canvas data context values
-  const {
-    boundingRect,
-    canvasDimensions,
-    currentScale,
-    currentTranslation,
-    initialScale,
-    objectFit
-  } = useCanvasDataContext();
+  const { canvasDimensions, currentScale, currentTranslation, initialScale } =
+    useCanvasDataContext();
   // Canvas transform context values
   const {
-    getIdealScale,
     getTranslateClamp,
     resetContainerPosition,
     scaleContentTo,
@@ -135,9 +124,7 @@ export default function FocusProvider({
       setFocusState({ animationSettings, data });
 
       // Disable auto sizing when focusing
-      if (autoSizingContext) {
-        autoSizingContext.disableAutoSizing();
-      }
+      autoSizingContext.disableAutoSizing();
     },
     []
   );
@@ -174,47 +161,40 @@ export default function FocusProvider({
   /**
    * PRIVATE FUNCTIONS
    */
-  const finishTransition = useCallback(
-    (finishStatus: FocusStatus, isGestureActive?: SharedValue<boolean>) => {
-      'worklet';
-      // Dismiss the transition if the new focus is pending
-      // (the new transition is being prepared or is in progress)
-      const currentStatus = focusStatus.value;
-      if (
-        ((finishStatus === FocusStatus.FOCUS &&
-          currentStatus === FocusStatus.FOCUS_TRANSITION) ||
-          (finishStatus === FocusStatus.BLUR &&
-            currentStatus === FocusStatus.BLUR_TRANSITION)) &&
-        transitionProgress.value === 1
-      ) {
-        // Set the finish status
-        focusStatus.value = finishStatus;
-        // Enable gestures (if they weren't disabled) and change the container
-        // position to fit into the canvas bounds if it's out of them
-        if (finishStatus === FocusStatus.BLUR) {
-          gesturesDisabled.value = false;
-          if (isGestureActive?.value) {
-            return;
-          }
-          translateContentTo(
-            {
-              x: currentTranslation.x.value,
-              y: currentTranslation.y.value
-            },
-            getTranslateClamp(currentScale.value),
-            DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
-          );
-        }
+  const finishTransition = useCallback((finishStatus: FocusStatus) => {
+    'worklet';
+    // Dismiss the transition if the new focus is pending
+    // (the new transition is being prepared or is in progress)
+    const currentStatus = focusStatus.value;
+    if (
+      ((finishStatus === FocusStatus.FOCUS &&
+        currentStatus === FocusStatus.FOCUS_TRANSITION) ||
+        (finishStatus === FocusStatus.BLUR &&
+          currentStatus === FocusStatus.BLUR_TRANSITION)) &&
+      transitionProgress.value === 1
+    ) {
+      // Set the finish status
+      focusStatus.value = finishStatus;
+      // Enable gestures and change the container position to fit
+      // into the canvas bounds if it's out of them
+      if (finishStatus === FocusStatus.BLUR) {
+        gesturesDisabled.value = false;
+        translateContentTo(
+          {
+            x: currentTranslation.x.value,
+            y: currentTranslation.y.value
+          },
+          getTranslateClamp(currentScale.value),
+          DEFAULT_GESTURE_ANIMATION_SETTINGS
+        );
       }
-    },
-    []
-  );
+    }
+  }, []);
 
   const updateAnimationSettingsWithFinishCallback = useCallback(
     (
       animationSettings: AnimationSettingsWithDefaults,
-      finishStatus: FocusStatus,
-      isGestureActive?: SharedValue<boolean>
+      finishStatus: FocusStatus
     ) => {
       'worklet';
       const { onComplete, ...timingConfig } = animationSettings;
@@ -222,7 +202,7 @@ export default function FocusProvider({
         ...timingConfig,
         onComplete: () => {
           'worklet';
-          finishTransition(finishStatus, isGestureActive);
+          finishTransition(finishStatus);
           if (onComplete) {
             runOnJS(onComplete)();
           }
@@ -235,21 +215,19 @@ export default function FocusProvider({
   const updateTransitionProgress = useCallback(
     (
       finishStatus: FocusStatus,
-      animationSettings: AnimationSettingsWithDefaults | null,
-      isGestureActive?: SharedValue<boolean>
+      animationSettings: AnimationSettingsWithDefaults | null
     ) => {
       'worklet';
       if (animationSettings) {
         const { onComplete, ...timingConfig } =
           updateAnimationSettingsWithFinishCallback(
             animationSettings,
-            finishStatus,
-            isGestureActive
+            finishStatus
           );
         transitionProgress.value = 0;
         transitionProgress.value = withTiming(1, timingConfig, onComplete);
       } else {
-        finishTransition(finishStatus, isGestureActive);
+        finishTransition(finishStatus);
       }
     },
     []
@@ -261,8 +239,7 @@ export default function FocusProvider({
       transitionType:
         | FocusStatus.BLUR_TRANSITION
         | FocusStatus.FOCUS_TRANSITION,
-      animationSettings: AnimationSettingsWithDefaults | null,
-      isGestureActive?: SharedValue<boolean>
+      animationSettings: AnimationSettingsWithDefaults | null
     ) => {
       'worklet';
       const finishStatus =
@@ -279,11 +256,7 @@ export default function FocusProvider({
       focusStatus.value = transitionType;
       focusKey.value = key;
       // Update the transition progress
-      updateTransitionProgress(
-        finishStatus,
-        animationSettings,
-        isGestureActive
-      );
+      updateTransitionProgress(finishStatus, animationSettings);
     },
     []
   );
@@ -300,16 +273,12 @@ export default function FocusProvider({
         const { onComplete: _, ...timingConfig } = animationSettings;
         resetContainerPosition({
           animationSettings: timingConfig,
-          autoSizingContext,
-          scale: initialScale.value
+          autoSizingContext
         });
       }
       // Otherwise, reset the container position without animation
       else {
-        resetContainerPosition({
-          autoSizingContext,
-          scale: initialScale.value
-        });
+        resetContainerPosition({ autoSizingContext });
       }
     },
     []
@@ -341,8 +310,7 @@ export default function FocusProvider({
     startTransition(
       null,
       FocusStatus.BLUR_TRANSITION,
-      blurState?.animationSettings ?? DEFAULT_FOCUS_ANIMATION_SETTINGS,
-      blurState.data.isGestureActive
+      blurState?.animationSettings ?? DEFAULT_FOCUS_ANIMATION_SETTINGS
     );
     runOnJS(setFocusState)(null);
   }, [blurState]);
@@ -414,6 +382,7 @@ export default function FocusProvider({
         progress: transitionProgress.value,
         startPosition: transitionStartPosition.value,
         startScale: transitionStartScale.value,
+        targetScale: initialScale.value,
         translation: {
           x: x.value,
           y: y.value
@@ -423,13 +392,14 @@ export default function FocusProvider({
     data => {
       // Don't do anything if there is no data
       if (!data) return;
-      const { origin, progress, startPosition, startScale, translation } = data;
-      // Calc the target scale
-      const targetScale = getIdealScale(
-        animatedBoundingRectToRect(boundingRect),
-        animatedCanvasDimensionsToDimensions(canvasDimensions),
-        objectFit.value
-      );
+      const {
+        origin,
+        progress,
+        startPosition,
+        startScale,
+        targetScale,
+        translation
+      } = data;
       // Scale the content to the initial scale
       const newScale = calcScaleOnProgress(progress, startScale, targetScale);
       scaleContentTo(newScale);
