@@ -57,7 +57,6 @@ export default function CanvasDataProvider({
   children,
   ...canvasSettings
 }: CanvasDataProviderProps) {
-  console.log('CanvasDataProvider');
   // CANVAS
   const canvasWidth = useSharedValue(0);
   const canvasHeight = useSharedValue(0);

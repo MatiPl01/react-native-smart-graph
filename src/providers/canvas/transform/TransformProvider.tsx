@@ -2,6 +2,7 @@ import { Vector } from '@shopify/react-native-skia';
 import { createContext, useCallback, useContext } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 import {
+  runOnJS,
   useAnimatedReaction,
   useSharedValue,
   withTiming
@@ -35,7 +36,7 @@ type TransformContextType = {
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
   resetContainerPosition: (settings?: {
     animationSettings?: Maybe<AnimationSettingsWithDefaults>;
-    autoSizingContext: Maybe<AutoSizingContextType>;
+    autoSizingContext?: AutoSizingContextType;
     canvasDimensions?: Dimensions;
     containerBoundingRect?: BoundingRect;
     scale?: number;
@@ -216,7 +217,7 @@ export default function TransformProvider({
   const resetContainerPosition = useCallback(
     (settings?: {
       animationSettings?: Maybe<AnimationSettingsWithDefaults>;
-      autoSizingContext?: Maybe<AutoSizingContextType>;
+      autoSizingContext?: AutoSizingContextType;
       canvasDimensions?: Dimensions;
       containerBoundingRect?: BoundingRect;
       scale?: number;
@@ -235,7 +236,9 @@ export default function TransformProvider({
       };
 
       // Disable auto sizing while resetting container position
-      settings?.autoSizingContext?.disableAutoSizing();
+      if (settings?.autoSizingContext) {
+        runOnJS(settings?.autoSizingContext?.disableAutoSizing)();
+      }
 
       const scale =
         settings?.scale ??
@@ -256,9 +259,11 @@ export default function TransformProvider({
       );
 
       // Enable auto sizing after resetting container position
-      settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
+      if (settings?.autoSizingContext) {
+        runOnJS(settings?.autoSizingContext?.enableAutoSizingAfterTimeout)();
+      }
     },
-    [objectFit]
+    []
   );
 
   useAnimatedReaction(

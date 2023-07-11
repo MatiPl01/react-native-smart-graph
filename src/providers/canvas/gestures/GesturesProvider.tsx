@@ -78,26 +78,22 @@ export default function GesturesProvider({
   const panTranslateY = useSharedValue(0);
   const isGestureActive = useSharedValue(false);
 
-  const handleGestureStart = useCallback(
-    (origin?: Maybe<Vector>) => {
-      isGestureActive.value = true;
-      if (focusStatus.value !== FocusStatus.BLUR) {
-        endFocus(
-          origin && {
-            isGestureActive,
-            origin,
-            translation: {
-              x: panTranslateX,
-              y: panTranslateY
-            }
+  const handleGestureStart = useCallback((origin?: Maybe<Vector>) => {
+    isGestureActive.value = true;
+    if (focusStatus.value !== FocusStatus.BLUR) {
+      endFocus(
+        origin && {
+          isGestureActive,
+          origin,
+          translation: {
+            x: panTranslateX,
+            y: panTranslateY
           }
-        );
-      } else if (autoSizingContext) {
-        autoSizingContext.disableAutoSizing();
-      }
-    },
-    [autoSizingContext?.disableAutoSizing]
-  );
+        }
+      );
+    }
+    autoSizingContext.disableAutoSizing();
+  }, []);
 
   const panGestureHandler = Gesture.Pan()
     .onStart(({ numberOfPointers, x, y }) => {

@@ -70,7 +70,6 @@ type OverlayOutletProps = {
 };
 
 export function OverlayOutlet({ gestureHandler }: OverlayOutletProps) {
-  console.log('OverlayOutlet');
   const contextValue = useContext(OverlayContext);
 
   if (!contextValue) {

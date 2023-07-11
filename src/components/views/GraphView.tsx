@@ -37,8 +37,6 @@ const GraphViewComposer = memo(function () {
   // Gestures context
   const { gestureHandler } = useGesturesContext();
 
-  console.log('GraphViewComposer');
-
   const overlayOutlet = useMemo(
     () => <OverlayOutlet gestureHandler={gestureHandler} />,
     [gestureHandler]

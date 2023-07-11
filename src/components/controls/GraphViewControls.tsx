@@ -43,7 +43,6 @@ type GraphViewControlsProps = {
 export default memo(function GraphViewControls({
   onObjectFitChange
 }: GraphViewControlsProps) {
-  console.log('GraphViewControls');
   // CONTEXTS
   // Canvas data context
   const { initialScale, objectFit } = useCanvasDataContext();

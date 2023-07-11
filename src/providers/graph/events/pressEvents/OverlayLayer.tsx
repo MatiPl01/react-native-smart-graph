@@ -32,7 +32,7 @@ export default function OverlayLayer<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >({
   boundingRect,
-  debug = true,
+  debug,
   renderedVerticesData,
   settings,
   transform,

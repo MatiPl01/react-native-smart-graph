@@ -124,9 +124,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       setFocusState({ animationSettings, data });
 
       // Disable auto sizing when focusing
-      if (autoSizingContext) {
-        autoSizingContext.disableAutoSizing();
-      }
+      autoSizingContext.disableAutoSizing();
     },
     []
   );

@@ -15,6 +15,7 @@ import { updateSpacing } from '@/utils/layout';
 import { AutoSizingProvider } from './auto';
 import { CanvasDataProvider } from './data';
 import { GesturesProvider } from './gestures';
+import SettingsChangeResponderProvider from './settings/SettingsChangeResponderProvider';
 import { FocusProvider, TransformProvider } from './transform';
 
 type CanvasProviderProps = PropsWithChildren<{
@@ -87,7 +88,10 @@ export default function CanvasProvider({
       <FocusProvider />,
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
-      <GesturesProvider />
+      <GesturesProvider />,
+      // SETTINGS
+      // The provider used to handle canvas settings change and respond to such changes
+      <SettingsChangeResponderProvider />
     ],
     []
   );

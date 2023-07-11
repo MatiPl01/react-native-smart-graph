@@ -72,7 +72,7 @@ export default function App() {
 
   useEffect(() => {
     setInterval(() => {
-      setPadding(p => (p === 25 ? 50 : 25));
+      // setPadding(p => (p === 25 ? 100 : 25));
       setVertexSpacing(v => (v === 50 ? 100 : 50));
     }, 1000);
   }, []);
