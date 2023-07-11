@@ -32,7 +32,7 @@ export default function OverlayLayer<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >({
   boundingRect,
-  debug,
+  debug = true,
   renderedVerticesData,
   settings,
   transform,
@@ -53,12 +53,11 @@ export default function OverlayLayer<
 
     return {
       height,
-      // top: transform.translateY.value,
       transform: [
         { translateX: transform.translateX.value + boundingLeft + dx },
         { translateY: transform.translateY.value + boundingTop + dy },
         { scale }
-      ] as never[], // this is a fix wor incorrectly inferred types
+      ] as never[], // this is a fix for incorrectly inferred types
       width
     };
   });

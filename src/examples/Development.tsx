@@ -5,11 +5,13 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Easing } from 'react-native-reanimated';
 
+import GraphViewControls from '@/components/controls/GraphViewControls';
 import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
 
@@ -18,6 +20,7 @@ import {
   DirectedEdgeData,
   DirectedGraphComponent,
   FocusSettings,
+  ObjectFit,
   VertexData,
   VertexPressHandler
 } from '..';
@@ -57,6 +60,7 @@ const ACHIEVEMENTS_GRAPH: {
 };
 
 export default function App() {
+  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
 
   useEffect(() => {
@@ -96,8 +100,7 @@ export default function App() {
       />
       <SafeAreaView style={styles.container}>
         <GraphView
-          controls
-          objectFit='contain'
+          objectFit={objectFit}
           padding={padding}
           scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
@@ -116,6 +119,9 @@ export default function App() {
             }}
             graph={graph}
           />
+          <View style={styles.controls}>
+            <GraphViewControls onObjectFitChange={setObjectFit} />
+          </View>
         </GraphView>
         <TouchableOpacity
           onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
@@ -148,5 +154,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative'
+  },
+  controls: {
+    marginTop: 64,
+    right: 12
   }
 });

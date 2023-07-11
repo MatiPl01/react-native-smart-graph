@@ -3,6 +3,7 @@ import {
   Fragment,
   useCallback,
   useContext,
+  useMemo,
   useState
 } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -42,16 +43,20 @@ export default function OverlayProvider({
 
   const removeLayer = useCallback((zIndex: number) => {
     setLayers(prevLayers => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [zIndex]: _, ...restLayers } = prevLayers;
       return restLayers;
     });
   }, []);
 
-  const contextValue: OverlayContextType = {
-    layers,
-    removeLayer,
-    renderLayer
-  };
+  const contextValue: OverlayContextType = useMemo(
+    () => ({
+      layers,
+      removeLayer,
+      renderLayer
+    }),
+    [layers]
+  );
 
   return (
     <OverlayContext.Provider value={contextValue}>
@@ -64,7 +69,8 @@ type OverlayOutletProps = {
   gestureHandler: ComposedGesture;
 };
 
-export const OverlayOutlet = ({ gestureHandler }: OverlayOutletProps) => {
+export function OverlayOutlet({ gestureHandler }: OverlayOutletProps) {
+  console.log('OverlayOutlet');
   const contextValue = useContext(OverlayContext);
 
   if (!contextValue) {
@@ -84,7 +90,7 @@ export const OverlayOutlet = ({ gestureHandler }: OverlayOutletProps) => {
       </View>
     </GestureDetector>
   );
-};
+}
 
 export const withOverlay = <
   P extends object,

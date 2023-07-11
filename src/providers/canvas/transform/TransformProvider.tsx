@@ -189,7 +189,7 @@ export default function TransformProvider({
     withClamping = true
   ) => {
     'worklet';
-    if (origin) {
+    if (origin && currentScale.value > 0) {
       const relativeScale = newScale / currentScale.value;
       translateContentTo(
         {

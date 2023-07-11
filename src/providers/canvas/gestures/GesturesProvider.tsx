@@ -66,6 +66,7 @@ export default function GesturesProvider({
 
   // OTHER VALUES
   // Gestures helper values
+  const isInitialRender = useSharedValue(true);
   // Pan
   const panStartScale = useSharedValue(1);
   // Pinch
@@ -201,6 +202,10 @@ export default function GesturesProvider({
       endPosition: pinchEndPosition.value
     }),
     ({ decayScale, endPosition }) => {
+      if (isInitialRender.value) {
+        isInitialRender.value = false;
+        return;
+      }
       scaleContentTo(decayScale, endPosition);
     }
   );

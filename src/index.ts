@@ -2,11 +2,12 @@
 /**
  * This file is the entry point for the library.
  *
- * It exports all the components, models, and types that are available to the
+ * It exports all the components, models and types that are available to the
  * library's users.
  */
 
 // COMPONENTS
+export { default as GraphViewControls } from '@/components/controls/GraphViewControls';
 export { default as DirectedGraphComponent } from '@/components/graphs/DirectedGraphComponent';
 export { default as UndirectedGraphComponent } from '@/components/graphs/UndirectedGraphComponent';
 
