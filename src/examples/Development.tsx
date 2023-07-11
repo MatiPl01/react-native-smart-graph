@@ -1,6 +1,6 @@
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   SafeAreaView,
   StatusBar,
@@ -18,7 +18,8 @@ import {
   DirectedEdgeData,
   DirectedGraphComponent,
   FocusSettings,
-  VertexData
+  VertexData,
+  VertexPressHandler
 } from '..';
 
 const FOCUS_SETTINGS: FocusSettings = {
@@ -56,11 +57,35 @@ const ACHIEVEMENTS_GRAPH: {
 };
 
 export default function App() {
-  const graph = useMemo(() => new DirectedGraph(), []);
+  const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
 
   useEffect(() => {
     graph.insertBatch(ACHIEVEMENTS_GRAPH);
   }, [graph]);
+
+  const [padding, setPadding] = useState(25);
+  const [vertexSpacing, setVertexSpacing] = useState(50);
+
+  useEffect(() => {
+    setInterval(() => {
+      setPadding(p => (p === 25 ? 50 : 25));
+      setVertexSpacing(v => (v === 50 ? 100 : 50));
+    }, 1000);
+  }, []);
+
+  const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
+    ({ vertex: { key } }) => {
+      console.log('long press', key);
+    },
+    []
+  );
+
+  const handleVertexPress = useCallback<VertexPressHandler<string>>(
+    ({ vertex: { key } }) => {
+      graph.focus(key, FOCUS_SETTINGS);
+    },
+    [graph]
+  );
 
   return (
     <GestureHandlerRootView style={styles.background}>
@@ -73,7 +98,7 @@ export default function App() {
         <GraphView
           controls
           objectFit='contain'
-          padding={25}
+          padding={padding}
           scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
             renderers={{
@@ -81,13 +106,12 @@ export default function App() {
             }}
             settings={{
               events: {
-                onVertexLongPress: ({ vertex: { key } }) =>
-                  console.log('long press', key),
-                onVertexPress: ({ vertex: { key } }) =>
-                  graph.focus(key, FOCUS_SETTINGS)
+                onVertexLongPress: handleVertexLongPress,
+                onVertexPress: handleVertexPress
               },
               placement: {
-                strategy: 'circles'
+                minVertexSpacing: vertexSpacing,
+                strategy: 'orbits'
               }
             }}
             graph={graph}

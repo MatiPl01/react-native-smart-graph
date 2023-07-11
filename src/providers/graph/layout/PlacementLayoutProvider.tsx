@@ -6,7 +6,6 @@ import {
   EdgeComponentRenderData,
   VertexComponentRenderData
 } from '@/types/components';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
 import {
@@ -17,24 +16,16 @@ import {
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
-export type GraphPlacementLayoutProviderProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = PropsWithChildren<{
+export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   onRender: (boundingRect: BoundingRect) => void;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphSettingsWithDefaults<V, E, ED>;
+  settings: GraphSettingsWithDefaults<V, E>;
 }>;
 
-function GraphPlacementLayoutProvider<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
+function GraphPlacementLayoutProvider<V, E>({
   children,
   graph,
   layoutAnimationSettings,
@@ -42,7 +33,7 @@ function GraphPlacementLayoutProvider<
   renderedEdgesData,
   renderedVerticesData,
   settings
-}: GraphPlacementLayoutProviderProps<V, E, ED>) {
+}: GraphPlacementLayoutProviderProps<V, E>) {
   const isFirstRenderRef = useRef(true);
   const graphLayout = useMemo<GraphLayout>(
     () =>

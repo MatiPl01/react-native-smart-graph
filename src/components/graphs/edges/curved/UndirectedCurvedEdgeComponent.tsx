@@ -19,8 +19,6 @@ function UndirectedCurvedEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  focusKey,
-  focusTransitionProgress,
   onRender,
   renderers,
   v1Position,
@@ -103,8 +101,6 @@ function UndirectedCurvedEdgeComponent<E, V>({
     <>
       {renderers.edge({
         animationProgress,
-        focusKey,
-        focusTransitionProgress,
         key: edge.key,
         parabolaX,
         parabolaY,

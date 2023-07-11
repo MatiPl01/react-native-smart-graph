@@ -100,7 +100,6 @@ export type EdgeComponentData<
   edge: Edge<E, V>;
   edgeRenderer: EdgeRenderFunction<E>;
   edgesCount: number;
-  labelRenderer?: EdgeLabelRendererFunction<E>;
   order: number;
   removed: boolean;
   v1Position: AnimatedVectorCoordinates;

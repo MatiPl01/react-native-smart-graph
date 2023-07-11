@@ -1,10 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import {
-  createContext,
-  PropsWithChildren,
-  useCallback,
-  useContext
-} from 'react';
+import { createContext, useCallback, useContext } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 import {
   useAnimatedReaction,
@@ -72,20 +67,11 @@ export const useTransformContext = () => {
   return contextValue as TransformContextType;
 };
 
-type TransformProviderProps = PropsWithChildren<{
-  maxScale: number;
-  minScale: number;
-  objectFit: ObjectFit;
-  padding: BoundingRect;
-}>;
-
 export default function TransformProvider({
-  children,
-  maxScale,
-  minScale,
-  objectFit,
-  padding
-}: TransformProviderProps) {
+  children
+}: {
+  children?: React.ReactNode;
+}) {
   // CONTEXT VALUES
   // Canvas data
   const {
@@ -98,7 +84,11 @@ export default function TransformProvider({
     canvasDimensions: { height: canvasHeight, width: canvasWidth },
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
-    initialScale
+    initialScale,
+    maxScale,
+    minScale,
+    objectFit,
+    padding
   } = useCanvasDataContext();
 
   // Other values
@@ -131,12 +121,13 @@ export default function TransformProvider({
   } => {
     'worklet';
 
-    const leftLimit = (-containerLeft.value + padding.left) * scale;
+    const leftLimit = (-containerLeft.value + padding.value.left) * scale;
     const rightLimit =
-      canvasWidth.value - (containerRight.value + padding.right) * scale;
-    const topLimit = (-containerTop.value + padding.top) * scale;
+      canvasWidth.value - (containerRight.value + padding.value.right) * scale;
+    const topLimit = (-containerTop.value + padding.value.top) * scale;
     const bottomLimit =
-      canvasHeight.value - (containerBottom.value + padding.bottom) * scale;
+      canvasHeight.value -
+      (containerBottom.value + padding.value.bottom) * scale;
 
     return {
       x: [Math.min(leftLimit, rightLimit), Math.max(rightLimit, leftLimit)],
@@ -154,15 +145,15 @@ export default function TransformProvider({
       return clamp(
         calcContainerScale(
           objFit,
-          initialScale,
+          initialScale.value,
           {
             height: boundingRect.bottom - boundingRect.top,
             width: boundingRect.right - boundingRect.left
           },
           canvasDimensions,
-          padding
+          padding.value
         ),
-        [minScale, maxScale]
+        [minScale.value, maxScale.value]
       );
     },
     []
@@ -248,14 +239,14 @@ export default function TransformProvider({
 
       const scale =
         settings?.scale ??
-        getIdealScale(containerBoundingRect, canvasDimensions, objectFit);
+        getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
 
       scaleContentTo(scale, undefined, settings?.animationSettings);
       translateContentTo(
         calcContainerTranslation(
           containerBoundingRect,
           canvasDimensions,
-          padding
+          padding.value
         ),
         undefined,
         settings?.animationSettings && {
@@ -283,7 +274,7 @@ export default function TransformProvider({
       resetContainerPosition({
         canvasDimensions: initialDimensions,
         containerBoundingRect: initialRect,
-        scale: initialScale
+        scale: initialScale.value
       });
       // Set canvas dimensions
       canvasWidth.value = initialDimensions.width;

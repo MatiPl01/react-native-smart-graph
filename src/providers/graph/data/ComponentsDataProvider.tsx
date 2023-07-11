@@ -59,26 +59,17 @@ export type ComponentsDataContextType<
 // not used outside of a provider
 const ComponentsDataContext = createContext(null);
 
-type ComponentsDataProviderProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = PropsWithChildren<{
+type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   renderers: GraphRenderersWithDefaults<V, E>;
-  settings: GraphSettingsWithDefaults<V, E, ED>;
+  settings: GraphSettingsWithDefaults<V, E>;
 }>;
 
 export default function ComponentsDataProvider<
   V,
   E,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
-  children,
-  graph,
-  renderers,
-  settings
-}: ComponentsDataProviderProps<V, E, ED>) {
+>({ children, graph, renderers, settings }: ComponentsDataProviderProps<V, E>) {
   // GRAPH CHANGES OBSERVER
   const [{ animationsSettings, orderedEdges, vertices }] =
     useGraphObserver(graph);
@@ -100,7 +91,7 @@ export default function ComponentsDataProvider<
 
   // GRAPH COMPONENTS RENDER DATA (received from graph components
   // after they have been rendered)
-  //(This data is managed by rendered components)
+  // (This data is managed by rendered components)
   // Store render data for graph vertex components
   const [renderedVerticesData, setRenderedVerticesData] = useState<
     Record<string, VertexComponentRenderData>
@@ -132,15 +123,16 @@ export default function ComponentsDataProvider<
   );
 
   useEffect(() => {
-    setVerticesData(
-      updateGraphVerticesData(
-        verticesData,
-        vertices,
-        animationsSettings,
-        settings,
-        renderers
-      )
+    const { data, wasUpdated } = updateGraphVerticesData(
+      verticesData,
+      vertices,
+      animationsSettings,
+      settings,
+      renderers
     );
+    if (wasUpdated) {
+      setVerticesData(data);
+    }
   }, [
     vertices,
     settings.components.vertex,
@@ -166,9 +158,21 @@ export default function ComponentsDataProvider<
     settings.components.edge,
     settings.animations.edges,
     renderers.edge,
-    renderers.label,
     renderers.arrow
   ]);
+
+  useEffect(() => {
+    if (!renderers.label) return;
+    const { data, wasUpdated } = updateGraphEdgeLabelsData(
+      edgeLabelsData,
+      edgesData,
+      renderedEdgesData,
+      renderers.label
+    );
+    if (wasUpdated) {
+      setEdgeLabelsData(data);
+    }
+  }, [renderedEdgesData, renderers.label]);
 
   const handleVertexRender = useCallback<VertexRenderHandler>(
     (key, renderValues) => {
@@ -205,12 +209,6 @@ export default function ComponentsDataProvider<
       return rest;
     });
   }, []);
-
-  useEffect(() => {
-    setEdgeLabelsData(
-      updateGraphEdgeLabelsData(edgeLabelsData, edgesData, renderedEdgesData)
-    );
-  }, [renderedEdgesData]);
 
   const contextValue = useMemo<ComponentsDataContextType<V, E, ED>>(
     () => ({

@@ -1,8 +1,11 @@
-import React, { memo, PropsWithChildren } from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import ViewControls from '@/components/controls/ViewControls';
 import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
+import GraphViewChildrenProvider, {
+  useGraphViewChildrenContext
+} from '@/contexts/GraphViewChildrenProvider';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, {
   FocusStatus,
@@ -16,8 +19,6 @@ import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 import { deepMemoComparator } from '@/utils/equality';
 
-import CanvasComponent from './canvas/CanvasComponent';
-
 type GraphViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;
   controls?: boolean;
@@ -28,26 +29,32 @@ type GraphViewProps = PropsWithChildren<{
 }>;
 
 function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
+  const providerComposer = useMemo(
+    () => <GraphViewComposer controls={controls} />,
+    [controls] // TODO - improve in https://github.com/MatiPl01/react-native-smart-graph/pull/184
+  );
+
   return (
     <View style={styles.container}>
-      <CanvasProvider {...providerProps}>
-        <GraphViewComposer controls={controls}>{children}</GraphViewComposer>
-      </CanvasProvider>
+      <GraphViewChildrenProvider graphViewChildren={children}>
+        <CanvasProvider {...providerProps}>{providerComposer}</CanvasProvider>
+      </GraphViewChildrenProvider>
     </View>
   );
 }
 
-type GraphViewComposerProps = PropsWithChildren<{
+type GraphViewComposerProps = {
   controls?: boolean;
-}>;
+};
 
-const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
+const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
   // CONTEXTS
+  // Graph view children context
+  const { canvas } = useGraphViewChildrenContext();
   // Canvas data context
-  const { boundingRect, currentScale, currentTranslation, initialScale } =
-    useCanvasDataContext();
+  const { initialScale } = useCanvasDataContext();
   // Transform context
-  const { handleCanvasRender, resetContainerPosition } = useTransformContext();
+  const { resetContainerPosition } = useTransformContext();
   // Auto sizing context
   const autoSizingContext = useAutoSizingContext();
   // Gestures context
@@ -60,7 +67,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
       resetContainerPosition({
         animationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS,
         autoSizingContext,
-        scale: initialScale
+        scale: initialScale.value
       });
     } else {
       endFocus(undefined, DEFAULT_FOCUS_ANIMATION_SETTINGS);
@@ -70,16 +77,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
   return (
     <>
       <OverlayProvider>
-        <CanvasComponent
-          transform={{
-            scale: currentScale,
-            translateX: currentTranslation.x,
-            translateY: currentTranslation.y
-          }}
-          boundingRect={boundingRect}
-          onRender={handleCanvasRender}>
-          {children}
-        </CanvasComponent>
+        {canvas}
         {/* Renders overlay layers set using the OverlayContext */}
         <OverlayOutlet gestureHandler={gestureHandler} />
       </OverlayProvider>
@@ -87,7 +85,7 @@ const GraphViewComposer = ({ children, controls }: GraphViewComposerProps) => {
       {controls && <ViewControls onReset={handleReset} />}
     </>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -101,8 +99,6 @@ const styles = StyleSheet.create({
 export default memo(
   GraphView,
   deepMemoComparator({
-    // Exclude events callback functions from the comparison
-    exclude: ['children.settings.events'],
     // shallow compare the graph object property of the child component
     // to prevent deep checking a large graph model structure
     // (graph should be memoized using the useMemo hook to prevent

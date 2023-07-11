@@ -1,7 +1,10 @@
-import { cloneElement, PropsWithChildren, ReactElement, useMemo } from 'react';
+import { memo, PropsWithChildren, useMemo } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
-import { GraphComponentPrivateProps } from '@/components/graphs/graph/GraphComponent';
+import {
+  DirectedGraphComponentProps,
+  UndirectedGraphComponentProps
+} from '@/components/graphs';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
@@ -13,12 +16,15 @@ import {
   AnimatedDimensions,
   BoundingRect
 } from '@/types/layout';
-import { GraphRenderers } from '@/types/renderer';
-import { GraphSettings, GraphSettingsWithDefaults } from '@/types/settings';
+import {
+  GraphEventsSettings,
+  GraphSettingsWithDefaults
+} from '@/types/settings';
 import {
   updateGraphRenderersWithDefaults,
   updateGraphSettingsWithDefaults
 } from '@/utils/components';
+import { deepMemoComparator } from '@/utils/equality';
 
 import { ComponentsDataProvider } from './data';
 import { PressEventsProvider, PressEventsProviderProps } from './events';
@@ -32,19 +38,15 @@ import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
 import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
 import VertexFocusProvider from './transform/VertexFocusProvider';
 
-const getLayoutProviders = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+const getLayoutProviders = <V, E>(
   graph: Graph<V, E>,
-  settings: GraphSettingsWithDefaults<V, E, ED>,
+  settings: GraphSettingsWithDefaults<V, E>,
   onRender: (boundingRect: BoundingRect) => void
 ) => {
   switch (settings.layout.managedBy) {
     case 'forces':
       return [
-        <ForcesPlacementProvider<ForcesPlacementProviderProps<V, E, ED>>
+        <ForcesPlacementProvider<ForcesPlacementProviderProps<V, E>>
           graph={graph}
           onRender={onRender}
           settings={settings}
@@ -54,7 +56,7 @@ const getLayoutProviders = <
     case 'placement':
     default:
       return [
-        <PlacementLayoutProvider<GraphPlacementLayoutProviderProps<V, E, ED>>
+        <PlacementLayoutProvider<GraphPlacementLayoutProviderProps<V, E>>
           graph={graph}
           onRender={onRender}
           settings={settings}
@@ -70,7 +72,7 @@ const getEventsProviders = <
 >(
   transform: AnimatedCanvasTransform,
   boundingRect: AnimatedBoundingRect,
-  settings: GraphSettingsWithDefaults<V, E, ED>,
+  settings: GraphSettingsWithDefaults<V, E>,
   renderLayer: (zIndex: number, layer: JSX.Element) => void
 ) => {
   if (settings.events) {
@@ -78,7 +80,7 @@ const getEventsProviders = <
       <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
         boundingRect={boundingRect}
         renderLayer={renderLayer}
-        settings={settings.events}
+        settings={settings.events as GraphEventsSettings<V, E, ED>}
         transform={transform}
       />
     ];
@@ -86,39 +88,25 @@ const getEventsProviders = <
   return [];
 };
 
-export type GraphProviderAdditionalProps =
-  | {
-      boundingRect: AnimatedBoundingRect;
-      canvasDimensions: AnimatedDimensions;
-      canvasScales: number[];
-      endFocus: FocusEndSetter;
-      focusKey: SharedValue<null | string>;
-      focusStatus: SharedValue<number>;
-      focusTransitionProgress: SharedValue<number>;
-      initialCanvasScale: number;
-      onRender: (containerBounds: BoundingRect) => void;
-      startFocus: FocusStartSetter;
-      transform: AnimatedCanvasTransform;
-    } & AccessibleOverlayContextType;
-
-type GraphProviderProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = PropsWithChildren<
+type GraphProviderProps<V, E> = PropsWithChildren<
   {
-    graph: Graph<V, E>;
-    renderers?: GraphRenderers<V, E>;
-    settings?: GraphSettings<V, E, ED>;
-  } & GraphProviderAdditionalProps
+    boundingRect: AnimatedBoundingRect;
+    canvasDimensions: AnimatedDimensions;
+    canvasScales: SharedValue<number[]>;
+    endFocus: FocusEndSetter;
+    focusKey: SharedValue<null | string>;
+    focusStatus: SharedValue<number>;
+    focusTransitionProgress: SharedValue<number>;
+    initialCanvasScale: SharedValue<number>;
+    onRender: (containerBounds: BoundingRect) => void;
+    startFocus: FocusStartSetter;
+    transform: AnimatedCanvasTransform;
+  } & AccessibleOverlayContextType &
+    (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
 >;
 
 // eslint-disable-next-line import/no-unused-modules
-export default function GraphProvider<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
+function GraphProvider<V, E>({
   boundingRect,
   canvasDimensions,
   canvasScales,
@@ -135,7 +123,7 @@ export default function GraphProvider<
   settings,
   startFocus,
   transform
-}: GraphProviderProps<V, E, ED>) {
+}: GraphProviderProps<V, E>) {
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
     [graph, settings]
@@ -190,9 +178,15 @@ export default function GraphProvider<
 
   return (
     <ContextProviderComposer providers={providers}>
-      {cloneElement(children as ReactElement<GraphComponentPrivateProps>, {
-        boundingRect
-      })}
+      {children}
     </ContextProviderComposer>
   );
 }
+
+export default memo(
+  GraphProvider,
+  deepMemoComparator({
+    include: ['graph', 'renderers', 'settings'],
+    shallow: ['graph']
+  })
+) as typeof GraphProvider;

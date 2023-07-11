@@ -5,8 +5,6 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
-import { useComponentFocus } from '@/hooks/focus';
-import { VertexFocusContextType } from '@/providers/graph';
 import {
   DirectedCurvedEdgeComponentProps,
   DirectedStraightEdgeComponentProps,
@@ -27,13 +25,11 @@ function EdgeComponent<E, V>({
   edge,
   edgeRenderer,
   edgesCount,
-  focusKey,
-  focusTransitionProgress,
   onRemove,
   order,
   removed,
   ...restProps
-}: EdgeComponentProps<E, V> & VertexFocusContextType) {
+}: EdgeComponentProps<E, V>) {
   // ANIMATION
   // Use a helper value to ensure that the animation progress is never negative
   const animationProgressHelper = useSharedValue(0);
@@ -45,14 +41,6 @@ function EdgeComponent<E, V>({
   // Target edge order
   const animatedOrder = useSharedValue(order);
   const animatedEdgesCount = useSharedValue(edgesCount);
-
-  // EDGE FOCUS
-  // Edge focus progress
-  const focusProgress = useSharedValue(0);
-
-  // Update current vertex focus progress based on the global
-  // focus transition progress and the focused vertex key
-  useComponentFocus(focusProgress, focusTransitionProgress, focusKey);
 
   // Edge mount/unmount animation
   useEffect(() => {
@@ -79,8 +67,6 @@ function EdgeComponent<E, V>({
     animatedOrder,
     animationProgress,
     edge,
-    focusKey,
-    focusTransitionProgress: focusProgress,
     renderers: arrowRenderer
       ? {
           arrow: arrowRenderer,
@@ -116,5 +102,5 @@ function EdgeComponent<E, V>({
 }
 
 export default memo(EdgeComponent) as <E, V>(
-  props: EdgeComponentProps<E, V> & VertexFocusContextType
+  props: EdgeComponentProps<E, V>
 ) => JSX.Element;

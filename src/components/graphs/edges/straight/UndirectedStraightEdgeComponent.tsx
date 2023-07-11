@@ -34,8 +34,6 @@ function UndirectedStraightEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  focusKey,
-  focusTransitionProgress,
   onRender,
   renderers,
   v1Position,
@@ -127,8 +125,6 @@ function UndirectedStraightEdgeComponent<E, V>({
     <>
       {renderers.edge({
         animationProgress,
-        focusKey,
-        focusTransitionProgress,
         key: edge.key,
         p1,
         p2,

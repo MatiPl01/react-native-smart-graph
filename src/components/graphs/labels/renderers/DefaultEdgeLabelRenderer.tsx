@@ -10,7 +10,6 @@ export default function DefaultEdgeLabelRenderer<E>({
   centerX,
   centerY,
   edgeRotation,
-  focusTransitionProgress,
   height,
   key
 }: EdgeLabelRendererProps<E>) {
@@ -32,15 +31,9 @@ export default function DefaultEdgeLabelRenderer<E>({
     { scale: Math.max(animationProgress.value, 0) }
   ]);
 
-  const opacity = useDerivedValue(() =>
-    focusTransitionProgress.value >= 0
-      ? 1
-      : 1 + 0.75 * focusTransitionProgress.value
-  );
-
   return (
     font && (
-      <Group opacity={opacity} transform={wrapperTransform}>
+      <Group transform={wrapperTransform}>
         <Group transform={labelTransform}>
           <Text
             color={DEFAULT_LABEL_RENDERER_SETTINGS.fontColor}
