@@ -40,8 +40,6 @@ function GraphEdges<
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
   );
 
-  console.log('GraphEdges');
-
   return (
     <Group opacity={opacity}>
       {Object.values(edgesData).map(data => (

@@ -47,7 +47,6 @@ export default function GesturesProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  console.log('GesturesProvider');
   // CONTEXT VALUES
   // Canvas data context values
   const {

@@ -15,8 +15,6 @@ export type DirectedGraphComponentProps<V, E> = {
 function DirectedGraphComponent<V, E>(
   props: DirectedGraphComponentProps<V, E>
 ) {
-  console.log('DirectedGraphComponent');
-
   return (
     <GraphComponentComposer<V, E, DirectedGraphComponentProps<V, E>>
       {...props}

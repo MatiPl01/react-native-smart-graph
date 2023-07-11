@@ -29,8 +29,6 @@ type GraphViewProps = PropsWithChildren<{
 }>;
 
 function GraphView({ children, controls, ...providerProps }: GraphViewProps) {
-  console.log('GraphView');
-
   const providerComposer = useMemo(
     () => <GraphViewComposer controls={controls} />,
     [controls] // TODO - improve in https://github.com/MatiPl01/react-native-smart-graph/pull/184
@@ -50,7 +48,6 @@ type GraphViewComposerProps = {
 };
 
 const GraphViewComposer = memo(({ controls }: GraphViewComposerProps) => {
-  console.log('GraphViewComposer');
   // CONTEXTS
   // Graph view children context
   const { canvas } = useGraphViewChildrenContext();

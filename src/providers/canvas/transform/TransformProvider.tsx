@@ -72,7 +72,6 @@ export default function TransformProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  console.log('TransformProvider');
   // CONTEXT VALUES
   // Canvas data
   const {

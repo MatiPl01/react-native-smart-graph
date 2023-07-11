@@ -124,7 +124,6 @@ function GraphProvider<V, E>({
   startFocus,
   transform
 }: GraphProviderProps<V, E>) {
-  console.log('GraphProvider');
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
     [graph, settings]

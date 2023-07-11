@@ -80,7 +80,6 @@ export default function FocusProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  console.log('FocusProvider');
   // CONTEXT VALUES
   // Canvas data context values
   const {
