@@ -63,17 +63,16 @@ export default class UndirectedGraph<V, E> extends Graph<
     vertices?.forEach(data => this.insertVertex(data, null));
     edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
-    if (animationSettings !== null) {
-      this.notifyGraphChange({
-        ...createAnimationsSettingsForBatchModification(
+    this.notifyGraphChange(
+      animationSettings &&
+        createAnimationsSettingsForBatchModification(
           {
             edges: edges?.map(({ key }) => key),
             vertices: vertices?.map(({ key }) => key)
           },
           animationSettings
         )
-      });
-    }
+    );
   }
 
   override insertEdge(
