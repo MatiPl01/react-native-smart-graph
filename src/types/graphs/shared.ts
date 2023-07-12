@@ -24,7 +24,7 @@ export interface Edge<E, V> {
 }
 
 export type VertexConnections = {
-  // incoming and outgoing edges will be the same for undirected graphs
+  // Undirected graphs have no incoming connections (an array will be empty)
   incoming: Array<string>;
   outgoing: Array<string>;
 };

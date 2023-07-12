@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
-import { Edge, Graph as IGraph, GraphObserver, Vertex } from '@/types/graphs';
+import {
+  Edge,
+  Graph as IGraph,
+  GraphConnections,
+  GraphObserver,
+  Vertex
+} from '@/types/graphs';
 import {
   AnimationSettings,
   AnimationsSettings,
@@ -275,6 +281,8 @@ export default abstract class Graph<
   get vertices(): Array<GV> {
     return Object.values(this.vertices$);
   }
+
+  abstract get connections(): GraphConnections;
 
   abstract insertBatch(
     data: {

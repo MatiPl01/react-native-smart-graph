@@ -30,7 +30,7 @@ export default class DirectedGraph<V, E> extends Graph<
     if (data) this.insertBatch(data);
   }
 
-  get connections(): GraphConnections {
+  override get connections(): GraphConnections {
     return Object.fromEntries(
       Object.values(this.vertices$).map(vertex => [
         vertex.key,

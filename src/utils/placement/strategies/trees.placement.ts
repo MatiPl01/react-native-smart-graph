@@ -3,8 +3,8 @@ import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { GraphConnections } from '@/types/graphs';
 import {
   GraphLayout,
-  OrbitsPlacementSettings,
-  PlacedVerticesPositions
+  PlacedVerticesPositions,
+  TreesPlacementSettings
 } from '@/types/settings';
 import {
   bfs,
@@ -111,7 +111,7 @@ export default function placeVerticesOnTrees(
   connections: GraphConnections,
   vertexRadius: number,
   isGraphDirected: boolean,
-  settings: OrbitsPlacementSettings
+  settings: TreesPlacementSettings
 ): GraphLayout {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];

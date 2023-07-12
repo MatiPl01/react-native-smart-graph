@@ -100,7 +100,8 @@
     "prepare": "husky install",
     "semantic-release": "semantic-release",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
   },
   "types": "dist/types/index.d.ts"
 }

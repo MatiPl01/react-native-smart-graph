@@ -22,7 +22,6 @@ import {
   VertexComponentRenderData
 } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { OrderedEdges, Vertex } from '@/types/graphs';
 import {
   EdgeLabelRendererFunction,
@@ -192,19 +191,15 @@ export const updateGraphVerticesData = <V, E>(
   };
 };
 
-export const updateGraphEdgesData = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
-  oldEdgesData: Record<string, EdgeComponentData<E, V, ED>>,
+export const updateGraphEdgesData = <V, E>(
+  oldEdgesData: Record<string, EdgeComponentData<E, V>>,
   currentEdges: OrderedEdges<E, V>,
   renderedVerticesData: Record<string, VertexComponentRenderData>,
   currentAnimationsSettings: AnimationsSettings,
   settings: GraphSettingsWithDefaults<V, E>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): {
-  data: Record<string, EdgeComponentData<E, V, ED>>;
+  data: Record<string, EdgeComponentData<E, V>>;
   wasUpdated: boolean;
 } => {
   const updatedEdgesData = { ...oldEdgesData };
@@ -275,13 +270,9 @@ export const updateGraphEdgesData = <
   };
 };
 
-export const updateGraphEdgeLabelsData = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+export const updateGraphEdgeLabelsData = <V, E>(
   oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
-  edgesData: Record<string, EdgeComponentData<E, V, ED>>,
+  edgesData: Record<string, EdgeComponentData<E, V>>,
   renderedEdgesData: Record<string, EdgeComponentRenderData>,
   labelRenderer: EdgeLabelRendererFunction<E>
 ): {

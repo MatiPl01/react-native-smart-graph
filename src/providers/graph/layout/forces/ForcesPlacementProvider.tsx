@@ -108,7 +108,7 @@ function ForcesPlacementProvider<V, E>({
     isSecondRenderRef.current = false;
 
     const { boundingRect, verticesPositions } = placeVertices(
-      graph,
+      graph.connections,
       settings.components.vertex.radius,
       settings.placement
     );

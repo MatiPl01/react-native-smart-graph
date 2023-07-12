@@ -29,7 +29,7 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (data) this.insertBatch(data);
   }
 
-  get connections(): GraphConnections {
+  override get connections(): GraphConnections {
     return Object.fromEntries(
       Object.values(this.vertices$).map(vertex => {
         const neighbors = vertex.edges.map(edge =>
@@ -41,7 +41,7 @@ export default class UndirectedGraph<V, E> extends Graph<
         return [
           vertex.key,
           {
-            incoming: neighbors,
+            incoming: [],
             outgoing: neighbors
           }
         ];
