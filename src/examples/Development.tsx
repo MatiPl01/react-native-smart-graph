@@ -59,6 +59,8 @@ const ACHIEVEMENTS_GRAPH: {
   ]
 };
 
+let added = false;
+
 export default function App() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('none');
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
@@ -67,12 +69,16 @@ export default function App() {
     graph.insertBatch(ACHIEVEMENTS_GRAPH);
   }, [graph]);
 
-  const [vertexSpacing, setVertexSpacing] = useState(50);
-
   useEffect(() => {
     setInterval(() => {
-      setVertexSpacing(v => (v === 50 ? 100 : 50));
-    }, 1000);
+      if (!added) {
+        graph.insertVertex({ key: 'test', value: 'test' });
+        added = true;
+      } else {
+        graph.removeVertex('test');
+        added = false;
+      }
+    }, 2000);
   }, []);
 
   const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
@@ -108,7 +114,7 @@ export default function App() {
                 onVertexPress: handleVertexPress
               },
               placement: {
-                minVertexSpacing: vertexSpacing,
+                minVertexSpacing: 50,
                 strategy: 'orbits'
               }
             }}
