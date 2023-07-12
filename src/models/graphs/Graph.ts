@@ -62,8 +62,8 @@ export default abstract class Graph<
     (this.edgesBetweenVertices$ as Mutable<typeof this.edgesBetweenVertices$>) =
       {};
     // Notify observers after all changes to the graph model are made
-    if (animationSettings !== null) {
-      this.notifyGraphChange(
+    this.notifyGraphChange(
+      animationSettings &&
         createAnimationsSettingsForBatchModification(
           {
             edges: Object.keys(this.edges$),
@@ -71,8 +71,7 @@ export default abstract class Graph<
           },
           animationSettings
         )
-      );
-    }
+    );
   }
 
   get connections(): GraphConnections {
@@ -146,10 +145,7 @@ export default abstract class Graph<
     this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
     // Add edge to edges
     this.edges$[edge.key] = edge;
-    // Notify change if notifyObservers is set to true
-    if (animationsSettings !== null) {
-      this.notifyGraphChange(animationsSettings);
-    }
+    this.notifyGraphChange(animationsSettings);
     return edge;
   }
 
@@ -161,10 +157,7 @@ export default abstract class Graph<
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
-    // Notify change if notifyObservers is set to true
-    if (animationSettings !== null) {
-      this.notifyGraphChange(animationSettings);
-    }
+    this.notifyGraphChange(animationSettings);
     return vertex;
   }
 
@@ -177,7 +170,9 @@ export default abstract class Graph<
     });
   }
 
-  protected notifyGraphChange(animationsSettings?: AnimationsSettings): void {
+  protected notifyGraphChange(
+    animationsSettings?: Maybe<AnimationsSettings>
+  ): void {
     this.observers.forEach(observer => {
       observer.graphChanged?.(
         animationsSettings ?? {
@@ -225,8 +220,8 @@ export default abstract class Graph<
     data.edges?.forEach(key => this.removeEdge(key, null));
     data.vertices?.forEach(key => this.removeVertex(key, null));
     // Notify observers after all changes to the graph model are made
-    if (animationSettings !== null) {
-      this.notifyGraphChange(
+    this.notifyGraphChange(
+      animationSettings &&
         createAnimationsSettingsForBatchModification(
           {
             edges: data.edges,
@@ -234,8 +229,7 @@ export default abstract class Graph<
           },
           animationSettings
         )
-      );
-    }
+    );
   }
 
   protected removeEdgeObject(
@@ -260,10 +254,7 @@ export default abstract class Graph<
     }
     // Remove the edge from edges
     delete this.edges$[edge.key];
-    // Notify change if notifyObservers is set to true
-    if (animationsSettings !== null) {
-      this.notifyGraphChange(animationsSettings);
-    }
+    this.notifyGraphChange(animationsSettings);
   }
 
   removeObserver(observer: GraphObserver): void {
@@ -278,15 +269,17 @@ export default abstract class Graph<
       throw new Error(`Vertex with key ${key} does not exist.`);
     }
 
+    // Blur vertex if it is focused
+    if (this.focusedVertexKey === key) {
+      this.blur();
+    }
+
     const vertex = this.vertices$[key] as GV;
     vertex.edges.forEach(edge => {
       this.removeEdge(edge.key);
     });
     delete this.vertices$[key];
-    // Notify change if notifyObservers is set to true
-    if (animationsSettings !== null) {
-      this.notifyGraphChange(animationsSettings);
-    }
+    this.notifyGraphChange(animationsSettings);
 
     return vertex.value;
   }
