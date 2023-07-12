@@ -1,20 +1,19 @@
-import { Vertex } from '@/types/graphs';
+import { GraphComponents } from '@/types/graphs';
 import { CircularPlacementSettings, GraphLayout } from '@/types/settings';
 import { arrangeGraphComponents } from '@/utils/placement/shared';
 
 import placeVerticesOnCircle from './circle.placement';
 
-const placeVerticesOnCircles = <V, E>(
-  components: Array<Array<Vertex<V, E>>>,
+export default function placeVerticesOnCircles(
+  components: GraphComponents,
   vertexRadius: number,
-  settings: CircularPlacementSettings<V, E>
-): GraphLayout => {
+  settings: CircularPlacementSettings
+): GraphLayout {
+  'worklet';
   return arrangeGraphComponents(
-    components.map(vertices =>
-      placeVerticesOnCircle(vertices, vertexRadius, settings)
+    components.map(component =>
+      placeVerticesOnCircle(component, vertexRadius, settings)
     ),
     vertexRadius
   );
-};
-
-export default placeVerticesOnCircles;
+}

@@ -1,6 +1,4 @@
-import potpack from 'potpack';
-
-import { Vertex } from '@/types/graphs';
+import potpack from '@/lib/potpack';
 import {
   AnimatedBoundingRect,
   AnimatedDimensions,
@@ -96,14 +94,12 @@ export const animatedCanvasDimensionsToDimensions = (
   };
 };
 
-export const defaultSortComparator = <V, E>(
-  u: Vertex<V, E>,
-  v: Vertex<V, E>
-) => {
-  if (u.key < v.key) {
+export const defaultSortComparator = (key1: string, key2: string) => {
+  'worklet';
+  if (key1 < key2) {
     return -1;
   }
-  if (u.key > v.key) {
+  if (key1 > key2) {
     return 1;
   }
   return 0;
@@ -113,6 +109,7 @@ export const arrangeGraphComponents = (
   graphComponents: Array<GraphLayout>,
   vertexRadius: number
 ): GraphLayout => {
+  'worklet';
   // Prepare graph components for packing
   const preparedComponents = graphComponents.map(
     ({ boundingRect: { bottom, left, right, top }, verticesPositions }) => ({

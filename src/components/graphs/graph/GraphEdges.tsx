@@ -13,29 +13,20 @@ import {
   EdgeRemoveHandler,
   EdgeRenderHandler
 } from '@/types/components';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 
-type GraphEdgesProps<
-  E,
-  V,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = {
-  edgesData: Record<string, EdgeComponentData<E, V, ED>>;
+type GraphEdgesProps<E, V> = {
+  edgesData: Record<string, EdgeComponentData<E, V>>;
   focusProgress: SharedValue<number>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
 };
 
-function GraphEdges<
-  E,
-  V,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
+function GraphEdges<E, V>({
   edgesData,
   focusProgress,
   handleEdgeRemove,
   handleEdgeRender
-}: GraphEdgesProps<E, V, ED>) {
+}: GraphEdgesProps<E, V>) {
   const opacity = useDerivedValue(() =>
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
   );

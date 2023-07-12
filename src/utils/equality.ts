@@ -18,6 +18,17 @@ export const deepEqual = (value1: any, value2: any): boolean => {
     return value1 === value2;
   }
 
+  // If value1 and value2 are react components
+  if (
+    React.isValidElement(value1 as object) &&
+    React.isValidElement(value2 as object)
+  ) {
+    if (value1.type !== value2.type) {
+      return false;
+    }
+    return deepEqual(value1.props, value2.props);
+  }
+
   // If value1 and value2 are Date objects and their time values are equal, they are deeply equal
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   if (Object.hasOwn(value1, 'getTime') && Object.hasOwn(value2, 'getTime')) {
@@ -56,7 +67,7 @@ const updateSettings = <S extends ExcludeSettings | IncludeSettings>(
   key: string,
   settings?: S
 ): S => {
-  const regex = new RegExp(`^${key}.`);
+  const regex = new RegExp(`^(${key}|\\*).`);
 
   if (isIncludeSettingsObject(settings)) {
     return {
@@ -108,7 +119,7 @@ export const deepMemoComparator =
     }
 
     // Deeply compare every prop except the ones in the excluded list
-    for (const key of Object.keys(prevProps)) {
+    for (const key of nextPropsKeys) {
       if (excludedSet && (excludedSet.has(key) || excludedSet.has('*'))) {
         continue;
       } else if (includeSet && !includeSet.has(key)) {
@@ -120,21 +131,7 @@ export const deepMemoComparator =
         continue;
       }
 
-      // If the prop is a React component, compare the component's type and props
       if (
-        React.isValidElement(prevProps[key] as object) &&
-        React.isValidElement(nextProps[key] as object)
-      ) {
-        if (
-          prevProps[key].type !== nextProps[key].type ||
-          !deepMemoComparator(updateSettings(key, settings))(
-            prevProps[key].props as Record<string, any>,
-            nextProps[key].props as Record<string, any>
-          )
-        ) {
-          return false;
-        }
-      } else if (
         // If the beginning of the excluded prop matches the current prop,
         // recursively call deepMemoComparator for nested properties
         (excludedSet &&
@@ -153,24 +150,25 @@ export const deepMemoComparator =
           prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
         )
       ) {
-        if (
-          React.isValidElement(prevProps[key] as object) &&
-          React.isValidElement(nextProps[key] as object)
-        ) {
-          if (
-            prevProps[key].type !== nextProps[key].type ||
-            !deepMemoComparator(updateSettings(key, settings))(
-              prevProps[key].props as Record<string, any>,
-              nextProps[key].props as Record<string, any>
-            )
-          ) {
-            return false;
-          }
+        const isPrevReactElement = React.isValidElement(
+          prevProps[key] as object
+        );
+        const isNextReactElement = React.isValidElement(
+          nextProps[key] as object
+        );
+
+        if (isPrevReactElement !== isNextReactElement) {
+          return false;
         }
+
         if (
           !deepMemoComparator(updateSettings(key, settings))(
-            prevProps[key] as Record<string, any>,
-            nextProps[key] as Record<string, any>
+            (isPrevReactElement
+              ? prevProps[key].props
+              : prevProps[key]) as Record<string, any>,
+            (isNextReactElement
+              ? nextProps[key].props
+              : nextProps[key]) as Record<string, any>
           )
         ) {
           return false;

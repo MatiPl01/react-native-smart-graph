@@ -1,59 +1,81 @@
-class Node<T> {
-  next: Node<T> | null = null;
+type Node<T> = {
+  next: Node<T> | null;
+  value: T;
+};
 
-  constructor(public value: T) {}
-}
+const createNode = <T>(value: T): Node<T> => {
+  'worklet';
+  return {
+    next: null,
+    value
+  };
+};
 
-export default class LinkedList<T> {
-  private length$ = 0;
-  head: Node<T> | null = null;
-  tail: Node<T> | null = null;
+export const createLinkedList = <T>() => {
+  'worklet';
+  let length = 0;
+  let head: Node<T> | null = null;
+  let tail: Node<T> | null = null;
 
-  append(value: T): void {
-    const node = new Node(value);
+  return {
+    append(value: T) {
+      'worklet';
+      const node = createNode(value);
 
-    if (!this.tail) {
-      this.head = node;
-      this.tail = node;
-      return;
+      if (!tail) {
+        head = node;
+        tail = node;
+        return;
+      }
+
+      tail.next = node;
+      tail = node;
+      length++;
+    },
+    head() {
+      'worklet';
+      return head;
+    },
+    length() {
+      'worklet';
+      return length;
+    },
+
+    popLeft() {
+      'worklet';
+      if (!head) {
+        return null;
+      }
+
+      const value = head.value;
+
+      head = head.next;
+      if (!head) {
+        tail = null;
+      }
+
+      length--;
+      return value;
+    },
+
+    prepend(value: T): void {
+      'worklet';
+      const node = createNode(value);
+
+      if (!head) {
+        head = node;
+        tail = node;
+        return;
+      }
+
+      node.next = head;
+      head = node;
+      length++;
+    },
+
+    tail() {
+      'worklet';
+      return tail;
     }
-
-    this.tail.next = node;
-    this.tail = node;
-    this.length$++;
-  }
-
-  get length(): number {
-    return this.length$;
-  }
-
-  popLeft(): T | null {
-    if (!this.head) {
-      return null;
-    }
-
-    const value = this.head.value;
-
-    this.head = this.head.next;
-    if (!this.head) {
-      this.tail = null;
-    }
-
-    this.length$--;
-    return value;
-  }
-
-  prepend(value: T): void {
-    const node = new Node(value);
-
-    if (!this.head) {
-      this.head = node;
-      this.tail = node;
-      return;
-    }
-
-    node.next = this.head;
-    this.head = node;
-    this.length$++;
-  }
-}
+  };
+};

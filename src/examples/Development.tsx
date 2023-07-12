@@ -1,17 +1,7 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Easing } from 'react-native-reanimated';
 
-import GraphViewControls from '@/components/controls/GraphViewControls';
 import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
 
@@ -19,66 +9,64 @@ import {
   DefaultEdgeLabelRenderer,
   DirectedEdgeData,
   DirectedGraphComponent,
-  FocusSettings,
+  GraphViewControls,
   ObjectFit,
   VertexData,
   VertexPressHandler
 } from '..';
 
-const FOCUS_SETTINGS: FocusSettings = {
-  alignment: {
-    horizontalAlignment: 'left',
-    horizontalOffset: 25
-  },
-  animation: {
-    duration: 250,
-    easing: Easing.inOut(Easing.ease)
-  },
-  disableGestures: false,
-  vertexScale: 4
-};
+const ADDED_COMPONENTS = [
+  { key: 'V1' },
+  { key: 'V2' },
+  { from: 'V1', key: 'E1', to: 'V2' }
+  // { key: 'V3' },
+  // { from: 'V1', key: 'E2', to: 'V3' },
+  // { key: 'V4' },
+  // { from: 'V3', key: 'E3', to: 'V4' },
+  // { key: 'V5' },
+  // { from: 'V3', key: 'E4', to: 'V5' }
+];
 
-const ACHIEVEMENTS_GRAPH: {
-  edges: DirectedEdgeData<string>[];
-  vertices: VertexData<string>[];
-} = {
-  edges: [
-    { from: 'root', key: 'root-sport', to: 'sport', value: '' },
-    { from: 'root', key: 'root-diet', to: 'diet', value: '' },
-    { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
-    { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
-    { from: 'root', key: 'root-reading', to: 'reading', value: '' }
-  ],
-  vertices: [
-    { key: 'root', value: 'Root' },
-    { key: 'sport', value: 'Sport' },
-    { key: 'diet', value: 'Diet' },
-    { key: 'sleep', value: 'Sleep' },
-    { key: 'meditation', value: 'Meditation' },
-    { key: 'reading', value: 'Reading' }
-  ]
-};
-
-let added = false;
+let idx = 0;
+let mode = 0;
 
 export default function App() {
-  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
+  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
 
   useEffect(() => {
-    graph.insertBatch(ACHIEVEMENTS_GRAPH);
-  }, [graph]);
-
-  useEffect(() => {
-    setInterval(() => {
-      if (!added) {
-        graph.insertVertex({ key: 'test', value: 'test' });
-        added = true;
-      } else {
-        graph.removeVertex('test');
-        added = false;
+    const interval = setInterval(() => {
+      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
+        mode = mode === 0 ? 1 : 0;
+        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
       }
-    }, 2000);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const component = ADDED_COMPONENTS[idx]!;
+
+      try {
+        if (mode === 0) {
+          if ('from' in component) {
+            graph.insertEdge(component as DirectedEdgeData<void>);
+          } else {
+            graph.insertVertex(component as VertexData<string>);
+          }
+          idx++;
+        } else {
+          if ('from' in component) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
+          idx--;
+        }
+      } catch (e) {
+        clearInterval(interval);
+        console.error(e);
+        return;
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
@@ -90,7 +78,7 @@ export default function App() {
 
   const handleVertexPress = useCallback<VertexPressHandler<string>>(
     ({ vertex: { key } }) => {
-      graph.focus(key, FOCUS_SETTINGS);
+      console.log('press', key);
     },
     [graph]
   );
@@ -114,8 +102,7 @@ export default function App() {
                 onVertexPress: handleVertexPress
               },
               placement: {
-                minVertexSpacing: 50,
-                strategy: 'orbits'
+                strategy: 'trees'
               }
             }}
             graph={graph}
@@ -124,15 +111,6 @@ export default function App() {
             <GraphViewControls onObjectFitChange={setObjectFit} />
           </View>
         </GraphView>
-        <TouchableOpacity
-          onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
-          style={styles.backButton}>
-          <FontAwesomeIcon
-            icon={faChevronLeft}
-            size={32}
-            style={{ color: 'white' }}
-          />
-        </TouchableOpacity>
       </SafeAreaView>
     </GestureHandlerRootView>
   );

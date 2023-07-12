@@ -74,19 +74,6 @@ export default abstract class Graph<
     );
   }
 
-  get connections(): GraphConnections {
-    return Object.fromEntries(
-      Object.values(this.vertices$).map(vertex => [
-        vertex.key,
-        vertex.edges.map(edge =>
-          edge.vertices[0].key === vertex.key
-            ? edge.vertices[1].key
-            : edge.vertices[0].key
-        )
-      ])
-    );
-  }
-
   get edges(): Array<GE> {
     return Object.values(this.edges$);
   }
@@ -287,6 +274,8 @@ export default abstract class Graph<
   get vertices(): Array<GV> {
     return Object.values(this.vertices$);
   }
+
+  abstract get connections(): GraphConnections;
 
   abstract insertBatch(
     data: {
