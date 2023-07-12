@@ -1,48 +1,47 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import Queue from '@/data/Queue';
-import { Vertex } from '@/types/graphs';
+import { createQueue } from '@/data/Queue';
+import { GraphConnections, Vertex } from '@/types/graphs';
 
-export const bfs = <V, E>(
-  startVertices: Array<Vertex<V, E>>,
+export const bfs = (
+  connections: GraphConnections,
+  startVertices: Array<string>,
   callback: (data: {
     depth: number;
-    parent: Vertex<V, E> | null;
-    startVertex: Vertex<V, E>;
-    vertex: Vertex<V, E>;
+    parent: null | string;
+    startVertex: string;
+    vertex: string;
   }) => boolean
-): Record<string, Vertex<V, E> | null> => {
-  const parents: Record<string, Vertex<V, E> | null> = {};
+): Record<string, null | string> => {
+  'worklet';
+  const parents: Record<string, null | string> = {};
 
   for (const sv of startVertices) {
-    const queue = new Queue<{
+    const queue = createQueue<{
       depth: number;
-      parent: Vertex<V, E> | null;
-      vertex: Vertex<V, E>;
+      key: string;
+      parent: null | string;
     }>();
-    queue.enqueue({ depth: 0, parent: null, vertex: sv });
-
+    queue.enqueue({ depth: 0, key: sv, parent: null });
     while (!queue.isEmpty()) {
-      const { depth, parent, vertex } = queue.dequeue() as {
+      const { depth, key, parent } = queue.dequeue() as {
         depth: number;
-        parent: Vertex<V, E>;
-        vertex: Vertex<V, E>;
+        key: string;
+        parent: string;
       };
-      if (parents[vertex.key] !== undefined) {
+      if (parents[key] !== undefined) {
         continue;
       }
-      parents[vertex.key] = parent;
-      if (callback({ depth, parent, startVertex: sv, vertex })) {
+      parents[key] = parent;
+      if (callback({ depth, parent, startVertex: sv, vertex: key })) {
         return parents;
       }
-      vertex.edges.forEach(edge => {
-        const nextVertex = edge.vertices.find(v => v.key !== vertex.key);
-        if (nextVertex) {
-          queue.enqueue({
-            depth: depth + 1,
-            parent: vertex,
-            vertex: nextVertex
-          });
-        }
+      const neighbors = connections[key];
+      neighbors?.forEach(neighbor => {
+        queue.enqueue({
+          depth: depth + 1,
+          key: neighbor,
+          parent: key
+        });
       });
     }
   }
@@ -50,18 +49,21 @@ export const bfs = <V, E>(
   return parents;
 };
 
-export const findGraphComponents = <V, E>(
-  vertices: Array<Vertex<V, E>>
-): Array<Array<Vertex<V, E>>> => {
-  const components: Record<string, Array<Vertex<V, E>>> = {};
+export const findGraphComponents = (
+  connections: GraphConnections
+): Array<Array<string>> => {
+  'worklet';
+  const components: Record<string, Array<string>> = {};
 
-  bfs(vertices, ({ startVertex, vertex }) => {
-    if (!components[startVertex.key]) {
-      components[startVertex.key] = [];
+  bfs(connections, Object.keys(connections), ({ startVertex, vertex }) => {
+    if (!components[startVertex]) {
+      components[startVertex] = [];
     }
-    components[startVertex.key]!.push(vertex);
+    components[startVertex]!.push(vertex);
     return false;
   });
+
+  console.log(components);
 
   return Object.values(components);
 };

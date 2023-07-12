@@ -1,8 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
-import { Dimensions } from 'react-native';
 
+import { WINDOW_DIMENSIONS } from '@/constants/device';
 import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { GraphConnections } from '@/types/graphs';
 import {
   GraphLayout,
   PlacedVerticesPositions,
@@ -51,6 +50,7 @@ const calcVerticesGridPositions = (
 const calcVerticesTriangularPositions = (
   props: CalcVerticesPositionsProps
 ): GraphLayout => {
+  'worklet';
   const { density, minVertexSpacing, vertexRadius, vertices } = props;
   const verticesCount = vertices.length;
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
@@ -124,6 +124,7 @@ const calcVerticesRandomPositions = (
   width: number,
   height: number
 ): GraphLayout => {
+  'worklet';
   const innerWidth = width - 2 * vertexRadius;
   const innerHeight = height - 2 * vertexRadius;
 
@@ -139,15 +140,13 @@ const calcVerticesRandomPositions = (
 };
 
 export default function placeVerticesRandomly(
-  connections: GraphConnections,
+  vertices: Array<string>,
   vertexRadius: number,
   settings: RandomPlacementSettings = {} as RandomPlacementSettings
 ): GraphLayout {
   'worklet';
-  const vertices = Object.keys(connections);
-
   if (settings.layoutType === 'random') {
-    const { height, width } = Dimensions.get('window');
+    const { height, width } = WINDOW_DIMENSIONS;
     return calcVerticesRandomPositions(
       vertices,
       vertexRadius,

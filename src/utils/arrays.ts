@@ -2,6 +2,7 @@
 export const zipArrays = <T extends Array<any>>(
   ...arrays: T
 ): Array<{ [K in keyof T]: T[K] extends Array<infer U> ? U : never }> => {
+  'worklet';
   const zippedArray: Array<{
     [K in keyof T]: T[K] extends Array<infer U> ? U : never;
   }> = [];

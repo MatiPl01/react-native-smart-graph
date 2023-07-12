@@ -71,6 +71,12 @@ export default memo(
     // to prevent deep checking a large graph model structure
     // (graph should be memoized using the useMemo hook to prevent
     // unnecessary rerenders)
-    shallow: ['children.graph', 'children.*.graph']
+    shallow: [
+      // This is used when the graph component is the only child of the GraphView
+      'children.graph',
+      // This is used when the GraphView has multiple children (e.g. when
+      // GraphViewControls are used)
+      'children.*.graph'
+    ]
   })
 ) as typeof GraphView;

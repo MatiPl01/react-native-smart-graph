@@ -1,25 +1,32 @@
 import { GraphConnections } from '@/types/graphs';
 import { GraphLayout, GraphPlacementSettings } from '@/types/settings';
+import { findGraphComponents } from '@/utils/algorithms';
 
+import placeVerticesOnCircle from './strategies/circle.placement';
+import placeVerticesOnCircles from './strategies/circles.placement';
 import placeVerticesRandomly from './strategies/random.placement';
 
 export * from './shared';
 
-export const placeVertices = <V, E>(
+export const placeVertices = (
   connections: GraphConnections,
   vertexRadius: number,
-  settings?: GraphPlacementSettings<V, E>
+  settings?: GraphPlacementSettings
 ): GraphLayout => {
   'worklet';
   switch (settings?.strategy) {
     case 'circle':
-    //   return placeVerticesOnCircle(graph.vertices, vertexRadius, settings);
-    // case 'circles':
-    //   return placeVerticesOnCircles(
-    //     findGraphComponents(graph.vertices),
-    //     vertexRadius,
-    //     settings
-    //   );
+      return placeVerticesOnCircle(
+        Object.keys(connections),
+        vertexRadius,
+        settings
+      );
+    case 'circles':
+      return placeVerticesOnCircles(
+        findGraphComponents(connections),
+        vertexRadius,
+        settings
+      );
     // case 'orbits':
     //   return placeVerticesOnOrbits(
     //     findGraphComponents(graph.vertices),
@@ -36,6 +43,10 @@ export const placeVertices = <V, E>(
     //   );
     default:
     case 'random':
-      return placeVerticesRandomly(connections, vertexRadius, settings);
+      return placeVerticesRandomly(
+        Object.keys(connections),
+        vertexRadius,
+        settings
+      );
   }
 };

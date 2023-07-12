@@ -62,7 +62,7 @@ const ACHIEVEMENTS_GRAPH: {
 let added = false;
 
 export default function App() {
-  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
+  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView objectFit='contain' padding={25} scales={[0.25, 1, 10]}>
+        <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
             renderers={{
               label: DefaultEdgeLabelRenderer
@@ -117,7 +117,9 @@ export default function App() {
                 onVertexLongPress: handleVertexLongPress,
                 onVertexPress: handleVertexPress
               },
-              placement: {}
+              placement: {
+                strategy: 'circles'
+              }
             }}
             graph={graph}
           />

@@ -1,6 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { Vertex } from '@/types/graphs';
 import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
 import { DeepRequiredAll } from '@/types/utils';
 
@@ -11,14 +10,14 @@ export type PlacementStrategy =
   | 'random'
   | 'trees';
 
-export type GraphPlacementSettings<V, E> =
-  | CircularPlacementSettings<V, E>
+export type GraphPlacementSettings =
+  | CircularPlacementSettings
   | OrbitsPlacementSettings
   | RandomPlacementSettings
   | TreesPlacementSettings;
 
-type SortablePlacementSettings<V, E> = {
-  sortComparator?: (u: Vertex<V, E>, v: Vertex<V, E>) => number;
+type SortablePlacementSettings = {
+  sortComparator?: (key1: string, key2: string) => number;
   sortVertices?: boolean;
 };
 
@@ -80,8 +79,8 @@ export type OrbitsPlacementSettings = (SharedPlacementSettings & {
 }) &
   OrbitsLayerSizingSettings;
 
-export type CircularPlacementSettings<V, E> = SharedPlacementSettings &
-  SortablePlacementSettings<V, E> & {
+export type CircularPlacementSettings = SharedPlacementSettings &
+  SortablePlacementSettings & {
     strategy: 'circle' | 'circles';
   };
 

@@ -1,5 +1,5 @@
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { Vertex } from '@/types/graphs';
+import { GraphConnections } from '@/types/graphs';
 import {
   CircularPlacementSettings,
   GraphLayout,
@@ -7,48 +7,12 @@ import {
 } from '@/types/settings';
 import { defaultSortComparator } from '@/utils/placement/shared';
 
-const placeVerticesOnCircle = <V, E>(
-  vertices: Array<Vertex<V, E>>,
-  vertexRadius: number,
-  {
-    minVertexSpacing = SHARED_PLACEMENT_SETTINGS.minVertexSpacing,
-    sortComparator = defaultSortComparator,
-    sortVertices = false
-  }: CircularPlacementSettings<V, E>
-): GraphLayout => {
-  const updatedVertices = sortVertices
-    ? vertices.sort(sortComparator)
-    : vertices;
-
-  const initialAngle = -Math.PI / 2;
-  const { angleStep, containerRadius, radius } = getLayout(
-    updatedVertices.length,
-    vertexRadius,
-    minVertexSpacing
-  );
-
-  return {
-    boundingRect: {
-      bottom: containerRadius,
-      left: -containerRadius,
-      right: containerRadius,
-      top: -containerRadius
-    },
-    verticesPositions: updatedVertices.reduce((acc, { key }, idx) => {
-      acc[key] = {
-        x: radius * Math.cos(initialAngle + angleStep * idx),
-        y: radius * Math.sin(initialAngle + angleStep * idx)
-      };
-      return acc;
-    }, {} as PlacedVerticesPositions)
-  };
-};
-
 const getLayout = (
   verticesCount: number,
   vertexRadius: number,
   minVertexSpacing: number
 ) => {
+  'worklet';
   let angleStep, radius;
 
   if (verticesCount <= 1) {
@@ -69,4 +33,36 @@ const getLayout = (
   };
 };
 
-export default placeVerticesOnCircle;
+export default function placeVerticesOnCircle(
+  vertices: Array<string>,
+  vertexRadius: number,
+  settings: CircularPlacementSettings
+): GraphLayout {
+  'worklet';
+  const updatedVertices = settings?.sortVertices
+    ? vertices.sort(settings?.sortComparator ?? defaultSortComparator)
+    : vertices;
+
+  const initialAngle = -Math.PI / 2;
+  const { angleStep, containerRadius, radius } = getLayout(
+    updatedVertices.length,
+    vertexRadius,
+    settings?.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing
+  );
+
+  return {
+    boundingRect: {
+      bottom: containerRadius,
+      left: -containerRadius,
+      right: containerRadius,
+      top: -containerRadius
+    },
+    verticesPositions: updatedVertices.reduce((acc, key, idx) => {
+      acc[key] = {
+        x: radius * Math.cos(initialAngle + angleStep * idx),
+        y: radius * Math.sin(initialAngle + angleStep * idx)
+      };
+      return acc;
+    }, {} as PlacedVerticesPositions)
+  };
+}
