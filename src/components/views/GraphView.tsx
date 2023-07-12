@@ -71,6 +71,6 @@ export default memo(
     // to prevent deep checking a large graph model structure
     // (graph should be memoized using the useMemo hook to prevent
     // unnecessary rerenders)
-    shallow: ['children.graph']
+    shallow: ['children.graph', 'children.*.graph']
   })
 ) as typeof GraphView;

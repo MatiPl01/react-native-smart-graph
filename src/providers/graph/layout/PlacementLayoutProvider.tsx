@@ -1,5 +1,9 @@
-import { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
-import { useAnimatedReaction } from 'react-native-reanimated';
+import { PropsWithChildren, useMemo } from 'react';
+import {
+  runOnJS,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
 import {
@@ -10,7 +14,6 @@ import { Graph } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
 import {
   AnimationSettingsWithDefaults,
-  GraphLayout,
   GraphSettingsWithDefaults
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
@@ -34,14 +37,14 @@ function GraphPlacementLayoutProvider<V, E>({
   renderedVerticesData,
   settings
 }: GraphPlacementLayoutProviderProps<V, E>) {
-  const isFirstRenderRef = useRef(true);
-  const graphLayout = useMemo<GraphLayout>(
-    () =>
-      placeVertices(
-        graph,
-        settings.components.vertex.radius,
-        settings.placement
-      ),
+  const isFirstRender = useSharedValue(true);
+
+  const layoutAnimationData = useMemo(
+    () => ({
+      connections: graph.connections,
+      settings: settings.placement,
+      vertexRadius: settings.components.vertex.radius
+    }),
     [
       renderedVerticesData,
       renderedEdgesData,
@@ -50,19 +53,20 @@ function GraphPlacementLayoutProvider<V, E>({
     ]
   );
 
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      onRender(graphLayout.boundingRect);
-      return;
-    }
-  }, [graphLayout]);
-
   useAnimatedReaction(
-    () => ({
-      finalPositions: graphLayout.verticesPositions
-    }),
-    ({ finalPositions }) => {
+    () => null,
+    () => {
+      const { boundingRect, verticesPositions } = placeVertices(
+        layoutAnimationData.connections,
+        layoutAnimationData.vertexRadius,
+        layoutAnimationData.settings
+      );
+
+      if (isFirstRender.value) {
+        isFirstRender.value = false;
+        runOnJS(onRender)(boundingRect);
+      }
+
       animateVerticesToFinalPositions(
         Object.fromEntries(
           Object.entries(renderedVerticesData).map(([key, { position }]) => [
@@ -70,11 +74,11 @@ function GraphPlacementLayoutProvider<V, E>({
             position
           ])
         ),
-        finalPositions,
+        verticesPositions,
         layoutAnimationSettings
       );
     },
-    [graphLayout]
+    [layoutAnimationData]
   );
 
   return <>{children}</>;

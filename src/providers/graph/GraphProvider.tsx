@@ -157,7 +157,7 @@ function GraphProvider<V, E>({
       ...getLayoutProviders(graph, memoSettings, onRender),
       // EVENTS
       // Press events provider
-      ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
+      // ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
       // FOCUS
       // Provider used to focus on a specific vertex
       <VertexFocusProvider

@@ -1,9 +1,11 @@
 const shuffle = <T>(arr: Array<T>): Array<T> => {
+  'worklet';
   const shuffled = [...arr];
   return shuffled.sort(() => Math.random() - 0.5);
 };
 
 const choice = <T>(arr: Array<T>): T => {
+  'worklet';
   if (!arr.length) {
     throw new Error('Array is empty');
   }
@@ -11,6 +13,7 @@ const choice = <T>(arr: Array<T>): T => {
 };
 
 const sample = <T>(arr: Array<T>, size: number): Array<T> => {
+  'worklet';
   if (size > arr.length) {
     throw new Error('Sample size is bigger than array length');
   }

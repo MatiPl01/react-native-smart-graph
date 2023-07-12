@@ -11,7 +11,6 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Easing } from 'react-native-reanimated';
 
-import GraphViewControls from '@/components/controls/GraphViewControls';
 import GraphView from '@/components/views/GraphView';
 import { DirectedGraph } from '@/models/graphs';
 
@@ -20,6 +19,7 @@ import {
   DirectedEdgeData,
   DirectedGraphComponent,
   FocusSettings,
+  GraphViewControls,
   ObjectFit,
   VertexData,
   VertexPressHandler
@@ -59,6 +59,8 @@ const ACHIEVEMENTS_GRAPH: {
   ]
 };
 
+let added = false;
+
 export default function App() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('none');
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
@@ -72,6 +74,14 @@ export default function App() {
   useEffect(() => {
     setInterval(() => {
       setVertexSpacing(v => (v === 50 ? 100 : 50));
+
+      if (!added) {
+        graph.insertVertex({ key: '1' });
+        added = true;
+      } else {
+        added = false;
+        graph.removeVertex('1');
+      }
     }, 1000);
   }, []);
 
@@ -97,7 +107,7 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
+        <GraphView objectFit='contain' padding={25} scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
             renderers={{
               label: DefaultEdgeLabelRenderer
@@ -107,10 +117,7 @@ export default function App() {
                 onVertexLongPress: handleVertexLongPress,
                 onVertexPress: handleVertexPress
               },
-              placement: {
-                minVertexSpacing: vertexSpacing,
-                strategy: 'orbits'
-              }
+              placement: {}
             }}
             graph={graph}
           />
