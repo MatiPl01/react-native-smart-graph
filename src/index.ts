@@ -37,8 +37,10 @@ export * from '@/examples';
 // TYPES
 export {
   type DirectedEdgeData,
+  type DirectedGraphData,
   type GraphData,
   type UndirectedEdgeData,
+  type UndirectedGraphData,
   type VertexData
 } from '@/types/data';
 export {
@@ -80,6 +82,8 @@ export {
   type EdgeLabelSettings,
   type EdgePressEvent,
   type EdgePressHandler,
+  type FocusPoint,
+  type FocusPoints,
   type FocusSettings,
   type ForcesLayoutSettings,
   type ForcesSettings,

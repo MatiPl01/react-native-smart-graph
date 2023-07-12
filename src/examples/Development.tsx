@@ -1,14 +1,5 @@
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  TouchableOpacity,
-  View
-} from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StyleSheet, View } from 'react-native';
 import { Easing } from 'react-native-reanimated';
 
 import GraphViewControls from '@/components/controls/GraphViewControls';
@@ -38,7 +29,7 @@ const FOCUS_SETTINGS: FocusSettings = {
   vertexScale: 4
 };
 
-const ACHIEVEMENTS_GRAPH: {
+const GRAPH: {
   edges: DirectedEdgeData<string>[];
   vertices: VertexData<string>[];
 } = {
@@ -59,12 +50,12 @@ const ACHIEVEMENTS_GRAPH: {
   ]
 };
 
-export default function App() {
+export default function Development() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('none');
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
 
   useEffect(() => {
-    graph.insertBatch(ACHIEVEMENTS_GRAPH);
+    graph.insertBatch(GRAPH);
   }, [graph]);
 
   const [vertexSpacing, setVertexSpacing] = useState(50);
@@ -90,68 +81,33 @@ export default function App() {
   );
 
   return (
-    <GestureHandlerRootView style={styles.background}>
-      <StatusBar
-        backgroundColor='transparent'
-        barStyle='light-content'
-        translucent
+    <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
+      <DirectedGraphComponent
+        renderers={{
+          label: DefaultEdgeLabelRenderer
+        }}
+        settings={{
+          events: {
+            onVertexLongPress: handleVertexLongPress,
+            onVertexPress: handleVertexPress
+          },
+          placement: {
+            minVertexSpacing: vertexSpacing,
+            strategy: 'orbits'
+          }
+        }}
+        graph={graph}
       />
-      <SafeAreaView style={styles.container}>
-        <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
-          <DirectedGraphComponent
-            renderers={{
-              label: DefaultEdgeLabelRenderer
-            }}
-            settings={{
-              events: {
-                onVertexLongPress: handleVertexLongPress,
-                onVertexPress: handleVertexPress
-              },
-              placement: {
-                minVertexSpacing: vertexSpacing,
-                strategy: 'orbits'
-              }
-            }}
-            graph={graph}
-          />
-          <View style={styles.controls}>
-            <GraphViewControls onObjectFitChange={setObjectFit} />
-          </View>
-        </GraphView>
-        <TouchableOpacity
-          onPress={() => graph.blur(FOCUS_SETTINGS.animation)}
-          style={styles.backButton}>
-          <FontAwesomeIcon
-            icon={faChevronLeft}
-            size={32}
-            style={{ color: 'white' }}
-          />
-        </TouchableOpacity>
-      </SafeAreaView>
-    </GestureHandlerRootView>
+      <View style={styles.controls}>
+        <GraphViewControls onObjectFitChange={setObjectFit} />
+      </View>
+    </GraphView>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: {
-    alignItems: 'center',
-    height: 32,
-    justifyContent: 'center',
-    left: 16,
-    position: 'absolute',
-    top: 64,
-    width: 32
-  },
-  background: {
-    backgroundColor: 'black',
-    flex: 1
-  },
-  container: {
-    flex: 1,
-    position: 'relative'
-  },
   controls: {
-    marginTop: 64,
-    right: 12
+    left: 12,
+    marginTop: 48
   }
 });

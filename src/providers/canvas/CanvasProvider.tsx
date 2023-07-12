@@ -17,6 +17,7 @@ import { CanvasDataProvider } from './data';
 import { GesturesProvider } from './gestures';
 import SettingsChangeResponderProvider from './settings/SettingsChangeResponderProvider';
 import { FocusProvider, TransformProvider } from './transform';
+import MultiFocusProvider from './transform/MultiFocusProvider';
 
 type CanvasProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
@@ -86,6 +87,10 @@ export default function CanvasProvider({
       // FOCUS
       // The provider used to handle canvas focus operations
       <FocusProvider />,
+      // The provider used to handle multiple points focus based on
+      // user-defined progress value (e.g. different zoom of the vertex
+      // based on the scroll position)
+      <MultiFocusProvider />,
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
       <GesturesProvider />,

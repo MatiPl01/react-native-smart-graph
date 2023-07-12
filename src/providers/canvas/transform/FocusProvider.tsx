@@ -41,7 +41,7 @@ type FocusContextType = {
   startFocus: FocusStartSetter;
 };
 
-const FocusContext = createContext(null);
+const FocusContext = createContext(null as unknown as object);
 
 export const useFocusContext = () => {
   const contextValue = useContext(FocusContext);
@@ -431,8 +431,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <FocusContext.Provider value={contextValue as any}>
+    <FocusContext.Provider value={contextValue}>
       {children}
     </FocusContext.Provider>
   );

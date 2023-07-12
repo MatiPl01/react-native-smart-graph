@@ -11,6 +11,7 @@ import {
   UndirectedGraphComponentsSettingsWithDefaults
 } from './components';
 import { GraphEventsSettings } from './events';
+import { GraphFocusSettings } from './focus';
 import { GraphLayoutSettings, GraphLayoutSettingsWithDefaults } from './layout';
 import {
   GraphPlacementSettings,
@@ -20,6 +21,7 @@ import {
 export * from './animations';
 export * from './components';
 export * from './events';
+export * from './focus';
 export * from './layout';
 export * from './placement';
 
@@ -30,11 +32,12 @@ type SharedGraphSettings<
 > = {
   animations?: GraphAnimationsSettings;
   events?: GraphEventsSettings<V, E, ED>;
+  focus?: GraphFocusSettings;
   layout?: GraphLayoutSettings;
   placement?: GraphPlacementSettings<V, E>;
 };
 
-export type DirectedGraphSettings<V, E> = SharedGraphSettings<
+export type DirectedGraphSettings<V = void, E = void> = SharedGraphSettings<
   V,
   E,
   DirectedEdgeData<E>
@@ -42,7 +45,7 @@ export type DirectedGraphSettings<V, E> = SharedGraphSettings<
   components?: DirectedGraphComponentsSettings;
 };
 
-export type UndirectedGraphSettings<V, E> = SharedGraphSettings<
+export type UndirectedGraphSettings<V = void, E = void> = SharedGraphSettings<
   V,
   E,
   UndirectedEdgeData<E>

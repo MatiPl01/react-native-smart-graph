@@ -32,7 +32,7 @@ export type VertexFocusContextType = {
   focusTransitionProgress: SharedValue<number>;
 };
 
-const VertexFocusContext = createContext(null);
+const VertexFocusContext = createContext(null as unknown as object);
 
 export const useVertexFocusContext = () => {
   const contextValue = useContext(VertexFocusContext);
@@ -227,8 +227,7 @@ function VertexFocusProvider<V, E>({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <VertexFocusContext.Provider value={contextValue as any}>
+    <VertexFocusContext.Provider value={contextValue}>
       {children}
     </VertexFocusContext.Provider>
   );

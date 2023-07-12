@@ -27,7 +27,7 @@ export type AutoSizingContextType = {
   ) => void;
 };
 
-const AutoSizingContext = createContext(null);
+const AutoSizingContext = createContext(null as unknown as object);
 
 export const useAutoSizingContext = () => {
   const contextValue = useContext(AutoSizingContext);

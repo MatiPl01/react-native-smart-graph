@@ -29,7 +29,7 @@ type CanvasDataContextType = {
   scales: SharedValue<number[]>;
 };
 
-const CanvasDataContext = createContext(null);
+const CanvasDataContext = createContext(null as unknown as object);
 
 export const useCanvasDataContext = () => {
   const contextValue = useContext(CanvasDataContext);
@@ -97,8 +97,7 @@ export default function CanvasDataProvider({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <CanvasDataContext.Provider value={contextValue as any}>
+    <CanvasDataContext.Provider value={contextValue}>
       {children}
     </CanvasDataContext.Provider>
   );

@@ -26,7 +26,7 @@ type GraphViewChildrenContextType<
   overlay: Array<React.ReactElement<Record<string, any>>>;
 };
 
-const GraphViewChildrenContext = createContext(null);
+const GraphViewChildrenContext = createContext(null as unknown as object);
 
 export const useGraphViewChildrenContext = <
   V,
@@ -179,8 +179,7 @@ export default function GraphViewChildrenProvider<
   }, [graphViewChildren]);
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    <GraphViewChildrenContext.Provider value={value as any}>
+    <GraphViewChildrenContext.Provider value={value}>
       {children}
     </GraphViewChildrenContext.Provider>
   );

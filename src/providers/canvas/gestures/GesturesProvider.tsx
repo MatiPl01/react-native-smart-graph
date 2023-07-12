@@ -23,7 +23,7 @@ type GesturesContextType = {
   gestureHandler: ComposedGesture;
 };
 
-const GesturesContext = createContext(null);
+const GesturesContext = createContext(null as unknown as object);
 
 export const useGesturesContext = () => {
   const contextValue = useContext(GesturesContext);
@@ -219,8 +219,7 @@ export default function GesturesProvider({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <GesturesContext.Provider value={contextValue as any}>
+    <GesturesContext.Provider value={contextValue}>
       {children}
     </GesturesContext.Provider>
   );

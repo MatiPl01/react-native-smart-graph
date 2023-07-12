@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable import/no-unused-modules */
 import {
   Context,
   createContext,
@@ -55,9 +54,7 @@ export type ComponentsDataContextType<
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
-// The initial value must be falsy to ensure that the context is
-// not used outside of a provider
-const ComponentsDataContext = createContext(null);
+const ComponentsDataContext = createContext(null as unknown as object);
 
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
@@ -236,12 +233,9 @@ export default function ComponentsDataProvider<
   );
 
   return (
-    <>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */}
-      <ComponentsDataContext.Provider value={contextValue as any}>
-        {children}
-      </ComponentsDataContext.Provider>
-    </>
+    <ComponentsDataContext.Provider value={contextValue}>
+      {children}
+    </ComponentsDataContext.Provider>
   );
 }
 
