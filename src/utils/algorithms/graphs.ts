@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createQueue } from '@/data/Queue';
-import { GraphConnections, Vertex } from '@/types/graphs';
+import {
+  GraphComponent,
+  GraphComponents,
+  GraphConnections
+} from '@/types/graphs';
 
 export const bfs = (
   connections: GraphConnections,
@@ -10,7 +14,7 @@ export const bfs = (
     parent: null | string;
     startVertex: string;
     vertex: string;
-  }) => boolean
+  }) => boolean | void
 ): Record<string, null | string> => {
   'worklet';
   const parents: Record<string, null | string> = {};
@@ -35,8 +39,7 @@ export const bfs = (
       if (callback({ depth, parent, startVertex: sv, vertex: key })) {
         return parents;
       }
-      const neighbors = connections[key];
-      neighbors?.forEach(neighbor => {
+      connections[key]?.outgoing?.forEach(neighbor => {
         queue.enqueue({
           depth: depth + 1,
           key: neighbor,
@@ -49,28 +52,74 @@ export const bfs = (
   return parents;
 };
 
-export const findGraphComponents = (
-  connections: GraphConnections
-): Array<Array<string>> => {
+// NOTE: This is an iterative post-order DFS implementation
+export const dfs = (
+  connections: GraphConnections,
+  startVertices: Array<string>,
+  callback: (data: {
+    depth: number;
+    parent: null | string;
+    startVertex: string;
+    vertex: string;
+  }) => boolean | void
+): Record<string, null | string> => {
   'worklet';
-  const components: Record<string, Array<string>> = {};
+  const parents: Record<string, null | string> = {};
+  const depths: Record<string, number> = {};
 
-  bfs(connections, Object.keys(connections), ({ startVertex, vertex }) => {
-    if (!components[startVertex]) {
-      components[startVertex] = [];
+  for (const sv of startVertices) {
+    const stack: Array<{
+      depth: number;
+      key: string;
+      parent: null | string;
+    }> = [];
+    stack.push({ depth: 0, key: sv, parent: null });
+
+    const visited: Record<string, boolean> = {};
+    const postOrder = [];
+
+    while (stack.length) {
+      const node = stack[stack.length - 1]!;
+      const { key } = node;
+      if (!visited[key]) {
+        visited[key] = true;
+        postOrder.push(node);
+
+        const neighbors = connections[key]?.outgoing ?? [];
+        for (const neighbor of neighbors) {
+          if (!visited[neighbor]) {
+            stack.push({
+              depth: node.depth + 1,
+              key: neighbor,
+              parent: key
+            });
+          }
+        }
+      } else {
+        stack.pop();
+      }
     }
-    components[startVertex]!.push(vertex);
-    return false;
-  });
 
-  console.log(components);
+    while (postOrder.length) {
+      const { depth, key, parent } = postOrder.pop()!;
+      if (parents[key] !== undefined) {
+        continue;
+      }
+      parents[key] = parent;
+      depths[key] = depth;
+      if (callback({ depth, parent, startVertex: sv, vertex: key })) {
+        return parents;
+      }
+    }
+  }
 
-  return Object.values(components);
+  return parents;
 };
 
-export const findGraphDiameter = <V, E>(
-  graphComponent: Array<Vertex<V, E>>
-): { diameter: number; path: Array<Vertex<V, E>> } => {
+const findGraphDiameter = (
+  connections: GraphConnections,
+  graphComponent: GraphComponent
+): { diameter: number; path: Array<string> } => {
   // Start from the last vertex in the component (it always will be
   // the farthest vertex from the vertex where BFS started as it
   // was inserted last)
@@ -79,9 +128,9 @@ export const findGraphDiameter = <V, E>(
   // Find the farthest vertex from the start vertex and the path
   // between them
   let farthestDistance = -1;
-  let farthestVertex: Vertex<V, E> | null = null;
+  let farthestVertex: null | string = null;
 
-  const parents = bfs([startVertex], ({ depth, vertex }) => {
+  const parents = bfs(connections, [startVertex], ({ depth, vertex }) => {
     if (depth > farthestDistance) {
       farthestDistance = depth;
       farthestVertex = vertex;
@@ -90,13 +139,13 @@ export const findGraphDiameter = <V, E>(
   });
 
   // Find the path between the start vertex and the farthest vertex
-  const path: Array<Vertex<V, E>> = [];
+  const path: Array<string> = [];
 
-  let currentVertex = farthestVertex as Vertex<V, E> | null;
+  let currentVertex = farthestVertex as null | string;
 
   while (currentVertex) {
     path.push(currentVertex);
-    currentVertex = parents[currentVertex.key] as Vertex<V, E> | null;
+    currentVertex = parents[currentVertex] as null | string;
   }
 
   return {
@@ -105,9 +154,74 @@ export const findGraphDiameter = <V, E>(
   };
 };
 
-export const findGraphCenter = <V, E>(
-  graphComponent: Array<Vertex<V, E>>
-): Vertex<V, E> => {
-  const { diameter, path } = findGraphDiameter(graphComponent);
+export const findGraphComponents = (
+  connections: GraphConnections
+): GraphComponents => {
+  'worklet';
+  const components: Record<string, GraphComponent> = {};
+
+  bfs(connections, Object.keys(connections), ({ startVertex, vertex }) => {
+    if (!components[startVertex]) {
+      components[startVertex] = [];
+    }
+    components[startVertex]!.push(vertex);
+  });
+
+  return Object.values(components);
+};
+
+export const findGraphCenter = (
+  connections: GraphConnections,
+  graphComponent: GraphComponent
+): string => {
+  'worklet';
+  const { diameter, path } = findGraphDiameter(connections, graphComponent);
   return path[Math.floor(diameter / 2)]!;
+};
+
+const findDirectedGraphSourceVertex = (
+  connections: GraphConnections,
+  graphComponent: Array<string>
+): string => {
+  'worklet';
+  let vertices = graphComponent.filter(
+    v => connections[v]?.incoming?.length === 0
+  );
+  if (vertices.length === 0) {
+    vertices = graphComponent;
+  }
+
+  return vertices.reduce((sourceVertex, vertex) => {
+    if (
+      connections[vertex]!.outgoing.length >
+      connections[sourceVertex]!.outgoing.length
+    ) {
+      return vertex;
+    }
+    return sourceVertex;
+  }, vertices[0]!);
+};
+
+export const findRootVertex = (
+  connections: GraphConnections,
+  graphComponent: GraphComponent,
+  selectedRootVertexKeys: Set<string>,
+  isGraphDirected: boolean
+): string => {
+  'worklet';
+  // Find the root vertex of the component
+  // 1. If there are selected root vertices, look for the root vertex among them
+  for (const key of graphComponent) {
+    if (selectedRootVertexKeys.has(key)) {
+      return key;
+    }
+  }
+  // 2. If the graph is undirected, select the center of the graph diameter
+  // as the root vertex
+  if (!isGraphDirected) {
+    return findGraphCenter(connections, graphComponent);
+  }
+  // 3. If the graph is directed, select the vertex with the highest out degree
+  // as the root vertex
+  return findDirectedGraphSourceVertex(connections, graphComponent);
 };

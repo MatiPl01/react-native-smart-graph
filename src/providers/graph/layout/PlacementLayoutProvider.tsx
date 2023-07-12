@@ -42,6 +42,7 @@ function GraphPlacementLayoutProvider<V, E>({
   const layoutAnimationData = useMemo(
     () => ({
       connections: graph.connections,
+      isGraphDirected: graph.isDirected(),
       settings: settings.placement,
       vertexRadius: settings.components.vertex.radius
     }),
@@ -59,7 +60,8 @@ function GraphPlacementLayoutProvider<V, E>({
       const { boundingRect, verticesPositions } = placeVertices(
         layoutAnimationData.connections,
         layoutAnimationData.vertexRadius,
-        layoutAnimationData.settings
+        layoutAnimationData.settings,
+        layoutAnimationData.isGraphDirected
       );
 
       if (isFirstRender.value) {

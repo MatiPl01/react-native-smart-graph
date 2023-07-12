@@ -1,6 +1,7 @@
 import UndirectedEdge from '@/models/edges/UndirectedEdge';
 import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
+import { GraphConnections } from '@/types/graphs';
 import {
   AnimationSettings,
   SingleModificationAnimationSettings
@@ -26,6 +27,26 @@ export default class UndirectedGraph<V, E> extends Graph<
   }) {
     super();
     if (data) this.insertBatch(data);
+  }
+
+  get connections(): GraphConnections {
+    return Object.fromEntries(
+      Object.values(this.vertices$).map(vertex => {
+        const neighbors = vertex.edges.map(edge =>
+          edge.vertices[0].key === vertex.key
+            ? edge.vertices[1].key
+            : edge.vertices[0].key
+        );
+
+        return [
+          vertex.key,
+          {
+            incoming: neighbors,
+            outgoing: neighbors
+          }
+        ];
+      })
+    );
   }
 
   override insertBatch(

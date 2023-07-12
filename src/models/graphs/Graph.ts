@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
-import {
-  Edge,
-  Graph as IGraph,
-  GraphConnections,
-  GraphObserver,
-  Vertex
-} from '@/types/graphs';
+import { Edge, Graph as IGraph, GraphObserver, Vertex } from '@/types/graphs';
 import {
   AnimationSettings,
   AnimationsSettings,
@@ -73,19 +67,6 @@ export default abstract class Graph<
         )
       );
     }
-  }
-
-  get connections(): GraphConnections {
-    return Object.fromEntries(
-      Object.values(this.vertices$).map(vertex => [
-        vertex.key,
-        vertex.edges.map(edge =>
-          edge.vertices[0].key === vertex.key
-            ? edge.vertices[1].key
-            : edge.vertices[0].key
-        )
-      ])
-    );
   }
 
   get edges(): Array<GE> {

@@ -1,114 +1,74 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { Vertex } from '@/types/graphs';
+import { GraphConnections } from '@/types/graphs';
 import {
   GraphLayout,
-  PlacedVerticesPositions,
-  TreesPlacementSettings
+  OrbitsPlacementSettings,
+  PlacedVerticesPositions
 } from '@/types/settings';
-import { findRootVertex } from '@/utils/graphs/models';
+import {
+  bfs,
+  dfs,
+  findGraphComponents,
+  findRootVertex
+} from '@/utils/algorithms';
 import {
   arrangeGraphComponents,
   calcContainerBoundingRect
 } from '@/utils/placement/shared';
 
-const placeVerticesOnTrees = <V, E>(
-  graphComponents: Array<Array<Vertex<V, E>>>,
-  vertexRadius: number,
-  isGraphDirected: boolean,
-  settings: TreesPlacementSettings
-): GraphLayout => {
-  const componentsLayouts: Array<GraphLayout> = [];
-  const rootVertexKeys = new Set(settings.roots);
+type VertexPosition = { col: number; row: number };
 
-  for (const component of graphComponents) {
-    // Find the root vertex of the component
-    const rootVertex = findRootVertex(
-      component,
-      rootVertexKeys,
-      isGraphDirected
-    );
-    // Place vertices on the grid
-    const arrangedVertices = arrangeVertices(rootVertex);
-    // Place vertices in the layout
-    const minVertexSpacing =
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
-    const verticesPositions = placeVertices(
-      arrangedVertices,
-      minVertexSpacing,
-      vertexRadius
-    );
-    // Calculate container dimensions
-    componentsLayouts.push({
-      boundingRect: calcContainerBoundingRect(
-        verticesPositions,
-        minVertexSpacing,
-        vertexRadius
-      ),
-      verticesPositions
-    });
-  }
-
-  return arrangeGraphComponents(componentsLayouts, vertexRadius);
-};
-
-const arrangeVertices = <V, E>(
-  rootVertex: Vertex<V, E>
-): Record<string, { col: number; row: number }> => {
-  const arrangedVertices: Record<string, { col: number; row: number }> = {};
-  const treeWidth = arrangeVerticesRecur(arrangedVertices, rootVertex);
-
-  arrangedVertices[rootVertex.key] = {
-    col: treeWidth / 2 - 0.5,
-    row: 0
-  };
-
-  return arrangedVertices;
-};
-
-const arrangeVerticesRecur = <V, E>(
-  arrangedVertices: Record<string, { col: number; row: number }>,
-  vertex: Vertex<V, E>,
-  visitedVertices: Set<string> = new Set(),
-  currentColumn = 0,
-  currentDepth = 0
-): number => {
-  visitedVertices.add(vertex.key);
-  const unusedVertexNeighbors: Array<Vertex<V, E>> = [];
-  const alreadyCheckedNeighbors = new Set<string>();
-
-  vertex.neighbors.forEach(neighbor => {
-    if (
-      !alreadyCheckedNeighbors.has(neighbor.key) &&
-      !visitedVertices.has(neighbor.key)
-    ) {
-      alreadyCheckedNeighbors.add(neighbor.key);
-      unusedVertexNeighbors.push(neighbor);
+const arrangeVertices = (
+  connections: GraphConnections,
+  rootVertex: string
+): Record<string, VertexPosition> => {
+  'worklet';
+  // Calculate subtree widths
+  const subtreeWidths: Record<string, number> = {};
+  dfs(connections, [rootVertex], ({ parent, vertex }) => {
+    if (!subtreeWidths[vertex]) {
+      subtreeWidths[vertex] = 1;
+    }
+    if (parent) {
+      if (!subtreeWidths[parent]) {
+        subtreeWidths[parent] = 0;
+      }
+      subtreeWidths[parent] += subtreeWidths[vertex]!;
     }
   });
 
-  if (unusedVertexNeighbors.length === 0) {
-    return 1;
-  }
+  // Arrange vertices
+  const arrangedVertices: Record<string, VertexPosition> = {
+    [rootVertex]: { col: subtreeWidths[rootVertex]! / 2, row: 0 }
+  };
 
-  let subtreeWidth = 0;
-  unusedVertexNeighbors.forEach(neighbor => {
-    const oldSubtreeWidth = subtreeWidth;
-    const childSubtreeWidth = arrangeVerticesRecur(
-      arrangedVertices,
-      neighbor,
-      visitedVertices,
-      currentColumn + subtreeWidth,
-      currentDepth + 1
-    );
-    subtreeWidth += childSubtreeWidth;
+  let prevData: {
+    depth: number;
+    parent: null | string;
+    vertex: string;
+  } | null = null;
 
-    arrangedVertices[neighbor.key] = {
-      col: currentColumn + oldSubtreeWidth + childSubtreeWidth / 2 - 0.5,
-      row: currentDepth + 1
-    };
+  bfs(connections, [rootVertex], data => {
+    const { depth, parent, vertex } = data;
+
+    if (parent) {
+      let col = 0;
+      if (prevData?.parent === parent) {
+        col =
+          arrangedVertices[prevData.vertex]!.col +
+          (subtreeWidths[vertex]! + 1) / 2;
+      } else {
+        col = arrangedVertices[parent]!.col - (subtreeWidths[parent]! - 1) / 2;
+      }
+
+      arrangedVertices[vertex] = { col, row: depth };
+    }
+
+    prevData = data;
   });
 
-  return subtreeWidth;
+  return arrangedVertices;
 };
 
 const placeVertices = (
@@ -116,6 +76,7 @@ const placeVertices = (
   minVertexSpacing: number,
   vertexRadius: number
 ): PlacedVerticesPositions => {
+  'worklet';
   // determine the minimum distance between vertices
   const padding = 2 * vertexRadius;
   const minVertexCenterDistance = padding + minVertexSpacing;
@@ -146,4 +107,46 @@ const placeVertices = (
   );
 };
 
-export default placeVerticesOnTrees;
+export default function placeVerticesOnTrees(
+  connections: GraphConnections,
+  vertexRadius: number,
+  isGraphDirected: boolean,
+  settings: OrbitsPlacementSettings
+): GraphLayout {
+  'worklet';
+  const componentsLayouts: Array<GraphLayout> = [];
+  const rootVertexKeys = new Set(settings.roots);
+
+  const graphComponents = findGraphComponents(connections);
+
+  for (const component of graphComponents) {
+    // Find the root vertex of the component
+    const rootVertex = findRootVertex(
+      connections,
+      component,
+      rootVertexKeys,
+      isGraphDirected
+    );
+    // Place vertices on the grid
+    const arrangedVertices = arrangeVertices(connections, rootVertex);
+    // Place vertices in the layout
+    const minVertexSpacing =
+      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+    const verticesPositions = placeVertices(
+      arrangedVertices,
+      minVertexSpacing,
+      vertexRadius
+    );
+    // Calculate container dimensions
+    componentsLayouts.push({
+      boundingRect: calcContainerBoundingRect(
+        verticesPositions,
+        minVertexSpacing,
+        vertexRadius
+      ),
+      verticesPositions
+    });
+  }
+
+  return arrangeGraphComponents(componentsLayouts, vertexRadius);
+}

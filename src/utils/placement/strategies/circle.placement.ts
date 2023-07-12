@@ -1,5 +1,4 @@
 import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { GraphConnections } from '@/types/graphs';
 import {
   CircularPlacementSettings,
   GraphLayout,

@@ -23,7 +23,17 @@ export interface Edge<E, V> {
   isDirected(): boolean;
 }
 
-export type GraphConnections = Record<string, Array<string>>;
+export type VertexConnections = {
+  // incoming and outgoing edges will be the same for undirected graphs
+  incoming: Array<string>;
+  outgoing: Array<string>;
+};
+
+export type GraphConnections = Record<string, VertexConnections>;
+
+export type GraphComponent = Array<string>;
+
+export type GraphComponents = Array<Array<string>>;
 
 export type GraphObserver = {
   focusChanged?: (vertexKey: null | string, settings?: FocusSettings) => void;
