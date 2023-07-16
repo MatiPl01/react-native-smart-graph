@@ -53,7 +53,7 @@ const calcResultantAttractiveForce = (
     return { x: 0, y: 0 };
   }
   return addVectorsArray(
-    vertexConnections
+    [...vertexConnections.outgoing, ...vertexConnections.incoming]
       .filter(neighborKey => !lockedVertices[neighborKey])
       .map(neighborKey =>
         calcAttractiveForce(

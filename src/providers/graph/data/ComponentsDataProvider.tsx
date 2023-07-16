@@ -21,7 +21,6 @@ import {
   VertexRenderHandler
 } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph, GraphConnections } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
 import {
@@ -36,14 +35,10 @@ import {
 } from '@/utils/components';
 import { withMemoContext } from '@/utils/contexts';
 
-export type ComponentsDataContextType<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = {
+export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
   edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
-  edgesData: Record<string, EdgeComponentData<E, V, ED>>;
+  edgesData: Record<string, EdgeComponentData<E, V>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
@@ -62,11 +57,12 @@ type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   settings: GraphSettingsWithDefaults<V, E>;
 }>;
 
-export default function ComponentsDataProvider<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({ children, graph, renderers, settings }: ComponentsDataProviderProps<V, E>) {
+export default function ComponentsDataProvider<V, E>({
+  children,
+  graph,
+  renderers,
+  settings
+}: ComponentsDataProviderProps<V, E>) {
   // GRAPH CHANGES OBSERVER
   const [{ animationsSettings, orderedEdges, vertices }] =
     useGraphObserver(graph);
@@ -79,7 +75,7 @@ export default function ComponentsDataProvider<
   >({});
   // Store data for graph edge components
   const [edgesData, setEdgesData] = useState<
-    Record<string, EdgeComponentData<E, V, ED>>
+    Record<string, EdgeComponentData<E, V>>
   >({});
   // Store data for edge labels
   const [edgeLabelsData, setEdgeLabelsData] = useState<
@@ -207,7 +203,7 @@ export default function ComponentsDataProvider<
     });
   }, []);
 
-  const contextValue = useMemo<ComponentsDataContextType<V, E, ED>>(
+  const contextValue = useMemo<ComponentsDataContextType<V, E>>(
     () => ({
       connections,
       edgeLabelsData,
@@ -241,7 +237,7 @@ export default function ComponentsDataProvider<
 
 export const withGraphData = <
   P extends object,
-  V extends CommonTypes<ComponentsDataContextType<unknown, unknown, never>, P>
+  V extends CommonTypes<ComponentsDataContextType<unknown, unknown>, P>
 >(
   Component: React.ComponentType<P>,
   selector: (contextValue: V) => Partial<V>
@@ -249,7 +245,7 @@ export const withGraphData = <
   withMemoContext(
     Component,
     ComponentsDataContext as unknown as Context<
-      ComponentsDataContextType<unknown, unknown, never>
+      ComponentsDataContextType<unknown, unknown>
     >,
     selector
   ) as <

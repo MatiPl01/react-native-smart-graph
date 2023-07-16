@@ -1,6 +1,6 @@
-import { Graph } from '@/types/graphs';
+import { GraphConnections } from '@/types/graphs';
 import { GraphLayout, GraphPlacementSettings } from '@/types/settings';
-import { findGraphComponents } from '@/utils/algorithms/graphs';
+import { findGraphComponents } from '@/utils/algorithms';
 
 import placeVerticesOnCircle from './strategies/circle.placement';
 import placeVerticesOnCircles from './strategies/circles.placement';
@@ -10,36 +10,46 @@ import placeVerticesOnTrees from './strategies/trees.placement';
 
 export * from './shared';
 
-export const placeVertices = <V, E>(
-  graph: Graph<V, E>,
+export const placeVertices = (
+  connections: GraphConnections,
   vertexRadius: number,
-  settings?: GraphPlacementSettings<V, E>
+  settings?: GraphPlacementSettings,
+  isGraphDirected = false
 ): GraphLayout => {
+  'worklet';
   switch (settings?.strategy) {
     case 'circle':
-      return placeVerticesOnCircle(graph.vertices, vertexRadius, settings);
+      return placeVerticesOnCircle(
+        Object.keys(connections),
+        vertexRadius,
+        settings
+      );
     case 'circles':
       return placeVerticesOnCircles(
-        findGraphComponents(graph.vertices),
+        findGraphComponents(connections),
         vertexRadius,
         settings
       );
     case 'orbits':
       return placeVerticesOnOrbits(
-        findGraphComponents(graph.vertices),
+        connections,
         vertexRadius,
-        graph.isDirected(),
+        isGraphDirected,
         settings
       );
     case 'trees':
       return placeVerticesOnTrees(
-        findGraphComponents(graph.vertices),
+        connections,
         vertexRadius,
-        graph.isDirected(),
+        isGraphDirected,
         settings
       );
     default:
     case 'random':
-      return placeVerticesRandomly(graph.vertices, vertexRadius, settings);
+      return placeVerticesRandomly(
+        Object.keys(connections),
+        vertexRadius,
+        settings
+      );
   }
 };

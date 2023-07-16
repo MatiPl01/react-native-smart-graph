@@ -1,8 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
-import { Dimensions } from 'react-native';
 
+import { WINDOW_DIMENSIONS } from '@/constants/device';
 import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { Vertex } from '@/types/graphs';
 import {
   GraphLayout,
   PlacedVerticesPositions,
@@ -12,48 +11,17 @@ import { zipArrays } from '@/utils/arrays';
 import { alignPositionsToCenter } from '@/utils/placement/shared';
 import random from '@/utils/random';
 
-const placeVerticesRandomly = <V, E>(
-  vertices: Array<Vertex<V, E>>,
-  vertexRadius: number,
-  settings: RandomPlacementSettings = {} as RandomPlacementSettings
-): GraphLayout => {
-  if (settings.layoutType === 'random') {
-    const { height, width } = Dimensions.get('window');
-    return calcVerticesRandomPositions(
-      vertices,
-      vertexRadius,
-      settings.containerWidth ?? width,
-      settings.containerHeight ?? height
-    );
-  }
-
-  const props: CalcVerticesPositionsProps<V, E> = {
-    density: settings.density ?? RANDOM_PLACEMENT_SETTINGS.density,
-    minVertexSpacing:
-      settings.minVertexSpacing ?? RANDOM_PLACEMENT_SETTINGS.minVertexSpacing,
-    vertexRadius,
-    vertices
-  };
-
-  switch (settings.layoutType) {
-    case 'triangular':
-      return calcVerticesTriangularPositions(props);
-    default:
-    case 'grid':
-      return calcVerticesGridPositions(props);
-  }
-};
-
-type CalcVerticesPositionsProps<V, E> = {
+type CalcVerticesPositionsProps = {
   density: number;
   minVertexSpacing: number;
   vertexRadius: number;
-  vertices: Array<Vertex<V, E>>;
+  vertices: string[];
 };
 
-const calcVerticesGridPositions = <V, E>(
-  props: CalcVerticesPositionsProps<V, E>
+const calcVerticesGridPositions = (
+  props: CalcVerticesPositionsProps
 ): GraphLayout => {
+  'worklet';
   const { density, minVertexSpacing, vertexRadius, vertices } = props;
   const verticesCount = vertices.length;
 
@@ -71,7 +39,7 @@ const calcVerticesGridPositions = <V, E>(
   }
   const selectedPositions = random.sample(availablePositions, verticesCount);
 
-  const verticesPositions = vertices.reduce((acc, { key }, idx) => {
+  const verticesPositions = vertices.reduce((acc, key, idx) => {
     acc[key] = selectedPositions[idx] as Vector;
     return acc;
   }, {} as PlacedVerticesPositions);
@@ -79,9 +47,10 @@ const calcVerticesGridPositions = <V, E>(
   return alignPositionsToCenter(verticesPositions);
 };
 
-const calcVerticesTriangularPositions = <V, E>(
-  props: CalcVerticesPositionsProps<V, E>
+const calcVerticesTriangularPositions = (
+  props: CalcVerticesPositionsProps
 ): GraphLayout => {
+  'worklet';
   const { density, minVertexSpacing, vertexRadius, vertices } = props;
   const verticesCount = vertices.length;
   const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
@@ -139,8 +108,8 @@ const calcVerticesTriangularPositions = <V, E>(
   );
 
   const verticesPositions = verticesAndPositions.reduce(
-    (acc, [vertex, position]) => {
-      acc[vertex.key] = position;
+    (acc, [key, position]) => {
+      acc[key] = position;
       return acc;
     },
     {} as PlacedVerticesPositions
@@ -149,16 +118,17 @@ const calcVerticesTriangularPositions = <V, E>(
   return alignPositionsToCenter(verticesPositions);
 };
 
-const calcVerticesRandomPositions = <V, E>(
-  vertices: Array<Vertex<V, E>>,
+const calcVerticesRandomPositions = (
+  vertices: string[],
   vertexRadius: number,
   width: number,
   height: number
 ): GraphLayout => {
+  'worklet';
   const innerWidth = width - 2 * vertexRadius;
   const innerHeight = height - 2 * vertexRadius;
 
-  const verticesPositions = vertices.reduce((acc, { key }) => {
+  const verticesPositions = vertices.reduce((acc, key) => {
     acc[key] = {
       x: vertexRadius + (Math.random() - 0.5) * innerWidth,
       y: vertexRadius + (Math.random() - 0.5) * innerHeight
@@ -169,4 +139,35 @@ const calcVerticesRandomPositions = <V, E>(
   return alignPositionsToCenter(verticesPositions);
 };
 
-export default placeVerticesRandomly;
+export default function placeVerticesRandomly(
+  vertices: Array<string>,
+  vertexRadius: number,
+  settings: RandomPlacementSettings = {} as RandomPlacementSettings
+): GraphLayout {
+  'worklet';
+  if (settings.layoutType === 'random') {
+    const { height, width } = WINDOW_DIMENSIONS;
+    return calcVerticesRandomPositions(
+      vertices,
+      vertexRadius,
+      settings.containerWidth ?? width,
+      settings.containerHeight ?? height
+    );
+  }
+
+  const props: CalcVerticesPositionsProps = {
+    density: settings.density ?? RANDOM_PLACEMENT_SETTINGS.density,
+    minVertexSpacing:
+      settings.minVertexSpacing ?? RANDOM_PLACEMENT_SETTINGS.minVertexSpacing,
+    vertexRadius,
+    vertices
+  };
+
+  switch (settings.layoutType) {
+    case 'triangular':
+      return calcVerticesTriangularPositions(props);
+    default:
+    case 'grid':
+      return calcVerticesGridPositions(props);
+  }
+}

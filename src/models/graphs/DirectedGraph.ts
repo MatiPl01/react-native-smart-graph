@@ -1,6 +1,7 @@
 import DirectedEdge from '@/models/edges/DirectedEdge';
 import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
 import { DirectedEdgeData, VertexData } from '@/types/data';
+import { GraphConnections } from '@/types/graphs';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -29,6 +30,18 @@ export default class DirectedGraph<V, E> extends Graph<
     if (data) this.insertBatch(data);
   }
 
+  override get connections(): GraphConnections {
+    return Object.fromEntries(
+      Object.values(this.vertices$).map(vertex => [
+        vertex.key,
+        {
+          incoming: vertex.inEdges.map(edge => edge.source.key),
+          outgoing: vertex.outEdges.map(edge => edge.target.key)
+        }
+      ])
+    );
+  }
+
   override insertBatch(
     {
       edges,
@@ -43,8 +56,8 @@ export default class DirectedGraph<V, E> extends Graph<
     vertices?.forEach(data => this.insertVertex(data, null));
     edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
-    if (animationSettings !== null) {
-      this.notifyGraphChange(
+    this.notifyGraphChange(
+      animationSettings &&
         createAnimationsSettingsForBatchModification(
           {
             edges: edges?.map(({ key }) => key),
@@ -52,8 +65,7 @@ export default class DirectedGraph<V, E> extends Graph<
           },
           animationSettings
         )
-      );
-    }
+    );
   }
 
   override insertEdge(

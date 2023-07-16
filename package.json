@@ -9,8 +9,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
-    "@fortawesome/react-native-fontawesome": "^0.3.0",
-    "potpack": "^2.0.0"
+    "@fortawesome/react-native-fontawesome": "^0.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",
@@ -101,7 +100,8 @@
     "prepare": "husky install",
     "semantic-release": "semantic-release",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
   },
   "types": "dist/types/index.d.ts"
 }

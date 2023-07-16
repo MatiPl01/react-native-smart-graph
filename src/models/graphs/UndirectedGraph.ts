@@ -1,6 +1,7 @@
 import UndirectedEdge from '@/models/edges/UndirectedEdge';
 import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
+import { GraphConnections } from '@/types/graphs';
 import {
   AnimationSettings,
   SingleModificationAnimationSettings
@@ -28,6 +29,26 @@ export default class UndirectedGraph<V, E> extends Graph<
     if (data) this.insertBatch(data);
   }
 
+  override get connections(): GraphConnections {
+    return Object.fromEntries(
+      Object.values(this.vertices$).map(vertex => {
+        const neighbors = vertex.edges.map(edge =>
+          edge.vertices[0].key === vertex.key
+            ? edge.vertices[1].key
+            : edge.vertices[0].key
+        );
+
+        return [
+          vertex.key,
+          {
+            incoming: [],
+            outgoing: neighbors
+          }
+        ];
+      })
+    );
+  }
+
   override insertBatch(
     {
       edges,
@@ -42,17 +63,16 @@ export default class UndirectedGraph<V, E> extends Graph<
     vertices?.forEach(data => this.insertVertex(data, null));
     edges?.forEach(data => this.insertEdge(data, null));
     // Notify observers after all changes to the graph model are made
-    if (animationSettings !== null) {
-      this.notifyGraphChange({
-        ...createAnimationsSettingsForBatchModification(
+    this.notifyGraphChange(
+      animationSettings &&
+        createAnimationsSettingsForBatchModification(
           {
             edges: edges?.map(({ key }) => key),
             vertices: vertices?.map(({ key }) => key)
           },
           animationSettings
         )
-      });
-    }
+    );
   }
 
   override insertEdge(

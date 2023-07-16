@@ -1,33 +1,43 @@
-import LinkedList from './LinkedList';
+import { createLinkedList } from './LinkedList';
 
-export default class Queue<T> {
-  protected linkedList: LinkedList<T> = new LinkedList();
+export const createQueue = <T>() => {
+  'worklet';
+  const linkedList = createLinkedList<T>();
 
-  dequeue(): T | null {
-    return this.linkedList.popLeft();
-  }
+  return {
+    dequeue(): T | null {
+      'worklet';
+      return linkedList.popLeft();
+    },
 
-  enqueue(value: T): void {
-    this.linkedList.append(value);
-  }
+    enqueue(value: T): void {
+      'worklet';
+      linkedList.append(value);
+    },
 
-  enqueueMany(values: Array<T>): void {
-    values.forEach(value => this.enqueue(value));
-  }
+    enqueueMany(values: Array<T>): void {
+      'worklet';
+      values.forEach(value => linkedList.append(value));
+    },
 
-  isEmpty(): boolean {
-    return !this.linkedList.head;
-  }
+    isEmpty(): boolean {
+      'worklet';
+      return !linkedList.head();
+    },
 
-  get length(): number {
-    return this.linkedList.length;
-  }
+    length(): number {
+      'worklet';
+      return linkedList.length();
+    },
 
-  peek(): T | null {
-    if (!this.linkedList.head) {
-      return null;
+    peek(): T | null {
+      'worklet';
+      const head = linkedList.head();
+      if (!head) {
+        return null;
+      }
+
+      return head.value;
     }
-
-    return this.linkedList.head.value;
-  }
-}
+  };
+};

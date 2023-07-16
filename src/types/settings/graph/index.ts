@@ -34,7 +34,7 @@ type SharedGraphSettings<
   events?: GraphEventsSettings<V, E, ED>;
   focus?: GraphFocusSettings;
   layout?: GraphLayoutSettings;
-  placement?: GraphPlacementSettings<V, E>;
+  placement?: GraphPlacementSettings;
 };
 
 export type DirectedGraphSettings<V = void, E = void> = SharedGraphSettings<
@@ -68,6 +68,6 @@ export type GraphSettingsWithDefaults<V, E> = (
   animations: GraphAnimationsSettingsWithDefaults;
   layout: GraphLayoutSettingsWithDefaults;
   placement:
-    | GraphPlacementSettings<V, E>
+    | GraphPlacementSettings
     | UnboundRandomPlacementSettingsWithDefaults;
 };
