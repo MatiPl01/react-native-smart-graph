@@ -6,4 +6,4 @@
 
 - Effortlessly create and interact with graph structures in your apps
 
-[Getting Started](#headline)
+[Getting Started](#getting-started)

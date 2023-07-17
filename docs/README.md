@@ -1,17 +1,60 @@
-# Headline
+# Getting Started
 
-> An `awesome` project.
+## Prerequisites
 
-Lorem ipsum dolor sit amet, gravida semper suspendisse ipsum, nam maecenas curabitur. Volutpat orci maecenas dui elementum. Massa at sollicitudin nec erat, sit libero dolor suspendisse amet, adipiscing dolor sed massa. Fermentum lectus. Est dignissim ac tempor, accusantium hac elit massa dictumst soluta
+### Peer dependencies installation
 
-## Libero dictumst mauris
+This library uses several external libraries that need to be installed beforehand. This libraries are required to build custom graph components, create custom animations and handle events.
 
-Tempus etiam, justo nullam vel eros et. Conubia integer. Amet elit nulla, eu tortor fugit pede arcu wisi, elit maecenas commodo integer et vitae nonummy.
+Run one of the following commands, depending on your package manager:
 
-```bash
-    Lorem Ipsum
+- yarn
+
+```sh
+yarn add @shopify/react-native-skia react-native-reanimated react-native-gesture-handler react-native-svg
 ```
 
-Curabitur amet sed voluptas convallis, urna sodales vivamus dui id minim eget, dapibus nostra dignissim, vestibulum mauris a tortor morbi lobortis eu, felis odio. Eu ligula taciti cras, faucibus ac vel quis donec sodales. Lacinia euismod sed semper donec. Magna aliquam sed non, vestibulum cursus sed ut vivamus felis porttitor, vestibulum nibh augue a pede, vehicula integer ut nunc proin.
+- npm
 
-Et diam integer euismod semper pede sapien, massa orci vel, lorem porttitor quam in orci amet, hymenaeos ultrices in. Urna ipsum pellentesque pretium quis, interdum ante commodo nullam eu tristique, aliquam nec velit nisl in, integer elementum ac recusandae nibh sit eu. Id libero lobortis sed quis. Luctus dapibus malesuada erat duis dolor pede, orci ut justo, diam enim id proin mi.
+```sh
+npm i @shopify/react-native-skia react-native-reanimated react-native-gesture-handler react-native-svg
+```
+
+### Adding Reanimated Babel plugin
+
+Reanimated requires a `'react-native-reanimated/plugin'` Babel plugin to work. Your `babel.config.js` should look like this after change:
+
+```js
+module.exports = {
+  presets: ...,
+  plugins: [
+    ...
+    'react-native-reanimated/plugin'
+    ]
+  ]
+};
+```
+
+### Pods installation (iOS only)
+
+Before running the app on the iOS device, you will have to take one more step and install required Pods:
+
+```sh
+npx pod-install ios
+```
+
+## Installation
+
+To install the library itself, you'll need to run one of the commands below, depending on the package manager you're using in your project.
+
+- yarn
+
+```sh
+yarn add react-native-smart-graph
+```
+
+- npm
+
+```sh
+npm i react-native-smart-graph
+```

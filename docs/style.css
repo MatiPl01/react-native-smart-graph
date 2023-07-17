@@ -8,6 +8,22 @@
   box-sizing: border-box;
 }
 
+::-webkit-scrollbar {
+  background-color: var(--codeBackgroundColor);
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--accent);
+  border-radius: 5px;
+}
+
+code::-webkit-scrollbar {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
 body:not(.ready) {
   overflow: hidden;
 }
@@ -25,9 +41,14 @@ body:not(.ready) {
   background-color: var(--background) !important;
   margin: 0 auto;
   color: var(--textColor);
-  width: 90% !important;
-  border-radius: 15px;
+  border-radius: 5px;
   text-indent: 15px;
+  margin: 0 0.5em;
+}
+
+.search input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: none !important;
 }
 
 body:not(.ready) .app-nav,
@@ -77,6 +98,7 @@ div#app:empty:before {
 body,
 html {
   height: 100%;
+  width: 100vw;
 }
 
 body {
@@ -563,7 +585,7 @@ body.close .content {
 
   #docsify-darklight-theme {
     position: absolute;
-    left: 10px;
+    right: 10px;
     top: 15px;
     width: 25px;
     height: 25px;
@@ -854,12 +876,14 @@ body {
   padding: 3px 5px;
   white-space: pre-wrap;
   font-weight: bold;
+  overflow: auto;
 }
 
 .markdown-section code,
 .markdown-section pre {
   background-color: var(--codeBackgroundColor);
   font-family: var(--codeFontFamily);
+  border-radius: 5px;
 }
 
 .markdown-section pre {
@@ -867,10 +891,9 @@ body {
   -webkit-font-smoothing: initial;
   line-height: 1.5rem;
   margin: 1.2em 0;
-  overflow: auto;
-  padding: 0 1.4rem;
   position: relative;
   word-wrap: normal;
+  border-radius: 5px;
 }
 
 .token.cdata,
@@ -981,8 +1004,7 @@ body {
   line-height: inherit;
   margin: 0 2px;
   max-width: inherit;
-  overflow: inherit;
-  padding: 2.2em 5px;
+  padding: 2.2em 1.4em;
   white-space: inherit;
 }
 
