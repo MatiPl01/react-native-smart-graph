@@ -9,12 +9,14 @@ import { calcAnimatedContainerBoundingRect } from '@/utils/placement';
 type ContainerDimensionsProviderProps = PropsWithChildren<{
   boundingRect: AnimatedBoundingRect;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
+  vertexRadius: number;
 }>;
 
 function ContainerDimensionsProvider({
   boundingRect,
   children,
-  renderedVerticesData
+  renderedVerticesData,
+  vertexRadius
 }: ContainerDimensionsProviderProps) {
   const renderedVerticesPositions = Object.fromEntries(
     Object.entries(renderedVerticesData).map(([key, { position }]) => [
@@ -26,7 +28,9 @@ function ContainerDimensionsProvider({
   useAnimatedReaction(
     () => ({ positions: renderedVerticesPositions }),
     ({ positions }) => {
-      Object.entries(calcAnimatedContainerBoundingRect(positions)).forEach(
+      Object.entries(
+        calcAnimatedContainerBoundingRect(positions, vertexRadius)
+      ).forEach(
         ([key, value]) =>
           (boundingRect[key as keyof AnimatedBoundingRect].value = value)
       );

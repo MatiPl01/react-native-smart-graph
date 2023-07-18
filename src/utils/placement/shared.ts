@@ -49,7 +49,8 @@ export const calcContainerBoundingRect = (
 };
 
 export const calcAnimatedContainerBoundingRect = (
-  placedVertices: AnimatedPlacedVerticesPositions
+  placedVertices: AnimatedPlacedVerticesPositions,
+  vertexRadius: number
 ): BoundingRect => {
   'worklet';
   let left = 0;
@@ -65,10 +66,10 @@ export const calcAnimatedContainerBoundingRect = (
   }
 
   return {
-    bottom,
-    left,
-    right,
-    top
+    bottom: bottom + vertexRadius,
+    left: left - vertexRadius,
+    right: right + vertexRadius,
+    top: top - vertexRadius
   };
 };
 
