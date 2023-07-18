@@ -12,6 +12,7 @@ import {
   SharedValue,
   useAnimatedReaction,
   useSharedValue,
+  useWorkletCallback,
   withTiming
 } from 'react-native-reanimated';
 
@@ -161,8 +162,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   /**
    * PRIVATE FUNCTIONS
    */
-  const finishTransition = useCallback((finishStatus: FocusStatus) => {
-    'worklet';
+  const finishTransition = useWorkletCallback((finishStatus: FocusStatus) => {
     // Dismiss the transition if the new focus is pending
     // (the new transition is being prepared or is in progress)
     const currentStatus = focusStatus.value;
@@ -191,12 +191,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     }
   }, []);
 
-  const updateAnimationSettingsWithFinishCallback = useCallback(
+  const updateAnimationSettingsWithFinishCallback = useWorkletCallback(
     (
       animationSettings: AnimationSettingsWithDefaults,
       finishStatus: FocusStatus
     ) => {
-      'worklet';
       const { onComplete, ...timingConfig } = animationSettings;
       return {
         ...timingConfig,
@@ -212,12 +211,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     []
   );
 
-  const updateTransitionProgress = useCallback(
+  const updateTransitionProgress = useWorkletCallback(
     (
       finishStatus: FocusStatus,
       animationSettings: AnimationSettingsWithDefaults | null
     ) => {
-      'worklet';
       if (animationSettings) {
         const { onComplete, ...timingConfig } =
           updateAnimationSettingsWithFinishCallback(
@@ -233,7 +231,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     []
   );
 
-  const startTransition = useCallback(
+  const startTransition = useWorkletCallback(
     (
       key: null | string,
       transitionType:
@@ -241,7 +239,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         | FocusStatus.FOCUS_TRANSITION,
       animationSettings: AnimationSettingsWithDefaults | null
     ) => {
-      'worklet';
       const finishStatus =
         transitionType === FocusStatus.BLUR_TRANSITION
           ? FocusStatus.BLUR
@@ -261,9 +258,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     []
   );
 
-  const handleContainerReset = useCallback(
+  const handleContainerReset = useWorkletCallback(
     (animationSettings: AnimationSettingsWithDefaults | null) => {
-      'worklet';
       focusStatus.value = FocusStatus.BLUR_TRANSITION;
       focusKey.value = null;
       updateTransitionProgress(FocusStatus.BLUR, animationSettings);

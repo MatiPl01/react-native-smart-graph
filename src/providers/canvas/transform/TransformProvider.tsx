@@ -4,6 +4,7 @@ import { LayoutChangeEvent } from 'react-native';
 import {
   useAnimatedReaction,
   useSharedValue,
+  useWorkletCallback,
   withTiming
 } from 'react-native-reanimated';
 
@@ -135,13 +136,12 @@ export default function TransformProvider({
     };
   };
 
-  const getIdealScale = useCallback(
+  const getIdealScale = useWorkletCallback(
     (
       boundingRect: BoundingRect,
       canvasDimensions: Dimensions,
       objFit: ObjectFit
     ) => {
-      'worklet';
       return clamp(
         calcContainerScale(
           objFit,
@@ -213,7 +213,7 @@ export default function TransformProvider({
     }
   };
 
-  const resetContainerPosition = useCallback(
+  const resetContainerPosition = useWorkletCallback(
     (settings?: {
       animationSettings?: Maybe<AnimationSettingsWithDefaults>;
       autoSizingContext?: AutoSizingContextType;
@@ -221,7 +221,6 @@ export default function TransformProvider({
       containerBoundingRect?: BoundingRect;
       scale?: number;
     }) => {
-      'worklet';
       const containerBoundingRect = settings?.containerBoundingRect ?? {
         bottom: containerBottom.value,
         left: containerLeft.value,
