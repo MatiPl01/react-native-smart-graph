@@ -18,13 +18,13 @@ import {
 const ADDED_COMPONENTS = [
   { key: 'V1' },
   { key: 'V2' },
-  { from: 'V1', key: 'E1', to: 'V2' }
-  // { key: 'V3' },
-  // { from: 'V1', key: 'E2', to: 'V3' },
-  // { key: 'V4' },
-  // { from: 'V3', key: 'E3', to: 'V4' },
-  // { key: 'V5' },
-  // { from: 'V3', key: 'E4', to: 'V5' }
+  { from: 'V1', key: 'E1', to: 'V2' },
+  { key: 'V3' },
+  { from: 'V1', key: 'E2', to: 'V3' },
+  { key: 'V4' },
+  { from: 'V3', key: 'E3', to: 'V4' },
+  { key: 'V5' },
+  { from: 'V3', key: 'E4', to: 'V5' }
 ];
 
 let idx = 0;
@@ -52,19 +52,21 @@ export default function App() {
           }
           idx++;
         } else {
-          if ('from' in component) {
-            graph.removeEdge(component.key);
-          } else {
-            graph.removeVertex(component.key);
-          }
-          idx--;
+          // if ('from' in component) {
+          //   graph.removeEdge(component.key);
+          // } else {
+          //   graph.removeVertex(component.key);
+          // }
+          // idx--;
+          clearInterval(interval);
+          return;
         }
       } catch (e) {
         clearInterval(interval);
         console.error(e);
         return;
       }
-    }, 500);
+    }, 100);
 
     return () => clearInterval(interval);
   }, []);
@@ -135,7 +137,8 @@ const styles = StyleSheet.create({
     position: 'relative'
   },
   controls: {
-    marginTop: 64,
-    right: 12
+    position: 'absolute',
+    right: 8,
+    top: 16
   }
 });

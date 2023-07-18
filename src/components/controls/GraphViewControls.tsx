@@ -119,10 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, .5)',
     borderRadius: 8,
     gap: 20,
-    padding: 8,
-    position: 'absolute',
-    right: 0,
-    top: 0
+    padding: 8
   },
   icon: {
     color: 'white'

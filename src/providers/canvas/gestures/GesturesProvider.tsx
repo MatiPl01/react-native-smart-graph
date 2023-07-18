@@ -161,7 +161,6 @@ export default function GesturesProvider({
         rubberBandEffect: true,
         velocity
       });
-      console.log('pinch end');
       autoSizingContext.enableAutoSizingAfterTimeout();
     });
 

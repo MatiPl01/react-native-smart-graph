@@ -50,7 +50,7 @@ const GraphViewComposer = memo(function () {
         {overlayOutlet}
       </OverlayProvider>
       {/* Render other component than canvas (e.g. graph controls) */}
-      <View style={StyleSheet.absoluteFill}>{overlay}</View>
+      <View style={styles.overlay}>{overlay}</View>
     </>
   );
 });
@@ -60,6 +60,10 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
     position: 'relative'
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none'
   }
 });
 
