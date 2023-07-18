@@ -1,15 +1,11 @@
 import { Canvas, Group } from '@shopify/react-native-skia';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
 import { DirectedGraphComponentProps } from '@/components/graphs/DirectedGraphComponent';
 import { UndirectedGraphComponentProps } from '@/components/graphs/UndirectedGraphComponent';
-import {
-  AccessibleOverlayContextType,
-  withOverlay
-} from '@/contexts/OverlayProvider';
 import {
   useCanvasDataContext,
   useFocusContext,
@@ -23,7 +19,7 @@ function GraphComponentComposer<
   P extends
     | DirectedGraphComponentProps<V, E>
     | UndirectedGraphComponentProps<V, E>
->(props: P & AccessibleOverlayContextType) {
+>(props: P) {
   // CONTEXTS
   // Canvas data context
   const {
@@ -89,7 +85,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default withOverlay(GraphComponentComposer) as <
+export default memo(GraphComponentComposer) as <
   V,
   E,
   P extends
