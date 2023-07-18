@@ -288,7 +288,7 @@ main.hidden {
   top: 0;
   bottom: 0;
   left: 0;
-  transition: transform 0.25s ease-out;
+  transition: transform 0.25s ease-out !important;
   width: 300px;
   z-index: 20;
 }
@@ -385,6 +385,7 @@ main.hidden {
   margin-bottom: 4px;
   width: 16px;
   height: 2px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
 body.sticky .sidebar,
@@ -582,10 +583,12 @@ body.close .content {
     -webkit-animation: octocat-wave 0.56s ease-in-out;
     animation: octocat-wave 0.56s ease-in-out;
   }
-
+  section.content h1 {
+    margin-top: 0 !important;
+  }
   #docsify-darklight-theme {
     position: absolute;
-    right: 10px;
+    right: 2em !important;
     top: 15px;
     width: 25px;
     height: 25px;
@@ -598,6 +601,9 @@ body.close .content {
     cursor: pointer;
     user-select: none;
     transition: background-image 0.15s ease-in-out 0.15s;
+  }
+  #main {
+    padding: 0 1.5em !important;
   }
 }
 
@@ -797,6 +803,11 @@ body {
   font-weight: 600;
 }
 
+section.content h1 {
+  margin-right: 2.5rem !important;
+  padding-top: 0.25em;
+}
+
 .markdown-section a {
   color: var(--accent);
   font-weight: 600;
@@ -894,6 +905,7 @@ body {
   position: relative;
   word-wrap: normal;
   border-radius: 5px;
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.1) !important;
 }
 
 .token.cdata,
@@ -1039,7 +1051,7 @@ pre:after {
 
 #docsify-darklight-theme {
   position: absolute;
-  right: 10px;
+  right: 3em;
   top: 15px;
   width: 25px;
   height: 25px;
@@ -1056,6 +1068,60 @@ pre:after {
 
 #docsify-darklight-theme p {
   visibility: hidden;
+}
+
+.app-name-link {
+  padding: 0 0.5em;
+  display: block;
+}
+
+.docsify-copy-code-button {
+  background-color: var(--background) !important;
+  top: 1.75em !important;
+  right: 0.5em !important;
+  border-radius: 5px !important;
+  width: 2em !important;
+  height: 2em !important;
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.15) !important;
+}
+
+.docsify-copy-code-button.success .success,
+.docsify-copy-code-button.error .error {
+  right: 100% !important;
+  transform: translate(-25%, -50%) !important;
+  color: var(--textColor) !important;
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.15) !important;
+}
+
+.docsify-copy-code-button svg {
+  fill: var(--textColor);
+  width: 1em;
+  height: 1em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.clear-button svg {
+  transform: scale(1) !important;
+}
+
+.clear-button svg circle {
+  fill: var(--codeBackgroundColor) !important;
+}
+
+.results-panel {
+  padding: 0.5em !important;
+}
+
+#main {
+  max-width: 1000px;
+  padding: 0 3em;
+}
+
+footer {
+  padding: 3em !important;
 }
 
 /* .tooltip {
