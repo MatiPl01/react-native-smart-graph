@@ -15,7 +15,7 @@ import {
 
 import { useFocusObserver } from '@/hooks';
 import { FocusStatus } from '@/providers/canvas';
-import { withGraphData } from '@/providers/graph';
+import { withGraphData } from '@/providers/graph/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';

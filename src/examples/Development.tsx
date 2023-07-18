@@ -69,15 +69,12 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
-    ({ vertex: { key } }) => {
-      console.log('long press', key);
-    },
-    []
-  );
+  const handleVertexLongPress = useCallback<VertexPressHandler>(key => {
+    console.log('long press', key);
+  }, []);
 
-  const handleVertexPress = useCallback<VertexPressHandler<string>>(
-    ({ vertex: { key } }) => {
+  const handleVertexPress = useCallback<VertexPressHandler>(
+    key => {
       console.log('press', key);
     },
     [graph]

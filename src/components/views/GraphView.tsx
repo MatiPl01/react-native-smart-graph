@@ -1,10 +1,10 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 
 import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
-import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, { useGesturesContext } from '@/providers/canvas';
 import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
@@ -37,20 +37,13 @@ const GraphViewComposer = memo(function () {
   // Gestures context
   const { gestureHandler } = useGesturesContext();
 
-  const overlayOutlet = useMemo(
-    () => <OverlayOutlet gestureHandler={gestureHandler} />,
-    [gestureHandler]
-  );
-
   return (
     <>
-      <OverlayProvider>
-        {canvas}
-        {/* Renders overlay layers set using the OverlayContext */}
-        {overlayOutlet}
-      </OverlayProvider>
+      <GestureDetector gesture={gestureHandler}>
+        <View style={styles.container}>{canvas}</View>
+      </GestureDetector>
       {/* Render other component than canvas (e.g. graph controls) */}
-      <View style={StyleSheet.absoluteFill}>{overlay}</View>
+      <View style={styles.overlay}>{overlay}</View>
     </>
   );
 });
@@ -60,6 +53,11 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
     position: 'relative'
+  },
+  overlay: {
+    position: 'absolute',
+    right: 0,
+    top: 0
   }
 });
 

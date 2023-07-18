@@ -5,10 +5,9 @@ import {
   DirectedGraphComponentProps,
   UndirectedGraphComponentProps
 } from '@/components/graphs';
-import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
+import { GesturesContextType } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import {
@@ -27,16 +26,16 @@ import {
 import { deepMemoComparator } from '@/utils/equality';
 
 import { ComponentsDataProvider } from './data';
-import { PressEventsProvider, PressEventsProviderProps } from './events';
+import { VertexPressEventsProvider } from './events';
 import {
+  ContainerDimensionsProvider,
   ForcesLayoutProvider,
   ForcesPlacementProvider,
+  ForcesPlacementProviderProps,
   GraphPlacementLayoutProviderProps,
   PlacementLayoutProvider
 } from './layout';
-import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
-import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
-import VertexFocusProvider from './transform/VertexFocusProvider';
+import { VertexFocusProvider } from './transform';
 
 const getLayoutProviders = <V, E>(
   graph: Graph<V, E>,
@@ -65,23 +64,18 @@ const getLayoutProviders = <V, E>(
   }
 };
 
-const getEventsProviders = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+const getEventsProviders = <V, E>(
   transform: AnimatedCanvasTransform,
-  boundingRect: AnimatedBoundingRect,
   settings: GraphSettingsWithDefaults<V, E>,
-  renderLayer: (zIndex: number, layer: JSX.Element) => void
+  gesturesContext: GesturesContextType
 ) => {
   if (settings.events) {
     return [
-      <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
-        boundingRect={boundingRect}
-        renderLayer={renderLayer}
-        settings={settings.events as GraphEventsSettings<V, E, ED>}
+      <VertexPressEventsProvider
+        pressGesturesObserver={gesturesContext.pressGesturesObserver}
+        settings={settings.events as GraphEventsSettings}
         transform={transform}
+        vertexRadius={settings.components.vertex.radius}
       />
     ];
   }
@@ -97,12 +91,12 @@ type GraphProviderProps<V, E> = PropsWithChildren<
     focusKey: SharedValue<null | string>;
     focusStatus: SharedValue<number>;
     focusTransitionProgress: SharedValue<number>;
+    gesturesContext: GesturesContextType;
     initialCanvasScale: SharedValue<number>;
     onRender: (containerBounds: BoundingRect) => void;
     startFocus: FocusStartSetter;
     transform: AnimatedCanvasTransform;
-  } & AccessibleOverlayContextType &
-    (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
+  } & (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
 >;
 
 // eslint-disable-next-line import/no-unused-modules
@@ -115,10 +109,10 @@ function GraphProvider<V, E>({
   focusKey,
   focusStatus,
   focusTransitionProgress,
+  gesturesContext,
   graph,
   initialCanvasScale,
   onRender,
-  renderLayer,
   renderers,
   settings,
   startFocus,
@@ -157,7 +151,7 @@ function GraphProvider<V, E>({
       ...getLayoutProviders(graph, memoSettings, onRender),
       // EVENTS
       // Press events provider
-      ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),
+      ...getEventsProviders(transform, memoSettings, gesturesContext),
       // FOCUS
       // Provider used to focus on a specific vertex
       <VertexFocusProvider
