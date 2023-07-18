@@ -161,7 +161,6 @@ export default function GesturesProvider({
         rubberBandEffect: true,
         velocity
       });
-      console.log('pinch end');
       autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
@@ -208,11 +207,24 @@ export default function GesturesProvider({
     }
   );
 
+  const singleTapGestureHandler = Gesture.Tap()
+    .numberOfTaps(1)
+    .onEnd(({ x, y }) => {
+      console.log('press', { x, y });
+    });
+
+  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) => {
+    console.log('long press', { x, y });
+  });
+
   const contextValue = useMemo<GesturesContextType>(
     () => ({
-      gestureHandler: Gesture.Race(
-        Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
-        doubleTapGestureHandler
+      gestureHandler: Gesture.Exclusive(
+        Gesture.Race(
+          doubleTapGestureHandler,
+          Gesture.Simultaneous(pinchGestureHandler, panGestureHandler)
+        ),
+        Gesture.Simultaneous(singleTapGestureHandler, longPressGestureHandler)
       )
     }),
     []

@@ -39,11 +39,11 @@ const GraphViewComposer = memo(function () {
 
   return (
     <>
-      <View style={styles.container}>{canvas}</View>
-      {/* Render other component than canvas (e.g. graph controls) */}
       <GestureDetector gesture={gestureHandler}>
-        <View style={StyleSheet.absoluteFill}>{overlay}</View>
+        <View style={styles.container}>{canvas}</View>
       </GestureDetector>
+      {/* Render other component than canvas (e.g. graph controls) */}
+      <View style={styles.overlay}>{overlay}</View>
     </>
   );
 });
@@ -53,6 +53,11 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
     position: 'relative'
+  },
+  overlay: {
+    position: 'absolute',
+    right: 0,
+    top: 0
   }
 });
 
