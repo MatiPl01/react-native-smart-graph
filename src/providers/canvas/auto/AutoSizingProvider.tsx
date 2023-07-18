@@ -172,6 +172,7 @@ export default function AutoSizingProvider({
         startTranslation,
         transitionProgress
       } = data;
+      if (!startScale) return;
       // Scale content to fit container based on objectFit
       scaleContentTo(
         calcScaleOnProgress(

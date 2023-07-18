@@ -29,7 +29,7 @@ type CanvasProviderProps = PropsWithChildren<{
 export default function CanvasProvider({
   autoSizingTimeout: autoSizingTimeoutProp = AUTO_SIZING_TIMEOUT,
   children,
-  initialScale: initialScaleProp = INITIAL_SCALE,
+  initialScale: initialScaleProp,
   objectFit: objectFitProp = 'none',
   padding: paddingProp,
   scales: scalesProp = DEFAULT_SCALES
@@ -38,7 +38,7 @@ export default function CanvasProvider({
   if (scalesProp.length === 0) {
     throw new Error('At least one scale must be provided');
   }
-  if (scalesProp.indexOf(initialScaleProp) < 0) {
+  if (scalesProp.indexOf(initialScaleProp ?? INITIAL_SCALE) < 0) {
     throw new Error('Initial scale must be included in scales');
   }
   // Store canvas settings in shared values to prevent re-renders
@@ -46,8 +46,12 @@ export default function CanvasProvider({
     () => autoSizingTimeoutProp,
     [autoSizingTimeoutProp]
   );
+  const initialScaleProvided = useDerivedValue(
+    () => !!initialScaleProp,
+    [initialScaleProp]
+  );
   const initialScale = useDerivedValue(
-    () => initialScaleProp,
+    () => initialScaleProp ?? INITIAL_SCALE,
     [initialScaleProp]
   );
   const objectFit = useDerivedValue(() => objectFitProp, [objectFitProp]);
@@ -69,6 +73,7 @@ export default function CanvasProvider({
       <CanvasDataProvider
         autoSizingTimeout={autoSizingTimeout}
         initialScale={initialScale}
+        initialScaleProvided={initialScaleProvided}
         maxScale={maxScale}
         minScale={minScale}
         objectFit={objectFit}

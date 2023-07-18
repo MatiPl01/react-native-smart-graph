@@ -1,10 +1,9 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useCallback, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 import {
   useAnimatedReaction,
   useSharedValue,
-  useWorkletCallback,
   withTiming
 } from 'react-native-reanimated';
 
@@ -87,6 +86,7 @@ export default function TransformProvider({
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
     initialScale,
+    isRendered,
     maxScale,
     minScale,
     objectFit,
@@ -97,23 +97,17 @@ export default function TransformProvider({
   const initialCanvasDimensions = useSharedValue<Dimensions | null>(null);
   const initialBoundingRect = useSharedValue<BoundingRect | null>(null);
 
-  const handleCanvasRender = useCallback(
-    ({
-      nativeEvent: {
-        layout: { height, width }
-      }
-    }: LayoutChangeEvent) => {
-      initialCanvasDimensions.value = { height, width };
-    },
-    []
-  );
+  const handleCanvasRender = ({
+    nativeEvent: {
+      layout: { height, width }
+    }
+  }: LayoutChangeEvent) => {
+    initialCanvasDimensions.value = { height, width };
+  };
 
-  const handleGraphRender = useCallback(
-    (containerBoundingRect: BoundingRect) => {
-      initialBoundingRect.value = containerBoundingRect;
-    },
-    []
-  );
+  const handleGraphRender = (containerBoundingRect: BoundingRect) => {
+    initialBoundingRect.value = containerBoundingRect;
+  };
 
   const getTranslateClamp = (
     scale: number
@@ -122,7 +116,6 @@ export default function TransformProvider({
     y: [number, number];
   } => {
     'worklet';
-
     const leftLimit = (-containerLeft.value + padding.value.left) * scale;
     const rightLimit =
       canvasWidth.value - (containerRight.value + padding.value.right) * scale;
@@ -137,28 +130,26 @@ export default function TransformProvider({
     };
   };
 
-  const getIdealScale = useWorkletCallback(
-    (
-      boundingRect: BoundingRect,
-      canvasDimensions: Dimensions,
-      objFit: ObjectFit
-    ) => {
-      return clamp(
-        calcContainerScale(
-          objFit,
-          initialScale.value,
-          {
-            height: boundingRect.bottom - boundingRect.top,
-            width: boundingRect.right - boundingRect.left
-          },
-          canvasDimensions,
-          padding.value
-        ),
-        [minScale.value, maxScale.value]
-      );
-    },
-    []
-  );
+  const getIdealScale = (
+    boundingRect: BoundingRect,
+    canvasDimensions: Dimensions,
+    objFit: ObjectFit
+  ) => {
+    'worklet';
+    return clamp(
+      calcContainerScale(
+        objFit,
+        initialScale.value,
+        {
+          height: boundingRect.bottom - boundingRect.top,
+          width: boundingRect.right - boundingRect.left
+        },
+        canvasDimensions,
+        padding.value
+      ),
+      [minScale.value, maxScale.value]
+    );
+  };
 
   const translateContentTo = (
     translate: Vector,
@@ -224,50 +215,48 @@ export default function TransformProvider({
     }
   };
 
-  const resetContainerPosition = useWorkletCallback(
-    (settings?: {
-      animationSettings?: Maybe<AnimationSettingsWithDefaults>;
-      autoSizingContext?: AutoSizingContextType;
-      canvasDimensions?: Dimensions;
-      containerBoundingRect?: BoundingRect;
-      scale?: number;
-    }) => {
-      const containerBoundingRect = settings?.containerBoundingRect ?? {
-        bottom: containerBottom.value,
-        left: containerLeft.value,
-        right: containerRight.value,
-        top: containerTop.value
-      };
+  const resetContainerPosition = (settings?: {
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>;
+    autoSizingContext?: AutoSizingContextType;
+    canvasDimensions?: Dimensions;
+    containerBoundingRect?: BoundingRect;
+    scale?: number;
+  }) => {
+    'worklet';
+    const containerBoundingRect = settings?.containerBoundingRect ?? {
+      bottom: containerBottom.value,
+      left: containerLeft.value,
+      right: containerRight.value,
+      top: containerTop.value
+    };
 
-      const canvasDimensions = settings?.canvasDimensions ?? {
-        height: canvasHeight.value,
-        width: canvasWidth.value
-      };
+    const canvasDimensions = settings?.canvasDimensions ?? {
+      height: canvasHeight.value,
+      width: canvasWidth.value
+    };
 
-      // Disable auto sizing while resetting container position
-      settings?.autoSizingContext?.disableAutoSizing();
+    // Disable auto sizing while resetting container position
+    settings?.autoSizingContext?.disableAutoSizing();
 
-      const scale =
-        settings?.scale ??
-        getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
+    const scale =
+      settings?.scale ??
+      getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
 
-      scaleContentTo(scale, undefined, settings?.animationSettings);
-      translateContentTo(
-        calcContainerTranslation(
-          containerBoundingRect,
-          canvasDimensions,
-          padding.value
-        ),
-        undefined,
-        settings?.animationSettings,
-        { callCallback: false }
-      );
+    scaleContentTo(scale, undefined, settings?.animationSettings);
+    translateContentTo(
+      calcContainerTranslation(
+        containerBoundingRect,
+        canvasDimensions,
+        padding.value
+      ),
+      undefined,
+      settings?.animationSettings,
+      { callCallback: false }
+    );
 
-      // Enable auto sizing after resetting container position
-      settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
-    },
-    []
-  );
+    // Enable auto sizing after resetting container position
+    settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
+  };
 
   useAnimatedReaction(
     () => ({
@@ -284,6 +273,7 @@ export default function TransformProvider({
         containerBoundingRect: initialRect,
         scale: initialScale.value
       });
+      isRendered.value = true;
       // Set canvas dimensions
       canvasWidth.value = initialDimensions.width;
       canvasHeight.value = initialDimensions.height;

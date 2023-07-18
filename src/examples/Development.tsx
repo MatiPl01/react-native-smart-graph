@@ -97,7 +97,11 @@ export default function App() {
         translucent
       />
       <SafeAreaView style={styles.container}>
-        <GraphView objectFit={objectFit} padding={0} scales={[0.25, 1, 10]}>
+        <GraphView
+          initialScale={1}
+          objectFit={objectFit}
+          padding={0}
+          scales={[0.25, 1, 10]}>
           <DirectedGraphComponent
             renderers={{
               label: DefaultEdgeLabelRenderer
