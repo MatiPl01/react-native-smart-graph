@@ -11,6 +11,7 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
+import { LONG_PRESS_DURATION } from '@/constants/events';
 import {
   FocusStatus,
   useAutoSizingContext,
@@ -223,6 +224,7 @@ export default function GesturesProvider({
     });
 
   const longPressGestureHandler = Gesture.LongPress()
+    .minDuration(LONG_PRESS_DURATION)
     .onTouchesDown(e => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       pressGesturesObserver.value?.onPressIn(e.allTouches[0]!);

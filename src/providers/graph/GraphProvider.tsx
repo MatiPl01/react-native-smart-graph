@@ -8,7 +8,6 @@ import {
 import { GesturesContextType } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import {
@@ -66,21 +65,18 @@ const getLayoutProviders = <V, E>(
   }
 };
 
-const getEventsProviders = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+const getEventsProviders = <V, E>(
   transform: AnimatedCanvasTransform,
   settings: GraphSettingsWithDefaults<V, E>,
   gesturesContext: GesturesContextType
 ) => {
   if (settings.events) {
     return [
-      <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
+      <PressEventsProvider<PressEventsProviderProps>
         pressGesturesObserver={gesturesContext.pressGesturesObserver}
-        settings={settings.events as GraphEventsSettings<V, E, ED>}
+        settings={settings.events as GraphEventsSettings}
         transform={transform}
+        vertexRadius={settings.components.vertex.radius}
       />
     ];
   }

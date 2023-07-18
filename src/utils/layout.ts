@@ -138,6 +138,7 @@ export const findPressedVertex = (
 
   if (closestVertexKey) {
     const closestVertexPosition = animatedVectorCoordinatesToVector(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       verticesData[closestVertexKey]!.position
     );
 
