@@ -50,15 +50,3 @@ export const grahamScan = (points: Vector[]): Vector[] => {
 
   return hull;
 };
-
-export const absoluteCoordinatesToCanvasCoordinates = (
-  absoluteCoordinates: Vector,
-  translate: Vector,
-  scale: number
-): Vector => {
-  'worklet';
-  return {
-    x: (absoluteCoordinates.x - translate.x) / scale,
-    y: (absoluteCoordinates.y - translate.y) / scale
-  };
-};

@@ -1,5 +1,5 @@
 import { Canvas, Group } from '@shopify/react-native-skia';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
@@ -7,9 +7,12 @@ import { GraphComponent } from '@/components/graphs';
 import { DirectedGraphComponentProps } from '@/components/graphs/DirectedGraphComponent';
 import { UndirectedGraphComponentProps } from '@/components/graphs/UndirectedGraphComponent';
 import {
+  AccessibleOverlayContextType,
+  withOverlay
+} from '@/contexts/OverlayProvider';
+import {
   useCanvasDataContext,
   useFocusContext,
-  useGesturesContext,
   useTransformContext
 } from '@/providers/canvas';
 import GraphProvider from '@/providers/graph/GraphProvider';
@@ -20,7 +23,7 @@ function GraphComponentComposer<
   P extends
     | DirectedGraphComponentProps<V, E>
     | UndirectedGraphComponentProps<V, E>
->(props: P) {
+>(props: P & AccessibleOverlayContextType) {
   // CONTEXTS
   // Canvas data context
   const {
@@ -41,8 +44,6 @@ function GraphComponentComposer<
     focusTransitionProgress,
     startFocus
   } = useFocusContext();
-  // Gesture context
-  const gesturesContext = useGesturesContext();
 
   const transform = useMemo(
     () => ({
@@ -71,7 +72,6 @@ function GraphComponentComposer<
           focusKey={focusKey}
           focusStatus={focusStatus}
           focusTransitionProgress={focusTransitionProgress}
-          gesturesContext={gesturesContext}
           initialCanvasScale={initialScale}
           onRender={handleGraphRender}
           startFocus={startFocus}
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default memo(GraphComponentComposer) as <
+export default withOverlay(GraphComponentComposer) as <
   V,
   E,
   P extends
