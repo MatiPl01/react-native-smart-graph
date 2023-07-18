@@ -1,3 +1,2 @@
-export const HIT_SLOP = 10;
-export const PRESS_SLOP = 50;
-export const LONG_PRESS_DURATION = 500;
+export const EDGE_LABEL_HIT_SLOP = 10;
+export const VERTEX_HIT_SLOP = 10;

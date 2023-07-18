@@ -1,6 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { VertexComponentRenderData } from '@/types/components';
 import {
   Alignment,
   AxisSpacing,
@@ -8,11 +7,6 @@ import {
   Dimensions,
   Spacing
 } from '@/types/layout';
-
-import {
-  animatedVectorCoordinatesToVector,
-  distanceBetweenVectors
-} from './vectors';
 
 export const findCenterOfPoints = (positions: Array<Vector>): Vector | null => {
   'worklet';
@@ -101,53 +95,4 @@ export const updateSpacing = (spacing?: Spacing): BoundingRect => {
     right: horizontal ?? 0,
     top: vertical ?? 0
   };
-};
-
-const findClosestVertex = (
-  position: Vector,
-  verticesData: Record<string, VertexComponentRenderData>
-): null | string => {
-  'worklet';
-  let closestVertexKey: null | string = null;
-  let closestVertexDistance = Infinity;
-
-  Object.entries(verticesData).forEach(
-    ([key, { position: vertexPosition }]) => {
-      const distance = distanceBetweenVectors(
-        position,
-        animatedVectorCoordinatesToVector(vertexPosition)
-      );
-      if (distance < closestVertexDistance) {
-        closestVertexKey = key;
-        closestVertexDistance = distance;
-      }
-    }
-  );
-
-  return closestVertexKey;
-};
-
-export const findPressedVertex = (
-  position: Vector,
-  vertexRadius: number,
-  hitSlop: number,
-  verticesData: Record<string, VertexComponentRenderData>
-): null | string => {
-  'worklet';
-  const closestVertexKey = findClosestVertex(position, verticesData);
-
-  if (closestVertexKey) {
-    const closestVertexPosition = animatedVectorCoordinatesToVector(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      verticesData[closestVertexKey]!.position
-    );
-
-    const distance = distanceBetweenVectors(position, closestVertexPosition);
-
-    if (distance <= vertexRadius + hitSlop) {
-      return closestVertexKey;
-    }
-  }
-
-  return null;
 };

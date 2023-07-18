@@ -78,6 +78,8 @@ export {
   type DirectedGraphComponentsSettings,
   type DirectedGraphSettings,
   type EdgeLabelSettings,
+  type EdgePressEvent,
+  type EdgePressHandler,
   type FocusSettings,
   type ForcesLayoutSettings,
   type ForcesSettings,
@@ -99,6 +101,7 @@ export {
   type UndirectedEdgeSettings,
   type UndirectedGraphComponentsSettings,
   type UndirectedGraphSettings,
+  type VertexPressEvent,
   type VertexPressHandler,
   type VertexSettings
 } from '@/types/settings';
