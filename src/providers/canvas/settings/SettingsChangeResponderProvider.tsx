@@ -21,7 +21,7 @@ export default function SettingsChangeResponderProvider({
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
   // Focus context values
-  const { focusKey } = useFocusContext();
+  const { focus } = useFocusContext();
 
   // Other values
   const isInitialRender = useSharedValue(true);
@@ -34,7 +34,7 @@ export default function SettingsChangeResponderProvider({
         return;
       }
       // Don't reset the container position if there is a focused object
-      if (focusKey.value !== null) return;
+      if (focus.key.value !== null) return;
       // Disable auto sizing
       autoSizingContext.disableAutoSizing();
       // Reset the container position

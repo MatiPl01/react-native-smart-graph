@@ -34,6 +34,10 @@ export default function MultiStepFocusExample() {
       withSequence(withTiming(1, timingConfig), withTiming(0, timingConfig)),
       -1
     );
+
+    // graph.focus('1', {
+    //   disableGestures: false
+    // });
   }, []);
 
   return (

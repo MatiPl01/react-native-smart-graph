@@ -6,10 +6,10 @@ import {
   UndirectedGraphComponentProps
 } from '@/components/graphs';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
+import { FocusContextType } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
-import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
@@ -93,13 +93,9 @@ type GraphProviderProps<V, E> = PropsWithChildren<
     boundingRect: AnimatedBoundingRect;
     canvasDimensions: AnimatedDimensions;
     canvasScales: SharedValue<number[]>;
-    endFocus: FocusEndSetter;
-    focusKey: SharedValue<null | string>;
-    focusStatus: SharedValue<number>;
-    focusTransitionProgress: SharedValue<number>;
+    focusContext: FocusContextType;
     initialCanvasScale: SharedValue<number>;
     onRender: (containerBounds: BoundingRect) => void;
-    startFocus: FocusStartSetter;
     transform: AnimatedCanvasTransform;
   } & AccessibleOverlayContextType &
     (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
@@ -111,17 +107,13 @@ function GraphProvider<V, E>({
   canvasDimensions,
   canvasScales,
   children,
-  endFocus,
-  focusKey,
-  focusStatus,
-  focusTransitionProgress,
+  focusContext,
   graph,
   initialCanvasScale,
   onRender,
   renderLayer,
   renderers,
   settings,
-  startFocus,
   transform
 }: GraphProviderProps<V, E>) {
   const memoSettings = useMemo(
@@ -163,13 +155,9 @@ function GraphProvider<V, E>({
       <VertexFocusProvider
         availableScales={canvasScales}
         canvasDimensions={canvasDimensions}
-        endFocus={endFocus}
-        focusKey={focusKey}
-        focusStatus={focusStatus}
-        focusTransitionProgress={focusTransitionProgress}
+        focusContext={focusContext}
         graph={graph}
         initialScale={initialCanvasScale}
-        startFocus={startFocus}
         vertexRadius={memoSettings.components.vertex.radius}
       />
     ],

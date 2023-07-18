@@ -1,4 +1,5 @@
 export {
+  type FocusContextType,
   default as FocusProvider,
   FocusStatus,
   useFocusContext

@@ -1,8 +1,11 @@
 import { memo, useEffect } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import {
+  SharedValue,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
-import { VertexFocusContextType } from '@/providers/graph';
 import { VertexRemoveHandler, VertexRenderHandler } from '@/types/components';
 import { Vertex } from '@/types/graphs';
 import { VertexRenderFunction } from '@/types/renderer';
@@ -13,9 +16,11 @@ import {
 import { DeepRequiredAll } from '@/types/utils';
 import { updateComponentAnimationState } from '@/utils/components';
 
-type VertexComponentProps<V, E> = VertexFocusContextType & {
+type VertexComponentProps<V, E> = {
   animationSettings: AnimationSettingsWithDefaults;
   componentSettings: DeepRequiredAll<VertexSettings>;
+  focusKey: SharedValue<null | string>;
+  focusTransitionProgress: SharedValue<number>;
   onRemove: VertexRemoveHandler;
   onRender: VertexRenderHandler;
   removed: boolean;

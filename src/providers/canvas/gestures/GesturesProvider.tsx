@@ -1,11 +1,11 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
-  runOnUI,
   useAnimatedReaction,
   useSharedValue,
+  useWorkletCallback,
   withDecay
 } from 'react-native-reanimated';
 
@@ -63,7 +63,7 @@ export default function GesturesProvider({
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
   // Focus context values
-  const { endFocus, focusStatus, gesturesDisabled } = useFocusContext();
+  const { blur, endFocus, focusStatus, gesturesDisabled } = useFocusContext();
 
   // OTHER VALUES
   // Gestures helper values
@@ -74,44 +74,32 @@ export default function GesturesProvider({
   const pinchStartScale = useSharedValue(1);
   const pinchDecayScale = useSharedValue(1);
   const pinchEndPosition = useSharedValue({ x: 0, y: 0 });
-  // Values used by the focus provider
-  const panTranslateX = useSharedValue(0);
-  const panTranslateY = useSharedValue(0);
-  const isGestureActive = useSharedValue(false);
+  // const isGestureActive = useSharedValue(false);
 
-  const handleGestureStart = useCallback((origin?: Maybe<Vector>) => {
-    isGestureActive.value = true;
-    runOnUI(autoSizingContext.disableAutoSizing)();
+  const handleGestureStart = useWorkletCallback((origin?: Maybe<Vector>) => {
+    // isGestureActive.value = true;
+    autoSizingContext.disableAutoSizing();
     if (focusStatus.value !== FocusStatus.BLUR) {
-      runOnJS(endFocus)(
-        origin && {
-          isGestureActive,
-          origin,
-          translation: {
-            x: panTranslateX,
-            y: panTranslateY
-          }
-        }
-      );
+      endFocus(origin && { origin });
     }
   }, []);
 
   const panGestureHandler = Gesture.Pan()
     .onStart(({ numberOfPointers, x, y }) => {
       if (gesturesDisabled.value) return;
-      panTranslateX.value = 0;
-      panTranslateY.value = 0;
+      blur.translationX.value = 0;
+      blur.translationY.value = 0;
       panStartScale.value = currentScale.value;
       // If there are multiple pointers, we don't want to end
       // focus with a blur transition to the origin
-      runOnJS(handleGestureStart)(numberOfPointers > 1 ? null : { x, y });
+      handleGestureStart(numberOfPointers > 1 ? null : { x, y });
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
       // The focus provider will handle canvas translation on blur transition
       if (focusStatus.value === FocusStatus.BLUR_TRANSITION) {
-        panTranslateX.value += e.changeX;
-        panTranslateY.value += e.changeY;
+        blur.translationX.value += e.changeX;
+        blur.translationY.value += e.changeY;
       }
       // Otherwise, translate the canvas normally
       else {
@@ -120,7 +108,7 @@ export default function GesturesProvider({
       }
     })
     .onEnd(({ velocityX, velocityY }) => {
-      isGestureActive.value = false;
+      // isGestureActive.value = false;
       if (gesturesDisabled.value) return;
       const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
       translateX.value = withDecay({
@@ -152,7 +140,7 @@ export default function GesturesProvider({
       );
     })
     .onEnd(({ focalX, focalY, velocity }) => {
-      isGestureActive.value = false;
+      // isGestureActive.value = false;
       if (gesturesDisabled.value) return;
       pinchDecayScale.value = currentScale.value;
       pinchEndPosition.value = { x: focalX, y: focalY };
@@ -161,7 +149,6 @@ export default function GesturesProvider({
         rubberBandEffect: true,
         velocity
       });
-      console.log('pinch end');
       autoSizingContext.enableAutoSizingAfterTimeout();
     });
 
