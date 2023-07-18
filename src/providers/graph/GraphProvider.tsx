@@ -5,6 +5,7 @@ import {
   DirectedGraphComponentProps,
   UndirectedGraphComponentProps
 } from '@/components/graphs';
+import { GesturesContextType } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
@@ -71,11 +72,13 @@ const getEventsProviders = <
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 >(
   transform: AnimatedCanvasTransform,
-  settings: GraphSettingsWithDefaults<V, E>
+  settings: GraphSettingsWithDefaults<V, E>,
+  gesturesContext: GesturesContextType
 ) => {
   if (settings.events) {
     return [
       <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
+        pressGesturesObserver={gesturesContext.pressGesturesObserver}
         settings={settings.events as GraphEventsSettings<V, E, ED>}
         transform={transform}
       />
@@ -93,6 +96,7 @@ type GraphProviderProps<V, E> = PropsWithChildren<
     focusKey: SharedValue<null | string>;
     focusStatus: SharedValue<number>;
     focusTransitionProgress: SharedValue<number>;
+    gesturesContext: GesturesContextType;
     initialCanvasScale: SharedValue<number>;
     onRender: (containerBounds: BoundingRect) => void;
     startFocus: FocusStartSetter;
@@ -110,6 +114,7 @@ function GraphProvider<V, E>({
   focusKey,
   focusStatus,
   focusTransitionProgress,
+  gesturesContext,
   graph,
   initialCanvasScale,
   onRender,
@@ -151,7 +156,7 @@ function GraphProvider<V, E>({
       ...getLayoutProviders(graph, memoSettings, onRender),
       // EVENTS
       // Press events provider
-      ...getEventsProviders(transform, memoSettings),
+      ...getEventsProviders(transform, memoSettings, gesturesContext),
       // FOCUS
       // Provider used to focus on a specific vertex
       <VertexFocusProvider

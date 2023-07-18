@@ -4,6 +4,7 @@ import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
   runOnUI,
+  SharedValue,
   useAnimatedReaction,
   useSharedValue,
   withDecay
@@ -17,10 +18,12 @@ import {
   useFocusContext,
   useTransformContext
 } from '@/providers/canvas';
+import { PressGesturesObserver } from '@/types/gestures';
 import { Maybe } from '@/types/utils';
 
-type GesturesContextType = {
+export type GesturesContextType = {
   gestureHandler: ComposedGesture;
+  pressGesturesObserver: SharedValue<PressGesturesObserver | null>;
 };
 
 const GesturesContext = createContext(null);
@@ -78,6 +81,12 @@ export default function GesturesProvider({
   const panTranslateX = useSharedValue(0);
   const panTranslateY = useSharedValue(0);
   const isGestureActive = useSharedValue(false);
+
+  // PRESS GESTURES
+  // This is used to handle gesture-related events from graph providers
+  const pressGesturesObserver = useSharedValue<PressGesturesObserver | null>(
+    null
+  );
 
   const handleGestureStart = useCallback((origin?: Maybe<Vector>) => {
     isGestureActive.value = true;
@@ -207,15 +216,24 @@ export default function GesturesProvider({
     }
   );
 
-  const singleTapGestureHandler = Gesture.Tap()
+  const pressGestureHandler = Gesture.Tap()
     .numberOfTaps(1)
     .onEnd(({ x, y }) => {
-      console.log('press', { x, y });
+      pressGesturesObserver.value?.onPress({ x, y });
     });
 
-  const longPressGestureHandler = Gesture.LongPress().onEnd(({ x, y }) => {
-    console.log('long press', { x, y });
-  });
+  const longPressGestureHandler = Gesture.LongPress()
+    .onTouchesDown(e => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      pressGesturesObserver.value?.onPressIn(e.allTouches[0]!);
+    })
+    .onTouchesUp(e => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      pressGesturesObserver.value?.onPressOut(e.allTouches[0]!);
+    })
+    .onEnd(({ x, y }) => {
+      pressGesturesObserver.value?.onLongPress({ x, y });
+    });
 
   const contextValue = useMemo<GesturesContextType>(
     () => ({
@@ -224,8 +242,9 @@ export default function GesturesProvider({
           doubleTapGestureHandler,
           Gesture.Simultaneous(pinchGestureHandler, panGestureHandler)
         ),
-        Gesture.Simultaneous(singleTapGestureHandler, longPressGestureHandler)
-      )
+        Gesture.Simultaneous(pressGestureHandler, longPressGestureHandler)
+      ),
+      pressGesturesObserver
     }),
     []
   );

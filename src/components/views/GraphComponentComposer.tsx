@@ -9,6 +9,7 @@ import { UndirectedGraphComponentProps } from '@/components/graphs/UndirectedGra
 import {
   useCanvasDataContext,
   useFocusContext,
+  useGesturesContext,
   useTransformContext
 } from '@/providers/canvas';
 import GraphProvider from '@/providers/graph/GraphProvider';
@@ -40,6 +41,8 @@ function GraphComponentComposer<
     focusTransitionProgress,
     startFocus
   } = useFocusContext();
+  // Gesture context
+  const gesturesContext = useGesturesContext();
 
   const transform = useMemo(
     () => ({
@@ -68,6 +71,7 @@ function GraphComponentComposer<
           focusKey={focusKey}
           focusStatus={focusStatus}
           focusTransitionProgress={focusTransitionProgress}
+          gesturesContext={gesturesContext}
           initialCanvasScale={initialScale}
           onRender={handleGraphRender}
           startFocus={startFocus}
