@@ -45,12 +45,13 @@ type TransformContextType = {
     newScale: number,
     origin?: Vector,
     animationSettings?: Maybe<AnimationSettingsWithDefaults>,
-    withClamping?: boolean
+    settings?: { callCallback?: boolean; withClamping?: boolean }
   ) => void;
   translateContentTo: (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    settings?: { callCallback?: boolean }
   ) => void;
 };
 
@@ -162,7 +163,8 @@ export default function TransformProvider({
   const translateContentTo = (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    settings?: { callCallback?: boolean }
   ) => {
     'worklet';
     const newTranslateX = clampTo?.x
@@ -175,7 +177,11 @@ export default function TransformProvider({
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings;
       translateX.value = withTiming(newTranslateX, timingConfig);
-      translateY.value = withTiming(newTranslateY, timingConfig, onComplete);
+      translateY.value = withTiming(
+        newTranslateY,
+        timingConfig,
+        settings?.callCallback === false ? undefined : onComplete
+      );
     } else {
       translateX.value = newTranslateX;
       translateY.value = newTranslateY;
@@ -186,7 +192,7 @@ export default function TransformProvider({
     newScale: number,
     origin?: Vector,
     animationSettings?: Maybe<AnimationSettingsWithDefaults>,
-    withClamping = true
+    settings?: { callCallback?: boolean; withClamping?: boolean }
   ) => {
     'worklet';
     if (origin && currentScale.value > 0) {
@@ -200,14 +206,19 @@ export default function TransformProvider({
             translateY.value -
             (origin.y - translateY.value) * (relativeScale - 1)
         },
-        withClamping ? getTranslateClamp(newScale) : undefined,
-        animationSettings && { ...animationSettings, onComplete: undefined }
+        settings?.withClamping ? getTranslateClamp(newScale) : undefined,
+        animationSettings,
+        { callCallback: false }
       );
     }
 
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings;
-      currentScale.value = withTiming(newScale, timingConfig, onComplete);
+      currentScale.value = withTiming(
+        newScale,
+        timingConfig,
+        settings?.callCallback === false ? undefined : onComplete
+      );
     } else {
       currentScale.value = newScale;
     }
@@ -248,7 +259,8 @@ export default function TransformProvider({
           padding.value
         ),
         undefined,
-        settings?.animationSettings
+        settings?.animationSettings,
+        { callCallback: false }
       );
 
       // Enable auto sizing after resetting container position

@@ -26,8 +26,18 @@ export default function SettingsChangeResponderProvider({
   // Other values
   const isInitialRender = useSharedValue(true);
 
+  // Disable auto sizing on every objectFit change
   useAnimatedReaction(
     () => objectFit.value,
+    () => {
+      autoSizingContext.disableAutoSizing();
+    }
+  );
+
+  // On every objectFit change, aftere autosizing has been disabled,
+  // reset the container position
+  useAnimatedReaction(
+    () => objectFit.value && !autoSizingContext.autoSizingEnabled.value,
     () => {
       if (isInitialRender.value) {
         isInitialRender.value = false;
@@ -35,15 +45,14 @@ export default function SettingsChangeResponderProvider({
       }
       // Don't reset the container position if there is a focused object
       if (focusKey.value !== null) return;
-      // Disable auto sizing
-      autoSizingContext.disableAutoSizing();
+
       // Reset the container position
       resetContainerPosition({
         animationSettings: {
           ...DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS,
-          onComplete: () => {
+          onComplete: completed => {
             // Re-enable auto sizing after the container position has been reset
-            autoSizingContext.enableAutoSizing();
+            if (completed) autoSizingContext.enableAutoSizing();
           }
         }
       });

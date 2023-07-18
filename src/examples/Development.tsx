@@ -16,7 +16,6 @@ import {
 } from '..';
 
 const ADDED_COMPONENTS = [
-  { key: 'V1' },
   { key: 'V2' },
   { from: 'V1', key: 'E1', to: 'V2' },
   { key: 'V3' },
@@ -32,7 +31,13 @@ let mode = 0;
 
 export default function App() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
-  const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
+  const graph = useMemo(
+    () =>
+      new DirectedGraph<string, unknown>({
+        vertices: [{ key: 'V1' }]
+      }),
+    []
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -52,14 +57,12 @@ export default function App() {
           }
           idx++;
         } else {
-          // if ('from' in component) {
-          //   graph.removeEdge(component.key);
-          // } else {
-          //   graph.removeVertex(component.key);
-          // }
-          // idx--;
-          clearInterval(interval);
-          return;
+          if ('from' in component) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
+          idx--;
         }
       } catch (e) {
         clearInterval(interval);
@@ -81,6 +84,7 @@ export default function App() {
   const handleVertexPress = useCallback<VertexPressHandler<string>>(
     ({ vertex: { key } }) => {
       console.log('press', key);
+      graph.focus(key);
     },
     [graph]
   );

@@ -33,9 +33,9 @@ export const animateVerticesToFinalPositions = (
         },
         // Call onComplete only once, when the last vertex animation is complete
         onComplete && idx === finalPositionsEntries.length - 1
-          ? () => {
+          ? (finished?: boolean) => {
               'worklet';
-              runOnJS(onComplete)();
+              runOnJS(onComplete)(finished);
             }
           : undefined
       );

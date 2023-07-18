@@ -36,6 +36,12 @@ const OBJECT_FIT_BUTTONS: Array<{ icon: IconDefinition; type: ObjectFit }> = [
   }
 ];
 
+type ButtonProps = {
+  icon: IconDefinition;
+  key: string;
+  onPress: () => void;
+};
+
 type GraphViewControlsProps = {
   onObjectFitChange?: (objectFit: ObjectFit) => void;
 };
@@ -87,7 +93,7 @@ export default memo(function GraphViewControls({
     onObjectFitChange?.(nextObjectFit);
   };
 
-  const buttons = [
+  const buttons: Array<ButtonProps> = [
     {
       icon: faArrowsToCircle,
       key: 'reset',
@@ -105,8 +111,8 @@ export default memo(function GraphViewControls({
 
   return (
     <View style={styles.container}>
-      {buttons.map(({ icon, key, onPress }) => (
-        <TouchableOpacity key={key} onPress={onPress}>
+      {buttons.map(({ icon, ...props }) => (
+        <TouchableOpacity {...props}>
           <FontAwesomeIcon icon={icon} size={32} style={styles.icon} />
         </TouchableOpacity>
       ))}
