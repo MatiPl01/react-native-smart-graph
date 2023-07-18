@@ -26,8 +26,7 @@ import {
 import { deepMemoComparator } from '@/utils/equality';
 
 import { ComponentsDataProvider } from './data';
-import { PressEventsProvider } from './events';
-import { PressEventsProviderProps } from './events/PressEventsProvider';
+import { VertexPressEventsProvider } from './events';
 import {
   ContainerDimensionsProvider,
   ForcesLayoutProvider,
@@ -72,7 +71,7 @@ const getEventsProviders = <V, E>(
 ) => {
   if (settings.events) {
     return [
-      <PressEventsProvider<PressEventsProviderProps>
+      <VertexPressEventsProvider
         pressGesturesObserver={gesturesContext.pressGesturesObserver}
         settings={settings.events as GraphEventsSettings}
         transform={transform}

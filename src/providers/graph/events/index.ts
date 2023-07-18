@@ -1,1 +1,1 @@
-export { default as PressEventsProvider } from './PressEventsProvider';
+export { default as VertexPressEventsProvider } from './VertexPressEventsProvider';
