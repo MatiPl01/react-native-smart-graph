@@ -148,7 +148,7 @@ export default function GesturesProvider({
         pinchStartScale.value * scale,
         { x: focalX, y: focalY },
         undefined,
-        false
+        { withClamping: false }
       );
     })
     .onEnd(({ focalX, focalY, velocity }) => {
@@ -203,7 +203,7 @@ export default function GesturesProvider({
         isInitialRender.value = false;
         return;
       }
-      scaleContentTo(decayScale, endPosition);
+      scaleContentTo(Math.max(decayScale, 0), endPosition);
     }
   );
 

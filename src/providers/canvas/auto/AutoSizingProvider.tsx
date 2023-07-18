@@ -2,6 +2,7 @@ import { Vector } from '@shopify/react-native-skia';
 import { createContext, useContext, useMemo, useRef } from 'react';
 import {
   runOnJS,
+  SharedValue,
   useAnimatedReaction,
   useSharedValue,
   withTiming
@@ -18,6 +19,7 @@ import {
 } from '@/utils/views';
 
 export type AutoSizingContextType = {
+  autoSizingEnabled: SharedValue<boolean>;
   disableAutoSizing: () => void;
   enableAutoSizing: (
     animationSettings?: Maybe<AnimationSettingsWithDefaults>
@@ -195,6 +197,7 @@ export default function AutoSizingProvider({
 
   const contextValue = useMemo<AutoSizingContextType>(
     () => ({
+      autoSizingEnabled,
       disableAutoSizing,
       enableAutoSizing,
       enableAutoSizingAfterTimeout

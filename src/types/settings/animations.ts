@@ -4,7 +4,7 @@ import Animated, { EasingFunctionFactory } from 'react-native-reanimated';
 export type AnimationSettings = {
   duration?: number;
   easing?: Animated.EasingFunction;
-  onComplete?: () => void;
+  onComplete?: (finished?: boolean) => void;
 };
 
 export type SingleModificationAnimationSettings =
@@ -37,5 +37,5 @@ export type AnimationSettingsWithDefaults = {
   // Change this type from Animated.EasingFunction to EasingFunctionFactory
   // because of incorrect type definition in react-native-reanimated
   easing: EasingFunctionFactory;
-  onComplete?: () => void;
+  onComplete?: (finished?: boolean) => void;
 };

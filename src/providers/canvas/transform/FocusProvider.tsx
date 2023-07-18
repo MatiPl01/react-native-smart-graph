@@ -199,11 +199,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       const { onComplete, ...timingConfig } = animationSettings;
       return {
         ...timingConfig,
-        onComplete: () => {
+        onComplete: (finished?: boolean) => {
           'worklet';
           finishTransition(finishStatus);
           if (onComplete) {
-            runOnJS(onComplete)();
+            runOnJS(onComplete)(finished);
           }
         }
       };
