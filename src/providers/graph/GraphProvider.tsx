@@ -151,7 +151,10 @@ function GraphProvider<V, E>({
       />,
       // LAYOUT
       // Provider used to compute the dimensions of the container
-      <ContainerDimensionsProvider boundingRect={boundingRect} />,
+      <ContainerDimensionsProvider
+        boundingRect={boundingRect}
+        vertexRadius={memoSettings.components.vertex.radius}
+      />,
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
       ...getLayoutProviders(graph, memoSettings, onRender),

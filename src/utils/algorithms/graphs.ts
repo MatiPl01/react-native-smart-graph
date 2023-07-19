@@ -120,6 +120,7 @@ const findGraphDiameter = (
   connections: GraphConnections,
   graphComponent: GraphComponent
 ): { diameter: number; path: Array<string> } => {
+  'worklet';
   // Start from the last vertex in the component (it always will be
   // the farthest vertex from the vertex where BFS started as it
   // was inserted last)

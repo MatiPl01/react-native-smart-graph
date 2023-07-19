@@ -124,6 +124,7 @@ export default function AutoSizingProvider({
     animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     'worklet';
+    if (objectFit.value === 'none') return;
     runOnJS(clearAutoSizingTimeout)();
     runOnJS(startAutoSizingTimeout)(animationSettings);
   };
@@ -132,6 +133,7 @@ export default function AutoSizingProvider({
     animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     'worklet';
+    if (objectFit.value === 'none') return;
     autoSizingEnabled.value = true;
     runOnJS(clearAutoSizingTimeout)();
     runOnJS(startAutoSizing)(animationSettings);
@@ -172,6 +174,7 @@ export default function AutoSizingProvider({
         startTranslation,
         transitionProgress
       } = data;
+      if (!startScale) return;
       // Scale content to fit container based on objectFit
       scaleContentTo(
         calcScaleOnProgress(

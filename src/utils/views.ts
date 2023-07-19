@@ -33,7 +33,7 @@ export const calcContainerScale = (
       break;
   }
 
-  return scale;
+  return scale || initialScale;
 };
 
 export const calcContainerTranslation = (
