@@ -30,7 +30,7 @@ let idx = 0;
 let mode = 0;
 
 export default function App() {
-  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
+  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
   const graph = useMemo(
     () =>
       new DirectedGraph<string, unknown>({
@@ -69,7 +69,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 100);
+    }, 250);
 
     return () => clearInterval(interval);
   }, []);
@@ -110,6 +110,9 @@ export default function App() {
               events: {
                 onVertexLongPress: handleVertexLongPress,
                 onVertexPress: handleVertexPress
+              },
+              layout: {
+                managedBy: 'forces'
               },
               placement: {
                 strategy: 'trees'

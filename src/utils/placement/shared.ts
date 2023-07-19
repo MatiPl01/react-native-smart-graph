@@ -53,12 +53,22 @@ export const calcAnimatedContainerBoundingRect = (
   vertexRadius: number
 ): BoundingRect => {
   'worklet';
-  let left = 0;
-  let right = 0;
-  let top = 0;
-  let bottom = 0;
+  const positions = Object.values(placedVertices);
+  if (!positions.length) {
+    return {
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0
+    };
+  }
 
-  for (const { x, y } of Object.values(placedVertices)) {
+  let left = Infinity;
+  let right = -Infinity;
+  let top = Infinity;
+  let bottom = -Infinity;
+
+  for (const { x, y } of positions) {
     left = Math.min(left, x.value);
     right = Math.max(right, x.value);
     top = Math.min(top, y.value);

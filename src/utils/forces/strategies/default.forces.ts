@@ -1,3 +1,5 @@
+import { Vector } from '@shopify/react-native-skia';
+
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { DefaultForcesStrategySettingsWithDefaults } from '@/types/settings/forces';
@@ -33,7 +35,7 @@ export const applyDefaultForces = (
     attractionScale,
     repulsionScale
   }: DefaultForcesStrategySettingsWithDefaults
-) => {
+): Record<string, Vector> => {
   'worklet';
   const forces = calcForces(
     connections,
@@ -42,5 +44,5 @@ export const applyDefaultForces = (
     createAttractionFactorGetter(attractionScale, attractionForceFactor),
     createRepulsionFactorGetter(repulsionScale)
   );
-  updateVerticesPositions(forces, lockedVertices, verticesPositions);
+  return updateVerticesPositions(forces, lockedVertices, verticesPositions);
 };

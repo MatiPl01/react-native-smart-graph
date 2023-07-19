@@ -155,7 +155,7 @@ const findForcesPlacementPositions = (
   return unplacedVertices.reduce((acc, key) => {
     acc[key] = allVerticesPositions[key] = findForcesPlacementPosition(
       allVerticesPositions,
-      (connections[key] ?? []) as string[],
+      connections[key]?.outgoing ?? [],
       vertexRadius
     );
     return acc;

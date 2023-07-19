@@ -187,3 +187,18 @@ export const createAnimationsSettingsForBatchModification = (
     )
   };
 };
+
+export const animateToValue = (
+  fromValue: number,
+  toValue: number,
+  eps?: number
+): number => {
+  'worklet';
+  const delta = toValue - fromValue;
+  const minDelta = eps ?? 1;
+  if (Math.abs(delta) < minDelta) {
+    return toValue;
+  }
+  const factor = Math.max(0.1, Math.abs(delta) / 1000);
+  return fromValue + delta * factor;
+};

@@ -120,14 +120,20 @@ export const updateVerticesPositions = (
   forces: Record<string, Vector>,
   lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>
-) => {
+): Record<string, Vector> => {
   'worklet';
+  const updatedVerticesPositions: Record<string, Vector> = {};
+
   Object.entries(verticesPositions).forEach(([vertexKey, vertexPosition]) => {
     if (lockedVertices[vertexKey]) {
       return;
     }
     const force = forces[vertexKey] as Vector;
-    vertexPosition.x.value += force.x;
-    vertexPosition.y.value += force.y;
+    updatedVerticesPositions[vertexKey] = {
+      x: vertexPosition.x.value + force.x,
+      y: vertexPosition.y.value + force.y
+    };
   });
+
+  return updatedVerticesPositions;
 };
