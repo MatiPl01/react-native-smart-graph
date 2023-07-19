@@ -153,9 +153,16 @@ const findForcesPlacementPositions = (
 
   // Place unplaced vertices
   return unplacedVertices.reduce((acc, key) => {
+    const neighbors = [];
+    if (connections[key]?.incoming) {
+      neighbors.push(...connections[key]!.incoming);
+    }
+    if (connections[key]?.outgoing) {
+      neighbors.push(...connections[key]!.outgoing);
+    }
     acc[key] = allVerticesPositions[key] = findForcesPlacementPosition(
       allVerticesPositions,
-      connections[key]?.outgoing ?? [],
+      neighbors,
       vertexRadius
     );
     return acc;
