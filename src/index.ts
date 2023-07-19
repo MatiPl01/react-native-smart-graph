@@ -37,8 +37,9 @@ export * from '@/examples';
 // TYPES
 export {
   type DirectedEdgeData,
-  type GraphData,
+  type DirectedGraphData,
   type UndirectedEdgeData,
+  type UndirectedGraphData,
   type VertexData
 } from '@/types/data';
 export {

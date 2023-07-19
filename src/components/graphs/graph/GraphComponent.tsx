@@ -1,4 +1,4 @@
-import { Mask, Rect } from '@shopify/react-native-skia';
+import { Mask } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
@@ -33,13 +33,13 @@ function GraphComponent({ boundingRect }: GraphComponentProps) {
   return (
     <>
       {/* TODO - remove after testing */}
-      <Rect
+      {/* <Rect
         color='#333'
         height={h}
         width={w}
         x={boundingRect.left}
         y={boundingRect.top}
-      />
+      /> */}
       <Mask
         mask={<GraphEdgesMask boundingRect={boundingRect} />}
         mode='luminance'>

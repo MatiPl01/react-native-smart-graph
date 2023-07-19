@@ -1,7 +1,7 @@
 - [Getting Started](/)
 - [Usage](pages/usage.md)
 - [Components](pages/components.md)
-- [Graph models](pages/models.md)
+- [Graph](pages/models.md)
 - [Components renderers](pages/renderers.md)
 - [Placement strategies](pages/placement.md)
 - [Layout types](pages/layout.md)

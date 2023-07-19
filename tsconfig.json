@@ -18,7 +18,8 @@
     "rootDir": "./src",
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "react-native-smart-graph": ["."]
     }
   },
   "include": ["./src"]
