@@ -4,7 +4,7 @@
  * It is used to test the library.
  */
 import { AppRegistry } from 'react-native';
-import App from '@/examples/Development';
+import { App } from '@/examples';
 
 import { name as appName } from './app.json';
 
