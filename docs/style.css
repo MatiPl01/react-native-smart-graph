@@ -805,12 +805,6 @@ body {
   position: relative;
 }
 
-.app-sub-sidebar li:before {
-  content: '-';
-  padding-right: 4px;
-  float: left;
-}
-
 .markdown-section h1,
 .markdown-section h2,
 .markdown-section h3,
@@ -1053,7 +1047,7 @@ footer {
 }
 
 .pagination-item-label {
-  color: var(--accent) !important;
+  color: var(--highlightColor) !important;
 }
 
 .alert.callout {
