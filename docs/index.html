@@ -43,8 +43,6 @@
         name: 'React Native Smart Graph',
         logo: `assets/logo-${isDarkMode ? 'light' : 'dark'}.png`,
         loadSidebar: true,
-        subMaxLevel: 3,
-        sidebarDisplayLevel: 1,
         topMargin: 25,
         alias: {
           '/.*/_sidebar.md': '/_sidebar.md'
@@ -54,7 +52,7 @@
         },
         // TODO - fix search (currently searching only in the main page (README.md))
         search: {
-          maxAge: 86400000, // Expiration time, the default one day
+          maxAge: 86400000, // Exqpiration time, the default one day
           paths: 'auto',
           placeholder: 'Type to search',
           noData: 'No Results!',
@@ -104,6 +102,11 @@
         },
         tabs: {
           theme: 'classic'
+        },
+        'flexible-alerts': {
+          warning: {
+            label: 'Important'
+          }
         },
         plugins: [
           function (hook) {
@@ -159,5 +162,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-jsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-tsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="//unpkg.com/docsify-accordion/src/style.css" />
   </body>
 </html>

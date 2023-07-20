@@ -3,13 +3,21 @@
 ## Features
 
 - Directed and undirected graphs support,
+
 - Multiple edges support (**straight** or **curved** edges),
+
 - Smooth gesture interactions, panning and scaling support,
+
 - Different placement strategies,
+
 - Different layout types: **static** or **force-managed**,
+
 - Easy to update graph models that allow changing the graph structure after render,
+
 - Customizable graph components (each component can be defined by the user),
+
 - Actions on vertex press,
+
 - Vertex focus support (customizable scale and position of focused vertex).
 
 ## Installation

@@ -329,6 +329,7 @@ main.hidden {
 .sidebar .sidebar-nav {
   line-height: 2em;
   padding-bottom: 40px;
+  user-select: none;
 }
 
 .sidebar li.collapse .app-sub-sidebar {
@@ -1057,4 +1058,28 @@ footer {
 
 .alert p:not(.title) {
   color: var(--textColor) !important;
+}
+
+table {
+  display: table !important;
+  width: 100% !important;
+}
+
+thead {
+  background-color: var(--codeBackgroundColor);
+}
+
+tr,
+th,
+td {
+  border-color: var(--borderColor) !important;
+}
+
+th {
+  text-align: left;
+}
+
+summary {
+  font-weight: bold;
+  user-select: none;
 }

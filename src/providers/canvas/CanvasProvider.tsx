@@ -34,13 +34,6 @@ export default function CanvasProvider({
   padding: paddingProp,
   scales: scalesProp = DEFAULT_SCALES
 }: CanvasProviderProps) {
-  // Validate parameters
-  if (scalesProp.length === 0) {
-    throw new Error('At least one scale must be provided');
-  }
-  if (scalesProp.indexOf(initialScaleProp ?? INITIAL_SCALE) < 0) {
-    throw new Error('Initial scale must be included in scales');
-  }
   // Store canvas settings in shared values to prevent re-renders
   const autoSizingTimeout = useDerivedValue(
     () => autoSizingTimeoutProp,

@@ -1,11 +1,17 @@
 - [Getting Started](/)
+  - [Features](/?id=features)
+  - [Installation](/?id=installation)
 - [Basic usage](pages/usage.md)
-- [Components](pages/components.md)
-
+  - [GestureHandlerRootView](pages/usage?id=gesturehandlerrootview)
+  - [Graph component](pages/usage?id=graph-component)
+- Components
   - [GraphView](pages/components/view.md)
+    - [Features](pages/components/view?id=features)
+    - [Usage](pages/components/view?id=usage)
+    - [Properties](pages/components/view?id=properties)
+    - [Example](pages/components/view?id=example)
   - [Graphs](pages/components/graphs.md)
   - [Overlay](pages/components/overlay.md)
-
 - [Graph models](pages/models.md)
 - [Graph components renderers](pages/renderers.md)
 - [Placement strategies](pages/placement.md)
