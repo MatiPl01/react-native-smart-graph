@@ -1,0 +1,1 @@
+# Circle placement strategy

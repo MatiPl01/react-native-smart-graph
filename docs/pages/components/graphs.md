@@ -1,1 +1,1 @@
-# Graph components
+# Graphs
