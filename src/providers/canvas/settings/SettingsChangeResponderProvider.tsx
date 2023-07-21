@@ -27,6 +27,7 @@ export default function SettingsChangeResponderProvider({
   // Other values
   const isFirstAutoSizingReactionCall = useSharedValue(true);
   const isFirstResetReactionCall = useSharedValue(true);
+  const prevObjectFit = useSharedValue<null | string>(null);
 
   // Disable auto sizing on every objectFit change
   useAnimatedReaction(
@@ -54,8 +55,12 @@ export default function SettingsChangeResponderProvider({
   // On every objectFit change, after auto-sizing has been disabled,
   // reset the container position
   useAnimatedReaction(
-    () => objectFit.value && !autoSizingContext.autoSizingEnabled.value,
-    () => {
+    () =>
+      objectFit.value !== prevObjectFit.value &&
+      !autoSizingContext.autoSizingEnabled.value,
+    shouldReset => {
+      prevObjectFit.value = objectFit.value;
+      if (!shouldReset) return;
       if (isFirstResetReactionCall.value) {
         isFirstResetReactionCall.value = false;
         return;
