@@ -37,7 +37,7 @@ Adjusts the size of the graph component rendered on the canvas. If value is diff
 | 'none' &#124; 'contain' &#124; 'cover' | 'none'  | no       |
 
 <details>
-<summary>Example</summary>
+<summary>Examples</summary>
 <article>
 <table>
   <tr>
@@ -74,7 +74,7 @@ type Spacing =
 | Spacing | 0       | no       |
 
 <details>
-<summary>Example</summary>
+<summary>Examples</summary>
 <article>
 <b>Adding padding to all 4 sides</b>
 <table>
@@ -127,7 +127,7 @@ If less than **3 scale values** are provided, the **first** one will be used as 
 | number[] | [0.25, 1, 2, 4] | no       |
 
 <details>
-<summary>Example</summary>
+<summary>Examples</summary>
 <article>
 <table>
   <tr>
@@ -178,7 +178,7 @@ Specifies how long after user inactivity (no gestures, no vertex focus, etc.) th
 - **Double tap gesture** - Quickly tapping twice on the canvas triggers a zoom in/out effect precisely where the canvas was tapped.
 
 <details>
-<summary>Example</summary>
+<summary>Examples</summary>
 <article>
 <table>
   <tr>
@@ -197,9 +197,9 @@ Specifies how long after user inactivity (no gestures, no vertex focus, etc.) th
 
 ## Example
 
-<!-- TODO - add recordings/gif images and fix auto sizing -->
-
 **Example code**
+
+The code snippet below presents the usage of all described properties combined together.
 
 ```tsx
 import { useMemo } from 'react';
@@ -225,10 +225,10 @@ export default function Graph() {
   return (
     <GraphView
       padding={{
-        top: 500,
+        top: 100,
         right: 200
       }}
-      autoSizingTimeout={500}
+      autoSizingTimeout={3000}
       initialScale={0.5}
       objectFit='contain'
       scales={[0.5, 1, 2]}>
@@ -246,8 +246,11 @@ export default function Graph() {
 }
 ```
 
-<!-- TODO: Add note about the graph component settings with link to the section describing the usage of these settings -->
+<!-- TODO - add link to placement strategies section -->
+
+> [!NOTE]
+> The placement strategy of the `DirectedGraphComponent` component was set to `'circle'` to ensure that the displayed result will always be the same. For more details about graph placement strategies visit [this]() section of documentation.
 
 **Recording**
 
-**Explanation**
+<video src="/assets/videos/components/GraphView/graph-view-example.mp4" style="width: 300px"></video>

@@ -21,10 +21,10 @@ export default function Graph() {
   return (
     <GraphView
       padding={{
-        top: 500,
+        top: 100,
         right: 200
       }}
-      autoSizingTimeout={500}
+      autoSizingTimeout={3000}
       initialScale={0.5}
       objectFit='contain'
       scales={[0.5, 1, 2]}>
