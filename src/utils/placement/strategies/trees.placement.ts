@@ -38,8 +38,6 @@ const arrangeVertices = (
     }
   });
 
-  console.log(subtreeWidths);
-
   // Arrange vertices
   const arrangedVertices: Record<string, VertexPosition> = {
     [rootVertex]: { col: subtreeWidths[rootVertex]! / 2, row: 0 }
@@ -70,8 +68,6 @@ const arrangeVertices = (
 
     prevData = data;
   });
-
-  console.log(arrangedVertices);
 
   return arrangedVertices;
 };

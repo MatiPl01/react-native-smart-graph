@@ -9,11 +9,55 @@ Circles placement strategy is very **similar** to the [circle](pages/placement/c
 
 ## Properties
 
-All properties are the same as for the [circle](pages/placement/circle?id=properties) placement strategy.
+> All properties (except the `'strategy'`) are the same as for the [circle](pages/placement/circle?id=properties) placement strategy.
+
+#### `strategy`
+
+A required field specifying the strategy to use.
+
+| Type      | Default | Required |
+| --------- | ------- | -------- |
+| 'circles' | -       | yes      |
+
+#### `minVertexSpacing`
+
+Specifies the minimum distance between vertices.
+
+| Type   | Default | Required |
+| ------ | ------- | -------- |
+| number | 20      | no       |
+
+#### `sortVertices`
+
+Determines whether graph vertices should be arranged in a circular layout based on specific relative order. Vertices will be sorted separately for each circle (each graph component).
+
+| Type    | Default | Required |
+| ------- | ------- | -------- |
+| boolean | false   | no       |
+
+> [!NOTE]
+> If this property is set to `true` without specifying the custom `sortComparator`, vertices will be sorted by their keys in a non-decreasing order.
+
+#### `sortComparator`
+
+Specifies how vertices should be ordered on each circle. The function must be a reanimated `'worklet'`, because all layout calculations are processed on the UI thread.
+
+Below is the default implementation of the `sortComparator` function:
+
+```ts
+const defaultSortComparator = (key1: string, key2: string) => {
+  'worklet';
+  return key1.localeCompare(key2);
+};
+```
+
+| Type                                   | Default               | Required |
+| -------------------------------------- | --------------------- | -------- |
+| (key1: string, key2: string) => number | defaultSortComparator | no       |
 
 ## Example
 
-**Example code (`CirclesPlacementExample`)**
+**Example code**
 
 ```tsx
 import { useMemo } from 'react';
@@ -79,4 +123,4 @@ export default function Graph() {
 
 **Result**
 
-<video src="./assets/videos/placement/circles/placement-example.mp4" style="width: 300px"></video>
+<img src="./assets/images/placement/circles/placement-example.png" alt="circles placement example" width="300" />

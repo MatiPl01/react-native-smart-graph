@@ -28,7 +28,7 @@
   - [Trees](pages/placement/trees.md)
     - [Description](pages/placement/trees?id=description)
     - [Properties](pages/placement/trees?id=properties)
-    - [Root vertex](pages/placement/trees?id=root-vertex)
+    - [Root vertices](pages/placement/trees?id=root-vertices)
     - [Example](pages/placement/trees?id=example)
   - [Orbits](pages/placement/orbits.md)
 - [Layout types](pages/layout.md)

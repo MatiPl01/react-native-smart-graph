@@ -17,7 +17,7 @@ A required field specifying the strategy to use.
 
 | Type     | Default | Required |
 | -------- | ------- | -------- |
-| 'string' | -       | yes      |
+| 'circle' | -       | yes      |
 
 #### `minVertexSpacing`
 
@@ -73,7 +73,7 @@ const defaultSortComparator = (key1: string, key2: string) => {
 
 ## Example
 
-**Example code (`CirclePlacementExample`)**
+**Example code**
 
 ```tsx
 import { useMemo } from 'react';
@@ -136,4 +136,4 @@ export default function Graph() {
 
 **Result**
 
-<video src="./assets/videos/placement/circle/placement-example.mp4" style="width: 300px"></video>
+<img src="./assets/images/placement/circle/placement-example.png" alt="circle placement example" width="300" />

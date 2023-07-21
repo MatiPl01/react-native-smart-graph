@@ -10,7 +10,7 @@
 
 ## Usage
 
-**Example code (`GraphViewExample`)**
+**Example code**
 
 ```tsx
 import { GraphView } from 'react-native-smart-graph';
@@ -197,7 +197,7 @@ Specifies how long after user inactivity (no gestures, no vertex focus, etc.) th
 
 ## Example
 
-**Example code (`GraphViewPropsExample`)**
+**Example code**
 
 The code snippet below presents the usage of all described properties combined together.
 
