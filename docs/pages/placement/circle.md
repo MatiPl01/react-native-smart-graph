@@ -1,6 +1,11 @@
 # Circle placement strategy
 
+## Description
+
 Circle placement strategy renders all graph vertices on a **single circle**. It **ignores connections between vertices**, so disconnected vertices will be displayed on the same circle as vertices which are connected to each other.
+
+> [!NOTE]
+> This strategy always gives **the same** result for **directed and undirected** graphs.
 
 ## Properties
 
@@ -59,8 +64,8 @@ const defaultSortComparator = (key1: string, key2: string) => {
     <th>Custom sort comparator (non-increasing order)</th>
   </tr>
   <tr>
-    <td><img src="/assets/images/placement/circle/sort-comparator-default.png"></img></td>
-    <td><img src="/assets/images/placement/circle/sort-comparator-custom.png"></img></td>
+    <td><img src="./assets/images/placement/circle/sort-comparator-default.png"></img></td>
+    <td><img src="./assets/images/placement/circle/sort-comparator-custom.png"></img></td>
   </tr>
 </table>
 </article>
@@ -131,7 +136,4 @@ export default function Graph() {
 
 **Result**
 
-<video src="/assets/videos/placement/circle/placement-example.mp4" style="width: 300px"></video>
-
-> [!NOTE]
-> The result will always be **the same** for **directed and undirected** graphs. That's why there is no example for the undirected graph.
+<video src="./assets/videos/placement/circle/placement-example.mp4" style="width: 300px"></video>

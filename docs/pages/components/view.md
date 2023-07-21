@@ -46,9 +46,9 @@ Adjusts the size of the graph component rendered on the canvas. If value is diff
     <th>'cover'</th>
   </tr>
   <tr>
-    <td><img src="/assets/images/components/GraphView/object-fit-none.png" alt="objectFit none example" /></td>
-    <td><img src="/assets/images/components/GraphView/object-fit-contain.png" alt="objectFit contain example" /></td>
-    <td><img src="/assets/images/components/GraphView/object-fit-cover.png" alt="objectFit cover example" /></td>
+    <td><img src="./assets/images/components/GraphView/object-fit-none.png" alt="objectFit none example" /></td>
+    <td><img src="./assets/images/components/GraphView/object-fit-contain.png" alt="objectFit contain example" /></td>
+    <td><img src="./assets/images/components/GraphView/object-fit-cover.png" alt="objectFit cover example" /></td>
   </tr>
 </table>
 </article>
@@ -84,9 +84,9 @@ type Spacing =
     <th>500</th>
   </tr>
   <tr>
-    <td><img src="/assets/images/components/GraphView/padding-0-contain.png" alt="padding 0 example" /></td>
-    <td><img src="/assets/images/components/GraphView/padding-100-contain.png" alt="padding 100 example" /></td>
-    <td><img src="/assets/images/components/GraphView/padding-500-contain.png" alt="padding 500 example" /></td>
+    <td><img src="./assets/images/components/GraphView/padding-0-contain.png" alt="padding 0 example" /></td>
+    <td><img src="./assets/images/components/GraphView/padding-100-contain.png" alt="padding 100 example" /></td>
+    <td><img src="./assets/images/components/GraphView/padding-500-contain.png" alt="padding 500 example" /></td>
   </tr>
 </table>
 
@@ -105,10 +105,10 @@ type Spacing =
     <th>{ bottom: 500 }</th>
   </tr>
   <tr>
-    <td><img src="/assets/images/components/GraphView/padding-left.png" alt="padding left example" /></td>
-    <td><img src="/assets/images/components/GraphView/padding-right.png" alt="padding right example" /></td>
-    <td><img src="/assets/images/components/GraphView/padding-top.png" alt="padding top example" /></td>
-    <td><img src="/assets/images/components/GraphView/padding-bottom.png" alt="padding bottom example" /></td>
+    <td><img src="./assets/images/components/GraphView/padding-left.png" alt="padding left example" /></td>
+    <td><img src="./assets/images/components/GraphView/padding-right.png" alt="padding right example" /></td>
+    <td><img src="./assets/images/components/GraphView/padding-top.png" alt="padding top example" /></td>
+    <td><img src="./assets/images/components/GraphView/padding-bottom.png" alt="padding bottom example" /></td>
   </tr>
 </table>
 </article>
@@ -136,9 +136,9 @@ If less than **3 scale values** are provided, the **first** one will be used as 
     <th>intermediate (1, 2, 4)</th>
   </tr>
   <tr>
-    <td><img src="/assets/images/components/GraphView/scale-min.gif" alt="minimum scale example" /></td>
-    <td><img src="/assets/images/components/GraphView/scale-max.gif" alt="maximum scale example" /></td>
-    <td><img src="/assets/images/components/GraphView/scale-intermediate.gif" alt="intermediate scales example" /></td>
+    <td><img src="./assets/images/components/GraphView/scale-min.gif" alt="minimum scale example" /></td>
+    <td><img src="./assets/images/components/GraphView/scale-max.gif" alt="maximum scale example" /></td>
+    <td><img src="./assets/images/components/GraphView/scale-intermediate.gif" alt="intermediate scales example" /></td>
   </tr>
 </table>
 </article>
@@ -187,9 +187,9 @@ Specifies how long after user inactivity (no gestures, no vertex focus, etc.) th
     <th>double tap</th>
   </tr>
   <tr>
-    <td><video src="/assets/videos/components/GraphView/gesture-pan.mp4"></video></td>
-    <td><video src="/assets/videos/components/GraphView/gesture-pinch.mp4"></video></td>
-    <td><video src="/assets/videos/components/GraphView/gesture-double-tap.mp4"></video></td>
+    <td><video src="./assets/videos/components/GraphView/gesture-pan.mp4"></video></td>
+    <td><video src="./assets/videos/components/GraphView/gesture-pinch.mp4"></video></td>
+    <td><video src="./assets/videos/components/GraphView/gesture-double-tap.mp4"></video></td>
   </tr>
 </table>
 </article>
@@ -251,4 +251,4 @@ export default function Graph() {
 
 **Result**
 
-<video src="/assets/videos/components/GraphView/graph-view-example.mp4" style="width: 300px"></video>
+<video src="./assets/videos/components/GraphView/graph-view-example.mp4" style="width: 300px"></video>

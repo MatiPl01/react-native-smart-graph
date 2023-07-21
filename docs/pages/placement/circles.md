@@ -1,10 +1,15 @@
 # Circles placement strategy
 
+## Description
+
 Circles placement strategy is very **similar** to the [circle](pages/placement/circle.md) placement strategy described on the previous page. The **only difference** is that it places **vertices from disjoint graphs** on **separate circles**. These **circles** are positioned **next to each other** then.
+
+> [!NOTE]
+> This strategy always gives **the same** result for **directed and undirected** graphs.
 
 ## Properties
 
-All properties are the same as for the [circle](pages/placement/circle.md) placement strategy.
+All properties are the same as for the [circle](pages/placement/circle?id=properties) placement strategy.
 
 ## Example
 
@@ -74,7 +79,4 @@ export default function Graph() {
 
 **Result**
 
-<video src="/assets/videos/placement/circles/placement-example.mp4" style="width: 300px"></video>
-
-> [!NOTE]
-> The result will always be **the same** for **directed and undirected** graphs. That's why there is no example for the undirected graph.
+<video src="./assets/videos/placement/circles/placement-example.mp4" style="width: 300px"></video>

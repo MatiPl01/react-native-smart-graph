@@ -1,18 +1,19 @@
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { CirclesPlacementExample } from '.';
+
+import Graph from './Graph';
 
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CirclesPlacementExample />
+      <Graph />
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#000'
+    backgroundColor: '#000',
+    flex: 1
   }
 });

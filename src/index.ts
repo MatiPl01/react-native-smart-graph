@@ -31,9 +31,6 @@ export * from '@/hooks';
 // ALGORITHMS
 export * from '@/utils/algorithms';
 
-// EXAMPLES
-export * from '@/examples';
-
 // TYPES
 export {
   type DirectedEdgeData,

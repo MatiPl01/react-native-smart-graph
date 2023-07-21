@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 
 ## Graph component
 
-Here is a simple usage example of the library without any additional settings of the `GraphView` and the `DirectedGraphComponent`/`UndirectedGraphComponent` components.
+Here is a simple usage example of the library without any additional settings of `GraphView` and `DirectedGraphComponent`/`UndirectedGraphComponent` components.
 
 <!-- tabs:start -->
 
@@ -70,7 +70,7 @@ export default function Graph() {
 
 **Expected result**
 
-<img src="/assets/images/usage/directed-graph.png" width="300" />
+<img src="./assets/images/usage/directed-graph.png" width="300" />
 
 #### **Undirected Graph**
 
@@ -107,7 +107,7 @@ export default function Graph() {
 
 **Expected result**
 
-<img src="/assets/images/usage/undirected-graph.png" width="300" />
+<img src="./assets/images/usage/undirected-graph.png" width="300" />
 
 <!-- tabs:end -->
 

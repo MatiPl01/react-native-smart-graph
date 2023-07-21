@@ -32,5 +32,5 @@ Placement strategy can be specified via the `settings` property of the graph com
 - [Random](pages/placement/random.md)
 - [Circle](pages/placement/circle.md)
 - [Circles](pages/placement/circles.md)
-- [Orbits](pages/placement/orbits.md)
 - [Trees](pages/placement/trees.md)
+- [Orbits](pages/placement/orbits.md)
