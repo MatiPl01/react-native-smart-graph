@@ -5,12 +5,12 @@
 ## Features
 
 - **Canvas Rendering**: Manages the initialization and rendering of graphs on the canvas,
-
 - **Gestures Support**: Supports a variety of touch gestures including panning, pinching, and double-tapping,
-
 - **Responsive Resizing**: Dynamically adjusts the canvas size based on the provided objectFit value,
 
 ## Usage
+
+**Example code (`GraphViewExample`)**
 
 ```tsx
 import { GraphView } from 'react-native-smart-graph';
@@ -197,7 +197,7 @@ Specifies how long after user inactivity (no gestures, no vertex focus, etc.) th
 
 ## Example
 
-**Example code**
+**Example code (`GraphViewPropsExample`)**
 
 The code snippet below presents the usage of all described properties combined together.
 
@@ -246,11 +246,9 @@ export default function Graph() {
 }
 ```
 
-<!-- TODO - add link to placement strategies section -->
-
 > [!NOTE]
-> The placement strategy of the `DirectedGraphComponent` component was set to `'circle'` to ensure that the displayed result will always be the same. For more details about graph placement strategies visit [this]() section of documentation.
+> The placement strategy of the `DirectedGraphComponent` component was set to `'circle'` to ensure that the displayed result will always be the same. For more details about graph placement strategies visit [this](pages/placement/circle.md) section of documentation.
 
-**Recording**
+**Result**
 
 <video src="/assets/videos/components/GraphView/graph-view-example.mp4" style="width: 300px"></video>

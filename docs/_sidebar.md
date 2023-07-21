@@ -14,7 +14,7 @@
   - [Graphs](pages/components/graphs.md)
   - [Overlay](pages/components/overlay.md)
 - [Graph models](pages/models.md)
-- [Graph components renderers](pages/renderers.md)
+- [Components renderers](pages/renderers.md)
 - [Placement strategies](pages/placement/index.md)
   - [Random](pages/placement/random.md)
   - [Circle](pages/placement/circle.md)

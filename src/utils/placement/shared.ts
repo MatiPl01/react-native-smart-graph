@@ -107,13 +107,7 @@ export const animatedCanvasDimensionsToDimensions = (
 
 export const defaultSortComparator = (key1: string, key2: string) => {
   'worklet';
-  if (key1 < key2) {
-    return -1;
-  }
-  if (key1 > key2) {
-    return 1;
-  }
-  return 0;
+  return key1.localeCompare(key2);
 };
 
 export const arrangeGraphComponents = (

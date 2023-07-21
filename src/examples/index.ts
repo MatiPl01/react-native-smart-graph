@@ -7,6 +7,9 @@ export { default as UndirectedGraphUsageExample } from './usage/UndirectedGraphU
 export { default as GraphViewExample } from './components/GraphView/GraphViewExample';
 export { default as GraphViewObjectFitExample } from './components/GraphView/GraphViewPropsExample';
 
+// PLACEMENT EXAMPLES
+export { default as CirclePlacementExample } from './placement/CirclePlacementExample';
+
 // DOCS TEST
 export { default as App } from './App';
 

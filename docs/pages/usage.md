@@ -37,7 +37,7 @@ Here is a simple usage example of the library without any additional settings of
 
 #### **Directed graph**
 
-**Example code**
+**Example code (`DirectedGraphUsageExample`)**
 
 ```tsx
 import { useMemo } from 'react';
@@ -74,7 +74,7 @@ export default function Graph() {
 
 #### **Undirected Graph**
 
-**Example code**
+**Example code (`UndirectedGraphUsageExample`)**
 
 ```tsx
 import { useMemo } from 'react';
