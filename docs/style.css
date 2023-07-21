@@ -329,6 +329,7 @@ main.hidden {
 .sidebar .sidebar-nav {
   line-height: 2em;
   padding-bottom: 40px;
+  user-select: none;
 }
 
 .sidebar li.collapse .app-sub-sidebar {
@@ -805,12 +806,6 @@ body {
   position: relative;
 }
 
-.app-sub-sidebar li:before {
-  content: '-';
-  padding-right: 4px;
-  float: left;
-}
-
 .markdown-section h1,
 .markdown-section h2,
 .markdown-section h3,
@@ -1053,7 +1048,7 @@ footer {
 }
 
 .pagination-item-label {
-  color: var(--accent) !important;
+  color: var(--highlightColor) !important;
 }
 
 .alert.callout {
@@ -1063,4 +1058,45 @@ footer {
 
 .alert p:not(.title) {
   color: var(--textColor) !important;
+}
+
+table {
+  display: table !important;
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+thead {
+  background-color: var(--codeBackgroundColor);
+}
+
+tr,
+th,
+td {
+  border-color: var(--borderColor) !important;
+}
+
+th {
+  text-align: left;
+}
+
+summary {
+  font-weight: bold;
+  user-select: none;
+  padding: 0.5rem 0 1rem 0;
+}
+
+details article {
+  padding: 1.5rem;
+  border-radius: 5px;
+  border: 1px solid var(--borderColor);
+}
+
+details b {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+video {
+  width: 100%;
 }

@@ -1,4 +1,4 @@
-# Usage
+# Basic usage
 
 ## GestureHandlerRootView
 
@@ -20,7 +20,8 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: '#000'
   }
 });
 ```
@@ -39,7 +40,6 @@ Here is a simple usage example of the library without any additional settings of
 **Example code**
 
 ```tsx
-/* eslint-disable import/no-unused-modules */
 import { useMemo } from 'react';
 import {
   GraphView,
@@ -70,14 +70,13 @@ export default function Graph() {
 
 **Expected result**
 
-<img src="../assets/images/usage/directed-graph.png" width="300" />
+<img src="/assets/images/usage/directed-graph.png" width="300" />
 
 #### **Undirected Graph**
 
 **Example code**
 
 ```tsx
-/* eslint-disable import/no-unused-modules */
 import { useMemo } from 'react';
 import {
   GraphView,
@@ -108,9 +107,9 @@ export default function Graph() {
 
 **Expected result**
 
-<img src="../assets/images/usage/undirected-graph.png" width="300" />
+<img src="/assets/images/usage/undirected-graph.png" width="300" />
 
 <!-- tabs:end -->
 
 > [!NOTE]
-> The rendered graph probably will look different on your device because vertices are placed using the `random` placement strategy by default.
+> The rendered graph probably will look slightly different on your device because vertices are placed using the `random` placement strategy by default.

@@ -1,11 +1,11 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   runOnJS,
-  runOnUI,
   useAnimatedReaction,
   useSharedValue,
+  useWorkletCallback,
   withDecay
 } from 'react-native-reanimated';
 
@@ -53,7 +53,6 @@ export default function GesturesProvider({
   const {
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
-    initialScale,
     maxScale,
     minScale,
     scales
@@ -79,9 +78,9 @@ export default function GesturesProvider({
   const panTranslateY = useSharedValue(0);
   const isGestureActive = useSharedValue(false);
 
-  const handleGestureStart = useCallback((origin?: Maybe<Vector>) => {
+  const handleGestureStart = useWorkletCallback((origin?: Maybe<Vector>) => {
     isGestureActive.value = true;
-    runOnUI(autoSizingContext.disableAutoSizing)();
+    autoSizingContext.disableAutoSizing();
     if (focusStatus.value !== FocusStatus.BLUR) {
       runOnJS(endFocus)(
         origin && {
@@ -104,7 +103,7 @@ export default function GesturesProvider({
       panStartScale.value = currentScale.value;
       // If there are multiple pointers, we don't want to end
       // focus with a blur transition to the origin
-      runOnJS(handleGestureStart)(numberOfPointers > 1 ? null : { x, y });
+      handleGestureStart(numberOfPointers > 1 ? null : { x, y });
     })
     .onChange(e => {
       if (gesturesDisabled.value) return;
@@ -140,7 +139,7 @@ export default function GesturesProvider({
     .onStart(() => {
       if (gesturesDisabled.value) return;
       pinchStartScale.value = currentScale.value;
-      runOnJS(handleGestureStart)(null);
+      handleGestureStart(null);
     })
     .onChange(({ focalX, focalY, scale }) => {
       if (gesturesDisabled.value) return;
@@ -169,15 +168,18 @@ export default function GesturesProvider({
     .maxDistance(50)
     .onStart(() => {
       if (gesturesDisabled.value) return;
-      runOnJS(handleGestureStart)();
+      handleGestureStart();
     })
     .onEnd(({ x, y }) => {
       if (gesturesDisabled.value) return;
       const origin = { x, y };
 
       if (currentScale.value === maxScale.value) {
+        const defaultScale =
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          scales.value.length >= 3 ? scales.value[1]! : scales.value[0]!;
         scaleContentTo(
-          initialScale.value,
+          defaultScale,
           origin,
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );

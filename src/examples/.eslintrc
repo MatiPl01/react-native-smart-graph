@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "import/no-unused-modules": "off",
+    "sort-vars": "off",
+    "perfectionist/sort-objects": "off",
+    "simple-import-sort/imports": "off"
+  }
+}
