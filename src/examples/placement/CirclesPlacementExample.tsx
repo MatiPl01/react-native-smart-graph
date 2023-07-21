@@ -1,16 +1,3 @@
-# Circles placement strategy
-
-Circles placement strategy is very **similar** to the [circle](pages/placement/circle.md) placement strategy described on the previous page. The **only difference** is that it places **vertices from disjoint graphs** on **separate circles**. These **circles** are positioned **next to each other** then.
-
-## Properties
-
-All properties are the same as for the [circle](pages/placement/circle.md) placement strategy.
-
-## Example
-
-**Example code (`CirclesPlacementExample`)**
-
-```tsx
 import { useMemo } from 'react';
 import { useWorkletCallback } from 'react-native-reanimated';
 import {
@@ -70,11 +57,3 @@ export default function Graph() {
     </GraphView>
   );
 }
-```
-
-**Result**
-
-<video src="/assets/videos/placement/circles/placement-example.mp4" style="width: 300px"></video>
-
-> [!NOTE]
-> The result will always be **the same** for **directed and undirected** graphs. That's why there is no example for the undirected graph.

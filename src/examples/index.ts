@@ -9,6 +9,7 @@ export { default as GraphViewObjectFitExample } from './components/GraphView/Gra
 
 // PLACEMENT EXAMPLES
 export { default as CirclePlacementExample } from './placement/CirclePlacementExample';
+export { default as CirclesPlacementExample } from './placement/CirclesPlacementExample';
 
 // DOCS TEST
 export { default as App } from './App';

@@ -1,11 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { CirclePlacementExample } from '.';
+import { CirclesPlacementExample } from '.';
 
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <CirclePlacementExample />
+      <CirclesPlacementExample />
     </GestureHandlerRootView>
   );
 }
