@@ -281,16 +281,6 @@ export default function TransformProvider({
     [initialCanvasDimensions, initialBoundingRect]
   );
 
-  // useFrameCallback(() => {
-  //   translateContentTo(
-  //     {
-  //       x: translateX.value,
-  //       y: translateY.value
-  //     },
-  //     getTranslateClamp(currentScale.value)
-  //   );
-  // });
-
   const contextValue: TransformContextType = {
     getIdealScale,
     getTranslateClamp,
