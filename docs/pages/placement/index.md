@@ -2,7 +2,7 @@
 
 <!-- TODO - add link to the graph component section -->
 
-The placement strategy determines the **relative position** of graph vertices. It is used to calculate vertices positions **based on certain conditions**, such as **relative connections** of vertices or some **different criteria**.
+The placement strategy determines the **relative position** of graph vertices. It is used for vertices positions calculations **based on certain conditions**, such as **relative connections** of vertices or some different criteria.
 
 Depending on the graph you want to render, some strategies might be more applicable than others. For example, for tree-like graph structures, the best results will be achieved with the `trees` placement strategy.
 
@@ -25,7 +25,7 @@ Placement strategy can be specified via the `settings` property of the graph com
 ```
 
 > [!NOTE]
-> You can use the `UndirectedGraphComponent` instead of the `DirectedGraphComponent`. All strategies are supported undirected and directed graphs but the visual result might be different in some strategies.
+> You can use the `UndirectedGraphComponent` instead of the `DirectedGraphComponent`. All strategies support undirected and directed graphs but the visual result might be different in some strategies dependent on connections of the vertices.
 
 ## Available placement strategies
 

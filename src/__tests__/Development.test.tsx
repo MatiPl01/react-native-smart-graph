@@ -1,8 +1,8 @@
 // Note: test renderer must be required after react-native.
 import { create } from 'react-test-renderer';
 
-import Development from '@/examples/Development';
+import App from '@/App';
 
 it('renders correctly', () => {
-  create(<Development />);
+  create(<App />);
 });
