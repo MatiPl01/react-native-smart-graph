@@ -1100,3 +1100,7 @@ details b {
 video {
   width: 100%;
 }
+
+ul li {
+  margin-bottom: 0.25rem;
+}

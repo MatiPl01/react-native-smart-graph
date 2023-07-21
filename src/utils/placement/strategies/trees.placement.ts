@@ -57,7 +57,8 @@ const arrangeVertices = (
       if (prevData?.parent === parent) {
         col =
           arrangedVertices[prevData.vertex]!.col +
-          (subtreeWidths[vertex]! + 1) / 2;
+          subtreeWidths[prevData.vertex]! / 2 +
+          subtreeWidths[vertex]! / 2;
       } else {
         col = arrangedVertices[parent]!.col - (subtreeWidths[parent]! - 1) / 2;
       }
