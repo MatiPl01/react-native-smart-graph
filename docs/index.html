@@ -36,7 +36,36 @@
     <div id="app">We are building something special for you ...</div>
 
     <script>
-      const isDarkMode = localStorage.getItem('DARK_LIGHT_THEME') === 'dark';
+      var isDarkMode = localStorage.getItem('DARK_LIGHT_THEME') === 'dark';
+
+      var setItem = localStorage.setItem.bind(localStorage);
+
+      localStorage.setItem = (key, value) => {
+        if (key === 'DARK_LIGHT_THEME') {
+          var img = document.querySelector('.app-name-link img');
+
+          if (value === 'dark') {
+            document.getElementById('prism-light-theme').disabled = true;
+            document.getElementById('prism-dark-theme').disabled = false;
+            img.src = 'assets/logo-light.png';
+          } else {
+            document.getElementById('prism-light-theme').disabled = false;
+            document.getElementById('prism-dark-theme').disabled = true;
+            img.src = 'assets/logo-dark.png';
+          }
+        }
+        setItem(key, value);
+      };
+
+      // PLUGINS
+      var autoVideoControls = function (hook, vm) {
+        hook.doneEach(function () {
+          var videos = document.querySelectorAll('video');
+          videos.forEach(function (video) {
+            video.setAttribute('controls', '');
+          });
+        });
+      };
 
       window.$docsify = {
         search: 'auto',
@@ -48,7 +77,7 @@
           '/.*/_sidebar.md': '/_sidebar.md'
         },
         customPageTitle: {
-          prefix: 'Smart Graph'
+          suffix: 'Smart Graph'
         },
         // TODO - fix search (currently searching only in the main page (README.md))
         search: {
@@ -123,27 +152,9 @@
             hook.doneEach(function () {
               window.scrollTo(0, 0);
             });
-          }
+          },
+          autoVideoControls
         ]
-      };
-
-      const setItem = localStorage.setItem.bind(localStorage);
-
-      localStorage.setItem = (key, value) => {
-        if (key === 'DARK_LIGHT_THEME') {
-          const img = document.querySelector('.app-name-link img');
-
-          if (value === 'dark') {
-            document.getElementById('prism-light-theme').disabled = true;
-            document.getElementById('prism-dark-theme').disabled = false;
-            img.src = 'assets/logo-light.png';
-          } else {
-            document.getElementById('prism-light-theme').disabled = false;
-            document.getElementById('prism-dark-theme').disabled = true;
-            img.src = 'assets/logo-dark.png';
-          }
-        }
-        setItem(key, value);
       };
     </script>
     <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>

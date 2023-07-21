@@ -21,12 +21,22 @@ export default function Graph() {
   return (
     <GraphView
       padding={{
-        top: 200,
-        right: 150
+        top: 500,
+        right: 200
       }}
+      autoSizingTimeout={500}
+      initialScale={0.5}
       objectFit='contain'
-      scales={[1, 2, 5]}>
-      <DirectedGraphComponent graph={graph} />
+      scales={[0.5, 1, 2]}>
+      <DirectedGraphComponent
+        settings={{
+          placement: {
+            strategy: 'circle',
+            minVertexSpacing: 150
+          }
+        }}
+        graph={graph}
+      />
     </GraphView>
   );
 }

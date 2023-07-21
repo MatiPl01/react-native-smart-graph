@@ -5,7 +5,7 @@ export { default as UndirectedGraphUsageExample } from './usage/UndirectedGraphU
 // COMPONENTS EXAMPLES
 // GraphView
 export { default as GraphViewExample } from './components/GraphView/GraphViewExample';
-export { default as GraphViewPropsExample } from './components/GraphView/GraphViewPropsExample';
+export { default as GraphViewObjectFitExample } from './components/GraphView/GraphViewPropsExample';
 
 // DOCS TEST
 export { default as App } from './App';

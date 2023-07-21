@@ -1063,6 +1063,7 @@ footer {
 table {
   display: table !important;
   width: 100% !important;
+  table-layout: fixed !important;
 }
 
 thead {
@@ -1082,4 +1083,20 @@ th {
 summary {
   font-weight: bold;
   user-select: none;
+  padding: 0.5rem 0 1rem 0;
+}
+
+details article {
+  padding: 1.5rem;
+  border-radius: 5px;
+  border: 1px solid var(--borderColor);
+}
+
+details b {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+video {
+  width: 100%;
 }
