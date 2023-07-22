@@ -16,10 +16,7 @@ import {
   AnimatedDimensions,
   BoundingRect
 } from '@/types/layout';
-import {
-  GraphEventsSettings,
-  GraphSettingsWithDefaults
-} from '@/types/settings';
+import { GraphSettingsWithDefaults } from '@/types/settings';
 import {
   updateGraphRenderersWithDefaults,
   updateGraphSettingsWithDefaults
@@ -77,10 +74,10 @@ const getEventsProviders = <
 ) => {
   if (settings.events) {
     return [
-      <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
+      <PressEventsProvider<PressEventsProviderProps<V, E>>
         boundingRect={boundingRect}
         renderLayer={renderLayer}
-        settings={settings.events as GraphEventsSettings<V, E, ED>}
+        settings={settings.events}
         transform={transform}
       />
     ];

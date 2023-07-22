@@ -10,7 +10,8 @@ import {
   bfs,
   dfs,
   findGraphComponents,
-  findRootVertex
+  findRootVertex,
+  transposeIncoming
 } from '@/utils/algorithms';
 import {
   arrangeGraphComponents,
@@ -60,7 +61,10 @@ const arrangeVertices = (
           subtreeWidths[prevData.vertex]! / 2 +
           subtreeWidths[vertex]! / 2;
       } else {
-        col = arrangedVertices[parent]!.col - (subtreeWidths[parent]! - 1) / 2;
+        col =
+          arrangedVertices[parent]!.col -
+          subtreeWidths[parent]! / 2 +
+          subtreeWidths[vertex]! / 2;
       }
 
       arrangedVertices[vertex] = { col, row: depth };
@@ -96,16 +100,13 @@ const placeVertices = (
   const height = padding + (numRows - 1) * minVertexCenterDistance;
 
   // calculate the positions of the vertices based on the grid
-  return Object.entries(arrangedVertices).reduce(
-    (acc, [key, { col, row }]) => ({
-      ...acc,
-      [key]: {
-        x: vertexRadius + col * minVertexCenterDistance - width / 2,
-        y: vertexRadius + row * minVertexCenterDistance - height / 2
-      }
-    }),
-    {} as PlacedVerticesPositions
-  );
+  return Object.entries(arrangedVertices).reduce((acc, [key, { col, row }]) => {
+    acc[key] = {
+      x: vertexRadius + col * minVertexCenterDistance - width / 2,
+      y: vertexRadius + row * minVertexCenterDistance - height / 2
+    };
+    return acc;
+  }, {} as PlacedVerticesPositions);
 };
 
 export default function placeVerticesOnTrees(
@@ -128,8 +129,14 @@ export default function placeVerticesOnTrees(
       rootVertexKeys,
       isGraphDirected
     );
-    // Place vertices on the grid
-    const arrangedVertices = arrangeVertices(connections, rootVertex);
+    // If the graph is directed and the selected root has incoming edges,
+    // transpose all subtrees with incoming edges to make the root vertex
+    // the source vertex
+    let updatedConnections = connections;
+    if (isGraphDirected && connections[rootVertex]!.incoming.length > 0) {
+      updatedConnections = transposeIncoming(connections, [rootVertex]);
+    }
+    const arrangedVertices = arrangeVertices(updatedConnections, rootVertex);
     // Place vertices in the layout
     const minVertexSpacing =
       settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;

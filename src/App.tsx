@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import Graph from './Graph';
+import Graph from './examples/Graph';
 
 export default function App() {
   return (
