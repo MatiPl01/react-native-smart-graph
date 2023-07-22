@@ -1,24 +1,30 @@
 import { PropsWithChildren } from 'react';
-import { useFrameCallback } from 'react-native-reanimated';
+import { SharedValue, useFrameCallback } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
 import { GraphConnections } from '@/types/graphs';
+import { BoundingRect } from '@/types/layout';
 import { ForcesSettingsWithDefaults } from '@/types/settings';
 import { animateToValue } from '@/utils/animations';
 import { applyForces } from '@/utils/forces';
-import { alignPositionsToCenter } from '@/utils/placement';
+import {
+  alignPositionsToCenter,
+  calcContainerBoundingRect
+} from '@/utils/placement';
 
 import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
   connections: GraphConnections;
   forcesSettings: ForcesSettingsWithDefaults;
+  targetBoundingRect: SharedValue<BoundingRect>;
 }>;
 
 function ForcesLayoutProvider({
   children,
   connections,
-  forcesSettings
+  forcesSettings,
+  targetBoundingRect
 }: ForcesLayoutProviderProps) {
   // CONTEXTS
   // Forces placement context
@@ -35,6 +41,10 @@ function ForcesLayoutProvider({
       )
     ).verticesPositions;
 
+    // Update the target bounding rect
+    targetBoundingRect.value = calcContainerBoundingRect(targetPositions);
+
+    // Update the positions of the vertices
     Object.entries(targetPositions).forEach(([key, targetPosition]) => {
       const vertexPosition = placedVerticesPositions[key];
       if (!vertexPosition) return;
@@ -52,6 +62,10 @@ function ForcesLayoutProvider({
   return <>{children}</>;
 }
 
-export default withGraphData(ForcesLayoutProvider, ({ connections }) => ({
-  connections
-}));
+export default withGraphData(
+  ForcesLayoutProvider,
+  ({ connections, targetBoundingRect }) => ({
+    connections,
+    targetBoundingRect
+  })
+);

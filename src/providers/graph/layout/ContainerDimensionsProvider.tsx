@@ -1,50 +1,23 @@
 import { PropsWithChildren } from 'react';
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
 import { VertexComponentRenderData } from '@/types/components';
 import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { animateToValue } from '@/utils/animations';
-import { calcAnimatedContainerBoundingRect } from '@/utils/placement';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
-  boundingRect: AnimatedBoundingRect;
+  boundingRect: AnimatedBoundingRect; // This is the real bounding rect of the container
   renderedVerticesData: Record<string, VertexComponentRenderData>;
+  targetBoundingRect: SharedValue<BoundingRect>; // This is the target bounding rect of the container
   vertexRadius: number;
 }>;
 
 function ContainerDimensionsProvider({
   boundingRect,
   children,
-  renderedVerticesData,
-  vertexRadius
+  targetBoundingRect
 }: ContainerDimensionsProviderProps) {
-  // HELPER VALUES
-  const targetBoundingRect = useSharedValue<BoundingRect>({
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0
-  });
-
-  const renderedVerticesPositions = Object.fromEntries(
-    Object.entries(renderedVerticesData).map(([key, { position }]) => [
-      key,
-      position
-    ])
-  );
-
-  useAnimatedReaction(
-    () => ({ positions: renderedVerticesPositions }),
-    ({ positions }) => {
-      targetBoundingRect.value = calcAnimatedContainerBoundingRect(
-        positions,
-        vertexRadius
-      );
-    },
-    [renderedVerticesPositions]
-  );
-
   useAnimatedReaction(
     () => ({
       currentRect: {
@@ -68,7 +41,7 @@ function ContainerDimensionsProvider({
 
 export default withGraphData(
   ContainerDimensionsProvider,
-  ({ renderedVerticesData }) => ({
-    renderedVerticesData
+  ({ targetBoundingRect }) => ({
+    targetBoundingRect
   })
 );

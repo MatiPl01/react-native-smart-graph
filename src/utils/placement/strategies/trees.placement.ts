@@ -121,6 +121,9 @@ export default function placeVerticesOnTrees(
 
   const graphComponents = findGraphComponents(connections);
 
+  const minVertexSpacing =
+    settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+
   for (const component of graphComponents) {
     // Find the root vertex of the component
     const rootVertex = findRootVertex(
@@ -138,8 +141,7 @@ export default function placeVerticesOnTrees(
     }
     const arrangedVertices = arrangeVertices(updatedConnections, rootVertex);
     // Place vertices in the layout
-    const minVertexSpacing =
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+
     const verticesPositions = placeVertices(
       arrangedVertices,
       minVertexSpacing,
@@ -147,14 +149,12 @@ export default function placeVerticesOnTrees(
     );
     // Calculate container dimensions
     componentsLayouts.push({
-      boundingRect: calcContainerBoundingRect(
-        verticesPositions,
-        minVertexSpacing,
-        vertexRadius
-      ),
+      boundingRect: calcContainerBoundingRect(verticesPositions, {
+        padding: vertexRadius
+      }),
       verticesPositions
     });
   }
 
-  return arrangeGraphComponents(componentsLayouts, vertexRadius);
+  return arrangeGraphComponents(componentsLayouts, minVertexSpacing);
 }

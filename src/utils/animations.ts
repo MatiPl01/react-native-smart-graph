@@ -195,8 +195,11 @@ export const animateToValue = (
 ): number => {
   'worklet';
   const delta = toValue - fromValue;
+
   const minDelta = eps ?? 1;
-  if (Math.abs(delta) < minDelta) {
+  // Delta can be NaN when the difference between values is too small
+  // (subtracting very close numbers can result in a number that is too small to be represented)
+  if (isNaN(delta) || Math.abs(delta) < minDelta) {
     return toValue;
   }
   const factor = Math.max(0.1, Math.abs(delta) / 1000);
