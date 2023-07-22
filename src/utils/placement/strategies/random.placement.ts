@@ -44,7 +44,7 @@ const calcVerticesGridPositions = (
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return alignPositionsToCenter(verticesPositions);
+  return alignPositionsToCenter(verticesPositions, vertexRadius);
 };
 
 const calcVerticesTriangularPositions = (
@@ -115,7 +115,7 @@ const calcVerticesTriangularPositions = (
     {} as PlacedVerticesPositions
   );
 
-  return alignPositionsToCenter(verticesPositions);
+  return alignPositionsToCenter(verticesPositions, vertexRadius);
 };
 
 const calcVerticesRandomPositions = (
@@ -136,7 +136,7 @@ const calcVerticesRandomPositions = (
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return alignPositionsToCenter(verticesPositions);
+  return alignPositionsToCenter(verticesPositions, vertexRadius);
 };
 
 export default function placeVerticesRandomly(

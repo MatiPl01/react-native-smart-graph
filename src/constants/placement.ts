@@ -10,3 +10,5 @@ export const RANDOM_PLACEMENT_SETTINGS: UnboundRandomPlacementSettingsWithDefaul
     layoutType: 'triangular',
     minVertexSpacing: 100
   };
+
+export const DEFAULT_ORBITS_MAX_SECTOR_ANGLE = Math.PI;

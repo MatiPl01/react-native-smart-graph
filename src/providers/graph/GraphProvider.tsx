@@ -6,6 +6,7 @@ import {
   UndirectedGraphComponentProps
 } from '@/components/graphs';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
+import { AutoSizingContextType } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
@@ -82,6 +83,7 @@ const getEventsProviders = <V, E>(
 
 type GraphProviderProps<V, E> = PropsWithChildren<
   {
+    autoSizingContext: AutoSizingContextType;
     boundingRect: AnimatedBoundingRect;
     canvasDimensions: AnimatedDimensions;
     canvasScales: SharedValue<number[]>;
@@ -99,6 +101,7 @@ type GraphProviderProps<V, E> = PropsWithChildren<
 
 // eslint-disable-next-line import/no-unused-modules
 function GraphProvider<V, E>({
+  autoSizingContext,
   boundingRect,
   canvasDimensions,
   canvasScales,
@@ -142,14 +145,14 @@ function GraphProvider<V, E>({
         settings={memoSettings}
       />,
       // LAYOUT
+      // Providers used to compute the layout of the graph and animate
+      // vertices based on calculated positions
+      ...getLayoutProviders(graph, memoSettings, onRender),
       // Provider used to compute the dimensions of the container
       <ContainerDimensionsProvider
         boundingRect={boundingRect}
         vertexRadius={memoSettings.components.vertex.radius}
       />,
-      // Providers used to compute the layout of the graph and animate
-      // vertices based on calculated positions
-      ...getLayoutProviders(graph, memoSettings, onRender),
       // EVENTS
       // Press events provider
       ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),

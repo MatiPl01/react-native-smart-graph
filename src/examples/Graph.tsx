@@ -61,7 +61,7 @@ export default function Graph() {
   );
 
   return (
-    <GraphView objectFit='contain' padding={50}>
+    <GraphView objectFit='contain'>
       <UndirectedGraphComponent
         settings={{
           // --- Placement settings ---

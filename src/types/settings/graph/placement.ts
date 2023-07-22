@@ -76,6 +76,7 @@ export type OrbitsLayerSizingSettings =
 export type OrbitsPlacementSettings = (SharedPlacementSettings & {
   roots?: Array<string>;
   strategy: 'orbits';
+  symmetric?: boolean;
 }) &
   OrbitsLayerSizingSettings;
 
