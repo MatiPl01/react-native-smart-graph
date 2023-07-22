@@ -32,6 +32,7 @@
     - [Example](pages/placement/trees?id=example)
   - [Orbits](pages/placement/orbits.md)
     - [Description](pages/placement/orbits?id=description)
+    - [Explanation](pages/placement/orbits?id=explanation)
     - [Properties](pages/placement/orbits?id=properties)
     - [Root vertices](pages/placement/orbits?id=root-vertices)
     - [Examples](pages/placement/orbits?id=examples)
