@@ -7,55 +7,36 @@ import {
   UndirectedGraphComponent
 } from 'react-native-smart-graph';
 
-const SMALL_TREE = {
-  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
-  edges: [
-    { key: 'SE1', vertices: ['SV1', 'SV2'] },
-    { key: 'SE2', vertices: ['SV1', 'SV3'] },
-    { key: 'SE3', vertices: ['SV1', 'SV4'] }
-  ]
-};
-
-const LARGE_TREE = {
+const GRAPH: UndirectedGraphData = {
   vertices: [
-    { key: 'LV1' },
-    { key: 'LV2' },
-    { key: 'LV3' },
-    { key: 'LV4' },
-    { key: 'LV5' },
-    { key: 'LV6' },
-    { key: 'LV7' },
-    { key: 'LV8' }
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' }
   ],
   edges: [
-    { key: 'LE1', vertices: ['LV1', 'LV2'] },
-    { key: 'LE2', vertices: ['LV2', 'LV3'] },
-    { key: 'LE3', vertices: ['LV2', 'LV4'] },
-    { key: 'LE4', vertices: ['LV2', 'LV5'] },
-    { key: 'LE5', vertices: ['LV5', 'LV6'] },
-    { key: 'LE6', vertices: ['LV1', 'LV7'] },
-    { key: 'LE7', vertices: ['LV5', 'LV8'] }
+    { key: 'E1', vertices: ['V1', 'V2'] },
+    { key: 'E2', vertices: ['V2', 'V3'] },
+    { key: 'E3', vertices: ['V2', 'V4'] },
+    { key: 'E4', vertices: ['V2', 'V5'] },
+    { key: 'E5', vertices: ['V5', 'V6'] },
+    { key: 'E6', vertices: ['V1', 'V7'] },
+    { key: 'E7', vertices: ['V5', 'V8'] }
   ]
-};
-
-const COMBINED_GRAPH: UndirectedGraphData = {
-  vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
-  edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
 };
 
 export default function Graph() {
-  const [smallTreeRoot, setSmallTreeRoot] = useState('');
-  const [largeTreeRoot, setLargeTreeRoot] = useState('');
+  const [orbitsRoot, setOrbitsRoot] = useState('');
 
-  const graph = useMemo(() => new UndirectedGraph(COMBINED_GRAPH), []);
+  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
 
-  const handleVertexPress = useCallback<VertexPressHandler>(
+  const handEVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
-      if (key.startsWith('SV')) {
-        setSmallTreeRoot(key);
-      } else {
-        setLargeTreeRoot(key);
-      }
+      setOrbitsRoot(key);
     },
     []
   );
@@ -66,13 +47,14 @@ export default function Graph() {
         settings={{
           // --- Placement settings ---
           placement: {
-            strategy: 'trees',
-            roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'auto', // <- doesn't have to be explicitly specified (it's a default option)
+            roots: [orbitsRoot]
           },
           // --- End of placement settings ---
           events: {
-            onVertexPress: handleVertexPress
+            onVertexPress: handEVertexPress
           }
         }}
         graph={graph}

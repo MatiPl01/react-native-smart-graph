@@ -74,9 +74,10 @@ export type OrbitsLayerSizingSettings =
 
 // TODO - maybe add orbits vertices sorting
 export type OrbitsPlacementSettings = (SharedPlacementSettings & {
+  maxSectorAngle?: number; // in radians
   roots?: Array<string>;
   strategy: 'orbits';
-  symmetric?: boolean;
+  symmetrical?: boolean;
 }) &
   OrbitsLayerSizingSettings;
 

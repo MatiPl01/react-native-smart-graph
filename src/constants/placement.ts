@@ -11,4 +11,4 @@ export const RANDOM_PLACEMENT_SETTINGS: UnboundRandomPlacementSettingsWithDefaul
     minVertexSpacing: 100
   };
 
-export const DEFAULT_ORBITS_MAX_SECTOR_ANGLE = Math.PI;
+export const DEFAULT_ORBITS_MAX_SECTOR_ANGLE = (2 / 3) * Math.PI;

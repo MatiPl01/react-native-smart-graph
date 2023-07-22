@@ -72,8 +72,6 @@ function GraphPlacementLayoutProvider<V, E>({
         runOnJS(onRender)(boundingRect);
       }
 
-      console.log(boundingRect);
-
       targetBoundingRect.value = boundingRect;
 
       animateVerticesToFinalPositions(

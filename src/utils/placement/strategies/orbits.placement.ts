@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
+import {
+  DEFAULT_ORBITS_MAX_SECTOR_ANGLE,
+  SHARED_PLACEMENT_SETTINGS
+} from '@/constants/placement';
 import { GraphConnections } from '@/types/graphs';
 import {
   GetLayerRadiusFunction,
@@ -8,7 +11,12 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
-import { bfs, findGraphComponents, findRootVertex } from '@/utils/algorithms';
+import {
+  bfs,
+  findGraphComponents,
+  findRootVertex,
+  transposeIncoming
+} from '@/utils/algorithms';
 import {
   arrangeGraphComponents,
   calcContainerBoundingRect,
@@ -220,7 +228,8 @@ const placeVertices = (
 
 const arrangeVertices = (
   connections: GraphConnections,
-  rootVertex: string
+  rootVertex: string,
+  maxSectorAngle: number
 ): ArrangedVertices => {
   'worklet';
   const layersAndChildren: Record<
@@ -251,7 +260,7 @@ const arrangeVertices = (
     }
     const vertexArrangedData = arrangedVertices[key]!;
     const childSectorAngle = Math.min(
-      Math.PI,
+      maxSectorAngle,
       vertexArrangedData.sectorAngle / children.length
     );
     let childStartAngle =
@@ -291,9 +300,19 @@ export default function placeVerticesOnOrbits(
       rootVertexKeys,
       isGraphDirected
     );
-
+    // If the graph is directed and the selected root has incoming edges,
+    // transpose all subtrees with incoming edges to make the root vertex
+    // the source vertex
+    let updatedConnections = connections;
+    if (isGraphDirected && connections[rootVertex]!.incoming.length > 0) {
+      updatedConnections = transposeIncoming(connections, [rootVertex]);
+    }
     // Arrange vertices in sectors
-    const arrangedVertices = arrangeVertices(connections, rootVertex);
+    const arrangedVertices = arrangeVertices(
+      updatedConnections,
+      rootVertex,
+      settings.maxSectorAngle ?? DEFAULT_ORBITS_MAX_SECTOR_ANGLE
+    );
     // Calculate the layout of the component
     const minVertexSpacing =
       settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
@@ -311,7 +330,7 @@ export default function placeVerticesOnOrbits(
     // Calc container dimensions
     const boundingRect = calcContainerBoundingRect(placedVerticesPositions, {
       padding: vertexRadius,
-      symmetry: settings.symmetric === false ? undefined : Symmetry.CENTER
+      symmetry: settings.symmetrical === false ? undefined : Symmetry.CENTER
     });
     componentsLayouts.push({
       boundingRect,
