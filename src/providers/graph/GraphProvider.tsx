@@ -6,7 +6,6 @@ import {
   UndirectedGraphComponentProps
 } from '@/components/graphs';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
-import { AutoSizingContextType } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
@@ -83,7 +82,6 @@ const getEventsProviders = <V, E>(
 
 type GraphProviderProps<V, E> = PropsWithChildren<
   {
-    autoSizingContext: AutoSizingContextType;
     boundingRect: AnimatedBoundingRect;
     canvasDimensions: AnimatedDimensions;
     canvasScales: SharedValue<number[]>;
@@ -101,7 +99,6 @@ type GraphProviderProps<V, E> = PropsWithChildren<
 
 // eslint-disable-next-line import/no-unused-modules
 function GraphProvider<V, E>({
-  autoSizingContext,
   boundingRect,
   canvasDimensions,
   canvasScales,
