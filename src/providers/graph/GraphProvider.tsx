@@ -8,7 +8,6 @@ import {
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import {
@@ -62,11 +61,7 @@ const getLayoutProviders = <V, E>(
   }
 };
 
-const getEventsProviders = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+const getEventsProviders = <V, E>(
   transform: AnimatedCanvasTransform,
   boundingRect: AnimatedBoundingRect,
   settings: GraphSettingsWithDefaults<V, E>,
