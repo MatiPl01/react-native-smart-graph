@@ -7,37 +7,28 @@ import {
   VertexComponentData,
   VertexComponentRenderData
 } from '@/types/components';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { AnimatedBoundingRect } from '@/types/layout';
 import { GraphEventsSettings } from '@/types/settings';
 
 import OverlayVertex from './OverlayVertex';
 
-type OverlayLayerProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = {
+type OverlayLayerProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   debug?: boolean;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphEventsSettings<V, E, ED>;
+  settings: GraphEventsSettings<V>;
   transform: AnimatedCanvasTransform;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
-export default function OverlayLayer<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
+export default function OverlayLayer<V, E>({
   boundingRect,
   debug,
   renderedVerticesData,
   settings,
   transform,
   verticesData
-}: OverlayLayerProps<V, E, ED>) {
+}: OverlayLayerProps<V, E>) {
   const style = useAnimatedStyle(() => {
     const boundingLeft = boundingRect.left.value;
     const boundingTop = boundingRect.top.value;

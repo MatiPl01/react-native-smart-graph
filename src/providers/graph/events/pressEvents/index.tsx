@@ -7,30 +7,21 @@ import {
   VertexComponentData,
   VertexComponentRenderData
 } from '@/types/components';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { AnimatedBoundingRect } from '@/types/layout';
 import { GraphEventsSettings } from '@/types/settings';
 
 import OverlayLayer from './OverlayLayer';
 
-export type PressEventsProviderProps<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = PropsWithChildren<{
+export type PressEventsProviderProps<V, E> = PropsWithChildren<{
   boundingRect: AnimatedBoundingRect;
   renderLayer: (zIndex: number, layer: JSX.Element) => void;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphEventsSettings<V, E, ED>;
+  settings: GraphEventsSettings<V>;
   transform: AnimatedCanvasTransform;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
-function PressEventsProvider<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->({
+function PressEventsProvider<V, E>({
   boundingRect,
   children,
   renderLayer,
@@ -38,7 +29,7 @@ function PressEventsProvider<
   settings,
   transform,
   verticesData
-}: PressEventsProviderProps<V, E, ED>) {
+}: PressEventsProviderProps<V, E>) {
   useEffect(() => {
     renderLayer(
       1,

@@ -8,7 +8,6 @@ import {
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { FocusEndSetter, FocusStartSetter } from '@/types/focus';
 import { Graph } from '@/types/graphs';
 import {
@@ -16,10 +15,7 @@ import {
   AnimatedDimensions,
   BoundingRect
 } from '@/types/layout';
-import {
-  GraphEventsSettings,
-  GraphSettingsWithDefaults
-} from '@/types/settings';
+import { GraphSettingsWithDefaults } from '@/types/settings';
 import {
   updateGraphRenderersWithDefaults,
   updateGraphSettingsWithDefaults
@@ -65,11 +61,7 @@ const getLayoutProviders = <V, E>(
   }
 };
 
-const getEventsProviders = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+const getEventsProviders = <V, E>(
   transform: AnimatedCanvasTransform,
   boundingRect: AnimatedBoundingRect,
   settings: GraphSettingsWithDefaults<V, E>,
@@ -77,10 +69,10 @@ const getEventsProviders = <
 ) => {
   if (settings.events) {
     return [
-      <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
+      <PressEventsProvider<PressEventsProviderProps<V, E>>
         boundingRect={boundingRect}
         renderLayer={renderLayer}
-        settings={settings.events as GraphEventsSettings<V, E, ED>}
+        settings={settings.events}
         transform={transform}
       />
     ];

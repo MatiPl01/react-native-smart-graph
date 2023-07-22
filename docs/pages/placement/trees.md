@@ -61,6 +61,10 @@ Steps outlined below follow a priority order. If the algorithm fails to select a
 
 ## Example
 
+<!-- TODO - add link to tke graph events section -->
+
+The example below is an example allowing to choose a root on vertex press. It demonstrates how the graph structure will be rendered when a **custom root vertex** is selected. The example uses **graph events** described in detail in [this]() section.
+
 <!-- tabs:start -->
 
 #### **Directed graph**
@@ -68,22 +72,14 @@ Steps outlined below follow a priority order. If the algorithm fails to select a
 **Example code**
 
 ```tsx
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   GraphView,
-  DirectedGraphData,
   DirectedGraph,
-  DirectedGraphComponent
+  DirectedGraphComponent,
+  DirectedGraphData,
+  VertexPressHandler
 } from 'react-native-smart-graph';
-
-const SMALL_TREE = {
-  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
-  edges: [
-    { key: 'SE1', from: 'SV1', to: 'SV2' },
-    { key: 'SE2', from: 'SV1', to: 'SV3' },
-    { key: 'SE3', from: 'SV1', to: 'SV4' }
-  ]
-};
 
 const LARGE_TREE = {
   vertices: [
@@ -107,13 +103,37 @@ const LARGE_TREE = {
   ]
 };
 
+const SMALL_TREE = {
+  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
+  edges: [
+    { key: 'SE1', from: 'SV1', to: 'SV2' },
+    { key: 'SE2', from: 'SV1', to: 'SV3' },
+    { key: 'SE3', from: 'SV1', to: 'SV4' }
+  ]
+};
+
+// --- Create disjoint graphs ---
 const COMBINED_GRAPH: DirectedGraphData = {
   vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
   edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
 };
 
 export default function Graph() {
+  const [smallTreeRoot, setSmallTreeRoot] = useState('');
+  const [largeTreeRoot, setLargeTreeRoot] = useState('');
+
   const graph = useMemo(() => new DirectedGraph(COMBINED_GRAPH), []);
+
+  const handleVertexPress = useCallback<VertexPressHandler>(
+    ({ vertex: { key } }) => {
+      if (key.startsWith('SV')) {
+        setSmallTreeRoot(key);
+      } else {
+        setLargeTreeRoot(key);
+      }
+    },
+    []
+  );
 
   return (
     <GraphView objectFit='contain' padding={50}>
@@ -122,9 +142,13 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'trees',
-            minVertexSpacing: 100
-          }
+            roots: [smallTreeRoot, largeTreeRoot],
+            minVertexSpacing: 50
+          },
           // --- End of placement settings ---
+          events: {
+            onVertexPress: handleVertexPress
+          }
         }}
         graph={graph}
       />
@@ -135,29 +159,21 @@ export default function Graph() {
 
 **Expected result**
 
-<img src="./assets/images/placement/trees/directed-graph.png" alt="directed graph trees placement example" width="300" />
+<video src="./assets/videos/placement/trees/trees-directed-placement-example.mp4" style="width: 300px"></video>
 
 #### **Undirected Graph**
 
 **Example code**
 
 ```tsx
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   GraphView,
+  VertexPressHandler,
   UndirectedGraphData,
   UndirectedGraph,
   UndirectedGraphComponent
 } from 'react-native-smart-graph';
-
-const SMALL_TREE = {
-  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
-  edges: [
-    { key: 'SE1', vertices: ['SV1', 'SV2'] },
-    { key: 'SE2', vertices: ['SV1', 'SV3'] },
-    { key: 'SE3', vertices: ['SV1', 'SV4'] }
-  ]
-};
 
 const LARGE_TREE = {
   vertices: [
@@ -181,13 +197,36 @@ const LARGE_TREE = {
   ]
 };
 
+const SMALL_TREE = {
+  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
+  edges: [
+    { key: 'SE1', vertices: ['SV1', 'SV2'] },
+    { key: 'SE2', vertices: ['SV1', 'SV3'] },
+    { key: 'SE3', vertices: ['SV1', 'SV4'] }
+  ]
+};
+
 const COMBINED_GRAPH: UndirectedGraphData = {
   vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
   edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
 };
 
 export default function Graph() {
+  const [smallTreeRoot, setSmallTreeRoot] = useState('');
+  const [largeTreeRoot, setLargeTreeRoot] = useState('');
+
   const graph = useMemo(() => new UndirectedGraph(COMBINED_GRAPH), []);
+
+  const handleVertexPress = useCallback<VertexPressHandler>(
+    ({ vertex: { key } }) => {
+      if (key.startsWith('SV')) {
+        setSmallTreeRoot(key);
+      } else {
+        setLargeTreeRoot(key);
+      }
+    },
+    []
+  );
 
   return (
     <GraphView objectFit='contain' padding={50}>
@@ -196,9 +235,13 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'trees',
-            minVertexSpacing: 100
-          }
+            roots: [smallTreeRoot, largeTreeRoot],
+            minVertexSpacing: 50
+          },
           // --- End of placement settings ---
+          events: {
+            onVertexPress: handleVertexPress
+          }
         }}
         graph={graph}
       />
@@ -209,9 +252,9 @@ export default function Graph() {
 
 **Expected result**
 
-<img src="./assets/images/placement/trees/undirected-graph.png" alt="undirected graph trees placement example" width="300" />
+<video src="./assets/videos/placement/trees/trees-undirected-placement-example.mp4" style="width: 300px"></video>
 
 <!-- tabs:end -->
 
 > [!NOTE]
-> In both examples above the same graph gives different results. That's because for the undirected graph the root vertex is chosen in such a way that the graph is most balanced.
+> In both examples above the same graph gives **different results** if roots aren't explicitly selected. That's because for the **undirected graph** the root vertex is chosen in such a way that the graph is **most balanced**, whereas the root vertex of the **directed graph** has either **no incoming edges** or has **the most outgoing edges**.

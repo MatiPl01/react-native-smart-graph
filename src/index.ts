@@ -76,8 +76,6 @@ export {
   type DirectedGraphComponentsSettings,
   type DirectedGraphSettings,
   type EdgeLabelSettings,
-  type EdgePressEvent,
-  type EdgePressHandler,
   type FocusSettings,
   type ForcesLayoutSettings,
   type ForcesSettings,

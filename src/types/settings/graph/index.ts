@@ -29,7 +29,7 @@ type SharedGraphSettings<
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > = {
   animations?: GraphAnimationsSettings;
-  events?: GraphEventsSettings<V, E, ED>;
+  events?: GraphEventsSettings<V>;
   layout?: GraphLayoutSettings;
   placement?: GraphPlacementSettings;
 };
