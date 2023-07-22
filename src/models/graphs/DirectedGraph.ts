@@ -15,7 +15,7 @@ import {
 
 import Graph from './Graph';
 
-export default class DirectedGraph<V, E> extends Graph<
+export default class DirectedGraph<V = void, E = void> extends Graph<
   V,
   E,
   DirectedGraphVertex<V, E>,

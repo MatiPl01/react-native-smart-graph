@@ -74,6 +74,7 @@ function OverlayVertex<V, E>({
     if (longPressStarted.value) return;
     // Animate the vertex and trigger the press event
     scale.value = pulseAnimation(PRESS_MAX_SCALE);
+
     onPress?.(getPressEventData());
   };
 

@@ -19,7 +19,8 @@ import {
 } from '@/utils/algorithms';
 import {
   arrangeGraphComponents,
-  calcContainerBoundingRect
+  calcContainerBoundingRect,
+  Symmetry
 } from '@/utils/placement/shared';
 
 type ArrangedVertices = Record<
@@ -327,11 +328,10 @@ export default function placeVerticesOnOrbits(
       layerRadiuses
     );
     // Calc container dimensions
-    const boundingRect = calcContainerBoundingRect(
-      placedVerticesPositions,
-      minVertexSpacing,
-      vertexRadius
-    );
+    const boundingRect = calcContainerBoundingRect(placedVerticesPositions, {
+      padding: vertexRadius,
+      symmetry: settings.symmetrical === false ? undefined : Symmetry.CENTER
+    });
     componentsLayouts.push({
       boundingRect,
       verticesPositions: placedVerticesPositions

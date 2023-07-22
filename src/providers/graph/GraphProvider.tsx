@@ -142,14 +142,14 @@ function GraphProvider<V, E>({
         settings={memoSettings}
       />,
       // LAYOUT
+      // Providers used to compute the layout of the graph and animate
+      // vertices based on calculated positions
+      ...getLayoutProviders(graph, memoSettings, onRender),
       // Provider used to compute the dimensions of the container
       <ContainerDimensionsProvider
         boundingRect={boundingRect}
         vertexRadius={memoSettings.components.vertex.radius}
       />,
-      // Providers used to compute the layout of the graph and animate
-      // vertices based on calculated positions
-      ...getLayoutProviders(graph, memoSettings, onRender),
       // EVENTS
       // Press events provider
       ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),

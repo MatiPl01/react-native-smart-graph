@@ -1,6 +1,7 @@
 import { PropsWithChildren, useMemo } from 'react';
 import {
   runOnJS,
+  SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
@@ -26,6 +27,7 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphSettingsWithDefaults<V, E>;
+  targetBoundingRect: SharedValue<BoundingRect>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
@@ -35,7 +37,8 @@ function GraphPlacementLayoutProvider<V, E>({
   onRender,
   renderedEdgesData,
   renderedVerticesData,
-  settings
+  settings,
+  targetBoundingRect
 }: GraphPlacementLayoutProviderProps<V, E>) {
   const isFirstRender = useSharedValue(true);
 
@@ -69,6 +72,8 @@ function GraphPlacementLayoutProvider<V, E>({
         runOnJS(onRender)(boundingRect);
       }
 
+      targetBoundingRect.value = boundingRect;
+
       animateVerticesToFinalPositions(
         Object.fromEntries(
           Object.entries(renderedVerticesData).map(([key, { position }]) => [
@@ -88,9 +93,15 @@ function GraphPlacementLayoutProvider<V, E>({
 
 export default withGraphData(
   GraphPlacementLayoutProvider,
-  ({ layoutAnimationSettings, renderedEdgesData, renderedVerticesData }) => ({
+  ({
     layoutAnimationSettings,
     renderedEdgesData,
-    renderedVerticesData
+    renderedVerticesData,
+    targetBoundingRect
+  }) => ({
+    layoutAnimationSettings,
+    renderedEdgesData,
+    renderedVerticesData,
+    targetBoundingRect
   })
 );
