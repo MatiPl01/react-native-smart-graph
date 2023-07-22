@@ -116,13 +116,15 @@ Steps outlined below follow a priority order. If the algorithm fails to select a
 
 Examples below include code snippets for different layer sizings and show expected results.
 
-**Code fragment**
+**Code snippets**
 
 <!-- tabs:start -->
 
 #### **auto**
 
 ```tsx
+...
+
 export default function Graph() {
   ...
   return (
@@ -248,6 +250,8 @@ export default function Graph() {
 #### **equal**
 
 ```tsx
+...
+
 export default function Graph() {
   ...
   return (
@@ -373,6 +377,8 @@ export default function Graph() {
 #### **non-decreasing**
 
 ```tsx
+...
+
 export default function Graph() {
   ...
   return (
@@ -498,6 +504,8 @@ export default function Graph() {
 #### **quad-increasing**
 
 ```tsx
+...
+
 export default function Graph() {
   ...
   return (
@@ -623,6 +631,7 @@ export default function Graph() {
 #### **custom**
 
 ```tsx
+...
 import { useWorkletCallback } from 'react-native-reanimated';
 import { GetLayerRadiusFunction } from 'react-native-smart-graph';
 

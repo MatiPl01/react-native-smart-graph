@@ -67,189 +67,251 @@ The example below is an example allowing to choose a root on vertex press. It de
 
 <!-- tabs:start -->
 
+**Code snippets**
+
 #### **Directed graph**
 
-**Example code**
-
 ```tsx
-import { useCallback, useMemo, useState } from 'react';
-import {
-  GraphView,
-  DirectedGraph,
-  DirectedGraphComponent,
-  DirectedGraphData,
-  VertexPressHandler
-} from 'react-native-smart-graph';
-
-const LARGE_TREE = {
-  vertices: [
-    { key: 'LV1' },
-    { key: 'LV2' },
-    { key: 'LV3' },
-    { key: 'LV4' },
-    { key: 'LV5' },
-    { key: 'LV6' },
-    { key: 'LV7' },
-    { key: 'LV8' }
-  ],
-  edges: [
-    { key: 'LE1', from: 'LV1', to: 'LV2' },
-    { key: 'LE2', from: 'LV2', to: 'LV3' },
-    { key: 'LE3', from: 'LV2', to: 'LV4' },
-    { key: 'LE4', from: 'LV2', to: 'LV5' },
-    { key: 'LE5', from: 'LV5', to: 'LV6' },
-    { key: 'LE6', from: 'LV1', to: 'LV7' },
-    { key: 'LE7', from: 'LV5', to: 'LV8' }
-  ]
-};
-
-const SMALL_TREE = {
-  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
-  edges: [
-    { key: 'SE1', from: 'SV1', to: 'SV2' },
-    { key: 'SE2', from: 'SV1', to: 'SV3' },
-    { key: 'SE3', from: 'SV1', to: 'SV4' }
-  ]
-};
-
-const COMBINED_GRAPH: DirectedGraphData = {
-  vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
-  edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
-};
+...
 
 export default function Graph() {
-  const [smallTreeRoot, setSmallTreeRoot] = useState('');
-  const [largeTreeRoot, setLargeTreeRoot] = useState('');
-
-  const graph = useMemo(() => new DirectedGraph(COMBINED_GRAPH), []);
-
-  const handleVertexPress = useCallback<VertexPressHandler>(
-    ({ vertex: { key } }) => {
-      if (key.startsWith('SV')) {
-        setSmallTreeRoot(key);
-      } else {
-        setLargeTreeRoot(key);
-      }
-    },
-    []
-  );
-
+  ...
   return (
     <GraphView objectFit='contain' padding={50}>
       <DirectedGraphComponent
         settings={{
-          // --- Placement settings ---
+          ...
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
             minVertexSpacing: 50
           },
-          // --- End of placement settings ---
-          events: {
-            onVertexPress: handleVertexPress
-          }
+          ...
         }}
-        graph={graph}
+        ...
       />
     </GraphView>
   );
 }
 ```
 
-**Expected result**
+<details>
+<summary>Show full code</summary>
+<article>
 
-<video src="./assets/videos/placement/trees/trees-directed-placement-example.mp4" style="width: 300px"></video>
+<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useCallback<span class="token punctuation">,</span> useMemo<span class="token punctuation">,</span> useState <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>
+  GraphView<span class="token punctuation">,</span>
+  DirectedGraph<span class="token punctuation">,</span>
+  DirectedGraphComponent<span class="token punctuation">,</span>
+  DirectedGraphData<span class="token punctuation">,</span>
+  VertexPressHandler
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token constant">LARGE_TREE</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV8'</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'LV1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'LV2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'LV2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'LV3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'LV2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'LV4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'LV2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'LV5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'LV5'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'LV6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'LV1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'LV7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'LV5'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'LV8'</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token constant">SMALL_TREE</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV4'</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SE1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'SV1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'SV2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SE2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'SV1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'SV3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SE3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'SV1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'SV4'</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token constant">COMBINED_GRAPH</span><span class="token operator">:</span> DirectedGraphData <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token constant">SMALL_TREE</span><span class="token punctuation">.</span>vertices<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token constant">LARGE_TREE</span><span class="token punctuation">.</span>vertices<span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token constant">SMALL_TREE</span><span class="token punctuation">.</span>edges<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token constant">LARGE_TREE</span><span class="token punctuation">.</span>edges<span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token punctuation">[</span>smallTreeRoot<span class="token punctuation">,</span> setSmallTreeRoot<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> <span class="token punctuation">[</span>largeTreeRoot<span class="token punctuation">,</span> setLargeTreeRoot<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">COMBINED_GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> handleVertexPress <span class="token operator">=</span> useCallback<span class="token operator">&lt;</span>VertexPressHandler<span class="token operator">&gt;</span><span class="token punctuation">(</span>
+    <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> <span class="token literal-property property">vertex</span><span class="token operator">:</span> <span class="token punctuation">{</span> key <span class="token punctuation">}</span> <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">startsWith</span><span class="token punctuation">(</span><span class="token string">'SV'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">setSmallTreeRoot</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token function">setLargeTreeRoot</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
+      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
+        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
+          <span class="token comment">// --- Placement settings ---</span>
+          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'trees'</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">roots</span><span class="token operator">:</span> <span class="token punctuation">[</span>smallTreeRoot<span class="token punctuation">,</span> largeTreeRoot<span class="token punctuation">]</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span>
+          <span class="token punctuation">}</span><span class="token punctuation">,</span>
+          <span class="token comment">// --- End of placement settings ---</span>
+          <span class="token literal-property property">events</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">onVertexPress</span><span class="token operator">:</span> handleVertexPress
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
+        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
+      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
+    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+
+</article>
+</details>
 
 #### **Undirected Graph**
 
-**Example code**
-
 ```tsx
-import { useCallback, useMemo, useState } from 'react';
-import {
-  GraphView,
-  VertexPressHandler,
-  UndirectedGraphData,
-  UndirectedGraph,
-  UndirectedGraphComponent
-} from 'react-native-smart-graph';
-
-const LARGE_TREE = {
-  vertices: [
-    { key: 'LV1' },
-    { key: 'LV2' },
-    { key: 'LV3' },
-    { key: 'LV4' },
-    { key: 'LV5' },
-    { key: 'LV6' },
-    { key: 'LV7' },
-    { key: 'LV8' }
-  ],
-  edges: [
-    { key: 'LE1', vertices: ['LV1', 'LV2'] },
-    { key: 'LE2', vertices: ['LV2', 'LV3'] },
-    { key: 'LE3', vertices: ['LV2', 'LV4'] },
-    { key: 'LE4', vertices: ['LV2', 'LV5'] },
-    { key: 'LE5', vertices: ['LV5', 'LV6'] },
-    { key: 'LE6', vertices: ['LV1', 'LV7'] },
-    { key: 'LE7', vertices: ['LV5', 'LV8'] }
-  ]
-};
-
-const SMALL_TREE = {
-  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
-  edges: [
-    { key: 'SE1', vertices: ['SV1', 'SV2'] },
-    { key: 'SE2', vertices: ['SV1', 'SV3'] },
-    { key: 'SE3', vertices: ['SV1', 'SV4'] }
-  ]
-};
-
-const COMBINED_GRAPH: UndirectedGraphData = {
-  vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
-  edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
-};
+...
 
 export default function Graph() {
-  const [smallTreeRoot, setSmallTreeRoot] = useState('');
-  const [largeTreeRoot, setLargeTreeRoot] = useState('');
-
-  const graph = useMemo(() => new UndirectedGraph(COMBINED_GRAPH), []);
-
-  const handleVertexPress = useCallback<VertexPressHandler>(
-    ({ vertex: { key } }) => {
-      if (key.startsWith('SV')) {
-        setSmallTreeRoot(key);
-      } else {
-        setLargeTreeRoot(key);
-      }
-    },
-    []
-  );
-
+  ...
   return (
     <GraphView objectFit='contain' padding={50}>
       <UndirectedGraphComponent
         settings={{
-          // --- Placement settings ---
+          ...
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
             minVertexSpacing: 50
           },
-          // --- End of placement settings ---
-          events: {
-            onVertexPress: handleVertexPress
-          }
+          ...
         }}
-        graph={graph}
+        ...
       />
     </GraphView>
   );
 }
 ```
 
-**Expected result**
+<details>
+<summary>Show full code</summary>
+<article>
+
+<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useCallback<span class="token punctuation">,</span> useMemo<span class="token punctuation">,</span> useState <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>
+  GraphView<span class="token punctuation">,</span>
+  VertexPressHandler<span class="token punctuation">,</span>
+  UndirectedGraphData<span class="token punctuation">,</span>
+  UndirectedGraph<span class="token punctuation">,</span>
+  UndirectedGraphComponent
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token constant">LARGE_TREE</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LV8'</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE1'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'LV1'</span><span class="token punctuation">,</span> <span class="token string">'LV2'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE2'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'LV2'</span><span class="token punctuation">,</span> <span class="token string">'LV3'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE3'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'LV2'</span><span class="token punctuation">,</span> <span class="token string">'LV4'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE4'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'LV2'</span><span class="token punctuation">,</span> <span class="token string">'LV5'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE5'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'LV5'</span><span class="token punctuation">,</span> <span class="token string">'LV6'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE6'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'LV1'</span><span class="token punctuation">,</span> <span class="token string">'LV7'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'LE7'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'LV5'</span><span class="token punctuation">,</span> <span class="token string">'LV8'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token constant">SMALL_TREE</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SV4'</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SE1'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'SV1'</span><span class="token punctuation">,</span> <span class="token string">'SV2'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SE2'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'SV1'</span><span class="token punctuation">,</span> <span class="token string">'SV3'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'SE3'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'SV1'</span><span class="token punctuation">,</span> <span class="token string">'SV4'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token constant">COMBINED_GRAPH</span><span class="token operator">:</span> UndirectedGraphData <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token constant">SMALL_TREE</span><span class="token punctuation">.</span>vertices<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token constant">LARGE_TREE</span><span class="token punctuation">.</span>vertices<span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token constant">SMALL_TREE</span><span class="token punctuation">.</span>edges<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token constant">LARGE_TREE</span><span class="token punctuation">.</span>edges<span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token punctuation">[</span>smallTreeRoot<span class="token punctuation">,</span> setSmallTreeRoot<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> <span class="token punctuation">[</span>largeTreeRoot<span class="token punctuation">,</span> setLargeTreeRoot<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">UndirectedGraph</span><span class="token punctuation">(</span><span class="token constant">COMBINED_GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> handleVertexPress <span class="token operator">=</span> useCallback<span class="token operator">&lt;</span>VertexPressHandler<span class="token operator">&gt;</span><span class="token punctuation">(</span>
+    <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> <span class="token literal-property property">vertex</span><span class="token operator">:</span> <span class="token punctuation">{</span> key <span class="token punctuation">}</span> <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>key<span class="token punctuation">.</span><span class="token function">startsWith</span><span class="token punctuation">(</span><span class="token string">'SV'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">setSmallTreeRoot</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token function">setLargeTreeRoot</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
+      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">UndirectedGraphComponent</span></span>
+        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
+          <span class="token comment">// --- Placement settings ---</span>
+          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'trees'</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">roots</span><span class="token operator">:</span> <span class="token punctuation">[</span>smallTreeRoot<span class="token punctuation">,</span> largeTreeRoot<span class="token punctuation">]</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span>
+          <span class="token punctuation">}</span><span class="token punctuation">,</span>
+          <span class="token comment">// --- End of placement settings ---</span>
+          <span class="token literal-property property">events</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">onVertexPress</span><span class="token operator">:</span> handleVertexPress
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
+        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
+      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
+    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+
+</article>
+</details>
+
+<!-- tabs:end -->
+
+**Result**
+
+<!-- tabs:start -->
+
+#### **Directed Graph**
+
+<video src="./assets/videos/placement/trees/trees-directed-placement-example.mp4" style="width: 300px"></video>
+
+#### **Undirected Graph**
 
 <video src="./assets/videos/placement/trees/trees-undirected-placement-example.mp4" style="width: 300px"></video>
 
