@@ -9,7 +9,7 @@ Circles placement strategy is very **similar** to the [circle](pages/placement/c
 
 ## Properties
 
-> All properties (except the `'strategy'`) are the same as for the [circle](pages/placement/circle?id=properties) placement strategy.
+> All properties (except the `strategy`) are the same as for the [circle](pages/placement/circle?id=properties) placement strategy.
 
 #### `strategy`
 

@@ -80,6 +80,7 @@ export {
   type ForcesLayoutSettings,
   type ForcesSettings,
   type ForcesStrategy,
+  type GetLayerRadiusFunction,
   type GraphAnimationsSettings,
   type GraphEventsSettings,
   type GraphLayoutSettings,

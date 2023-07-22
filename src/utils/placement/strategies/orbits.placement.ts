@@ -8,7 +8,12 @@ import {
   OrbitsPlacementSettings,
   PlacedVerticesPositions
 } from '@/types/settings';
-import { bfs, findGraphComponents, findRootVertex } from '@/utils/algorithms';
+import {
+  bfs,
+  findGraphComponents,
+  findRootVertex,
+  transposeIncoming
+} from '@/utils/algorithms';
 import {
   arrangeGraphComponents,
   calcContainerBoundingRect
@@ -290,9 +295,15 @@ export default function placeVerticesOnOrbits(
       rootVertexKeys,
       isGraphDirected
     );
-
+    // If the graph is directed and the selected root has incoming edges,
+    // transpose all subtrees with incoming edges to make the root vertex
+    // the source vertex
+    let updatedConnections = connections;
+    if (isGraphDirected && connections[rootVertex]!.incoming.length > 0) {
+      updatedConnections = transposeIncoming(connections, [rootVertex]);
+    }
     // Arrange vertices in sectors
-    const arrangedVertices = arrangeVertices(connections, rootVertex);
+    const arrangedVertices = arrangeVertices(updatedConnections, rootVertex);
     // Calculate the layout of the component
     const minVertexSpacing =
       settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;

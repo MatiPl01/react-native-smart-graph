@@ -7,7 +7,7 @@ Trees placement strategy is best suited for graphs that should be rendered as **
 If used with disjoint graphs, **disjoint graph components** will form **separate trees** placed next to each other.
 
 > [!NOTE]
-> This strategy gives different results for **directed and undirected** graphs. In **directed graphs**, since edges **point from one node to another**, they shape the graph's appearance or layout. On the other hand, **undirected graphs**, where edges have **no fixed direction**, yield a different, more evenly distributed layout.
+> This strategy can give different results for **directed and undirected** graphs. In **directed graphs**, since edges **point from one node to another**, they shape the graph's appearance or layout. On the other hand, **undirected graphs**, where edges have **no fixed direction**, yield a different, more evenly distributed layout.
 
 ## Properties
 
@@ -45,7 +45,7 @@ Steps outlined below follow a priority order. If the algorithm fails to select a
 
 #### **Directed graph**
 
-1. Iterate over the keys of vertices present in the current graph component, verifying if a vertex appears in the roots array. If the **roots array** is **supplied and contains a vertex**, return this vertex key,
+1. Iterate over the keys of vertices present in the current graph component verifying if a vertex appears in the roots array. If the **roots array** is **supplied and contains a vertex**, return this vertex key,
 
 2. Create a **list of candidates** for a root vertex. Find all **vertices with no incoming edges** and save this list as a list of candidates. **If the list is empty**, treat **all vertices** of the graph component as candidates,
 
@@ -112,7 +112,6 @@ const SMALL_TREE = {
   ]
 };
 
-// --- Create disjoint graphs ---
 const COMBINED_GRAPH: DirectedGraphData = {
   vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
   edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
@@ -255,6 +254,3 @@ export default function Graph() {
 <video src="./assets/videos/placement/trees/trees-undirected-placement-example.mp4" style="width: 300px"></video>
 
 <!-- tabs:end -->
-
-> [!NOTE]
-> In both examples above the same graph gives **different results** if roots aren't explicitly selected. That's because for the **undirected graph** the root vertex is chosen in such a way that the graph is **most balanced**, whereas the root vertex of the **directed graph** has either **no incoming edges** or has **the most outgoing edges**.

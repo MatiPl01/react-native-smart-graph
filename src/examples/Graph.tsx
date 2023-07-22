@@ -1,79 +1,100 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useWorkletCallback } from 'react-native-reanimated';
 import {
   GraphView,
-  VertexPressHandler,
-  UndirectedGraphData,
-  UndirectedGraph,
-  UndirectedGraphComponent
+  GetLayerRadiusFunction,
+  DirectedGraph,
+  DirectedGraphComponent
 } from 'react-native-smart-graph';
 
-const SMALL_TREE = {
-  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
-  edges: [
-    { key: 'SE1', vertices: ['SV1', 'SV2'] },
-    { key: 'SE2', vertices: ['SV1', 'SV3'] },
-    { key: 'SE3', vertices: ['SV1', 'SV4'] }
-  ]
-};
-
-const LARGE_TREE = {
+const ORBITS_GRAPH = {
   vertices: [
-    { key: 'LV1' },
-    { key: 'LV2' },
-    { key: 'LV3' },
-    { key: 'LV4' },
-    { key: 'LV5' },
-    { key: 'LV6' },
-    { key: 'LV7' },
-    { key: 'LV8' }
+    { key: 'V0' }, // root
+    // First orbit vertices
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    // Second orbit vertices
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' },
+    { key: 'V9' },
+    { key: 'V10' },
+    { key: 'V11' },
+    { key: 'V12' },
+    { key: 'V13' },
+    { key: 'V14' },
+    { key: 'V15' },
+    // Third orbit vertices
+    { key: 'V16' },
+    { key: 'V17' },
+    { key: 'V18' },
+    { key: 'V19' },
+    { key: 'V20' },
+    { key: 'V21' },
+    { key: 'V22' },
+    { key: 'V23' },
+    { key: 'V24' }
   ],
   edges: [
-    { key: 'LE1', vertices: ['LV1', 'LV2'] },
-    { key: 'LE2', vertices: ['LV2', 'LV3'] },
-    { key: 'LE3', vertices: ['LV2', 'LV4'] },
-    { key: 'LE4', vertices: ['LV2', 'LV5'] },
-    { key: 'LE5', vertices: ['LV5', 'LV6'] },
-    { key: 'LE6', vertices: ['LV1', 'LV7'] },
-    { key: 'LE7', vertices: ['LV5', 'LV8'] }
+    // Edges from root to first orbit
+    { key: 'E0', from: 'V0', to: 'V1' },
+    { key: 'E1', from: 'V0', to: 'V2' },
+    { key: 'E2', from: 'V0', to: 'V3' },
+    { key: 'E3', from: 'V0', to: 'V4' },
+    { key: 'E4', from: 'V0', to: 'V5' },
+    // Edges from first orbit to second orbit
+    // V1 has 1 child
+    { key: 'E5', from: 'V1', to: 'V6' },
+    // V2 has 2 children
+    { key: 'E6', from: 'V2', to: 'V7' },
+    { key: 'E7', from: 'V2', to: 'V8' },
+    // V3 has 3 children
+    { key: 'E8', from: 'V3', to: 'V9' },
+    { key: 'E9', from: 'V3', to: 'V10' },
+    { key: 'E10', from: 'V3', to: 'V11' },
+    // V4 has 4 children
+    { key: 'E11', from: 'V4', to: 'V12' },
+    { key: 'E12', from: 'V4', to: 'V13' },
+    { key: 'E13', from: 'V4', to: 'V14' },
+    { key: 'E14', from: 'V4', to: 'V15' },
+    // Edges from second orbit to third orbit
+    { key: 'E15', from: 'V6', to: 'V16' },
+    { key: 'E16', from: 'V7', to: 'V17' },
+    { key: 'E17', from: 'V7', to: 'V18' },
+    { key: 'E18', from: 'V9', to: 'V19' },
+    { key: 'E19', from: 'V10', to: 'V20' },
+    { key: 'E20', from: 'V11', to: 'V21' },
+    { key: 'E21', from: 'V12', to: 'V22' },
+    { key: 'E22', from: 'V13', to: 'V23' },
+    { key: 'E23', from: 'V14', to: 'V24' }
   ]
-};
-
-const COMBINED_GRAPH: UndirectedGraphData = {
-  vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
-  edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
 };
 
 export default function Graph() {
-  const [smallTreeRoot, setSmallTreeRoot] = useState('');
-  const [largeTreeRoot, setLargeTreeRoot] = useState('');
+  const graph = useMemo(() => new DirectedGraph(ORBITS_GRAPH), []);
 
-  const graph = useMemo(() => new UndirectedGraph(COMBINED_GRAPH), []);
-
-  const handleVertexPress = useCallback<VertexPressHandler>(
-    ({ vertex: { key } }) => {
-      if (key.startsWith('SV')) {
-        setSmallTreeRoot(key);
-      } else {
-        setLargeTreeRoot(key);
-      }
+  const getLayerRadius: GetLayerRadiusFunction = useWorkletCallback(
+    ({ layerIndex }) => {
+      return Math.log((layerIndex + 3) ** 3) * 100;
     },
     []
   );
 
   return (
     <GraphView objectFit='contain' padding={50}>
-      <UndirectedGraphComponent
+      <DirectedGraphComponent
         settings={{
           // --- Placement settings ---
           placement: {
-            strategy: 'trees',
-            roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
-          },
-          // --- End of placement settings ---
-          events: {
-            onVertexPress: handleVertexPress
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'custom',
+            getLayerRadius
           }
+          // --- End of placement settings ---
         }}
         graph={graph}
       />
