@@ -126,14 +126,116 @@
 
     <script>
       // PLUGINS
-      var autoVideoControls = function (hook, vm) {
+      // Auto video controls
+      function autoVideoControlsPlugin(hook, vm) {
         hook.doneEach(function () {
           var videos = document.querySelectorAll('video');
           videos.forEach(function (video) {
             video.setAttribute('controls', '');
           });
         });
-      };
+      }
+
+      // Accordion
+      function accordionPlugin(hook, vm) {
+        hook.beforeEach(function (content) {
+          const lines = content.split('\n');
+          const accordionRegex = {
+            start: /<!-- accordion:start -->/,
+            end: /<!-- accordion:end -->/,
+            title: /#### _(.+)_/
+          };
+
+          let stack = [];
+
+          for (let i = 0; i < lines.length; i++) {
+            if (accordionRegex.start.test(lines[i].trim())) {
+              let title = '';
+              // search for the closest occurrence of title pattern
+              for (let j = i + 1; j < lines.length; j++) {
+                const titleMatch = accordionRegex.title.exec(lines[j]);
+                if (titleMatch) {
+                  title = titleMatch[1];
+                  break;
+                }
+              }
+
+              let accordion = {
+                title: title,
+                content: [],
+                startLine: i
+              };
+              stack.push(accordion);
+            } else if (accordionRegex.end.test(lines[i].trim())) {
+              const accordion = stack.pop();
+              const accordionHtml = `<article class="accordion"><h4 class="accordion-title">${
+                accordion.title
+              }</h4><section class="accordion-content">\n${accordion.content.join(
+                '\n'
+              )}\n</section></article>`;
+
+              if (stack.length > 0) {
+                // Inside another accordion
+                stack[stack.length - 1].content.push(accordionHtml);
+              } else {
+                // Replace in the original content
+                lines.splice(
+                  accordion.startLine, // start
+                  i - accordion.startLine + 1, // deleteCount
+                  accordionHtml // insert
+                );
+              }
+            } else if (stack.length > 0) {
+              // Exclude a line which contains the accordion title
+              if (!accordionRegex.title.test(lines[i])) {
+                stack[stack.length - 1].content.push(lines[i]);
+              }
+            }
+          }
+
+          return lines.join('\n');
+        });
+
+        hook.doneEach(function () {
+          // Find all accordions
+          document.querySelectorAll('.accordion').forEach(accordion => {
+            // Define content
+            const content = accordion.querySelector('.accordion-content');
+
+            // Add click event to the title
+            accordion
+              .querySelector('.accordion-title')
+              .addEventListener('click', () => {
+                const wasOpen = accordion.classList.contains('open');
+
+                if (wasOpen) {
+                  content.style.height = `${content.scrollHeight}px`; // Set to current height for transitions
+                  accordion.classList.remove('open');
+                  setTimeout(() => (content.style.height = '0')); // Set to 0 to transition to closed state
+                } else {
+                  content.style.height = '0'; // Force a "layout" by setting to 0
+                  accordion.classList.add('open');
+                  content.style.height = `${content.scrollHeight}px`; // Then immediately set to target height
+                }
+
+                // Listen for the end of the transitions
+                accordion.addEventListener(
+                  'transitionend',
+                  function (event) {
+                    if (!wasOpen) {
+                      content.style.height = 'auto'; // When the transition to open state ends
+                    }
+                    // The transition to the closed state should not change the height from '0'
+                  },
+                  { once: true }
+                );
+              });
+
+            // Initialize height (closed)
+            content.style.height = '0';
+          });
+        });
+      }
 
       window.$docsify = {
         search: 'auto',
@@ -229,7 +331,8 @@
               }, 500);
             });
           },
-          autoVideoControls
+          autoVideoControlsPlugin,
+          accordionPlugin
         ]
       };
 

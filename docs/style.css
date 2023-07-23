@@ -1090,16 +1090,52 @@ summary {
   padding: 0.5rem 0 1rem 0;
 }
 
-details article {
-  padding: 1.5rem;
-  border-radius: 5px;
-  border: 1px solid var(--borderColor);
+/* Custom accordion */
+.accordion {
+  box-sizing: border-box;
+  background-color: transparent !important;
 }
 
-details b {
-  display: block;
+.accordion > .accordion-title {
+  cursor: pointer;
   margin-bottom: 1rem;
+  margin-left: 1.5rem;
+  margin-top: 1rem;
+  position: relative;
+  font-weight: bold;
+  user-select: none;
+  color: var(--textColor);
 }
+
+.accordion > .accordion-title::before {
+  content: '';
+  position: absolute;
+  border: 5px solid transparent;
+  border-left-color: var(--textColor);
+  top: 0.5rem;
+  left: -1rem;
+  transition: transform 0.3s ease-in-out;
+}
+
+.accordion > .accordion-content {
+  margin: 1.5rem 0;
+  padding: 0 1.5rem;
+  border-radius: 5px;
+  border: 1px solid var(--borderColor);
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.accordion.open > .accordion-title::before {
+  transform: rotate(90deg) translate(25%, 50%);
+}
+
+.accordion:not(.open) > .accordion-content {
+  visibility: hidden;
+  margin: 0;
+}
+
+/* End of custom accordion */
 
 video {
   width: 100%;
