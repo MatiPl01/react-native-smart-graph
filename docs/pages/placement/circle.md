@@ -64,8 +64,8 @@ const defaultSortComparator = (key1: string, key2: string) => {
     <th>Custom sort comparator (non-increasing order)</th>
   </tr>
   <tr>
-    <td><img src="./assets/images/placement/circle/sort-comparator-default.png"></img></td>
-    <td><img src="./assets/images/placement/circle/sort-comparator-custom.png"></img></td>
+    <td><img src="./assets/images/placement/circle/sort-comparator-default.png"/></td>
+    <td><img src="./assets/images/placement/circle/sort-comparator-custom.png"/></td>
   </tr>
 </table>
 </article>

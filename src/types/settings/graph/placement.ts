@@ -21,7 +21,7 @@ type SortablePlacementSettings = {
   sortVertices?: boolean;
 };
 
-export type RandomLayoutType = 'grid' | 'random' | 'triangular';
+export type RandomMeshType = 'grid' | 'random' | 'triangular';
 
 type SharedPlacementSettings = {
   minVertexSpacing?: number;
@@ -30,12 +30,12 @@ type SharedPlacementSettings = {
 export type BoundRandomPlacementSettings = {
   containerHeight?: number;
   containerWidth?: number;
-  layoutType: 'random';
+  mesh: 'random';
 };
 
 export type UnboundRandomPlacementSettings = {
   density?: number;
-  layoutType: Exclude<RandomLayoutType, 'random'>;
+  mesh?: Exclude<RandomMeshType, 'random'>;
   minVertexSpacing?: number;
 };
 
