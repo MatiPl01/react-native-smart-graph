@@ -73,15 +73,16 @@ body:not(.ready) [data-cloak] {
   display: none;
 }
 
+#app {
+  min-height: 100vh;
+  margin-top: 0 !important;
+}
+
 div#app {
   font-size: 30px;
   font-weight: lighter;
   margin: 40vh auto;
   text-align: center;
-}
-
-div#app:empty:before {
-  content: 'Loading...';
 }
 
 .emoji {
@@ -1103,4 +1104,71 @@ video {
 
 ul li {
   margin-bottom: 0.25rem;
+}
+
+.loader-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999998;
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s;
+}
+
+body.loading {
+  overflow: hidden !important;
+  height: 100vh !important;
+  position: fixed !important;
+}
+
+body.loading *:not(.loader-screen)) {
+  display: none !important;
+}
+
+body:not(.loading) {
+  background-color: var(--background) !important;
+}
+
+body:not(.loading) .loader-screen {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader {
+  filter: drop-shadow(0 0 0.25rem rgba(0, 0, 0, 0.35));
+}
+
+.loader .left {
+  animation: loader-left 1s infinite alternate ease-in-out;
+  animation-delay: -0.5s;
+  transform-origin: 200px 60px;
+}
+
+.loader .right {
+  animation: loader-right 1s infinite alternate ease-in-out;
+  animation-delay: -0.5s;
+  transform-origin: 200px 60px;
+}
+
+@keyframes loader-left {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-60deg);
+  }
+}
+
+@keyframes loader-right {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(60deg);
+  }
 }
