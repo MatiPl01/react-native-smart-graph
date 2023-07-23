@@ -1094,16 +1094,16 @@ summary {
 .accordion {
   box-sizing: border-box;
   background-color: transparent !important;
+  margin-bottom: 1rem;
 }
 
 .accordion > .accordion-title {
   cursor: pointer;
-  margin-bottom: 1rem;
-  margin-left: 1.5rem;
-  margin-top: 1rem;
+  margin: 0 0 1rem 1.5rem;
   position: relative;
   font-weight: bold;
   user-select: none;
+  transition: all 0.3s ease-in-out;
   color: var(--textColor);
 }
 
@@ -1118,12 +1118,14 @@ summary {
 }
 
 .accordion > .accordion-content {
-  margin: 1.5rem 0;
-  padding: 0 1.5rem;
   border-radius: 5px;
   border: 1px solid var(--borderColor);
   overflow: hidden;
   transition: all 0.3s ease-in-out;
+}
+
+.accordion > .accordion-content > .accordion-inner {
+  margin: 1.5rem;
 }
 
 .accordion.open > .accordion-title::before {
@@ -1132,10 +1134,17 @@ summary {
 
 .accordion:not(.open) > .accordion-content {
   visibility: hidden;
-  margin: 0;
+}
+
+.accordion:not(.open) > .accordion-title {
+  margin-bottom: 0;
 }
 
 /* End of custom accordion */
+
+.accordion pre {
+  margin: 0;
+}
 
 video {
   width: 100%;

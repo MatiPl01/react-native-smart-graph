@@ -250,104 +250,104 @@ type DirectedGraphRenderers<V, E> = {
 };
 ```
 
-<details>
-<summary>Example</summary>
-<article>
+<!-- accordion:start -->
 
-  <details>
-  <summary>Show full code</summary>
-  <article>
+#### _Example_
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo<span class="token punctuation">,</span> useState <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> StyleSheet<span class="token punctuation">,</span> Text<span class="token punctuation">,</span> View <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> TouchableOpacity <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-gesture-handler'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  DefaultEdgeLabelRenderer<span class="token punctuation">,</span>
-  DirectedGraphData<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
+<!-- accordion:start -->
+
+#### _Show full code_
+
+```tsx
+import { useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import {
+  GraphView,
+  DefaultEdgeLabelRenderer,
+  DirectedGraphData,
+  DirectedGraph,
   DirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">GRAPH</span><span class="token operator">:</span> DirectedGraphData <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const GRAPH: DirectedGraphData = {
+  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }],
+  edges: [
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V2', to: 'V3' },
+    { key: 'E3', from: 'V3', to: 'V1' },
+    { key: 'E4', from: 'V1', to: 'V3' },
+    { key: 'E5', from: 'V3', to: 'V2' },
+    { key: 'E6', from: 'V1', to: 'V3' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> <span class="token punctuation">[</span>showLabels<span class="token punctuation">,</span> setShowLabels<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const [showLabels, setShowLabels] = useState(true);
 
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
-  <span class="token keyword">const</span> <span class="token function-variable function">toggleLabels</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token function">setShowLabels</span><span class="token punctuation">(</span><span class="token operator">!</span>showLabels<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const toggleLabels = () => setShowLabels(!showLabels);
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">25</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-        </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-          <span class="token attr-name">renderers</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-            <span class="token literal-property property">label</span><span class="token operator">:</span> showLabels <span class="token operator">?</span> DefaultEdgeLabelRenderer <span class="token operator">:</span> <span class="token keyword">undefined</span>
-          <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-          <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-            <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-              <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'circle'</span><span class="token punctuation">,</span>
-              <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">100</span>
-            <span class="token punctuation">}</span>
-          <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-          <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-        <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token punctuation">{</span><span class="token comment">/* Helper overlay to change dimensions */</span><span class="token punctuation">}</span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">View</span></span> <span class="token attr-name">style</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>styles<span class="token punctuation">.</span>overlay<span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-        </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">TouchableOpacity</span></span> <span class="token attr-name">onPress</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>toggleLabels<span class="token punctuation">}</span></span> <span class="token attr-name">style</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>styles<span class="token punctuation">.</span>button<span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-          </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">Text</span></span> <span class="token attr-name">style</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>styles<span class="token punctuation">.</span>buttonText<span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-            </span><span class="token punctuation">{</span>showLabels <span class="token operator">?</span> <span class="token string">'Hide'</span> <span class="token operator">:</span> <span class="token string">'Show'</span><span class="token punctuation">}</span><span class="token plain-text"> labels
-          </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">Text</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-        </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">TouchableOpacity</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">View</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+  return (
+    <>
+      <GraphView objectFit='contain' padding={25}>
+        <DirectedGraphComponent
+          renderers={{
+            label: showLabels ? DefaultEdgeLabelRenderer : undefined
+          }}
+          settings={{
+            placement: {
+              strategy: 'circle',
+              minVertexSpacing: 100
+            }
+          }}
+          graph={graph}
+        />
+      </GraphView>
+      {/* Helper overlay to change dimensions */}
+      <View style={styles.overlay}>
+        <TouchableOpacity onPress={toggleLabels} style={styles.button}>
+          <Text style={styles.buttonText}>
+            {showLabels ? 'Hide' : 'Show'} labels
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
 
-<span class="token keyword">const</span> styles <span class="token operator">=</span> StyleSheet<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-  <span class="token literal-property property">overlay</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token operator">...</span>StyleSheet<span class="token punctuation">.</span>absoluteFillObject<span class="token punctuation">,</span>
-    <span class="token literal-property property">justifyContent</span><span class="token operator">:</span> <span class="token string">'flex-end'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">pointerEvents</span><span class="token operator">:</span> <span class="token string">'box-none'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">alignItems</span><span class="token operator">:</span> <span class="token string">'center'</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">button</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token literal-property property">backgroundColor</span><span class="token operator">:</span> <span class="token string">'#edcf46'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">justifyContent</span><span class="token operator">:</span> <span class="token string">'center'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">borderRadius</span><span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">marginBottom</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">paddingHorizontal</span><span class="token operator">:</span> <span class="token number">25</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">paddingVertical</span><span class="token operator">:</span> <span class="token number">10</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">buttonText</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token literal-property property">fontSize</span><span class="token operator">:</span> <span class="token number">30</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">lineHeight</span><span class="token operator">:</span> <span class="token number">30</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">fontWeight</span><span class="token operator">:</span> <span class="token string">'bold'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">textAlign</span><span class="token operator">:</span> <span class="token string">'center'</span>
-  <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    pointerEvents: 'box-none',
+    alignItems: 'center'
+  },
+  button: {
+    backgroundColor: '#edcf46',
+    justifyContent: 'center',
+    borderRadius: 5,
+    marginBottom: 50,
+    paddingHorizontal: 25,
+    paddingVertical: 10
+  },
+  buttonText: {
+    fontSize: 30,
+    lineHeight: 30,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  }
+});
+```
 
-  </article>
-  </details>
+<!-- accordion:end -->
 
-<string>Result</string>
+**Result**
 
 <img src="./assets/images/components/graphs/example-labels-directed.gif" alt="directed graph labels example" width="300" />
 
-</article>
-</details>
+<!-- accordion:end -->
 
 #### **Undirected graph**
 
@@ -369,103 +369,103 @@ type UndirectedGraphRenderers<V, E> = {
 };
 ```
 
-<details>
-<summary>Example</summary>
-<article>
+<!-- accordion:start -->
 
-  <details>
-  <summary>Show full code</summary>
-  <article>
+#### _Example_
 
-  <pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo<span class="token punctuation">,</span> useState <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> StyleSheet<span class="token punctuation">,</span> Text<span class="token punctuation">,</span> View <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> TouchableOpacity <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-gesture-handler'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  UndirectedGraphData<span class="token punctuation">,</span>
-  UndirectedGraph<span class="token punctuation">,</span>
-  UndirectedGraphComponent<span class="token punctuation">,</span>
+<!-- accordion:start -->
+
+#### _Show full code_
+
+```tsx
+import { useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import {
+  GraphView,
+  UndirectedGraphData,
+  UndirectedGraph,
+  UndirectedGraphComponent,
   DefaultEdgeLabelRenderer
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">GRAPH</span><span class="token operator">:</span> UndirectedGraphData <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token string">'V2'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token string">'V3'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token string">'V1'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token string">'V3'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token string">'V2'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token string">'V3'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const GRAPH: UndirectedGraphData = {
+  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }],
+  edges: [
+    { key: 'E1', vertices: ['V1', 'V2'] },
+    { key: 'E2', vertices: ['V2', 'V3'] },
+    { key: 'E3', vertices: ['V3', 'V1'] },
+    { key: 'E4', vertices: ['V1', 'V3'] },
+    { key: 'E5', vertices: ['V3', 'V2'] },
+    { key: 'E6', vertices: ['V1', 'V3'] }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> <span class="token punctuation">[</span>showLabels<span class="token punctuation">,</span> setShowLabels<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const [showLabels, setShowLabels] = useState(true);
 
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">UndirectedGraph</span><span class="token punctuation">(</span><span class="token constant">GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
 
-  <span class="token keyword">const</span> <span class="token function-variable function">toggleLabels</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token function">setShowLabels</span><span class="token punctuation">(</span><span class="token operator">!</span>showLabels<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const toggleLabels = () => setShowLabels(!showLabels);
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">25</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-        </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">UndirectedGraphComponent</span></span>
-          <span class="token attr-name">renderers</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-            <span class="token literal-property property">label</span><span class="token operator">:</span> showLabels <span class="token operator">?</span> DefaultEdgeLabelRenderer <span class="token operator">:</span> <span class="token keyword">undefined</span>
-          <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-          <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-            <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-              <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'circle'</span><span class="token punctuation">,</span>
-              <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">100</span>
-            <span class="token punctuation">}</span>
-          <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-          <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-        <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token punctuation">{</span><span class="token comment">/* Helper overlay to change dimensions */</span><span class="token punctuation">}</span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">View</span></span> <span class="token attr-name">style</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>styles<span class="token punctuation">.</span>overlay<span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-        </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">TouchableOpacity</span></span> <span class="token attr-name">onPress</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>toggleLabels<span class="token punctuation">}</span></span> <span class="token attr-name">style</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>styles<span class="token punctuation">.</span>button<span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-          </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">Text</span></span> <span class="token attr-name">style</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>styles<span class="token punctuation">.</span>buttonText<span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-            </span><span class="token punctuation">{</span>showLabels <span class="token operator">?</span> <span class="token string">'Hide'</span> <span class="token operator">:</span> <span class="token string">'Show'</span><span class="token punctuation">}</span><span class="token plain-text"> labels
-          </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">Text</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-        </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">TouchableOpacity</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">View</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+  return (
+    <>
+      <GraphView objectFit='contain' padding={25}>
+        <UndirectedGraphComponent
+          renderers={{
+            label: showLabels ? DefaultEdgeLabelRenderer : undefined
+          }}
+          settings={{
+            placement: {
+              strategy: 'circle',
+              minVertexSpacing: 100
+            }
+          }}
+          graph={graph}
+        />
+      </GraphView>
+      {/* Helper overlay to change dimensions */}
+      <View style={styles.overlay}>
+        <TouchableOpacity onPress={toggleLabels} style={styles.button}>
+          <Text style={styles.buttonText}>
+            {showLabels ? 'Hide' : 'Show'} labels
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
 
-<span class="token keyword">const</span> styles <span class="token operator">=</span> StyleSheet<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-  <span class="token literal-property property">overlay</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token operator">...</span>StyleSheet<span class="token punctuation">.</span>absoluteFillObject<span class="token punctuation">,</span>
-    <span class="token literal-property property">justifyContent</span><span class="token operator">:</span> <span class="token string">'flex-end'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">pointerEvents</span><span class="token operator">:</span> <span class="token string">'box-none'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">alignItems</span><span class="token operator">:</span> <span class="token string">'center'</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">button</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token literal-property property">backgroundColor</span><span class="token operator">:</span> <span class="token string">'#edcf46'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">justifyContent</span><span class="token operator">:</span> <span class="token string">'center'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">borderRadius</span><span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">marginBottom</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">paddingHorizontal</span><span class="token operator">:</span> <span class="token number">25</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">paddingVertical</span><span class="token operator">:</span> <span class="token number">10</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">buttonText</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token literal-property property">fontSize</span><span class="token operator">:</span> <span class="token number">30</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">lineHeight</span><span class="token operator">:</span> <span class="token number">30</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">fontWeight</span><span class="token operator">:</span> <span class="token string">'bold'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">textAlign</span><span class="token operator">:</span> <span class="token string">'center'</span>
-  <span class="token punctuation">}</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    pointerEvents: 'box-none',
+    alignItems: 'center'
+  },
+  button: {
+    backgroundColor: '#edcf46',
+    justifyContent: 'center',
+    borderRadius: 5,
+    marginBottom: 50,
+    paddingHorizontal: 25,
+    paddingVertical: 10
+  },
+  buttonText: {
+    fontSize: 30,
+    lineHeight: 30,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  }
+});
+```
 
-  </article>
-  </details>
+<!-- accordion:end -->
 
-<string>Result</string>
+**Result**
 
 <img src="./assets/images/components/graphs/example-labels-undirected.gif" alt="undirected graph labels example" width="300" />
 
-</article>
-</details>
+<!-- accordion:end -->
 
 <!-- tabs:end -->

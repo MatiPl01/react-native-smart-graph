@@ -92,23 +92,15 @@ Sets the maximum angle of the sector (if you don't know what is a sector, see th
 | ------ | ------------- | -------- |
 | number | 2/3 ⋅ Math.PI | no       |
 
-<details>
-<summary>Examples</summary>
-<article>
-<table>
-  <tr>
-    <th>2/3 ⋅ Math.PI (default)</th>
-    <th>1/2 ⋅ Math.PI</th>
-    <th>1/4 ⋅ Math.PI</th>
-  </tr>
-  <tr>
-    <td><img src="./assets/images/placement/orbits/example-sector-angle-default.png" alt="default sector angle example" /></td>
-    <td><img src="./assets/images/placement/orbits/example-sector-angle-quarter.png" alt="1/4 sector angle example" /></td>
-    <td><img src="./assets/images/placement/orbits/example-sector-angle-one-eighth.png" alt="1/8 sector angle example" /></td>
-  </tr>
-</table>
-</article>
-</details>
+<!-- accordion:start -->
+
+#### _Examples_
+
+| 2/3 ⋅ Math.PI (default)                                                                                            | 1/2 ⋅ Math.PI                                                                                                  | 1/4 ⋅ Math.PI                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| <img src="./assets/images/placement/orbits/example-sector-angle-default.png" alt="default sector angle example" /> | <img src="./assets/images/placement/orbits/example-sector-angle-quarter.png" alt="1/4 sector angle example" /> | <img src="./assets/images/placement/orbits/example-sector-angle-one-eighth.png" alt="1/8 sector angle example" /> |
+
+<!-- accordion:end -->
 
 #### `symmetrical`
 
@@ -120,21 +112,15 @@ If this property is set to `true` (default), padding will be added to the graph 
 | ------- | ------- | -------- |
 | boolean | true    | no       |
 
-<details>
-<summary>Examples</summary>
-<article>
-<table>
-  <tr>
-    <th>true (default)</th>
-    <th>false</th>
-  </tr>
-  <tr>
-    <td><img src="./assets/images/placement/orbits/example-symmetrical-true.png" alt="symmetrical example" /></td>
-    <td><img src="./assets/images/placement/orbits/example-symmetrical-false.png" alt="non-symmetrical example" /></td>
-  </tr>
-</table>
-</article>
-</details>
+<!-- accordion:start -->
+
+#### _Examples_
+
+| true (default)                                                                                        | false                                                                                                      |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| <img src="./assets/images/placement/orbits/example-symmetrical-true.png" alt="symmetrical example" /> | <img src="./assets/images/placement/orbits/example-symmetrical-false.png" alt="non-symmetrical example" /> |
+
+<!-- accordion:end -->
 
 ## Root vertices
 
@@ -198,106 +184,107 @@ export default function Graph() {
 }
 ```
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useMemo } from 'react';
+import {
+  GraphView,
+  DirectedGraph,
   DirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">ORBITS_GRAPH</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V0'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// root</span>
-    <span class="token comment">// First orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Second orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Third orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token comment">// Edges from root to first orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E0'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from first orbit to second orbit</span>
-    <span class="token comment">// V1 has 1 child</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V2 has 2 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V3 has 3 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E8'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E9'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E10'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V4 has 4 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E11'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E12'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E13'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E14'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from second orbit to third orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E15'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V6'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E16'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E17'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E18'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V9'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E19'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V10'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E20'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V11'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E21'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V12'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E22'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V13'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E23'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V14'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const ORBITS_GRAPH = {
+  vertices: [
+    { key: 'V0' }, // root
+    // First orbit vertices
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    // Second orbit vertices
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' },
+    { key: 'V9' },
+    { key: 'V10' },
+    { key: 'V11' },
+    { key: 'V12' },
+    { key: 'V13' },
+    { key: 'V14' },
+    { key: 'V15' },
+    // Third orbit vertices
+    { key: 'V16' },
+    { key: 'V17' },
+    { key: 'V18' },
+    { key: 'V19' },
+    { key: 'V20' },
+    { key: 'V21' },
+    { key: 'V22' },
+    { key: 'V23' },
+    { key: 'V24' }
+  ],
+  edges: [
+    // Edges from root to first orbit
+    { key: 'E0', from: 'V0', to: 'V1' },
+    { key: 'E1', from: 'V0', to: 'V2' },
+    { key: 'E2', from: 'V0', to: 'V3' },
+    { key: 'E3', from: 'V0', to: 'V4' },
+    { key: 'E4', from: 'V0', to: 'V5' },
+    // Edges from first orbit to second orbit
+    // V1 has 1 child
+    { key: 'E5', from: 'V1', to: 'V6' },
+    // V2 has 2 children
+    { key: 'E6', from: 'V2', to: 'V7' },
+    { key: 'E7', from: 'V2', to: 'V8' },
+    // V3 has 3 children
+    { key: 'E8', from: 'V3', to: 'V9' },
+    { key: 'E9', from: 'V3', to: 'V10' },
+    { key: 'E10', from: 'V3', to: 'V11' },
+    // V4 has 4 children
+    { key: 'E11', from: 'V4', to: 'V12' },
+    { key: 'E12', from: 'V4', to: 'V13' },
+    { key: 'E13', from: 'V4', to: 'V14' },
+    { key: 'E14', from: 'V4', to: 'V15' },
+    // Edges from second orbit to third orbit
+    { key: 'E15', from: 'V6', to: 'V16' },
+    { key: 'E16', from: 'V7', to: 'V17' },
+    { key: 'E17', from: 'V7', to: 'V18' },
+    { key: 'E18', from: 'V9', to: 'V19' },
+    { key: 'E19', from: 'V10', to: 'V20' },
+    { key: 'E20', from: 'V11', to: 'V21' },
+    { key: 'E21', from: 'V12', to: 'V22' },
+    { key: 'E22', from: 'V13', to: 'V23' },
+    { key: 'E23', from: 'V14', to: 'V24' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">ORBITS_GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const graph = useMemo(() => new DirectedGraph(ORBITS_GRAPH), []);
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'orbits'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">layerSizing</span><span class="token operator">:</span> <span class="token string">'auto'</span> <span class="token comment">// &lt;- doesn't have to be explicitly specified (it's a default option)</span>
-          <span class="token punctuation">}</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+  return (
+    <GraphView objectFit='contain' padding={50}>
+      <DirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'auto' // <- doesn't have to be explicitly specified (it's a default option)
+          }
+          // --- End of placement settings ---
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 #### **equal**
 
@@ -325,106 +312,107 @@ export default function Graph() {
 }
 ```
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useMemo } from 'react';
+import {
+  GraphView,
+  DirectedGraph,
   DirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">ORBITS_GRAPH</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V0'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// root</span>
-    <span class="token comment">// First orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Second orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Third orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token comment">// Edges from root to first orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E0'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from first orbit to second orbit</span>
-    <span class="token comment">// V1 has 1 child</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V2 has 2 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V3 has 3 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E8'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E9'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E10'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V4 has 4 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E11'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E12'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E13'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E14'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from second orbit to third orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E15'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V6'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E16'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E17'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E18'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V9'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E19'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V10'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E20'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V11'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E21'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V12'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E22'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V13'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E23'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V14'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const ORBITS_GRAPH = {
+  vertices: [
+    { key: 'V0' }, // root
+    // First orbit vertices
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    // Second orbit vertices
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' },
+    { key: 'V9' },
+    { key: 'V10' },
+    { key: 'V11' },
+    { key: 'V12' },
+    { key: 'V13' },
+    { key: 'V14' },
+    { key: 'V15' },
+    // Third orbit vertices
+    { key: 'V16' },
+    { key: 'V17' },
+    { key: 'V18' },
+    { key: 'V19' },
+    { key: 'V20' },
+    { key: 'V21' },
+    { key: 'V22' },
+    { key: 'V23' },
+    { key: 'V24' }
+  ],
+  edges: [
+    // Edges from root to first orbit
+    { key: 'E0', from: 'V0', to: 'V1' },
+    { key: 'E1', from: 'V0', to: 'V2' },
+    { key: 'E2', from: 'V0', to: 'V3' },
+    { key: 'E3', from: 'V0', to: 'V4' },
+    { key: 'E4', from: 'V0', to: 'V5' },
+    // Edges from first orbit to second orbit
+    // V1 has 1 child
+    { key: 'E5', from: 'V1', to: 'V6' },
+    // V2 has 2 children
+    { key: 'E6', from: 'V2', to: 'V7' },
+    { key: 'E7', from: 'V2', to: 'V8' },
+    // V3 has 3 children
+    { key: 'E8', from: 'V3', to: 'V9' },
+    { key: 'E9', from: 'V3', to: 'V10' },
+    { key: 'E10', from: 'V3', to: 'V11' },
+    // V4 has 4 children
+    { key: 'E11', from: 'V4', to: 'V12' },
+    { key: 'E12', from: 'V4', to: 'V13' },
+    { key: 'E13', from: 'V4', to: 'V14' },
+    { key: 'E14', from: 'V4', to: 'V15' },
+    // Edges from second orbit to third orbit
+    { key: 'E15', from: 'V6', to: 'V16' },
+    { key: 'E16', from: 'V7', to: 'V17' },
+    { key: 'E17', from: 'V7', to: 'V18' },
+    { key: 'E18', from: 'V9', to: 'V19' },
+    { key: 'E19', from: 'V10', to: 'V20' },
+    { key: 'E20', from: 'V11', to: 'V21' },
+    { key: 'E21', from: 'V12', to: 'V22' },
+    { key: 'E22', from: 'V13', to: 'V23' },
+    { key: 'E23', from: 'V14', to: 'V24' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">ORBITS_GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const graph = useMemo(() => new DirectedGraph(ORBITS_GRAPH), []);
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'orbits'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">layerSizing</span><span class="token operator">:</span> <span class="token string">'equal'</span>
-          <span class="token punctuation">}</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+  return (
+    <GraphView objectFit='contain' padding={50}>
+      <DirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'equal'
+          }
+          // --- End of placement settings ---
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 #### **non-decreasing**
 
@@ -452,106 +440,107 @@ export default function Graph() {
 }
 ```
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useMemo } from 'react';
+import {
+  GraphView,
+  DirectedGraph,
   DirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">ORBITS_GRAPH</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V0'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// root</span>
-    <span class="token comment">// First orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Second orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Third orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token comment">// Edges from root to first orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E0'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from first orbit to second orbit</span>
-    <span class="token comment">// V1 has 1 child</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V2 has 2 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V3 has 3 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E8'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E9'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E10'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V4 has 4 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E11'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E12'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E13'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E14'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from second orbit to third orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E15'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V6'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E16'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E17'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E18'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V9'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E19'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V10'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E20'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V11'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E21'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V12'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E22'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V13'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E23'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V14'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const ORBITS_GRAPH = {
+  vertices: [
+    { key: 'V0' }, // root
+    // First orbit vertices
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    // Second orbit vertices
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' },
+    { key: 'V9' },
+    { key: 'V10' },
+    { key: 'V11' },
+    { key: 'V12' },
+    { key: 'V13' },
+    { key: 'V14' },
+    { key: 'V15' },
+    // Third orbit vertices
+    { key: 'V16' },
+    { key: 'V17' },
+    { key: 'V18' },
+    { key: 'V19' },
+    { key: 'V20' },
+    { key: 'V21' },
+    { key: 'V22' },
+    { key: 'V23' },
+    { key: 'V24' }
+  ],
+  edges: [
+    // Edges from root to first orbit
+    { key: 'E0', from: 'V0', to: 'V1' },
+    { key: 'E1', from: 'V0', to: 'V2' },
+    { key: 'E2', from: 'V0', to: 'V3' },
+    { key: 'E3', from: 'V0', to: 'V4' },
+    { key: 'E4', from: 'V0', to: 'V5' },
+    // Edges from first orbit to second orbit
+    // V1 has 1 child
+    { key: 'E5', from: 'V1', to: 'V6' },
+    // V2 has 2 children
+    { key: 'E6', from: 'V2', to: 'V7' },
+    { key: 'E7', from: 'V2', to: 'V8' },
+    // V3 has 3 children
+    { key: 'E8', from: 'V3', to: 'V9' },
+    { key: 'E9', from: 'V3', to: 'V10' },
+    { key: 'E10', from: 'V3', to: 'V11' },
+    // V4 has 4 children
+    { key: 'E11', from: 'V4', to: 'V12' },
+    { key: 'E12', from: 'V4', to: 'V13' },
+    { key: 'E13', from: 'V4', to: 'V14' },
+    { key: 'E14', from: 'V4', to: 'V15' },
+    // Edges from second orbit to third orbit
+    { key: 'E15', from: 'V6', to: 'V16' },
+    { key: 'E16', from: 'V7', to: 'V17' },
+    { key: 'E17', from: 'V7', to: 'V18' },
+    { key: 'E18', from: 'V9', to: 'V19' },
+    { key: 'E19', from: 'V10', to: 'V20' },
+    { key: 'E20', from: 'V11', to: 'V21' },
+    { key: 'E21', from: 'V12', to: 'V22' },
+    { key: 'E22', from: 'V13', to: 'V23' },
+    { key: 'E23', from: 'V14', to: 'V24' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">ORBITS_GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const graph = useMemo(() => new DirectedGraph(ORBITS_GRAPH), []);
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'orbits'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">layerSizing</span><span class="token operator">:</span> <span class="token string">'non-decreasing'</span>
-          <span class="token punctuation">}</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+  return (
+    <GraphView objectFit='contain' padding={50}>
+      <DirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'non-decreasing'
+          }
+          // --- End of placement settings ---
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 #### **quad-increasing**
 
@@ -579,106 +568,107 @@ export default function Graph() {
 }
 ```
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useMemo } from 'react';
+import {
+  GraphView,
+  DirectedGraph,
   DirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">ORBITS_GRAPH</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V0'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// root</span>
-    <span class="token comment">// First orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Second orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Third orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token comment">// Edges from root to first orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E0'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from first orbit to second orbit</span>
-    <span class="token comment">// V1 has 1 child</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V2 has 2 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V3 has 3 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E8'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E9'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E10'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V4 has 4 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E11'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E12'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E13'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E14'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from second orbit to third orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E15'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V6'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E16'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E17'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E18'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V9'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E19'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V10'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E20'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V11'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E21'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V12'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E22'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V13'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E23'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V14'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const ORBITS_GRAPH = {
+  vertices: [
+    { key: 'V0' }, // root
+    // First orbit vertices
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    // Second orbit vertices
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' },
+    { key: 'V9' },
+    { key: 'V10' },
+    { key: 'V11' },
+    { key: 'V12' },
+    { key: 'V13' },
+    { key: 'V14' },
+    { key: 'V15' },
+    // Third orbit vertices
+    { key: 'V16' },
+    { key: 'V17' },
+    { key: 'V18' },
+    { key: 'V19' },
+    { key: 'V20' },
+    { key: 'V21' },
+    { key: 'V22' },
+    { key: 'V23' },
+    { key: 'V24' }
+  ],
+  edges: [
+    // Edges from root to first orbit
+    { key: 'E0', from: 'V0', to: 'V1' },
+    { key: 'E1', from: 'V0', to: 'V2' },
+    { key: 'E2', from: 'V0', to: 'V3' },
+    { key: 'E3', from: 'V0', to: 'V4' },
+    { key: 'E4', from: 'V0', to: 'V5' },
+    // Edges from first orbit to second orbit
+    // V1 has 1 child
+    { key: 'E5', from: 'V1', to: 'V6' },
+    // V2 has 2 children
+    { key: 'E6', from: 'V2', to: 'V7' },
+    { key: 'E7', from: 'V2', to: 'V8' },
+    // V3 has 3 children
+    { key: 'E8', from: 'V3', to: 'V9' },
+    { key: 'E9', from: 'V3', to: 'V10' },
+    { key: 'E10', from: 'V3', to: 'V11' },
+    // V4 has 4 children
+    { key: 'E11', from: 'V4', to: 'V12' },
+    { key: 'E12', from: 'V4', to: 'V13' },
+    { key: 'E13', from: 'V4', to: 'V14' },
+    { key: 'E14', from: 'V4', to: 'V15' },
+    // Edges from second orbit to third orbit
+    { key: 'E15', from: 'V6', to: 'V16' },
+    { key: 'E16', from: 'V7', to: 'V17' },
+    { key: 'E17', from: 'V7', to: 'V18' },
+    { key: 'E18', from: 'V9', to: 'V19' },
+    { key: 'E19', from: 'V10', to: 'V20' },
+    { key: 'E20', from: 'V11', to: 'V21' },
+    { key: 'E21', from: 'V12', to: 'V22' },
+    { key: 'E22', from: 'V13', to: 'V23' },
+    { key: 'E23', from: 'V14', to: 'V24' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">ORBITS_GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const graph = useMemo(() => new DirectedGraph(ORBITS_GRAPH), []);
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'orbits'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">layerSizing</span><span class="token operator">:</span> <span class="token string">'quad-increasing'</span>
-          <span class="token punctuation">}</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+  return (
+    <GraphView objectFit='contain' padding={50}>
+      <DirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'quad-increasing'
+          }
+          // --- End of placement settings ---
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 #### **custom**
 
@@ -716,116 +706,117 @@ export default function Graph() {
 }
 ```
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> useWorkletCallback <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-reanimated'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  GetLayerRadiusFunction<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useMemo } from 'react';
+import { useWorkletCallback } from 'react-native-reanimated';
+import {
+  GraphView,
+  GetLayerRadiusFunction,
+  DirectedGraph,
   DirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">ORBITS_GRAPH</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V0'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// root</span>
-    <span class="token comment">// First orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Second orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Third orbit vertices</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token comment">// Edges from root to first orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E0'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V0'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from first orbit to second orbit</span>
-    <span class="token comment">// V1 has 1 child</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V2 has 2 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V3 has 3 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E8'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V9'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E9'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V10'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E10'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V11'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// V4 has 4 children</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E11'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V12'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E12'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V13'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E13'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V14'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E14'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V15'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token comment">// Edges from second orbit to third orbit</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E15'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V6'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V16'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E16'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V17'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E17'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V7'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V18'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E18'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V9'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V19'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E19'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V10'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V20'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E20'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V11'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V21'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E21'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V12'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V22'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E22'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V13'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V23'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E23'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V14'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V24'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const ORBITS_GRAPH = {
+  vertices: [
+    { key: 'V0' }, // root
+    // First orbit vertices
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    // Second orbit vertices
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' },
+    { key: 'V9' },
+    { key: 'V10' },
+    { key: 'V11' },
+    { key: 'V12' },
+    { key: 'V13' },
+    { key: 'V14' },
+    { key: 'V15' },
+    // Third orbit vertices
+    { key: 'V16' },
+    { key: 'V17' },
+    { key: 'V18' },
+    { key: 'V19' },
+    { key: 'V20' },
+    { key: 'V21' },
+    { key: 'V22' },
+    { key: 'V23' },
+    { key: 'V24' }
+  ],
+  edges: [
+    // Edges from root to first orbit
+    { key: 'E0', from: 'V0', to: 'V1' },
+    { key: 'E1', from: 'V0', to: 'V2' },
+    { key: 'E2', from: 'V0', to: 'V3' },
+    { key: 'E3', from: 'V0', to: 'V4' },
+    { key: 'E4', from: 'V0', to: 'V5' },
+    // Edges from first orbit to second orbit
+    // V1 has 1 child
+    { key: 'E5', from: 'V1', to: 'V6' },
+    // V2 has 2 children
+    { key: 'E6', from: 'V2', to: 'V7' },
+    { key: 'E7', from: 'V2', to: 'V8' },
+    // V3 has 3 children
+    { key: 'E8', from: 'V3', to: 'V9' },
+    { key: 'E9', from: 'V3', to: 'V10' },
+    { key: 'E10', from: 'V3', to: 'V11' },
+    // V4 has 4 children
+    { key: 'E11', from: 'V4', to: 'V12' },
+    { key: 'E12', from: 'V4', to: 'V13' },
+    { key: 'E13', from: 'V4', to: 'V14' },
+    { key: 'E14', from: 'V4', to: 'V15' },
+    // Edges from second orbit to third orbit
+    { key: 'E15', from: 'V6', to: 'V16' },
+    { key: 'E16', from: 'V7', to: 'V17' },
+    { key: 'E17', from: 'V7', to: 'V18' },
+    { key: 'E18', from: 'V9', to: 'V19' },
+    { key: 'E19', from: 'V10', to: 'V20' },
+    { key: 'E20', from: 'V11', to: 'V21' },
+    { key: 'E21', from: 'V12', to: 'V22' },
+    { key: 'E22', from: 'V13', to: 'V23' },
+    { key: 'E23', from: 'V14', to: 'V24' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">ORBITS_GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const graph = useMemo(() => new DirectedGraph(ORBITS_GRAPH), []);
 
-  <span class="token keyword">const</span> <span class="token literal-property property">getLayerRadius</span><span class="token operator">:</span> GetLayerRadiusFunction <span class="token operator">=</span> <span class="token function">useWorkletCallback</span><span class="token punctuation">(</span>
-    <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> layerIndex <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
-      <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">(</span>layerIndex <span class="token operator">+</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">**</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">100</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">[</span><span class="token punctuation">]</span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const getLayerRadius: GetLayerRadiusFunction = useWorkletCallback(
+    ({ layerIndex }) => {
+      return Math.log((layerIndex + 3) ** 3) * 100;
+    },
+    []
+  );
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'orbits'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">layerSizing</span><span class="token operator">:</span> <span class="token string">'custom'</span><span class="token punctuation">,</span>
+  return (
+    <GraphView objectFit='contain' padding={50}>
+      <DirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'custom',
             getLayerRadius
-          <span class="token punctuation">}</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+          }
+          // --- End of placement settings ---
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 <!-- tabs:end -->
 
@@ -861,77 +852,78 @@ export default function Graph() {
 
 #### **Directed graph**
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useCallback<span class="token punctuation">,</span> useMemo<span class="token punctuation">,</span> useState <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
-  VertexPressHandler<span class="token punctuation">,</span>
-  DirectedGraphComponent<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useCallback, useMemo, useState } from 'react';
+import {
+  GraphView,
+  DirectedGraph,
+  VertexPressHandler,
+  DirectedGraphComponent,
   DirectedGraphData
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">GRAPH</span><span class="token operator">:</span> DirectedGraphData <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V5'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V5'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const GRAPH: DirectedGraphData = {
+  vertices: [
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' }
+  ],
+  edges: [
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V2', to: 'V3' },
+    { key: 'E3', from: 'V2', to: 'V4' },
+    { key: 'E4', from: 'V2', to: 'V5' },
+    { key: 'E5', from: 'V5', to: 'V6' },
+    { key: 'E6', from: 'V1', to: 'V7' },
+    { key: 'E7', from: 'V5', to: 'V8' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> <span class="token punctuation">[</span>orbitsRoot<span class="token punctuation">,</span> setOrbitsRoot<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const [orbitsRoot, setOrbitsRoot] = useState('');
 
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
-  <span class="token keyword">const</span> handEVertexPress <span class="token operator">=</span> useCallback<span class="token operator">&lt;</span>VertexPressHandler<span class="token operator">&gt;</span><span class="token punctuation">(</span>
-    <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> <span class="token literal-property property">vertex</span><span class="token operator">:</span> <span class="token punctuation">{</span> key <span class="token punctuation">}</span> <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
-      <span class="token function">setOrbitsRoot</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">[</span><span class="token punctuation">]</span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const handEVertexPress = useCallback<VertexPressHandler>(
+    ({ vertex: { key } }) => {
+      setOrbitsRoot(key);
+    },
+    []
+  );
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'orbits'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">layerSizing</span><span class="token operator">:</span> <span class="token string">'auto'</span><span class="token punctuation">,</span> <span class="token comment">// &lt;- doesn't have to be explicitly specified (it's a default option)</span>
-            <span class="token literal-property property">roots</span><span class="token operator">:</span> <span class="token punctuation">[</span>orbitsRoot<span class="token punctuation">]</span>
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-          <span class="token literal-property property">events</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">onVertexPress</span><span class="token operator">:</span> handEVertexPress
-          <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+  return (
+    <GraphView objectFit='contain'>
+      <DirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'auto', // <- doesn't have to be explicitly specified (it's a default option)
+            roots: [orbitsRoot]
+          },
+          // --- End of placement settings ---
+          events: {
+            onVertexPress: handEVertexPress
+          }
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 **Result**
 
@@ -939,77 +931,78 @@ export default function Graph() {
 
 #### **Undirected graph**
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useCallback<span class="token punctuation">,</span> useMemo<span class="token punctuation">,</span> useState <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  VertexPressHandler<span class="token punctuation">,</span>
-  UndirectedGraphData<span class="token punctuation">,</span>
-  UndirectedGraph<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useCallback, useMemo, useState } from 'react';
+import {
+  GraphView,
+  VertexPressHandler,
+  UndirectedGraphData,
+  UndirectedGraph,
   UndirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">GRAPH</span><span class="token operator">:</span> UndirectedGraphData <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V8'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token string">'V2'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token string">'V3'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token string">'V4'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token string">'V5'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V5'</span><span class="token punctuation">,</span> <span class="token string">'V6'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token string">'V7'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'V5'</span><span class="token punctuation">,</span> <span class="token string">'V8'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const GRAPH: UndirectedGraphData = {
+  vertices: [
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' }
+  ],
+  edges: [
+    { key: 'E1', vertices: ['V1', 'V2'] },
+    { key: 'E2', vertices: ['V2', 'V3'] },
+    { key: 'E3', vertices: ['V2', 'V4'] },
+    { key: 'E4', vertices: ['V2', 'V5'] },
+    { key: 'E5', vertices: ['V5', 'V6'] },
+    { key: 'E6', vertices: ['V1', 'V7'] },
+    { key: 'E7', vertices: ['V5', 'V8'] }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> <span class="token punctuation">[</span>orbitsRoot<span class="token punctuation">,</span> setOrbitsRoot<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const [orbitsRoot, setOrbitsRoot] = useState('');
 
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">UndirectedGraph</span><span class="token punctuation">(</span><span class="token constant">GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
 
-  <span class="token keyword">const</span> handEVertexPress <span class="token operator">=</span> useCallback<span class="token operator">&lt;</span>VertexPressHandler<span class="token operator">&gt;</span><span class="token punctuation">(</span>
-    <span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> <span class="token literal-property property">vertex</span><span class="token operator">:</span> <span class="token punctuation">{</span> key <span class="token punctuation">}</span> <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
-      <span class="token function">setOrbitsRoot</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">[</span><span class="token punctuation">]</span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const handEVertexPress = useCallback<VertexPressHandler>(
+    ({ vertex: { key } }) => {
+      setOrbitsRoot(key);
+    },
+    []
+  );
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">UndirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'orbits'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">50</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">layerSizing</span><span class="token operator">:</span> <span class="token string">'auto'</span><span class="token punctuation">,</span> <span class="token comment">// &lt;- doesn't have to be explicitly specified (it's a default option)</span>
-            <span class="token literal-property property">roots</span><span class="token operator">:</span> <span class="token punctuation">[</span>orbitsRoot<span class="token punctuation">]</span>
-          <span class="token punctuation">}</span><span class="token punctuation">,</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-          <span class="token literal-property property">events</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">onVertexPress</span><span class="token operator">:</span> handEVertexPress
-          <span class="token punctuation">}</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+  return (
+    <GraphView objectFit='contain'>
+      <UndirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'auto', // <- doesn't have to be explicitly specified (it's a default option)
+            roots: [orbitsRoot]
+          },
+          // --- End of placement settings ---
+          events: {
+            onVertexPress: handEVertexPress
+          }
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 **Result**
 

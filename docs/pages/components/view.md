@@ -38,23 +38,15 @@ Adjusts the size of the graph component rendered on the canvas. If value is diff
 | -------------------------------------- | ------- | -------- |
 | 'none' &#124; 'contain' &#124; 'cover' | 'none'  | no       |
 
-<details>
-<summary>Examples</summary>
-<article>
-<table>
-  <tr>
-    <th>'none'</th>
-    <th>'contain'</th>
-    <th>'cover'</th>
-  </tr>
-  <tr>
-    <td><img src="./assets/images/components/GraphView/object-fit-none.png" alt="objectFit none example" /></td>
-    <td><img src="./assets/images/components/GraphView/object-fit-contain.png" alt="objectFit contain example" /></td>
-    <td><img src="./assets/images/components/GraphView/object-fit-cover.png" alt="objectFit cover example" /></td>
-  </tr>
-</table>
-</article>
-</details>
+<!-- accordion:start -->
+
+#### _Examples_
+
+| 'none'                                                                                              | 'contain'                                                                                                 | 'cover'                                                                                               |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| <img src="./assets/images/components/GraphView/object-fit-none.png" alt="objectFit none example" /> | <img src="./assets/images/components/GraphView/object-fit-contain.png" alt="objectFit contain example" /> | <img src="./assets/images/components/GraphView/object-fit-cover.png" alt="objectFit cover example" /> |
+
+<!-- accordion:end -->
 
 #### `padding`
 
@@ -75,46 +67,24 @@ type Spacing =
 | ------- | ------- | -------- |
 | Spacing | 0       | no       |
 
-<details>
-<summary>Examples</summary>
-<article>
-<strong>Adding padding to all 4 sides</strong>
-<table>
-  <tr>
-    <th>0    </th>
-    <th>100</th>
-    <th>500</th>
-  </tr>
-  <tr>
-    <td><img src="./assets/images/components/GraphView/padding-0-contain.png" alt="padding 0 example" /></td>
-    <td><img src="./assets/images/components/GraphView/padding-100-contain.png" alt="padding 100 example" /></td>
-    <td><img src="./assets/images/components/GraphView/padding-500-contain.png" alt="padding 500 example" /></td>
-  </tr>
-</table>
+<!-- accordion:start -->
 
-<div class="alert callout note">
-<p class="title"><span class="icon icon-note"></span>Note</p>
-<p>In the example above the <code>objectFit</code> property was set to <code>'contain'</code>. When it is set to <code>'none'</code>, adding padding to all 4 sides od the graph container will not be visible during the initial render because the scale of the container is calculated based on the <code>initialScale</code> property.</p> Even if not visible, padding is added, which can be noticed while panning the canvas.
-</div>
+#### _Examples_
 
-<strong>Adding padding separately to each side</strong>
+| 0                                                                                                | 100                                                                                                  | 500                                                                                                  |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| <img src="./assets/images/components/GraphView/padding-0-contain.png" alt="padding 0 example" /> | <img src="./assets/images/components/GraphView/padding-100-contain.png" alt="padding 100 example" /> | <img src="./assets/images/components/GraphView/padding-500-contain.png" alt="padding 500 example" /> |
 
-<table>
-  <tr>
-    <th>{ left: 500 }</th>
-    <th>{ right: 500 }</th>
-    <th>{ top: 500 }</th>
-    <th>{ bottom: 500 }</th>
-  </tr>
-  <tr>
-    <td><img src="./assets/images/components/GraphView/padding-left.png" alt="padding left example" /></td>
-    <td><img src="./assets/images/components/GraphView/padding-right.png" alt="padding right example" /></td>
-    <td><img src="./assets/images/components/GraphView/padding-top.png" alt="padding top example" /></td>
-    <td><img src="./assets/images/components/GraphView/padding-bottom.png" alt="padding bottom example" /></td>
-  </tr>
-</table>
-</article>
-</details>
+> [!NOTE]
+> In the example above the `objectFit` property was set to `'contain'`. When it is set to `'none'`, adding padding to all 4 sides of the graph container will not be visible during the initial render, because the scale of the container is calculated based on the `initialScale` property. Even if not visible, padding is added, which can be noticed while panning the canvas.
+
+**Adding padding separately to each side**
+
+| { left: 500 }                                                                                  | { right: 500 }                                                                                   | { top: 500 }                                                                                 | { bottom: 500 }                                                                                    |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| <img src="./assets/images/components/GraphView/padding-left.png" alt="padding left example" /> | <img src="./assets/images/components/GraphView/padding-right.png" alt="padding right example" /> | <img src="./assets/images/components/GraphView/padding-top.png" alt="padding top example" /> | <img src="./assets/images/components/GraphView/padding-bottom.png" alt="padding bottom example" /> |
+
+<!-- accordion:end -->
 
 #### `scales`
 
@@ -128,23 +98,15 @@ If less than **3 scale values** are provided, the **first** one will be used as 
 | -------- | --------------- | -------- |
 | number[] | [0.25, 1, 2, 4] | no       |
 
-<details>
-<summary>Examples</summary>
-<article>
-<table>
-  <tr>
-    <th>min scale (0.25)</th>
-    <th>max scale (4)</th>
-    <th>intermediate (1, 2, 4)</th>
-  </tr>
-  <tr>
-    <td><img src="./assets/images/components/GraphView/scale-min.gif" alt="minimum scale example" /></td>
-    <td><img src="./assets/images/components/GraphView/scale-max.gif" alt="maximum scale example" /></td>
-    <td><img src="./assets/images/components/GraphView/scale-intermediate.gif" alt="intermediate scales example" /></td>
-  </tr>
-</table>
-</article>
-</details>
+<!-- accordion:start -->
+
+#### _Examples_
+
+| min scale (0.25)                                                                             | max scale (4)                                                                                | intermediate (1, 2, 4)                                                                                      |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| <img src="./assets/images/components/GraphView/scale-min.gif" alt="minimum scale example" /> | <img src="./assets/images/components/GraphView/scale-max.gif" alt="maximum scale example" /> | <img src="./assets/images/components/GraphView/scale-intermediate.gif" alt="intermediate scales example" /> |
+
+<!-- accordion:end -->
 
 > [!WARNING]
 > Scales in the array must be sorted in an increasing order.
@@ -181,23 +143,15 @@ Specifies **how long after user inactivity** (no gestures, no vertex focus, etc.
 
 - **Double tap gesture** - Quickly **tapping twice** on the canvas triggers a zoom in/out effect precisely where the canvas was tapped.
 
-<details>
-<summary>Examples</summary>
-<article>
-<table>
-  <tr>
-    <th>pan</th>
-    <th>pinch</th>
-    <th>double tap</th>
-  </tr>
-  <tr>
-    <td><video src="./assets/videos/components/GraphView/gesture-pan.mp4"></video></td>
-    <td><video src="./assets/videos/components/GraphView/gesture-pinch.mp4"></video></td>
-    <td><video src="./assets/videos/components/GraphView/gesture-double-tap.mp4"></video></td>
-  </tr>
-</table>
-</article>
-</details>
+<!-- accordion:start -->
+
+#### _Examples_
+
+| min scale (0.25)                                                           | max scale (4)                                                                | intermediate (1, 2, 4)                                                            |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| <video src="./assets/videos/components/GraphView/gesture-pan.mp4"></video> | <video src="./assets/videos/components/GraphView/gesture-pinch.mp4"></video> | <video src="./assets/videos/components/GraphView/gesture-double-tap.mp4"></video> |
+
+<!-- accordion:end -->
 
 ## Example
 
