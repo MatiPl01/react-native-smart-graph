@@ -1,5 +1,7 @@
 # GraphView
 
+## Description
+
 `GraphView` is a wrapper component designed to provide an interactive and dynamic canvas for graphical representations of graphs. It is responsible for rendering a graph component on canvas and supports multiple user gestures.
 
 ## Features
