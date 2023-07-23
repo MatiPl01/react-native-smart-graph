@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-> [!NOTE]
+> [!TIP]
 > Remember to specify the size of the `GestureHandlerRootView` (usually `flex: 1` to occupy the whole available space) as it's default height is 0.
 
 ## Graph component
