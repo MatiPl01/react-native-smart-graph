@@ -65,9 +65,9 @@ Steps outlined below follow a priority order. If the algorithm fails to select a
 
 The example below is an example allowing to choose a root on vertex press. It demonstrates how the graph structure will be rendered when a **custom root vertex** is selected. The example uses **graph events** described in detail in [this]() section.
 
-<!-- tabs:start -->
-
 **Code snippets**
+
+<!-- tabs:start -->
 
 #### **Directed graph**
 

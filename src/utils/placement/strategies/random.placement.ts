@@ -145,7 +145,7 @@ export default function placeVerticesRandomly(
   settings: RandomPlacementSettings = {} as RandomPlacementSettings
 ): GraphLayout {
   'worklet';
-  if (settings.layoutType === 'random') {
+  if (settings.mesh === 'random') {
     const { height, width } = WINDOW_DIMENSIONS;
     return calcVerticesRandomPositions(
       vertices,
@@ -163,7 +163,7 @@ export default function placeVerticesRandomly(
     vertices
   };
 
-  switch (settings.layoutType) {
+  switch (settings.mesh) {
     case 'triangular':
       return calcVerticesTriangularPositions(props);
     default:

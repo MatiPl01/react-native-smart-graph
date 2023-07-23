@@ -28,10 +28,10 @@ Every vertex connected with the root will be placed on the first orbit (circle a
       <td><img src="./assets/images/placement/orbits/explanation-sectors.png" alt="sectors explanation"  /> </td>
       <td>
         <p>
-          Areas with different background colors represent different sectors. Each vertex connected to the root will have its <b>own sector</b>. The <b>size of the sector</b> depends on <b>how sparse the subtree</b> is.
+          Areas with different background colors represent different sectors. Each vertex connected to the root will have its <strong>own sector</strong>. The <strong>size of the sector</strong> depends on <strong>how sparse the subtree</strong> is.
         </p>
         <p>
-          Sectors are further divided into smaller sectors. For example, the <b>V02</b> vertex is the root of its subtree and its sector is divided into 2 sectors, one for the <b>V07</b> vertex, and the other for the <b>V08</b> vertex.
+          Sectors are further divided into smaller sectors. For example, the <strong>V02</strong> vertex is the root of its subtree and its sector is divided into 2 sectors, one for the <strong>V07</strong> vertex, and the other for the <strong>V08</strong> vertex.
         </p>
       </td>
     </tr>

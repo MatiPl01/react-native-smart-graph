@@ -76,7 +76,7 @@ type Spacing =
 <details>
 <summary>Examples</summary>
 <article>
-<b>Adding padding to all 4 sides</b>
+<strong>Adding padding to all 4 sides</strong>
 <table>
   <tr>
     <th>0    </th>
@@ -95,7 +95,7 @@ type Spacing =
 <p>In the example above the <code>objectFit</code> property was set to <code>'contain'</code>. When it is set to <code>'none'</code>, adding padding to all 4 sides od the graph container will not be visible during the initial render because the scale of the container is calculated based on the <code>initialScale</code> property.</p> Even if not visible, padding is added, which can be noticed while panning the canvas.
 </div>
 
-<b>Adding padding separately to each side</b>
+<strong>Adding padding separately to each side</strong>
 
 <table>
   <tr>
