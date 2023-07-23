@@ -35,6 +35,10 @@
   border-radius: 5px;
 }
 
+::selection {
+  background-color: var(--selectionColor);
+}
+
 code::-webkit-scrollbar {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -823,7 +827,6 @@ section.content h1 {
 .markdown-section a {
   color: var(--accent);
   font-weight: 600;
-  text-decoration: none;
 }
 
 .markdown-section h1 {

@@ -7,7 +7,7 @@ There are 2 graph components exported by the library:
 - `DirectedGraphComponent`
 - `UndirectedGraphComponent`
 
-In essence, both components **work the same** underneath the hood. The main motivation behind creating 2 separate components was to provide **accurate TypeScript types** for different graph [models](pages/models/index.md).
+In essence, both components **work the same** underneath the hood. The main motivation behind creating 2 separate components was to provide **accurate TypeScript types** for different graph [models](pages/models/index.md), graph [settings](pages/components/graphs?id=settings) and [renderers](pages/components/graphs?id=renderers).
 
 ## Features
 
@@ -21,7 +21,7 @@ In essence, both components **work the same** underneath the hood. The main moti
 
 - using custom [component renderers](pages/renderers/index.md) to customize the appearance of the graph,
 
-  <!-- TODO - add information about multi step focus when implemented -->
+<!-- TODO - add information about multi step focus when implemented -->
 
 ## Usage
 
@@ -96,6 +96,8 @@ export default function Graph() {
 In all **generic types**, the `V` type is a type of the **vertex data** and the `E` type is a type of the **edge data**.
 
 For example, if **vertices** in your graph will have data of type `VertexData` and **edges** will have data of type `EdgeData`, you should **replace** `V` with `VertexData` and `E` with `EdgeData` when using the type.
+
+<!-- TODO - add link to models docs where data types are described after docs page is created -->
 
 If edge or edge has **no data**, leave these types **empty**.
 

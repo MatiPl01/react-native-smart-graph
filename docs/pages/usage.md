@@ -13,7 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
-      {/* Your graph component should be rendered in here */}
+      {/* Place your graph component in here */}
     </GestureHandlerRootView>
   );
 }
