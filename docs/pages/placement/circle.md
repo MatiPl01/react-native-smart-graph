@@ -55,21 +55,15 @@ const defaultSortComparator = (key1: string, key2: string) => {
 | -------------------------------------- | --------------------- | -------- |
 | (key1: string, key2: string) => number | defaultSortComparator | no       |
 
-<details>
-<summary>Examples</summary>
-<article>
-<table>
-  <tr>
-    <th>Default sort comparator (non-decreasing order)</th>
-    <th>Custom sort comparator (non-increasing order)</th>
-  </tr>
-  <tr>
-    <td><img src="./assets/images/placement/circle/sort-comparator-default.png"/></td>
-    <td><img src="./assets/images/placement/circle/sort-comparator-custom.png"/></td>
-  </tr>
-</table>
-</article>
-</details>
+<!-- accordion:start -->
+
+#### _Examples_
+
+| Default sort comparator (non-decreasing order)                            | Custom sort comparator (non-increasing order)                            |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| <img src="./assets/images/placement/circle/sort-comparator-default.png"/> | <img src="./assets/images/placement/circle/sort-comparator-custom.png"/> |
+
+<!-- accordion:end -->
 
 ## Example
 
@@ -106,69 +100,70 @@ export default function Graph() {
 }
 ```
 
-<details>
-<summary>Show full code</summary>
-<article>
+<!-- accordion:start -->
 
-<pre v-pre="" data-lang="tsx"><code class="lang-tsx"><span class="token keyword">import</span> <span class="token punctuation">{</span> useMemo <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> useWorkletCallback <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-reanimated'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span>
-  GraphView<span class="token punctuation">,</span>
-  DirectedGraphData<span class="token punctuation">,</span>
-  DirectedGraph<span class="token punctuation">,</span>
+#### _Show full code_
+
+```tsx
+import { useMemo } from 'react';
+import { useWorkletCallback } from 'react-native-reanimated';
+import {
+  GraphView,
+  DirectedGraphData,
+  DirectedGraph,
   DirectedGraphComponent
-<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-native-smart-graph'</span><span class="token punctuation">;</span>
+} from 'react-native-smart-graph';
 
-<span class="token keyword">const</span> <span class="token constant">GRAPH</span><span class="token operator">:</span> DirectedGraphData <span class="token operator">=</span> <span class="token punctuation">{</span>
-  <span class="token literal-property property">vertices</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'V7'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token literal-property property">edges</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E1'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V2'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E2'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V2'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E3'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V3'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V1'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E4'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V4'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V5'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E5'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V5'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V6'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E6'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V3'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{</span> <span class="token literal-property property">key</span><span class="token operator">:</span> <span class="token string">'E7'</span><span class="token punctuation">,</span> <span class="token literal-property property">from</span><span class="token operator">:</span> <span class="token string">'V1'</span><span class="token punctuation">,</span> <span class="token literal-property property">to</span><span class="token operator">:</span> <span class="token string">'V4'</span> <span class="token punctuation">}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+const GRAPH: DirectedGraphData = {
+  vertices: [
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    { key: 'V6' },
+    { key: 'V7' }
+  ],
+  edges: [
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V2', to: 'V3' },
+    { key: 'E3', from: 'V3', to: 'V1' },
+    { key: 'E4', from: 'V4', to: 'V5' },
+    { key: 'E5', from: 'V5', to: 'V6' },
+    { key: 'E6', from: 'V1', to: 'V3' },
+    { key: 'E7', from: 'V1', to: 'V4' }
+  ]
+};
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">Graph</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-  <span class="token keyword">const</span> graph <span class="token operator">=</span> <span class="token function">useMemo</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">DirectedGraph</span><span class="token punctuation">(</span><span class="token constant">GRAPH</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+export default function Graph() {
+  const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
-  <span class="token keyword">const</span> sortComparator <span class="token operator">=</span> <span class="token function">useWorkletCallback</span><span class="token punctuation">(</span>
-    <span class="token punctuation">(</span><span class="token parameter"><span class="token literal-property property">a</span><span class="token operator">:</span> string<span class="token punctuation">,</span> <span class="token literal-property property">b</span><span class="token operator">:</span> string</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> b<span class="token punctuation">.</span><span class="token function">localeCompare</span><span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">,</span>
-    <span class="token punctuation">[</span><span class="token punctuation">]</span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  const sortComparator = useWorkletCallback(
+    (a: string, b: string) => b.localeCompare(a),
+    []
+  );
 
-  <span class="token keyword">return</span> <span class="token punctuation">(</span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">GraphView</span></span> <span class="token attr-name">objectFit</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">'</span>contain<span class="token punctuation">'</span></span> <span class="token attr-name">padding</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token number">50</span><span class="token punctuation">}</span></span><span class="token punctuation">&gt;</span></span><span class="token plain-text">
-      </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">DirectedGraphComponent</span></span>
-        <span class="token attr-name">settings</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span><span class="token punctuation">{</span>
-          <span class="token comment">// --- Placement settings ---</span>
-          <span class="token literal-property property">placement</span><span class="token operator">:</span> <span class="token punctuation">{</span>
-            <span class="token literal-property property">strategy</span><span class="token operator">:</span> <span class="token string">'circle'</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">minVertexSpacing</span><span class="token operator">:</span> <span class="token number">150</span><span class="token punctuation">,</span>
-            <span class="token literal-property property">sortVertices</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  return (
+    <GraphView objectFit='contain' padding={50}>
+      <DirectedGraphComponent
+        settings={{
+          // --- Placement settings ---
+          placement: {
+            strategy: 'circle',
+            minVertexSpacing: 150,
+            sortVertices: true,
             sortComparator
-          <span class="token punctuation">}</span>
-          <span class="token comment">// --- End of placement settings ---</span>
-        <span class="token punctuation">}</span><span class="token punctuation">}</span></span>
-        <span class="token attr-name">graph</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">{</span>graph<span class="token punctuation">}</span></span>
-      <span class="token punctuation">/&gt;</span></span><span class="token plain-text">
-    </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">GraphView</span></span><span class="token punctuation">&gt;</span></span>
-  <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span></code><button class="docsify-copy-code-button"><span class="label"><svg><use href="assets/icons.svg#copy"></use></svg></span><span class="error">Error</span><span class="success">Copied</span></button></pre>
+          }
+          // --- End of placement settings ---
+        }}
+        graph={graph}
+      />
+    </GraphView>
+  );
+}
+```
 
-</article>
-</details>
+<!-- accordion:end -->
 
 **Result**
 
