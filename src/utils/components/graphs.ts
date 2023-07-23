@@ -43,10 +43,10 @@ import {
 } from '@/types/settings/graph/layout';
 import { deepEqual } from '@/utils/equality';
 
-export const updateGraphSettingsWithDefaults = <V, E>(
+export const updateGraphSettingsWithDefaults = <V>(
   isGraphDirected: boolean,
-  settings?: GraphSettings<V, E>
-): GraphSettingsWithDefaults<V, E> => ({
+  settings?: GraphSettings<V>
+): GraphSettingsWithDefaults<V> => ({
   ...settings,
   animations: {
     edges: {
@@ -133,7 +133,7 @@ export const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V, E>>,
   currentVertices: Array<Vertex<V, E>>,
   currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): {
   data: Record<string, VertexComponentData<V, E>>;
@@ -196,7 +196,7 @@ export const updateGraphEdgesData = <V, E>(
   currentEdges: OrderedEdges<E, V>,
   renderedVerticesData: Record<string, VertexComponentRenderData>,
   currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V>,
   renderers: GraphRenderersWithDefaults<V, E>
 ): {
   data: Record<string, EdgeComponentData<E, V>>;

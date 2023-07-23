@@ -1,5 +1,3 @@
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
-
 import {
   GraphAnimationsSettings,
   GraphAnimationsSettingsWithDefaults
@@ -23,42 +21,30 @@ export * from './events';
 export * from './layout';
 export * from './placement';
 
-type SharedGraphSettings<
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
-> = {
+type SharedGraphSettings<V> = {
   animations?: GraphAnimationsSettings;
   events?: GraphEventsSettings<V>;
   layout?: GraphLayoutSettings;
   placement?: GraphPlacementSettings;
 };
 
-export type DirectedGraphSettings<V, E> = SharedGraphSettings<
-  V,
-  E,
-  DirectedEdgeData<E>
-> & {
+export type DirectedGraphSettings<V> = SharedGraphSettings<V> & {
   components?: DirectedGraphComponentsSettings;
 };
 
-export type UndirectedGraphSettings<V, E> = SharedGraphSettings<
-  V,
-  E,
-  UndirectedEdgeData<E>
-> & {
+export type UndirectedGraphSettings<V> = SharedGraphSettings<V> & {
   components?: UndirectedGraphComponentsSettings;
 };
 
-export type GraphSettings<V, E> =
-  | DirectedGraphSettings<V, E>
-  | UndirectedGraphSettings<V, E>;
+export type GraphSettings<V> =
+  | DirectedGraphSettings<V>
+  | UndirectedGraphSettings<V>;
 
-export type GraphSettingsWithDefaults<V, E> = (
-  | (Omit<DirectedGraphSettings<V, E>, 'animations'> & {
+export type GraphSettingsWithDefaults<V> = (
+  | (Omit<DirectedGraphSettings<V>, 'animations'> & {
       components: DirectedGraphComponentsSettingsWithDefaults;
     })
-  | (Omit<UndirectedGraphSettings<V, E>, 'animations'> & {
+  | (Omit<UndirectedGraphSettings<V>, 'animations'> & {
       components: UndirectedGraphComponentsSettingsWithDefaults;
     })
 ) & {

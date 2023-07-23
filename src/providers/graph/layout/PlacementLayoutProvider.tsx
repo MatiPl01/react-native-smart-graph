@@ -26,7 +26,7 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   onRender: (boundingRect: BoundingRect) => void;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphSettingsWithDefaults<V, E>;
+  settings: GraphSettingsWithDefaults<V>;
   targetBoundingRect: SharedValue<BoundingRect>;
 }>;
 

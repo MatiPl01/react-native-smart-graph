@@ -36,7 +36,7 @@ import VertexFocusProvider from './transform/VertexFocusProvider';
 
 const getLayoutProviders = <V, E>(
   graph: Graph<V, E>,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V>,
   onRender: (boundingRect: BoundingRect) => void
 ) => {
   switch (settings.layout.managedBy) {
@@ -64,7 +64,7 @@ const getLayoutProviders = <V, E>(
 const getEventsProviders = <V, E>(
   transform: AnimatedCanvasTransform,
   boundingRect: AnimatedBoundingRect,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V>,
   renderLayer: (zIndex: number, layer: JSX.Element) => void
 ) => {
   if (settings.events) {

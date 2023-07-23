@@ -9,7 +9,7 @@ import { deepMemoComparator } from '@/utils/equality';
 export type DirectedGraphComponentProps<V, E> = {
   graph: DirectedGraph<V, E>;
   renderers?: DirectedGraphRenderers<V, E>;
-  settings?: DirectedGraphSettings<V, E>;
+  settings?: DirectedGraphSettings<V>;
 };
 
 function DirectedGraphComponent<V, E>(

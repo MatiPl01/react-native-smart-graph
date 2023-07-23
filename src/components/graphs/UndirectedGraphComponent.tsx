@@ -9,7 +9,7 @@ import { deepMemoComparator } from '@/utils/equality';
 export type UndirectedGraphComponentProps<V, E> = {
   graph: UndirectedGraph<V, E>;
   renderers?: UndirectedGraphRenderers<V, E>;
-  settings?: UndirectedGraphSettings<V, E>;
+  settings?: UndirectedGraphSettings<V>;
 };
 
 function UndirectedGraphComponent<V, E>(

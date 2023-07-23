@@ -45,7 +45,7 @@ export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   onRender: (boundingRect: BoundingRect) => void;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphSettingsWithDefaults<V, E>;
+  settings: GraphSettingsWithDefaults<V>;
 }>;
 
 function ForcesPlacementProvider<V, E>({
