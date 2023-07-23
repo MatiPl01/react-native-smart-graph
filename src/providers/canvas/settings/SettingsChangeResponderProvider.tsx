@@ -1,4 +1,8 @@
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import {
+  runOnJS,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useAutoSizingContext } from '@/providers/canvas/auto';
@@ -28,6 +32,14 @@ export default function SettingsChangeResponderProvider({
   const isFirstAutoSizingReactionCall = useSharedValue(true);
   const isFirstResetReactionCall = useSharedValue(true);
   const prevObjectFit = useSharedValue<null | string>(null);
+
+  // A workaround to make sure that the auto sizing is enabled after the
+  // object-fit change animation has completed
+  const delayedEnableAutoSizing = () => {
+    setTimeout(() => {
+      autoSizingContext.enableAutoSizing();
+    }, 0);
+  };
 
   // Disable auto sizing on every objectFit change
   useAnimatedReaction(
@@ -73,7 +85,9 @@ export default function SettingsChangeResponderProvider({
           ...DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS,
           onComplete: completed => {
             // Re-enable auto sizing after the container position has been reset
-            if (completed) autoSizingContext.enableAutoSizing();
+            if (completed) {
+              runOnJS(delayedEnableAutoSizing)();
+            }
           }
         }
       });

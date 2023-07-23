@@ -94,7 +94,6 @@ export default function AutoSizingProvider({
   const startAutoSizing = (
     animationSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
-    autoSizingTimeoutRef.current = null;
     const animSettings =
       animationSettings === undefined
         ? DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS

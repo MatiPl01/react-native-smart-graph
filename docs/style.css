@@ -35,6 +35,10 @@
   border-radius: 5px;
 }
 
+::selection {
+  background-color: var(--selectionColor);
+}
+
 code::-webkit-scrollbar {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -824,7 +828,6 @@ section.content h1 {
 .markdown-section a {
   color: var(--accent);
   font-weight: 600;
-  text-decoration: none;
 }
 
 .markdown-section h1 {
@@ -1157,18 +1160,18 @@ body:not(.loading) .loader-screen {
 
 @keyframes loader-left {
   0% {
-    transform: rotate(0deg);
+    transform: rotate(-60deg);
   }
   100% {
-    transform: rotate(-60deg);
+    transform: rotate(0deg);
   }
 }
 
 @keyframes loader-right {
   0% {
-    transform: rotate(0deg);
+    transform: rotate(60deg);
   }
   100% {
-    transform: rotate(60deg);
+    transform: rotate(0deg);
   }
 }

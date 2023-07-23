@@ -58,7 +58,7 @@ Adjusts the size of the graph component rendered on the canvas. If value is diff
 
 #### `padding`
 
-Adds padding to the graph container on the specific sides. You can specify padding in one of 3 possible ways:
+Adds **padding to the graph container** on the specific sides. You can specify padding in one of the 3 possible ways:
 
 - by passing a **number** - the same padding will be added to each container side,
 - by specifying vertical and/or horizontal padding,
@@ -151,7 +151,9 @@ If less than **3 scale values** are provided, the **first** one will be used as 
 
 #### `initialScale`
 
-Specifies the initial scale of the graph component relative to the canvas dimensions.
+Specifies the **initial scale** of the **graph component** relative to the **canvas dimensions**.
+
+If used with the `objectFit` property different than `'none'`, the graph will be **initially rendered with the specified** `initialScale` and then, **after** the `autoSizingTimeout` **passes**, will **start resizing automatically**.
 
 | Type   | Default | Required |
 | ------ | ------- | -------- |
@@ -162,7 +164,7 @@ Specifies the initial scale of the graph component relative to the canvas dimens
 
 #### `autoSizingTimeout`
 
-Specifies how long after user inactivity (no gestures, no vertex focus, etc.) the graph container will start resizing automatically.
+Specifies **how long after user inactivity** (no gestures, no vertex focus, etc.) the graph container will **start resizing automatically**.
 
 | Type   | Default | Required |
 | ------ | ------- | -------- |
@@ -173,11 +175,11 @@ Specifies how long after user inactivity (no gestures, no vertex focus, etc.) th
 
 ## Gestures
 
-- **Pan gesture** - Activated by dragging one finger on the screen, enabling the translation of the canvas,
+- **Pan gesture** - Activated by **dragging one finger** on the screen, enabling the translation of the canvas,
 
-- **Pinch gesture** - By moving two fingers together or apart on the screen, users can zoom in or out on the canvas,
+- **Pinch gesture** - By **moving two fingers together** or **apart** on the screen, users can zoom in or out on the canvas,
 
-- **Double tap gesture** - Quickly tapping twice on the canvas triggers a zoom in/out effect precisely where the canvas was tapped.
+- **Double tap gesture** - Quickly **tapping twice** on the canvas triggers a zoom in/out effect precisely where the canvas was tapped.
 
 <details>
 <summary>Examples</summary>

@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import {
   GraphView,
-  DefaultEdgeLabelRenderer,
   DirectedGraphData,
   DirectedGraph,
-  DirectedGraphComponent
+  DirectedGraphComponent,
+  GraphViewControls,
+  ObjectFit
 } from 'react-native-smart-graph';
 
 const GRAPH: DirectedGraphData = {
@@ -22,59 +22,51 @@ const GRAPH: DirectedGraphData = {
 };
 
 export default function Graph() {
-  const [showLabels, setShowLabels] = useState(true);
+  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
   const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
-  const toggleLabels = () => setShowLabels(!showLabels);
-
   return (
     <>
-      <GraphView objectFit='contain' padding={25}>
-        <DirectedGraphComponent
-          renderers={{
-            label: showLabels ? DefaultEdgeLabelRenderer : undefined
-          }}
-          settings={{
-            placement: {
-              strategy: 'circle',
-              minVertexSpacing: 100
-            }
-          }}
-          graph={graph}
+      <GraphView
+        initialScale={0.5}
+        objectFit={objectFit}
+        padding={25}
+        scales={[0.5, 1, 4]}>
+        <DirectedGraphComponent graph={graph} />
+        {/* --- GraphViewControls --- */}
+        <GraphViewControls
+          onObjectFitChange={setObjectFit}
+          style={styles.controls}
         />
+        {/* --- End of GraphViewControls --- */}
       </GraphView>
       {/* Helper overlay to change dimensions */}
       <View style={styles.overlay}>
-        <TouchableOpacity onPress={toggleLabels} style={styles.button}>
-          <Text style={styles.buttonText}>
-            {showLabels ? 'Hide' : 'Show'} labels
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.objectFitText}>objectFit: '{objectFit}'</Text>
       </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  // --- GraphViewControls styles ---
+  controls: {
+    position: 'absolute',
+    right: 20,
+    top: 40
+  },
+  // --- End of GraphViewControls styles ---
   overlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'flex-end',
-    pointerEvents: 'box-none',
-    alignItems: 'center'
+    pointerEvents: 'box-none'
   },
-  button: {
-    backgroundColor: '#edcf46',
-    justifyContent: 'center',
-    borderRadius: 5,
-    marginBottom: 50,
-    paddingHorizontal: 25,
-    paddingVertical: 10
-  },
-  buttonText: {
-    fontSize: 30,
-    lineHeight: 30,
+  objectFitText: {
+    color: 'white',
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
+    marginBottom: 50
   }
 });

@@ -13,7 +13,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
-      {/* Your graph component should be rendered in here */}
+      {/* Place your graph component in here */}
     </GestureHandlerRootView>
   );
 }
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
 });
 ```
 
-> [!NOTE]
+> [!TIP]
 > Remember to specify the size of the `GestureHandlerRootView` (usually `flex: 1` to occupy the whole available space) as it's default height is 0.
 
 ## Graph component
