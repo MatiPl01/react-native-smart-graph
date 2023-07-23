@@ -60,7 +60,7 @@ const ComponentsDataContext = createContext(null);
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   renderers: GraphRenderersWithDefaults<V, E>;
-  settings: GraphSettingsWithDefaults<V, E>;
+  settings: GraphSettingsWithDefaults<V>;
 }>;
 
 export default function ComponentsDataProvider<V, E>({
@@ -170,7 +170,13 @@ export default function ComponentsDataProvider<V, E>({
   ]);
 
   useEffect(() => {
-    if (!renderers.label) return;
+    if (!renderers.label) {
+      // Remove labels if there is no label renderer
+      if (Object.keys(edgeLabelsData).length > 0) {
+        setEdgeLabelsData({});
+      }
+      return;
+    }
     const { data, wasUpdated } = updateGraphEdgeLabelsData(
       edgeLabelsData,
       edgesData,

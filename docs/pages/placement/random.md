@@ -370,7 +370,7 @@ export default function Graph() {
     <span class="token literal-property property">width</span><span class="token operator">:</span> <span class="token number">40</span><span class="token punctuation">,</span>
     <span class="token literal-property property">height</span><span class="token operator">:</span> <span class="token number">40</span><span class="token punctuation">,</span>
     <span class="token literal-property property">justifyContent</span><span class="token operator">:</span> <span class="token string">'center'</span><span class="token punctuation">,</span>
-    <span class="token literal-property property">borderEndEndRadius</span><span class="token operator">:</span> <span class="token number">5</span>
+    <span class="token literal-property property">borderRadius</span><span class="token operator">:</span> <span class="token number">5</span>
   <span class="token punctuation">}</span><span class="token punctuation">,</span>
   <span class="token literal-property property">buttonText</span><span class="token operator">:</span> <span class="token punctuation">{</span>
     <span class="token literal-property property">fontSize</span><span class="token operator">:</span> <span class="token number">30</span><span class="token punctuation">,</span>
