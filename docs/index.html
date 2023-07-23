@@ -32,31 +32,99 @@
       type="text/css" />
   </head>
 
-  <body>
-    <div id="app">We are building something special for you ...</div>
+  <body class="loading">
+    <div id="app">&nbsp;</div>
+
+    <div class="loader-screen">
+      <svg
+        class="loader"
+        width="400"
+        height="400"
+        xmlns="http://www.w3.org/2000/svg">
+        <!-- left verte with edges -->
+        <g class="left">
+          <g class="edge edge-left-1">
+            <path
+              d="M 50 200 Q 200 150, 350 200"
+              stroke="#999"
+              stroke-width="4"
+              fill="transparent"
+              transform="
+              translate(50, 125)
+              rotate(-58)
+              translate(-200, -100)" />
+            <polygon
+              points="0, 0 35, 10 0, 20"
+              transform="translate(88 235) rotate(110)"
+              fill="#999" />
+          </g>
+          <g class="edge edge-left-2">
+            <path
+              d="M 50 200 Q 200 250, 350 200"
+              stroke="#999"
+              stroke-width="4"
+              fill="transparent"
+              transform="
+              translate(30, 145)
+              rotate(-58)
+              translate(-200, -100)" />
+            <polygon
+              points="0, 0 35, 10 0, 20"
+              transform="translate(116 256) rotate(130)"
+              fill="#999" />
+          </g>
+          <g class="vertex vertex-left" transform="translate(60 300)">
+            <circle r="40" fill="#F9D949" />
+            <circle r="30" fill="#000" />
+          </g>
+        </g>
+
+        <!-- right vertex edges -->
+        <g class="right">
+          <g class="edge edge-right-1">
+            <path
+              d="M 50 200 Q 200 150, 350 200"
+              stroke="#999"
+              stroke-width="4"
+              fill="transparent"
+              transform="
+              translate(350, 125)
+              rotate(58)
+              translate(-200, -100)" />
+            <polygon
+              points="0, 0 35, 10 0, 20"
+              transform="translate(330 225) rotate(70)"
+              fill="#999" />
+          </g>
+          <g class="edge edge-right-2">
+            <path
+              d="M 50 200 Q 200 250, 350 200"
+              stroke="#999"
+              stroke-width="4"
+              fill="transparent"
+              transform="
+              translate(370, 145)
+              rotate(58)
+              translate(-200, -100)" />
+            <polygon
+              points="0, 0 35, 10 0, 20"
+              transform="translate(214 132) rotate(-110)"
+              fill="#999" />
+          </g>
+          <g class="vertex vertex-right" transform="translate(340 300)">
+            <circle r="40" fill="#F9D949" />
+            <circle r="30" fill="#000" />
+          </g>
+        </g>
+
+        <g class="vertex vertex-top" transform="translate(200 60)">
+          <circle r="40" fill="#F9D949" />
+          <circle r="30" fill="#000" />
+        </g>
+      </svg>
+    </div>
 
     <script>
-      var isDarkMode = localStorage.getItem('DARK_LIGHT_THEME') === 'dark';
-
-      var setItem = localStorage.setItem.bind(localStorage);
-
-      localStorage.setItem = (key, value) => {
-        if (key === 'DARK_LIGHT_THEME') {
-          var img = document.querySelector('.app-name-link img');
-
-          if (value === 'dark') {
-            document.getElementById('prism-light-theme').disabled = true;
-            document.getElementById('prism-dark-theme').disabled = false;
-            img.src = 'assets/logo-light.png';
-          } else {
-            document.getElementById('prism-light-theme').disabled = false;
-            document.getElementById('prism-dark-theme').disabled = true;
-            img.src = 'assets/logo-dark.png';
-          }
-        }
-        setItem(key, value);
-      };
-
       // PLUGINS
       var autoVideoControls = function (hook, vm) {
         hook.doneEach(function () {
@@ -154,9 +222,47 @@
             hook.doneEach(function () {
               window.scrollTo(0, 0);
             });
+
+            hook.mounted(function () {
+              setTimeout(() => {
+                document.querySelector('body').classList.remove('loading');
+              }, 500);
+            });
           },
           autoVideoControls
         ]
+      };
+
+      var isDarkMode = localStorage.getItem('DARK_LIGHT_THEME') === 'dark';
+
+      // Set the background color of the body before the page is loaded
+      // to avoid the white flash
+      function updateBackgroundColor() {
+        document.body.style.backgroundColor =
+          window.$docsify.darklightTheme[
+            isDarkMode ? 'dark' : 'light'
+          ].background;
+      }
+
+      updateBackgroundColor();
+
+      var setItem = localStorage.setItem.bind(localStorage);
+
+      localStorage.setItem = (key, value) => {
+        if (key === 'DARK_LIGHT_THEME') {
+          var img = document.querySelector('.app-name-link img');
+
+          if (value === 'dark') {
+            document.getElementById('prism-light-theme').disabled = true;
+            document.getElementById('prism-dark-theme').disabled = false;
+            img.src = 'assets/logo-light.png';
+          } else {
+            document.getElementById('prism-light-theme').disabled = false;
+            document.getElementById('prism-dark-theme').disabled = true;
+            img.src = 'assets/logo-dark.png';
+          }
+        }
+        setItem(key, value);
       };
     </script>
     <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
@@ -171,6 +277,7 @@
     <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/@sujaykumarh/docsify-plugin-title@1.x/dist/plugin.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docsify-updated/src/time-updater.min.js"></script>
+
     <!-- Prism (syntax highlighting) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-jsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-tsx.min.js"></script>
