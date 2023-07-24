@@ -7,19 +7,19 @@ There are 2 graph components exported by the library:
 - `DirectedGraphComponent`
 - `UndirectedGraphComponent`
 
-In essence, both components **work the same** underneath the hood. The main motivation behind creating 2 separate components was to provide **accurate TypeScript types** for different graph [models](pages/models/index.md), graph [settings](pages/components/graphs?id=settings) and [renderers](pages/components/graphs?id=renderers).
+In essence, both components **work the same** underneath the hood. The main motivation behind creating 2 separate components was to provide **accurate TypeScript types** for different graph [models](pages/models/index), graph [settings](pages/components/graphs?id=settings) and [renderers](pages/components/graphs?id=renderers).
 
 ## Features
 
 - **rendering** graph on the canvas,
-- managing multiple graph features through the `settings` object, such as:
+- managing multiple graph features through the [settings](pages/settings/index) object, such as:
 
-  - changing graph [components settings](pages/graph-components-settings.md),
-  - setting the [placement strategy](pages/placement/index.md) which modifies the vertices placement positions on the canvas,
-  - modifying the [layout type](pages/layout/index.md) that changes the vertices behavior (the graph can be either **static**, or **dynamically change** vertices placement based on their **relative distance** or **connections**),
-  - managing [graph events](pages/events.md) (for now only vertex press events)
+  - changing graph [components settings](pages/settings/components-settings),
+  - setting the [placement strategy](pages/settings/placement/index) which modifies the vertices placement positions on the canvas,
+  - modifying the [layout type](pages/settings/layout/index) that changes the vertices behavior (the graph can be either **static**, or **dynamically change** vertices placement based on their **relative distance** or **connections**),
+  - managing [graph events](pages/settings/events) (for now only vertex press events)
 
-- using custom [component renderers](pages/renderers/index.md) to customize the appearance of the graph,
+- using custom [component renderers](pages/renderers/index) to customize the appearance of the graph,
 
 <!-- TODO - add information about multi step focus when implemented -->
 
@@ -105,7 +105,7 @@ If edge or edge has **no data**, leave these types **empty**.
 
 The only required property that should be passed the **graph model** representing the **graph structure to render**.
 
-For more information about graph models, visit [this](pages/models/index.md) page of documentation.
+For more information about graph models, visit [this](pages/models/index) page of documentation.
 
 <!-- tabs:start -->
 
@@ -186,11 +186,11 @@ type DirectedGraphSettings<V> = {
 
 All properties of the `settings` object are described in detail in separate pages of the documentation:
 
-- [components](pages/graph-components-settings.md),
-- [placement](pages/placement/index.md),
-- [layout](pages/layout/index.md),
-- [events](pages/events.md),
-- [animations](pages/animations/index.md)
+- [components](pages/settings/components-settings),
+- [placement](pages/settings/placement/index),
+- [layout](pages/settings/layout/index),
+- [events](pages/settings/events),
+- [animations](pages/animations/index)
 
 #### **Undirected graph**
 
@@ -213,11 +213,11 @@ type UndirectedGraphSettings<V> = {
 
 All properties of the `settings` object are described in detail in separate pages of the documentation:
 
-- [components](pages/graph-components-settings.md),
-- [placement](pages/placement/index.md),
-- [layout](pages/layout/index.md),
-- [events](pages/events.md),
-- [animations](pages/animations/index.md)
+- [components](pages/settings/components-settings),
+- [placement](pages/settings/placement/index),
+- [layout](pages/settings/layout/index),
+- [events](pages/settings/events),
+- [animations](pages/animations/index)
 
 <!-- tabs:end -->
 
@@ -225,7 +225,7 @@ All properties of the `settings` object are described in detail in separate page
 
 The object with custom renderers of graph components. Renderers are, in essence, **custom components** used to **render parts of the graph** on hte canvas.
 
-For more details refer to [this](pages/renderers/index.md) page.
+For more details refer to [this](pages/renderers/index) page.
 
 <!-- tabs:start -->
 
@@ -237,7 +237,7 @@ For more details refer to [this](pages/renderers/index.md) page.
 
 The only renderer that has **no implementation** assigned by default is the `label` renderer.
 
-To render labels over edges with the **edge key** as the **label text**, you can use the `DefaultEdgeLabelRenderer` renderer provided by the library. If you want to implement your custom edge label renderer, refer to [this](pages/renderers/index.md) section of the [component renderers](pages/renderers/index.md) documentation page.
+To render labels over edges with the **edge key** as the **label text**, you can use the `DefaultEdgeLabelRenderer` renderer provided by the library. If you want to implement your custom edge label renderer, refer to [this](pages/renderers/index) section of the [component renderers](pages/renderers/index) documentation page.
 
 <!-- TODO - update this link once renderers documentation page is ready  -->
 
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
 
 The only renderer that has **no implementation** assigned by default is the `label` renderer.
 
-To render labels over edges with the **edge key** as the **label text**, you can use the `DefaultEdgeLabelRenderer` renderer provided by the library. If you want to implement your custom edge label renderer, refer to [this](pages/renderers/index.md) section of the [component renderers](pages/renderers/index.md) documentation page.
+To render labels over edges with the **edge key** as the **label text**, you can use the `DefaultEdgeLabelRenderer` renderer provided by the library. If you want to implement your custom edge label renderer, refer to [this](pages/renderers/index) section of the [component renderers](pages/renderers/index) documentation page.
 
 <!-- TODO - update this link once renderers documentation page is ready  -->
 

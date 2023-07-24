@@ -2,7 +2,7 @@
 
 ## Description
 
-Orbits placement strategy works similarly to the [trees](pages/placement/trees.md) placement strategy. It looks for the root vertex, and distributes other vertices relatively to the selected root.
+Orbits placement strategy works similarly to the [trees](pages/settings/placement/trees) placement strategy. It looks for the root vertex, and distributes other vertices relatively to the selected root.
 
 Every vertex connected with the root will be placed on the first orbit (circle around the root). All children of these vertices will be positioned on the next orbit, and so on.
 
@@ -72,7 +72,7 @@ This property has an impact on the layer radius calculation logic.
 | 'auto' &#124; 'equal' &#124; 'non-decreasing' &#124; 'quad-increasing' &#124; 'custom' | 'auto'  | no       |
 
 > [!NOTE]
-> The `'custom'` layer sizing requires the [getLayerRadius](pages/placement/orbits?id=getlayerradius) property described below.
+> The `'custom'` layer sizing requires the [getLayerRadius](pages/settings/placement/orbits?id=getlayerradius) property described below.
 
 #### `getLayerRadius`
 
@@ -86,7 +86,7 @@ A worklet function that is used for layer radiuses calculation.
 
 #### `maxSectorAngle`
 
-Sets the maximum angle of the sector (if you don't know what is a sector, see this [explanation](/pages/placement/orbits?id=explanation)). The angle should be specified in radians.
+Sets the maximum angle of the sector (if you don't know what is a sector, see this [explanation](/pages/settings/placement/orbits?id=explanation)). The angle should be specified in radians.
 
 | Type   | Default       | Required |
 | ------ | ------------- | -------- |
@@ -124,7 +124,7 @@ If this property is set to `true` (default), padding will be added to the graph 
 
 ## Root vertices
 
-> The logic is **the same** as for the [trees](pages/placement/trees?id=root-vertices) placement strategy.
+> The logic is **the same** as for the [trees](pages/settings/placement/trees?id=root-vertices) placement strategy.
 
 This section explains the **root vertex selection algorithm**. If the graph is disjoint, the same logic applies to each separate graph component.
 

@@ -1,23 +1,23 @@
-# Circles placement strategy
+# Circle placement strategy
 
 ## Description
 
-Circles placement strategy is very **similar** to the [circle](pages/placement/circle.md) placement strategy described on the previous page. The **only difference** is that it places **vertices from disjoint graphs** on **separate circles**. These **circles** are positioned **next to each other** then.
+Circle placement strategy renders all graph vertices on a **single circle**. It **ignores connections between vertices**, so disconnected vertices will be displayed on the same circle as vertices which are connected to each other.
 
 > [!NOTE]
 > This strategy always gives **the same** result for **directed and undirected** graphs.
 
 ## Properties
 
-> All properties (except the `strategy`) are the same as for the [circle](pages/placement/circle?id=properties) placement strategy.
+All properties listed below should be passed in the graph component `settings` object as described in [this](pages/settings/placement/index?id=usage) section.
 
 #### `strategy`
 
 A required field specifying the strategy to use.
 
-| Type      | Default | Required |
-| --------- | ------- | -------- |
-| 'circles' | -       | yes      |
+| Type     | Default | Required |
+| -------- | ------- | -------- |
+| 'circle' | -       | yes      |
 
 #### `minVertexSpacing`
 
@@ -29,7 +29,7 @@ Specifies the minimum distance between vertices.
 
 #### `sortVertices`
 
-Determines whether graph vertices should be arranged in a circular layout based on specific relative order. Vertices will be sorted separately for each circle (each graph component).
+Determines whether graph vertices should be arranged in a circular layout based on specific relative order.
 
 | Type    | Default | Required |
 | ------- | ------- | -------- |
@@ -40,7 +40,7 @@ Determines whether graph vertices should be arranged in a circular layout based 
 
 #### `sortComparator`
 
-Specifies how vertices should be ordered on each circle. The function must be a reanimated `'worklet'`, because all layout calculations are processed on the UI thread.
+Specifies how vertices should be ordered on the circle. The function must be a reanimated `'worklet'`, because all layout calculations are processed on the UI thread.
 
 Below is the default implementation of the `sortComparator` function:
 
@@ -54,6 +54,16 @@ const defaultSortComparator = (key1: string, key2: string) => {
 | Type                                   | Default               | Required |
 | -------------------------------------- | --------------------- | -------- |
 | (key1: string, key2: string) => number | defaultSortComparator | no       |
+
+<!-- accordion:start -->
+
+#### _Examples_
+
+| Default sort comparator (non-decreasing order)                            | Custom sort comparator (non-increasing order)                            |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| <img src="./assets/images/placement/circle/sort-comparator-default.png"/> | <img src="./assets/images/placement/circle/sort-comparator-custom.png"/> |
+
+<!-- accordion:end -->
 
 ## Example
 
@@ -76,7 +86,7 @@ export default function Graph() {
         settings={{
           ...
           placement: {
-            strategy: 'circles',
+            strategy: 'circle',
             minVertexSpacing: 150,
             sortVertices: true,
             sortComparator
@@ -112,19 +122,16 @@ const GRAPH: DirectedGraphData = {
     { key: 'V4' },
     { key: 'V5' },
     { key: 'V6' },
-    { key: 'V7' },
-    { key: 'V8' },
-    { key: 'V9' }
+    { key: 'V7' }
   ],
   edges: [
     { key: 'E1', from: 'V1', to: 'V2' },
     { key: 'E2', from: 'V2', to: 'V3' },
     { key: 'E3', from: 'V3', to: 'V1' },
-    { key: 'E4', from: 'V5', to: 'V6' },
-    { key: 'E5', from: 'V1', to: 'V3' },
-    { key: 'E6', from: 'V1', to: 'V4' },
-    { key: 'E7', from: 'V5', to: 'V7' },
-    { key: 'E8', from: 'V2', to: 'V8' }
+    { key: 'E4', from: 'V4', to: 'V5' },
+    { key: 'E5', from: 'V5', to: 'V6' },
+    { key: 'E6', from: 'V1', to: 'V3' },
+    { key: 'E7', from: 'V1', to: 'V4' }
   ]
 };
 
@@ -142,7 +149,7 @@ export default function Graph() {
         settings={{
           // --- Placement settings ---
           placement: {
-            strategy: 'circles',
+            strategy: 'circle',
             minVertexSpacing: 150,
             sortVertices: true,
             sortComparator
@@ -160,4 +167,4 @@ export default function Graph() {
 
 **Result**
 
-<img src="./assets/images/placement/circles/placement-example.png" alt="circles placement example" width="300" />
+<img src="./assets/images/placement/circle/placement-example.png" alt="circle placement example" width="300" />
