@@ -8,7 +8,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { memo, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle
+} from 'react-native';
 import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 
 import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
@@ -36,12 +42,20 @@ const OBJECT_FIT_BUTTONS: Array<{ icon: IconDefinition; type: ObjectFit }> = [
   }
 ];
 
+type ButtonProps = {
+  icon: IconDefinition;
+  key: string;
+  onPress: () => void;
+};
+
 type GraphViewControlsProps = {
   onObjectFitChange?: (objectFit: ObjectFit) => void;
+  style?: StyleProp<ViewStyle>;
 };
 
 export default memo(function GraphViewControls({
-  onObjectFitChange
+  onObjectFitChange,
+  style
 }: GraphViewControlsProps) {
   // CONTEXTS
   // Canvas data context
@@ -87,7 +101,7 @@ export default memo(function GraphViewControls({
     onObjectFitChange?.(nextObjectFit);
   };
 
-  const buttons = [
+  const buttons: Array<ButtonProps> = [
     {
       icon: faArrowsToCircle,
       key: 'reset',
@@ -104,12 +118,14 @@ export default memo(function GraphViewControls({
   }
 
   return (
-    <View style={styles.container}>
-      {buttons.map(({ icon, key, onPress }) => (
-        <TouchableOpacity key={key} onPress={onPress}>
-          <FontAwesomeIcon icon={icon} size={32} style={styles.icon} />
-        </TouchableOpacity>
-      ))}
+    <View style={style}>
+      <View style={styles.container}>
+        {buttons.map(({ icon, ...props }) => (
+          <TouchableOpacity {...props}>
+            <FontAwesomeIcon icon={icon} size={32} style={styles.icon} />
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 });
@@ -119,10 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, .5)',
     borderRadius: 8,
     gap: 20,
-    left: 0,
-    padding: 8,
-    position: 'absolute',
-    top: 0
+    padding: 8
   },
   icon: {
     color: 'white'

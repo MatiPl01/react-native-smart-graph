@@ -10,7 +10,8 @@ import {
   bfs,
   dfs,
   findGraphComponents,
-  findRootVertex
+  findRootVertex,
+  transposeIncoming
 } from '@/utils/algorithms';
 import {
   arrangeGraphComponents,
@@ -57,9 +58,13 @@ const arrangeVertices = (
       if (prevData?.parent === parent) {
         col =
           arrangedVertices[prevData.vertex]!.col +
-          (subtreeWidths[vertex]! + 1) / 2;
+          subtreeWidths[prevData.vertex]! / 2 +
+          subtreeWidths[vertex]! / 2;
       } else {
-        col = arrangedVertices[parent]!.col - (subtreeWidths[parent]! - 1) / 2;
+        col =
+          arrangedVertices[parent]!.col -
+          subtreeWidths[parent]! / 2 +
+          subtreeWidths[vertex]! / 2;
       }
 
       arrangedVertices[vertex] = { col, row: depth };
@@ -95,16 +100,13 @@ const placeVertices = (
   const height = padding + (numRows - 1) * minVertexCenterDistance;
 
   // calculate the positions of the vertices based on the grid
-  return Object.entries(arrangedVertices).reduce(
-    (acc, [key, { col, row }]) => ({
-      ...acc,
-      [key]: {
-        x: vertexRadius + col * minVertexCenterDistance - width / 2,
-        y: vertexRadius + row * minVertexCenterDistance - height / 2
-      }
-    }),
-    {} as PlacedVerticesPositions
-  );
+  return Object.entries(arrangedVertices).reduce((acc, [key, { col, row }]) => {
+    acc[key] = {
+      x: vertexRadius + col * minVertexCenterDistance - width / 2,
+      y: vertexRadius + row * minVertexCenterDistance - height / 2
+    };
+    return acc;
+  }, {} as PlacedVerticesPositions);
 };
 
 export default function placeVerticesOnTrees(
@@ -119,6 +121,9 @@ export default function placeVerticesOnTrees(
 
   const graphComponents = findGraphComponents(connections);
 
+  const minVertexSpacing =
+    settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+
   for (const component of graphComponents) {
     // Find the root vertex of the component
     const rootVertex = findRootVertex(
@@ -127,11 +132,16 @@ export default function placeVerticesOnTrees(
       rootVertexKeys,
       isGraphDirected
     );
-    // Place vertices on the grid
-    const arrangedVertices = arrangeVertices(connections, rootVertex);
+    // If the graph is directed and the selected root has incoming edges,
+    // transpose all subtrees with incoming edges to make the root vertex
+    // the source vertex
+    let updatedConnections = connections;
+    if (isGraphDirected && connections[rootVertex]!.incoming.length > 0) {
+      updatedConnections = transposeIncoming(connections, [rootVertex]);
+    }
+    const arrangedVertices = arrangeVertices(updatedConnections, rootVertex);
     // Place vertices in the layout
-    const minVertexSpacing =
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+
     const verticesPositions = placeVertices(
       arrangedVertices,
       minVertexSpacing,
@@ -139,14 +149,12 @@ export default function placeVerticesOnTrees(
     );
     // Calculate container dimensions
     componentsLayouts.push({
-      boundingRect: calcContainerBoundingRect(
-        verticesPositions,
-        minVertexSpacing,
-        vertexRadius
-      ),
+      boundingRect: calcContainerBoundingRect(verticesPositions, {
+        padding: vertexRadius
+      }),
       verticesPositions
     });
   }
 
-  return arrangeGraphComponents(componentsLayouts, vertexRadius);
+  return arrangeGraphComponents(componentsLayouts, minVertexSpacing);
 }

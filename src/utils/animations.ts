@@ -33,9 +33,9 @@ export const animateVerticesToFinalPositions = (
         },
         // Call onComplete only once, when the last vertex animation is complete
         onComplete && idx === finalPositionsEntries.length - 1
-          ? () => {
+          ? (finished?: boolean) => {
               'worklet';
-              runOnJS(onComplete)();
+              runOnJS(onComplete)(finished);
             }
           : undefined
       );
@@ -186,4 +186,22 @@ export const createAnimationsSettingsForBatchModification = (
       ]) ?? []
     )
   };
+};
+
+export const animateToValue = (
+  fromValue: number,
+  toValue: number,
+  eps?: number
+): number => {
+  'worklet';
+  const delta = toValue - fromValue;
+
+  const minDelta = eps ?? 1;
+  // Delta can be NaN when the difference between values is too small
+  // (subtracting very close numbers can result in a number that is too small to be represented)
+  if (isNaN(delta) || Math.abs(delta) < minDelta) {
+    return toValue;
+  }
+  const factor = Math.max(0.1, Math.abs(delta) / 1000);
+  return fromValue + delta * factor;
 };

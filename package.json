@@ -33,6 +33,7 @@
     "babel-plugin-module-resolver": "^5.0.0",
     "babel-plugin-react-require": "^4.0.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
+    "docsify-darklight-theme": "^3.2.0",
     "eslint": "^8.41.0",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-import": "^2.27.5",
@@ -79,7 +80,7 @@
     "react": ">=18.0.0",
     "react-native": ">=0.71.8",
     "react-native-gesture-handler": ">=2.0.0",
-    "react-native-reanimated": ">=3.0.0",
+    "react-native-reanimated": ">=3.3.0",
     "react-native-svg": ">=13.0.0"
   },
   "publishConfig": {
@@ -91,6 +92,7 @@
     "build": "yarn clean && bob build && yarn declarations:emit",
     "clean": "rm -rf dist && rm -f *.tgz",
     "declarations:emit": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "docs": "docsify serve docs",
     "format:code": "prettier --write .",
     "format:deps": "syncpack format",
     "ios": "react-native run-ios",

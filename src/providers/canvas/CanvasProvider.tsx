@@ -17,7 +17,6 @@ import { CanvasDataProvider } from './data';
 import { GesturesProvider } from './gestures';
 import SettingsChangeResponderProvider from './settings/SettingsChangeResponderProvider';
 import { FocusProvider, TransformProvider } from './transform';
-import MultiFocusProvider from './transform/MultiFocusProvider';
 
 type CanvasProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
@@ -30,25 +29,22 @@ type CanvasProviderProps = PropsWithChildren<{
 export default function CanvasProvider({
   autoSizingTimeout: autoSizingTimeoutProp = AUTO_SIZING_TIMEOUT,
   children,
-  initialScale: initialScaleProp = INITIAL_SCALE,
+  initialScale: initialScaleProp,
   objectFit: objectFitProp = 'none',
   padding: paddingProp,
   scales: scalesProp = DEFAULT_SCALES
 }: CanvasProviderProps) {
-  // Validate parameters
-  if (scalesProp.length === 0) {
-    throw new Error('At least one scale must be provided');
-  }
-  if (scalesProp.indexOf(initialScaleProp) < 0) {
-    throw new Error('Initial scale must be included in scales');
-  }
   // Store canvas settings in shared values to prevent re-renders
   const autoSizingTimeout = useDerivedValue(
     () => autoSizingTimeoutProp,
     [autoSizingTimeoutProp]
   );
+  const initialScaleProvided = useDerivedValue(
+    () => !!initialScaleProp,
+    [initialScaleProp]
+  );
   const initialScale = useDerivedValue(
-    () => initialScaleProp,
+    () => initialScaleProp ?? INITIAL_SCALE,
     [initialScaleProp]
   );
   const objectFit = useDerivedValue(() => objectFitProp, [objectFitProp]);
@@ -70,6 +66,7 @@ export default function CanvasProvider({
       <CanvasDataProvider
         autoSizingTimeout={autoSizingTimeout}
         initialScale={initialScale}
+        initialScaleProvided={initialScaleProvided}
         maxScale={maxScale}
         minScale={minScale}
         objectFit={objectFit}
@@ -87,10 +84,6 @@ export default function CanvasProvider({
       // FOCUS
       // The provider used to handle canvas focus operations
       <FocusProvider />,
-      // The provider used to handle multiple points focus based on
-      // user-defined progress value (e.g. different zoom of the vertex
-      // based on the scroll position)
-      <MultiFocusProvider />,
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
       <GesturesProvider />,

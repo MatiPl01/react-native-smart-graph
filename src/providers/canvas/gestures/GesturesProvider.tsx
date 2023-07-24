@@ -2,7 +2,6 @@ import { Vector } from '@shopify/react-native-skia';
 import { createContext, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
-  runOnJS,
   useAnimatedReaction,
   useSharedValue,
   useWorkletCallback,
@@ -53,7 +52,6 @@ export default function GesturesProvider({
   const {
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
-    initialScale,
     maxScale,
     minScale,
     scales
@@ -74,10 +72,8 @@ export default function GesturesProvider({
   const pinchStartScale = useSharedValue(1);
   const pinchDecayScale = useSharedValue(1);
   const pinchEndPosition = useSharedValue({ x: 0, y: 0 });
-  // const isGestureActive = useSharedValue(false);
 
   const handleGestureStart = useWorkletCallback((origin?: Maybe<Vector>) => {
-    // isGestureActive.value = true;
     autoSizingContext.disableAutoSizing();
     if (focusStatus.value !== FocusStatus.BLUR) {
       endFocus(origin && { origin });
@@ -108,7 +104,6 @@ export default function GesturesProvider({
       }
     })
     .onEnd(({ velocityX, velocityY }) => {
-      // isGestureActive.value = false;
       if (gesturesDisabled.value) return;
       const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
       translateX.value = withDecay({
@@ -128,7 +123,7 @@ export default function GesturesProvider({
     .onStart(() => {
       if (gesturesDisabled.value) return;
       pinchStartScale.value = currentScale.value;
-      runOnJS(handleGestureStart)(null);
+      handleGestureStart(null);
     })
     .onChange(({ focalX, focalY, scale }) => {
       if (gesturesDisabled.value) return;
@@ -136,11 +131,10 @@ export default function GesturesProvider({
         pinchStartScale.value * scale,
         { x: focalX, y: focalY },
         undefined,
-        false
+        { withClamping: false }
       );
     })
     .onEnd(({ focalX, focalY, velocity }) => {
-      // isGestureActive.value = false;
       if (gesturesDisabled.value) return;
       pinchDecayScale.value = currentScale.value;
       pinchEndPosition.value = { x: focalX, y: focalY };
@@ -157,15 +151,18 @@ export default function GesturesProvider({
     .maxDistance(50)
     .onStart(() => {
       if (gesturesDisabled.value) return;
-      runOnJS(handleGestureStart)();
+      handleGestureStart();
     })
     .onEnd(({ x, y }) => {
       if (gesturesDisabled.value) return;
       const origin = { x, y };
 
       if (currentScale.value === maxScale.value) {
+        const defaultScale =
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          scales.value.length >= 3 ? scales.value[1]! : scales.value[0]!;
         scaleContentTo(
-          initialScale.value,
+          defaultScale,
           origin,
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
@@ -191,7 +188,7 @@ export default function GesturesProvider({
         isInitialRender.value = false;
         return;
       }
-      scaleContentTo(decayScale, endPosition);
+      scaleContentTo(Math.max(decayScale, 0), endPosition);
     }
   );
 

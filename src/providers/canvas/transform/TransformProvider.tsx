@@ -1,5 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useCallback, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 import {
   useAnimatedReaction,
@@ -44,12 +44,13 @@ type TransformContextType = {
     newScale: number,
     origin?: Vector,
     animationSettings?: Maybe<AnimationSettingsWithDefaults>,
-    withClamping?: boolean
+    settings?: { callCallback?: boolean; withClamping?: boolean }
   ) => void;
   translateContentTo: (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    settings?: { callCallback?: boolean }
   ) => void;
 };
 
@@ -85,6 +86,7 @@ export default function TransformProvider({
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
     initialScale,
+    isRendered,
     maxScale,
     minScale,
     objectFit,
@@ -95,23 +97,17 @@ export default function TransformProvider({
   const initialCanvasDimensions = useSharedValue<Dimensions | null>(null);
   const initialBoundingRect = useSharedValue<BoundingRect | null>(null);
 
-  const handleCanvasRender = useCallback(
-    ({
-      nativeEvent: {
-        layout: { height, width }
-      }
-    }: LayoutChangeEvent) => {
-      initialCanvasDimensions.value = { height, width };
-    },
-    []
-  );
+  const handleCanvasRender = ({
+    nativeEvent: {
+      layout: { height, width }
+    }
+  }: LayoutChangeEvent) => {
+    initialCanvasDimensions.value = { height, width };
+  };
 
-  const handleGraphRender = useCallback(
-    (containerBoundingRect: BoundingRect) => {
-      initialBoundingRect.value = containerBoundingRect;
-    },
-    []
-  );
+  const handleGraphRender = (containerBoundingRect: BoundingRect) => {
+    initialBoundingRect.value = containerBoundingRect;
+  };
 
   const getTranslateClamp = (
     scale: number
@@ -120,7 +116,6 @@ export default function TransformProvider({
     y: [number, number];
   } => {
     'worklet';
-
     const leftLimit = (-containerLeft.value + padding.value.left) * scale;
     const rightLimit =
       canvasWidth.value - (containerRight.value + padding.value.right) * scale;
@@ -135,34 +130,32 @@ export default function TransformProvider({
     };
   };
 
-  const getIdealScale = useCallback(
-    (
-      boundingRect: BoundingRect,
-      canvasDimensions: Dimensions,
-      objFit: ObjectFit
-    ) => {
-      'worklet';
-      return clamp(
-        calcContainerScale(
-          objFit,
-          initialScale.value,
-          {
-            height: boundingRect.bottom - boundingRect.top,
-            width: boundingRect.right - boundingRect.left
-          },
-          canvasDimensions,
-          padding.value
-        ),
-        [minScale.value, maxScale.value]
-      );
-    },
-    []
-  );
+  const getIdealScale = (
+    boundingRect: BoundingRect,
+    canvasDimensions: Dimensions,
+    objFit: ObjectFit
+  ) => {
+    'worklet';
+    return clamp(
+      calcContainerScale(
+        objFit,
+        initialScale.value,
+        {
+          height: boundingRect.bottom - boundingRect.top,
+          width: boundingRect.right - boundingRect.left
+        },
+        canvasDimensions,
+        padding.value
+      ),
+      [minScale.value, maxScale.value]
+    );
+  };
 
   const translateContentTo = (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    settings?: { callCallback?: boolean }
   ) => {
     'worklet';
     const newTranslateX = clampTo?.x
@@ -175,7 +168,11 @@ export default function TransformProvider({
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings;
       translateX.value = withTiming(newTranslateX, timingConfig);
-      translateY.value = withTiming(newTranslateY, timingConfig, onComplete);
+      translateY.value = withTiming(
+        newTranslateY,
+        timingConfig,
+        settings?.callCallback === false ? undefined : onComplete
+      );
     } else {
       translateX.value = newTranslateX;
       translateY.value = newTranslateY;
@@ -186,7 +183,7 @@ export default function TransformProvider({
     newScale: number,
     origin?: Vector,
     animationSettings?: Maybe<AnimationSettingsWithDefaults>,
-    withClamping = true
+    settings?: { callCallback?: boolean; withClamping?: boolean }
   ) => {
     'worklet';
     if (origin && currentScale.value > 0) {
@@ -200,63 +197,66 @@ export default function TransformProvider({
             translateY.value -
             (origin.y - translateY.value) * (relativeScale - 1)
         },
-        withClamping ? getTranslateClamp(newScale) : undefined,
-        animationSettings && { ...animationSettings, onComplete: undefined }
+        settings?.withClamping ? getTranslateClamp(newScale) : undefined,
+        animationSettings,
+        { callCallback: false }
       );
     }
 
     if (animationSettings) {
       const { onComplete, ...timingConfig } = animationSettings;
-      currentScale.value = withTiming(newScale, timingConfig, onComplete);
+      currentScale.value = withTiming(
+        newScale,
+        timingConfig,
+        settings?.callCallback === false ? undefined : onComplete
+      );
     } else {
       currentScale.value = newScale;
     }
   };
 
-  const resetContainerPosition = useCallback(
-    (settings?: {
-      animationSettings?: Maybe<AnimationSettingsWithDefaults>;
-      autoSizingContext?: AutoSizingContextType;
-      canvasDimensions?: Dimensions;
-      containerBoundingRect?: BoundingRect;
-      scale?: number;
-    }) => {
-      'worklet';
-      const containerBoundingRect = settings?.containerBoundingRect ?? {
-        bottom: containerBottom.value,
-        left: containerLeft.value,
-        right: containerRight.value,
-        top: containerTop.value
-      };
+  const resetContainerPosition = (settings?: {
+    animationSettings?: Maybe<AnimationSettingsWithDefaults>;
+    autoSizingContext?: AutoSizingContextType;
+    canvasDimensions?: Dimensions;
+    containerBoundingRect?: BoundingRect;
+    scale?: number;
+  }) => {
+    'worklet';
+    const containerBoundingRect = settings?.containerBoundingRect ?? {
+      bottom: containerBottom.value,
+      left: containerLeft.value,
+      right: containerRight.value,
+      top: containerTop.value
+    };
 
-      const canvasDimensions = settings?.canvasDimensions ?? {
-        height: canvasHeight.value,
-        width: canvasWidth.value
-      };
+    const canvasDimensions = settings?.canvasDimensions ?? {
+      height: canvasHeight.value,
+      width: canvasWidth.value
+    };
 
-      // Disable auto sizing while resetting container position
-      settings?.autoSizingContext?.disableAutoSizing();
+    // Disable auto sizing while resetting container position
+    settings?.autoSizingContext?.disableAutoSizing();
 
-      const scale =
-        settings?.scale ??
-        getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
+    const scale =
+      settings?.scale ??
+      getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
 
-      scaleContentTo(scale, undefined, settings?.animationSettings);
-      translateContentTo(
-        calcContainerTranslation(
-          containerBoundingRect,
-          canvasDimensions,
-          padding.value
-        ),
-        undefined,
-        settings?.animationSettings
-      );
+    scaleContentTo(scale, undefined, settings?.animationSettings);
+    translateContentTo(
+      calcContainerTranslation(
+        containerBoundingRect,
+        canvasDimensions,
+        padding.value
+      ),
+      undefined,
+      settings?.animationSettings,
+      { callCallback: false }
+    );
 
-      // Enable auto sizing after resetting container position
-      settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
-    },
-    []
-  );
+    // Enable auto sizing after resetting container position
+    settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
+  };
 
   useAnimatedReaction(
     () => ({
@@ -273,6 +273,7 @@ export default function TransformProvider({
         containerBoundingRect: initialRect,
         scale: initialScale.value
       });
+      isRendered.value = true;
       // Set canvas dimensions
       canvasWidth.value = initialDimensions.width;
       canvasHeight.value = initialDimensions.height;

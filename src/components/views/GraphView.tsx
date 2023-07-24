@@ -1,6 +1,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { INITIAL_SCALE } from '@/constants/views';
 import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
@@ -19,6 +20,7 @@ type GraphViewProps = PropsWithChildren<{
 }>;
 
 function GraphView({ children, ...providerProps }: GraphViewProps) {
+  validateProps(providerProps);
   const providerComposer = useMemo(() => <GraphViewComposer />, []);
 
   return (
@@ -29,6 +31,25 @@ function GraphView({ children, ...providerProps }: GraphViewProps) {
     </View>
   );
 }
+
+const validateProps = ({ initialScale, scales }: GraphViewProps) => {
+  // Validate parameters
+  if (scales) {
+    if (scales.length === 0) {
+      throw new Error('At least one scale must be provided');
+    }
+    if (scales.indexOf(initialScale ?? INITIAL_SCALE) < 0) {
+      throw new Error('Initial scale must be included in scales');
+    }
+    if (scales.some(scale => scale <= 0)) {
+      throw new Error('All scales must be positive');
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (scales.some((scale, index) => scale <= scales[index - 1]!)) {
+      throw new Error('Scales must be in ascending order');
+    }
+  }
+};
 
 const GraphViewComposer = memo(function () {
   // CONTEXTS
@@ -50,7 +71,7 @@ const GraphViewComposer = memo(function () {
         {overlayOutlet}
       </OverlayProvider>
       {/* Render other component than canvas (e.g. graph controls) */}
-      <View style={StyleSheet.absoluteFill}>{overlay}</View>
+      <View style={styles.overlay}>{overlay}</View>
     </>
   );
 });
@@ -60,6 +81,10 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: 'hidden',
     position: 'relative'
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none'
   }
 });
 

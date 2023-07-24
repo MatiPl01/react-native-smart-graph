@@ -8,6 +8,7 @@ import {
   useMemo,
   useState
 } from 'react';
+import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useGraphObserver } from '@/hooks';
 import {
@@ -22,6 +23,7 @@ import {
 } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { Graph, GraphConnections } from '@/types/graphs';
+import { BoundingRect } from '@/types/layout';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
 import {
   AnimationSettingsWithDefaults,
@@ -46,6 +48,7 @@ export type ComponentsDataContextType<V, E> = {
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
+  targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
@@ -54,7 +57,7 @@ const ComponentsDataContext = createContext(null as unknown as object);
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   renderers: GraphRenderersWithDefaults<V, E>;
-  settings: GraphSettingsWithDefaults<V, E>;
+  settings: GraphSettingsWithDefaults<V>;
 }>;
 
 export default function ComponentsDataProvider<V, E>({
@@ -115,6 +118,15 @@ export default function ComponentsDataProvider<V, E>({
     [vertices, orderedEdges]
   );
 
+  // VALUES UPDATED BY OTHER PROVIDERS
+  // Target bounding rect
+  const targetBoundingRect = useSharedValue<BoundingRect>({
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0
+  });
+
   useEffect(() => {
     const { data, wasUpdated } = updateGraphVerticesData(
       verticesData,
@@ -155,7 +167,13 @@ export default function ComponentsDataProvider<V, E>({
   ]);
 
   useEffect(() => {
-    if (!renderers.label) return;
+    if (!renderers.label) {
+      // Remove labels if there is no label renderer
+      if (Object.keys(edgeLabelsData).length > 0) {
+        setEdgeLabelsData({});
+      }
+      return;
+    }
     const { data, wasUpdated } = updateGraphEdgeLabelsData(
       edgeLabelsData,
       edgesData,
@@ -215,6 +233,7 @@ export default function ComponentsDataProvider<V, E>({
       layoutAnimationSettings,
       renderedEdgesData,
       renderedVerticesData,
+      targetBoundingRect,
       verticesData
     }),
     [

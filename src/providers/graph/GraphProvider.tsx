@@ -9,17 +9,13 @@ import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import { FocusContextType } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import { DirectedEdgeData, UndirectedEdgeData } from '@/types/data';
 import { Graph } from '@/types/graphs';
 import {
   AnimatedBoundingRect,
   AnimatedDimensions,
   BoundingRect
 } from '@/types/layout';
-import {
-  GraphEventsSettings,
-  GraphSettingsWithDefaults
-} from '@/types/settings';
+import { GraphSettingsWithDefaults } from '@/types/settings';
 import {
   updateGraphRenderersWithDefaults,
   updateGraphSettingsWithDefaults
@@ -40,7 +36,7 @@ import VertexFocusProvider from './transform/VertexFocusProvider';
 
 const getLayoutProviders = <V, E>(
   graph: Graph<V, E>,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V>,
   onRender: (boundingRect: BoundingRect) => void
 ) => {
   switch (settings.layout.managedBy) {
@@ -65,22 +61,18 @@ const getLayoutProviders = <V, E>(
   }
 };
 
-const getEventsProviders = <
-  V,
-  E,
-  ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
->(
+const getEventsProviders = <V, E>(
   transform: AnimatedCanvasTransform,
   boundingRect: AnimatedBoundingRect,
-  settings: GraphSettingsWithDefaults<V, E>,
+  settings: GraphSettingsWithDefaults<V>,
   renderLayer: (zIndex: number, layer: JSX.Element) => void
 ) => {
   if (settings.events) {
     return [
-      <PressEventsProvider<PressEventsProviderProps<V, E, ED>>
+      <PressEventsProvider<PressEventsProviderProps<V, E>>
         boundingRect={boundingRect}
         renderLayer={renderLayer}
-        settings={settings.events as GraphEventsSettings<V, E, ED>}
+        settings={settings.events}
         transform={transform}
       />
     ];
@@ -142,11 +134,14 @@ function GraphProvider<V, E>({
         settings={memoSettings}
       />,
       // LAYOUT
-      // Provider used to compute the dimensions of the container
-      <ContainerDimensionsProvider boundingRect={boundingRect} />,
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
       ...getLayoutProviders(graph, memoSettings, onRender),
+      // Provider used to compute the dimensions of the container
+      <ContainerDimensionsProvider
+        boundingRect={boundingRect}
+        vertexRadius={memoSettings.components.vertex.radius}
+      />,
       // EVENTS
       // Press events provider
       ...getEventsProviders(transform, boundingRect, memoSettings, renderLayer),

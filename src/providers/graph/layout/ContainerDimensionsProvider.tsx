@@ -1,35 +1,38 @@
 import { PropsWithChildren } from 'react';
-import { useAnimatedReaction } from 'react-native-reanimated';
+import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
 import { VertexComponentRenderData } from '@/types/components';
-import { AnimatedBoundingRect } from '@/types/layout';
-import { calcAnimatedContainerBoundingRect } from '@/utils/placement';
+import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
+import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
-  boundingRect: AnimatedBoundingRect;
+  boundingRect: AnimatedBoundingRect; // This is the real bounding rect of the container
   renderedVerticesData: Record<string, VertexComponentRenderData>;
+  targetBoundingRect: SharedValue<BoundingRect>; // This is the target bounding rect of the container
+  vertexRadius: number;
 }>;
 
 function ContainerDimensionsProvider({
   boundingRect,
   children,
-  renderedVerticesData
+  targetBoundingRect
 }: ContainerDimensionsProviderProps) {
-  const renderedVerticesPositions = Object.fromEntries(
-    Object.entries(renderedVerticesData).map(([key, { position }]) => [
-      key,
-      position
-    ])
-  );
-
   useAnimatedReaction(
-    () => ({ positions: renderedVerticesPositions }),
-    ({ positions }) => {
-      Object.entries(calcAnimatedContainerBoundingRect(positions)).forEach(
-        ([key, value]) =>
-          (boundingRect[key as keyof AnimatedBoundingRect].value = value)
-      );
+    () => ({
+      currentRect: {
+        bottom: boundingRect.bottom.value,
+        left: boundingRect.left.value,
+        right: boundingRect.right.value,
+        top: boundingRect.top.value
+      },
+      targetRect: targetBoundingRect.value
+    }),
+    ({ currentRect, targetRect }) => {
+      Object.keys(boundingRect).forEach((key: string) => {
+        const k = key as keyof BoundingRect;
+        boundingRect[k].value = animateToValue(currentRect[k], targetRect[k]);
+      });
     }
   );
 
@@ -38,7 +41,7 @@ function ContainerDimensionsProvider({
 
 export default withGraphData(
   ContainerDimensionsProvider,
-  ({ renderedVerticesData }) => ({
-    renderedVerticesData
+  ({ targetBoundingRect }) => ({
+    targetBoundingRect
   })
 );

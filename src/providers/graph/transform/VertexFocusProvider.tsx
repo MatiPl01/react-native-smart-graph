@@ -158,11 +158,6 @@ function VertexFocusProvider<V, E>({
       focusContext.focus.x.value = vertexData.x - dx / vertexData.scale;
       focusContext.focus.y.value = vertexData.y - dy / vertexData.scale;
       focusContext.focus.scale.value = vertexData.scale;
-      console.log(
-        focusContext.focus.x.value,
-        focusContext.focus.y.value,
-        focusContext.focus.scale.value
-      );
     }
   );
 

@@ -6,6 +6,31 @@ import {
   GraphConnections
 } from '@/types/graphs';
 
+export enum TraverseDirection {
+  INCOMING,
+  OUTGOING,
+  BOTH
+}
+
+const getVertexNeighbors = (
+  connections: GraphConnections,
+  vertex: string,
+  traverseDirection?: TraverseDirection
+): Array<string> => {
+  'worklet';
+  switch (traverseDirection ?? TraverseDirection.OUTGOING) {
+    case TraverseDirection.INCOMING:
+      return connections[vertex]?.incoming ?? [];
+    case TraverseDirection.OUTGOING:
+      return connections[vertex]?.outgoing ?? [];
+    case TraverseDirection.BOTH:
+      return [
+        ...(connections[vertex]?.incoming ?? []),
+        ...(connections[vertex]?.outgoing ?? [])
+      ];
+  }
+};
+
 export const bfs = (
   connections: GraphConnections,
   startVertices: Array<string>,
@@ -14,7 +39,8 @@ export const bfs = (
     parent: null | string;
     startVertex: string;
     vertex: string;
-  }) => boolean | void
+  }) => boolean | void,
+  traverseDirection?: TraverseDirection
 ): Record<string, null | string> => {
   'worklet';
   const parents: Record<string, null | string> = {};
@@ -39,13 +65,15 @@ export const bfs = (
       if (callback({ depth, parent, startVertex: sv, vertex: key })) {
         return parents;
       }
-      connections[key]?.outgoing?.forEach(neighbor => {
-        queue.enqueue({
-          depth: depth + 1,
-          key: neighbor,
-          parent: key
-        });
-      });
+      getVertexNeighbors(connections, key, traverseDirection).forEach(
+        neighbor => {
+          queue.enqueue({
+            depth: depth + 1,
+            key: neighbor,
+            parent: key
+          });
+        }
+      );
     }
   }
 
@@ -61,7 +89,8 @@ export const dfs = (
     parent: null | string;
     startVertex: string;
     vertex: string;
-  }) => boolean | void
+  }) => boolean | void,
+  traverseDirection?: TraverseDirection
 ): Record<string, null | string> => {
   'worklet';
   const parents: Record<string, null | string> = {};
@@ -85,7 +114,11 @@ export const dfs = (
         visited[key] = true;
         postOrder.push(node);
 
-        const neighbors = connections[key]?.outgoing ?? [];
+        const neighbors = getVertexNeighbors(
+          connections,
+          key,
+          traverseDirection
+        );
         for (const neighbor of neighbors) {
           if (!visited[neighbor]) {
             stack.push({
@@ -120,6 +153,7 @@ const findGraphDiameter = (
   connections: GraphConnections,
   graphComponent: GraphComponent
 ): { diameter: number; path: Array<string> } => {
+  'worklet';
   // Start from the last vertex in the component (it always will be
   // the farthest vertex from the vertex where BFS started as it
   // was inserted last)
@@ -160,12 +194,17 @@ export const findGraphComponents = (
   'worklet';
   const components: Record<string, GraphComponent> = {};
 
-  bfs(connections, Object.keys(connections), ({ startVertex, vertex }) => {
-    if (!components[startVertex]) {
-      components[startVertex] = [];
-    }
-    components[startVertex]!.push(vertex);
-  });
+  bfs(
+    connections,
+    Object.keys(connections),
+    ({ startVertex, vertex }) => {
+      if (!components[startVertex]) {
+        components[startVertex] = [];
+      }
+      components[startVertex]!.push(vertex);
+    },
+    TraverseDirection.BOTH
+  );
 
   return Object.values(components);
 };
@@ -224,4 +263,47 @@ export const findRootVertex = (
   // 3. If the graph is directed, select the vertex with the highest out degree
   // as the root vertex
   return findDirectedGraphSourceVertex(connections, graphComponent);
+};
+
+export const transposeIncoming = (
+  connections: GraphConnections,
+  startVertices?: Array<string>
+): GraphConnections => {
+  'worklet';
+
+  // Transform connections to a more efficient format for
+  // edges direction swapping
+  const updatedConnections = Object.fromEntries(
+    Object.entries(connections).map(([key, { incoming, outgoing }]) => [
+      key,
+      {
+        incoming: Object.fromEntries(incoming.map(v => [v, true])),
+        outgoing: Object.fromEntries(outgoing.map(v => [v, true]))
+      }
+    ])
+  );
+
+  bfs(
+    connections,
+    startVertices ?? Object.keys(connections),
+    ({ parent, vertex }) => {
+      if (!parent) return;
+      // Swap connection from parent to vertex with connection from vertex to parent
+      delete updatedConnections[parent]!.incoming[vertex];
+      delete updatedConnections[vertex]!.outgoing[parent];
+      updatedConnections[parent]!.outgoing[vertex] = true;
+      updatedConnections[vertex]!.incoming[parent] = true;
+    },
+    TraverseDirection.INCOMING
+  );
+
+  return Object.fromEntries(
+    Object.entries(updatedConnections).map(([key, { incoming, outgoing }]) => [
+      key,
+      {
+        incoming: Object.keys(incoming),
+        outgoing: Object.keys(outgoing)
+      }
+    ])
+  );
 };

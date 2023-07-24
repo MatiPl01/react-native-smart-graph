@@ -31,14 +31,10 @@ export * from '@/hooks';
 // ALGORITHMS
 export * from '@/utils/algorithms';
 
-// EXAMPLES
-export * from '@/examples';
-
 // TYPES
 export {
   type DirectedEdgeData,
   type DirectedGraphData,
-  type GraphData,
   type UndirectedEdgeData,
   type UndirectedGraphData,
   type VertexData
@@ -80,24 +76,23 @@ export {
   type DirectedGraphComponentsSettings,
   type DirectedGraphSettings,
   type EdgeLabelSettings,
-  type EdgePressEvent,
-  type EdgePressHandler,
   type FocusPoint,
   type FocusPoints,
   type FocusSettings,
   type ForcesLayoutSettings,
   type ForcesSettings,
   type ForcesStrategy,
+  type GetLayerRadiusFunction,
   type GraphAnimationsSettings,
   type GraphEventsSettings,
   type GraphLayoutSettings,
-  type GraphLayoutType,
+  type GraphMeshType,
   type GraphPlacementSettings,
   type OrbitsLayerSizing,
   type OrbitsLayerSizingSettings,
   type OrbitsPlacementSettings,
   type PlacementStrategy,
-  type RandomLayoutType,
+  type RandomMeshType,
   type RandomPlacementSettings,
   type SingleModificationAnimationSettings,
   type TreesPlacementSettings,

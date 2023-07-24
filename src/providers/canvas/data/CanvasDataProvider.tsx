@@ -22,6 +22,8 @@ type CanvasDataContextType = {
   currentScale: SharedValue<number>;
   currentTranslation: AnimatedVectorCoordinates;
   initialScale: SharedValue<number>;
+  initialScaleProvided: SharedValue<boolean>;
+  isRendered: SharedValue<boolean>;
   maxScale: SharedValue<number>;
   minScale: SharedValue<number>;
   objectFit: SharedValue<ObjectFit>;
@@ -46,6 +48,7 @@ export const useCanvasDataContext = () => {
 type CanvasDataProviderProps = PropsWithChildren<{
   autoSizingTimeout: SharedValue<number>;
   initialScale: SharedValue<number>;
+  initialScaleProvided: SharedValue<boolean>;
   maxScale: SharedValue<number>;
   minScale: SharedValue<number>;
   objectFit: SharedValue<ObjectFit>;
@@ -57,6 +60,8 @@ export default function CanvasDataProvider({
   children,
   ...canvasSettings
 }: CanvasDataProviderProps) {
+  // BASIC DATA
+  const isRendered = useSharedValue(false);
   // CANVAS
   const canvasWidth = useSharedValue(0);
   const canvasHeight = useSharedValue(0);
@@ -71,7 +76,7 @@ export default function CanvasDataProvider({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   // AUTO SIZING
-  const autoSizingEnabled = useSharedValue(true);
+  const autoSizingEnabled = useSharedValue(false);
 
   const contextValue: CanvasDataContextType = useMemo(
     () => ({
@@ -91,6 +96,7 @@ export default function CanvasDataProvider({
         x: translateX,
         y: translateY
       },
+      isRendered,
       ...canvasSettings
     }),
     []

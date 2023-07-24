@@ -21,12 +21,12 @@ export type GraphData<VD, ED> = {
   vertices: Array<VD>;
 };
 
-export type DirectedGraphData<V = void, E = void> = {
-  edges?: Array<DirectedEdgeData<E>>;
-  vertices: Array<VertexData<V>>;
-};
+export type UndirectedGraphData<V = void, E = void> = GraphData<
+  VertexData<V>,
+  UndirectedEdgeData<E>
+>;
 
-export type UndirectedGraphData<V = void, E = void> = {
-  edges?: Array<UndirectedEdgeData<E>>;
-  vertices: Array<VertexData<V>>;
-};
+export type DirectedGraphData<V = void, E = void> = GraphData<
+  VertexData<V>,
+  DirectedEdgeData<E>
+>;

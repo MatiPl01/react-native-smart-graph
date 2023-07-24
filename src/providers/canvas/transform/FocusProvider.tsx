@@ -119,16 +119,16 @@ export default function FocusProvider({ children }: FocusProviderProps) {
 
   // Focus setter
   const startFocus = useWorkletCallback(
-    (
-      data: FocusData,
-      animSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
-    ) => {
+    (data: FocusData, animSettings?: Maybe<AnimationSettingsWithDefaults>) => {
       // Turn off animated reaction until data is completely set
       focusStatus.value = FocusStatus.FOCUS_PREPARATION;
       focusKey.value = data.key;
       // Set focus data
       gesturesDisabled.value = data.gesturesDisabled;
-      animationSettings.value = animSettings;
+      animationSettings.value =
+        animSettings === undefined
+          ? DEFAULT_FOCUS_ANIMATION_SETTINGS
+          : animSettings;
 
       // Disable auto sizing when focusing
       autoSizingContext.disableAutoSizing();
@@ -140,8 +140,12 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const endFocus = useWorkletCallback(
     (
       data?: Maybe<BlurData>,
-      animSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
+      animSettings?: Maybe<AnimationSettingsWithDefaults>
     ) => {
+      const updatedAnimSettings =
+        animSettings === undefined
+          ? DEFAULT_FOCUS_ANIMATION_SETTINGS
+          : animSettings;
       // Do nothing if there is no focus applied
       if (focusStatus.value === FocusStatus.BLUR) {
         return;
@@ -151,16 +155,16 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         focusStatus.value = FocusStatus.BLUR;
         gesturesDisabled.value = false;
         focusKey.value = null;
-        updateTransitionProgress(FocusStatus.BLUR, animSettings);
+        updateTransitionProgress(FocusStatus.BLUR, updatedAnimSettings);
       }
       // Set focus data if it is provided (to prepare for the transition)
       else if (data) {
-        animationSettings.value = animSettings;
+        animationSettings.value = updatedAnimSettings;
         blurOrigin.value = data.origin;
       }
       // Otherwise, just reset the container position
       else {
-        handleContainerReset(animSettings);
+        handleContainerReset(updatedAnimSettings);
       }
     },
     []
@@ -206,11 +210,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       const { onComplete, ...timingConfig } = animSettings;
       return {
         ...timingConfig,
-        onComplete: () => {
+        onComplete: (finished?: boolean) => {
           'worklet';
           finishTransition(finishStatus);
           if (onComplete) {
-            runOnJS(onComplete)();
+            runOnJS(onComplete)(finished);
           }
         }
       };
@@ -328,7 +332,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   useAnimatedReaction(
     () => {
       const status = focusStatus.value;
-      console.log('<<>> HERE');
       if (
         status !== FocusStatus.FOCUS_TRANSITION &&
         status !== FocusStatus.FOCUS

@@ -11,12 +11,24 @@ import {
   PlacedVerticesPositions
 } from '@/types/settings';
 
+export enum Symmetry {
+  NONE,
+  HORIZONTAL,
+  VERTICAL,
+  CENTER
+}
+
 export const calcContainerBoundingRect = (
   placedVertices: PlacedVerticesPositions,
-  minVertexSpacing = 0,
-  vertexRadius = 0
+  settings?: {
+    padding?: number;
+    symmetry?: Symmetry;
+  }
 ): BoundingRect => {
   'worklet';
+  const symmetry = settings?.symmetry ?? Symmetry.NONE;
+  const padding = settings?.padding ?? 0;
+
   const vertices = Object.values(placedVertices);
 
   if (!vertices.length) {
@@ -40,24 +52,56 @@ export const calcContainerBoundingRect = (
     maxY = Math.max(maxY, y);
   }
 
+  switch (symmetry) {
+    case Symmetry.HORIZONTAL:
+      minX = Math.min(minX, -maxX);
+      maxX = Math.max(maxX, -minX);
+      break;
+    case Symmetry.VERTICAL:
+      minY = Math.min(minY, -maxY);
+      maxY = Math.max(maxY, -minY);
+      break;
+    case Symmetry.CENTER:
+      minX = Math.min(minX, -maxX);
+      maxX = Math.max(maxX, -minX);
+      minY = Math.min(minY, -maxY);
+      maxY = Math.max(maxY, -minY);
+      break;
+  }
+
   return {
-    bottom: maxY + vertexRadius + minVertexSpacing / 2,
-    left: minX - vertexRadius - minVertexSpacing / 2,
-    right: maxX + vertexRadius + minVertexSpacing / 2,
-    top: minY - vertexRadius - minVertexSpacing / 2
+    // bottom: maxY + vertexRadius + minVertexSpacing / 2,
+    // left: minX - vertexRadius - minVertexSpacing / 2,
+    // right: maxX + vertexRadius + minVertexSpacing / 2,
+    // top: minY - vertexRadius - minVertexSpacing / 2
+    bottom: maxY + padding,
+    left: minX - padding,
+    right: maxX + padding,
+    top: minY - padding
   };
 };
 
 export const calcAnimatedContainerBoundingRect = (
-  placedVertices: AnimatedPlacedVerticesPositions
+  placedVertices: AnimatedPlacedVerticesPositions,
+  vertexRadius: number
 ): BoundingRect => {
   'worklet';
-  let left = 0;
-  let right = 0;
-  let top = 0;
-  let bottom = 0;
+  const positions = Object.values(placedVertices);
+  if (!positions.length) {
+    return {
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0
+    };
+  }
 
-  for (const { x, y } of Object.values(placedVertices)) {
+  let left = Infinity;
+  let right = -Infinity;
+  let top = Infinity;
+  let bottom = -Infinity;
+
+  for (const { x, y } of positions) {
     left = Math.min(left, x.value);
     right = Math.max(right, x.value);
     top = Math.min(top, y.value);
@@ -65,10 +109,10 @@ export const calcAnimatedContainerBoundingRect = (
   }
 
   return {
-    bottom,
-    left,
-    right,
-    top
+    bottom: bottom + vertexRadius,
+    left: left - vertexRadius,
+    right: right + vertexRadius,
+    top: top - vertexRadius
   };
 };
 
@@ -96,68 +140,99 @@ export const animatedCanvasDimensionsToDimensions = (
 
 export const defaultSortComparator = (key1: string, key2: string) => {
   'worklet';
-  if (key1 < key2) {
-    return -1;
-  }
-  if (key1 > key2) {
-    return 1;
-  }
-  return 0;
+  return key1.localeCompare(key2);
 };
 
 export const arrangeGraphComponents = (
   graphComponents: Array<GraphLayout>,
-  vertexRadius: number
+  spacing: number
 ): GraphLayout => {
   'worklet';
   // Prepare graph components for packing
   const preparedComponents = graphComponents.map(
-    ({ boundingRect: { bottom, left, right, top }, verticesPositions }) => ({
-      h: bottom - top,
-      verticesPositions,
-      w: right - left,
-      x: 0,
-      y: 0
-    })
+    ({ boundingRect, verticesPositions }) => {
+      const { bottom, left, right, top } = boundingRect;
+      return {
+        boundingRect,
+        h: bottom - top + spacing,
+        verticesPositions,
+        w: right - left + spacing,
+        x: 0,
+        y: 0
+      };
+    }
   );
   // Pack graph components on the screen
   const packed = potpack(preparedComponents);
+
   // Translate graph components to correct positions on the screen
-  const verticesPositions = Object.fromEntries(
-    preparedComponents.flatMap(
-      ({ h, verticesPositions: positions, w, x, y }) => {
-        const { bottom, left, right, top } =
-          calcContainerBoundingRect(positions);
+  const translatedLayouts = preparedComponents.map(
+    ({ boundingRect, h, verticesPositions: positions, w, x, y }) => {
+      const { bottom, left, right, top } = boundingRect;
 
-        // calculate the shift of graph center relative to component center
-        const widthShift = w / 2 - (left + right) / 2;
-        const heightShift = h / 2 - (top + bottom) / 2;
+      // calculate the shift of graph center relative to component center
+      const widthShift = w / 2 - (left + right) / 2;
+      const heightShift = h / 2 - (top + bottom) / 2;
 
-        return Object.entries(positions).map(([key, { x: vx, y: vy }]) => [
-          key,
-          {
-            x: vx + x - packed.w / 2 + widthShift,
-            y: vy + y - packed.h / 2 + heightShift
-          }
-        ]);
-      }
-    )
+      const xShift = x - packed.w / 2 + widthShift;
+      const yShift = y - packed.h / 2 + heightShift;
+
+      return {
+        boundingRect: {
+          bottom: bottom + yShift,
+          left: left + xShift,
+          right: right + xShift,
+          top: top + yShift
+        },
+        verticesPositions: Object.fromEntries(
+          Object.entries(positions).map(([key, { x: vx, y: vy }]) => [
+            key,
+            { x: vx + xShift, y: vy + yShift }
+          ])
+        )
+      };
+    }
   );
 
-  return {
-    boundingRect: calcContainerBoundingRect(verticesPositions, 0, vertexRadius),
-    verticesPositions
-  };
+  // Combine all graph components into one graph layout
+  const combinedLayout = translatedLayouts.reduce(
+    (acc, { boundingRect, verticesPositions }) => {
+      const { bottom, left, right, top } = boundingRect;
+      acc.boundingRect.bottom = Math.max(acc.boundingRect.bottom, bottom);
+      acc.boundingRect.left = Math.min(acc.boundingRect.left, left);
+      acc.boundingRect.right = Math.max(acc.boundingRect.right, right);
+      acc.boundingRect.top = Math.min(acc.boundingRect.top, top);
+      acc.verticesPositions = {
+        ...acc.verticesPositions,
+        ...verticesPositions
+      };
+      return acc;
+    },
+    {
+      boundingRect: {
+        bottom: -Infinity,
+        left: Infinity,
+        right: -Infinity,
+        top: Infinity
+      },
+      verticesPositions: {}
+    } as GraphLayout
+  );
+
+  return combinedLayout;
 };
 
 export const alignPositionsToCenter = (
-  positions: PlacedVerticesPositions
+  positions: PlacedVerticesPositions,
+  padding = 0
 ): {
   boundingRect: BoundingRect;
   verticesPositions: PlacedVerticesPositions;
 } => {
   'worklet';
-  const { bottom, left, right, top } = calcContainerBoundingRect(positions);
+  const { bottom, left, right, top } = calcContainerBoundingRect(positions, {
+    padding
+  });
   const width = right - left;
   const height = bottom - top;
   const offsetX = width / 2 + left;

@@ -23,7 +23,7 @@ const getLayout = (
       (2 * vertexRadius + minVertexSpacing) / (2 * Math.sin(angleStep / 2));
   }
 
-  const containerRadius = radius + vertexRadius + minVertexSpacing / 2;
+  const containerRadius = radius + vertexRadius;
 
   return {
     angleStep,

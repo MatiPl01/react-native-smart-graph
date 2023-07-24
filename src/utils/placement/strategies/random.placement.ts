@@ -44,7 +44,7 @@ const calcVerticesGridPositions = (
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return alignPositionsToCenter(verticesPositions);
+  return alignPositionsToCenter(verticesPositions, vertexRadius);
 };
 
 const calcVerticesTriangularPositions = (
@@ -115,7 +115,7 @@ const calcVerticesTriangularPositions = (
     {} as PlacedVerticesPositions
   );
 
-  return alignPositionsToCenter(verticesPositions);
+  return alignPositionsToCenter(verticesPositions, vertexRadius);
 };
 
 const calcVerticesRandomPositions = (
@@ -136,7 +136,7 @@ const calcVerticesRandomPositions = (
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return alignPositionsToCenter(verticesPositions);
+  return alignPositionsToCenter(verticesPositions, vertexRadius);
 };
 
 export default function placeVerticesRandomly(
@@ -145,7 +145,7 @@ export default function placeVerticesRandomly(
   settings: RandomPlacementSettings = {} as RandomPlacementSettings
 ): GraphLayout {
   'worklet';
-  if (settings.layoutType === 'random') {
+  if (settings.mesh === 'random') {
     const { height, width } = WINDOW_DIMENSIONS;
     return calcVerticesRandomPositions(
       vertices,
@@ -163,7 +163,7 @@ export default function placeVerticesRandomly(
     vertices
   };
 
-  switch (settings.layoutType) {
+  switch (settings.mesh) {
     case 'triangular':
       return calcVerticesTriangularPositions(props);
     default:
