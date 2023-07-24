@@ -76,6 +76,8 @@ export {
   type DirectedGraphComponentsSettings,
   type DirectedGraphSettings,
   type EdgeLabelSettings,
+  type FocusPoint,
+  type FocusPoints,
   type FocusSettings,
   type ForcesLayoutSettings,
   type ForcesSettings,

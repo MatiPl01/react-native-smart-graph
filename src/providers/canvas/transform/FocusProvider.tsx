@@ -1,12 +1,5 @@
 import { vec, Vector } from '@shopify/react-native-skia';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState
-} from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -24,8 +17,8 @@ import { useAutoSizingContext, useCanvasDataContext } from '@/providers/canvas';
 import {
   BlurData,
   FocusData,
-  FocusEndSetter,
-  FocusStartSetter
+  FocusEndFunction,
+  FocusStartFunction
 } from '@/types/focus';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { Maybe } from '@/types/utils';
@@ -33,16 +26,27 @@ import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
 
-type FocusContextType = {
-  endFocus: FocusEndSetter;
-  focusKey: SharedValue<null | string>;
-  focusStatus: SharedValue<number>;
+export type FocusContextType = {
+  blur: {
+    origin: SharedValue<Vector | null>;
+    translationX: SharedValue<number>;
+    translationY: SharedValue<number>;
+  };
+  endFocus: FocusEndFunction;
+  focus: {
+    key: SharedValue<null | string>;
+    scale: SharedValue<number>;
+    x: SharedValue<number>;
+    y: SharedValue<number>;
+  };
+  focusStatus: SharedValue<FocusStatus>;
   focusTransitionProgress: SharedValue<number>;
   gesturesDisabled: SharedValue<boolean>;
-  startFocus: FocusStartSetter;
+  startFocus: FocusStartFunction;
+  status: SharedValue<number>;
 };
 
-const FocusContext = createContext(null);
+const FocusContext = createContext(null as unknown as object);
 
 export const useFocusContext = () => {
   const contextValue = useContext(FocusContext);
@@ -61,16 +65,6 @@ export enum FocusStatus {
   BLUR_TRANSITION,
   BLUR
 }
-
-type FocusState = {
-  animationSettings: AnimationSettingsWithDefaults | null;
-  data: FocusData;
-};
-
-type BlurState = {
-  animationSettings: AnimationSettingsWithDefaults | null;
-  data: BlurData;
-};
 
 type FocusProviderProps = {
   children?: React.ReactNode;
@@ -91,19 +85,30 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
 
-  // CONTEXT VALUES
+  // CONTEXT VALUES - FOCUS
   // Helper value for disabling gestures
   const gesturesDisabled = useSharedValue(false);
+  // This value is used to indicate what is the current focus key
+  // (e.g. the key of the focused vertex)
+  const focusKey = useSharedValue<null | string>(null);
+  // Focused vertex data
+  const focusX = useSharedValue(0);
+  const focusY = useSharedValue(0);
+  const focusScale = useSharedValue(1);
+
+  // CONTEXT VALUES - BLUR
+  const blurTranslationX = useSharedValue(0);
+  const blurTranslationY = useSharedValue(0);
+  // The start point of the gesture-triggered blur animation
+  const blurOrigin = useSharedValue<Vector | null>(null);
+
   // This value is used to indicate what is the current focus status
   const focusStatus = useSharedValue(FocusStatus.BLUR);
-  const focusKey = useSharedValue<null | string>(null);
 
-  // FOCUS & BLUR
-  // Focus state
-  const [focusState, setFocusState] = useState<FocusState | null>();
-  // Blur state
-  const [blurState, setBlurState] = useState<BlurState | null>();
+  // HELPER VALUES
   // Focus/Blur transition
+  const animationSettings =
+    useSharedValue<AnimationSettingsWithDefaults | null>(null);
   const transitionProgress = useSharedValue(1);
   const transitionStartPosition = useSharedValue<Vector>(vec(0, 0));
   const transitionStartScale = useSharedValue<number>(0);
@@ -113,16 +118,17 @@ export default function FocusProvider({ children }: FocusProviderProps) {
    */
 
   // Focus setter
-  const startFocus = useCallback(
-    (
-      data: FocusData,
-      animationSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
-    ) => {
+  const startFocus = useWorkletCallback(
+    (data: FocusData, animSettings?: Maybe<AnimationSettingsWithDefaults>) => {
       // Turn off animated reaction until data is completely set
       focusStatus.value = FocusStatus.FOCUS_PREPARATION;
+      focusKey.value = data.key;
       // Set focus data
       gesturesDisabled.value = data.gesturesDisabled;
-      setFocusState({ animationSettings, data });
+      animationSettings.value =
+        animSettings === undefined
+          ? DEFAULT_FOCUS_ANIMATION_SETTINGS
+          : animSettings;
 
       // Disable auto sizing when focusing
       autoSizingContext.disableAutoSizing();
@@ -131,11 +137,15 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   );
 
   // Blur setter
-  const endFocus = useCallback(
+  const endFocus = useWorkletCallback(
     (
       data?: Maybe<BlurData>,
-      animationSettings: Maybe<AnimationSettingsWithDefaults> = DEFAULT_FOCUS_ANIMATION_SETTINGS
+      animSettings?: Maybe<AnimationSettingsWithDefaults>
     ) => {
+      const updatedAnimSettings =
+        animSettings === undefined
+          ? DEFAULT_FOCUS_ANIMATION_SETTINGS
+          : animSettings;
       // Do nothing if there is no focus applied
       if (focusStatus.value === FocusStatus.BLUR) {
         return;
@@ -145,15 +155,16 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         focusStatus.value = FocusStatus.BLUR;
         gesturesDisabled.value = false;
         focusKey.value = null;
-        updateTransitionProgress(FocusStatus.BLUR, animationSettings);
+        updateTransitionProgress(FocusStatus.BLUR, updatedAnimSettings);
       }
       // Set focus data if it is provided (to prepare for the transition)
       else if (data) {
-        setBlurState({ animationSettings, data });
+        animationSettings.value = updatedAnimSettings;
+        blurOrigin.value = data.origin;
       }
       // Otherwise, just reset the container position
       else {
-        handleContainerReset(animationSettings);
+        handleContainerReset(updatedAnimSettings);
       }
     },
     []
@@ -193,10 +204,10 @@ export default function FocusProvider({ children }: FocusProviderProps) {
 
   const updateAnimationSettingsWithFinishCallback = useWorkletCallback(
     (
-      animationSettings: AnimationSettingsWithDefaults,
+      animSettings: AnimationSettingsWithDefaults,
       finishStatus: FocusStatus
     ) => {
-      const { onComplete, ...timingConfig } = animationSettings;
+      const { onComplete, ...timingConfig } = animSettings;
       return {
         ...timingConfig,
         onComplete: (finished?: boolean) => {
@@ -214,14 +225,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const updateTransitionProgress = useWorkletCallback(
     (
       finishStatus: FocusStatus,
-      animationSettings: AnimationSettingsWithDefaults | null
+      animSettings: AnimationSettingsWithDefaults | null
     ) => {
-      if (animationSettings) {
+      if (animSettings) {
         const { onComplete, ...timingConfig } =
-          updateAnimationSettingsWithFinishCallback(
-            animationSettings,
-            finishStatus
-          );
+          updateAnimationSettingsWithFinishCallback(animSettings, finishStatus);
         transitionProgress.value = 0;
         transitionProgress.value = withTiming(1, timingConfig, onComplete);
       } else {
@@ -237,7 +245,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       transitionType:
         | FocusStatus.BLUR_TRANSITION
         | FocusStatus.FOCUS_TRANSITION,
-      animationSettings: AnimationSettingsWithDefaults | null
+      animSettings: AnimationSettingsWithDefaults | null
     ) => {
       const finishStatus =
         transitionType === FocusStatus.BLUR_TRANSITION
@@ -253,20 +261,20 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       focusStatus.value = transitionType;
       focusKey.value = key;
       // Update the transition progress
-      updateTransitionProgress(finishStatus, animationSettings);
+      updateTransitionProgress(finishStatus, animSettings);
     },
     []
   );
 
   const handleContainerReset = useWorkletCallback(
-    (animationSettings: AnimationSettingsWithDefaults | null) => {
+    (animSettings: AnimationSettingsWithDefaults | null) => {
       focusStatus.value = FocusStatus.BLUR_TRANSITION;
       focusKey.value = null;
-      updateTransitionProgress(FocusStatus.BLUR, animationSettings);
+      updateTransitionProgress(FocusStatus.BLUR, animSettings);
       // Reset the container position with animation if it is provided
-      if (animationSettings) {
+      if (animSettings) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { onComplete: _, ...timingConfig } = animationSettings;
+        const { onComplete: _, ...timingConfig } = animSettings;
         resetContainerPosition({
           animationSettings: timingConfig,
           autoSizingContext
@@ -286,30 +294,34 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     () => ({
       canvasRendered: !!(
         canvasDimensions.width.value && canvasDimensions.height.value
-      )
+      ),
+      key: focusKey.value
     }),
-    ({ canvasRendered }) => {
-      if (!focusState || !canvasRendered) return;
+    ({ canvasRendered, key }) => {
+      if (!key || !canvasRendered) return;
       startTransition(
-        focusState.data.key,
+        key,
         FocusStatus.FOCUS_TRANSITION,
-        focusState.animationSettings
+        animationSettings.value
       );
-      runOnJS(setBlurState)(null);
-    },
-    [focusState]
+      blurOrigin.value = null;
+    }
   );
 
-  // This is used to start the blur transition
-  useEffect(() => {
-    if (!focusState || !blurState) return;
-    startTransition(
-      null,
-      FocusStatus.BLUR_TRANSITION,
-      blurState?.animationSettings ?? DEFAULT_FOCUS_ANIMATION_SETTINGS
-    );
-    runOnJS(setFocusState)(null);
-  }, [blurState]);
+  // This is used to start the blur transition with the provided origin
+  useAnimatedReaction(
+    () => ({
+      origin: blurOrigin.value
+    }),
+    ({ origin }) => {
+      if (!origin) return;
+      startTransition(
+        null,
+        FocusStatus.BLUR_TRANSITION,
+        animationSettings.value ?? DEFAULT_FOCUS_ANIMATION_SETTINGS
+      );
+    }
+  );
 
   /**
    * ANIMATION HANDLERS
@@ -321,27 +333,21 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     () => {
       const status = focusStatus.value;
       if (
-        (status !== FocusStatus.FOCUS_TRANSITION &&
-          status !== FocusStatus.FOCUS) ||
-        !focusState
+        status !== FocusStatus.FOCUS_TRANSITION &&
+        status !== FocusStatus.FOCUS
       ) {
         return null;
       }
-
-      const {
-        centerPosition: { x, y },
-        scale
-      } = focusState.data;
 
       return {
         progress: transitionProgress.value,
         startPosition: transitionStartPosition.value,
         startScale: transitionStartScale.value,
         targetPosition: {
-          x: canvasDimensions.width.value / 2 - x.value * scale.value,
-          y: canvasDimensions.height.value / 2 - y.value * scale.value
+          x: canvasDimensions.width.value / 2 - focusX.value * focusScale.value,
+          y: canvasDimensions.height.value / 2 - focusY.value * focusScale.value
         },
-        targetScale: scale.value
+        targetScale: focusScale.value
       };
     },
     data => {
@@ -367,21 +373,20 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   useAnimatedReaction(
     () => {
       const status = focusStatus.value;
-      if (status !== FocusStatus.BLUR_TRANSITION || !blurState) {
+      const origin = blurOrigin.value;
+      if (status !== FocusStatus.BLUR_TRANSITION || !origin) {
         return null;
       }
 
-      const { x, y } = blurState.data.translation;
-
       return {
-        origin: blurState.data.origin,
+        origin,
         progress: transitionProgress.value,
         startPosition: transitionStartPosition.value,
         startScale: transitionStartScale.value,
         targetScale: initialScale.value,
         translation: {
-          x: x.value,
-          y: y.value
+          x: blurTranslationX.value,
+          y: blurTranslationY.value
         }
       };
     },
@@ -416,19 +421,31 @@ export default function FocusProvider({ children }: FocusProviderProps) {
 
   const contextValue = useMemo<FocusContextType>(
     () => ({
+      blur: {
+        origin: blurOrigin,
+        // These 2 values must be updated by the external provider
+        translationX: blurTranslationX,
+        translationY: blurTranslationY
+      },
       endFocus,
-      focusKey,
+      focus: {
+        key: focusKey,
+        // These 3 values must be updated by the external provider
+        scale: focusScale,
+        x: focusX,
+        y: focusY
+      },
       focusStatus,
       focusTransitionProgress: transitionProgress,
       gesturesDisabled,
-      startFocus
+      startFocus,
+      status: focusStatus
     }),
     []
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <FocusContext.Provider value={contextValue as any}>
+    <FocusContext.Provider value={contextValue}>
       {children}
     </FocusContext.Provider>
   );

@@ -54,7 +54,7 @@ type TransformContextType = {
   ) => void;
 };
 
-const TransformContext = createContext(null);
+const TransformContext = createContext(null as unknown as object);
 
 export const useTransformContext = () => {
   const contextValue = useContext(TransformContext);
@@ -292,8 +292,7 @@ export default function TransformProvider({
   };
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <TransformContext.Provider value={contextValue as any}>
+    <TransformContext.Provider value={contextValue}>
       {children}
     </TransformContext.Provider>
   );

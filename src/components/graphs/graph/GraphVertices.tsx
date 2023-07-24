@@ -1,5 +1,6 @@
 import VertexComponent from '@/components/graphs/vertices/VertexComponent';
-import { useVertexFocusContext, withGraphData } from '@/providers/graph';
+import { FocusContextType } from '@/providers/canvas';
+import { withGraphData } from '@/providers/graph';
 import {
   VertexComponentData,
   VertexRemoveHandler,
@@ -7,22 +8,23 @@ import {
 } from '@/types/components';
 
 type GraphVerticesProps<V, E> = {
+  focusContext: FocusContextType;
   handleVertexRemove: VertexRemoveHandler;
   handleVertexRender: VertexRenderHandler;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
 function GraphVertices<V, E>({
+  focusContext,
   handleVertexRemove,
   handleVertexRender,
   verticesData
 }: GraphVerticesProps<V, E>) {
-  const focusContextValue = useVertexFocusContext();
-
   return Object.values(verticesData).map(data => (
     <VertexComponent
       {...data}
-      {...focusContextValue}
+      focusKey={focusContext.focus.key}
+      focusTransitionProgress={focusContext.focusTransitionProgress}
       key={data.vertex.key}
       onRemove={handleVertexRemove}
       onRender={handleVertexRender}

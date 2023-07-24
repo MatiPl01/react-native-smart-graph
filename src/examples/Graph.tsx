@@ -1,80 +1,115 @@
-import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import {
-  GraphView,
-  UndirectedGraphData,
-  UndirectedGraph,
-  UndirectedGraphComponent,
-  DefaultEdgeLabelRenderer
-} from 'react-native-smart-graph';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { Easing } from 'react-native-reanimated';
 
-const GRAPH: UndirectedGraphData = {
-  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }],
+import GraphViewControls from '@/components/controls/GraphViewControls';
+import GraphView from '@/components/views/GraphView';
+import { DirectedGraph } from '@/models/graphs';
+
+import {
+  DefaultEdgeLabelRenderer,
+  DirectedEdgeData,
+  DirectedGraphComponent,
+  FocusSettings,
+  ObjectFit,
+  VertexData,
+  VertexPressHandler
+} from '..';
+
+const FOCUS_SETTINGS: FocusSettings = {
+  alignment: {
+    horizontalAlignment: 'left',
+    horizontalOffset: 25
+  },
+  animation: {
+    duration: 250,
+    easing: Easing.inOut(Easing.ease)
+  },
+  disableGestures: false,
+  vertexScale: 4
+};
+
+const GRAPH: {
+  edges: DirectedEdgeData<string>[];
+  vertices: VertexData<string>[];
+} = {
   edges: [
-    { key: 'E1', vertices: ['V1', 'V2'] },
-    { key: 'E2', vertices: ['V2', 'V3'] },
-    { key: 'E3', vertices: ['V3', 'V1'] },
-    { key: 'E4', vertices: ['V1', 'V3'] },
-    { key: 'E5', vertices: ['V3', 'V2'] },
-    { key: 'E6', vertices: ['V1', 'V3'] }
+    { from: 'root', key: 'root-sport', to: 'sport', value: '' },
+    { from: 'root', key: 'root-diet', to: 'diet', value: '' },
+    { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
+    { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
+    { from: 'root', key: 'root-reading', to: 'reading', value: '' }
+  ],
+  vertices: [
+    { key: 'root', value: 'Root' },
+    { key: 'sport', value: 'Sport' },
+    { key: 'diet', value: 'Diet' },
+    { key: 'sleep', value: 'Sleep' },
+    { key: 'meditation', value: 'Meditation' },
+    { key: 'reading', value: 'Reading' }
   ]
 };
 
-export default function Graph() {
-  const [showLabels, setShowLabels] = useState(true);
+export default function Development() {
+  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
+  const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
 
-  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
+  useEffect(() => {
+    graph.insertBatch(GRAPH);
+  }, [graph]);
 
-  const toggleLabels = () => setShowLabels(!showLabels);
+  const [vertexSpacing, setVertexSpacing] = useState(50);
+
+  useEffect(() => {
+    setInterval(() => {
+      setVertexSpacing(v => (v === 50 ? 100 : 50));
+    }, 1000);
+  }, []);
+
+  const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
+    ({ vertex: { key } }) => {
+      console.log('long press', key);
+    },
+    []
+  );
+
+  const handleVertexPress = useCallback<VertexPressHandler<string>>(
+    ({ vertex: { key } }) => {
+      graph.focus(key, FOCUS_SETTINGS);
+    },
+    [graph]
+  );
 
   return (
-    <>
-      <GraphView objectFit='contain' padding={25}>
-        <UndirectedGraphComponent
-          renderers={{
-            label: showLabels ? DefaultEdgeLabelRenderer : undefined
-          }}
-          settings={{
-            placement: {
-              strategy: 'circle',
-              minVertexSpacing: 100
-            }
-          }}
-          graph={graph}
-        />
-      </GraphView>
-      {/* Helper overlay to change dimensions */}
-      <View style={styles.overlay}>
-        <TouchableOpacity onPress={toggleLabels} style={styles.button}>
-          <Text style={styles.buttonText}>
-            {showLabels ? 'Hide' : 'Show'} labels
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </>
+    <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
+      <DirectedGraphComponent
+        renderers={{
+          label: DefaultEdgeLabelRenderer
+        }}
+        settings={{
+          events: {
+            onVertexLongPress: handleVertexLongPress,
+            onVertexPress: handleVertexPress
+          },
+          placement: {
+            minVertexSpacing: vertexSpacing,
+            strategy: 'orbits'
+          }
+        }}
+        graph={graph}
+      />
+      <GraphViewControls
+        onObjectFitChange={setObjectFit}
+        style={styles.controls}
+      />
+    </GraphView>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    pointerEvents: 'box-none',
-    alignItems: 'center'
-  },
-  button: {
-    backgroundColor: '#edcf46',
-    justifyContent: 'center',
-    borderRadius: 5,
-    marginBottom: 50,
-    paddingHorizontal: 25,
-    paddingVertical: 10
-  },
-  buttonText: {
-    fontSize: 30,
-    lineHeight: 30,
-    fontWeight: 'bold',
-    textAlign: 'center'
+  controls: {
+    position: 'absolute',
+    top: 40,
+    right: 10
   }
 });

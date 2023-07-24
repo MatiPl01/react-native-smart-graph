@@ -26,7 +26,7 @@ type ForcesPlacementContextType = {
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>;
 };
 
-const ForcesPlacementContext = createContext(null);
+const ForcesPlacementContext = createContext(null as unknown as object);
 
 export const useForcesPlacementContext = () => {
   const contextValue = useContext(ForcesPlacementContext);
@@ -159,8 +159,7 @@ function ForcesPlacementProvider<V, E>({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <ForcesPlacementContext.Provider value={contextValue as any}>
+    <ForcesPlacementContext.Provider value={contextValue}>
       {children}
     </ForcesPlacementContext.Provider>
   );

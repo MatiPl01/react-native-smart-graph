@@ -37,13 +37,7 @@ function GraphComponentComposer<
   // Transform context
   const { handleCanvasRender, handleGraphRender } = useTransformContext();
   // Focus context
-  const {
-    endFocus,
-    focusKey,
-    focusStatus,
-    focusTransitionProgress,
-    startFocus
-  } = useFocusContext();
+  const focusContext = useFocusContext();
 
   const transform = useMemo(
     () => ({
@@ -68,15 +62,14 @@ function GraphComponentComposer<
           boundingRect={boundingRect}
           canvasDimensions={canvasDimensions}
           canvasScales={scales}
-          endFocus={endFocus}
-          focusKey={focusKey}
-          focusStatus={focusStatus}
-          focusTransitionProgress={focusTransitionProgress}
+          focusContext={focusContext}
           initialCanvasScale={initialScale}
           onRender={handleGraphRender}
-          startFocus={startFocus}
           transform={transform}>
-          <GraphComponent boundingRect={boundingRect} />
+          <GraphComponent
+            boundingRect={boundingRect}
+            focusContext={focusContext}
+          />
         </GraphProvider>
       </Group>
     </Canvas>
