@@ -39,6 +39,11 @@ export default function Graph() {
             placement: {
               strategy: 'circle',
               minVertexSpacing: 100
+            },
+            components: {
+              vertex: {
+                radius: 50
+              }
             }
           }}
           graph={graph}
