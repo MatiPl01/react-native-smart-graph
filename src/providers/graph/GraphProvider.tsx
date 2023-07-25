@@ -32,6 +32,7 @@ import {
 } from './layout';
 import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
 import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
+import MultiStepVertexFocusProvider from './transform/MultiStepVertexFocusProvider';
 import VertexFocusProvider from './transform/VertexFocusProvider';
 
 const getLayoutProviders = <V, E>(
@@ -154,7 +155,17 @@ function GraphProvider<V, E>({
         graph={graph}
         initialScale={initialCanvasScale}
         vertexRadius={memoSettings.components.vertex.radius}
-      />
+      />,
+      // Provider used to focus one of the vertices specified in an
+      // array based on the user-defined progress
+      ...(memoSettings.focus
+        ? [
+            <MultiStepVertexFocusProvider
+              focusContext={focusContext}
+              settings={memoSettings.focus}
+            />
+          ]
+        : [])
     ],
     [memoRenderers]
   );

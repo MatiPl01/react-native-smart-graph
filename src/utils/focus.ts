@@ -4,8 +4,10 @@ import {
   DEFAULT_FOCUS_SCALE_MULTIPLIER
 } from '@/constants/focus';
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { AnimationSettingsWithDefaults } from '@/types/settings';
+import { AnimationSettingsWithDefaults, FocusPoint } from '@/types/settings';
 import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
+
+import { binarySearchLE } from './algorithms';
 
 export const getFocusedVertexData = (
   focusedVertexWithPosition: {
@@ -46,5 +48,29 @@ export const getFocusedVertexData = (
           availableScales[availableScales.length - 1]!
         )
     }
+  };
+};
+
+export const calcMultiStepFocusPoint = (
+  progress: number,
+  focusPoints: Array<{ startsAt: number; value: FocusPoint }>
+): {
+  after: string;
+  before: string;
+  progress: number;
+} => {
+  'worklet';
+  const idx = binarySearchLE(focusPoints, progress, point => point.startsAt);
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const before = focusPoints[idx]!;
+  const after = focusPoints[idx + 1] ?? before;
+  const progressStart = before.startsAt;
+  const progressEnd = after?.startsAt ?? 1;
+
+  return {
+    after,
+    before,
+    progress: (progress - progressStart) / (progressEnd - progressStart)
   };
 };

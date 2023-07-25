@@ -1,4 +1,11 @@
-import { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef
+} from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -18,6 +25,24 @@ import {
   getAlignedVertexAbsolutePosition,
   getCoordinatesRelativeToCenter
 } from '@/utils/layout';
+
+type VertexFocusContextType = {
+  isVertexFocused: SharedValue<boolean>;
+};
+
+const VertexFocusContext = createContext(null as unknown as object);
+
+export const useVertexFocusContext = () => {
+  const contextValue = useContext(VertexFocusContext);
+
+  if (!contextValue) {
+    throw new Error(
+      'useVertexFocusContext must be used within a VertexFocusProvider'
+    );
+  }
+
+  return contextValue as VertexFocusContextType;
+};
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   availableScales: SharedValue<number[]>;
@@ -68,6 +93,10 @@ function VertexFocusProvider<V, E>({
     [focusedVertexWithPosition, data.settings]
   );
 
+  // CONTEXT VALUES
+  // Is vertex focused
+  const isVertexFocused = useSharedValue(false);
+
   // OTHER VALUES
   // Helper values
   const isFirstRenderRef = useRef(true);
@@ -88,6 +117,7 @@ function VertexFocusProvider<V, E>({
         focusContext.status.value !== FocusStatus.BLUR_TRANSITION
       ) {
         focusContext.endFocus(undefined, focusedVertexData.animation);
+        isVertexFocused.value = false;
       }
       return;
     }
@@ -109,6 +139,7 @@ function VertexFocusProvider<V, E>({
       },
       focusedVertexData.animation
     );
+    isVertexFocused.value = true;
   }, [focusedVertexData]);
 
   useAnimatedReaction(
@@ -177,11 +208,23 @@ function VertexFocusProvider<V, E>({
         status === FocusStatus.BLUR
       ) {
         runOnJS(blurGraph)();
+        isVertexFocused.value = false;
       }
     }
   );
 
-  return <>{children}</>;
+  const contextValue = useMemo<VertexFocusContextType>(
+    () => ({
+      isVertexFocused
+    }),
+    []
+  );
+
+  return (
+    <VertexFocusContext.Provider value={contextValue}>
+      {children}
+    </VertexFocusContext.Provider>
+  );
 }
 
 export default withGraphData(
