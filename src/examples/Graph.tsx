@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 import {
   Easing,
   useSharedValue,
-  withRepeat,
   withSequence,
   withTiming
 } from 'react-native-reanimated';
@@ -47,6 +46,8 @@ const GRAPH: {
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
+let added = false;
+
 export default function Development() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
@@ -71,17 +72,20 @@ export default function Development() {
 
   useEffect(() => {
     setInterval(() => {
-      setVertexSpacing(v => (v === 50 ? 150 : 50));
+      // setVertexSpacing(v => (v === 50 ? 150 : 50));
+      if (!added) {
+        graph.insertVertex({ key: 'V5' });
+      } else {
+        graph.removeVertex('V5');
+      }
+      added = !added;
     }, 1000);
   }, []);
 
   useEffect(() => {
-    multiStepFocusProgress.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 2000, easing: Easing.linear }),
-        withTiming(0, { duration: 2000, easing: Easing.linear })
-      ),
-      -1
+    multiStepFocusProgress.value = withSequence(
+      withTiming(1, { duration: 2000, easing: Easing.linear }),
+      withTiming(0, { duration: 2000, easing: Easing.linear })
     );
   }, []);
 

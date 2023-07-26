@@ -3,9 +3,13 @@ import {
   DEFAULT_ALIGNMENT_SETTINGS,
   DEFAULT_FOCUS_SCALE_MULTIPLIER
 } from '@/constants/focus';
+import { FocusStepData } from '@/types/focus';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
+
+import { animatedVectorCoordinatesToVector } from './vectors';
+import { calcScaleOnProgress, calcTranslationOnProgress } from './views';
 
 export const getFocusedVertexData = (
   focusedVertexWithPosition: {
@@ -49,26 +53,47 @@ export const getFocusedVertexData = (
   };
 };
 
-// export const calcMultiStepFocusPoint = (
-//   progress: number,
-//   focusPoints: Array<{ startsAt: number; value: FocusPoint }>
-// ): {
-//   after: string;
-//   before: string;
-//   progress: number;
-// } => {
-//   'worklet';
-//   const idx = binarySearchLE(focusPoints, progress, point => point.startsAt);
-
-//   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-//   const before = focusPoints[idx]!;
-//   const after = focusPoints[idx + 1] ?? before;
-//   const progressStart = before.startsAt;
-//   const progressEnd = after?.startsAt ?? 1;
-
-//   return {
-//     after,
-//     before,
-//     progress: (progress - progressStart) / (progressEnd - progressStart)
-//   };
-// };
+export const calcMultiStepFocusTransition = (
+  stepProgress: number,
+  before?: FocusStepData,
+  after?: FocusStepData
+): {
+  scale: number;
+  x: number;
+  y: number;
+} => {
+  'worklet';
+  if (before && after) {
+    const { position: beforePosition, scale: beforeScale } = before.vertex;
+    const { position: afterPosition, scale: afterScale } = after.vertex;
+    return {
+      ...calcTranslationOnProgress(
+        stepProgress,
+        animatedVectorCoordinatesToVector(beforePosition),
+        animatedVectorCoordinatesToVector(afterPosition)
+      ),
+      scale: calcScaleOnProgress(
+        stepProgress,
+        beforeScale.value,
+        afterScale.value
+      )
+    };
+  }
+  if (before) {
+    return {
+      ...animatedVectorCoordinatesToVector(before.vertex.position),
+      scale: before.vertex.scale.value
+    };
+  }
+  if (after) {
+    return {
+      ...animatedVectorCoordinatesToVector(after.vertex.position),
+      scale: after.vertex.scale.value
+    };
+  }
+  return {
+    scale: 1,
+    x: 0,
+    y: 0
+  };
+};

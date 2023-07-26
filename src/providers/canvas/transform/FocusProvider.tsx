@@ -78,6 +78,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const {
     getTranslateClamp,
     resetContainerPosition,
+    resetContainerPositionOnProgress,
     scaleContentTo,
     translateContentTo
   } = useTransformContext();
@@ -162,11 +163,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     animSettings: AnimationSettingsWithDefaults | null
   ) => {
     'worklet';
-    focusStatus.value = FocusStatus.BLUR_TRANSITION;
-    focusKey.value = null;
-    updateTransitionProgress(animSettings);
     // Reset the container position with animation if it is provided
     if (animSettings) {
+      focusStatus.value = FocusStatus.BLUR_TRANSITION;
+      focusKey.value = null;
+      updateTransitionProgress(animSettings);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { onComplete: _, ...timingConfig } = animSettings;
       resetContainerPosition({
@@ -174,10 +175,12 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         autoSizingContext
       });
     }
-    // Otherwise, reset the container and update the transition progress manually
-    // from the outside
+    // Otherwise, reset the container based on progress updated from the
+    // outside (e.g. from MultiStepFocusProvider)
+    // The function below will trigger the animated reaction that will
+    // handle the animation based on the progress updated from the outside
     else {
-      resetContainerPosition({ animationSettings: null, autoSizingContext });
+      startTransition(null, FocusStatus.BLUR_TRANSITION, null);
     }
   };
 
@@ -238,7 +241,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       animationSettings.value = updatedAnimSettings;
       blurOrigin.value = data.origin;
     }
-    // Otherwise, just reset the container position
+    // Otherwise, reset the container position
     else {
       handleContainerReset(updatedAnimSettings);
     }
@@ -354,6 +357,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   );
 
   // Blur animation handler (from focused to unfocused state)
+  // (when the blur origin is provided)
   useAnimatedReaction(
     () => {
       const status = focusStatus.value;
@@ -403,11 +407,39 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     }
   );
 
+  // Blur animation handler (from focused to unfocused state)
+  // (when the blur origin is not provided and the progress
+  // is updated from the outside)
+  useAnimatedReaction(
+    () => {
+      const status = focusStatus.value;
+      if (status !== FocusStatus.BLUR_TRANSITION || animationSettings.value) {
+        return null;
+      }
+
+      return {
+        progress: transitionProgress.value,
+        startPosition: transitionStartPosition.value,
+        startScale: transitionStartScale.value
+      };
+    },
+    data => {
+      // Don't do anything if there is no data
+      if (!data) return;
+      const { progress, startPosition, startScale } = data;
+      // Reset the container position based on the progress
+      resetContainerPositionOnProgress(progress, startScale, startPosition, {
+        autoSizingContext
+      });
+    }
+  );
+
   const contextValue = useMemo<FocusContextType>(
     () => ({
       blur: {
         origin: blurOrigin,
         // These 2 values must be updated by the external provider
+        // if the blur origin is provided in the blur data
         translationX: blurTranslationX,
         translationY: blurTranslationY
       },
