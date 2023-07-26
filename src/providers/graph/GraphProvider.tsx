@@ -176,6 +176,7 @@ function GraphProvider<V, E>({
               focusContext={focusContext}
               gesturesContext={gesturesContext}
               settings={memoSettings.focus}
+              transformContext={transformContext}
             />
           ]
         : [])

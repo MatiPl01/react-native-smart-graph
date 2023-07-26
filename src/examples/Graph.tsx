@@ -49,7 +49,18 @@ const GRAPH: {
 
 export default function Development() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
+
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
+  const focusPoints = useMemo(
+    // TODO - add information in docs about useMemo
+    () => ({
+      0.25: { key: 'V4' },
+      0.5: { key: 'V2' },
+      1: { key: 'V3' }
+    }),
+    []
+  );
+
   const multiStepFocusProgress = useSharedValue(0);
 
   useEffect(() => {
@@ -58,11 +69,11 @@ export default function Development() {
 
   const [vertexSpacing, setVertexSpacing] = useState(50);
 
-  useEffect(() => {
-    setInterval(() => {
-      setVertexSpacing(v => (v === 50 ? 150 : 50));
-    }, 1000);
-  }, []);
+  // useEffect(() => {
+  //   setInterval(() => {
+  //     setVertexSpacing(v => (v === 50 ? 150 : 50));
+  //   }, 1000);
+  // }, []);
 
   useEffect(() => {
     multiStepFocusProgress.value = withRepeat(
@@ -104,11 +115,7 @@ export default function Development() {
             strategy: 'orbits'
           },
           focus: {
-            points: {
-              0: { key: 'V1' },
-              0.25: { key: 'V2' },
-              0.75: { key: 'V3' }
-            },
+            points: focusPoints,
             progress: multiStepFocusProgress
           }
         }}
