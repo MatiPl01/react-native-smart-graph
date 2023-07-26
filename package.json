@@ -99,13 +99,13 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "postinstall": "patch-package",
     "prepack": "yarn build",
     "prepare": "husky install",
     "semantic-release": "semantic-release",
     "start": "react-native start",
     "test": "jest",
-    "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package"
+    "typecheck": "tsc --noEmit"
   },
   "types": "dist/types/index.d.ts"
 }

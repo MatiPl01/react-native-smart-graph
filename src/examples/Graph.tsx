@@ -69,11 +69,11 @@ export default function Development() {
 
   const [vertexSpacing, setVertexSpacing] = useState(50);
 
-  // useEffect(() => {
-  //   setInterval(() => {
-  //     setVertexSpacing(v => (v === 50 ? 150 : 50));
-  //   }, 1000);
-  // }, []);
+  useEffect(() => {
+    setInterval(() => {
+      setVertexSpacing(v => (v === 50 ? 150 : 50));
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     multiStepFocusProgress.value = withRepeat(

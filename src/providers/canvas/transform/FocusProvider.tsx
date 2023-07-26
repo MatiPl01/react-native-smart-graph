@@ -174,9 +174,10 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         autoSizingContext
       });
     }
-    // Otherwise, reset the container position without animation
+    // Otherwise, reset the container and update the transition progress manually
+    // from the outside
     else {
-      resetContainerPosition({ autoSizingContext });
+      resetContainerPosition({ animationSettings: null, autoSizingContext });
     }
   };
 
