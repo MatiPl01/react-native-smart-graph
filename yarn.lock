@@ -2407,10 +2407,10 @@
     lodash-es "^4.17.21"
     read-pkg-up "^9.0.0"
 
-"@shopify/react-native-skia@^0.1.196":
-  version "0.1.196"
-  resolved "https://registry.npmjs.org/@shopify/react-native-skia/-/react-native-skia-0.1.196.tgz"
-  integrity sha512-MwL+X9XzwPdyp5juOel6pNkd7DoRfPSbjqlkOTs5C83HCdceZOO0x6DMK9uiZv/mVxQwOnexfNh5h06185qiow==
+"@shopify/react-native-skia@^0.1.197":
+  version "0.1.197"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.197.tgz#7595ad52015b4ac869813c8b3c4f4bd231485f92"
+  integrity sha512-OW7SG/X57gKScz1n9e3GaxrjuiJoQYqXVsYQKuU/JtpoYkzZHpzH8cvBBEjHhuUzoMW0/ER25XB+SUk1K58ozg==
   dependencies:
     canvaskit-wasm "0.38.0"
     react-reconciler "^0.27.0"

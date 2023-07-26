@@ -21,7 +21,7 @@ import {
   clamp
 } from '@/utils/views';
 
-type TransformContextType = {
+export type TransformContextType = {
   getIdealScale: (
     boundingRect: BoundingRect,
     canvasDimensions: Dimensions,
@@ -73,7 +73,7 @@ export default function TransformProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // CONTEXT VALUES
+  // OTHER CONTEXTS VALUES
   // Canvas data
   const {
     boundingRect: {

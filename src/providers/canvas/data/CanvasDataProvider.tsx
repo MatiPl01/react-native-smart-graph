@@ -14,7 +14,7 @@ import {
 } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 
-type CanvasDataContextType = {
+export type CanvasDataContextType = {
   autoSizingEnabled: SharedValue<boolean>;
   autoSizingTimeout: SharedValue<number>;
   boundingRect: AnimatedBoundingRect;

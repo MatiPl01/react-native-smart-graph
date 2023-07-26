@@ -48,7 +48,7 @@ export default function AutoSizingProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // CONTEXT VALUES
+  // OTHER CONTEXTS VALUES
   // Canvas data context values
   const {
     autoSizingEnabled,

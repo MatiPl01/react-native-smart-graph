@@ -1,7 +1,7 @@
 import { PropsWithChildren, useMemo } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
+import { useAnimatedReaction } from 'react-native-reanimated';
 
-import { FocusContextType } from '@/providers/canvas';
+import { FocusContextType, GesturesContextType } from '@/providers/canvas';
 import { withGraphData } from '@/providers/graph/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { GraphFocusSettings } from '@/types/settings';
@@ -10,11 +10,11 @@ import { useVertexFocusContext } from './VertexFocusProvider';
 
 type MultiStepFocusProviderProps = PropsWithChildren<{
   focusContext: FocusContextType;
+  gesturesContext: GesturesContextType;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphFocusSettings;
 }>;
 
-// TODO - add focus points validation (startAt should be between 0 and 1)
 function MultiStepFocusProvider({
   children,
   focusContext,
@@ -33,15 +33,23 @@ function MultiStepFocusProvider({
         .sort(({ startsAt: a }, { startsAt: b }) => a - b),
     [settings.points]
   );
+
+  // Enable the multi step focus when the vertex is not focused
+  // and no gesture is being performed
+  useAnimatedReaction(
+    () => !isVertexFocused.value,
+    enabled => {}
+  );
+
   // const focusData = useMemo<FocusData>(
   //   () => ({
   //     gesturesDisabled: !!settings.gesturesDisabled,
   //     key: calcMultiStepFocusPoint(settings.progress.value, orderedFocusPoints)
-  //       .after.key
+  //       .after
   //   }),
   //   [settings.gesturesDisabled, settings.progress, orderedFocusPoints]
   // );
-  const previousKey = useSharedValue<null | string>(null);
+  // const previousKey = useSharedValue<null | string>(null);
 
   // useAnimatedReaction(
   //   () => ({

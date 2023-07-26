@@ -71,7 +71,7 @@ type FocusProviderProps = {
 };
 
 export default function FocusProvider({ children }: FocusProviderProps) {
-  // CONTEXT VALUES
+  // OTHER CONTEXTS VALUES
   // Canvas data context values
   const { canvasDimensions, currentScale, currentTranslation, initialScale } =
     useCanvasDataContext();

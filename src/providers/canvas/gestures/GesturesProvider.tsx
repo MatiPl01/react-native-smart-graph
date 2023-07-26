@@ -2,9 +2,9 @@ import { Vector } from '@shopify/react-native-skia';
 import { createContext, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
+  SharedValue,
   useAnimatedReaction,
   useSharedValue,
-  useWorkletCallback,
   withDecay
 } from 'react-native-reanimated';
 
@@ -18,8 +18,9 @@ import {
 } from '@/providers/canvas';
 import { Maybe } from '@/types/utils';
 
-type GesturesContextType = {
+export type GesturesContextType = {
   gestureHandler: ComposedGesture;
+  isGestureActive: SharedValue<boolean>;
 };
 
 const GesturesContext = createContext(null as unknown as object);
@@ -47,7 +48,7 @@ export default function GesturesProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // CONTEXT VALUES
+  // OTHER CONTEXTS VALUES
   // Canvas data context values
   const {
     currentScale,
@@ -73,12 +74,23 @@ export default function GesturesProvider({
   const pinchDecayScale = useSharedValue(1);
   const pinchEndPosition = useSharedValue({ x: 0, y: 0 });
 
-  const handleGestureStart = useWorkletCallback((origin?: Maybe<Vector>) => {
+  // CONTEXT VALUES
+  const isGestureActive = useSharedValue(false);
+
+  const handleGestureStart = (origin?: Maybe<Vector>) => {
+    'worklet';
+    isGestureActive.value = true;
     autoSizingContext.disableAutoSizing();
     if (focusStatus.value !== FocusStatus.BLUR) {
       endFocus(origin && { origin });
     }
-  }, []);
+  };
+
+  const handleGestureEnd = () => {
+    'worklet';
+    isGestureActive.value = false;
+    autoSizingContext.enableAutoSizingAfterTimeout();
+  };
 
   const panGestureHandler = Gesture.Pan()
     .onStart(({ numberOfPointers, x, y }) => {
@@ -116,7 +128,7 @@ export default function GesturesProvider({
         clamp: clampY,
         velocity: velocityY
       });
-      autoSizingContext.enableAutoSizingAfterTimeout();
+      handleGestureEnd();
     });
 
   const pinchGestureHandler = Gesture.Pinch()
@@ -143,7 +155,7 @@ export default function GesturesProvider({
         rubberBandEffect: true,
         velocity
       });
-      autoSizingContext.enableAutoSizingAfterTimeout();
+      handleGestureEnd();
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -175,7 +187,7 @@ export default function GesturesProvider({
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
       }
-      autoSizingContext.enableAutoSizingAfterTimeout();
+      handleGestureEnd();
     });
 
   useAnimatedReaction(
@@ -197,7 +209,8 @@ export default function GesturesProvider({
       gestureHandler: Gesture.Race(
         Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
         doubleTapGestureHandler
-      )
+      ),
+      isGestureActive
     }),
     []
   );
