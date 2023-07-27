@@ -8,7 +8,6 @@ import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import {
   CanvasDataContextType,
   FocusContextType,
-  GesturesContextType,
   TransformContextType
 } from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
@@ -85,7 +84,6 @@ type GraphProviderProps<V, E> = PropsWithChildren<
   {
     canvasDataContext: CanvasDataContextType;
     focusContext: FocusContextType;
-    gesturesContext: GesturesContextType;
     transformContext: TransformContextType;
   } & AccessibleOverlayContextType &
     (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
@@ -96,7 +94,6 @@ function GraphProvider<V, E>({
   canvasDataContext,
   children,
   focusContext,
-  gesturesContext,
   graph,
   renderLayer,
   renderers,

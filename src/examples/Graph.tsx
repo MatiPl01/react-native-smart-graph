@@ -48,8 +48,6 @@ const GRAPH: {
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
-const added = false;
-
 export default function Development() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
@@ -81,20 +79,6 @@ export default function Development() {
   useEffect(() => {
     graph.insertBatch(GRAPH);
   }, [graph]);
-
-  const [vertexSpacing, setVertexSpacing] = useState(50);
-
-  // useEffect(() => {
-  //   setInterval(() => {
-  //     // setVertexSpacing(v => (v === 50 ? 150 : 50));
-  //     if (!added) {
-  //       graph.insertVertex({ key: 'V5' });
-  //     } else {
-  //       graph.removeVertex('V5');
-  //     }
-  //     added = !added;
-  //   }, 1000);
-  // }, []);
 
   useEffect(() => {
     multiStepFocusProgress.value = withRepeat(
@@ -132,7 +116,6 @@ export default function Development() {
             onVertexPress: handleVertexPress
           },
           placement: {
-            minVertexSpacing: vertexSpacing,
             strategy: 'orbits'
           },
           focus: {

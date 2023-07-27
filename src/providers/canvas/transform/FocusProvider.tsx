@@ -194,7 +194,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     animSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     'worklet';
-    console.log('start', data, animSettings);
     // Reset blur settings
     blurOrigin.value = null;
     // Disable auto sizing when focusing
@@ -216,7 +215,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     animSettings?: Maybe<AnimationSettingsWithDefaults>
   ) => {
     'worklet';
-    console.log('end', data, animSettings);
     const updatedAnimSettings = (animationSettings.value =
       animSettings === undefined
         ? DEFAULT_FOCUS_ANIMATION_SETTINGS
@@ -300,7 +298,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
           : FocusStatus.FOCUS;
       // Set the finish status
       focusStatus.value = finishStatus;
-      console.log('focus end', finishStatus);
       // Enable gestures and change the container position to fit
       // into the canvas bounds if it's out of them
       if (finishStatus === FocusStatus.BLUR) {

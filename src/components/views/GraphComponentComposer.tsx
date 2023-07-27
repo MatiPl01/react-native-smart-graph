@@ -12,7 +12,6 @@ import {
 import {
   useCanvasDataContext,
   useFocusContext,
-  useGesturesContext,
   useTransformContext
 } from '@/providers/canvas';
 import GraphProvider from '@/providers/graph/GraphProvider';
@@ -63,8 +62,6 @@ function GraphComponentComposer<
   const canvasDataContext = useCanvasDataContext();
   // Transform context
   const transformContext = useTransformContext();
-  // Gestures context
-  const gesturesContext = useGesturesContext();
   // Focus context
   const focusContext = useFocusContext();
 
@@ -83,7 +80,6 @@ function GraphComponentComposer<
           {...props}
           canvasDataContext={canvasDataContext}
           focusContext={focusContext}
-          gesturesContext={gesturesContext}
           transformContext={transformContext}>
           <GraphComponent
             canvasDataContext={canvasDataContext}
