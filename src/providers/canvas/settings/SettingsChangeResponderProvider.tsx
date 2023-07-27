@@ -26,7 +26,7 @@ export default function SettingsChangeResponderProvider({
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
   // Focus context values
-  const { focusKey } = useFocusContext();
+  const { focus } = useFocusContext();
 
   // Other values
   const isFirstAutoSizingReactionCall = useSharedValue(true);
@@ -53,12 +53,12 @@ export default function SettingsChangeResponderProvider({
         autoSizingContext.disableAutoSizing();
         return;
       }
+      isFirstAutoSizingReactionCall.value = false;
       if (objFit !== 'none') {
-        isFirstAutoSizingReactionCall.value = false;
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
         } else {
-          autoSizingContext.enableAutoSizing();
+          // autoSizingContext.enableAutoSizing();
         }
       }
     }
@@ -78,7 +78,7 @@ export default function SettingsChangeResponderProvider({
         return;
       }
       // Don't reset the container position if there is a focused object
-      if (focusKey.value !== null) return;
+      if (focus.key.value !== null) return;
       // Reset the container position
       resetContainerPosition({
         animationSettings: {

@@ -25,17 +25,29 @@ export default abstract class Graph<
 > implements IGraph<V, E>
 {
   private focusedVertexKey: null | string = null;
+  private lastFocusChangeSettings: FocusSettings | null = null;
+  private lastGraphChangeSettings: AnimationsSettings | null = null;
+
   private readonly observers: Set<GraphObserver> = new Set();
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
     string,
     Record<string, Array<GE>>
   > = {};
-
   protected readonly vertices$: Record<string, GV> = {};
 
   addObserver(observer: GraphObserver): void {
     this.observers.add(observer);
+    // Notify about last changes
+    if (this.lastGraphChangeSettings) {
+      observer?.graphChanged?.(this.lastGraphChangeSettings);
+    }
+    if (this.focusedVertexKey) {
+      observer?.focusChanged?.(
+        this.focusedVertexKey,
+        this.lastFocusChangeSettings ?? undefined
+      );
+    }
   }
 
   blur(settings?: Maybe<AnimationSettings>): void {
@@ -152,6 +164,7 @@ export default abstract class Graph<
     vertexKey: null | string,
     settings?: FocusSettings
   ): void {
+    this.lastFocusChangeSettings = settings ?? null;
     this.observers.forEach(observer => {
       observer.focusChanged?.(vertexKey, settings);
     });
@@ -160,13 +173,13 @@ export default abstract class Graph<
   protected notifyGraphChange(
     animationsSettings?: Maybe<AnimationsSettings>
   ): void {
+    const updatedAnimationSettings = animationsSettings ?? {
+      edges: {},
+      vertices: {}
+    };
+    this.lastGraphChangeSettings = updatedAnimationSettings;
     this.observers.forEach(observer => {
-      observer.graphChanged?.(
-        animationsSettings ?? {
-          edges: {},
-          vertices: {}
-        }
-      );
+      observer.graphChanged?.(updatedAnimationSettings);
     });
   }
 

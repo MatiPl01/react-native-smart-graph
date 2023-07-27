@@ -3,8 +3,7 @@ import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
-import { useVertexFocusContext } from '@/providers/graph';
-import { AnimatedBoundingRect } from '@/types/layout';
+import { CanvasDataContextType, FocusContextType } from '@/providers/canvas';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
@@ -12,12 +11,18 @@ import GraphEdgesMask from './GraphEdgesMask';
 import GraphVertices from './GraphVertices';
 
 type GraphComponentProps = {
-  boundingRect: AnimatedBoundingRect;
+  canvasDataContext: CanvasDataContextType;
+  focusContext: FocusContextType;
 };
 
-function GraphComponent({ boundingRect }: GraphComponentProps) {
-  const { focusKey, focusTransitionProgress } = useVertexFocusContext();
-  // Helper value to animate components on vertex focus
+function GraphComponent({
+  canvasDataContext: { boundingRect },
+  focusContext: {
+    focus: { key: focusKey },
+    focusTransitionProgress
+  }
+}: GraphComponentProps) {
+  // A helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
   // Update the focusProgress
   useComponentFocus(focusProgress, focusTransitionProgress, focusKey);
@@ -29,7 +34,10 @@ function GraphComponent({ boundingRect }: GraphComponentProps) {
         mode='luminance'>
         <GraphEdges focusProgress={focusProgress} />
       </Mask>
-      <GraphVertices />
+      <GraphVertices
+        focusKey={focusKey}
+        focusTransitionProgress={focusTransitionProgress}
+      />
       <GraphEdgesLabels focusProgress={focusProgress} />
     </>
   );

@@ -91,7 +91,7 @@ export type EdgeComponentProps<E, V> = Omit<
 export type EdgeComponentData<E, V> = {
   animationSettings: AnimationSettingsWithDefaults;
   arrowRenderer?: EdgeArrowRenderFunction;
-  componentSettings: GraphSettingsWithDefaults<V, E>['components']['edge'];
+  componentSettings: GraphSettingsWithDefaults<V>['components']['edge'];
   edge: Edge<E, V>;
   edgeRenderer: EdgeRenderFunction<E>;
   edgesCount: number;

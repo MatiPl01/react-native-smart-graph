@@ -18,10 +18,12 @@ import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,
   calcContainerTranslation,
+  calcScaleOnProgress,
+  calcTranslationOnProgress,
   clamp
 } from '@/utils/views';
 
-type TransformContextType = {
+export type TransformContextType = {
   getIdealScale: (
     boundingRect: BoundingRect,
     canvasDimensions: Dimensions,
@@ -40,6 +42,18 @@ type TransformContextType = {
     containerBoundingRect?: BoundingRect;
     scale?: number;
   }) => void;
+  resetContainerPositionOnProgress: (
+    progress: number,
+    startScale: number,
+    startTranslation: Vector,
+    settings?: {
+      autoSizingContext?: AutoSizingContextType;
+      canvasDimensions?: Dimensions;
+      containerBoundingRect?: BoundingRect;
+      padding?: BoundingRect;
+      scale?: number;
+    }
+  ) => void;
   scaleContentTo: (
     newScale: number,
     origin?: Vector,
@@ -54,7 +68,7 @@ type TransformContextType = {
   ) => void;
 };
 
-const TransformContext = createContext(null);
+const TransformContext = createContext(null as unknown as object);
 
 export const useTransformContext = () => {
   const contextValue = useContext(TransformContext);
@@ -73,7 +87,7 @@ export default function TransformProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // CONTEXT VALUES
+  // OTHER CONTEXTS VALUES
   // Canvas data
   const {
     boundingRect: {
@@ -107,6 +121,24 @@ export default function TransformProvider({
 
   const handleGraphRender = (containerBoundingRect: BoundingRect) => {
     initialBoundingRect.value = containerBoundingRect;
+  };
+
+  const getCurrentBoundingRect = (): BoundingRect => {
+    'worklet';
+    return {
+      bottom: containerBottom.value,
+      left: containerLeft.value,
+      right: containerRight.value,
+      top: containerTop.value
+    };
+  };
+
+  const getCurrentCanvasDimensions = (): Dimensions => {
+    'worklet';
+    return {
+      height: canvasHeight.value,
+      width: canvasWidth.value
+    };
   };
 
   const getTranslateClamp = (
@@ -223,17 +255,10 @@ export default function TransformProvider({
     scale?: number;
   }) => {
     'worklet';
-    const containerBoundingRect = settings?.containerBoundingRect ?? {
-      bottom: containerBottom.value,
-      left: containerLeft.value,
-      right: containerRight.value,
-      top: containerTop.value
-    };
-
-    const canvasDimensions = settings?.canvasDimensions ?? {
-      height: canvasHeight.value,
-      width: canvasWidth.value
-    };
+    const containerBoundingRect =
+      settings?.containerBoundingRect ?? getCurrentBoundingRect();
+    const canvasDimensions =
+      settings?.canvasDimensions ?? getCurrentCanvasDimensions();
 
     // Disable auto sizing while resetting container position
     settings?.autoSizingContext?.disableAutoSizing();
@@ -256,6 +281,51 @@ export default function TransformProvider({
 
     // Enable auto sizing after resetting container position
     settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
+  };
+
+  const resetContainerPositionOnProgress = (
+    progress: number,
+    startScale: number,
+    startTranslation: Vector,
+    settings?: {
+      autoSizingContext?: AutoSizingContextType;
+      canvasDimensions?: Dimensions;
+      containerBoundingRect?: BoundingRect;
+      padding?: BoundingRect;
+      scale?: number;
+    }
+  ) => {
+    'worklet';
+    if (progress === 0) {
+      settings?.autoSizingContext?.disableAutoSizing();
+    }
+
+    const containerBoundingRect =
+      settings?.containerBoundingRect ?? getCurrentBoundingRect();
+    const canvasDimensions =
+      settings?.canvasDimensions ?? getCurrentCanvasDimensions();
+    const targetScale =
+      settings?.scale ??
+      getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
+
+    // Scale content to fit container based on objectFit
+    scaleContentTo(calcScaleOnProgress(progress, startScale, targetScale));
+    // Translate content to fit container based on objectFit
+    translateContentTo(
+      calcTranslationOnProgress(
+        progress,
+        startTranslation,
+        calcContainerTranslation(
+          containerBoundingRect,
+          canvasDimensions,
+          settings?.padding ?? padding.value
+        )
+      )
+    );
+
+    if (progress === 1) {
+      settings?.autoSizingContext?.enableAutoSizingAfterTimeout();
+    }
   };
 
   useAnimatedReaction(
@@ -287,13 +357,13 @@ export default function TransformProvider({
     handleCanvasRender,
     handleGraphRender,
     resetContainerPosition,
+    resetContainerPositionOnProgress,
     scaleContentTo,
     translateContentTo
   };
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <TransformContext.Provider value={contextValue as any}>
+    <TransformContext.Provider value={contextValue}>
       {children}
     </TransformContext.Provider>
   );

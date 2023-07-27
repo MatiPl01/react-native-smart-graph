@@ -14,7 +14,7 @@ import {
 } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 
-type CanvasDataContextType = {
+export type CanvasDataContextType = {
   autoSizingEnabled: SharedValue<boolean>;
   autoSizingTimeout: SharedValue<number>;
   boundingRect: AnimatedBoundingRect;
@@ -23,6 +23,7 @@ type CanvasDataContextType = {
   currentTranslation: AnimatedVectorCoordinates;
   initialScale: SharedValue<number>;
   initialScaleProvided: SharedValue<boolean>;
+  isGestureActive: SharedValue<boolean>;
   isRendered: SharedValue<boolean>;
   maxScale: SharedValue<number>;
   minScale: SharedValue<number>;
@@ -31,7 +32,7 @@ type CanvasDataContextType = {
   scales: SharedValue<number[]>;
 };
 
-const CanvasDataContext = createContext(null);
+const CanvasDataContext = createContext(null as unknown as object);
 
 export const useCanvasDataContext = () => {
   const contextValue = useContext(CanvasDataContext);
@@ -77,6 +78,8 @@ export default function CanvasDataProvider({
   const translateY = useSharedValue(0);
   // AUTO SIZING
   const autoSizingEnabled = useSharedValue(false);
+  // GESTURES
+  const isGestureActive = useSharedValue(false);
 
   const contextValue: CanvasDataContextType = useMemo(
     () => ({
@@ -96,6 +99,7 @@ export default function CanvasDataProvider({
         x: translateX,
         y: translateY
       },
+      isGestureActive,
       isRendered,
       ...canvasSettings
     }),
@@ -103,8 +107,7 @@ export default function CanvasDataProvider({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <CanvasDataContext.Provider value={contextValue as any}>
+    <CanvasDataContext.Provider value={contextValue}>
       {children}
     </CanvasDataContext.Provider>
   );

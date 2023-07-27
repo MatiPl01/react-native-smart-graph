@@ -1,5 +1,7 @@
+import { SharedValue } from 'react-native-reanimated';
+
 import VertexComponent from '@/components/graphs/vertices/VertexComponent';
-import { useVertexFocusContext, withGraphData } from '@/providers/graph';
+import { withGraphData } from '@/providers/graph';
 import {
   VertexComponentData,
   VertexRemoveHandler,
@@ -7,22 +9,25 @@ import {
 } from '@/types/components';
 
 type GraphVerticesProps<V, E> = {
+  focusKey: SharedValue<null | string>;
+  focusTransitionProgress: SharedValue<number>;
   handleVertexRemove: VertexRemoveHandler;
   handleVertexRender: VertexRenderHandler;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
 function GraphVertices<V, E>({
+  focusKey,
+  focusTransitionProgress,
   handleVertexRemove,
   handleVertexRender,
   verticesData
 }: GraphVerticesProps<V, E>) {
-  const focusContextValue = useVertexFocusContext();
-
   return Object.values(verticesData).map(data => (
     <VertexComponent
       {...data}
-      {...focusContextValue}
+      focusKey={focusKey}
+      focusTransitionProgress={focusTransitionProgress}
       key={data.vertex.key}
       onRemove={handleVertexRemove}
       onRender={handleVertexRender}
