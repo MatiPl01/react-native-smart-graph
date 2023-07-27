@@ -1,35 +1,49 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 import {
+  SharedValue,
   useAnimatedReaction,
   useDerivedValue,
   useSharedValue,
   useWorkletCallback
 } from 'react-native-reanimated';
 
-import { FocusContextType, GesturesContextType } from '@/providers/canvas';
+import { FocusContextType, FocusStatus } from '@/providers/canvas';
 import { withGraphData } from '@/providers/graph/data';
 import { VertexComponentRenderData } from '@/types/components';
 import { FocusStepData } from '@/types/focus';
+import { AnimatedDimensions } from '@/types/layout';
 import { GraphFocusSettings } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
 import { animateToValue } from '@/utils/animations';
-import { calcMultiStepFocusTransition } from '@/utils/focus';
+import {
+  getMultiStepFocusTransformation,
+  updateFocusedVertexTransformation
+} from '@/utils/focus';
+import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { useVertexFocusContext } from './VertexFocusProvider';
 
 type MultiStepFocusProviderProps = PropsWithChildren<{
+  availableScales: SharedValue<number[]>;
+  canvasDimensions: AnimatedDimensions;
   focusContext: FocusContextType;
-  gesturesContext: GesturesContextType;
+  initialScale: SharedValue<number>;
+  isGestureActive: SharedValue<boolean>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphFocusSettings;
+  vertexRadius: number;
 }>;
 
-function MultiStepFocusProvider({
+function MultiStepVertexFocusProvider({
+  availableScales,
+  canvasDimensions,
   children,
   focusContext,
-  gesturesContext,
+  initialScale,
+  isGestureActive,
   renderedVerticesData,
-  settings
+  settings,
+  vertexRadius
 }: MultiStepFocusProviderProps) {
   // CONTEXT VALUES
   // Vertex focus context values
@@ -44,9 +58,8 @@ function MultiStepFocusProvider({
   const isEnabled = useDerivedValue(
     // Enable the multi step focus when the vertex is not focused
     // and no gesture is being performed
-    () => !isVertexFocused.value && !gesturesContext.isGestureActive.value
+    () => !isVertexFocused.value && !isGestureActive.value
   );
-  // const initialStep = useSharedValue(-1);
   // This value is used to ensure that the transition to the current
   // focus points is smooth
   const isProgressSynced = useSharedValue(false);
@@ -54,8 +67,10 @@ function MultiStepFocusProvider({
   // context (for smooth transitions)
   const currentProgress = useSharedValue(0);
   // Used to determine the direction of the progress
+  const previousProgress = useSharedValue(0);
   const initialStep = useSharedValue(-1);
   const previousStep = useSharedValue(-1);
+  const shouldResetFocus = useSharedValue(false);
 
   const updateInitialStep = useWorkletCallback(
     (progress: null | number, data: Array<FocusStepData>) => {
@@ -64,8 +79,12 @@ function MultiStepFocusProvider({
         return;
       }
       const step = binarySearchLE(data, progress, ({ startsAt }) => startsAt);
-      currentProgress.value = data[step - 1]?.startsAt ?? 0;
+      if (step === initialStep.value) return;
+      initialStep.value = step;
+      currentProgress.value = previousProgress.value =
+        data[step - 1]?.startsAt ?? 0;
       previousStep.value = initialStep.value = step;
+      shouldResetFocus.value = true;
     },
     []
   );
@@ -114,21 +133,27 @@ function MultiStepFocusProvider({
   // when the initial step changes
   useAnimatedReaction(
     () => ({
-      enabled: isEnabled.value,
       progress: {
         current: currentProgress.value,
         target: settings.progress.value // TODO - prevent reaction if the DirectedGraphComponent re-renders but the value is the same
-      }
-      // step: initialStep.value
+      },
+      step: initialStep.value
     }),
-    ({ enabled, progress }) => {
-      if (!enabled) return;
+    ({ progress, step }) => {
+      const currentStep = previousStep.value;
+      if (
+        step === -1 ||
+        (!focusStepsData[currentStep] && !focusStepsData[currentStep - 1])
+      ) {
+        return;
+      }
       // Calculate the resulting progress
       const result = isProgressSynced.value
         ? progress.target
-        : animateToValue(progress.current, progress.target);
+        : animateToValue(progress.current, progress.target, 0.01);
       // Update the current progress value
       if (result === progress.target) isProgressSynced.value = true;
+      previousProgress.value = currentProgress.value;
       currentProgress.value = result;
     }
   );
@@ -136,11 +161,12 @@ function MultiStepFocusProvider({
   // The main reaction that updates the focus context
   useAnimatedReaction(
     () => ({
-      enabled: isEnabled.value,
-      progress: currentProgress.value
+      progress: currentProgress.value,
+      reset: shouldResetFocus.value,
+      step: initialStep.value
     }),
-    ({ enabled, progress }) => {
-      if (!enabled) return;
+    ({ progress, reset, step }) => {
+      if (step === -1 || progress === previousProgress.value) return;
 
       // Get the current state of the transition
       let currentStep = previousStep.value;
@@ -165,39 +191,63 @@ function MultiStepFocusProvider({
       const stepProgress =
         (progress - beforeProgress) / (afterProgress - beforeProgress);
 
-      console.log(
-        calcMultiStepFocusTransition(stepProgress, beforeStep, afterStep)
+      // Update the focused vertex transformation
+      updateFocusedVertexTransformation(
+        getMultiStepFocusTransformation(
+          stepProgress,
+          {
+            availableScales: availableScales.value,
+            canvasDimensions:
+              animatedCanvasDimensionsToDimensions(canvasDimensions),
+            disableGestures: !!settings.gesturesDisabled,
+            initialScale: initialScale.value,
+            vertexRadius
+          },
+          beforeStep,
+          afterStep
+        ),
+        focusContext
       );
 
-      // 1. FOCUS START - when the focus status is blur and the multi
+      const focusStatus = focusContext.focusStatus.value;
+
+      // FOCUS START - when the focus status is blur and the multi
       // step focus is enabled
-      // if (focusContext.focusStatus.value === FocusStatus.BLUR) {
-      //   focusContext.startFocus(
-      //     {
-      //       gesturesDisabled: !!settings.gesturesDisabled,
-      //       key: afterPoint?.value.key ?? ''
-      //     },
-      //     null
-      //   );
-      // }
+      if (reset) {
+        shouldResetFocus.value = false;
+        focusContext.startFocus(
+          {
+            gesturesDisabled: !!settings.gesturesDisabled,
+            key: afterStep?.value.key ?? ''
+          },
+          null
+        );
+      }
+      // FOCUS TRANSITION - after starting the focus, until the first
+      // step point is reached
+      else if (focusStatus === FocusStatus.FOCUS_TRANSITION) {
+        focusContext.focusTransitionProgress.value =
+          currentStep === initialStep.value ? stepProgress : 1;
+      }
+      // FOCUS
+      else if (focusStatus === FocusStatus.FOCUS) {
+        focusContext.focusTransitionProgress.value = stepProgress; // TODO - add smooth transition of focused vertices opacity
+      }
 
-      // // 2. FOCUS TRANSITION - after starting the focus, until the first
-      // // step point is reached
-      // if (focusContext.focusStatus.value === FocusStatus.FOCUS_TRANSITION) {
-      //   focusContext.focusTransitionProgress.value =
-      //     currentStep === initialStep.value ? stepProgress : 1;
-      // }
-
-      // // 2. FOCUS - when the next step exists (there is a point that starts at the
-      // // progress value equal to 0 or the current step is not the first one - there
-      // // is a point that starts at the lower value od the external progress)
-
-      // // 3. BLUR TRANSITION - when the current step progress decreases from 1 to 0
-      // // and the current step is the first one in the array of focus points
-      // // (there is no point with lower start progress value and no point
-      // // starting at the progress value equal to 0)
-
-      // // Update values for the next reaction
+      // BLUR START
+      if (
+        !beforeStep &&
+        progress < previousProgress.value &&
+        focusStatus !== FocusStatus.BLUR_TRANSITION &&
+        focusStatus !== FocusStatus.BLUR
+      ) {
+        focusContext.endFocus(undefined, null);
+      }
+      // BLUR TRANSITION
+      else if (focusStatus === FocusStatus.BLUR_TRANSITION) {
+        focusContext.focusTransitionProgress.value = 1 - stepProgress;
+      }
+      // Update values for the next reaction
       previousStep.value = currentStep;
     },
     [focusStepsData]
@@ -207,6 +257,6 @@ function MultiStepFocusProvider({
 }
 
 export default withGraphData(
-  MultiStepFocusProvider,
+  MultiStepVertexFocusProvider,
   ({ renderedVerticesData }) => ({ renderedVerticesData })
 );

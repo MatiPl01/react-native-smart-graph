@@ -20,11 +20,11 @@ import { VertexComponentRenderData } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { AnimatedDimensions } from '@/types/layout';
 import { FocusedVertexData } from '@/types/settings/focus';
-import { getFocusedVertexData } from '@/utils/focus';
 import {
-  getAlignedVertexAbsolutePosition,
-  getCoordinatesRelativeToCenter
-} from '@/utils/layout';
+  getFocusedVertexData,
+  getFocusedVertexTransformation,
+  updateFocusedVertexTransformation
+} from '@/utils/focus';
 
 type VertexFocusContextType = {
   isVertexFocused: SharedValue<boolean>;
@@ -125,6 +125,7 @@ function VertexFocusProvider<V, E>({
     // Disable transitions until the new focus animations starts
     transitionDisabled.value = true;
     // Start focus if there is a focused vertex and focus is not active
+    if (focusContext.focus.key.value === focusedVertexData.vertex.key) return;
     const {
       position: { x, y },
       scale
@@ -169,26 +170,20 @@ function VertexFocusProvider<V, E>({
           height: canvasDimensions.height.value,
           width: canvasDimensions.width.value
         },
-        radius: vertex.radius,
-        scale: vertex.scale,
-        x: vertex.position.x.value,
-        y: vertex.position.y.value
+        vertex: {
+          radius: vertex.radius,
+          scale: vertex.scale,
+          x: vertex.position.x.value,
+          y: vertex.position.y.value
+        }
       };
     },
     vertexData => {
       if (!vertexData) return;
-      // Calculate vertex position based on the alignment settings
-      const { x: dx, y: dy } = getCoordinatesRelativeToCenter(
-        vertexData.canvasDimensions,
-        getAlignedVertexAbsolutePosition(
-          vertexData.canvasDimensions,
-          vertexData.alignment,
-          vertexData.radius * vertexData.scale
-        )
+      updateFocusedVertexTransformation(
+        getFocusedVertexTransformation(vertexData),
+        focusContext
       );
-      focusContext.focus.x.value = vertexData.x - dx / vertexData.scale;
-      focusContext.focus.y.value = vertexData.y - dy / vertexData.scale;
-      focusContext.focus.scale.value = vertexData.scale;
     }
   );
 

@@ -58,7 +58,7 @@ export default function SettingsChangeResponderProvider({
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
         } else {
-          autoSizingContext.enableAutoSizing();
+          // autoSizingContext.enableAutoSizing();
         }
       }
     }

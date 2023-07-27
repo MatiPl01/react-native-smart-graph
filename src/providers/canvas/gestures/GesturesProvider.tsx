@@ -2,7 +2,6 @@ import { Vector } from '@shopify/react-native-skia';
 import { createContext, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
-  SharedValue,
   useAnimatedReaction,
   useSharedValue,
   withDecay
@@ -20,7 +19,6 @@ import { Maybe } from '@/types/utils';
 
 export type GesturesContextType = {
   gestureHandler: ComposedGesture;
-  isGestureActive: SharedValue<boolean>;
 };
 
 const GesturesContext = createContext(null as unknown as object);
@@ -53,6 +51,7 @@ export default function GesturesProvider({
   const {
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
+    isGestureActive,
     maxScale,
     minScale,
     scales
@@ -73,9 +72,6 @@ export default function GesturesProvider({
   const pinchStartScale = useSharedValue(1);
   const pinchDecayScale = useSharedValue(1);
   const pinchEndPosition = useSharedValue({ x: 0, y: 0 });
-
-  // CONTEXT VALUES
-  const isGestureActive = useSharedValue(false);
 
   const handleGestureStart = (origin?: Maybe<Vector>) => {
     'worklet';
@@ -209,8 +205,7 @@ export default function GesturesProvider({
       gestureHandler: Gesture.Race(
         Gesture.Simultaneous(pinchGestureHandler, panGestureHandler),
         doubleTapGestureHandler
-      ),
-      isGestureActive
+      )
     }),
     []
   );

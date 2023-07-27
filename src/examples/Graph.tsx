@@ -15,6 +15,7 @@ import {
   DefaultEdgeLabelRenderer,
   DirectedEdgeData,
   DirectedGraphComponent,
+  FocusPoints,
   FocusSettings,
   ObjectFit,
   VertexData,
@@ -52,12 +53,24 @@ export default function Development() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
-  const focusPoints = useMemo(
+  const focusPoints = useMemo<FocusPoints>(
     // TODO - add information in docs about useMemo
     () => ({
-      0.25: { key: 'V4' },
-      0.5: { key: 'V2' },
-      1: { key: 'V3' }
+      0.25: { key: 'V1', vertexScale: 10 },
+      0.5: {
+        key: 'V2',
+        vertexScale: 2,
+        alignment: { horizontalAlignment: 'left', horizontalOffset: 25 }
+      },
+      1: {
+        key: 'V3',
+        alignment: {
+          verticalAlignment: 'top',
+          verticalOffset: 0,
+          horizontalAlignment: 'left',
+          horizontalOffset: 0
+        }
+      }
     }),
     []
   );
@@ -84,8 +97,8 @@ export default function Development() {
 
   useEffect(() => {
     multiStepFocusProgress.value = withSequence(
-      withTiming(1, { duration: 2000, easing: Easing.linear }),
-      withTiming(0, { duration: 2000, easing: Easing.linear })
+      withTiming(1, { duration: 3000, easing: Easing.linear }),
+      withTiming(0, { duration: 3000, easing: Easing.linear })
     );
   }, []);
 

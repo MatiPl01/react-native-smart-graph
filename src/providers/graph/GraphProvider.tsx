@@ -173,10 +173,13 @@ function GraphProvider<V, E>({
       ...(memoSettings.focus
         ? [
             <MultiStepVertexFocusProvider
+              availableScales={canvasDataContext.scales}
+              canvasDimensions={canvasDataContext.canvasDimensions}
               focusContext={focusContext}
-              gesturesContext={gesturesContext}
+              initialScale={canvasDataContext.initialScale}
+              isGestureActive={canvasDataContext.isGestureActive}
               settings={memoSettings.focus}
-              transformContext={transformContext}
+              vertexRadius={memoSettings.components.vertex.radius}
             />
           ]
         : [])

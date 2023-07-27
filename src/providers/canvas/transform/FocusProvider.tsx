@@ -286,6 +286,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     () => transitionProgress.value,
     progress => {
       if (progress !== 1) return;
+      console.log('focus end');
       const currentStatus = focusStatus.value;
       const finishStatus =
         currentStatus === FocusStatus.BLUR_TRANSITION ||
@@ -327,7 +328,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       }
 
       return {
-        progress: transitionProgress.value,
+        progress: status === FocusStatus.FOCUS ? 1 : transitionProgress.value,
         startPosition: transitionStartPosition.value,
         startScale: transitionStartScale.value,
         targetPosition: {
@@ -413,7 +414,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   useAnimatedReaction(
     () => {
       const status = focusStatus.value;
-      if (status !== FocusStatus.BLUR_TRANSITION || animationSettings.value) {
+      if (
+        (status !== FocusStatus.BLUR_TRANSITION &&
+          status !== FocusStatus.BLUR) ||
+        animationSettings.value
+      ) {
         return null;
       }
 

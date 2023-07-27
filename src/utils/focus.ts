@@ -3,12 +3,20 @@ import {
   DEFAULT_ALIGNMENT_SETTINGS,
   DEFAULT_FOCUS_SCALE_MULTIPLIER
 } from '@/constants/focus';
+import { FocusContextType } from '@/providers/canvas';
 import { FocusStepData } from '@/types/focus';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import {
+  Alignment,
+  AnimatedVectorCoordinates,
+  Dimensions
+} from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
 
-import { animatedVectorCoordinatesToVector } from './vectors';
+import {
+  getAlignedVertexAbsolutePosition,
+  getCoordinatesRelativeToCenter
+} from './layout';
 import { calcScaleOnProgress, calcTranslationOnProgress } from './views';
 
 export const getFocusedVertexData = (
@@ -21,6 +29,7 @@ export const getFocusedVertexData = (
   initialScale: number,
   settings?: FocusSettings
 ): FocusedVertexData => {
+  'worklet';
   const animationSettings =
     settings?.animation !== null
       ? ({
@@ -53,43 +62,120 @@ export const getFocusedVertexData = (
   };
 };
 
-export const calcMultiStepFocusTransition = (
-  stepProgress: number,
-  before?: FocusStepData,
-  after?: FocusStepData
-): {
+type VertexTransformation = {
   scale: number;
   x: number;
   y: number;
-} => {
+};
+
+type TransformationInput = {
+  alignment: Required<Alignment>;
+  canvasDimensions: Dimensions;
+  vertex: VertexTransformation & {
+    radius: number;
+  };
+};
+
+export const updateFocusedVertexTransformation = (
+  transformation: VertexTransformation,
+  focusContext: FocusContextType
+): void => {
   'worklet';
-  if (before && after) {
-    const { position: beforePosition, scale: beforeScale } = before.vertex;
-    const { position: afterPosition, scale: afterScale } = after.vertex;
+  focusContext.focus.x.value = transformation.x;
+  focusContext.focus.y.value = transformation.y;
+  focusContext.focus.scale.value = transformation.scale;
+};
+
+export const getFocusedVertexTransformation = ({
+  alignment,
+  canvasDimensions,
+  vertex
+}: TransformationInput): VertexTransformation => {
+  'worklet';
+  // Calculate vertex position based on the alignment settings
+  const { x: dx, y: dy } = getCoordinatesRelativeToCenter(
+    canvasDimensions,
+    getAlignedVertexAbsolutePosition(
+      canvasDimensions,
+      alignment,
+      vertex.radius * vertex.scale
+    )
+  );
+  return {
+    scale: vertex.scale,
+    x: vertex.x - dx / vertex.scale,
+    y: vertex.y - dy / vertex.scale
+  };
+};
+
+type FocusConfig = {
+  availableScales: number[];
+  canvasDimensions: Dimensions;
+  disableGestures: boolean;
+  initialScale: number;
+  vertexRadius: number;
+};
+
+const getMultiStepVertexTransformation = (
+  stepData: FocusStepData,
+  config: FocusConfig
+): VertexTransformation => {
+  'worklet';
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const { alignment, position, radius, scale } = getFocusedVertexData(
+    {
+      key: stepData.value.key,
+      position: stepData.vertex.position
+    },
+    config.vertexRadius,
+    config.availableScales,
+    config.initialScale,
+    {
+      alignment: stepData.value.alignment,
+      animation: null,
+      disableGestures: config.disableGestures,
+      vertexScale: stepData.value.vertexScale
+    }
+  ).vertex!;
+
+  return getFocusedVertexTransformation({
+    alignment,
+    canvasDimensions: config.canvasDimensions,
+    vertex: {
+      radius,
+      scale,
+      x: position.x.value,
+      y: position.y.value
+    }
+  });
+};
+
+export const getMultiStepFocusTransformation = (
+  stepProgress: number,
+  config: FocusConfig,
+  before?: FocusStepData,
+  after?: FocusStepData
+): VertexTransformation => {
+  'worklet';
+  const beforeVertexData =
+    before && getMultiStepVertexTransformation(before, config);
+  const afterVertexData =
+    after && getMultiStepVertexTransformation(after, config);
+
+  if (beforeVertexData && afterVertexData) {
+    const { scale: beforeScale, ...beforePosition } = beforeVertexData;
+    const { scale: afterScale, ...afterPosition } = afterVertexData;
     return {
-      ...calcTranslationOnProgress(
-        stepProgress,
-        animatedVectorCoordinatesToVector(beforePosition),
-        animatedVectorCoordinatesToVector(afterPosition)
-      ),
-      scale: calcScaleOnProgress(
-        stepProgress,
-        beforeScale.value,
-        afterScale.value
-      )
+      ...calcTranslationOnProgress(stepProgress, beforePosition, afterPosition),
+      scale: calcScaleOnProgress(stepProgress, beforeScale, afterScale)
     };
   }
-  if (before) {
-    return {
-      ...animatedVectorCoordinatesToVector(before.vertex.position),
-      scale: before.vertex.scale.value
-    };
+  if (beforeVertexData) {
+    return beforeVertexData;
   }
-  if (after) {
-    return {
-      ...animatedVectorCoordinatesToVector(after.vertex.position),
-      scale: after.vertex.scale.value
-    };
+  if (afterVertexData) {
+    return afterVertexData;
   }
   return {
     scale: 1,
