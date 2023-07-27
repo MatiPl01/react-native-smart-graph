@@ -53,12 +53,12 @@ export default function SettingsChangeResponderProvider({
         autoSizingContext.disableAutoSizing();
         return;
       }
+      isFirstAutoSizingReactionCall.value = false;
       if (objFit !== 'none') {
-        isFirstAutoSizingReactionCall.value = false;
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
         } else {
-          autoSizingContext.enableAutoSizing();
+          // autoSizingContext.enableAutoSizing();
         }
       }
     }

@@ -1,5 +1,4 @@
 import { Canvas, Group } from '@shopify/react-native-skia';
-import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
@@ -17,6 +16,39 @@ import {
 } from '@/providers/canvas';
 import GraphProvider from '@/providers/graph/GraphProvider';
 
+const validateProps = <
+  V,
+  E,
+  P extends
+    | DirectedGraphComponentProps<V, E>
+    | UndirectedGraphComponentProps<V, E>
+>(
+  props: P & AccessibleOverlayContextType
+) => {
+  // TODO - add more validations
+  // FOCUS
+  // Focus points validation
+  if (props.settings?.focus) {
+    const focusPoints = props.settings.focus.points;
+    const keySet = new Set();
+    Object.keys(focusPoints).forEach(key => {
+      if (+key < 0 || +key > 1) {
+        throw new Error(
+          `Invalid focus points: key ${key} must be between 0 and 1`
+        );
+      }
+      if (keySet.has(key)) {
+        throw new Error(
+          `Invalid focus points: duplicate key ${key} found in ${JSON.stringify(
+            focusPoints
+          )}`
+        );
+      }
+      keySet.add(key);
+    });
+  }
+};
+
 function GraphComponentComposer<
   V,
   E,
@@ -24,50 +56,33 @@ function GraphComponentComposer<
     | DirectedGraphComponentProps<V, E>
     | UndirectedGraphComponentProps<V, E>
 >(props: P & AccessibleOverlayContextType) {
+  validateProps<V, E, P>(props);
   // CONTEXTS
   // Canvas data context
-  const {
-    boundingRect,
-    canvasDimensions,
-    currentScale,
-    currentTranslation,
-    initialScale,
-    scales
-  } = useCanvasDataContext();
+  const canvasDataContext = useCanvasDataContext();
   // Transform context
-  const { handleCanvasRender, handleGraphRender } = useTransformContext();
+  const transformContext = useTransformContext();
   // Focus context
   const focusContext = useFocusContext();
 
-  const transform = useMemo(
-    () => ({
-      scale: currentScale,
-      translateX: currentTranslation.x,
-      translateY: currentTranslation.y
-    }),
-    []
-  );
-
   const canvasTransform = useDerivedValue(() => [
-    { translateX: currentTranslation.x.value },
-    { translateY: currentTranslation.y.value },
-    { scale: currentScale.value }
+    { translateX: canvasDataContext.currentTranslation.x.value },
+    { translateY: canvasDataContext.currentTranslation.y.value },
+    { scale: canvasDataContext.currentScale.value }
   ]);
 
   return (
-    <Canvas onLayout={handleCanvasRender} style={styles.canvas}>
+    <Canvas
+      onLayout={transformContext.handleCanvasRender}
+      style={styles.canvas}>
       <Group transform={canvasTransform}>
         <GraphProvider<V, E>
           {...props}
-          boundingRect={boundingRect}
-          canvasDimensions={canvasDimensions}
-          canvasScales={scales}
+          canvasDataContext={canvasDataContext}
           focusContext={focusContext}
-          initialCanvasScale={initialScale}
-          onRender={handleGraphRender}
-          transform={transform}>
+          transformContext={transformContext}>
           <GraphComponent
-            boundingRect={boundingRect}
+            canvasDataContext={canvasDataContext}
             focusContext={focusContext}
           />
         </GraphProvider>

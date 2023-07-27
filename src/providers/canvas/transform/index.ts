@@ -5,6 +5,7 @@ export {
   useFocusContext
 } from './FocusProvider';
 export {
+  type TransformContextType,
   default as TransformProvider,
   useTransformContext
 } from './TransformProvider';

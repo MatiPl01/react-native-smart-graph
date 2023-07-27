@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { Easing } from 'react-native-reanimated';
+import {
+  Easing,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming
+} from 'react-native-reanimated';
 
 import GraphViewControls from '@/components/controls/GraphViewControls';
 import GraphView from '@/components/views/GraphView';
@@ -10,6 +16,7 @@ import {
   DefaultEdgeLabelRenderer,
   DirectedEdgeData,
   DirectedGraphComponent,
+  FocusPoints,
   FocusSettings,
   ObjectFit,
   VertexData,
@@ -34,36 +41,53 @@ const GRAPH: {
   vertices: VertexData<string>[];
 } = {
   edges: [
-    { from: 'root', key: 'root-sport', to: 'sport', value: '' },
-    { from: 'root', key: 'root-diet', to: 'diet', value: '' },
-    { from: 'root', key: 'root-sleep', to: 'sleep', value: '' },
-    { from: 'root', key: 'root-meditation', to: 'meditation', value: '' },
-    { from: 'root', key: 'root-reading', to: 'reading', value: '' }
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V1', to: 'V3' },
+    { key: 'E3', from: 'V1', to: 'V4' }
   ],
-  vertices: [
-    { key: 'root', value: 'Root' },
-    { key: 'sport', value: 'Sport' },
-    { key: 'diet', value: 'Diet' },
-    { key: 'sleep', value: 'Sleep' },
-    { key: 'meditation', value: 'Meditation' },
-    { key: 'reading', value: 'Reading' }
-  ]
+  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
 export default function Development() {
-  const [objectFit, setObjectFit] = useState<ObjectFit>('none');
+  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
+
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
+  const focusPoints = useMemo<FocusPoints>(
+    // TODO - add information in docs about useMemo
+    () => ({
+      0.25: { key: 'V1', vertexScale: 10 },
+      0.5: {
+        key: 'V2',
+        vertexScale: 2,
+        alignment: { horizontalAlignment: 'left', horizontalOffset: 25 }
+      },
+      0.8: {
+        key: 'V3',
+        alignment: {
+          verticalAlignment: 'top',
+          verticalOffset: 0,
+          horizontalAlignment: 'left',
+          horizontalOffset: 0
+        }
+      }
+    }),
+    []
+  );
+
+  const multiStepFocusProgress = useSharedValue(0);
 
   useEffect(() => {
     graph.insertBatch(GRAPH);
   }, [graph]);
 
-  const [vertexSpacing, setVertexSpacing] = useState(50);
-
   useEffect(() => {
-    setInterval(() => {
-      setVertexSpacing(v => (v === 50 ? 100 : 50));
-    }, 1000);
+    multiStepFocusProgress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 5000, easing: Easing.linear }),
+        withTiming(0, { duration: 5000, easing: Easing.linear })
+      ),
+      -1
+    );
   }, []);
 
   const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
@@ -92,8 +116,11 @@ export default function Development() {
             onVertexPress: handleVertexPress
           },
           placement: {
-            minVertexSpacing: vertexSpacing,
             strategy: 'orbits'
+          },
+          focus: {
+            points: focusPoints,
+            progress: multiStepFocusProgress
           }
         }}
         graph={graph}

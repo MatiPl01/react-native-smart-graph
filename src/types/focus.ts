@@ -1,6 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { AnimationSettingsWithDefaults } from './settings';
+import { VertexComponentRenderData } from './components';
+import { AnimationSettingsWithDefaults, FocusPoint } from './settings';
 import { Maybe } from './utils';
 
 export type FocusData = {
@@ -21,3 +22,9 @@ export type FocusEndFunction = (
   data?: Maybe<BlurData>,
   animationSettings?: Maybe<AnimationSettingsWithDefaults>
 ) => void;
+
+export type FocusStepData = {
+  startsAt: number;
+  value: FocusPoint;
+  vertex: VertexComponentRenderData;
+};

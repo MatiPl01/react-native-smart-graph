@@ -12,11 +12,6 @@ import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasDataContext, useTransformContext } from '@/providers/canvas';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { Maybe } from '@/types/utils';
-import {
-  calcContainerTranslation,
-  calcScaleOnProgress,
-  calcTranslationOnProgress
-} from '@/utils/views';
 
 export type AutoSizingContextType = {
   autoSizingEnabled: SharedValue<boolean>;
@@ -48,7 +43,7 @@ export default function AutoSizingProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // CONTEXT VALUES
+  // OTHER CONTEXTS VALUES
   // Canvas data context values
   const {
     autoSizingEnabled,
@@ -66,8 +61,7 @@ export default function AutoSizingProvider({
     padding
   } = useCanvasDataContext();
   // Transform context values
-  const { getIdealScale, scaleContentTo, translateContentTo } =
-    useTransformContext();
+  const { resetContainerPositionOnProgress } = useTransformContext();
 
   // OTHER VALUES
   const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -149,6 +143,9 @@ export default function AutoSizingProvider({
     () =>
       objectFit.value !== 'none' && autoSizingEnabled.value
         ? {
+            // boundingRect and canvasDimensions must be used to trigger
+            // the reaction when the canvas is resized or the container
+            // bounding rect changes
             boundingRect: {
               bottom: containerBottom.value,
               left: containerLeft.value,
@@ -159,6 +156,7 @@ export default function AutoSizingProvider({
               height: canvasHeight.value,
               width: canvasWidth.value
             },
+            containerPadding: padding.value,
             startScale: autoSizingStartScale.value,
             startTranslation: autoSizingStartTranslation.value,
             transitionProgress: autoSizingTransitionProgress.value
@@ -169,30 +167,21 @@ export default function AutoSizingProvider({
       const {
         boundingRect,
         canvasDimensions,
+        containerPadding,
         startScale,
         startTranslation,
         transitionProgress
       } = data;
       if (!startScale) return;
-      // Scale content to fit container based on objectFit
-      scaleContentTo(
-        calcScaleOnProgress(
-          transitionProgress,
-          startScale,
-          getIdealScale(boundingRect, canvasDimensions, objectFit.value)
-        )
-      );
-      // Translate content to fit container based on objectFit
-      translateContentTo(
-        calcTranslationOnProgress(
-          transitionProgress,
-          startTranslation,
-          calcContainerTranslation(
-            boundingRect,
-            canvasDimensions,
-            padding.value
-          )
-        )
+      resetContainerPositionOnProgress(
+        transitionProgress,
+        startScale,
+        startTranslation,
+        {
+          canvasDimensions,
+          containerBoundingRect: boundingRect,
+          padding: containerPadding
+        }
       );
     }
   );
