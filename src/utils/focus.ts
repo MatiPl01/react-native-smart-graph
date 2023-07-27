@@ -183,3 +183,36 @@ export const getMultiStepFocusTransformation = (
     y: 0
   };
 };
+
+export const getFocusStep = (
+  progress: number,
+  previousStep: number,
+  focusStepsData: Array<FocusStepData>
+): {
+  afterStep: FocusStepData | undefined;
+  beforeStep: FocusStepData | undefined;
+  currentStep: number;
+} | null => {
+  'worklet';
+  let afterStep = focusStepsData[previousStep];
+  let beforeStep = focusStepsData[previousStep - 1];
+
+  if (!afterStep && !beforeStep) return null;
+
+  while (afterStep && progress > afterStep.startsAt) {
+    beforeStep = afterStep;
+    afterStep = focusStepsData[previousStep + 1];
+    previousStep++;
+  }
+  while (beforeStep && progress < beforeStep.startsAt) {
+    afterStep = beforeStep;
+    beforeStep = focusStepsData[previousStep - 2];
+    previousStep--;
+  }
+
+  return {
+    afterStep,
+    beforeStep,
+    currentStep: previousStep
+  };
+};

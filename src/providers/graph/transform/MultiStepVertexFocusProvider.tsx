@@ -16,6 +16,7 @@ import { GraphFocusSettings } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
 import { animateToValue } from '@/utils/animations';
 import {
+  getFocusStep,
   getMultiStepFocusTransformation,
   updateFocusedVertexTransformation
 } from '@/utils/focus';
@@ -169,23 +170,12 @@ function MultiStepVertexFocusProvider({
       if (step === -1 || progress === previousProgress.value) return;
 
       // Get the current state of the transition
-      let currentStep = previousStep.value;
-      let afterStep = focusStepsData[currentStep];
-      let beforeStep = focusStepsData[currentStep - 1];
+      const prevStep = previousStep.value;
+      const currentSteps = getFocusStep(progress, prevStep, focusStepsData);
+      if (!currentSteps) return;
+      const { afterStep, beforeStep, currentStep } = currentSteps;
 
-      if (!afterStep && !beforeStep) return;
-
-      while (afterStep && progress > afterStep.startsAt) {
-        beforeStep = afterStep;
-        afterStep = focusStepsData[currentStep + 1];
-        currentStep++;
-      }
-      while (beforeStep && progress < beforeStep.startsAt) {
-        afterStep = beforeStep;
-        beforeStep = focusStepsData[currentStep - 2];
-        currentStep--;
-      }
-
+      // Calculate the progress of the current step
       const afterProgress = afterStep?.startsAt ?? 1;
       const beforeProgress = beforeStep?.startsAt ?? 0;
       const stepProgress =
@@ -210,10 +200,15 @@ function MultiStepVertexFocusProvider({
       );
 
       const focusStatus = focusContext.focusStatus.value;
-
       // FOCUS START - when the focus status is blur and the multi
       // step focus is enabled
-      if (reset) {
+      if (
+        reset ||
+        ((focusStatus === FocusStatus.BLUR ||
+          focusStatus === FocusStatus.BLUR_TRANSITION) &&
+          ((beforeStep && progress < previousProgress.value) ||
+            (afterStep && progress > previousProgress.value)))
+      ) {
         shouldResetFocus.value = false;
         focusContext.startFocus(
           {
@@ -226,18 +221,33 @@ function MultiStepVertexFocusProvider({
       // FOCUS TRANSITION - after starting the focus, until the first
       // step point is reached
       else if (focusStatus === FocusStatus.FOCUS_TRANSITION) {
-        focusContext.focusTransitionProgress.value =
-          currentStep === initialStep.value ? stepProgress : 1;
+        if (currentStep !== previousStep.value) {
+          focusContext.focusTransitionProgress.value = 1;
+        } else if (progress > previousProgress.value) {
+          focusContext.focusTransitionProgress.value = stepProgress;
+          focusContext.focus.key.value = afterStep?.value.key ?? '';
+        } else {
+          focusContext.focusTransitionProgress.value = 1 - stepProgress;
+          focusContext.focus.key.value = beforeStep?.value.key ?? '';
+        }
       }
       // FOCUS
       else if (focusStatus === FocusStatus.FOCUS) {
-        focusContext.focusTransitionProgress.value = stepProgress; // TODO - add smooth transition of focused vertices opacity
+        // Update focus transition progress to ensure that components'
+        // focus transition progress values are updated
+        if (progress > previousProgress.value) {
+          focusContext.focusTransitionProgress.value = stepProgress;
+          focusContext.focus.key.value = afterStep?.value.key ?? '';
+        } else {
+          focusContext.focusTransitionProgress.value = 1 - stepProgress;
+          focusContext.focus.key.value = beforeStep?.value.key ?? '';
+        }
       }
 
       // BLUR START
       if (
-        !beforeStep &&
-        progress < previousProgress.value &&
+        ((!beforeStep && progress < previousProgress.value) ||
+          (!afterStep && progress > previousProgress.value)) &&
         focusStatus !== FocusStatus.BLUR_TRANSITION &&
         focusStatus !== FocusStatus.BLUR
       ) {
@@ -245,7 +255,11 @@ function MultiStepVertexFocusProvider({
       }
       // BLUR TRANSITION
       else if (focusStatus === FocusStatus.BLUR_TRANSITION) {
-        focusContext.focusTransitionProgress.value = 1 - stepProgress;
+        if (progress > previousProgress.value) {
+          focusContext.focusTransitionProgress.value = stepProgress;
+        } else {
+          focusContext.focusTransitionProgress.value = 1 - stepProgress;
+        }
       }
       // Update values for the next reaction
       previousStep.value = currentStep;

@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import {
   Easing,
   useSharedValue,
+  withRepeat,
   withSequence,
   withTiming
 } from 'react-native-reanimated';
@@ -47,7 +48,7 @@ const GRAPH: {
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
-let added = false;
+const added = false;
 
 export default function Development() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
@@ -62,7 +63,7 @@ export default function Development() {
         vertexScale: 2,
         alignment: { horizontalAlignment: 'left', horizontalOffset: 25 }
       },
-      1: {
+      0.8: {
         key: 'V3',
         alignment: {
           verticalAlignment: 'top',
@@ -83,22 +84,25 @@ export default function Development() {
 
   const [vertexSpacing, setVertexSpacing] = useState(50);
 
-  useEffect(() => {
-    setInterval(() => {
-      // setVertexSpacing(v => (v === 50 ? 150 : 50));
-      if (!added) {
-        graph.insertVertex({ key: 'V5' });
-      } else {
-        graph.removeVertex('V5');
-      }
-      added = !added;
-    }, 1000);
-  }, []);
+  // useEffect(() => {
+  //   setInterval(() => {
+  //     // setVertexSpacing(v => (v === 50 ? 150 : 50));
+  //     if (!added) {
+  //       graph.insertVertex({ key: 'V5' });
+  //     } else {
+  //       graph.removeVertex('V5');
+  //     }
+  //     added = !added;
+  //   }, 1000);
+  // }, []);
 
   useEffect(() => {
-    multiStepFocusProgress.value = withSequence(
-      withTiming(1, { duration: 3000, easing: Easing.linear }),
-      withTiming(0, { duration: 3000, easing: Easing.linear })
+    multiStepFocusProgress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 5000, easing: Easing.linear }),
+        withTiming(0, { duration: 5000, easing: Easing.linear })
+      ),
+      -1
     );
   }, []);
 

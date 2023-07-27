@@ -257,7 +257,13 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       key: focusKey.value
     }),
     ({ canvasRendered, key }) => {
-      if (!key || !canvasRendered) return;
+      if (
+        key === null ||
+        !canvasRendered ||
+        focusStatus.value !== FocusStatus.FOCUS_PREPARATION
+      ) {
+        return;
+      }
       startTransition(
         key,
         FocusStatus.FOCUS_TRANSITION,
@@ -286,7 +292,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     () => transitionProgress.value,
     progress => {
       if (progress !== 1) return;
-      console.log('focus end');
       const currentStatus = focusStatus.value;
       const finishStatus =
         currentStatus === FocusStatus.BLUR_TRANSITION ||
@@ -295,6 +300,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
           : FocusStatus.FOCUS;
       // Set the finish status
       focusStatus.value = finishStatus;
+      console.log('focus end', finishStatus);
       // Enable gestures and change the container position to fit
       // into the canvas bounds if it's out of them
       if (finishStatus === FocusStatus.BLUR) {
