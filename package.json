@@ -65,7 +65,9 @@
     "typescript": "^5.1.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "patches",
+    "src"
   ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
