@@ -292,8 +292,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       if (progress !== 1) return;
       const currentStatus = focusStatus.value;
       const finishStatus =
-        currentStatus === FocusStatus.BLUR_TRANSITION ||
-        currentStatus === FocusStatus.BLUR
+        currentStatus === FocusStatus.BLUR_TRANSITION
           ? FocusStatus.BLUR
           : FocusStatus.FOCUS;
       // Set the finish status

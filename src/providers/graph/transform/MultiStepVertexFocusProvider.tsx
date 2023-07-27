@@ -181,6 +181,8 @@ function MultiStepVertexFocusProvider({
       const stepProgress =
         (progress - beforeProgress) / (afterProgress - beforeProgress);
 
+      console.log(stepProgress);
+
       // Update the focused vertex transformation
       updateFocusedVertexTransformation(
         getMultiStepFocusTransformation(
