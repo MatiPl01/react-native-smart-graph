@@ -7,12 +7,13 @@ import {
   useWorkletCallback
 } from 'react-native-reanimated';
 
-import { FocusContextType, FocusStatus } from '@/providers/canvas';
+import { FocusContextType } from '@/providers/canvas';
 import { withGraphData } from '@/providers/graph/data';
+import { useVertexFocusContext } from '@/providers/graph/transform/VertexFocusProvider';
 import { VertexComponentRenderData } from '@/types/components';
 import { FocusStepData } from '@/types/focus';
 import { AnimatedDimensions } from '@/types/layout';
-import { GraphFocusSettings } from '@/types/settings';
+import { MultiStepFocusSettings } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
 import { animateToValue } from '@/utils/animations';
 import {
@@ -22,7 +23,7 @@ import {
 } from '@/utils/focus';
 import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
-import { useVertexFocusContext } from './VertexFocusProvider';
+import { useStateMachine } from './StateMachine';
 
 type MultiStepFocusProviderProps = PropsWithChildren<{
   availableScales: SharedValue<number[]>;
@@ -31,7 +32,7 @@ type MultiStepFocusProviderProps = PropsWithChildren<{
   initialScale: SharedValue<number>;
   isGestureActive: SharedValue<boolean>;
   renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphFocusSettings;
+  settings: MultiStepFocusSettings;
   vertexRadius: number;
 }>;
 
@@ -56,6 +57,8 @@ function MultiStepVertexFocusProvider({
   );
 
   // OTHER VALUES
+  const stateMachine = useStateMachine(focusContext);
+
   const isEnabled = useDerivedValue(
     // Enable the multi step focus when the vertex is not focused
     // and no gesture is being performed
@@ -181,7 +184,8 @@ function MultiStepVertexFocusProvider({
       const stepProgress =
         (progress - beforeProgress) / (afterProgress - beforeProgress);
 
-      console.log(stepProgress);
+      // Update the state machine
+      stateMachine.update(progress, beforeStep, afterStep);
 
       // Update the focused vertex transformation
       updateFocusedVertexTransformation(
@@ -201,68 +205,68 @@ function MultiStepVertexFocusProvider({
         focusContext
       );
 
-      const focusStatus = focusContext.focusStatus.value;
-      // FOCUS START - when the focus status is blur and the multi
-      // step focus is enabled
-      if (
-        reset ||
-        ((focusStatus === FocusStatus.BLUR ||
-          focusStatus === FocusStatus.BLUR_TRANSITION) &&
-          ((beforeStep && progress < previousProgress.value) ||
-            (afterStep && progress > previousProgress.value)))
-      ) {
-        shouldResetFocus.value = false;
-        focusContext.startFocus(
-          {
-            gesturesDisabled: !!settings.gesturesDisabled,
-            key: afterStep?.value.key ?? ''
-          },
-          null
-        );
-      }
-      // FOCUS TRANSITION - after starting the focus, until the first
-      // step point is reached
-      else if (focusStatus === FocusStatus.FOCUS_TRANSITION) {
-        if (currentStep !== previousStep.value) {
-          focusContext.focusTransitionProgress.value = 1;
-        } else if (progress > previousProgress.value) {
-          focusContext.focusTransitionProgress.value = stepProgress;
-          focusContext.focus.key.value = afterStep?.value.key ?? '';
-        } else {
-          focusContext.focusTransitionProgress.value = 1 - stepProgress;
-          focusContext.focus.key.value = beforeStep?.value.key ?? '';
-        }
-      }
-      // FOCUS
-      else if (focusStatus === FocusStatus.FOCUS) {
-        // Update focus transition progress to ensure that components'
-        // focus transition progress values are updated
-        if (progress > previousProgress.value) {
-          focusContext.focusTransitionProgress.value = stepProgress;
-          focusContext.focus.key.value = afterStep?.value.key ?? '';
-        } else {
-          focusContext.focusTransitionProgress.value = 1 - stepProgress;
-          focusContext.focus.key.value = beforeStep?.value.key ?? '';
-        }
-      }
+      // const focusStatus = focusContext.focusStatus.value;
+      // // FOCUS START - when the focus status is blur and the multi
+      // // step focus is enabled
+      // if (
+      //   reset ||
+      //   ((focusStatus === FocusStatus.BLUR ||
+      //     focusStatus === FocusStatus.BLUR_TRANSITION) &&
+      //     ((beforeStep && progress < previousProgress.value) ||
+      //       (afterStep && progress > previousProgress.value)))
+      // ) {
+      //   shouldResetFocus.value = false;
+      //   focusContext.startFocus(
+      //     {
+      //       gesturesDisabled: !!settings.gesturesDisabled,
+      //       key: afterStep?.value.key ?? ''
+      //     },
+      //     null
+      //   );
+      // }
+      // // FOCUS TRANSITION - after starting the focus, until the first
+      // // step point is reached
+      // else if (focusStatus === FocusStatus.FOCUS_TRANSITION) {
+      //   if (currentStep !== previousStep.value) {
+      //     focusContext.focusTransitionProgress.value = 1;
+      //   } else if (progress > previousProgress.value) {
+      //     focusContext.focusTransitionProgress.value = stepProgress;
+      //     focusContext.focus.key.value = afterStep?.value.key ?? '';
+      //   } else {
+      //     focusContext.focusTransitionProgress.value = 1 - stepProgress;
+      //     focusContext.focus.key.value = beforeStep?.value.key ?? '';
+      //   }
+      // }
+      // // FOCUS
+      // else if (focusStatus === FocusStatus.FOCUS) {
+      //   // Update focus transition progress to ensure that components'
+      //   // focus transition progress values are updated
+      //   if (progress > previousProgress.value) {
+      //     focusContext.focusTransitionProgress.value = stepProgress;
+      //     focusContext.focus.key.value = afterStep?.value.key ?? '';
+      //   } else {
+      //     focusContext.focusTransitionProgress.value = 1 - stepProgress;
+      //     focusContext.focus.key.value = beforeStep?.value.key ?? '';
+      //   }
+      // }
 
-      // BLUR START
-      if (
-        ((!beforeStep && progress < previousProgress.value) ||
-          (!afterStep && progress > previousProgress.value)) &&
-        focusStatus !== FocusStatus.BLUR_TRANSITION &&
-        focusStatus !== FocusStatus.BLUR
-      ) {
-        focusContext.endFocus(undefined, null);
-      }
-      // BLUR TRANSITION
-      else if (focusStatus === FocusStatus.BLUR_TRANSITION) {
-        if (progress > previousProgress.value) {
-          focusContext.focusTransitionProgress.value = stepProgress;
-        } else {
-          focusContext.focusTransitionProgress.value = 1 - stepProgress;
-        }
-      }
+      // // BLUR START
+      // if (
+      //   ((!beforeStep && progress < previousProgress.value) ||
+      //     (!afterStep && progress > previousProgress.value)) &&
+      //   focusStatus !== FocusStatus.BLUR_TRANSITION &&
+      //   focusStatus !== FocusStatus.BLUR
+      // ) {
+      //   focusContext.endFocus(undefined, null);
+      // }
+      // // BLUR TRANSITION
+      // else if (focusStatus === FocusStatus.BLUR_TRANSITION) {
+      //   if (progress > previousProgress.value) {
+      //     focusContext.focusTransitionProgress.value = stepProgress;
+      //   } else {
+      //     focusContext.focusTransitionProgress.value = 1 - stepProgress;
+      //   }
+      // }
       // Update values for the next reaction
       previousStep.value = currentStep;
     },

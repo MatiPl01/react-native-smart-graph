@@ -24,15 +24,14 @@ import { deepMemoComparator } from '@/utils/equality';
 import { ComponentsDataProvider } from './data';
 import { PressEventsProvider, PressEventsProviderProps } from './events';
 import {
+  ContainerDimensionsProvider,
   ForcesLayoutProvider,
   ForcesPlacementProvider,
+  ForcesPlacementProviderProps,
   GraphPlacementLayoutProviderProps,
   PlacementLayoutProvider
 } from './layout';
-import ContainerDimensionsProvider from './layout/ContainerDimensionsProvider';
-import { ForcesPlacementProviderProps } from './layout/forces/ForcesPlacementProvider';
-import MultiStepVertexFocusProvider from './transform/MultiStepVertexFocusProvider';
-import VertexFocusProvider from './transform/VertexFocusProvider';
+import { MultiStepVertexFocusProvider, VertexFocusProvider } from './transform';
 
 const getLayoutProviders = <V, E>(
   graph: Graph<V, E>,
