@@ -17,7 +17,6 @@ import {
   getAlignedVertexAbsolutePosition,
   getCoordinatesRelativeToCenter
 } from './layout';
-import { calcScaleOnProgress, calcTranslationOnProgress } from './views';
 
 export const getFocusedVertexData = (
   focusedVertexWithPosition: {
@@ -76,14 +75,24 @@ type TransformationInput = {
   };
 };
 
-export const updateFocusedVertexTransformation = (
-  transformation: VertexTransformation,
+export const updateFocusTransformation = (
+  transformation: {
+    end?: VertexTransformation;
+    start?: VertexTransformation;
+  },
   focusContext: FocusContextType
 ): void => {
   'worklet';
-  focusContext.focus.x.value = transformation.x;
-  focusContext.focus.y.value = transformation.y;
-  focusContext.focus.scale.value = transformation.scale;
+  if (transformation.start) {
+    focusContext.focus.start.scale.value = transformation.start.scale;
+    focusContext.focus.start.x.value = transformation.start.x;
+    focusContext.focus.start.y.value = transformation.start.y;
+  }
+  if (transformation.end) {
+    focusContext.focus.end.scale.value = transformation.end.scale;
+    focusContext.focus.end.x.value = transformation.end.x;
+    focusContext.focus.end.y.value = transformation.end.y;
+  }
 };
 
 export const getFocusedVertexTransformation = ({
@@ -111,12 +120,11 @@ export const getFocusedVertexTransformation = ({
 type FocusConfig = {
   availableScales: number[];
   canvasDimensions: Dimensions;
-  disableGestures: boolean;
   initialScale: number;
   vertexRadius: number;
 };
 
-const getMultiStepVertexTransformation = (
+export const getMultiStepVertexTransformation = (
   stepData: FocusStepData,
   config: FocusConfig
 ): VertexTransformation => {
@@ -134,7 +142,6 @@ const getMultiStepVertexTransformation = (
     {
       alignment: stepData.value.alignment,
       animation: null,
-      disableGestures: config.disableGestures,
       vertexScale: stepData.value.vertexScale
     }
   ).vertex!;
@@ -151,46 +158,13 @@ const getMultiStepVertexTransformation = (
   });
 };
 
-export const getMultiStepFocusTransformation = (
-  stepProgress: number,
-  config: FocusConfig,
-  before?: FocusStepData,
-  after?: FocusStepData
-): VertexTransformation => {
-  'worklet';
-  const beforeVertexData =
-    before && getMultiStepVertexTransformation(before, config);
-  const afterVertexData =
-    after && getMultiStepVertexTransformation(after, config);
-
-  if (beforeVertexData && afterVertexData) {
-    const { scale: beforeScale, ...beforePosition } = beforeVertexData;
-    const { scale: afterScale, ...afterPosition } = afterVertexData;
-    return {
-      ...calcTranslationOnProgress(stepProgress, beforePosition, afterPosition),
-      scale: calcScaleOnProgress(stepProgress, beforeScale, afterScale)
-    };
-  }
-  if (beforeVertexData) {
-    return beforeVertexData;
-  }
-  if (afterVertexData) {
-    return afterVertexData;
-  }
-  return {
-    scale: 1,
-    x: 0,
-    y: 0
-  };
-};
-
 export const getFocusStep = (
   progress: number,
   previousStep: number,
   focusStepsData: Array<FocusStepData>
 ): {
-  afterStep: FocusStepData | undefined;
-  beforeStep: FocusStepData | undefined;
+  afterStep: FocusStepData | null;
+  beforeStep: FocusStepData | null;
   currentStep: number;
 } | null => {
   'worklet';
@@ -211,8 +185,8 @@ export const getFocusStep = (
   }
 
   return {
-    afterStep,
-    beforeStep,
+    afterStep: afterStep ?? null,
+    beforeStep: beforeStep ?? null,
     currentStep: previousStep
   };
 };

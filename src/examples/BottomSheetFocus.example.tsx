@@ -49,7 +49,7 @@ export default function BottomSheetFocus() {
         }
       },
       1: {
-        key: 'V1',
+        key: 'V2',
         vertexScale: 2.5,
         alignment: {
           verticalOffset: 75,

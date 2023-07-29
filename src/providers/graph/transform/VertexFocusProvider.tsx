@@ -23,7 +23,7 @@ import { FocusedVertexData } from '@/types/settings/focus';
 import {
   getFocusedVertexData,
   getFocusedVertexTransformation,
-  updateFocusedVertexTransformation
+  updateFocusTransformation
 } from '@/utils/focus';
 
 type VertexFocusContextType = {
@@ -130,9 +130,16 @@ function VertexFocusProvider<V, E>({
       position: { x, y },
       scale
     } = focusedVertexData.vertex;
-    focusContext.focus.x.value = x.value;
-    focusContext.focus.y.value = y.value;
-    focusContext.focus.scale.value = scale;
+    updateFocusTransformation(
+      {
+        end: {
+          scale,
+          x: x.value,
+          y: y.value
+        }
+      },
+      focusContext
+    );
     focusContext.startFocus(
       {
         gesturesDisabled: data.settings.disableGestures,
@@ -180,8 +187,8 @@ function VertexFocusProvider<V, E>({
     },
     vertexData => {
       if (!vertexData) return;
-      updateFocusedVertexTransformation(
-        getFocusedVertexTransformation(vertexData),
+      updateFocusTransformation(
+        { end: getFocusedVertexTransformation(vertexData) },
         focusContext
       );
     }
