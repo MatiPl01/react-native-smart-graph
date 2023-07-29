@@ -48,7 +48,7 @@ const GRAPH: {
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
-export default function Development() {
+export default function Graph() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
   const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);

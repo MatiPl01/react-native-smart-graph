@@ -66,7 +66,8 @@ function MultiStepVertexFocusProvider({
   );
 
   const startSync = useWorkletCallback(() => {
-    syncProgress.value = 0;
+    // Make it non-zero to prevent reaction from calling sync infinitely
+    syncProgress.value = 0.00001;
     syncProgress.value = withTiming(1, DEFAULT_GESTURE_ANIMATION_SETTINGS); // TODO - maybe make this customizable
   }, []);
 
@@ -77,10 +78,10 @@ function MultiStepVertexFocusProvider({
         return;
       }
       const step = binarySearchLE(data, progress, ({ startsAt }) => startsAt);
+      syncProgress.value = 0;
       if (step === initialStep.value) return;
       initialStep.value = step;
       previousStep.value = initialStep.value = step;
-      startSync();
     },
     []
   );
@@ -125,6 +126,21 @@ function MultiStepVertexFocusProvider({
     [settings.progress, focusStepsData]
   );
 
+  // Start syncing the progress if the progress value changes
+  // (For smooth graph transition from current position to the
+  // focus position when the focus is enabled)
+  useAnimatedReaction(
+    () => ({
+      enabled: isEnabled.value,
+      progress: settings.progress.value
+    }),
+    ({ enabled }) => {
+      if (enabled && syncProgress.value === 0) {
+        startSync();
+      }
+    }
+  );
+
   // The main reaction that updates the focus context
   useAnimatedReaction(
     () => ({
@@ -136,7 +152,9 @@ function MultiStepVertexFocusProvider({
       step: initialStep.value
     }),
     ({ progress, step }) => {
-      if (step === -1 || progress.current === progress.previous) return;
+      if (step === -1) {
+        return;
+      }
 
       // Get the current state of the transition
       const prevStep = previousStep.value;

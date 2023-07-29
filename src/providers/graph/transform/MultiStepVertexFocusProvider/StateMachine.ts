@@ -63,6 +63,7 @@ const focusTransitionState: StateHandler = props => {
     currentProgress,
     focusContext,
     previousProgress,
+    syncProgress,
     targetKey: { value: targetKey }
   } = props;
 
@@ -74,7 +75,10 @@ const focusTransitionState: StateHandler = props => {
   }
 
   // D - If the focus target point was reached, change the state to focus
-  if (isBetween(targetStep.startsAt, previousProgress, currentProgress)) {
+  if (
+    syncProgress === 1 &&
+    isBetween(targetStep.startsAt, previousProgress, currentProgress)
+  ) {
     return MachineState.FOCUS;
   }
 
@@ -104,17 +108,19 @@ const focusTransitionState: StateHandler = props => {
   return MachineState.FOCUS_TRANSITION;
 };
 
-const focusState: StateHandler = ({
-  currentProgress,
-  focusContext,
-  previousProgress
-}) => {
+const focusState: StateHandler = props => {
   'worklet';
+  const { currentProgress, focusContext, previousProgress } = props;
+  const { target: targetStep } = getTransitionBounds(props);
+
   // Update the transition progress to 1
   focusContext.focusTransitionProgress.value = 1;
 
   // E - Start the focus animation if the progress is modified
-  if (currentProgress !== previousProgress) {
+  if (
+    targetStep &&
+    !isBetween(targetStep.startsAt, previousProgress, currentProgress)
+  ) {
     return MachineState.FOCUS_START;
   }
 
@@ -161,15 +167,19 @@ const blurTransitionState: StateHandler = props => {
   return MachineState.BLUR_TRANSITION;
 };
 
-const blurState: StateHandler = ({ currentProgress, previousProgress }) => {
+const blurState: StateHandler = props => {
   'worklet';
-  // J - if progress is modified, start the focus animation
-  if (currentProgress !== previousProgress) {
+  const targetKey = getTargetKey(props);
+
+  // J - if progress is modified, and there is a target vertex, start the
+  // focus animation
+  if (targetKey) {
     // Start the synchronization progress (animation between the current
     // canvas position and the target position calculated based on the
     // focused vertex position)
     return MachineState.FOCUS_START;
   }
+
   // Otherwise, stay in the blur state
   return MachineState.BLUR;
 };
@@ -231,19 +241,23 @@ export const useStateMachine = (
         afterStep
       ) {
         'worklet';
-        state.value = STATE_HANDLERS[state.value]({
-          afterStep,
-          beforeStep,
-          canvasDataContext,
-          currentProgress,
-          focusContext,
-          previousProgress,
-          settings,
-          syncProgress,
-          targetKey,
-          vertexRadius
-        });
-        console.log('state', state.value);
+        let result = state.value;
+        do {
+          state.value = result;
+          result = STATE_HANDLERS[state.value]({
+            afterStep,
+            beforeStep,
+            canvasDataContext,
+            currentProgress,
+            focusContext,
+            previousProgress,
+            settings,
+            syncProgress,
+            targetKey,
+            vertexRadius
+          });
+          console.log(result);
+        } while (result !== state.value);
       }
     }),
     [focusContext, settings]

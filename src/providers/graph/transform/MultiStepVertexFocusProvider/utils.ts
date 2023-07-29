@@ -15,9 +15,9 @@ export const getTargetKey = ({
 }: StateProps): null | string => {
   'worklet';
   return (
-    (currentProgress < previousProgress
+    (currentProgress <= previousProgress
       ? beforeStep?.value.key
-      : currentProgress > previousProgress
+      : currentProgress >= previousProgress
       ? afterStep?.value.key
       : null) ?? null
   );
@@ -40,16 +40,16 @@ export const getResultingProgress = (
   return stepProgress * syncProgress;
 };
 
-export const getTransitionBounds = (
-  props: StateProps
-): {
+export const getTransitionBounds = ({
+  afterStep,
+  beforeStep,
+  syncProgress,
+  targetKey: { value: targetKey }
+}: StateProps): {
   source: FocusStepData | null;
   target: FocusStepData | null;
 } => {
   'worklet';
-  const { afterStep, beforeStep } = props;
-  const targetKey = getTargetKey(props);
-
   let targetStep: FocusStepData | null = null;
   let sourceStep: FocusStepData | null = null;
 
@@ -62,6 +62,10 @@ export const getTransitionBounds = (
   } else if (targetKey === null) {
     // For blur transition
     sourceStep = beforeStep ?? afterStep;
+  }
+
+  if (syncProgress < 1) {
+    sourceStep = null;
   }
 
   return {

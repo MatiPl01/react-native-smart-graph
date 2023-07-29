@@ -27,3 +27,13 @@ export type StateProps = {
 };
 
 export type StateHandler = (props: StateProps) => MachineState;
+
+export type MachineContext = {
+  update(
+    currentProgress: number,
+    previousProgress: number,
+    syncProgress: number,
+    afterStep: FocusStepData | null,
+    beforeStep: FocusStepData | null
+  ): void;
+};
