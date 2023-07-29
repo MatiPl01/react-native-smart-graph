@@ -1,9 +1,9 @@
-export type VertexData<V> = {
+export type VertexData<V = void> = {
   key: string;
   value?: V;
 };
 
-export type DirectedEdgeData<E> = {
+export type DirectedEdgeData<E = void> = {
   from: string;
   key: string;
   to: string;

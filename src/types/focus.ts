@@ -5,17 +5,19 @@ import { AnimationSettingsWithDefaults, FocusPoint } from './settings';
 import { Maybe } from './utils';
 
 export type FocusData = {
+  customSource?: boolean;
   gesturesDisabled: boolean;
   key: string;
 };
 
 export type BlurData = {
-  origin: Vector;
+  customSource?: boolean;
+  origin?: Vector;
 };
 
 export type FocusStartFunction = (
   data: FocusData,
-  animationSettings: Maybe<AnimationSettingsWithDefaults>
+  animationSettings?: Maybe<AnimationSettingsWithDefaults>
 ) => void;
 
 export type FocusEndFunction = (

@@ -9,7 +9,7 @@ import {
   UndirectedGraphComponentsSettingsWithDefaults
 } from './components';
 import { GraphEventsSettings } from './events';
-import { GraphFocusSettings } from './focus';
+import { MultiStepFocusSettings } from './focus';
 import { GraphLayoutSettings, GraphLayoutSettingsWithDefaults } from './layout';
 import {
   GraphPlacementSettings,
@@ -26,7 +26,7 @@ export * from './placement';
 type SharedGraphSettings<V> = {
   animations?: GraphAnimationsSettings;
   events?: GraphEventsSettings<V>;
-  focus?: GraphFocusSettings;
+  focus?: MultiStepFocusSettings;
   layout?: GraphLayoutSettings;
   placement?: GraphPlacementSettings;
 };

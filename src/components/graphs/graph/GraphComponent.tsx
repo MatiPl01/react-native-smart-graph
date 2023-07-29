@@ -17,15 +17,12 @@ type GraphComponentProps = {
 
 function GraphComponent({
   canvasDataContext: { boundingRect },
-  focusContext: {
-    focus: { key: focusKey },
-    focusTransitionProgress
-  }
+  focusContext
 }: GraphComponentProps) {
   // A helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
   // Update the focusProgress
-  useComponentFocus(focusProgress, focusTransitionProgress, focusKey);
+  useComponentFocus(focusProgress, focusContext);
 
   return (
     <>
@@ -34,10 +31,7 @@ function GraphComponent({
         mode='luminance'>
         <GraphEdges focusProgress={focusProgress} />
       </Mask>
-      <GraphVertices
-        focusKey={focusKey}
-        focusTransitionProgress={focusTransitionProgress}
-      />
+      <GraphVertices focusContext={focusContext} />
       <GraphEdgesLabels focusProgress={focusProgress} />
     </>
   );
