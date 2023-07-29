@@ -27,6 +27,7 @@ const focusStartState: StateHandler = props => {
   const targetKey = getTargetKey(props);
 
   if (targetKey === null) {
+    oldTargetKey.value = targetKey;
     // B - If there is no focused vertex, start the blur animation
     return MachineState.BLUR_START;
   }
@@ -67,20 +68,27 @@ const focusTransitionState: StateHandler = props => {
     targetKey: { value: targetKey }
   } = props;
 
-  const { target: targetStep } = getTransitionBounds(props);
+  const { source: sourceStep, target: targetStep } = getTransitionBounds(props);
 
   // C - If  there is no transition target, restart the focus animation
   if (!targetStep) {
     return MachineState.FOCUS_START;
   }
 
+  if (!sourceStep && currentProgress === 0) {
+    // J - Change state to blur if there was no previous focus target
+    // and the current progress is 0 (this will change the container
+    // position to the position that it had before the focus transition)
+    if (focusContext.previousKey.value === null) {
+      return MachineState.BLUR;
+    }
+    // L - Start blur transition if there was a previous focus target
+    // and the current progress is 0 (this will reset the container position
+    // to the ideal position)
+    return MachineState.BLUR_START;
+  }
+
   // D - If the focus target point was reached, change the state to focus
-  console.log(
-    syncProgress,
-    targetStep.startsAt,
-    previousProgress,
-    currentProgress
-  );
   if (
     syncProgress === 1 &&
     isBetween(targetStep.startsAt, previousProgress, currentProgress)
@@ -120,13 +128,21 @@ const focusState: StateHandler = props => {
   const { currentProgress, previousProgress, targetKey } = props;
   const { source: sourceStep, target: targetStep } = getTransitionBounds(props);
 
-  // E - Start the focus animation if the progress is modified
-  const startStep = targetKey.value === null ? sourceStep : targetStep;
-  if (
-    startStep &&
-    !isBetween(startStep.startsAt, previousProgress, currentProgress)
-  ) {
-    return MachineState.FOCUS_START;
+  // Start step is the target step when the focus state was entered from
+  // the focus transition state, whereas the start step is the source step
+  // when the focus state was entered from the blur transition state
+  const startStep =
+    targetStep ?? (targetKey.value === null ? sourceStep : null);
+
+  if (startStep) {
+    // E - Start the focus animation if the progress is modified
+    if (!isBetween(startStep.startsAt, previousProgress, currentProgress)) {
+      return MachineState.FOCUS_START;
+    }
+  } else {
+    // K - Start the blur transition there is no step to start focus
+    // transition from
+    return MachineState.BLUR_START;
   }
 
   // Otherwise, stay in the focus state
@@ -156,6 +172,7 @@ const blurTransitionState: StateHandler = props => {
 
   // H - If the resulting progress is 1, the blur animation is finished
   if (resultingProgress === 1 || !sourceStep) {
+    focusContext.transitionProgress.value = 1;
     return MachineState.BLUR;
   }
 
@@ -210,22 +227,25 @@ type MachineContext = {
 };
 
 /*
-State machine diagram: // TODO - make it vertical
+State machine diagram:
+(I know it's quire complex, but it's the best I could do to visualize it :D)
+(I hope I won't have to touch this code ever again)
 
-    +------------------------------------------- I -----------------------------------------------------------+
-    |                                                                                                         |
-    |   +------------------------------  B ---------------------------+                                       |
-    |   |                                                             |                                       |  
-    v   |                                                             v                                       |
-FOCUS_START -- A --> FOCUS_TRANSITION -- D --> FOCUS            BLUR_START -- F --> BLUR_TRANSITION -- H --> BLUR
+    +------------------------------------------- I ------------------------------------------------------------+
+    |                                                                                                          |
+    |   +------------------------------  B ---------------------------+                                        |
+    |   |                                                             |                                        |
+    |   |                     +--------------- J ---------------------^--------------------------------------+ |
+    |   |                     \                                       |                                      | |
+    |   |                     |  +------------ L ------------------+  |                                      | |
+    |   |                     |  |                                 |  |                                      | |
+    v   |                     |  |                                 v  v                                      v |
+FOCUS_START -- A --> FOCUS_TRANSITION -- D --> FOCUS --- K ---> BLUR_START -- F --> BLUR_TRANSITION -- H --> BLUR
     ^   ^                     |                 |  ^                                    |
     |   |                     |                 |  |                                    |
     |   +------- C -----------+                 |  +---------------- G -----------------+
     |                                           |                                     
     +--------------------- E -------------------+
-
-Transition descriptions:
-// TODO - add descriptions
 */
 export const useStateMachine = (
   focusContext: FocusContextType,
@@ -262,7 +282,6 @@ export const useStateMachine = (
             targetKey,
             vertexRadius
           });
-          console.log(result);
         } while (result !== state.value);
         state.value = result;
       }

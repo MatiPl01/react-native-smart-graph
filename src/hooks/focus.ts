@@ -9,20 +9,42 @@ export const useComponentFocus = (
 ): void => {
   useAnimatedReaction(
     () => ({
-      focusedKey: focusContext.focus.key.value,
+      currentKey: focusContext.focus.key.value,
       progress: focusContext.transitionProgress.value
     }),
-    ({ focusedKey, progress }) => {
-      const previousResult = result.value;
+    ({ currentKey, progress }) => {
+      const previousKey = focusContext.previousKey.value;
 
-      // If the current component is focused or there is no focus at all,
-      // we want to remove blur from the current component
-      if (focusedKey === componentKey || focusedKey === null) {
-        result.value = Math.max(previousResult, progress);
+      // If no focus target, no component is blurred
+      if (currentKey === null && previousKey === null) {
+        result.value = 1;
       }
-      // If progress is increasing, we want to blur the current component
-      else if (!(previousResult === 1 && progress === 1)) {
-        result.value = Math.min(previousResult, 1 - progress);
+      // Transition from blur to focus
+      else if (previousKey === null && currentKey !== null) {
+        if (componentKey === currentKey) {
+          result.value = 1; // Focus target
+        } else {
+          result.value = 1 - progress; // Others
+        }
+      }
+      // Transition from focus to blur
+      else if (previousKey !== null && currentKey === null) {
+        if (componentKey === previousKey) {
+          result.value = 1; // Previous focus target
+        } else {
+          result.value = progress; // Others
+        }
+      }
+      // Transition from focus to focus (changing focus target)
+      else {
+        // eslint-disable-next-line no-lonely-if
+        if (componentKey === currentKey) {
+          result.value = progress; // Focus target
+        } else if (componentKey === previousKey) {
+          result.value = 1 - progress; // Previous focus target
+        } else {
+          result.value = 0; // Others
+        }
       }
     },
     [componentKey]

@@ -45,6 +45,7 @@ export type FocusContextType = {
   };
   focusStatus: SharedValue<FocusStatus>;
   gesturesDisabled: SharedValue<boolean>;
+  previousKey: SharedValue<null | string>;
   startFocus: FocusStartFunction;
   status: SharedValue<FocusStatus>;
   transitionProgress: SharedValue<number>;
@@ -122,6 +123,9 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const transitionStartPosition = useSharedValue({ x: 0, y: 0 });
   const transitionStartScale = useSharedValue(0);
   const transitionProgress = useSharedValue(1);
+  // The value below is used only to properly update the previous focus key
+  const currentKey = useSharedValue<null | string>(null);
+  const previousKey = useSharedValue<null | string>(null);
 
   /**
    * PRIVATE FUNCTIONS
@@ -261,6 +265,16 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   /*
    * HELPER REACTIONS
    */
+
+  // This reaction is used to update the previous focus key
+  useAnimatedReaction(
+    () => focusKey.value,
+    key => {
+      if (currentKey.value === key) return;
+      previousKey.value = currentKey.value;
+      currentKey.value = key;
+    }
+  );
 
   // This reaction is used to update the start scale and translation
   // of the container during the focus/blur transition based on
@@ -516,6 +530,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     },
     focusStatus,
     gesturesDisabled,
+    previousKey,
     startFocus,
     status: focusStatus,
     transitionProgress
