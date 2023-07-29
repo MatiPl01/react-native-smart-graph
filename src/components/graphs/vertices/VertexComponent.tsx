@@ -1,11 +1,8 @@
 import { memo, useEffect } from 'react';
-import {
-  SharedValue,
-  useDerivedValue,
-  useSharedValue
-} from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
+import { FocusContextType } from '@/providers/canvas';
 import { VertexRemoveHandler, VertexRenderHandler } from '@/types/components';
 import { Vertex } from '@/types/graphs';
 import { VertexRenderFunction } from '@/types/renderer';
@@ -19,8 +16,7 @@ import { updateComponentAnimationState } from '@/utils/components';
 type VertexComponentProps<V, E> = {
   animationSettings: AnimationSettingsWithDefaults;
   componentSettings: DeepRequiredAll<VertexSettings>;
-  focusKey: SharedValue<null | string>;
-  focusTransitionProgress: SharedValue<number>;
+  focusContext: FocusContextType;
   onRemove: VertexRemoveHandler;
   onRender: VertexRenderHandler;
   removed: boolean;
@@ -31,8 +27,7 @@ type VertexComponentProps<V, E> = {
 function VertexComponent<V, E>({
   animationSettings,
   componentSettings,
-  focusKey,
-  focusTransitionProgress,
+  focusContext,
   onRemove,
   onRender,
   removed,
@@ -66,7 +61,7 @@ function VertexComponent<V, E>({
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
-  useComponentFocus(focusProgress, focusTransitionProgress, focusKey, key);
+  useComponentFocus(focusProgress, focusContext, key);
 
   useEffect(() => {
     // Call onRender callback on mount
@@ -91,12 +86,12 @@ function VertexComponent<V, E>({
   return renderer({
     animationProgress,
     currentRadius,
-    focusKey,
-    focusTransitionProgress: focusProgress,
+    focusKey: focusContext.focus.key,
     key,
     position: { x: positionX, y: positionY },
     radius: componentSettings.radius,
     scale,
+    transitionProgress: focusProgress,
     value: vertex.value
   });
 }

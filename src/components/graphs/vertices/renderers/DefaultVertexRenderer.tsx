@@ -12,11 +12,11 @@ import { VertexRendererProps } from '@/types/renderer';
 export default function DefaultVertexRenderer<V>({
   animationProgress,
   currentRadius,
-  focusTransitionProgress,
   key,
   position: { x, y },
   radius,
-  scale
+  scale,
+  transitionProgress
 }: VertexRendererProps<V>) {
   const font = useFont(
     FONTS.rubikFont,
@@ -40,7 +40,7 @@ export default function DefaultVertexRenderer<V>({
   ]);
 
   const opacity = useDerivedValue(() =>
-    interpolate(focusTransitionProgress.value, [0, 1], [0.5, 1])
+    interpolate(transitionProgress.value, [0, 1], [0.5, 1])
   );
 
   if (font === null) {

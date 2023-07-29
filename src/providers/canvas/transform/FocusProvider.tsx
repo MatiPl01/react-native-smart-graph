@@ -44,10 +44,10 @@ export type FocusContextType = {
     start: FocusVertexTransition;
   };
   focusStatus: SharedValue<FocusStatus>;
-  focusTransitionProgress: SharedValue<number>;
   gesturesDisabled: SharedValue<boolean>;
   startFocus: FocusStartFunction;
   status: SharedValue<FocusStatus>;
+  transitionProgress: SharedValue<number>;
 };
 
 const FocusContext = createContext(null as unknown as object);
@@ -119,9 +119,9 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // Focus/Blur transition
   const animationSettings =
     useSharedValue<AnimationSettingsWithDefaults | null>(null);
-  const transitionProgress = useSharedValue(1);
   const transitionStartPosition = useSharedValue({ x: 0, y: 0 });
   const transitionStartScale = useSharedValue(0);
+  const transitionProgress = useSharedValue(1);
 
   /**
    * PRIVATE FUNCTIONS
@@ -436,7 +436,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         targetScale,
         translation
       } = data;
-      console.log(sourcePosition, sourceScale, progress);
       // Scale the content to the initial scale
       const newScale = calcScaleOnProgress(progress, sourceScale, targetScale);
       scaleContentTo(newScale);
@@ -498,28 +497,28 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     },
     endFocus,
     focus: {
-      // These 3 values must be updated by the external provider
       end: {
+        // These 3 values must be updated by the external provider
         scale: endScale,
         x: endX,
         y: endY
       },
       key: focusKey,
-      // These 3 values should be updated only if the transition
-      // start point is the specific point on canvas
-      // (e.g. see the multi step focus where the transition start
-      // points is another vertex)
       start: {
+        // These 3 values should be updated only if the transition
+        // start point is the specific point on canvas
+        // (e.g. see the multi step focus where the transition start
+        // points is another vertex)
         scale: startScale,
         x: startX,
         y: startY
       }
     },
     focusStatus,
-    focusTransitionProgress: transitionProgress,
     gesturesDisabled,
     startFocus,
-    status: focusStatus
+    status: focusStatus,
+    transitionProgress
   };
 
   return (

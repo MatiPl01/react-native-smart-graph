@@ -9,11 +9,11 @@ export type SharedRenderersProps = {
 export type VertexRendererProps<V> = SharedRenderersProps & {
   currentRadius: SharedValue<number>;
   focusKey: SharedValue<null | string>;
-  focusTransitionProgress: SharedValue<number>;
   key: string;
   position: AnimatedVectorCoordinates;
   radius: number;
   scale: SharedValue<number>;
+  transitionProgress: SharedValue<number>;
   value?: V;
 };
 

@@ -1,22 +1,27 @@
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
+import { FocusContextType } from '@/providers/canvas';
+
 export const useComponentFocus = (
   result: SharedValue<number>,
-  transitionProgress: SharedValue<number>,
-  focusedComponentKey: SharedValue<null | string>,
+  focusContext: FocusContextType,
   componentKey?: string
 ): void => {
   useAnimatedReaction(
     () => ({
-      focusedKey: focusedComponentKey.value,
-      previousResult: result.value,
-      progress: transitionProgress.value
+      focusedKey: focusContext.focus.key.value,
+      progress: focusContext.transitionProgress.value
     }),
-    ({ focusedKey, previousResult, progress }) => {
+    ({ focusedKey, progress }) => {
+      const previousResult = result.value;
+
+      // If the current component is focused or there is no focus at all,
+      // we want to remove blur from the current component
       if (focusedKey === componentKey || focusedKey === null) {
         result.value = Math.max(previousResult, progress);
-      } else {
-        // TODO - fix when progress doesn't go to 1
+      }
+      // If progress is increasing, we want to blur the current component
+      else if (!(previousResult === 1 && progress === 1)) {
         result.value = Math.min(previousResult, 1 - progress);
       }
     },

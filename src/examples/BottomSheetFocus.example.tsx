@@ -100,8 +100,8 @@ export default function BottomSheetFocus() {
               onVertexPress: handleVertexPress
             },
             placement: {
-              strategy: 'orbits',
-              minVertexSpacing: 100
+              strategy: 'orbits'
+              // minVertexSpacing: 100
             }
           }}
           graph={graph}
