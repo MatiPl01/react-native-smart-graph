@@ -6,7 +6,7 @@ import { Maybe } from './utils';
 
 export type FocusData = {
   customSource?: boolean;
-  gesturesDisabled: boolean;
+  gesturesDisabled?: boolean;
   key: string;
 };
 

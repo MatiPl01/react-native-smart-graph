@@ -1,0 +1,120 @@
+diff --git a/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts b/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts
+index a074279..d6e699a 100644
+--- a/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts
++++ b/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts
+@@ -2,6 +2,7 @@ import type { Animation, AnimationCallback, AnimationObject, AnimatableValue, Ti
+ interface DecayConfig {
+     deceleration?: number;
+     velocityFactor?: number;
++    rubberBandEffect?: boolean;
+     clamp?: number[];
+     velocity?: number;
+ }
+diff --git a/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts b/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
+index 8666f1c..df06960 100644
+--- a/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
++++ b/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
+@@ -11,6 +11,7 @@ import { isWeb } from '../PlatformChecker';
+ interface DecayConfig {
+   deceleration?: number;
+   velocityFactor?: number;
++  rubberBandEffect?: boolean;
+   clamp?: number[];
+   velocity?: number;
+ }
+@@ -69,6 +70,7 @@ export const withDecay = function (
+ 
+     const VELOCITY_EPS = IS_WEB ? 1 / 20 : 1;
+     const SLOPE_FACTOR = 0.1;
++    const DERIVATIVE_EPS = 0.1;
+ 
+     let decay: (animation: InnerDecayAnimation, now: number) => boolean;
+ 
+@@ -88,13 +90,6 @@ export const withDecay = function (
+           derivative = current - config.clamp![clampIndex];
+         }
+ 
+-        if (derivative !== 0) {
+-          animation.springActive = true;
+-        } else if (derivative === 0 && animation.springActive) {
+-          animation.current = config.clamp![clampIndex];
+-          return true;
+-        }
+-
+         const v =
+           velocity *
+             Math.exp(
+@@ -102,6 +97,15 @@ export const withDecay = function (
+             ) -
+           derivative * config.rubberBandFactor;
+ 
++        if (Math.abs(derivative) > DERIVATIVE_EPS) {
++          animation.springActive = true;
++        } else if (animation.springActive) {
++          animation.current = config.clamp![clampIndex];
++          return true;
++        } else if (Math.abs(v) < VELOCITY_EPS) {
++          return true;
++        }
++
+         animation.current =
+           current + (v * config.velocityFactor * deltaTime) / 1000;
+         animation.velocity = v;
+diff --git a/node_modules/react-native-reanimated/src/reanimated2/animation/timing.ts b/node_modules/react-native-reanimated/src/reanimated2/animation/timing.ts
+index 8304add..f377210 100644
+--- a/node_modules/react-native-reanimated/src/reanimated2/animation/timing.ts
++++ b/node_modules/react-native-reanimated/src/reanimated2/animation/timing.ts
+@@ -18,6 +18,7 @@ export interface TimingAnimation extends Animation<TimingAnimation> {
+   easing: EasingFn;
+   startValue: AnimatableValue;
+   startTime: Timestamp;
++  prevTimestamp: Timestamp;
+   progress: number;
+   toValue: AnimatableValue;
+   current: AnimatableValue;
+@@ -57,18 +58,21 @@ export const withTiming = function (
+     }
+ 
+     function timing(animation: InnerTimingAnimation, now: Timestamp): boolean {
+-      const { toValue, startTime, startValue } = animation;
+-      const runtime = now - startTime;
++      const { toValue, startTime, startValue, prevTimestamp } = animation;
++      const currTimestamp = Math.max(prevTimestamp, now);
++      const runtime = currTimestamp - startTime;
+ 
+       if (runtime >= config.duration) {
+         // reset startTime to avoid reusing finished animation config in `start` method
+         animation.startTime = 0;
++        animation.prevTimestamp = 0;
+         animation.current = toValue;
+         return true;
+       }
+       const progress = animation.easing(runtime / config.duration);
+       animation.current =
+         (startValue as number) + (toValue - (startValue as number)) * progress;
++      animation.prevTimestamp = currTimestamp;
+       return false;
+     }
+ 
+@@ -88,11 +92,13 @@ export const withTiming = function (
+         // new timing over the old one with the same parameters. If so, we want
+         // to copy animation timeline properties
+         animation.startTime = (previousAnimation as TimingAnimation).startTime;
++        animation.prevTimestamp = animation.startTime;
+         animation.startValue = (
+           previousAnimation as TimingAnimation
+         ).startValue;
+       } else {
+         animation.startTime = now;
++        animation.prevTimestamp = now;
+         animation.startValue = value;
+       }
+       animation.current = value;
+@@ -107,6 +113,7 @@ export const withTiming = function (
+       type: 'timing',
+       onFrame: timing,
+       onStart: onStart as (animation: TimingAnimation, now: number) => boolean,
++      prevTimestamp: 0,
+       progress: 0,
+       toValue,
+       startValue: 0,

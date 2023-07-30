@@ -1,9 +1,11 @@
 // eslint-disable-next-line import/default
-import Animated, { EasingFunctionFactory } from 'react-native-reanimated';
+import { EasingFn } from 'react-native-reanimated';
+
+import { AnimationEasing } from '@/types/animations';
 
 export type AnimationSettings = {
   duration?: number;
-  easing?: Animated.EasingFunction;
+  easing?: EasingFn;
   onComplete?: (finished?: boolean) => void;
 };
 
@@ -36,6 +38,6 @@ export type AnimationSettingsWithDefaults = {
   duration: number;
   // Change this type from Animated.EasingFunction to EasingFunctionFactory
   // because of incorrect type definition in react-native-reanimated
-  easing: EasingFunctionFactory;
+  easing: AnimationEasing;
   onComplete?: (finished?: boolean) => void;
 };

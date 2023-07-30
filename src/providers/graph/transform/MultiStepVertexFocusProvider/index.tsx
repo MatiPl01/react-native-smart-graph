@@ -15,7 +15,7 @@ import { VertexComponentRenderData } from '@/types/components';
 import { FocusStepData } from '@/types/focus';
 import { MultiStepFocusSettings } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
-import { getFocusStep } from '@/utils/focus';
+import { getFocusSteps } from '@/utils/focus';
 
 import { useStateMachine } from './StateMachine';
 
@@ -158,7 +158,7 @@ function MultiStepVertexFocusProvider({
 
       // Get the current state of the transition
       const prevStep = previousStep.value;
-      const currentSteps = getFocusStep(
+      const currentSteps = getFocusSteps(
         progress.current,
         prevStep,
         focusStepsData

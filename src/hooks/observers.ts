@@ -83,7 +83,7 @@ export const useFocusObserver = <V, E>(
   const [state, setState] = useState<FocusState>({
     focusedVertexKey: null,
     settings: {
-      disableGestures: true
+      disableGestures: false // Gestures will be enabled by default
     }
   });
 
@@ -94,7 +94,7 @@ export const useFocusObserver = <V, E>(
       setState({
         focusedVertexKey: vertexKey,
         settings: {
-          disableGestures: true,
+          disableGestures: false,
           ...settings
         }
       });

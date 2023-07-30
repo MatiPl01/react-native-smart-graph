@@ -158,7 +158,7 @@ export const getMultiStepVertexTransformation = (
   });
 };
 
-export const getFocusStep = (
+export const getFocusSteps = (
   progress: number,
   previousStep: number,
   focusStepsData: Array<FocusStepData>

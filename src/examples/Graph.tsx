@@ -120,7 +120,8 @@ export default function Graph() {
           },
           focus: {
             points: focusPoints,
-            progress: multiStepFocusProgress
+            progress: multiStepFocusProgress,
+            disableGestures: true
           }
         }}
         graph={graph}

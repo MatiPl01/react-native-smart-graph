@@ -20,7 +20,7 @@ const focusStartState: StateHandler = props => {
   'worklet';
   const {
     focusContext,
-    settings: { gesturesDisabled },
+    settings: { disableGestures },
     targetKey: oldTargetKey
   } = props;
 
@@ -46,7 +46,7 @@ const focusStartState: StateHandler = props => {
     focusContext.startFocus(
       {
         customSource: !!sourceStep,
-        gesturesDisabled: !!gesturesDisabled,
+        gesturesDisabled: disableGestures,
         key: targetKey
       },
       null

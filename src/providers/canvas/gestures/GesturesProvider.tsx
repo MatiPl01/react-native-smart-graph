@@ -51,6 +51,7 @@ export default function GesturesProvider({
   const {
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
+    gesturesDisabled,
     isGestureActive,
     maxScale,
     minScale,
@@ -61,7 +62,7 @@ export default function GesturesProvider({
   // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
   // Focus context values
-  const { blur, endFocus, focusStatus, gesturesDisabled } = useFocusContext();
+  const { blur, endFocus, focusStatus } = useFocusContext();
 
   // OTHER VALUES
   // Gestures helper values
