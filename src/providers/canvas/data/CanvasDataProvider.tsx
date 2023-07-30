@@ -21,6 +21,7 @@ export type CanvasDataContextType = {
   canvasDimensions: AnimatedDimensions;
   currentScale: SharedValue<number>;
   currentTranslation: AnimatedVectorCoordinates;
+  gesturesDisabled: SharedValue<boolean>;
   initialScale: SharedValue<number>;
   initialScaleProvided: SharedValue<boolean>;
   isGestureActive: SharedValue<boolean>;
@@ -79,6 +80,7 @@ export default function CanvasDataProvider({
   // AUTO SIZING
   const autoSizingEnabled = useSharedValue(false);
   // GESTURES
+  const gesturesDisabled = useSharedValue(false);
   const isGestureActive = useSharedValue(false);
 
   const contextValue: CanvasDataContextType = useMemo(
@@ -99,6 +101,7 @@ export default function CanvasDataProvider({
         x: translateX,
         y: translateY
       },
+      gesturesDisabled,
       isGestureActive,
       isRendered,
       ...canvasSettings

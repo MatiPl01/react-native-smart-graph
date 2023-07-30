@@ -11,7 +11,7 @@ export type FocusPoint = {
 export type FocusPoints = Record<number, FocusPoint>;
 
 export type MultiStepFocusSettings = {
-  gesturesDisabled?: boolean;
+  disableGestures?: boolean;
   points: FocusPoints;
   progress: SharedValue<number>;
 };

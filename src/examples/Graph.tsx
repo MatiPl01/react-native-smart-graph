@@ -111,16 +111,17 @@ export default function Graph() {
           label: DefaultEdgeLabelRenderer
         }}
         settings={{
-          events: {
-            onVertexLongPress: handleVertexLongPress,
-            onVertexPress: handleVertexPress
-          },
+          // events: {
+          //   onVertexLongPress: handleVertexLongPress,
+          //   onVertexPress: handleVertexPress
+          // },
           placement: {
             strategy: 'orbits'
           },
           focus: {
             points: focusPoints,
-            progress: multiStepFocusProgress
+            progress: multiStepFocusProgress,
+            disableGestures: true
           }
         }}
         graph={graph}

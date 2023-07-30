@@ -44,7 +44,6 @@ export type FocusContextType = {
     start: FocusVertexTransition;
   };
   focusStatus: SharedValue<FocusStatus>;
-  gesturesDisabled: SharedValue<boolean>;
   previousKey: SharedValue<null | string>;
   startFocus: FocusStartFunction;
   status: SharedValue<FocusStatus>;
@@ -78,8 +77,13 @@ type FocusProviderProps = {
 export default function FocusProvider({ children }: FocusProviderProps) {
   // OTHER CONTEXTS VALUES
   // Canvas data context values
-  const { canvasDimensions, currentScale, currentTranslation, initialScale } =
-    useCanvasDataContext();
+  const {
+    canvasDimensions,
+    currentScale,
+    currentTranslation,
+    gesturesDisabled,
+    initialScale
+  } = useCanvasDataContext();
   // Canvas transform context values
   const {
     getTranslateClamp,
@@ -92,8 +96,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const autoSizingContext = useAutoSizingContext();
 
   // CONTEXT VALUES - FOCUS
-  // Helper value for disabling gestures
-  const gesturesDisabled = useSharedValue(false);
   // This value is used to indicate what is the current focus key
   // (e.g. the key of the focused vertex)
   const focusKey = useSharedValue<null | string>(null);
@@ -214,7 +216,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     // Set focus data
     useCustomSource.value = !!data.customSource;
     focusKey.value = data.key;
-    gesturesDisabled.value = data.gesturesDisabled;
+    gesturesDisabled.value = !!data.gesturesDisabled;
     animationSettings.value =
       animSettings === undefined
         ? DEFAULT_FOCUS_ANIMATION_SETTINGS
@@ -529,7 +531,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       }
     },
     focusStatus,
-    gesturesDisabled,
     previousKey,
     startFocus,
     status: focusStatus,
