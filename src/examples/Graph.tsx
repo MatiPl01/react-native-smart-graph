@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
 import {
   DirectedGraphData,
   DirectedGraph,
@@ -31,12 +30,7 @@ const GRAPH: DirectedGraphData = {
 };
 
 export default function Graph() {
-  const [radius, setRadius] = useState(50);
-
   const graph = useMemo(() => new DirectedGraph(GRAPH), []);
-
-  const increaseRadius = () => setRadius(prev => Math.min(prev + 5, 100));
-  const decreaseRadius = () => setRadius(prev => Math.max(prev - 5, 5));
 
   return (
     <>
@@ -45,11 +39,16 @@ export default function Graph() {
           settings={{
             // --- Graph components settings ---
             components: {
-              vertex: {
-                radius
+              edge: {
+                type: 'straight',
+                maxOffsetFactor: 0.5
               }
-            }
+            },
             // --- End of graph components settings ---
+            placement: {
+              strategy: 'circle',
+              minVertexSpacing: 75
+            }
           }}
           graph={graph}
         />
@@ -57,13 +56,13 @@ export default function Graph() {
       {/* Helper overlay to change dimensions */}
       <View style={styles.overlay}>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={decreaseRadius} style={styles.button}>
+          {/* <TouchableOpacity onPress={decreaseRadius} style={styles.button}>
             <Text style={styles.buttonText}>-</Text>
           </TouchableOpacity>
           <Text style={styles.radiusText}>{radius}</Text>
           <TouchableOpacity onPress={increaseRadius} style={styles.button}>
             <Text style={styles.buttonText}>+</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </>

@@ -29,7 +29,7 @@ import {
   GraphRenderersWithDefaults
 } from '@/types/renderer';
 import {
-  DirectedEdgeSettings,
+  DirectedGraphComponentsSettings,
   GraphSettings,
   GraphSettingsWithDefaults
 } from '@/types/settings';
@@ -67,22 +67,23 @@ export const updateGraphSettingsWithDefaults = <V>(
   components: {
     ...settings?.components,
     edge: {
-      ...(settings?.components?.edge?.type === 'straight'
-        ? STRAIGHT_EDGE_COMPONENT_SETTINGS
-        : CURVED_EDGE_COMPONENT_SETTINGS),
+      ...(settings?.components?.edge?.type === 'curved'
+        ? CURVED_EDGE_COMPONENT_SETTINGS
+        : STRAIGHT_EDGE_COMPONENT_SETTINGS),
       ...settings?.components?.edge,
       ...(isGraphDirected
         ? {
             arrow: {
               ...ARROW_COMPONENT_SETTINGS,
-              ...(settings?.components?.edge as DirectedEdgeSettings)?.arrow
+              ...(settings?.components as DirectedGraphComponentsSettings)
+                ?.arrow
             }
           }
         : {}),
 
       label: {
         ...LABEL_COMPONENT_SETTINGS,
-        ...settings?.components?.edge?.label
+        ...settings?.components?.label
       }
     },
     vertex: {

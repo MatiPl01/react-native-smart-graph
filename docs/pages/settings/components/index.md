@@ -40,9 +40,7 @@ Graph components settings can be specified via the `settings` property of the gr
 
 <!-- tabs:end -->
 
-## Properties
-
-### Available settings
+## Available settings
 
 - [vertex](pages/settings/components/vertex)
 - [edge](pages/settings/components/edge)

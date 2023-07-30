@@ -48,19 +48,16 @@ export default function SettingsChangeResponderProvider({
       rendered: isRendered.value
     }),
     ({ objFit, rendered }) => {
-      console.log(objFit);
       if (!rendered) return;
       if (!isFirstAutoSizingReactionCall.value) {
         autoSizingContext.disableAutoSizing();
         return;
       }
-      console.log('here 1', objFit);
       isFirstAutoSizingReactionCall.value = false;
       if (objFit !== 'none') {
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
         } else {
-          console.log('here 2');
           autoSizingContext.enableAutoSizing();
         }
       }
