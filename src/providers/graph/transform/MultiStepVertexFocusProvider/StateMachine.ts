@@ -25,7 +25,6 @@ const focusStartState: StateHandler = props => {
   } = props;
 
   const targetKey = getTargetKey(props);
-
   if (targetKey === null) {
     oldTargetKey.value = targetKey;
     // B - If there is no focused vertex, start the blur animation
@@ -37,8 +36,10 @@ const focusStartState: StateHandler = props => {
   if (oldTargetKey.value !== targetKey) {
     oldTargetKey.value = targetKey;
     const { source: sourceStep } = getTransitionBounds(props);
-    // Reset the transition progress if there is no source step
-    if (!sourceStep) {
+    // Reset the transition progress if there is no source step or
+    // the transition was finished (the new transition will start from
+    // the beginning)
+    if (!sourceStep || focusContext.transitionProgress.value === 1) {
       focusContext.transitionProgress.value = 0;
     }
     // Set the new focus target in the focus context
@@ -70,6 +71,14 @@ const focusTransitionState: StateHandler = props => {
 
   const { source: sourceStep, target: targetStep } = getTransitionBounds(props);
 
+  // Update the focus context
+  updateTransitionPoints(props);
+  // Update the transition progress
+  focusContext.transitionProgress.value = getResultingProgress(
+    targetStep,
+    props
+  );
+
   // C - If  there is no transition target, restart the focus animation
   if (!targetStep) {
     return MachineState.FOCUS_START;
@@ -94,6 +103,7 @@ const focusTransitionState: StateHandler = props => {
     isBetween(targetStep.startsAt, previousProgress, currentProgress)
   ) {
     focusContext.transitionProgress.value = 1;
+    // focusContext.transitionProgress.value = 1;
     return MachineState.FOCUS;
   }
 
@@ -109,15 +119,6 @@ const focusTransitionState: StateHandler = props => {
   ) {
     return MachineState.FOCUS_START;
   }
-
-  // Otherwise, update the focus transition
-  // Update the focus context
-  updateTransitionPoints(props);
-  // Update the transition progress
-  focusContext.transitionProgress.value = getResultingProgress(
-    targetStep,
-    props
-  );
 
   // Continue the focus transition
   return MachineState.FOCUS_TRANSITION;
