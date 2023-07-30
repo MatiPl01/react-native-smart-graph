@@ -117,14 +117,6 @@ const focusTransitionState: StateHandler = props => {
       afterStep &&
       targetKey !== afterStep.value.key)
   ) {
-    // console.log(
-    //   '>>> 2',
-    //   targetKey,
-    //   currentProgress,
-    //   previousProgress,
-    //   beforeStep?.value.key,
-    //   afterStep?.value.key
-    // );
     return MachineState.FOCUS_START;
   }
 

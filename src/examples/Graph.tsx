@@ -111,10 +111,10 @@ export default function Graph() {
           label: DefaultEdgeLabelRenderer
         }}
         settings={{
-          // events: {
-          //   onVertexLongPress: handleVertexLongPress,
-          //   onVertexPress: handleVertexPress
-          // },
+          events: {
+            onVertexLongPress: handleVertexLongPress,
+            onVertexPress: handleVertexPress
+          },
           placement: {
             strategy: 'orbits'
           },

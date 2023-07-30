@@ -1,8 +1,16 @@
 diff --git a/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts b/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
-index 8666f1c..99a7529 100644
+index 8666f1c..df06960 100644
 --- a/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
 +++ b/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
-@@ -69,6 +69,7 @@ export const withDecay = function (
+@@ -11,6 +11,7 @@ import { isWeb } from '../PlatformChecker';
+ interface DecayConfig {
+   deceleration?: number;
+   velocityFactor?: number;
++  rubberBandEffect?: boolean;
+   clamp?: number[];
+   velocity?: number;
+ }
+@@ -69,6 +70,7 @@ export const withDecay = function (
  
      const VELOCITY_EPS = IS_WEB ? 1 / 20 : 1;
      const SLOPE_FACTOR = 0.1;
@@ -10,7 +18,7 @@ index 8666f1c..99a7529 100644
  
      let decay: (animation: InnerDecayAnimation, now: number) => boolean;
  
-@@ -88,13 +89,6 @@ export const withDecay = function (
+@@ -88,13 +90,6 @@ export const withDecay = function (
            derivative = current - config.clamp![clampIndex];
          }
  
@@ -24,7 +32,7 @@ index 8666f1c..99a7529 100644
          const v =
            velocity *
              Math.exp(
-@@ -102,6 +96,15 @@ export const withDecay = function (
+@@ -102,6 +97,15 @@ export const withDecay = function (
              ) -
            derivative * config.rubberBandFactor;
  
