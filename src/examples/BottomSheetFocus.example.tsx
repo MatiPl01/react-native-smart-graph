@@ -48,6 +48,13 @@ export default function BottomSheetFocus() {
           verticalOffset: 100
         }
       },
+      0.9: {
+        key: 'V3',
+        alignment: {
+          verticalOffset: 50,
+          verticalAlignment: 'top'
+        }
+      },
       1: {
         key: 'V2',
         vertexScale: 2.5,

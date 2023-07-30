@@ -11,16 +11,30 @@ export const getTargetKey = ({
   afterStep,
   beforeStep,
   currentProgress,
-  previousProgress
+  previousProgress,
+  targetKey: { value: prevTargetKey }
 }: StateProps): null | string => {
   'worklet';
-  return (
-    (currentProgress <= previousProgress
-      ? beforeStep?.value.key
-      : currentProgress >= previousProgress
-      ? afterStep?.value.key
-      : null) ?? null
-  );
+  if (currentProgress < previousProgress) {
+    return beforeStep?.value.key ?? null;
+  } else if (currentProgress > previousProgress) {
+    return afterStep?.value.key ?? null;
+  }
+  if (
+    beforeStep &&
+    (beforeStep.value.key === prevTargetKey || prevTargetKey === null) &&
+    currentProgress > beforeStep.startsAt
+  ) {
+    return afterStep?.value.key ?? null;
+  }
+  if (
+    afterStep &&
+    (afterStep.value.key === prevTargetKey || prevTargetKey === null) &&
+    currentProgress < afterStep.startsAt
+  ) {
+    return beforeStep?.value.key ?? null;
+  }
+  return prevTargetKey;
 };
 
 export const getResultingProgress = (
