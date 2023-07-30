@@ -1,3 +1,15 @@
+diff --git a/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts b/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts
+index a074279..d6e699a 100644
+--- a/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts
++++ b/node_modules/react-native-reanimated/lib/typescript/reanimated2/animation/decay.d.ts
+@@ -2,6 +2,7 @@ import type { Animation, AnimationCallback, AnimationObject, AnimatableValue, Ti
+ interface DecayConfig {
+     deceleration?: number;
+     velocityFactor?: number;
++    rubberBandEffect?: boolean;
+     clamp?: number[];
+     velocity?: number;
+ }
 diff --git a/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts b/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
 index 8666f1c..df06960 100644
 --- a/node_modules/react-native-reanimated/src/reanimated2/animation/decay.ts
