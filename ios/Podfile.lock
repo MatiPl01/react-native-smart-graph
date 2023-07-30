@@ -374,7 +374,7 @@ PODS:
   - React-jsinspector (0.72.0)
   - React-logger (0.72.0):
     - glog
-  - react-native-skia (0.1.196):
+  - react-native-skia (0.1.197):
     - React
     - React-callinvoker
     - React-Core
@@ -490,7 +490,7 @@ PODS:
     - React-perflogger (= 0.72.0)
   - RNGestureHandler (2.10.2):
     - React-Core
-  - RNReanimated (3.3.0):
+  - RNReanimated (3.4.1):
     - DoubleConversion
     - FBLazyVector
     - glog
@@ -735,7 +735,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 990287d74aedc4fdd08ebd80736b1a5c71b54da2
   React-jsinspector: 8d754fc957255a29d93e52fc67a895045cdc8703
   React-logger: 454ffb01980778a43b0153ee98721d0275b56616
-  react-native-skia: 73b15a92d31e322fd25e5bb7feff226c0a25215e
+  react-native-skia: e2cb3443442bf7680e3276dc82cd87c97f96b6f9
   React-NativeModulesApple: 038cd625999ff352fc13d11fd335ea7509794599
   React-perflogger: 684a11499a0589cc42135d6d5cc04d0e4e0e261a
   React-RCTActionSheet: 00b0a4c382a13b834124fa3f541a7d8d1d56efb9
@@ -754,7 +754,7 @@ SPEC CHECKSUMS:
   React-utils: c12d2e75c8bbc727939ddc4319ed95493395ed5a
   ReactCommon: 517b45ed311ba9146aa8b55a8ef6617425f7448e
   RNGestureHandler: f75d81410b40aaa99e71ae8f8bb7a88620c95042
-  RNReanimated: 9f7068e43b9358a46a688d94a5a3adb258139457
+  RNReanimated: 53ca20eee770c41173703f5948cd8898aa08262c
   RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   Yoga: 1d6727ed193122f6adaf435c3de1a768326ff83b
@@ -762,4 +762,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 15f6c580622653cba1c8ea74c340a0b591ea2d59
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.11.3

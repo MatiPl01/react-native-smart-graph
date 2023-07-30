@@ -1,3 +1,4 @@
+export { default as ContainerDimensionsProvider } from './ContainerDimensionsProvider';
 export * from './forces';
 export {
   type GraphPlacementLayoutProviderProps,

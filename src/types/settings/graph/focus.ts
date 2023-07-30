@@ -10,8 +10,8 @@ export type FocusPoint = {
 
 export type FocusPoints = Record<number, FocusPoint>;
 
-export type GraphFocusSettings = {
-  gesturesDisabled?: boolean;
+export type MultiStepFocusSettings = {
+  disableGestures?: boolean;
   points: FocusPoints;
   progress: SharedValue<number>;
 };

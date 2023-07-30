@@ -19,3 +19,17 @@ export const calcApproxPointOnParabola = (
   const y2 = parabola(x2, a, p, q);
   return { x: x2, y: y2 };
 };
+
+export const isBetween = (x: number, a: number, b: number): boolean => {
+  'worklet';
+  let lower = a;
+  let upper = b;
+
+  // If a > b, swap them
+  if (a > b) {
+    lower = b;
+    upper = a;
+  }
+
+  return x >= lower && x <= upper;
+};

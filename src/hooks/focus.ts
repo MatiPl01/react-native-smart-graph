@@ -1,22 +1,50 @@
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
+import { FocusContextType } from '@/providers/canvas';
+
 export const useComponentFocus = (
   result: SharedValue<number>,
-  transitionProgress: SharedValue<number>,
-  focusedComponentKey: SharedValue<null | string>,
+  focusContext: FocusContextType,
   componentKey?: string
 ): void => {
   useAnimatedReaction(
     () => ({
-      focusedKey: focusedComponentKey.value,
-      previousResult: result.value,
-      progress: transitionProgress.value
+      currentKey: focusContext.focus.key.value,
+      progress: focusContext.transitionProgress.value
     }),
-    ({ focusedKey, previousResult, progress }) => {
-      if (focusedKey === componentKey || focusedKey === null) {
-        result.value = Math.max(previousResult, progress);
-      } else {
-        result.value = Math.min(previousResult, 1 - progress);
+    ({ currentKey, progress }) => {
+      const previousKey = focusContext.previousKey.value;
+
+      // If no focus target, no component is blurred
+      if (currentKey === null && previousKey === null) {
+        result.value = 1;
+      }
+      // Transition from blur to focus
+      else if (previousKey === null && currentKey !== null) {
+        if (componentKey === currentKey) {
+          result.value = 1; // Focus target
+        } else {
+          result.value = 1 - progress; // Others
+        }
+      }
+      // Transition from focus to blur
+      else if (previousKey !== null && currentKey === null) {
+        if (componentKey === previousKey) {
+          result.value = 1; // Previous focus target
+        } else {
+          result.value = progress; // Others
+        }
+      }
+      // Transition from focus to focus (changing focus target)
+      else {
+        // eslint-disable-next-line no-lonely-if
+        if (componentKey === currentKey) {
+          result.value = progress; // Focus target
+        } else if (componentKey === previousKey) {
+          result.value = 1 - progress; // Previous focus target
+        } else {
+          result.value = 0; // Others
+        }
       }
     },
     [componentKey]

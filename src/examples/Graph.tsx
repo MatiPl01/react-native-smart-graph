@@ -31,7 +31,7 @@ const GRAPH: DirectedGraphData = {
 };
 
 export default function Graph() {
-  const [radius, setRadius] = useState(0.5);
+  const [radius, setRadius] = useState(50);
 
   const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
