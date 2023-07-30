@@ -2,9 +2,8 @@
 
 ## Description
 
-Settings related to graph edges. They are used to
-
-<!-- TODO - add description -->
+Settings related to graph edges. They are used to change the type of edges
+(**straight** or **curved**) and **related settings**.
 
 ## Usage
 

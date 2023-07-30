@@ -108,10 +108,15 @@ function UndirectedStraightEdgeComponent<E, V>({
       p1.value = addVectors(v1, p1Translation);
       p2.value = addVectors(v2, p2Translation);
       // Update edge label max size
+      const maxSize =
+        (componentSettings.edge.maxOffsetFactor * (r1 + r2)) /
+        (edgesCount > 0 ? edgesCount - 1 : 1);
+      const avgRadius = (r1 + r2) / 2;
       if (componentSettings.label?.sizeRatio) {
-        const avgOffset = (p1Offset + p2Offset) / 2;
-        labelHeight.value =
-          2 * (edgesCount === 1 ? avgOffset : avgOffset / (edgesCount - 1));
+        labelHeight.value = Math.min(
+          maxSize,
+          componentSettings.label.sizeRatio * avgRadius
+        );
       }
     }
   );
