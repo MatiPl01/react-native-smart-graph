@@ -95,20 +95,15 @@ function UndirectedStraightEdgeComponent<E, V>({
         null,
         order,
         edgesCount,
-        componentSettings.maxOffsetFactor
+        componentSettings.edge.maxOffsetFactor
       );
 
       const p1Offset = calcOffset(r1);
       const p2Offset = calcOffset(r2);
 
-      const p1Translation = multiplyVector(
-        calcOrthogonalUnitVector(v1, v2),
-        p1Offset
-      );
-      const p2Translation = multiplyVector(
-        calcOrthogonalUnitVector(v2, v1),
-        p2Offset
-      );
+      const dirVector = calcOrthogonalUnitVector(v1, v2);
+      const p1Translation = multiplyVector(dirVector, p1Offset);
+      const p2Translation = multiplyVector(dirVector, p2Offset);
       // Update edge line points positions
       p1.value = addVectors(v1, p1Translation);
       p2.value = addVectors(v2, p2Translation);

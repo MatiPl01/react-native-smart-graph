@@ -147,4 +147,6 @@ const styles = StyleSheet.create({
 
 <!-- accordion:end -->
 
+**Result**
+
 <video src="./assets/videos/settings/components/vertex/vertex-radius-example.mp4" style="width: 300px"></video>

@@ -77,7 +77,7 @@ function EdgeComponent<E, V>({
         }
   };
 
-  switch (sharedProps.componentSettings.type) {
+  switch (sharedProps.componentSettings.edge.type) {
     case 'straight':
       return edge.isDirected() ? (
         <DirectedStraightEdgeComponent

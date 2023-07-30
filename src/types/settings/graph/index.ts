@@ -44,10 +44,10 @@ export type GraphSettings<V> =
   | UndirectedGraphSettings<V>;
 
 export type GraphSettingsWithDefaults<V> = (
-  | (Omit<DirectedGraphSettings<V>, 'animations'> & {
+  | (Omit<DirectedGraphSettings<V>, 'animations' | 'components'> & {
       components: DirectedGraphComponentsSettingsWithDefaults;
     })
-  | (Omit<UndirectedGraphSettings<V>, 'animations'> & {
+  | (Omit<UndirectedGraphSettings<V>, 'animations' | 'components'> & {
       components: UndirectedGraphComponentsSettingsWithDefaults;
     })
 ) & {

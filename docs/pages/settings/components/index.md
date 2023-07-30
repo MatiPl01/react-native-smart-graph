@@ -4,6 +4,8 @@
 
 Graph components settings are settings related to the **appearance of graph components**. They are used to **properly calculate layout** an **customize** how particular parts of graph **look**.
 
+If you need more **visual customization** options, please consider writing your own **graph component renderer** as described in [this](pages/renderers/index) page.
+
 ## Usage
 
 Graph components settings can be specified via the `settings` property of the graph component. All components settings should be listed under the `components` property of the `settings` object (see the example below):
@@ -42,5 +44,7 @@ Graph components settings can be specified via the `settings` property of the gr
 
 ## Available settings
 
-- [vertex](pages/settings/components/vertex)
-- [edge](pages/settings/components/edge)
+- [Vertex](pages/settings/components/vertex)
+- [Edge](pages/settings/components/edge)
+- [Edge label](pages/settings/components/label)
+- [Directed edge arrow](pages/settings/components/arrow)
