@@ -1,0 +1,1 @@
+# Edge label component settings

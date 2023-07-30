@@ -83,20 +83,15 @@ function DirectedStraightEdgeComponent<E, V>({
         null,
         order,
         edgesCount,
-        componentSettings.maxOffsetFactor
+        componentSettings.edge.maxOffsetFactor
       );
 
       const p1Offset = calcOffset(r1);
       const p2Offset = calcOffset(r2);
 
-      const p1Translation = multiplyVector(
-        calcOrthogonalUnitVector(v1, v2),
-        p1Offset
-      );
-      const p2Translation = multiplyVector(
-        calcOrthogonalUnitVector(v2, v1),
-        p2Offset
-      );
+      const dirVector = calcOrthogonalUnitVector(v1, v2);
+      const p1Translation = multiplyVector(dirVector, p1Offset);
+      const p2Translation = multiplyVector(dirVector, p2Offset);
       // Update edge line points positions
       p1.value = addVectors(v1, p1Translation);
       p2.value = addVectors(v2, p2Translation);
@@ -106,7 +101,8 @@ function DirectedStraightEdgeComponent<E, V>({
         dirVec.value,
         Math.sqrt(r2 ** 2 - p2Offset ** 2)
       );
-      const maxSize = (p1Offset + p2Offset) / (edgesCount - 1);
+      const maxSize =
+        (componentSettings.edge.maxOffsetFactor * (r1 + r2)) / (edgesCount - 1);
       // Update edge label max size
       const avgRadius = (r1 + r2) / 2;
       if (componentSettings.label?.sizeRatio) {

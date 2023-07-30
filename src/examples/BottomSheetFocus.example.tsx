@@ -96,7 +96,7 @@ export default function BottomSheetFocus() {
 
   return (
     <>
-      <GraphView>
+      <GraphView objectFit='contain'>
         <DirectedGraphComponent
           settings={{
             focus: {

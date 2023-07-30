@@ -205,7 +205,7 @@ export default function Graph() {
 ```
 
 > [!NOTE]
-> The placement strategy of the `DirectedGraphComponent` component was set to `'circle'` to ensure that the displayed result will always be the same. For more details about graph placement strategies visit [this](pages/placement/circle.md) section of documentation.
+> The placement strategy of the `DirectedGraphComponent` component was set to `'circle'` to ensure that the displayed result will always be the same. For more details about graph placement strategies visit [this](pages/settings/placement/circle) section of documentation.
 
 **Result**
 

@@ -1,5 +1,5 @@
 export {
+  type GesturesContextType,
   default as GesturesProvider,
-  useGesturesContext,
-  type GesturesContextType
+  useGesturesContext
 } from './GesturesProvider';

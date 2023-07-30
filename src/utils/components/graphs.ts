@@ -29,7 +29,7 @@ import {
   GraphRenderersWithDefaults
 } from '@/types/renderer';
 import {
-  DirectedEdgeSettings,
+  DirectedGraphComponentsSettings,
   GraphSettings,
   GraphSettingsWithDefaults
 } from '@/types/settings';
@@ -67,23 +67,22 @@ export const updateGraphSettingsWithDefaults = <V>(
   components: {
     ...settings?.components,
     edge: {
-      ...(settings?.components?.edge?.type === 'straight'
-        ? STRAIGHT_EDGE_COMPONENT_SETTINGS
-        : CURVED_EDGE_COMPONENT_SETTINGS),
-      ...settings?.components?.edge,
-      ...(isGraphDirected
-        ? {
-            arrow: {
-              ...ARROW_COMPONENT_SETTINGS,
-              ...(settings?.components?.edge as DirectedEdgeSettings)?.arrow
-            }
+      ...(settings?.components?.edge?.type === 'curved'
+        ? CURVED_EDGE_COMPONENT_SETTINGS
+        : STRAIGHT_EDGE_COMPONENT_SETTINGS),
+      ...settings?.components?.edge
+    },
+    ...(isGraphDirected
+      ? {
+          arrow: {
+            ...ARROW_COMPONENT_SETTINGS,
+            ...(settings?.components as DirectedGraphComponentsSettings)?.arrow
           }
-        : {}),
-
-      label: {
-        ...LABEL_COMPONENT_SETTINGS,
-        ...settings?.components?.edge?.label
-      }
+        }
+      : {}),
+    label: {
+      ...LABEL_COMPONENT_SETTINGS,
+      ...settings?.components?.label
     },
     vertex: {
       ...VERTEX_COMPONENT_SETTINGS,
@@ -224,6 +223,8 @@ export const updateGraphEdgesData = <V, E>(
         !deepEqual(oldEdgeData.componentSettings, settings.components.edge) ||
         !deepEqual(settings.animations.edges, oldEdgeData.animationSettings))
     ) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { vertex: _, ...componentSettings } = settings.components;
       wasUpdated = true;
       updatedEdgesData[edge.key] = {
         animationSettings: {
@@ -231,7 +232,7 @@ export const updateGraphEdgesData = <V, E>(
           ...currentAnimationsSettings.edges[edge.key]
         } as unknown as AnimationSettingsWithDefaults,
         arrowRenderer: renderers.arrow,
-        componentSettings: settings.components.edge,
+        componentSettings,
         edge,
         edgeRenderer: renderers.edge,
         edgesCount,

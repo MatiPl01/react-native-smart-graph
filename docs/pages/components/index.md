@@ -4,6 +4,6 @@ Graph components provide the core functionality of the library. Their main funct
 
 ## Available components
 
-- [GraphView](pages/components/view.md) - the main component responsible for rendering the canvas and handling user gestures,
-- [Graphs](pages/components/graphs.md) - components responsible for rendering graphs on the canvas, managing graph placement, transitioning vertices and edges on graph modifications, etc.,
-- [Overlay](pages/components/overlay.md) - components rendered above the canvas, used e.g. to modify canvas settings.
+- [GraphView](pages/components/view) - the main component responsible for rendering the canvas and handling user gestures,
+- [Graphs](pages/components/graphs) - components responsible for rendering graphs on the canvas, managing graph placement, transitioning vertices and edges on graph modifications, etc.,
+- [Overlay](pages/components/overlay) - components rendered above the canvas, used e.g. to modify canvas settings.

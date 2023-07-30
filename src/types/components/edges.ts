@@ -36,8 +36,9 @@ type SharedEdgeComponentProps = SharedRenderersProps & {
 
 export type DirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    componentSettings: Required<CurvedEdgeSettings> & {
+    componentSettings: {
       arrow: Required<EdgeArrowSettings>;
+      edge: Required<CurvedEdgeSettings>;
       label?: EdgeLabelSettings;
     };
     edge: DirectedEdge<E, V>;
@@ -46,7 +47,8 @@ export type DirectedCurvedEdgeComponentProps<E, V> =
 
 export type UndirectedCurvedEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    componentSettings: Required<CurvedEdgeSettings> & {
+    componentSettings: {
+      edge: Required<CurvedEdgeSettings>;
       label?: EdgeLabelSettings;
     };
     edge: UndirectedEdge<E, V>;
@@ -55,8 +57,9 @@ export type UndirectedCurvedEdgeComponentProps<E, V> =
 
 export type DirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    componentSettings: Required<StraightEdgeSettings> & {
+    componentSettings: {
       arrow: Required<EdgeArrowSettings>;
+      edge: Required<StraightEdgeSettings>;
       label?: EdgeLabelSettings;
     };
     edge: DirectedEdge<E, V>;
@@ -65,7 +68,8 @@ export type DirectedStraightEdgeComponentProps<E, V> =
 
 export type UndirectedStraightEdgeComponentProps<E, V> =
   SharedEdgeComponentProps & {
-    componentSettings: Required<StraightEdgeSettings> & {
+    componentSettings: {
+      edge: Required<StraightEdgeSettings>;
       label?: EdgeLabelSettings;
     };
     edge: UndirectedEdge<E, V>;
@@ -91,7 +95,7 @@ export type EdgeComponentProps<E, V> = Omit<
 export type EdgeComponentData<E, V> = {
   animationSettings: AnimationSettingsWithDefaults;
   arrowRenderer?: EdgeArrowRenderFunction;
-  componentSettings: GraphSettingsWithDefaults<V, E>['components']['edge'];
+  componentSettings: Omit<GraphSettingsWithDefaults<V>['components'], 'vertex'>;
   edge: Edge<E, V>;
   edgeRenderer: EdgeRenderFunction<E>;
   edgesCount: number;

@@ -15,7 +15,7 @@ import { updateSpacing } from '@/utils/layout';
 import { AutoSizingProvider } from './auto';
 import { CanvasDataProvider } from './data';
 import { GesturesProvider } from './gestures';
-import SettingsChangeResponderProvider from './settings/SettingsChangeResponderProvider';
+import { SettingsChangeResponderProvider } from './settings';
 import { FocusProvider, TransformProvider } from './transform';
 
 type CanvasProviderProps = PropsWithChildren<{

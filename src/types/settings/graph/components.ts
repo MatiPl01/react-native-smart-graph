@@ -19,36 +19,23 @@ export type EdgeLabelSettings = {
   sizeRatio?: number; // 0.75 is a good value
 };
 
-type SharedEdgeSettings = (
-  | CurvedEdgeSettings
-  | Record<string, never>
-  | StraightEdgeSettings
-) & {
-  label?: EdgeLabelSettings;
-};
+export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
 export type EdgeArrowSettings = {
   scale?: number; // scale relative to vertex radius
 };
 
-export type DirectedEdgeSettings = SharedEdgeSettings & {
-  arrow?: EdgeArrowSettings;
-};
-
-export type UndirectedEdgeSettings = SharedEdgeSettings;
-
 type SharedGraphComponentsSettings = {
+  edge?: EdgeSettings;
+  label?: EdgeLabelSettings;
   vertex?: VertexSettings;
 };
 
 export type DirectedGraphComponentsSettings = SharedGraphComponentsSettings & {
-  edge?: DirectedEdgeSettings;
+  arrow?: EdgeArrowSettings;
 };
 
-export type UndirectedGraphComponentsSettings =
-  SharedGraphComponentsSettings & {
-    edge?: UndirectedEdgeSettings;
-  };
+export type UndirectedGraphComponentsSettings = SharedGraphComponentsSettings;
 
 export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   DirectedGraphComponentsSettings,

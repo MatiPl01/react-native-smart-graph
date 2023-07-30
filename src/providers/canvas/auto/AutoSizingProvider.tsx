@@ -92,6 +92,11 @@ export default function AutoSizingProvider({
       animationSettings === undefined
         ? DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
         : animationSettings;
+    autoSizingStartScale.value = currentScale.value;
+    autoSizingStartTranslation.value = {
+      x: translateX.value,
+      y: translateY.value
+    };
     // Crete a smooth transition between the current state and the auto-layout state
     if (animSettings) {
       const { onComplete, ...timingConfig } = animSettings;
@@ -106,11 +111,6 @@ export default function AutoSizingProvider({
     else {
       autoSizingTransitionProgress.value = 1;
     }
-    autoSizingStartScale.value = currentScale.value;
-    autoSizingStartTranslation.value = {
-      x: translateX.value,
-      y: translateY.value
-    };
   };
 
   const enableAutoSizingAfterTimeout = (

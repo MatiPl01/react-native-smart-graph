@@ -14,11 +14,12 @@ You can write your **own overlay components** (explanation in [this](pages/compo
 
 #### Description
 
-This component displays **controls over the canvas**. These controls allow **resizing graph to the initial position** and **changing the objectFit** property of the [GraphView](pages/components/view.md) component.
+This component displays **controls over the canvas**. These controls allow **resizing graph to the initial position** and **changing the objectFit** property of the [GraphView](pages/components/view) component.
 
 #### Features
 
 - Resettings **position** and **scale** of the graph container to **initial settings** (the graph is **re-centered** and the scale is changed to the [initialScale](pages/components/view?id=initialscale)),
+<!-- TODO - this link redirects to the current page but scrolls to wrong position -->
 
 - Changing the value of the [objectFit](pages/components/view?id=objectfit) property to the **next value**.
 
@@ -28,7 +29,7 @@ This component displays **controls over the canvas**. These controls allow **res
 
 A callback function called when the object fit change button is pressed. The button **is visible** only when this **callback is provided**.
 
-This callback is passed the new `objectFit` value which can be then passed to the [GraphView](pages/components/view.md) component (see [this](pages/components/overlay?id=example) example).
+This callback is passed the new `objectFit` value which can be then passed to the [GraphView](pages/components/view) component (see [this](pages/components/overlay?id=example) example).
 
 | Type                           | Default | Required |
 | ------------------------------ | ------- | -------- |

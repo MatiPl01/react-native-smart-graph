@@ -1,143 +1,47 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { useMemo } from 'react';
 import {
-  Easing,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming
-} from 'react-native-reanimated';
+  GraphView,
+  UndirectedGraph,
+  UndirectedGraphComponent,
+  UndirectedGraphData
+} from 'react-native-smart-graph';
 
-import GraphViewControls from '@/components/controls/GraphViewControls';
-import GraphView from '@/components/views/GraphView';
-import { DirectedGraph } from '@/models/graphs';
-
-import {
-  DefaultEdgeLabelRenderer,
-  DirectedEdgeData,
-  DirectedGraphComponent,
-  FocusPoints,
-  FocusSettings,
-  ObjectFit,
-  VertexData,
-  VertexPressHandler
-} from '..';
-
-const FOCUS_SETTINGS: FocusSettings = {
-  alignment: {
-    horizontalAlignment: 'left',
-    horizontalOffset: 25
-  },
-  animation: {
-    duration: 250,
-    easing: Easing.inOut(Easing.ease)
-  },
-  disableGestures: false,
-  vertexScale: 4
-};
-
-const GRAPH: {
-  edges: DirectedEdgeData<string>[];
-  vertices: VertexData<string>[];
-} = {
+const GRAPH: UndirectedGraphData = {
+  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }],
   edges: [
-    { key: 'E1', from: 'V1', to: 'V2' },
-    { key: 'E2', from: 'V1', to: 'V3' },
-    { key: 'E3', from: 'V1', to: 'V4' }
-  ],
-  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
+    { key: 'E1', vertices: ['V1', 'V2'] },
+    { key: 'E2', vertices: ['V1', 'V3'] },
+    { key: 'E3', vertices: ['V2', 'V3'] },
+    { key: 'E4', vertices: ['V3', 'V1'] },
+    { key: 'E5', vertices: ['V3', 'V2'] },
+    { key: 'E6', vertices: ['V3', 'V1'] },
+    { key: 'E7', vertices: ['V3', 'V2'] },
+    { key: 'E8', vertices: ['V3', 'V1'] },
+    { key: 'E9', vertices: ['V2', 'V1'] }
+  ]
 };
 
 export default function Graph() {
-  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
-
-  const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
-  const focusPoints = useMemo<FocusPoints>(
-    // TODO - add information in docs about useMemo
-    () => ({
-      0.25: { key: 'V1', vertexScale: 10 },
-      0.5: {
-        key: 'V2',
-        vertexScale: 2,
-        alignment: { horizontalAlignment: 'left', horizontalOffset: 25 }
-      },
-      0.8: {
-        key: 'V3',
-        alignment: {
-          verticalAlignment: 'top',
-          verticalOffset: 0,
-          horizontalAlignment: 'left',
-          horizontalOffset: 0
-        }
-      }
-    }),
-    []
-  );
-
-  const multiStepFocusProgress = useSharedValue(0);
-
-  useEffect(() => {
-    graph.insertBatch(GRAPH);
-  }, [graph]);
-
-  useEffect(() => {
-    multiStepFocusProgress.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 5000, easing: Easing.linear }),
-        withTiming(0, { duration: 5000, easing: Easing.linear })
-      ),
-      -1
-    );
-  }, []);
-
-  const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
-    ({ vertex: { key } }) => {
-      console.log('long press', key);
-    },
-    []
-  );
-
-  const handleVertexPress = useCallback<VertexPressHandler<string>>(
-    ({ vertex: { key } }) => {
-      graph.focus(key, FOCUS_SETTINGS);
-    },
-    [graph]
-  );
+  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
 
   return (
-    <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
-      <DirectedGraphComponent
-        renderers={{
-          label: DefaultEdgeLabelRenderer
-        }}
+    <GraphView objectFit='contain' padding={50}>
+      <UndirectedGraphComponent
         settings={{
-          events: {
-            onVertexLongPress: handleVertexLongPress,
-            onVertexPress: handleVertexPress
+          // --- Graph components settings ---
+          components: {
+            edge: {
+              type: 'curved'
+            }
           },
+          // --- End of graph components settings ---
           placement: {
-            strategy: 'orbits'
-          },
-          focus: {
-            points: focusPoints,
-            progress: multiStepFocusProgress,
-            disableGestures: true
+            strategy: 'circle',
+            minVertexSpacing: 75
           }
         }}
         graph={graph}
       />
-      <GraphViewControls
-        onObjectFitChange={setObjectFit}
-        style={styles.controls}
-      />
     </GraphView>
   );
 }
-
-const styles = StyleSheet.create({
-  controls: {
-    position: 'absolute',
-    top: 40,
-    right: 10
-  }
-});
