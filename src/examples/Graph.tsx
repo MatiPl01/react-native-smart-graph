@@ -4,27 +4,27 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import {
   GraphView,
   DefaultEdgeLabelRenderer,
-  UndirectedGraph,
-  UndirectedGraphComponent,
-  UndirectedGraphData
+  DirectedGraphComponent,
+  DirectedGraphData,
+  DirectedGraph
 } from 'react-native-smart-graph';
 
-const GRAPH: UndirectedGraphData = {
+const GRAPH: DirectedGraphData = {
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }],
   edges: [
-    { key: 'E1', vertices: ['V1', 'V2'] },
-    { key: 'E2', vertices: ['V1', 'V3'] },
-    { key: 'E3', vertices: ['V2', 'V3'] },
-    { key: 'E4', vertices: ['V3', 'V1'] },
-    { key: 'E5', vertices: ['V3', 'V2'] },
-    { key: 'E6', vertices: ['V3', 'V1'] }
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V1', to: 'V3' },
+    { key: 'E3', from: 'V2', to: 'V3' },
+    { key: 'E4', from: 'V3', to: 'V1' },
+    { key: 'E5', from: 'V3', to: 'V2' },
+    { key: 'E6', from: 'V3', to: 'V1' }
   ]
 };
 
 export default function Graph() {
   const [sizeRatio, setSizeRatio] = useState(1);
 
-  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
+  const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
   const increaseSizeRatio = () =>
     setSizeRatio(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
@@ -34,7 +34,7 @@ export default function Graph() {
   return (
     <>
       <GraphView objectFit='contain' padding={50}>
-        <UndirectedGraphComponent
+        <DirectedGraphComponent
           renderers={{
             label: DefaultEdgeLabelRenderer
           }}
@@ -43,6 +43,9 @@ export default function Graph() {
             components: {
               label: {
                 sizeRatio
+              },
+              edge: {
+                type: 'curved'
               }
             },
             // --- End of graph components settings ---
