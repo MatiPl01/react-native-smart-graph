@@ -2,7 +2,7 @@
 
 ## Description
 
-Settings related to graph edges. They are used to change the type of edges
+Settings related to **graph edges**. They are used to change the type of edges
 (**straight** or **curved**) and **related settings**.
 
 ## Usage
@@ -407,6 +407,7 @@ const styles = StyleSheet.create({
 
 ```tsx
 ...
+
 export default function Graph() {
   ...
   return (

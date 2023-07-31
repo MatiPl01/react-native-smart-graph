@@ -112,10 +112,10 @@ function UndirectedStraightEdgeComponent<E, V>({
         (componentSettings.edge.maxOffsetFactor * (r1 + r2)) /
         (edgesCount > 0 ? edgesCount - 1 : 1);
       const avgRadius = (r1 + r2) / 2;
-      if (componentSettings.label?.sizeRatio) {
+      if (componentSettings.label?.scale) {
         labelHeight.value = Math.min(
           maxSize,
-          componentSettings.label.sizeRatio * avgRadius
+          componentSettings.label.scale * avgRadius
         );
       }
     }

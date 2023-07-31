@@ -16,7 +16,7 @@ export type CurvedEdgeSettings = {
 };
 
 export type EdgeLabelSettings = {
-  sizeRatio?: number; // 0.75 is a good value
+  scale?: number; // 0.75 is a good value
 };
 
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
@@ -39,10 +39,10 @@ export type UndirectedGraphComponentsSettings = SharedGraphComponentsSettings;
 
 export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   DirectedGraphComponentsSettings,
-  ['edge', 'type'] | ['label', 'sizeRatio'] | ['vertex', 'radius']
+  ['edge', 'type'] | ['label', 'scale'] | ['vertex', 'radius']
 >;
 
 export type UndirectedGraphComponentsSettingsWithDefaults = DeepRequired<
   UndirectedGraphComponentsSettings,
-  ['edge', 'type'] | ['label', 'sizeRatio'] | ['vertex', 'radius']
+  ['edge', 'type'] | ['label', 'scale'] | ['vertex', 'radius']
 >;

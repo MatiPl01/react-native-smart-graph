@@ -2,11 +2,11 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import {
-  GraphView,
-  DefaultEdgeLabelRenderer,
-  DirectedGraphComponent,
   DirectedGraphData,
-  DirectedGraph
+  DirectedGraph,
+  GraphView,
+  DirectedGraphComponent,
+  DefaultEdgeLabelRenderer
 } from 'react-native-smart-graph';
 
 const GRAPH: DirectedGraphData = {
@@ -22,14 +22,14 @@ const GRAPH: DirectedGraphData = {
 };
 
 export default function Graph() {
-  const [sizeRatio, setSizeRatio] = useState(1);
+  const [scale, setScale] = useState(1);
 
   const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
-  const increaseSizeRatio = () =>
-    setSizeRatio(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
-  const decreaseSizeRatio = () =>
-    setSizeRatio(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
+  const increaseScale = () =>
+    setScale(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
+  const decreaseScale = () =>
+    setScale(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
 
   return (
     <>
@@ -41,11 +41,8 @@ export default function Graph() {
           settings={{
             // --- Graph components settings ---
             components: {
-              label: {
-                sizeRatio
-              },
-              edge: {
-                type: 'curved'
+              arrow: {
+                scale
               }
             },
             // --- End of graph components settings ---
@@ -60,11 +57,11 @@ export default function Graph() {
       {/* Helper overlay to change dimensions */}
       <View style={styles.overlay}>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={decreaseSizeRatio} style={styles.button}>
+          <TouchableOpacity onPress={decreaseScale} style={styles.button}>
             <Text style={styles.buttonText}>-</Text>
           </TouchableOpacity>
-          <Text style={styles.radiusText}>{sizeRatio}</Text>
-          <TouchableOpacity onPress={increaseSizeRatio} style={styles.button}>
+          <Text style={styles.radiusText}>{scale}</Text>
+          <TouchableOpacity onPress={increaseScale} style={styles.button}>
             <Text style={styles.buttonText}>+</Text>
           </TouchableOpacity>
         </View>

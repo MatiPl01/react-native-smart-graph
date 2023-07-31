@@ -41,16 +41,11 @@ function DirectedCurvedEdgeComponent<E, V>({
   const labelHeight = useDerivedValue(
     () =>
       ((v1Radius.value + v2Radius.value) / 2) *
-      (componentSettings.label?.sizeRatio ?? LABEL_COMPONENT_SETTINGS.sizeRatio)
+      (componentSettings.label?.scale ?? LABEL_COMPONENT_SETTINGS.scale)
   );
   // Edge arrow
   const arrowHeight = useDerivedValue(
-    () =>
-      1.5 *
-      Math.min(
-        v2Radius.value * componentSettings.arrow.scale,
-        labelHeight.value
-      )
+    () => 1.5 * v2Radius.value * componentSettings.arrow.scale
   );
   const arrowWidth = useDerivedValue(() => (2 / 3) * arrowHeight.value);
   const arrowTipPosition = useSharedValue({ x: 0, y: 0 });

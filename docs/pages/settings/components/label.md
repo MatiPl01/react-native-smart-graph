@@ -23,7 +23,7 @@ components: {
 
 ## Properties
 
-#### `sizeRatio`
+#### `scale`
 
 This property is used to calculate the **label size** relatively to the **vertex radius**.
 
@@ -33,7 +33,7 @@ This property is used to calculate the **label size** relatively to the **vertex
 
 > [!NOTE]
 > If you use [straight](pages/settings/components/edge?id=type) edges, there might be **not enough space** to **render labels with
-> the specified** `sizeRatio`. In such case, the label **size** will be **calculated
+> the specified** `scale`. In such case, the label **size** will be **calculated
 > automatically** based on the **maximum available space**.
 >
 > If you use [curved](pages/settings/components/edge?id=type) edges, curves will be calculated
@@ -83,14 +83,14 @@ const GRAPH: DirectedGraphData = {
 };
 
 export default function Graph() {
-  const [sizeRatio, setSizeRatio] = useState(1);
+  const [scale, setScale] = useState(1);
 
   const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
-  const increaseSizeRatio = () =>
-    setSizeRatio(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
-  const decreaseSizeRatio = () =>
-    setSizeRatio(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
+  const increaseScale = () =>
+    setScale(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
+  const decreaseScale = () =>
+    setScale(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
 
   return (
     <>
@@ -103,7 +103,7 @@ export default function Graph() {
             // --- Graph components settings ---
             components: {
               label: {
-                sizeRatio
+                scale
               }
             },
             // --- End of graph components settings ---
@@ -118,11 +118,11 @@ export default function Graph() {
       {/* Helper overlay to change dimensions */}
       <View style={styles.overlay}>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={decreaseSizeRatio} style={styles.button}>
+          <TouchableOpacity onPress={decreaseScale} style={styles.button}>
             <Text style={styles.buttonText}>-</Text>
           </TouchableOpacity>
-          <Text style={styles.radiusText}>{sizeRatio}</Text>
-          <TouchableOpacity onPress={increaseSizeRatio} style={styles.button}>
+          <Text style={styles.radiusText}>{scale}</Text>
+          <TouchableOpacity onPress={increaseScale} style={styles.button}>
             <Text style={styles.buttonText}>+</Text>
           </TouchableOpacity>
         </View>
@@ -184,7 +184,7 @@ export default function Graph() {
             ...
             components: {
               label: {
-                sizeRatio
+                scale
               }
             },
             ...
@@ -235,14 +235,14 @@ const GRAPH: DirectedGraphData = {
 };
 
 export default function Graph() {
-  const [sizeRatio, setSizeRatio] = useState(1);
+  const [scale, setScale] = useState(1);
 
   const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
-  const increaseSizeRatio = () =>
-    setSizeRatio(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
-  const decreaseSizeRatio = () =>
-    setSizeRatio(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
+  const increaseScale = () =>
+    setScale(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
+  const decreaseScale = () =>
+    setScale(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
 
   return (
     <>
@@ -255,7 +255,7 @@ export default function Graph() {
             // --- Graph components settings ---
             components: {
               label: {
-                sizeRatio
+                scale
               },
               edge: {
                 type: 'curved'
@@ -273,11 +273,11 @@ export default function Graph() {
       {/* Helper overlay to change dimensions */}
       <View style={styles.overlay}>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={decreaseSizeRatio} style={styles.button}>
+          <TouchableOpacity onPress={decreaseScale} style={styles.button}>
             <Text style={styles.buttonText}>-</Text>
           </TouchableOpacity>
-          <Text style={styles.radiusText}>{sizeRatio}</Text>
-          <TouchableOpacity onPress={increaseSizeRatio} style={styles.button}>
+          <Text style={styles.radiusText}>{scale}</Text>
+          <TouchableOpacity onPress={increaseScale} style={styles.button}>
             <Text style={styles.buttonText}>+</Text>
           </TouchableOpacity>
         </View>
@@ -339,7 +339,7 @@ export default function Graph() {
             ...
             components: {
               label: {
-                sizeRatio
+                scale
               },
               edge: {
                 type: 'curved'
@@ -399,14 +399,14 @@ const GRAPH: UndirectedGraphData = {
 };
 
 export default function Graph() {
-  const [sizeRatio, setSizeRatio] = useState(1);
+  const [scale, setScale] = useState(1);
 
   const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
 
-  const increaseSizeRatio = () =>
-    setSizeRatio(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
-  const decreaseSizeRatio = () =>
-    setSizeRatio(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
+  const increaseScale = () =>
+    setScale(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
+  const decreaseScale = () =>
+    setScale(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
 
   return (
     <>
@@ -419,7 +419,7 @@ export default function Graph() {
             // --- Graph components settings ---
             components: {
               label: {
-                sizeRatio
+                scale
               }
             },
             // --- End of graph components settings ---
@@ -434,11 +434,11 @@ export default function Graph() {
       {/* Helper overlay to change dimensions */}
       <View style={styles.overlay}>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={decreaseSizeRatio} style={styles.button}>
+          <TouchableOpacity onPress={decreaseScale} style={styles.button}>
             <Text style={styles.buttonText}>-</Text>
           </TouchableOpacity>
-          <Text style={styles.radiusText}>{sizeRatio}</Text>
-          <TouchableOpacity onPress={increaseSizeRatio} style={styles.button}>
+          <Text style={styles.radiusText}>{scale}</Text>
+          <TouchableOpacity onPress={increaseScale} style={styles.button}>
             <Text style={styles.buttonText}>+</Text>
           </TouchableOpacity>
         </View>
@@ -500,7 +500,7 @@ export default function Graph() {
             ...
             components: {
               label: {
-                sizeRatio
+                scale
               }
             },
             ...
@@ -551,14 +551,14 @@ const GRAPH: UndirectedGraphData = {
 };
 
 export default function Graph() {
-  const [sizeRatio, setSizeRatio] = useState(1);
+  const [scale, setScale] = useState(1);
 
   const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
 
-  const increaseSizeRatio = () =>
-    setSizeRatio(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
-  const decreaseSizeRatio = () =>
-    setSizeRatio(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
+  const increaseScale = () =>
+    setScale(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
+  const decreaseScale = () =>
+    setScale(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
 
   return (
     <>
@@ -571,7 +571,7 @@ export default function Graph() {
             // --- Graph components settings ---
             components: {
               label: {
-                sizeRatio
+                scale
               },
               edge: {
                 type: 'curved'
@@ -589,11 +589,11 @@ export default function Graph() {
       {/* Helper overlay to change dimensions */}
       <View style={styles.overlay}>
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={decreaseSizeRatio} style={styles.button}>
+          <TouchableOpacity onPress={decreaseScale} style={styles.button}>
             <Text style={styles.buttonText}>-</Text>
           </TouchableOpacity>
-          <Text style={styles.radiusText}>{sizeRatio}</Text>
-          <TouchableOpacity onPress={increaseSizeRatio} style={styles.button}>
+          <Text style={styles.radiusText}>{scale}</Text>
+          <TouchableOpacity onPress={increaseScale} style={styles.button}>
             <Text style={styles.buttonText}>+</Text>
           </TouchableOpacity>
         </View>
@@ -655,7 +655,7 @@ export default function Graph() {
             ...
             components: {
               label: {
-                sizeRatio
+                scale
               },
               edge: {
                 type: 'curved'
