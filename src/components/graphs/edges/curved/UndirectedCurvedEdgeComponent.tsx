@@ -41,28 +41,28 @@ function UndirectedCurvedEdgeComponent<E, V>({
   const labelHeight = useDerivedValue(
     () =>
       ((v1Radius.value + v2Radius.value) / 2) *
-      (componentSettings.label?.sizeRatio ?? LABEL_COMPONENT_SETTINGS.sizeRatio)
+      (componentSettings.label?.scale ?? LABEL_COMPONENT_SETTINGS.scale)
   );
 
   useAnimatedReaction(
     () => {
+      const offset =
+        labelHeight.value *
+        (animatedOrder.value - (animatedEdgesCount.value - 1) / 2);
       // Ensure that the order of edges is always the same
       // no matter which vertex was specified first on the edge
       // vertices array
       if (v1Key.localeCompare(v2Key) > 0) {
-        return { v1: v2Position, v2: v1Position };
+        return { offset, v1: v2Position, v2: v1Position };
       }
-      return { v1: v1Position, v2: v2Position };
+      return { offset, v1: v1Position, v2: v2Position };
     },
-    ({ v1, v2 }) => {
+    ({ offset, v1, v2 }) => {
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(
         animatedVectorCoordinatesToVector(v1),
         animatedVectorCoordinatesToVector(v2)
       );
-      const offset =
-        labelHeight.value *
-        (animatedOrder.value - (animatedEdgesCount.value - 1) / 2);
       const { x, y } = translateAlongVector(
         {
           x: (v1.x.value + v2.x.value) / 2,

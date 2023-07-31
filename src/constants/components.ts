@@ -25,5 +25,5 @@ export const ARROW_COMPONENT_SETTINGS: Required<EdgeArrowSettings> = {
 };
 
 export const LABEL_COMPONENT_SETTINGS: Required<EdgeLabelSettings> = {
-  sizeRatio: 0.75
+  scale: 0.75
 };

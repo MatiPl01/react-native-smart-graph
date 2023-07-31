@@ -20,7 +20,7 @@ export default function DefaultVertexRenderer<V>({
 }: VertexRendererProps<V>) {
   const font = useFont(
     FONTS.rubikFont,
-    radius * DEFAULT_VERTEX_RENDERER_SETTINGS.font.sizeRatio
+    radius * DEFAULT_VERTEX_RENDERER_SETTINGS.font.scale
   );
 
   useAnimatedReaction(
@@ -55,7 +55,7 @@ export default function DefaultVertexRenderer<V>({
       />
       <Circle
         transform={[
-          { scale: 1 - DEFAULT_VERTEX_RENDERER_SETTINGS.border.sizeRatio }
+          { scale: 1 - DEFAULT_VERTEX_RENDERER_SETTINGS.border.scale }
         ]}
         color={DEFAULT_VERTEX_RENDERER_SETTINGS.color}
         r={radius}

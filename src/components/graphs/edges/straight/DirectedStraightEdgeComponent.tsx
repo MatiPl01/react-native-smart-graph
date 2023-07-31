@@ -101,14 +101,15 @@ function DirectedStraightEdgeComponent<E, V>({
         dirVec.value,
         Math.sqrt(r2 ** 2 - p2Offset ** 2)
       );
-      const maxSize =
-        (componentSettings.edge.maxOffsetFactor * (r1 + r2)) / (edgesCount - 1);
       // Update edge label max size
+      const maxSize =
+        (componentSettings.edge.maxOffsetFactor * (r1 + r2)) /
+        (edgesCount > 0 ? edgesCount - 1 : 1);
       const avgRadius = (r1 + r2) / 2;
-      if (componentSettings.label?.sizeRatio) {
+      if (componentSettings.label?.scale) {
         labelHeight.value = Math.min(
-          componentSettings.label.sizeRatio * avgRadius,
-          maxSize
+          maxSize,
+          componentSettings.label.scale * avgRadius
         );
       }
       // Update edge arrow max size
