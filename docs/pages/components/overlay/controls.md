@@ -1,31 +1,19 @@
-# Overlay components
+# GraphViewControls
 
 ## Description
 
-Overlay components are components **rendered over the canvas**. They have **access to canvas-related data** stored in **context** providing particular canvas functionalities.
-
-Currently, there is only **one predefined** overlay component with **simple controls** (more details [below](pages/components/overlay?id=graphviewcontrols)).
-
-You can write your **own overlay components** (explanation in [this](pages/components/overlay?id=custom-components) section). They are just **like plain React Native components** but have **access to canvas data**, thus can offer some **additional functionality**.
-
-## Available components
-
-### GraphViewControls
-
-#### Description
-
 This component displays **controls over the canvas**. These controls allow **resizing graph to the initial position** and **changing the objectFit** property of the [GraphView](pages/components/view) component.
 
-#### Features
+## Features
 
 - Resettings **position** and **scale** of the graph container to **initial settings** (the graph is **re-centered** and the scale is changed to the [initialScale](pages/components/view?id=initialscale)),
 <!-- TODO - this link redirects to the current page but scrolls to wrong position -->
 
 - Changing the value of the [objectFit](pages/components/view?id=objectfit) property to the **next value**.
 
-#### Properties
+## Properties
 
-##### `onObjectFitChange`
+#### `onObjectFitChange`
 
 A callback function called when the object fit change button is pressed. The button **is visible** only when this **callback is provided**.
 
@@ -35,7 +23,7 @@ This callback is passed the new `objectFit` value which can be then passed to th
 | ------------------------------ | ------- | -------- |
 | (objectFit: ObjectFit) => void | -       | no       |
 
-##### `style`
+#### `style`
 
 The `View` component style object. It will be passed to the underlying `View` component.
 
@@ -43,7 +31,7 @@ The `View` component style object. It will be passed to the underlying `View` co
 | ---------------------- | ------- | -------- |
 | StyleProp\<ViewStyle\> | -       | no       |
 
-#### Example
+## Example
 
 **Code snippet**
 
@@ -172,13 +160,3 @@ const styles = StyleSheet.create({
 **Result**
 
 <video src="./assets/videos/components/overlay/graph-view-controls-example.mp4" style="width: 300px"></video>
-
-## Custom components
-
-<!-- TODO - add this to documentation once the library code is polished and no more major changes to the inner logic will be made -->
-
-> [!NOTE]
-> This part of documentation will be **added later**, once the first stable version is released. Custom components touch parts of the **inner logic** which **might change**, so adding documentation for this part makes no sense for now.
-
-> [!TIP]
-> If you need to create your **custom component**, please look at the `GraphViewControls` component implementation and **experiment with** it to achieve the desired result.
