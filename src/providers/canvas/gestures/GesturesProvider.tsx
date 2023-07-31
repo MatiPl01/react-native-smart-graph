@@ -16,6 +16,7 @@ import {
   useTransformContext
 } from '@/providers/canvas';
 import { Maybe } from '@/types/utils';
+import { averageVector } from '@/utils/vectors';
 
 export type GesturesContextType = {
   gestureHandler: ComposedGesture;
@@ -68,11 +69,14 @@ export default function GesturesProvider({
   // Gestures helper values
   const isInitialRender = useSharedValue(true);
   // Pan
+  const isPanActive = useSharedValue(false);
   const panStartScale = useSharedValue(1);
+  const prevPanPositions = useSharedValue<Record<string, Vector>>({});
   // Pinch
+  const isPinchActive = useSharedValue(false);
   const pinchStartScale = useSharedValue(1);
   const pinchDecayScale = useSharedValue(1);
-  const pinchEndPosition = useSharedValue({ x: 0, y: 0 });
+  const pinchEndVelocity = useSharedValue(0);
 
   const handleGestureStart = (origin?: Maybe<Vector>) => {
     'worklet';
@@ -85,13 +89,59 @@ export default function GesturesProvider({
 
   const handleGestureEnd = () => {
     'worklet';
+    // Don't do anuthing if there is still an active gesture
+    if (isPanActive.value || isPinchActive.value) {
+      return;
+    }
     isGestureActive.value = false;
     autoSizingContext.enableAutoSizingAfterTimeout();
+  };
+
+  const handlePanEnd = (velocityX: number, velocityY: number) => {
+    'worklet';
+    const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
+    translateX.value = withDecay({
+      ...TRANSLATION_DECAY_CONFIG,
+      clamp: clampX,
+      velocity: velocityX
+    });
+    translateY.value = withDecay({
+      ...TRANSLATION_DECAY_CONFIG,
+      clamp: clampY,
+      velocity: velocityY
+    });
+    handleGestureEnd();
+  };
+
+  const handlePinchEnd = () => {
+    'worklet';
+    pinchDecayScale.value = withDecay({
+      clamp: [minScale.value, maxScale.value],
+      rubberBandEffect: true,
+      velocity: pinchEndVelocity.value
+    });
+    pinchEndVelocity.value = 0;
+    handleGestureEnd();
+  };
+
+  const applyPanTranslation = ({ x, y }: Vector) => {
+    'worklet';
+    // The focus provider will handle canvas translation on blur transition
+    if (focusStatus.value === FocusStatus.BLUR_TRANSITION) {
+      blur.translationX.value += x;
+      blur.translationY.value += y;
+    }
+    // Otherwise, translate the canvas normally
+    else {
+      translateX.value += x;
+      translateY.value += y;
+    }
   };
 
   const panGestureHandler = Gesture.Pan()
     .onStart(({ numberOfPointers, x, y }) => {
       if (gesturesDisabled.value) return;
+      isPanActive.value = true;
       blur.translationX.value = 0;
       blur.translationY.value = 0;
       panStartScale.value = currentScale.value;
@@ -99,38 +149,53 @@ export default function GesturesProvider({
       // focus with a blur transition to the origin
       handleGestureStart(numberOfPointers > 1 ? null : { x, y });
     })
-    .onChange(e => {
-      if (gesturesDisabled.value) return;
-      // The focus provider will handle canvas translation on blur transition
-      if (focusStatus.value === FocusStatus.BLUR_TRANSITION) {
-        blur.translationX.value += e.changeX;
-        blur.translationY.value += e.changeY;
-      }
-      // Otherwise, translate the canvas normally
-      else {
-        translateX.value += e.changeX;
-        translateY.value += e.changeY;
-      }
+    // Use this only for single-touch panning
+    .onChange(({ changeX, changeY, numberOfPointers }) => {
+      if (gesturesDisabled.value || numberOfPointers > 1) return;
+      // Reset previous positions if there is only one touch
+      prevPanPositions.value = {};
+      // Update previous position
+      applyPanTranslation({ x: changeX, y: changeY });
+    })
+    // Use this only for multi-touch panning
+    .onTouchesMove(({ allTouches }) => {
+      if (gesturesDisabled.value || allTouches.length < 2) return;
+      // Activate pinch gesture handler
+      // Calculate the average change in position
+      const avgChange = averageVector(
+        allTouches.map(({ absoluteX, absoluteY, id }) => {
+          const prevPosition = prevPanPositions.value[id];
+          if (!prevPosition) return { x: 0, y: 0 };
+          return {
+            x: absoluteX - prevPosition.x,
+            y: absoluteY - prevPosition.y
+          };
+        })
+      );
+      // Apply the translation to the canvas
+      applyPanTranslation(avgChange);
+      // Update previous touches
+      prevPanPositions.value = Object.fromEntries(
+        allTouches.map(({ absoluteX, absoluteY, id }) => [
+          id,
+          { x: absoluteX, y: absoluteY }
+        ])
+      );
     })
     .onEnd(({ velocityX, velocityY }) => {
+      isPanActive.value = false;
+      prevPanPositions.value = {};
       if (gesturesDisabled.value) return;
-      const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
-      translateX.value = withDecay({
-        ...TRANSLATION_DECAY_CONFIG,
-        clamp: clampX,
-        velocity: velocityX
-      });
-      translateY.value = withDecay({
-        ...TRANSLATION_DECAY_CONFIG,
-        clamp: clampY,
-        velocity: velocityY
-      });
-      handleGestureEnd();
+      handlePanEnd(velocityX, velocityY);
+      // Call this to make shure that the pinch gesture ends
+      // with transitiion
+      handlePinchEnd();
     });
 
   const pinchGestureHandler = Gesture.Pinch()
     .onStart(() => {
       if (gesturesDisabled.value) return;
+      isPinchActive.value = true;
       pinchStartScale.value = currentScale.value;
       handleGestureStart(null);
     })
@@ -143,16 +208,12 @@ export default function GesturesProvider({
         { withClamping: false }
       );
     })
-    .onEnd(({ focalX, focalY, velocity }) => {
+    .onEnd(({ velocity }) => {
+      isPinchActive.value = false;
       if (gesturesDisabled.value) return;
       pinchDecayScale.value = currentScale.value;
-      pinchEndPosition.value = { x: focalX, y: focalY };
-      pinchDecayScale.value = withDecay({
-        clamp: [minScale.value, maxScale.value],
-        rubberBandEffect: true,
-        velocity
-      });
-      handleGestureEnd();
+      pinchEndVelocity.value = velocity;
+      if (!isPanActive.value) handlePinchEnd();
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -173,7 +234,8 @@ export default function GesturesProvider({
         scaleContentTo(
           defaultScale,
           origin,
-          DEFAULT_GESTURE_ANIMATION_SETTINGS
+          DEFAULT_GESTURE_ANIMATION_SETTINGS,
+          { withClamping: true }
         );
       } else {
         // Find the first scale that is bigger than current scale
@@ -181,23 +243,23 @@ export default function GesturesProvider({
         scaleContentTo(
           newScale ?? maxScale.value,
           origin,
-          DEFAULT_GESTURE_ANIMATION_SETTINGS
+          DEFAULT_GESTURE_ANIMATION_SETTINGS,
+          { withClamping: true }
         );
       }
       handleGestureEnd();
     });
 
   useAnimatedReaction(
-    () => ({
-      decayScale: pinchDecayScale.value,
-      endPosition: pinchEndPosition.value
-    }),
-    ({ decayScale, endPosition }) => {
+    () => pinchDecayScale.value,
+    decayScale => {
       if (isInitialRender.value) {
         isInitialRender.value = false;
         return;
       }
-      scaleContentTo(Math.max(decayScale, 0), endPosition);
+      scaleContentTo(Math.max(decayScale, 0), undefined, undefined, {
+        withClamping: true
+      });
     }
   );
 
