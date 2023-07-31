@@ -1,4 +1,4 @@
-import { vec, Vector } from '@shopify/react-native-skia';
+import { Vector } from '@shopify/react-native-skia';
 
 import { AnimatedVector, AnimatedVectorCoordinates } from '@/types/layout';
 
@@ -53,7 +53,7 @@ export const animatedVectorToVector = (vector?: AnimatedVector): Vector => {
         x: vector.value.x,
         y: vector.value.y
       }
-    : vec(0, 0);
+    : { x: 0, y: 0 };
 };
 
 export const addVectorsArray = (vectors: Array<Vector>): Vector => {
@@ -80,6 +80,12 @@ export const subtractVectors = (vector1: Vector, vector2: Vector): Vector => {
 export const multiplyVector = (vector: Vector, factor: number): Vector => {
   'worklet';
   return { x: vector.x * factor, y: vector.y * factor };
+};
+
+export const averageVector = (vectors: Array<Vector>): Vector => {
+  'worklet';
+  if (!vectors.length) return { x: 0, y: 0 };
+  return multiplyVector(addVectorsArray(vectors), 1 / vectors.length);
 };
 
 export const vectorLength = (vector: Vector): number => {

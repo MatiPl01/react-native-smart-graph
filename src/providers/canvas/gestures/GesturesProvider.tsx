@@ -16,6 +16,7 @@ import {
   useTransformContext
 } from '@/providers/canvas';
 import { Maybe } from '@/types/utils';
+import { averageVector } from '@/utils/vectors';
 
 export type GesturesContextType = {
   gestureHandler: ComposedGesture;
@@ -69,6 +70,7 @@ export default function GesturesProvider({
   const isInitialRender = useSharedValue(true);
   // Pan
   const panStartScale = useSharedValue(1);
+  const prevPanPositions = useSharedValue<Record<string, Vector>>({});
   // Pinch
   const pinchStartScale = useSharedValue(1);
   const pinchDecayScale = useSharedValue(1);
@@ -89,6 +91,20 @@ export default function GesturesProvider({
     autoSizingContext.enableAutoSizingAfterTimeout();
   };
 
+  const applyPanTranslation = ({ x, y }: Vector) => {
+    'worklet';
+    // The focus provider will handle canvas translation on blur transition
+    if (focusStatus.value === FocusStatus.BLUR_TRANSITION) {
+      blur.translationX.value += x;
+      blur.translationY.value += y;
+    }
+    // Otherwise, translate the canvas normally
+    else {
+      translateX.value += x;
+      translateY.value += y;
+    }
+  };
+
   const panGestureHandler = Gesture.Pan()
     .onStart(({ numberOfPointers, x, y }) => {
       if (gesturesDisabled.value) return;
@@ -99,20 +115,40 @@ export default function GesturesProvider({
       // focus with a blur transition to the origin
       handleGestureStart(numberOfPointers > 1 ? null : { x, y });
     })
-    .onChange(e => {
-      if (gesturesDisabled.value) return;
-      // The focus provider will handle canvas translation on blur transition
-      if (focusStatus.value === FocusStatus.BLUR_TRANSITION) {
-        blur.translationX.value += e.changeX;
-        blur.translationY.value += e.changeY;
-      }
-      // Otherwise, translate the canvas normally
-      else {
-        translateX.value += e.changeX;
-        translateY.value += e.changeY;
-      }
+    // Use this only for single-touch panning
+    .onChange(({ changeX, changeY, numberOfPointers }) => {
+      if (gesturesDisabled.value || numberOfPointers > 1) return;
+      // Reset previous positions if there is only one touch
+      prevPanPositions.value = {};
+      // Update previous position
+      applyPanTranslation({ x: changeX, y: changeY });
+    })
+    // Use this only for multi-touch panning
+    .onTouchesMove(({ allTouches }) => {
+      if (gesturesDisabled.value || allTouches.length < 2) return;
+      // Calculate the average change in position
+      const avgChange = averageVector(
+        allTouches.map(({ absoluteX, absoluteY, id }) => {
+          const prevPosition = prevPanPositions.value[id];
+          if (!prevPosition) return { x: 0, y: 0 };
+          return {
+            x: absoluteX - prevPosition.x,
+            y: absoluteY - prevPosition.y
+          };
+        })
+      );
+      // Apply the translation to the canvas
+      applyPanTranslation(avgChange);
+      // Update previous touches
+      prevPanPositions.value = Object.fromEntries(
+        allTouches.map(({ absoluteX, absoluteY, id }) => [
+          id,
+          { x: absoluteX, y: absoluteY }
+        ])
+      );
     })
     .onEnd(({ velocityX, velocityY }) => {
+      prevPanPositions.value = {};
       if (gesturesDisabled.value) return;
       const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
       translateX.value = withDecay({
@@ -173,7 +209,8 @@ export default function GesturesProvider({
         scaleContentTo(
           defaultScale,
           origin,
-          DEFAULT_GESTURE_ANIMATION_SETTINGS
+          DEFAULT_GESTURE_ANIMATION_SETTINGS,
+          { withClamping: true }
         );
       } else {
         // Find the first scale that is bigger than current scale
@@ -181,7 +218,8 @@ export default function GesturesProvider({
         scaleContentTo(
           newScale ?? maxScale.value,
           origin,
-          DEFAULT_GESTURE_ANIMATION_SETTINGS
+          DEFAULT_GESTURE_ANIMATION_SETTINGS,
+          { withClamping: true }
         );
       }
       handleGestureEnd();
