@@ -16,6 +16,7 @@
       name="viewport"
       content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
 
+    <link rel="shortcut icon" type="image/jpg" href="./favicon.ico?" />
     <link
       id="prism-light-theme"
       href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css"
@@ -139,36 +140,36 @@
       // Accordion
       function accordionPlugin(hook, vm) {
         hook.beforeEach(function (content) {
-          const lines = content.split('\n');
-          const accordionRegex = {
-            start: /<!-- accordion:start -->/,
-            end: /<!-- accordion:end -->/,
-            title: /#### _(.+)_/
+          var lines = content.split('\n');
+          var accordionRegex = {
+            start: new RegExp('<!-- accordion:start -->'),
+            end: new RegExp('<!-- accordion:end -->'),
+            title: new RegExp('#### _(.+)_')
           };
 
-          let stack = [];
+          var stack = [];
 
-          for (let i = 0; i < lines.length; i++) {
+          for (var i = 0; i < lines.length; i++) {
             if (accordionRegex.start.test(lines[i].trim())) {
-              let title = '';
+              var title = '';
               // search for the closest occurrence of title pattern
-              for (let j = i + 1; j < lines.length; j++) {
-                const titleMatch = accordionRegex.title.exec(lines[j]);
+              for (var j = i + 1; j < lines.length; j++) {
+                var titleMatch = accordionRegex.title.exec(lines[j]);
                 if (titleMatch) {
                   title = titleMatch[1];
                   break;
                 }
               }
 
-              let accordion = {
+              var accordion = {
                 title: title,
                 content: [],
                 startLine: i
               };
               stack.push(accordion);
             } else if (accordionRegex.end.test(lines[i].trim())) {
-              const accordion = stack.pop();
-              const accordionHtml = `<article class="accordion"><h4 class="accordion-title">${
+              var accordion = stack.pop();
+              var accordionHtml = `<article class="accordion"><h4 class="accordion-title">${
                 accordion.title
               }</h4><section class="accordion-content"><div class="accordion-inner">\n${accordion.content.join(
                 '\n'
@@ -201,8 +202,8 @@
           // Find all accordions
           document.querySelectorAll('.accordion').forEach(accordion => {
             // Define content
-            const content = accordion.querySelector('.accordion-content');
-            const data = { wasOpen: false };
+            var content = accordion.querySelector('.accordion-content');
+            var data = { wasOpen: false };
 
             // Add click event to the title
             accordion
