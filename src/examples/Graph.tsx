@@ -1,105 +1,142 @@
-import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { StyleSheet } from 'react-native';
 import {
-  DirectedGraphData,
-  DirectedGraph,
-  GraphView,
-  DirectedGraphComponent,
-  DefaultEdgeLabelRenderer
-} from 'react-native-smart-graph';
+  Easing,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming
+} from 'react-native-reanimated';
 
-const GRAPH: DirectedGraphData = {
-  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }],
+import GraphViewControls from '@/components/controls/GraphViewControls';
+import GraphView from '@/components/views/GraphView';
+import { DirectedGraph } from '@/models/graphs';
+
+import {
+  DefaultEdgeLabelRenderer,
+  DirectedEdgeData,
+  DirectedGraphComponent,
+  FocusPoints,
+  FocusSettings,
+  ObjectFit,
+  VertexData,
+  VertexPressHandler
+} from '..';
+
+const FOCUS_SETTINGS: FocusSettings = {
+  alignment: {
+    horizontalAlignment: 'left',
+    horizontalOffset: 25
+  },
+  animation: {
+    duration: 250,
+    easing: Easing.inOut(Easing.ease)
+  },
+  disableGestures: false,
+  vertexScale: 4
+};
+
+const GRAPH: {
+  edges: DirectedEdgeData<string>[];
+  vertices: VertexData<string>[];
+} = {
   edges: [
     { key: 'E1', from: 'V1', to: 'V2' },
     { key: 'E2', from: 'V1', to: 'V3' },
-    { key: 'E3', from: 'V2', to: 'V3' },
-    { key: 'E4', from: 'V3', to: 'V1' },
-    { key: 'E5', from: 'V3', to: 'V2' },
-    { key: 'E6', from: 'V3', to: 'V1' }
-  ]
+    { key: 'E3', from: 'V1', to: 'V4' }
+  ],
+  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
 export default function Graph() {
-  const [scale, setScale] = useState(1);
+  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
-  const graph = useMemo(() => new DirectedGraph(GRAPH), []);
+  const graph = useMemo(() => new DirectedGraph<string, unknown>(), []);
+  const focusPoints = useMemo<FocusPoints>(
+    // TODO - add information in docs about useMemo
+    () => ({
+      0.25: { key: 'V1', vertexScale: 10 },
+      0.5: {
+        key: 'V2',
+        vertexScale: 2,
+        alignment: { horizontalAlignment: 'left', horizontalOffset: 25 }
+      },
+      0.8: {
+        key: 'V3',
+        alignment: {
+          verticalAlignment: 'top',
+          verticalOffset: 0,
+          horizontalAlignment: 'left',
+          horizontalOffset: 0
+        }
+      }
+    }),
+    []
+  );
 
-  const increaseScale = () =>
-    setScale(prev => Math.min(Math.round(10 * prev + 2) / 10, 2));
-  const decreaseScale = () =>
-    setScale(prev => Math.max(Math.round(10 * prev - 2) / 10, 0.2));
+  const multiStepFocusProgress = useSharedValue(0);
+
+  useEffect(() => {
+    graph.insertBatch(GRAPH);
+  }, [graph]);
+
+  useEffect(() => {
+    multiStepFocusProgress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 5000, easing: Easing.linear }),
+        withTiming(0, { duration: 5000, easing: Easing.linear })
+      ),
+      -1
+    );
+  }, []);
+
+  const handleVertexLongPress = useCallback<VertexPressHandler<string>>(
+    ({ vertex: { key } }) => {
+      console.log('long press', key);
+    },
+    []
+  );
+
+  const handleVertexPress = useCallback<VertexPressHandler<string>>(
+    ({ vertex: { key } }) => {
+      graph.focus(key, FOCUS_SETTINGS);
+    },
+    [graph]
+  );
 
   return (
-    <>
-      <GraphView objectFit='contain' padding={50}>
-        <DirectedGraphComponent
-          renderers={{
-            label: DefaultEdgeLabelRenderer
-          }}
-          settings={{
-            // --- Graph components settings ---
-            components: {
-              arrow: {
-                scale
-              }
-            },
-            // --- End of graph components settings ---
-            placement: {
-              strategy: 'circle',
-              minVertexSpacing: 100
-            }
-          }}
-          graph={graph}
-        />
-      </GraphView>
-      {/* Helper overlay to change dimensions */}
-      <View style={styles.overlay}>
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity onPress={decreaseScale} style={styles.button}>
-            <Text style={styles.buttonText}>-</Text>
-          </TouchableOpacity>
-          <Text style={styles.radiusText}>{scale}</Text>
-          <TouchableOpacity onPress={increaseScale} style={styles.button}>
-            <Text style={styles.buttonText}>+</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </>
+    <GraphView objectFit={objectFit} padding={25} scales={[0.25, 1, 10]}>
+      <DirectedGraphComponent
+        renderers={{
+          label: DefaultEdgeLabelRenderer
+        }}
+        settings={{
+          events: {
+            onVertexLongPress: handleVertexLongPress,
+            onVertexPress: handleVertexPress
+          },
+          placement: {
+            strategy: 'orbits'
+          },
+          focus: {
+            points: focusPoints,
+            progress: multiStepFocusProgress
+          }
+        }}
+        graph={graph}
+      />
+      <GraphViewControls
+        onObjectFitChange={setObjectFit}
+        style={styles.controls}
+      />
+    </GraphView>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    pointerEvents: 'box-none'
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 50
-  },
-  button: {
-    backgroundColor: '#edcf46',
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    borderRadius: 5
-  },
-  buttonText: {
-    fontSize: 30,
-    lineHeight: 30,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  radiusText: {
-    fontSize: 30,
-    color: '#fff',
-    fontWeight: 'bold',
-    width: 75,
-    textAlign: 'center'
+  controls: {
+    position: 'absolute',
+    top: 40,
+    right: 10
   }
 });

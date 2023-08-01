@@ -55,9 +55,11 @@ function MultiStepVertexFocusProvider({
   const initialStep = useSharedValue(-1);
   const previousStep = useSharedValue(-1);
 
-  // State machine
+  // Used to ensure that the transition between the current graph
+  // position and the focus point is smooth
   const syncProgress = useSharedValue(0);
 
+  // State machine
   const stateMachine = useStateMachine(
     focusContext,
     canvasDataContext,
@@ -73,6 +75,7 @@ function MultiStepVertexFocusProvider({
 
   const updateInitialStep = useWorkletCallback(
     (progress: null | number, data: Array<FocusStepData>) => {
+      stateMachine.reset();
       if (progress === null) {
         initialStep.value = -1;
         return;

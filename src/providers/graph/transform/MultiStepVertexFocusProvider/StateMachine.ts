@@ -14,8 +14,6 @@ import {
   updateTransitionPoints
 } from './utils';
 
-// TODO - add handling of cases when the transition was interrupted from outside
-
 const focusStartState: StateHandler = props => {
   'worklet';
   const {
@@ -218,6 +216,7 @@ const STATE_HANDLERS: Record<MachineState, StateHandler> = {
 };
 
 type MachineContext = {
+  reset(): void;
   update(
     currentProgress: number,
     previousProgress: number,
@@ -259,7 +258,16 @@ export const useStateMachine = (
 
   return useMemo<MachineContext>(
     () => ({
+      // Resets the machine state
+      reset() {
+        'worklet';
+        // Trun off the focus without any transition
+        // focusContext.endFocus(null);
+        state.value = MachineState.BLUR;
+        targetKey.value = null;
+      },
       state,
+      // Updates the state of the machine
       update(
         currentProgress,
         previousProgress,
@@ -283,6 +291,7 @@ export const useStateMachine = (
             targetKey,
             vertexRadius
           });
+          console.log(result);
         } while (result !== state.value);
         state.value = result;
       }
