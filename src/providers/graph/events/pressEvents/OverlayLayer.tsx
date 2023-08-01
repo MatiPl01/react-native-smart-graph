@@ -3,10 +3,7 @@ import React from 'react';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import {
-  VertexComponentData,
-  VertexComponentRenderData
-} from '@/types/components';
+import { VertexComponentData } from '@/types/components';
 import { AnimatedBoundingRect } from '@/types/layout';
 import { GraphEventsSettings } from '@/types/settings';
 
@@ -15,7 +12,6 @@ import OverlayVertex from './OverlayVertex';
 type OverlayLayerProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   debug?: boolean;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphEventsSettings<V>;
   transform: AnimatedCanvasTransform;
   verticesData: Record<string, VertexComponentData<V, E>>;
@@ -24,7 +20,6 @@ type OverlayLayerProps<V, E> = {
 export default function OverlayLayer<V, E>({
   boundingRect,
   debug,
-  renderedVerticesData,
   settings,
   transform,
   verticesData
@@ -64,7 +59,7 @@ export default function OverlayLayer<V, E>({
           }
         ]}>
         {(settings?.onVertexPress || settings?.onVertexLongPress) &&
-          Object.entries(renderedVerticesData).map(
+          Object.entries(verticesData).map(
             ([key, { currentRadius, position, scale }]) => {
               const data = verticesData[key];
 

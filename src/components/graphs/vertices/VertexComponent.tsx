@@ -3,25 +3,16 @@ import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import { FocusContextType } from '@/providers/canvas';
-import { VertexRemoveHandler, VertexRenderHandler } from '@/types/components';
-import { Vertex } from '@/types/graphs';
+import { VertexComponentData } from '@/types/components';
 import { VertexRenderFunction } from '@/types/renderer';
-import {
-  AnimationSettingsWithDefaults,
-  VertexSettings
-} from '@/types/settings';
-import { DeepRequiredAll } from '@/types/utils';
+import { VertexSettingsWithDefaults } from '@/types/settings';
 import { updateComponentAnimationState } from '@/utils/components';
 
-type VertexComponentProps<V, E> = {
-  animationSettings: AnimationSettingsWithDefaults;
-  componentSettings: DeepRequiredAll<VertexSettings>;
+type VertexComponentProps<V, E> = VertexComponentData<V, E> & {
+  componentSettings: VertexSettingsWithDefaults;
   focusContext: FocusContextType;
-  onRemove: VertexRemoveHandler;
-  onRender: VertexRenderHandler;
-  removed: boolean;
+  onRemove: (key: string) => void;
   renderer: VertexRenderFunction<V>;
-  vertex: Vertex<V, E>;
 };
 
 function VertexComponent<V, E>({
@@ -29,10 +20,10 @@ function VertexComponent<V, E>({
   componentSettings,
   focusContext,
   onRemove,
-  onRender,
   removed,
   renderer,
-  vertex
+  vertex,
+  ...restProps
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
@@ -44,17 +35,6 @@ function VertexComponent<V, E>({
     Math.max(0, animationProgressHelper.value)
   );
 
-  // POSITION
-  // Current vertex position
-  const positionX = useSharedValue(0);
-  const positionY = useSharedValue(0);
-
-  // SCALE AND RADIUS
-  // Current vertex scale
-  const scale = useSharedValue(1);
-  // Current vertex radius
-  const currentRadius = useSharedValue(0);
-
   // FOCUS
   // Vertex focus progress
   const focusProgress = useSharedValue(0);
@@ -62,15 +42,6 @@ function VertexComponent<V, E>({
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
   useComponentFocus(focusProgress, focusContext, key);
-
-  useEffect(() => {
-    // Call onRender callback on mount
-    onRender(key, {
-      currentRadius,
-      position: { x: positionX, y: positionY },
-      scale
-    });
-  }, [key]);
 
   useEffect(() => {
     updateComponentAnimationState(
@@ -84,14 +55,12 @@ function VertexComponent<V, E>({
 
   // Render the vertex component
   return renderer({
+    ...restProps,
+    ...componentSettings,
     animationProgress,
-    currentRadius,
     focusKey: focusContext.focus.key,
-    key,
-    position: { x: positionX, y: positionY },
-    radius: componentSettings.radius,
-    scale,
-    transitionProgress: focusProgress,
+    focusProgress,
+    key: vertex.key,
     value: vertex.value
   });
 }

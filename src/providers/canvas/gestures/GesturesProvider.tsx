@@ -99,7 +99,9 @@ export default function GesturesProvider({
 
   const handlePanEnd = (velocityX: number, velocityY: number) => {
     'worklet';
-    const { x: clampX, y: clampY } = getTranslateClamp(currentScale.value);
+    const { x: clampX, y: clampY } = getTranslateClamp(
+      Math.min(Math.max(minScale.value, currentScale.value), maxScale.value)
+    );
     translateX.value = withDecay({
       ...TRANSLATION_DECAY_CONFIG,
       clamp: clampX,

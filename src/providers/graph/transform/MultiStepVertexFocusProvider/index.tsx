@@ -11,7 +11,7 @@ import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import { CanvasDataContextType, FocusContextType } from '@/providers/canvas';
 import { withGraphData } from '@/providers/graph/data';
 import { useVertexFocusContext } from '@/providers/graph/transform/VertexFocusProvider';
-import { VertexComponentRenderData } from '@/types/components';
+import { VertexComponentData } from '@/types/components';
 import { FocusStepData } from '@/types/focus';
 import { MultiStepFocusSettings } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
@@ -19,22 +19,22 @@ import { getFocusSteps } from '@/utils/focus';
 
 import { useStateMachine } from './StateMachine';
 
-type MultiStepFocusProviderProps = PropsWithChildren<{
+type MultiStepFocusProviderProps<V, E> = PropsWithChildren<{
   canvasDataContext: CanvasDataContextType;
   focusContext: FocusContextType;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: MultiStepFocusSettings;
   vertexRadius: number;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
-function MultiStepVertexFocusProvider({
+function MultiStepVertexFocusProvider<V, E>({
   canvasDataContext,
   children,
   focusContext,
-  renderedVerticesData,
   settings,
-  vertexRadius
-}: MultiStepFocusProviderProps) {
+  vertexRadius,
+  verticesData
+}: MultiStepFocusProviderProps<V, E>) {
   // CONTEXT VALUES
   // Vertex focus context values
   const { isVertexFocused } = useVertexFocusContext();
@@ -96,7 +96,7 @@ function MultiStepVertexFocusProvider({
         startsAt: +key,
         value,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        vertex: renderedVerticesData[value.key]!
+        vertex: verticesData[value.key]!
       }))
       // Filter out focus points that don't have a corresponding vertex
       .filter(({ vertex }) => vertex)
@@ -113,7 +113,7 @@ function MultiStepVertexFocusProvider({
     ) {
       setFocusStepsData(newFocusStepsData);
     }
-  }, [settings.points, renderedVerticesData]);
+  }, [settings.points, verticesData]);
 
   // Update the initial step when the progress property is replaced,
   // the focus steps data changes or the isEnabled value changes
@@ -187,5 +187,5 @@ function MultiStepVertexFocusProvider({
 
 export default withGraphData(
   MultiStepVertexFocusProvider,
-  ({ renderedVerticesData }) => ({ renderedVerticesData })
+  ({ verticesData }) => ({ verticesData })
 );

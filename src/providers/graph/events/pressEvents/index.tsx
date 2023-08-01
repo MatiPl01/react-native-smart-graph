@@ -3,10 +3,7 @@ import { PropsWithChildren, useEffect } from 'react';
 // eslint-disable-next-line import/default
 import { withGraphData } from '@/providers/graph';
 import { AnimatedCanvasTransform } from '@/types/canvas';
-import {
-  VertexComponentData,
-  VertexComponentRenderData
-} from '@/types/components';
+import { VertexComponentData } from '@/types/components';
 import { AnimatedBoundingRect } from '@/types/layout';
 import { GraphEventsSettings } from '@/types/settings';
 
@@ -15,7 +12,6 @@ import OverlayLayer from './OverlayLayer';
 export type PressEventsProviderProps<V, E> = PropsWithChildren<{
   boundingRect: AnimatedBoundingRect;
   renderLayer: (zIndex: number, layer: JSX.Element) => void;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphEventsSettings<V>;
   transform: AnimatedCanvasTransform;
   verticesData: Record<string, VertexComponentData<V, E>>;
@@ -25,7 +21,6 @@ function PressEventsProvider<V, E>({
   boundingRect,
   children,
   renderLayer,
-  renderedVerticesData,
   settings,
   transform,
   verticesData
@@ -35,25 +30,16 @@ function PressEventsProvider<V, E>({
       1,
       <OverlayLayer
         boundingRect={boundingRect}
-        renderedVerticesData={renderedVerticesData}
         settings={settings}
         transform={transform}
         verticesData={verticesData}
       />
     );
-  }, [
-    renderedVerticesData,
-    settings?.onVertexPress,
-    settings?.onVertexLongPress
-  ]);
+  }, [verticesData, settings?.onVertexPress, settings?.onVertexLongPress]);
 
   return <>{children}</>;
 }
 
-export default withGraphData(
-  PressEventsProvider,
-  ({ renderedVerticesData, verticesData }) => ({
-    renderedVerticesData,
-    verticesData
-  })
-);
+export default withGraphData(PressEventsProvider, ({ verticesData }) => ({
+  verticesData
+}));

@@ -16,7 +16,7 @@ import {
 import { useFocusObserver } from '@/hooks';
 import { FocusContextType, FocusStatus } from '@/providers/canvas';
 import { withGraphData } from '@/providers/graph';
-import { VertexComponentRenderData } from '@/types/components';
+import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { AnimatedDimensions } from '@/types/layout';
 import { FocusedVertexData } from '@/types/settings/focus';
@@ -50,8 +50,8 @@ type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   focusContext: FocusContextType;
   graph: Graph<V, E>;
   initialScale: SharedValue<number>;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
   vertexRadius: number;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function VertexFocusProvider<V, E>({
@@ -61,8 +61,8 @@ function VertexFocusProvider<V, E>({
   focusContext,
   graph,
   initialScale,
-  renderedVerticesData,
-  vertexRadius
+  vertexRadius,
+  verticesData
 }: VertexFocusProviderProps<V, E>) {
   // OBSERVER
   // Vertex focus observer
@@ -71,15 +71,14 @@ function VertexFocusProvider<V, E>({
   // FOCUSED VERTEX DATA
   const focusedVertexWithPosition = useMemo(() => {
     const position =
-      data.focusedVertexKey &&
-      renderedVerticesData[data.focusedVertexKey]?.position;
+      data.focusedVertexKey && verticesData[data.focusedVertexKey]?.position;
     return position && data.focusedVertexKey
       ? {
           key: data.focusedVertexKey,
           position
         }
       : null;
-  }, [renderedVerticesData, data.focusedVertexKey]);
+  }, [verticesData, data.focusedVertexKey]);
   // Updated focused vertex data
   const focusedVertexData = useMemo<FocusedVertexData>(
     () =>
@@ -229,9 +228,6 @@ function VertexFocusProvider<V, E>({
   );
 }
 
-export default withGraphData(
-  VertexFocusProvider,
-  ({ renderedVerticesData }) => ({
-    renderedVerticesData
-  })
-);
+export default withGraphData(VertexFocusProvider, ({ verticesData }) => ({
+  verticesData
+}));

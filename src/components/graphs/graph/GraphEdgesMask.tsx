@@ -2,18 +2,18 @@ import { Circle, Rect } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
-import { VertexComponentRenderData } from '@/types/components';
+import { VertexComponentData } from '@/types/components';
 import { AnimatedBoundingRect } from '@/types/layout';
 
-type GraphEdgesMaskProps = {
+type GraphEdgesMaskProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
-function GraphEdgesMask({
+function GraphEdgesMask<V, E>({
   boundingRect,
-  renderedVerticesData
-}: GraphEdgesMaskProps) {
+  verticesData
+}: GraphEdgesMaskProps<V, E>) {
   const width = useDerivedValue(
     () => boundingRect.right.value - boundingRect.left.value
   );
@@ -30,7 +30,7 @@ function GraphEdgesMask({
         x={boundingRect.left}
         y={boundingRect.top}
       />
-      {Object.entries(renderedVerticesData).map(([key, data]) => (
+      {Object.entries(verticesData).map(([key, data]) => (
         <Circle
           color='black'
           cx={data.position.x}
@@ -43,6 +43,6 @@ function GraphEdgesMask({
   );
 }
 
-export default withGraphData(GraphEdgesMask, ({ renderedVerticesData }) => ({
-  renderedVerticesData
+export default withGraphData(GraphEdgesMask, ({ verticesData }) => ({
+  verticesData
 }));
