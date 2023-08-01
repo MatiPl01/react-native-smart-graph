@@ -29,9 +29,9 @@ export type BatchModificationAnimationSettings =
   | AnimationSettings;
 
 export type AnimationsSettings = {
-  edges: Record<string, AnimationSettings>;
+  edges: Record<string, AnimationSettings | undefined>;
   layout?: AnimationSettings;
-  vertices: Record<string, AnimationSettings>;
+  vertices: Record<string, AnimationSettings | undefined>;
 };
 
 export type AnimationSettingsWithDefaults = {

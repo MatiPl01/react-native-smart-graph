@@ -134,7 +134,7 @@ export const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V, E>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
-  currentAnimationsSettings: Record<string, AnimationSettings>,
+  currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AnimationSettingsWithDefaults
 ): {
   data: Record<string, VertexComponentData<V, E>>;

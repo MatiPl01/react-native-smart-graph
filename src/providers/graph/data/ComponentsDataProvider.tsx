@@ -133,7 +133,6 @@ export default function ComponentsDataProvider<V, E>({
       animationsSettings.vertices,
       settings.animations.vertices
     );
-    console.log('?', vertices.length, Object.keys(data).length);
     if (shouldRender) {
       setVerticesData(data);
     }
