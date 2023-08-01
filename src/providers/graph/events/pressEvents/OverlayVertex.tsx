@@ -36,6 +36,7 @@ type VertexOverlayProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   data: VertexComponentData<V, E>;
   debug?: boolean;
+  displayed: SharedValue<boolean>;
   onLongPress?: VertexPressHandler<V>;
   onPress?: VertexPressHandler<V>;
   position: AnimatedVectorCoordinates;
@@ -49,6 +50,7 @@ function OverlayVertex<V, E>({
   boundingRect,
   data: { vertex },
   debug,
+  displayed,
   onLongPress,
   onPress,
   position,
@@ -123,6 +125,8 @@ function OverlayVertex<V, E>({
   };
 
   const style = useAnimatedStyle(() => {
+    if (!displayed.value) return { display: 'none' };
+
     const size = 2 * radius.value;
 
     return {

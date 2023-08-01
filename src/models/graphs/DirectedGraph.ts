@@ -50,27 +50,31 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
       edges?: Array<DirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange = true
   ): void {
     // Insert edges and vertices to the graph model
-    vertices?.forEach(data => this.insertVertex(data, null));
-    edges?.forEach(data => this.insertEdge(data, null));
+    vertices?.forEach(data => this.insertVertex(data, null, false));
+    edges?.forEach(data => this.insertEdge(data, null, false));
     // Notify observers after all changes to the graph model are made
-    this.notifyGraphChange(
-      animationSettings &&
-        createAnimationsSettingsForBatchModification(
-          {
-            edges: edges?.map(({ key }) => key),
-            vertices: vertices?.map(({ key }) => key)
-          },
-          animationSettings
-        )
-    );
+    if (notifyChange) {
+      this.notifyGraphChange(
+        animationSettings &&
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: edges?.map(({ key }) => key),
+              vertices: vertices?.map(({ key }) => key)
+            },
+            animationSettings
+          )
+      );
+    }
   }
 
   override insertEdge(
     { from: sourceKey, key, to: targetKey, value }: DirectedEdgeData<E>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>
+    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    notifyChange = true
   ): DirectedEdge<E, V> {
     this.checkSelfLoop(sourceKey, targetKey);
     const source = this.getVertex(sourceKey);
@@ -92,7 +96,8 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
         createAnimationsSettingsForSingleModification(
           { edge: key },
           animationSettings
-        )
+        ),
+      notifyChange
     );
 
     return edge;
@@ -100,7 +105,8 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
 
   override insertVertex(
     { key, value }: VertexData<V>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>
+    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    notifyChange = true
   ): DirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new DirectedGraphVertex<V, E>(key, value),
@@ -108,7 +114,8 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
         createAnimationsSettingsForSingleModification(
           { vertex: key },
           animationSettings
-        )
+        ),
+      notifyChange
     );
   }
 
@@ -160,11 +167,12 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
       edges?: Array<DirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<AnimationSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange = true
   ): void {
-    this.clear();
+    this.clear(null, false);
     setTimeout(() => {
-      this.insertBatch(batchData, animationSettings);
+      this.insertBatch(batchData, animationSettings, notifyChange);
     }, 0);
   }
 }

@@ -1,41 +1,34 @@
 import VertexComponent from '@/components/graphs/vertices/VertexComponent';
 import { FocusContextType } from '@/providers/canvas';
 import { withGraphData } from '@/providers/graph';
-import {
-  VertexComponentData,
-  VertexRemoveHandler,
-  VertexRenderHandler
-} from '@/types/components';
+import { VertexComponentData, VertexRemoveHandler } from '@/types/components';
+import { VertexRenderFunction } from '@/types/renderer';
+import { VertexSettingsWithDefaults } from '@/types/settings';
 
 type GraphVerticesProps<V, E> = {
+  componentSettings: VertexSettingsWithDefaults;
   focusContext: FocusContextType;
-  handleVertexRemove: VertexRemoveHandler;
-  handleVertexRender: VertexRenderHandler;
+  onRemove: VertexRemoveHandler;
+  renderer: VertexRenderFunction<V>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
 function GraphVertices<V, E>({
-  focusContext,
-  handleVertexRemove,
-  handleVertexRender,
-  verticesData
+  verticesData,
+  ...restProps
 }: GraphVerticesProps<V, E>) {
   return Object.values(verticesData).map(data => (
-    <VertexComponent
-      {...data}
-      focusContext={focusContext}
-      key={data.vertex.key}
-      onRemove={handleVertexRemove}
-      onRender={handleVertexRender}
-    />
+    <VertexComponent {...restProps} {...data} key={data.vertex.key} />
   ));
 }
 
 export default withGraphData(
   GraphVertices,
-  ({ handleVertexRemove, handleVertexRender, verticesData }) => ({
+  ({ handleVertexRemove, renderers, settings, verticesData }) => ({
+    componentSettings: settings.components.vertex,
     handleVertexRemove,
-    handleVertexRender,
+    onRemove: handleVertexRemove,
+    renderer: renderers.vertex,
     verticesData
   })
 );

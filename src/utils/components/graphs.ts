@@ -1,3 +1,5 @@
+import { makeMutable } from 'react-native-reanimated';
+
 import DefaultEdgeArrowRenderer from '@/components/graphs/arrows/renderers/DefaultEdgeArrowRenderer';
 import DefaultCurvedEdgeRenderer from '@/components/graphs/edges/curved/renderers/DefaultCurvedEdgeRenderer';
 import DefaultStraightEdgeRenderer from '@/components/graphs/edges/straight/renderers/DefaultStraightEdgeRenderer';
@@ -18,8 +20,7 @@ import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
 import {
   EdgeComponentData,
   EdgeComponentRenderData,
-  VertexComponentData,
-  VertexComponentRenderData
+  VertexComponentData
 } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { OrderedEdges, Vertex } from '@/types/graphs';
@@ -34,6 +35,7 @@ import {
   GraphSettingsWithDefaults
 } from '@/types/settings';
 import {
+  AnimationSettings,
   AnimationSettingsWithDefaults,
   AnimationsSettings
 } from '@/types/settings/animations';
@@ -131,69 +133,88 @@ export const updateGraphRenderersWithDefaults = <V, E>(
 export const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V, E>>,
   currentVertices: Array<Vertex<V, E>>,
-  currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V>,
-  renderers: GraphRenderersWithDefaults<V, E>
+  removedVertices: Set<string>,
+  currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
+  defaultAnimationSettings: AnimationSettingsWithDefaults
 ): {
   data: Record<string, VertexComponentData<V, E>>;
-  wasUpdated: boolean;
+  shouldRender: boolean;
 } => {
   const updatedVerticesData = { ...oldVerticesData };
-  let wasUpdated = false;
+  let shouldRender = false;
 
   // Add new vertices
-  currentVertices.forEach(vertex => {
+  for (const vertex of currentVertices) {
     const oldVertex = oldVerticesData[vertex.key];
-    if (
-      !oldVertex ||
-      oldVertex?.removed ||
-      renderers.vertex !== oldVertex.renderer ||
-      !deepEqual(oldVertex.componentSettings, settings.components.vertex) ||
-      !deepEqual(settings.animations.vertices, oldVertex.animationSettings)
-    ) {
-      wasUpdated = true;
-      updatedVerticesData[vertex.key] = {
-        animationSettings: {
-          ...settings.animations.vertices,
-          ...currentAnimationsSettings.vertices[vertex.key]
-        } as unknown as AnimationSettingsWithDefaults,
-        componentSettings: settings.components.vertex,
-        removed: false,
-        renderer: renderers.vertex,
-        vertex
-      };
+    // Remove vertex from the removed vertices set if it is in graph
+    if (removedVertices.has(vertex.key)) {
+      removedVertices.delete(vertex.key);
     }
-  });
+    // Continue if vertex is already in the graph and is not removed
+    if (oldVertex && !oldVertex.removed) {
+      continue;
+    }
+    shouldRender = true;
+    // Create the vertex data
+    updatedVerticesData[vertex.key] = {
+      ...(oldVertex ?? {
+        // Create shared values only for new vertices
+        currentRadius: makeMutable(0),
+        displayed: makeMutable(true),
+        position: {
+          x: makeMutable(0),
+          y: makeMutable(0)
+        },
+        scale: makeMutable(1)
+      }),
+      animationSettings: {
+        ...defaultAnimationSettings,
+        ...currentAnimationsSettings
+      },
+      removed: false,
+      vertex
+    };
+  }
 
   // Keys of vertices that are currently in the graph
   const currentVerticesKeys = new Set(currentVertices.map(v => v.key));
 
-  // Mark vertices as removed if there were removed from the graph model
-  Object.keys(oldVerticesData).forEach(key => {
-    if (!currentVerticesKeys.has(key)) {
-      wasUpdated = true;
-      updatedVerticesData[key] = {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...updatedVerticesData[key]!,
-        animationSettings: {
-          ...settings.animations.vertices,
-          ...currentAnimationsSettings.vertices[key]
-        } as unknown as AnimationSettingsWithDefaults,
-        removed: true
-      };
+  // Mark vertices as removed if they were removed from the graph model
+  for (const key in oldVerticesData) {
+    const vertexData = oldVerticesData[key];
+    if (vertexData && !currentVerticesKeys.has(key)) {
+      if (!vertexData.removed) {
+        shouldRender = true;
+        updatedVerticesData[key] = {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          ...vertexData,
+          animationSettings: {
+            ...defaultAnimationSettings,
+            ...currentAnimationsSettings
+          },
+          removed: true
+        };
+      }
     }
-  });
+  }
+
+  // Remove vertices from vertices data if theri removeal animation is finished
+  // and they weren't added back to the graph model
+  for (const key of removedVertices) {
+    delete updatedVerticesData[key];
+    removedVertices.delete(key);
+  }
 
   return {
     data: updatedVerticesData,
-    wasUpdated
+    shouldRender
   };
 };
 
 export const updateGraphEdgesData = <V, E>(
   oldEdgesData: Record<string, EdgeComponentData<E, V>>,
   currentEdges: OrderedEdges<E, V>,
-  renderedVerticesData: Record<string, VertexComponentRenderData>,
+  verticesData: Record<string, VertexComponentData<V, E>>,
   currentAnimationsSettings: AnimationsSettings,
   settings: GraphSettingsWithDefaults<V>,
   renderers: GraphRenderersWithDefaults<V, E>
@@ -207,8 +228,8 @@ export const updateGraphEdgesData = <V, E>(
   // Add new edges to edges data
   currentEdges.forEach(({ edge, edgesCount, order }) => {
     const [v1, v2] = edge.vertices;
-    const v1Data = renderedVerticesData[v1.key];
-    const v2Data = renderedVerticesData[v2.key];
+    const v1Data = verticesData[v1.key];
+    const v2Data = verticesData[v2.key];
 
     const oldEdgeData = oldEdgesData[edge.key];
 

@@ -65,15 +65,18 @@ export interface Graph<V, E> {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange?: boolean
   ): void;
   insertEdge(
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>
+    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    notifyChange?: boolean
   ): Edge<E, V>;
   insertVertex(
     data: VertexData<V>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>
+    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    notifyChange?: boolean
   ): Vertex<V, E>;
   isDirected(): boolean;
   removeBatch(
@@ -81,22 +84,26 @@ export interface Graph<V, E> {
       edges: Array<string>;
       vertices: Array<string>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange?: boolean
   ): void;
   removeEdge(
     key: string,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>
+    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    notifyChange?: boolean
   ): E | undefined;
   removeObserver(observer: GraphObserver): void;
   removeVertex(
     key: string,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>
+    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    notifyChange?: boolean
   ): V | undefined;
   replaceBatch(
     data: {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange?: boolean
   ): void;
 }

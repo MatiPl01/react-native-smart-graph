@@ -9,7 +9,7 @@ import {
 import { withGraphData } from '@/providers/graph';
 import {
   EdgeComponentRenderData,
-  VertexComponentRenderData
+  VertexComponentData
 } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
@@ -25,9 +25,9 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   onRender: (boundingRect: BoundingRect) => void;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphSettingsWithDefaults<V>;
   targetBoundingRect: SharedValue<BoundingRect>;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
@@ -36,9 +36,9 @@ function GraphPlacementLayoutProvider<V, E>({
   layoutAnimationSettings,
   onRender,
   renderedEdgesData,
-  renderedVerticesData,
   settings,
-  targetBoundingRect
+  targetBoundingRect,
+  verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
   const isFirstRender = useSharedValue(true);
 
@@ -50,7 +50,7 @@ function GraphPlacementLayoutProvider<V, E>({
       vertexRadius: settings.components.vertex.radius
     }),
     [
-      renderedVerticesData,
+      verticesData,
       renderedEdgesData,
       settings.components.vertex.radius,
       settings.placement
@@ -76,7 +76,7 @@ function GraphPlacementLayoutProvider<V, E>({
 
       animateVerticesToFinalPositions(
         Object.fromEntries(
-          Object.entries(renderedVerticesData).map(([key, { position }]) => [
+          Object.entries(verticesData).map(([key, { position }]) => [
             key,
             position
           ])
@@ -96,12 +96,12 @@ export default withGraphData(
   ({
     layoutAnimationSettings,
     renderedEdgesData,
-    renderedVerticesData,
-    targetBoundingRect
+    targetBoundingRect,
+    verticesData
   }) => ({
     layoutAnimationSettings,
     renderedEdgesData,
-    renderedVerticesData,
-    targetBoundingRect
+    targetBoundingRect,
+    verticesData
   })
 );

@@ -2,13 +2,11 @@ import { PropsWithChildren } from 'react';
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
-import { VertexComponentRenderData } from '@/types/components';
 import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
   boundingRect: AnimatedBoundingRect; // This is the real bounding rect of the container
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
   targetBoundingRect: SharedValue<BoundingRect>; // This is the target bounding rect of the container
   vertexRadius: number;
 }>;

@@ -10,7 +10,7 @@ import {
 import { runOnUI } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
-import { VertexComponentRenderData } from '@/types/components';
+import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
 import {
@@ -44,8 +44,8 @@ export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   onRender: (boundingRect: BoundingRect) => void;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
   settings: GraphSettingsWithDefaults<V>;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function ForcesPlacementProvider<V, E>({
@@ -53,8 +53,8 @@ function ForcesPlacementProvider<V, E>({
   graph,
   layoutAnimationSettings,
   onRender,
-  renderedVerticesData,
-  settings
+  settings,
+  verticesData
 }: ForcesPlacementProviderProps<V, E>) {
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
@@ -76,7 +76,7 @@ function ForcesPlacementProvider<V, E>({
   const isSecondRenderRef = useRef(false);
 
   useEffect(() => {
-    // Skip the first render (when renderedVerticesData is empty)
+    // Skip the first render (when verticesData is empty)
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
       isSecondRenderRef.current = true;
@@ -84,10 +84,7 @@ function ForcesPlacementProvider<V, E>({
     }
     // Get animated vertices positions
     const animatedVerticesPositions = Object.fromEntries(
-      Object.entries(renderedVerticesData).map(([key, { position }]) => [
-        key,
-        position
-      ])
+      Object.entries(verticesData).map(([key, { position }]) => [key, position])
     );
     // Animate vertices to their final positions on the second render
     if (isSecondRenderRef.current) {
@@ -100,7 +97,7 @@ function ForcesPlacementProvider<V, E>({
     }
     // Update the state
     setPlacedVerticesPositions(animatedVerticesPositions);
-  }, [renderedVerticesData]);
+  }, [verticesData]);
 
   const handleFirstGraphRender = (
     animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
@@ -136,7 +133,7 @@ function ForcesPlacementProvider<V, E>({
   const handleNextGraphRender = () => {
     runOnUI(updateNewVerticesPositions)(
       placedVerticesPositions,
-      renderedVerticesData,
+      verticesData,
       graph.connections,
       settings.components.vertex.radius
     );
@@ -167,8 +164,8 @@ function ForcesPlacementProvider<V, E>({
 
 export default withGraphData(
   ForcesPlacementProvider,
-  ({ layoutAnimationSettings, renderedVerticesData }) => ({
+  ({ layoutAnimationSettings, verticesData }) => ({
     layoutAnimationSettings,
-    renderedVerticesData
+    verticesData
   })
 );

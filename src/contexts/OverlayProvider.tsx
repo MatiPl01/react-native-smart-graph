@@ -1,4 +1,6 @@
 import {
+  ComponentType,
+  Context,
   createContext,
   Fragment,
   useCallback,
@@ -9,7 +11,7 @@ import {
 import { StyleSheet, View } from 'react-native';
 import { ComposedGesture, GestureDetector } from 'react-native-gesture-handler';
 
-import { CommonTypes } from '@/types/utils';
+import { DataProviderReturnType } from '@/types/data';
 import { withMemoContext } from '@/utils/contexts';
 
 export type AccessibleOverlayContextType = {
@@ -92,22 +94,18 @@ export function OverlayOutlet({ gestureHandler }: OverlayOutletProps) {
 }
 
 export const withOverlay = <
-  P extends object,
-  V extends CommonTypes<AccessibleOverlayContextType, P>
+  P extends object, // component props
+  R extends Partial<P> // values returned by selector
 >(
-  Component: React.ComponentType<P>
+  Component: ComponentType<P>
 ) =>
-  withMemoContext<P, AccessibleOverlayContextType, V>(
+  withMemoContext(
     Component,
-    OverlayContext as unknown as React.Context<AccessibleOverlayContextType>,
-    (({ removeLayer, renderLayer }: AccessibleOverlayContextType) => {
+    OverlayContext as unknown as Context<AccessibleOverlayContextType>,
+    ({ removeLayer, renderLayer }: AccessibleOverlayContextType) => {
       return {
         removeLayer,
         renderLayer
       };
-    }) as unknown as (contextValue: V) => Partial<V>
-  ) as <
-    C extends object = P // This workaround allows passing generic prop types
-  >(
-    props: Omit<C, keyof V>
-  ) => JSX.Element;
+    }
+  ) as unknown as DataProviderReturnType<P, R>;

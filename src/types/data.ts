@@ -16,7 +16,7 @@ export type UndirectedEdgeData<E = void> = {
   vertices: string[];
 };
 
-export type GraphData<VD, ED> = {
+type GraphData<VD, ED> = {
   edges?: Array<ED>;
   vertices: Array<VD>;
 };
@@ -30,3 +30,9 @@ export type DirectedGraphData<V = void, E = void> = GraphData<
   VertexData<V>,
   DirectedEdgeData<E>
 >;
+
+export type DataProviderReturnType<P extends object, V> = <
+  C extends object = P // This workaround allows passing generic prop types
+>(
+  props: Omit<C, keyof V>
+) => JSX.Element;

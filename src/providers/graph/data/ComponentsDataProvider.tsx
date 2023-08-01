@@ -17,11 +17,10 @@ import {
   EdgeRemoveHandler,
   EdgeRenderHandler,
   VertexComponentData,
-  VertexComponentRenderData,
-  VertexRemoveHandler,
-  VertexRenderHandler
+  VertexRemoveHandler
 } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
+import { DataProviderReturnType } from '@/types/data';
 import { Graph, GraphConnections } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
 import { GraphRenderersWithDefaults } from '@/types/renderer';
@@ -29,13 +28,13 @@ import {
   AnimationSettingsWithDefaults,
   GraphSettingsWithDefaults
 } from '@/types/settings';
-import { CommonTypes } from '@/types/utils';
 import {
   updateGraphEdgeLabelsData,
   updateGraphEdgesData,
   updateGraphVerticesData
 } from '@/utils/components';
 import { withMemoContext } from '@/utils/contexts';
+import { cancelVertexAnimations } from '@/utils/data';
 
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
@@ -44,10 +43,10 @@ export type ComponentsDataContextType<V, E> = {
   handleEdgeRemove: EdgeRemoveHandler;
   handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
-  handleVertexRender: VertexRenderHandler;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   renderedEdgesData: Record<string, EdgeComponentRenderData>;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
+  renderers: GraphRenderersWithDefaults<V, E>;
+  settings: GraphSettingsWithDefaults<V>;
   targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
@@ -70,12 +69,15 @@ export default function ComponentsDataProvider<V, E>({
   const [{ animationsSettings, orderedEdges, vertices }] =
     useGraphObserver(graph);
 
-  // GRAPH COMPONENTS DATA (necessary to render graph components)
-  // (This data is managed by contexts)
+  // GRAPH COMPONENTS DATA
   // Store data for graph vertex components
   const [verticesData, setVerticesData] = useState<
     Record<string, VertexComponentData<V, E>>
   >({});
+  // Store keys of removed vertices fow thich the removal animation
+  // has been completed and are waiting to be unmounted
+  const removedVertices = useMemo(() => new Set<string>(), []);
+
   // Store data for graph edge components
   const [edgesData, setEdgesData] = useState<
     Record<string, EdgeComponentData<E, V>>
@@ -88,10 +90,6 @@ export default function ComponentsDataProvider<V, E>({
   // GRAPH COMPONENTS RENDER DATA (received from graph components
   // after they have been rendered)
   // (This data is managed by rendered components)
-  // Store render data for graph vertex components
-  const [renderedVerticesData, setRenderedVerticesData] = useState<
-    Record<string, VertexComponentRenderData>
-  >({});
   // Store render data for graph edge components
   const [renderedEdgesData, setRenderedEdgesData] = useState<
     Record<string, EdgeComponentRenderData>
@@ -128,28 +126,30 @@ export default function ComponentsDataProvider<V, E>({
   });
 
   useEffect(() => {
-    const { data, wasUpdated } = updateGraphVerticesData(
+    const { data, shouldRender } = updateGraphVerticesData(
       verticesData,
       vertices,
-      animationsSettings,
-      settings,
-      renderers
+      removedVertices,
+      animationsSettings.vertices,
+      settings.animations.vertices
     );
-    if (wasUpdated) {
+    if (shouldRender) {
       setVerticesData(data);
     }
-  }, [
-    vertices,
-    settings.components.vertex,
-    settings.animations.vertices,
-    renderers.vertex
-  ]);
 
+    return () => {
+      for (const vertexData of Object.values(data)) {
+        cancelVertexAnimations(vertexData);
+      }
+    };
+  }, [vertices]);
+
+  // TODO
   useEffect(() => {
     const { data, wasUpdated } = updateGraphEdgesData(
       edgesData,
       orderedEdges,
-      renderedVerticesData,
+      verticesData,
       animationsSettings,
       settings,
       renderers
@@ -159,7 +159,7 @@ export default function ComponentsDataProvider<V, E>({
     }
   }, [
     orderedEdges,
-    renderedVerticesData,
+    verticesData,
     settings.components.edge,
     settings.animations.edges,
     renderers.edge,
@@ -185,22 +185,11 @@ export default function ComponentsDataProvider<V, E>({
     }
   }, [renderedEdgesData, renderers.label]);
 
-  const handleVertexRender = useCallback<VertexRenderHandler>(
-    (key, renderValues) => {
-      setRenderedVerticesData(prev => ({ ...prev, [key]: renderValues }));
-    },
-    []
-  );
-
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
-    setVerticesData(prev => {
-      const { [key]: _, ...rest } = prev;
-      return rest;
-    });
-    setRenderedVerticesData(prev => {
-      const { [key]: _, ...rest } = prev;
-      return rest;
-    });
+    const vertexData = verticesData[key];
+    if (!vertexData) return;
+    cancelVertexAnimations(vertexData);
+    removedVertices.add(key);
   }, []);
 
   const handleEdgeRender = useCallback<EdgeRenderHandler>(
@@ -229,10 +218,10 @@ export default function ComponentsDataProvider<V, E>({
       handleEdgeRemove,
       handleEdgeRender,
       handleVertexRemove,
-      handleVertexRender,
       layoutAnimationSettings,
       renderedEdgesData,
-      renderedVerticesData,
+      renderers,
+      settings,
       targetBoundingRect,
       verticesData
     }),
@@ -240,10 +229,11 @@ export default function ComponentsDataProvider<V, E>({
       connections,
       verticesData,
       edgesData,
-      renderedVerticesData,
       renderedEdgesData,
       layoutAnimationSettings,
-      edgeLabelsData
+      edgeLabelsData,
+      settings,
+      renderers
     ]
   );
 
@@ -255,20 +245,15 @@ export default function ComponentsDataProvider<V, E>({
 }
 
 export const withGraphData = <
-  P extends object,
-  V extends CommonTypes<ComponentsDataContextType<unknown, unknown>, P>
+  C extends ComponentsDataContextType<unknown, unknown>, // context type
+  P extends object, // component props
+  R extends Partial<P> // values returned by selector
 >(
   Component: React.ComponentType<P>,
-  selector: (contextValue: V) => Partial<V>
+  selector: (contextValue: C) => R
 ) =>
   withMemoContext(
     Component,
-    ComponentsDataContext as unknown as Context<
-      ComponentsDataContextType<unknown, unknown>
-    >,
+    ComponentsDataContext as unknown as Context<C>,
     selector
-  ) as <
-    C extends object = P // This workaround allows passing generic prop types
-  >(
-    props: Omit<C, keyof V>
-  ) => JSX.Element;
+  ) as DataProviderReturnType<P, R>;

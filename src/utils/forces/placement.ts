@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vector } from '@shopify/react-native-skia';
 
-import { VertexComponentRenderData } from '@/types/components';
+import { VertexComponentData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { grahamScan } from '@/utils/algorithms';
@@ -169,9 +169,9 @@ const findForcesPlacementPositions = (
   }, {} as Record<string, Vector>);
 };
 
-export const updateNewVerticesPositions = (
+export const updateNewVerticesPositions = <V, E>(
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
-  renderedVerticesData: Record<string, VertexComponentRenderData>,
+  verticesData: Record<string, VertexComponentData<V, E>>,
   connections: GraphConnections,
   vertexRadius: number
 ): void => {
@@ -179,7 +179,7 @@ export const updateNewVerticesPositions = (
   // Filter out vertices that were removed from the graph
   const filteredVertices = Object.fromEntries(
     Object.entries(placedVerticesPositions).filter(
-      ([key]) => renderedVerticesData[key]
+      ([key]) => verticesData[key]?.displayed.value
     )
   );
   // Calculate new vertices placement positions
@@ -190,7 +190,7 @@ export const updateNewVerticesPositions = (
   );
   // Update positions of new vertices
   Object.entries(newVerticesPositions).forEach(([key, position]) => {
-    const vertexPosition = renderedVerticesData[key]?.position;
+    const vertexPosition = verticesData[key]?.position;
     if (!vertexPosition) {
       return;
     }

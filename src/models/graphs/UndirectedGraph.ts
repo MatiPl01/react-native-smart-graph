@@ -57,27 +57,31 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
       edges?: Array<UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<AnimationSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange = true
   ): void {
     // Insert edges and vertices to the graph model
-    vertices?.forEach(data => this.insertVertex(data, null));
-    edges?.forEach(data => this.insertEdge(data, null));
+    vertices?.forEach(data => this.insertVertex(data, null, false));
+    edges?.forEach(data => this.insertEdge(data, null, false));
     // Notify observers after all changes to the graph model are made
-    this.notifyGraphChange(
-      animationSettings &&
-        createAnimationsSettingsForBatchModification(
-          {
-            edges: edges?.map(({ key }) => key),
-            vertices: vertices?.map(({ key }) => key)
-          },
-          animationSettings
-        )
-    );
+    if (notifyChange) {
+      this.notifyGraphChange(
+        animationSettings &&
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: edges?.map(({ key }) => key),
+              vertices: vertices?.map(({ key }) => key)
+            },
+            animationSettings
+          )
+      );
+    }
   }
 
   override insertEdge(
     { key, value, vertices: [vertex1key, vertex2key] }: UndirectedEdgeData<E>,
-    animationSettings?: Maybe<AnimationSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange = true
   ): UndirectedEdge<E, V> {
     if (!vertex1key || !vertex2key) {
       throw new Error(`Edge ${key} must have two vertices`);
@@ -106,7 +110,8 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
         createAnimationsSettingsForSingleModification(
           { edge: key },
           animationSettings
-        )
+        ),
+      notifyChange
     );
 
     return edge;
@@ -114,7 +119,8 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
 
   override insertVertex(
     { key, value }: VertexData<V>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>
+    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    notifyChange = true
   ): UndirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new UndirectedGraphVertex<V, E>(key, value),
@@ -122,7 +128,8 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
         createAnimationsSettingsForSingleModification(
           { vertex: key },
           animationSettings
-        )
+        ),
+      notifyChange
     );
   }
 
@@ -170,11 +177,12 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
       edges?: Array<UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<AnimationSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange = true
   ): void {
-    this.clear();
+    this.clear(null, false);
     setTimeout(() => {
-      this.insertBatch(batchData, animationSettings);
+      this.insertBatch(batchData, animationSettings, notifyChange);
     }, 0);
   }
 }
