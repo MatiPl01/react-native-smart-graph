@@ -74,6 +74,9 @@ export default function ComponentsDataProvider<V, E>({
   const [verticesData, setVerticesData] = useState<
     Record<string, VertexComponentData<V, E>>
   >({});
+  // Store keys of removed vertices fow thich the removal animation
+  // has been completed and are waiting to be unmounted
+  const removedVertices = useMemo(() => new Set<string>(), []);
 
   // Store data for graph edge components
   const [edgesData, setEdgesData] = useState<
@@ -123,13 +126,15 @@ export default function ComponentsDataProvider<V, E>({
   });
 
   useEffect(() => {
-    const { data, wasUpdated } = updateGraphVerticesData(
+    console.log('?');
+    const { data, shouldRender } = updateGraphVerticesData(
       verticesData,
       vertices,
+      removedVertices,
       animationsSettings.vertices,
       settings.animations.vertices
     );
-    if (wasUpdated) {
+    if (shouldRender) {
       setVerticesData(data);
     }
 
@@ -182,11 +187,7 @@ export default function ComponentsDataProvider<V, E>({
   }, [renderedEdgesData, renderers.label]);
 
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
-    setVerticesData(prev => {
-      const { [key]: removed, ...rest } = prev;
-      if (removed) clearVertexComponentData(removed);
-      return rest;
-    });
+    removedVertices.add(key);
   }, []);
 
   const handleEdgeRender = useCallback<EdgeRenderHandler>(

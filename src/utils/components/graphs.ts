@@ -133,21 +133,28 @@ export const updateGraphRenderersWithDefaults = <V, E>(
 export const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V, E>>,
   currentVertices: Array<Vertex<V, E>>,
+  removedVertices: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings>,
   defaultAnimationSettings: AnimationSettingsWithDefaults
 ): {
   data: Record<string, VertexComponentData<V, E>>;
-  wasUpdated: boolean;
+  shouldRender: boolean;
 } => {
   const updatedVerticesData = { ...oldVerticesData };
-  let wasUpdated = false;
+  let shouldRender = false;
 
   // Add new vertices
   for (const vertex of currentVertices) {
     const oldVertex = oldVerticesData[vertex.key];
+    // Remove vertex from the removed vertices set if it is in graph
+    if (removedVertices.has(vertex.key)) {
+      removedVertices.delete(vertex.key);
+    }
     // Continue if vertex is already in the graph and is not removed
-    if (oldVertex && !oldVertex.removed) continue;
-    wasUpdated = true;
+    if (oldVertex && !oldVertex.removed) {
+      continue;
+    }
+    shouldRender = true;
     // Create the vertex data
     updatedVerticesData[vertex.key] = {
       ...(oldVertex ?? {
@@ -157,13 +164,13 @@ export const updateGraphVerticesData = <V, E>(
           x: makeMutable(0),
           y: makeMutable(0)
         },
-        removed: false,
         scale: makeMutable(1)
       }),
       animationSettings: {
         ...defaultAnimationSettings,
         ...currentAnimationsSettings
       },
+      removed: false,
       vertex
     };
   }
@@ -171,25 +178,35 @@ export const updateGraphVerticesData = <V, E>(
   // Keys of vertices that are currently in the graph
   const currentVerticesKeys = new Set(currentVertices.map(v => v.key));
 
-  // Mark vertices as removed if there were removed from the graph model
+  // Mark vertices as removed if they were removed from the graph model
   for (const key in oldVerticesData) {
-    if (!currentVerticesKeys.has(key)) {
-      wasUpdated = true;
-      updatedVerticesData[key] = {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...updatedVerticesData[key]!,
-        animationSettings: {
-          ...defaultAnimationSettings,
-          ...currentAnimationsSettings
-        },
-        removed: true
-      };
+    const vertexData = oldVerticesData[key];
+    if (vertexData && !currentVerticesKeys.has(key)) {
+      if (!vertexData.removed) {
+        shouldRender = true;
+        updatedVerticesData[key] = {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          ...vertexData,
+          animationSettings: {
+            ...defaultAnimationSettings,
+            ...currentAnimationsSettings
+          },
+          removed: true
+        };
+      }
     }
+  }
+
+  // Remove vertices from vertices data if theri removeal animation is finished
+  // and they weren't added back to the graph model
+  for (const key of removedVertices) {
+    delete updatedVerticesData[key];
+    removedVertices.delete(key);
   }
 
   return {
     data: updatedVerticesData,
-    wasUpdated
+    shouldRender
   };
 };
 

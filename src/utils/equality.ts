@@ -180,17 +180,3 @@ export const deepMemoComparator =
 
     return true;
   };
-
-export const deepEqualPick = <T extends Record<string, any>>(
-  obj: T,
-  keys: (keyof T)[]
-): boolean => {
-  'worklet';
-  for (const key of keys) {
-    if (!deepEqual(obj[key], obj[key])) {
-      return false;
-    }
-  }
-
-  return true;
-};

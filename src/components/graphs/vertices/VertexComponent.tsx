@@ -1,17 +1,17 @@
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import { FocusContextType } from '@/providers/canvas';
-import { VertexComponentData } from '@/types/components';
-import { VertexRenderFunction } from '@/types/renderer';
+import { VertexComponentData, VertexRemoveHandler } from '@/types/components';
+import { VertexRendererProps, VertexRenderFunction } from '@/types/renderer';
 import { VertexSettingsWithDefaults } from '@/types/settings';
 import { updateComponentAnimationState } from '@/utils/components';
 
 type VertexComponentProps<V, E> = VertexComponentData<V, E> & {
   componentSettings: VertexSettingsWithDefaults;
   focusContext: FocusContextType;
-  onRemove: (key: string) => void;
+  onRemove: VertexRemoveHandler;
   renderer: VertexRenderFunction<V>;
 };
 
@@ -26,6 +26,7 @@ function VertexComponent<V, E>({
   ...restProps
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
+  const [displayed, setDisplayed] = useState(true);
 
   // ANIMATION
   // Vertex render animation progress
@@ -39,31 +40,56 @@ function VertexComponent<V, E>({
   // Vertex focus progress
   const focusProgress = useSharedValue(0);
 
+  // RENDERER PROPS
+  const rendererProps = useMemo<VertexRendererProps<V>>(
+    () => ({
+      ...restProps,
+      ...componentSettings,
+      animationProgress,
+      focusKey: focusContext.focus.key,
+      focusProgress,
+      key: vertex.key,
+      value: vertex.value
+    }),
+    [componentSettings, vertex]
+  );
+
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
   useComponentFocus(focusProgress, focusContext, key);
 
   useEffect(() => {
+    if (!removed) setDisplayed(true);
+
     updateComponentAnimationState(
       key,
       animationProgressHelper,
       animationSettings,
       removed,
-      onRemove
+      () => {
+        setDisplayed(false);
+        onRemove(key);
+      }
     );
   }, [removed, animationSettings]);
 
   // Render the vertex component
-  return renderer({
-    ...restProps,
-    ...componentSettings,
-    animationProgress,
-    focusKey: focusContext.focus.key,
-    focusProgress,
-    key: vertex.key,
-    value: vertex.value
-  });
+  return displayed ? (
+    <RenderedVertexComponent<V> props={rendererProps} renderer={renderer} />
+  ) : null;
 }
+
+type RenderedVertexComponentProps<V> = {
+  props: VertexRendererProps<V>;
+  renderer: VertexRenderFunction<V>;
+};
+
+const RenderedVertexComponent = memo(function <V>({
+  props,
+  renderer
+}: RenderedVertexComponentProps<V>) {
+  return renderer(props);
+}) as <V>(props: RenderedVertexComponentProps<V>) => JSX.Element;
 
 export default memo(VertexComponent) as <V, E>(
   props: VertexComponentProps<V, E>

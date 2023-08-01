@@ -6,7 +6,7 @@ import {
   DirectedGraphComponent
 } from 'react-native-smart-graph';
 
-const VERTICES_COUNT = 4;
+const VERTICES_COUNT = 25;
 const INTERVAL = 1000;
 
 const VERTICES = new Array(VERTICES_COUNT).fill(null).map((_, i) => ({
@@ -14,7 +14,6 @@ const VERTICES = new Array(VERTICES_COUNT).fill(null).map((_, i) => ({
 }));
 
 let direction = 1;
-let count = 0;
 
 export default function Graph() {
   const graph = useMemo(
@@ -28,18 +27,15 @@ export default function Graph() {
   useEffect(() => {
     setInterval(() => {
       if (direction === 1) {
-        if (count === VERTICES_COUNT) {
-          direction = -1;
-          graph.removeVertex(VERTICES[--count]!.key);
-        } else {
-          graph.insertVertex(VERTICES[count++]!);
-        }
-      } else if (count === 0) {
-        direction = 1;
-        graph.insertVertex(VERTICES[count++]!);
+        graph.insertBatch({
+          vertices: VERTICES
+        });
       } else {
-        graph.removeVertex(VERTICES[--count]!.key);
+        graph.removeBatch({
+          vertices: VERTICES.map(({ key }) => key)
+        });
       }
+      direction *= -1;
     }, INTERVAL);
   }, []);
 
