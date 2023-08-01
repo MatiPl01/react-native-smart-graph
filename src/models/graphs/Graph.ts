@@ -67,23 +67,28 @@ export default abstract class Graph<
     }
   }
 
-  clear(animationSettings?: Maybe<BatchModificationAnimationSettings>): void {
+  clear(
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange = true
+  ): void {
     // Clear the whole graph
     (this.vertices$ as Mutable<typeof this.vertices$>) = {};
     (this.edges$ as Mutable<typeof this.edges$>) = {};
     (this.edgesBetweenVertices$ as Mutable<typeof this.edgesBetweenVertices$>) =
       {};
     // Notify observers after all changes to the graph model are made
-    this.notifyGraphChange(
-      animationSettings &&
-        createAnimationsSettingsForBatchModification(
-          {
-            edges: Object.keys(this.edges$),
-            vertices: Object.keys(this.vertices$)
-          },
-          animationSettings
-        )
-    );
+    if (notifyChange) {
+      this.notifyGraphChange(
+        animationSettings &&
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: Object.keys(this.edges$),
+              vertices: Object.keys(this.vertices$)
+            },
+            animationSettings
+          )
+      );
+    }
   }
 
   get edges(): Array<GE> {
@@ -121,7 +126,8 @@ export default abstract class Graph<
 
   protected insertEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<AnimationsSettings>
+    animationsSettings?: Maybe<AnimationsSettings>,
+    notifyChange = true
   ): GE {
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
@@ -144,19 +150,20 @@ export default abstract class Graph<
     this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
     // Add edge to edges
     this.edges$[edge.key] = edge;
-    this.notifyGraphChange(animationsSettings);
+    if (notifyChange) this.notifyGraphChange(animationsSettings);
     return edge;
   }
 
   protected insertVertexObject(
     vertex: GV,
-    animationSettings?: Maybe<AnimationsSettings>
+    animationSettings?: Maybe<AnimationsSettings>,
+    notifyChange = true
   ): GV {
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
-    this.notifyGraphChange(animationSettings);
+    if (notifyChange) this.notifyGraphChange(animationSettings);
     return vertex;
   }
 
@@ -214,27 +221,31 @@ export default abstract class Graph<
       edges?: Array<string>;
       vertices?: Array<string>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange = true
   ): void {
     // Remove edges and vertices from graph
-    data.edges?.forEach(key => this.removeEdge(key, null));
-    data.vertices?.forEach(key => this.removeVertex(key, null));
+    data.edges?.forEach(key => this.removeEdge(key, null, false));
+    data.vertices?.forEach(key => this.removeVertex(key, null, false));
     // Notify observers after all changes to the graph model are made
-    this.notifyGraphChange(
-      animationSettings &&
-        createAnimationsSettingsForBatchModification(
-          {
-            edges: data.edges,
-            vertices: data.vertices
-          },
-          animationSettings
-        )
-    );
+    if (notifyChange) {
+      this.notifyGraphChange(
+        animationSettings &&
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: data.edges,
+              vertices: data.vertices
+            },
+            animationSettings
+          )
+      );
+    }
   }
 
   protected removeEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<AnimationsSettings>
+    animationsSettings?: Maybe<AnimationsSettings>,
+    notifyChange = true
   ): void {
     // Remove edge from edges between vertices
     const [vertex1, vertex2] = edge.vertices;
@@ -254,7 +265,7 @@ export default abstract class Graph<
     }
     // Remove the edge from edges
     delete this.edges$[edge.key];
-    this.notifyGraphChange(animationsSettings);
+    if (notifyChange) this.notifyGraphChange(animationsSettings);
   }
 
   removeObserver(observer: GraphObserver): void {
@@ -263,7 +274,8 @@ export default abstract class Graph<
 
   removeVertex(
     key: string,
-    animationsSettings?: Maybe<AnimationsSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange = true
   ): V | undefined {
     if (!this.vertices$[key]) {
       throw new Error(`Vertex with key ${key} does not exist.`);
@@ -275,11 +287,20 @@ export default abstract class Graph<
     }
 
     const vertex = this.vertices$[key] as GV;
-    vertex.edges.forEach(edge => {
-      this.removeEdge(edge.key);
-    });
+    const edgeKeys = vertex.edges.map(edge => edge.key);
+    for (const edgeKey of edgeKeys) {
+      this.removeEdge(edgeKey, null, false);
+    }
     delete this.vertices$[key];
-    this.notifyGraphChange(animationsSettings);
+    if (notifyChange) {
+      this.notifyGraphChange(
+        animationSettings &&
+          createAnimationsSettingsForBatchModification(
+            { edges: edgeKeys, vertices: [key] },
+            animationSettings
+          )
+      );
+    }
 
     return vertex.value;
   }
@@ -295,17 +316,20 @@ export default abstract class Graph<
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange?: boolean
   ): void;
 
   abstract insertEdge(
     data: ED,
-    animationSettings?: Maybe<AnimationSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange?: boolean
   ): GE;
 
   abstract insertVertex(
     data: VertexData<V>,
-    animationSettings?: Maybe<AnimationSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange?: boolean
   ): GV;
 
   abstract isDirected(): boolean;
@@ -316,7 +340,8 @@ export default abstract class Graph<
 
   abstract removeEdge(
     key: string,
-    animationSettings?: Maybe<AnimationSettings>
+    animationSettings?: Maybe<AnimationSettings>,
+    notifyChange?: boolean
   ): E | undefined;
 
   abstract replaceBatch(
@@ -324,6 +349,7 @@ export default abstract class Graph<
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
+    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    notifyChange?: boolean
   ): void;
 }

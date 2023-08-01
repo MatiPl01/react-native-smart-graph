@@ -160,6 +160,7 @@ export const updateGraphVerticesData = <V, E>(
       ...(oldVertex ?? {
         // Create shared values only for new vertices
         currentRadius: makeMutable(0),
+        displayed: makeMutable(true),
         position: {
           x: makeMutable(0),
           y: makeMutable(0)

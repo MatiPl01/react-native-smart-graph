@@ -1,4 +1,5 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { Group } from '@shopify/react-native-skia';
+import { memo, useEffect, useMemo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
@@ -18,6 +19,7 @@ type VertexComponentProps<V, E> = VertexComponentData<V, E> & {
 function VertexComponent<V, E>({
   animationSettings,
   componentSettings,
+  displayed,
   focusContext,
   onRemove,
   removed,
@@ -26,7 +28,6 @@ function VertexComponent<V, E>({
   ...restProps
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
-  const [displayed, setDisplayed] = useState(true);
 
   // ANIMATION
   // Vertex render animation progress
@@ -59,7 +60,7 @@ function VertexComponent<V, E>({
   useComponentFocus(focusProgress, focusContext, key);
 
   useEffect(() => {
-    if (!removed) setDisplayed(true);
+    if (!removed) displayed.value = true;
 
     updateComponentAnimationState(
       key,
@@ -67,16 +68,21 @@ function VertexComponent<V, E>({
       animationSettings,
       removed,
       () => {
-        setDisplayed(false);
+        displayed.value = false;
         onRemove(key);
       }
     );
   }, [removed, animationSettings]);
 
+  // Hide vertices that wait for removal
+  const transform = useDerivedValue(() => [{ scale: displayed.value ? 1 : 0 }]);
+
   // Render the vertex component
-  return displayed ? (
-    <RenderedVertexComponent<V> props={rendererProps} renderer={renderer} />
-  ) : null;
+  return (
+    <Group transform={transform}>
+      <RenderedVertexComponent<V> props={rendererProps} renderer={renderer} />
+    </Group>
+  );
 }
 
 type RenderedVertexComponentProps<V> = {

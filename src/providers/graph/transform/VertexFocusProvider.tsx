@@ -70,12 +70,13 @@ function VertexFocusProvider<V, E>({
 
   // FOCUSED VERTEX DATA
   const focusedVertexWithPosition = useMemo(() => {
-    const position =
-      data.focusedVertexKey && verticesData[data.focusedVertexKey]?.position;
-    return position && data.focusedVertexKey
+    const vertexData = data.focusedVertexKey
+      ? verticesData[data.focusedVertexKey]
+      : null;
+    return vertexData && vertexData.displayed.value && data.focusedVertexKey
       ? {
           key: data.focusedVertexKey,
-          position
+          position: vertexData.position
         }
       : null;
   }, [verticesData, data.focusedVertexKey]);

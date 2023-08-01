@@ -178,7 +178,9 @@ export const updateNewVerticesPositions = <V, E>(
   'worklet';
   // Filter out vertices that were removed from the graph
   const filteredVertices = Object.fromEntries(
-    Object.entries(placedVerticesPositions).filter(([key]) => verticesData[key])
+    Object.entries(placedVerticesPositions).filter(
+      ([key]) => verticesData[key]?.displayed.value
+    )
   );
   // Calculate new vertices placement positions
   const newVerticesPositions = findForcesPlacementPositions(

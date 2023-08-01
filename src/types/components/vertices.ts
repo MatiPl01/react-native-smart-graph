@@ -7,6 +7,7 @@ import { AnimationSettingsWithDefaults } from '@/types/settings';
 export type VertexComponentData<V, E> = {
   animationSettings: AnimationSettingsWithDefaults;
   currentRadius: SharedValue<number>;
+  displayed: SharedValue<boolean>;
   position: AnimatedVectorCoordinates;
   removed: boolean;
   scale: SharedValue<number>;

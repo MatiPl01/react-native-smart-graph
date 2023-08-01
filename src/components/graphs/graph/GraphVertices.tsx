@@ -17,8 +17,6 @@ function GraphVertices<V, E>({
   verticesData,
   ...restProps
 }: GraphVerticesProps<V, E>) {
-  // console.log('render');
-
   return Object.values(verticesData).map(data => (
     <VertexComponent {...restProps} {...data} key={data.vertex.key} />
   ));

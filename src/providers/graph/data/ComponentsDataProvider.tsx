@@ -34,7 +34,7 @@ import {
   updateGraphVerticesData
 } from '@/utils/components';
 import { withMemoContext } from '@/utils/contexts';
-import { clearVertexComponentData } from '@/utils/data';
+import { cancelVertexAnimations } from '@/utils/data';
 
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
@@ -126,7 +126,6 @@ export default function ComponentsDataProvider<V, E>({
   });
 
   useEffect(() => {
-    console.log('?');
     const { data, shouldRender } = updateGraphVerticesData(
       verticesData,
       vertices,
@@ -134,13 +133,14 @@ export default function ComponentsDataProvider<V, E>({
       animationsSettings.vertices,
       settings.animations.vertices
     );
+    console.log('?', vertices.length, Object.keys(data).length);
     if (shouldRender) {
       setVerticesData(data);
     }
 
     return () => {
       for (const vertexData of Object.values(data)) {
-        clearVertexComponentData(vertexData);
+        cancelVertexAnimations(vertexData);
       }
     };
   }, [vertices]);
@@ -187,6 +187,9 @@ export default function ComponentsDataProvider<V, E>({
   }, [renderedEdgesData, renderers.label]);
 
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
+    const vertexData = verticesData[key];
+    if (!vertexData) return;
+    cancelVertexAnimations(vertexData);
     removedVertices.add(key);
   }, []);
 

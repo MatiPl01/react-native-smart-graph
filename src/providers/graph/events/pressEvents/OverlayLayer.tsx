@@ -60,7 +60,7 @@ export default function OverlayLayer<V, E>({
         ]}>
         {(settings?.onVertexPress || settings?.onVertexLongPress) &&
           Object.entries(verticesData).map(
-            ([key, { currentRadius, position, scale }]) => {
+            ([key, { currentRadius, displayed, position, scale }]) => {
               const data = verticesData[key];
 
               if (!data) {
@@ -72,6 +72,7 @@ export default function OverlayLayer<V, E>({
                   boundingRect={boundingRect}
                   data={data}
                   debug={debug}
+                  displayed={displayed}
                   key={key}
                   onLongPress={settings?.onVertexLongPress}
                   onPress={settings?.onVertexPress}
