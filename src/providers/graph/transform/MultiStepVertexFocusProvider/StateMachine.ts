@@ -2,11 +2,10 @@ import { useMemo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
 import { CanvasDataContextType, FocusContextType } from '@/providers/canvas';
-import { FocusStepData } from '@/types/focus';
 import { MultiStepFocusSettings } from '@/types/settings';
 import { isBetween } from '@/utils/math';
 
-import { MachineState, StateHandler } from './types';
+import { MachineContext, MachineState, StateHandler } from './types';
 import {
   getResultingProgress,
   getTargetKey,
@@ -217,16 +216,6 @@ const STATE_HANDLERS: Record<MachineState, StateHandler> = {
   [MachineState.FOCUS_TRANSITION]: focusTransitionState
 };
 
-type MachineContext = {
-  update(
-    currentProgress: number,
-    previousProgress: number,
-    syncProgress: number,
-    afterStep: FocusStepData | null,
-    beforeStep: FocusStepData | null
-  ): void;
-};
-
 /*
 State machine diagram:
 (I know it's quire complex, but it's the best I could do to visualize it :D)
@@ -248,16 +237,16 @@ FOCUS_START -- A --> FOCUS_TRANSITION -- D --> FOCUS --- K ---> BLUR_START -- F 
     |                                           |                                     
     +--------------------- E -------------------+
 */
-export const useStateMachine = (
+export const useStateMachine = <V, E>(
   focusContext: FocusContextType,
   canvasDataContext: CanvasDataContextType,
   settings: MultiStepFocusSettings,
   vertexRadius: number
-): MachineContext => {
+): MachineContext<V, E> => {
   const state = useSharedValue<MachineState>(MachineState.BLUR);
   const targetKey = useSharedValue<null | string>(null);
 
-  return useMemo<MachineContext>(
+  return useMemo<MachineContext<V, E>>(
     () => ({
       state,
       update(

@@ -7,13 +7,13 @@ import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { StateProps } from './types';
 
-export const getTargetKey = ({
+export const getTargetKey = <V, E>({
   afterStep,
   beforeStep,
   currentProgress,
   previousProgress,
   targetKey: { value: prevTargetKey }
-}: StateProps): null | string => {
+}: StateProps<V, E>): null | string => {
   'worklet';
   if (currentProgress < previousProgress) {
     return beforeStep?.value.key ?? null;
@@ -37,9 +37,9 @@ export const getTargetKey = ({
   return prevTargetKey;
 };
 
-export const getResultingProgress = (
-  targetStep: FocusStepData | null,
-  { afterStep, beforeStep, currentProgress, syncProgress }: StateProps
+export const getResultingProgress = <V, E>(
+  targetStep: FocusStepData<V, E> | null,
+  { afterStep, beforeStep, currentProgress, syncProgress }: StateProps<V, E>
 ): number => {
   'worklet';
   const afterProgress = afterStep?.startsAt ?? 1;
@@ -54,18 +54,18 @@ export const getResultingProgress = (
   return stepProgress * syncProgress;
 };
 
-export const getTransitionBounds = ({
+export const getTransitionBounds = <V, E>({
   afterStep,
   beforeStep,
   syncProgress,
   targetKey: { value: targetKey }
-}: StateProps): {
-  source: FocusStepData | null;
-  target: FocusStepData | null;
+}: StateProps<V, E>): {
+  source: FocusStepData<V, E> | null;
+  target: FocusStepData<V, E> | null;
 } => {
   'worklet';
-  let targetStep: FocusStepData | null = null;
-  let sourceStep: FocusStepData | null = null;
+  let targetStep: FocusStepData<V, E> | null = null;
+  let sourceStep: FocusStepData<V, E> | null = null;
 
   if (targetKey === beforeStep?.value.key) {
     targetStep = beforeStep;
@@ -88,8 +88,8 @@ export const getTransitionBounds = ({
   };
 };
 
-export const updateTransitionPoints = (
-  props: StateProps
+export const updateTransitionPoints = <V, E>(
+  props: StateProps<V, E>
 ): {
   endUpdated?: boolean;
   startUpdated?: boolean;

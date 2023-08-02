@@ -13,9 +13,9 @@ export enum MachineState {
   FOCUS_TRANSITION = 'FOCUS_TRANSITION'
 }
 
-export type StateProps = {
-  afterStep: FocusStepData | null;
-  beforeStep: FocusStepData | null;
+export type StateProps<V, E> = {
+  afterStep: FocusStepData<V, E> | null;
+  beforeStep: FocusStepData<V, E> | null;
   canvasDataContext: CanvasDataContextType;
   currentProgress: number;
   focusContext: FocusContextType;
@@ -26,14 +26,14 @@ export type StateProps = {
   vertexRadius: number;
 };
 
-export type StateHandler = (props: StateProps) => MachineState;
+export type StateHandler = <V, E>(props: StateProps<V, E>) => MachineState;
 
-export type MachineContext = {
+export type MachineContext<V, E> = {
   update(
     currentProgress: number,
     previousProgress: number,
     syncProgress: number,
-    afterStep: FocusStepData | null,
-    beforeStep: FocusStepData | null
+    afterStep: FocusStepData<V, E> | null,
+    beforeStep: FocusStepData<V, E> | null
   ): void;
 };
