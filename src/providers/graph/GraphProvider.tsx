@@ -1,4 +1,4 @@
-import { memo, PropsWithChildren, useMemo } from 'react';
+import { memo, PropsWithChildren, useMemo, useState } from 'react';
 
 import {
   DirectedGraphComponentProps,
@@ -15,10 +15,7 @@ import { AnimatedCanvasTransform } from '@/types/canvas';
 import { Graph } from '@/types/graphs';
 import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { GraphSettingsWithDefaults } from '@/types/settings';
-import {
-  updateGraphRenderersWithDefaults,
-  updateGraphSettingsWithDefaults
-} from '@/utils/components';
+import { updateGraphRenderersWithDefaults } from '@/utils/components';
 import { deepMemoComparator } from '@/utils/equality';
 
 import { ComponentsDataProvider } from './data';
@@ -99,19 +96,19 @@ function GraphProvider<V, E>({
   settings,
   transformContext
 }: GraphProviderProps<V, E>) {
-  const memoSettings = useMemo(
-    () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
-    [graph, settings]
+  const [updatedSettings, q] = useState<GraphSettingsWithDefaults<V> | null>(
+    null
   );
 
   const memoRenderers = useMemo(
     () =>
+      updatedSettings &&
       updateGraphRenderersWithDefaults(
         graph.isDirected(),
-        memoSettings.components.edge.type,
+        updatedSettings.components.edge.type,
         renderers
       ),
-    [graph, memoSettings, renderers]
+    [graph, updatedSettings, renderers]
   );
 
   const transform = useMemo(
@@ -124,59 +121,62 @@ function GraphProvider<V, E>({
   );
 
   const providers = useMemo(
-    () => [
-      // DATA
-      // The main provider used to react on graph changes and update
-      // components data accordingly
-      <ComponentsDataProvider
-        graph={graph}
-        renderers={memoRenderers}
-        settings={memoSettings}
-      />,
-      // LAYOUT
-      // Providers used to compute the layout of the graph and animate
-      // vertices based on calculated positions
-      ...getLayoutProviders(
-        graph,
-        memoSettings,
-        transformContext.handleGraphRender
-      ),
-      // Provider used to compute the dimensions of the container
-      <ContainerDimensionsProvider
-        boundingRect={canvasDataContext.boundingRect}
-        vertexRadius={memoSettings.components.vertex.radius}
-      />,
-      // EVENTS
-      // Press events provider
-      ...getEventsProviders(
-        transform,
-        canvasDataContext.boundingRect,
-        memoSettings,
-        renderLayer
-      ),
-      // FOCUS
-      // Provider used to focus on a specific vertex
-      <VertexFocusProvider
-        availableScales={canvasDataContext.scales}
-        canvasDimensions={canvasDataContext.canvasDimensions}
-        focusContext={focusContext}
-        graph={graph}
-        initialScale={canvasDataContext.initialScale}
-        vertexRadius={memoSettings.components.vertex.radius}
-      />,
-      // Provider used to focus one of the vertices specified in an
-      // array based on the user-defined progress
-      ...(memoSettings.focus
+    () =>
+      updatedSettings && memoRenderers
         ? [
-            <MultiStepVertexFocusProvider
-              canvasDataContext={canvasDataContext}
+            // DATA
+            // The main provider used to react on graph changes and update
+            // components data accordingly
+            <ComponentsDataProvider
+              graph={graph}
+              renderers={memoRenderers}
+              settings={updatedSettings}
+            />,
+            // LAYOUT
+            // Providers used to compute the layout of the graph and animate
+            // vertices based on calculated positions
+            ...getLayoutProviders(
+              graph,
+              updatedSettings,
+              transformContext.handleGraphRender
+            ),
+            // Provider used to compute the dimensions of the container
+            <ContainerDimensionsProvider
+              boundingRect={canvasDataContext.boundingRect}
+              vertexRadius={updatedSettings.components.vertex.radius}
+            />,
+            // EVENTS
+            // Press events provider
+            ...getEventsProviders(
+              transform,
+              canvasDataContext.boundingRect,
+              updatedSettings,
+              renderLayer
+            ),
+            // FOCUS
+            // Provider used to focus on a specific vertex
+            <VertexFocusProvider
+              availableScales={canvasDataContext.scales}
+              canvasDimensions={canvasDataContext.canvasDimensions}
               focusContext={focusContext}
-              settings={memoSettings.focus}
-              vertexRadius={memoSettings.components.vertex.radius}
-            />
+              graph={graph}
+              initialScale={canvasDataContext.initialScale}
+              vertexRadius={updatedSettings.components.vertex.radius}
+            />,
+            // Provider used to focus one of the vertices specified in an
+            // array based on the user-defined progress
+            ...(updatedSettings.focus
+              ? [
+                  <MultiStepVertexFocusProvider
+                    canvasDataContext={canvasDataContext}
+                    focusContext={focusContext}
+                    settings={updatedSettings.focus}
+                    vertexRadius={updatedSettings.components.vertex.radius}
+                  />
+                ]
+              : [])
           ]
-        : [])
-    ],
+        : [],
     [memoRenderers]
   );
 

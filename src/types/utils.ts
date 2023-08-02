@@ -9,6 +9,14 @@ export type DeepRequired<T, P extends Array<string>> = T extends object
       }>
   : T;
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer I>
+    ? Array<DeepPartial<I>>
+    : T[P] extends ReadonlyArray<infer I>
+    ? ReadonlyArray<DeepPartial<I>>
+    : DeepPartial<T[P]>;
+};
+
 type Shift<T extends Array<any>> = ((...t: T) => any) extends (
   first: any,
   ...rest: infer Rest

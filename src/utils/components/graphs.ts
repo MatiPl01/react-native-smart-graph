@@ -37,7 +37,8 @@ import {
 
 export const updateGraphSettingsWithDefaults = <V>(
   isGraphDirected: boolean,
-  settings?: GraphSettings<V>
+  oldSettings: GraphSettingsWithDefaults<V>,
+  newSettings?: GraphSettings<V>
 ): GraphSettingsWithDefaults<V> => ({
   ...settings,
   animations: {

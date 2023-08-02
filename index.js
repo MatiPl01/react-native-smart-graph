@@ -3,6 +3,8 @@
  *
  * It is used to test the library.
  */
+import './wydr';
+
 import { AppRegistry } from 'react-native';
 import App from '@/App';
 
