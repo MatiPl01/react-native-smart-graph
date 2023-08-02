@@ -3,8 +3,7 @@ import { useMemo } from 'react';
 import { ContextProviderComposer } from '@/providers/utils';
 
 import { AutoSizingProvider } from './auto';
-import { CanvasDataProvider } from './data';
-import { CanvasDataProviderProps } from './data/CanvasDataProvider';
+import { CanvasDataProvider, CanvasDataProviderProps } from './data';
 import { GesturesProvider } from './gestures';
 import { SettingsChangeResponderProvider } from './settings';
 import { FocusProvider, TransformProvider } from './transform';

@@ -1,2 +1,5 @@
-export { default as CanvasDataProvider } from './CanvasDataProvider';
+export {
+  default as CanvasDataProvider,
+  type CanvasDataProviderProps
+} from './CanvasDataProvider';
 export { type CanvasDataContextType, useCanvasDataContext } from './context';
