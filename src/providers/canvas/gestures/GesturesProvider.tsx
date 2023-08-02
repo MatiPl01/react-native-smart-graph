@@ -74,6 +74,8 @@ export default function GesturesProvider({
   const prevPanPositions = useSharedValue<Record<string, Vector>>({});
   // Pinch
   const isPinchActive = useSharedValue(false);
+  const shouldHandlePinchEnd = useSharedValue(false);
+  const pinchEndOrigin = useSharedValue<Maybe<Vector>>(null);
   const pinchStartScale = useSharedValue(1);
   const pinchDecayScale = useSharedValue(1);
   const pinchEndVelocity = useSharedValue(0);
@@ -118,11 +120,11 @@ export default function GesturesProvider({
   const handlePinchEnd = () => {
     'worklet';
     pinchDecayScale.value = withDecay({
+      ...TRANSLATION_DECAY_CONFIG,
       clamp: [minScale.value, maxScale.value],
-      rubberBandEffect: true,
       velocity: pinchEndVelocity.value
     });
-    pinchEndVelocity.value = 0;
+    shouldHandlePinchEnd.value = false;
     handleGestureEnd();
   };
 
@@ -188,16 +190,17 @@ export default function GesturesProvider({
       isPanActive.value = false;
       prevPanPositions.value = {};
       if (gesturesDisabled.value) return;
-      handlePanEnd(velocityX, velocityY);
-      // Call this to make shure that the pinch gesture ends
-      // with transitiion
-      handlePinchEnd();
+      if (shouldHandlePinchEnd.value) {
+        handlePinchEnd();
+        if (!pinchEndOrigin.value) handlePanEnd(velocityX, velocityY);
+      } else handlePanEnd(velocityX, velocityY);
     });
 
   const pinchGestureHandler = Gesture.Pinch()
     .onStart(() => {
       if (gesturesDisabled.value) return;
       isPinchActive.value = true;
+      pinchEndOrigin.value = null;
       pinchStartScale.value = currentScale.value;
       handleGestureStart(null);
     })
@@ -210,12 +213,15 @@ export default function GesturesProvider({
         { withClamping: false }
       );
     })
-    .onEnd(({ velocity }) => {
+    .onEnd(({ focalX, focalY, velocity }) => {
       isPinchActive.value = false;
       if (gesturesDisabled.value) return;
       pinchDecayScale.value = currentScale.value;
       pinchEndVelocity.value = velocity;
+      pinchEndOrigin.value =
+        currentScale.value > maxScale.value ? { x: focalX, y: focalY } : null;
       if (!isPanActive.value) handlePinchEnd();
+      else shouldHandlePinchEnd.value = true;
     });
 
   const doubleTapGestureHandler = Gesture.Tap()
@@ -259,9 +265,16 @@ export default function GesturesProvider({
         isInitialRender.value = false;
         return;
       }
-      scaleContentTo(Math.max(decayScale, 0), undefined, undefined, {
-        withClamping: true
-      });
+      // Stop the decay animation if the user starts a new gesture
+      if (isPanActive.value || isPanActive.value) return;
+      scaleContentTo(
+        Math.max(decayScale, 0),
+        pinchEndOrigin.value ?? undefined,
+        undefined,
+        {
+          withClamping: true
+        }
+      );
     }
   );
 

@@ -151,6 +151,12 @@ export default function ComponentsDataProvider<V, E>({
     if (shouldRender) {
       setEdgesData(data);
     }
+
+    return () => {
+      for (const edgeData of Object.values(data)) {
+        cancelEdgeAnimations(edgeData);
+      }
+    };
   }, [orderedEdges, verticesData]);
 
   useEffect(() => {
