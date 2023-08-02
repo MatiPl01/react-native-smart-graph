@@ -40,9 +40,9 @@ function MultiStepVertexFocusProvider<V, E>({
   const { isVertexFocused } = useVertexFocusContext();
 
   // MULTI STEP FOCUS DATA
-  const [focusStepsData, setFocusStepsData] = useState<Array<FocusStepData>>(
-    []
-  );
+  const [focusStepsData, setFocusStepsData] = useState<
+    Array<FocusStepData<V, E>>
+  >([]);
 
   // OTHER VALUES
   const isEnabled = useDerivedValue(
@@ -72,7 +72,7 @@ function MultiStepVertexFocusProvider<V, E>({
   }, []);
 
   const updateInitialStep = useWorkletCallback(
-    (progress: null | number, data: Array<FocusStepData>) => {
+    (progress: null | number, data: Array<FocusStepData<V, E>>) => {
       if (progress === null) {
         initialStep.value = -1;
         return;

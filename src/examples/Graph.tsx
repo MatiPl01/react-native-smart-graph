@@ -1,70 +1,72 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import {
   GraphView,
-  VertexPressHandler,
-  DefaultEdgeLabelRenderer,
-  UndirectedGraphComponent,
-  UndirectedGraphData,
-  UndirectedGraph
+  DirectedGraphData,
+  DirectedGraph,
+  DirectedGraphComponent,
+  GraphViewControls,
+  ObjectFit
 } from 'react-native-smart-graph';
 
-const GRAPH: UndirectedGraphData = {
-  vertices: [
-    { key: 'V1' },
-    { key: 'V2' },
-    { key: 'V3' },
-    { key: 'V4' },
-    { key: 'V5' },
-    { key: 'V6' },
-    { key: 'V7' },
-    { key: 'V8' }
-  ],
+const GRAPH: DirectedGraphData = {
+  vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }],
   edges: [
-    { key: 'E1', vertices: ['V1', 'V2'] },
-    { key: 'E2', vertices: ['V2', 'V3'] },
-    { key: 'E3', vertices: ['V2', 'V4'] },
-    { key: 'E4', vertices: ['V2', 'V5'] },
-    { key: 'E5', vertices: ['V5', 'V6'] },
-    { key: 'E6', vertices: ['V1', 'V7'] },
-    { key: 'E7', vertices: ['V5', 'V8'] },
-    { key: 'E71', vertices: ['V5', 'V8'] },
-    { key: 'E72', vertices: ['V5', 'V8'] }
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V2', to: 'V3' },
+    { key: 'E3', from: 'V3', to: 'V1' },
+    { key: 'E4', from: 'V1', to: 'V3' },
+    { key: 'E5', from: 'V3', to: 'V2' },
+    { key: 'E6', from: 'V1', to: 'V3' }
   ]
 };
 
 export default function Graph() {
-  const [orbitsRoot, setOrbitsRoot] = useState('');
+  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
-  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
-
-  const handEVertexPress = useCallback<VertexPressHandler>(
-    ({ vertex: { key } }) => {
-      setOrbitsRoot(key);
-    },
-    []
-  );
+  const graph = useMemo(() => new DirectedGraph(GRAPH), []);
 
   return (
-    <GraphView objectFit='contain'>
-      <UndirectedGraphComponent
-        renderers={{
-          label: DefaultEdgeLabelRenderer
-        }}
-        settings={{
-          // --- Placement settings ---
-          placement: {
-            strategy: 'orbits',
-            minVertexSpacing: 50,
-            layerSizing: 'auto', // <- doesn't have to be explicitly specified (it's a default option)
-            roots: [orbitsRoot]
-          },
-          // --- End of placement settings ---
-          events: {
-            onVertexPress: handEVertexPress
-          }
-        }}
-        graph={graph}
-      />
-    </GraphView>
+    <>
+      <GraphView
+        initialScale={0.5}
+        objectFit={objectFit}
+        padding={25}
+        scales={[0.5, 1, 4]}>
+        <DirectedGraphComponent graph={graph} />
+        {/* --- GraphViewControls --- */}
+        <GraphViewControls
+          onObjectFitChange={setObjectFit}
+          style={styles.controls}
+        />
+        {/* --- End of GraphViewControls --- */}
+      </GraphView>
+      {/* Helper overlay to change dimensions */}
+      <View style={styles.overlay}>
+        <Text style={styles.objectFitText}>objectFit: '{objectFit}'</Text>
+      </View>
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  // --- GraphViewControls styles ---
+  controls: {
+    position: 'absolute',
+    right: 20,
+    top: 40
+  },
+  // --- End of GraphViewControls styles ---
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    pointerEvents: 'box-none'
+  },
+  objectFitText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 50
+  }
+});

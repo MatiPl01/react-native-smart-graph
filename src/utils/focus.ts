@@ -124,8 +124,8 @@ type FocusConfig = {
   vertexRadius: number;
 };
 
-export const getMultiStepVertexTransformation = (
-  stepData: FocusStepData,
+export const getMultiStepVertexTransformation = <V, E>(
+  stepData: FocusStepData<V, E>,
   config: FocusConfig
 ): VertexTransformation => {
   'worklet';
@@ -158,13 +158,13 @@ export const getMultiStepVertexTransformation = (
   });
 };
 
-export const getFocusSteps = (
+export const getFocusSteps = <V, E>(
   progress: number,
   previousStep: number,
-  focusStepsData: Array<FocusStepData>
+  focusStepsData: Array<FocusStepData<V, E>>
 ): {
-  afterStep: FocusStepData | null;
-  beforeStep: FocusStepData | null;
+  afterStep: FocusStepData<V, E> | null;
+  beforeStep: FocusStepData<V, E> | null;
   currentStep: number;
 } | null => {
   'worklet';

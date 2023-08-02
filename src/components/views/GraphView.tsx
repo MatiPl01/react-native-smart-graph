@@ -1,7 +1,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { INITIAL_SCALE } from '@/constants/views';
+import { DEFAULT_SETTINGS } from '@/constants/views';
 import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
@@ -38,7 +38,7 @@ const validateProps = ({ initialScale, scales }: GraphViewProps) => {
     if (scales.length === 0) {
       throw new Error('At least one scale must be provided');
     }
-    if (scales.indexOf(initialScale ?? INITIAL_SCALE) < 0) {
+    if (scales.indexOf(initialScale ?? DEFAULT_SETTINGS.initialScale) < 0) {
       throw new Error('Initial scale must be included in scales');
     }
     if (scales.some(scale => scale <= 0)) {
@@ -70,7 +70,7 @@ const GraphViewComposer = memo(function () {
         {/* Renders overlay layers set using the OverlayContext */}
         {overlayOutlet}
       </OverlayProvider>
-      {/* Render other component than canvas (e.g. graph controls) */}
+      {/* Render other components than canvas (e.g. graph controls) */}
       <View style={styles.overlay}>{overlay}</View>
     </>
   );
