@@ -7,10 +7,7 @@ import {
 } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
-import {
-  EdgeComponentRenderData,
-  VertexComponentData
-} from '@/types/components';
+import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
 import {
@@ -21,10 +18,10 @@ import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
+  edgesData: Record<string, EdgeComponentData<E, V>>;
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
   onRender: (boundingRect: BoundingRect) => void;
-  renderedEdgesData: Record<string, EdgeComponentRenderData>;
   settings: GraphSettingsWithDefaults<V>;
   targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V, E>>;
@@ -32,10 +29,10 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
 
 function GraphPlacementLayoutProvider<V, E>({
   children,
+  edgesData,
   graph,
   layoutAnimationSettings,
   onRender,
-  renderedEdgesData,
   settings,
   targetBoundingRect,
   verticesData
@@ -51,7 +48,7 @@ function GraphPlacementLayoutProvider<V, E>({
     }),
     [
       verticesData,
-      renderedEdgesData,
+      edgesData,
       settings.components.vertex.radius,
       settings.placement
     ]
@@ -94,13 +91,13 @@ function GraphPlacementLayoutProvider<V, E>({
 export default withGraphData(
   GraphPlacementLayoutProvider,
   ({
+    edgesData,
     layoutAnimationSettings,
-    renderedEdgesData,
     targetBoundingRect,
     verticesData
   }) => ({
+    edgesData,
     layoutAnimationSettings,
-    renderedEdgesData,
     targetBoundingRect,
     verticesData
   })

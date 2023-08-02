@@ -10,22 +10,22 @@ import { withGraphData } from '@/providers/graph';
 import {
   EdgeComponentData,
   EdgeComponentProps,
-  EdgeRemoveHandler,
-  EdgeRenderHandler
+  EdgeRemoveHandler
 } from '@/types/components';
 
-type GraphEdgesProps<E, V> = {
+type GraphEdgesProps<E, V> = Pick<
+  EdgeComponentProps<E, V>,
+  'arrowRenderer' | 'edgeRenderer' | 'labelRenderer'
+> & {
   edgesData: Record<string, EdgeComponentData<E, V>>;
   focusProgress: SharedValue<number>;
-  handleEdgeRemove: EdgeRemoveHandler;
-  handleEdgeRender: EdgeRenderHandler;
+  onRemove: EdgeRemoveHandler;
 };
 
 function GraphEdges<E, V>({
   edgesData,
   focusProgress,
-  handleEdgeRemove,
-  handleEdgeRender
+  ...restProps
 }: GraphEdgesProps<E, V>) {
   const opacity = useDerivedValue(() =>
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
@@ -36,10 +36,9 @@ function GraphEdges<E, V>({
       {Object.values(edgesData).map(data => (
         <EdgeComponent
           {...({
+            ...restProps,
             ...data,
-            key: data.edge.key,
-            onRemove: handleEdgeRemove,
-            onRender: handleEdgeRender
+            key: data.edge.key
           } as unknown as EdgeComponentProps<E, V>)}
         />
       ))}
@@ -49,9 +48,16 @@ function GraphEdges<E, V>({
 
 export default withGraphData(
   GraphEdges,
-  ({ edgesData, handleEdgeRemove, handleEdgeRender }) => ({
-    edgesData,
-    handleEdgeRemove,
-    handleEdgeRender
-  })
+  ({ edgesData, handleEdgeRemove, renderers, settings }) => {
+    const { vertex: _, ...componentSettings } = settings.components;
+
+    return {
+      arrowRenderer: renderers.arrow,
+      componentSettings,
+      edgeRenderer: renderers.edge,
+      edgesData,
+      labelRenderer: renderers.label,
+      onRemove: handleEdgeRemove
+    };
+  }
 );

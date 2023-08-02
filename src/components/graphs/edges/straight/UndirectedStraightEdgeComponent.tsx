@@ -1,9 +1,5 @@
-import { memo, useEffect } from 'react';
-import {
-  useAnimatedReaction,
-  useDerivedValue,
-  useSharedValue
-} from 'react-native-reanimated';
+import { memo } from 'react';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
@@ -34,7 +30,8 @@ function UndirectedStraightEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  onRender,
+  labelHeight,
+  labelPosition,
   renderers,
   v1Position,
   v1Radius,
@@ -50,21 +47,9 @@ function UndirectedStraightEdgeComponent<E, V>({
     x: v2Position.x.value,
     y: v2Position.y.value
   });
-  // Edge label
-  const centerX = useDerivedValue(() => (p1.value.x + p2.value.x) / 2);
-  const centerY = useDerivedValue(() => (p1.value.y + p2.value.y) / 2);
-  const labelHeight = useSharedValue(0);
 
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
-
-  useEffect(() => {
-    onRender(edge.key, {
-      animationProgress,
-      labelHeight,
-      labelPosition: { x: centerX, y: centerY }
-    });
-  }, [edge.key]);
 
   useAnimatedReaction(
     () => {
@@ -118,6 +103,9 @@ function UndirectedStraightEdgeComponent<E, V>({
           componentSettings.label.scale * avgRadius
         );
       }
+      // Update label position
+      labelPosition.x.value = (p1.value.x + p2.value.x) / 2;
+      labelPosition.y.value = (p1.value.y + p2.value.y) / 2;
     }
   );
 

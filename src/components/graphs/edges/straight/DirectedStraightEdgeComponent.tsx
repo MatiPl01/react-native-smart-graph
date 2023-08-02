@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -35,7 +35,8 @@ function DirectedStraightEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  onRender,
+  labelHeight,
+  labelPosition,
   renderers,
   v1Position,
   v1Radius,
@@ -56,18 +57,6 @@ function DirectedStraightEdgeComponent<E, V>({
   const arrowTipPosition = useSharedValue(p2.value);
   const arrowWidth = useSharedValue(0);
   const arrowHeight = useDerivedValue(() => 1.5 * arrowWidth.value);
-  // Edge label
-  const centerX = useDerivedValue(() => (p1.value.x + p2.value.x) / 2);
-  const centerY = useDerivedValue(() => (p1.value.y + p2.value.y) / 2);
-  const labelHeight = useSharedValue(0);
-
-  useEffect(() => {
-    onRender(edge.key, {
-      animationProgress,
-      labelHeight,
-      labelPosition: { x: centerX, y: centerY }
-    });
-  }, [edge.key]);
 
   useAnimatedReaction(
     () => ({
@@ -117,6 +106,9 @@ function DirectedStraightEdgeComponent<E, V>({
         maxSize,
         componentSettings.arrow.scale * avgRadius
       );
+      // Update label position
+      labelPosition.x.value = (p1.value.x + p2.value.x) / 2;
+      labelPosition.y.value = (p1.value.y + p2.value.y) / 2;
     }
   );
 

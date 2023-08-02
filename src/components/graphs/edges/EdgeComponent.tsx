@@ -1,6 +1,6 @@
 import { memo, useEffect } from 'react';
 import {
-  useDerivedValue,
+  useAnimatedReaction,
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
@@ -20,6 +20,7 @@ import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeCompon
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
 function EdgeComponent<E, V>({
+  animationProgress,
   animationSettings,
   arrowRenderer,
   edge,
@@ -31,35 +32,35 @@ function EdgeComponent<E, V>({
   ...restProps
 }: EdgeComponentProps<E, V>) {
   // ANIMATION
-  // Use a helper value to ensure that the animation progress is never negative
-  const animationProgressHelper = useSharedValue(0);
-  const animationProgress = useDerivedValue(() =>
-    Math.max(0, animationProgressHelper.value)
-  );
 
   // EDGE ORDERING
   // Target edge order
-  const animatedOrder = useSharedValue(order);
-  const animatedEdgesCount = useSharedValue(edgesCount);
+  const animatedOrder = useSharedValue(order.value);
+  const animatedEdgesCount = useSharedValue(edgesCount.value);
 
   // Edge mount/unmount animation
   useEffect(() => {
     updateComponentAnimationState(
       edge.key,
-      animationProgressHelper,
+      animationProgress,
       animationSettings,
       removed,
       onRemove
     );
   }, [removed, animationSettings]);
 
-  // Edge ordering animation
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
-    animatedOrder.value = withTiming(order, settingsWithoutCallback);
-    animatedEdgesCount.value = withTiming(edgesCount, settingsWithoutCallback);
-  }, [order, edgesCount]);
+  // Use separate order and count values to make their changes animated
+  useAnimatedReaction(
+    () => ({
+      count: edgesCount.value,
+      ord: order.value
+    }),
+    ({ count, ord }) => {
+      const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
+      animatedOrder.value = withTiming(ord, settingsWithoutCallback);
+      animatedEdgesCount.value = withTiming(count, settingsWithoutCallback);
+    }
+  );
 
   const sharedProps = {
     ...restProps,

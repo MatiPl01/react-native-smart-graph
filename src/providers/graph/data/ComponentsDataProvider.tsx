@@ -13,9 +13,7 @@ import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import { useGraphObserver } from '@/hooks';
 import {
   EdgeComponentData,
-  EdgeComponentRenderData,
   EdgeRemoveHandler,
-  EdgeRenderHandler,
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/components';
@@ -34,17 +32,15 @@ import {
   updateGraphVerticesData
 } from '@/utils/components';
 import { withMemoContext } from '@/utils/contexts';
-import { cancelVertexAnimations } from '@/utils/data';
+import { cancelEdgeAnimations, cancelVertexAnimations } from '@/utils/data';
 
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
   edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
   edgesData: Record<string, EdgeComponentData<E, V>>;
   handleEdgeRemove: EdgeRemoveHandler;
-  handleEdgeRender: EdgeRenderHandler;
   handleVertexRemove: VertexRemoveHandler;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
-  renderedEdgesData: Record<string, EdgeComponentRenderData>;
   renderers: GraphRenderersWithDefaults<V, E>;
   settings: GraphSettingsWithDefaults<V>;
   targetBoundingRect: SharedValue<BoundingRect>;
@@ -70,29 +66,28 @@ export default function ComponentsDataProvider<V, E>({
     useGraphObserver(graph);
 
   // GRAPH COMPONENTS DATA
+  // VERTICES
   // Store data for graph vertex components
   const [verticesData, setVerticesData] = useState<
     Record<string, VertexComponentData<V, E>>
   >({});
-  // Store keys of removed vertices fow thich the removal animation
-  // has been completed and are waiting to be unmounted
+  // Store keys of removed vertices for thich the removal animation
+  // has been completed and vertices are waiting to be unmounted
   const removedVertices = useMemo(() => new Set<string>(), []);
 
+  // EDGES
   // Store data for graph edge components
   const [edgesData, setEdgesData] = useState<
     Record<string, EdgeComponentData<E, V>>
   >({});
+  // Store keys of removed edges for thich the removal animation
+  // has been completed and edges are waiting to be unmounted
+  const removedEdges = useMemo(() => new Set<string>(), []);
+
+  // EDGE LABELS
   // Store data for edge labels
   const [edgeLabelsData, setEdgeLabelsData] = useState<
     Record<string, EdgeLabelComponentData<E>>
-  >({});
-
-  // GRAPH COMPONENTS RENDER DATA (received from graph components
-  // after they have been rendered)
-  // (This data is managed by rendered components)
-  // Store render data for graph edge components
-  const [renderedEdgesData, setRenderedEdgesData] = useState<
-    Record<string, EdgeComponentRenderData>
   >({});
 
   // ANIMATION SETTINGS
@@ -144,27 +139,19 @@ export default function ComponentsDataProvider<V, E>({
     };
   }, [vertices]);
 
-  // TODO
   useEffect(() => {
-    const { data, wasUpdated } = updateGraphEdgesData(
+    const { data, shouldRender } = updateGraphEdgesData(
       edgesData,
       orderedEdges,
       verticesData,
-      animationsSettings,
-      settings,
-      renderers
+      removedEdges,
+      animationsSettings.edges,
+      settings.animations.edges
     );
-    if (wasUpdated) {
+    if (shouldRender) {
       setEdgesData(data);
     }
-  }, [
-    orderedEdges,
-    verticesData,
-    settings.components.edge,
-    settings.animations.edges,
-    renderers.edge,
-    renderers.arrow
-  ]);
+  }, [orderedEdges, verticesData]);
 
   useEffect(() => {
     if (!renderers.label) {
@@ -174,16 +161,14 @@ export default function ComponentsDataProvider<V, E>({
       }
       return;
     }
-    const { data, wasUpdated } = updateGraphEdgeLabelsData(
+    const { data, shouldRender } = updateGraphEdgeLabelsData(
       edgeLabelsData,
-      edgesData,
-      renderedEdgesData,
-      renderers.label
+      edgesData
     );
-    if (wasUpdated) {
+    if (shouldRender) {
       setEdgeLabelsData(data);
     }
-  }, [renderedEdgesData, renderers.label]);
+  }, [edgesData, renderers.label]);
 
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
     const vertexData = verticesData[key];
@@ -192,22 +177,11 @@ export default function ComponentsDataProvider<V, E>({
     removedVertices.add(key);
   }, []);
 
-  const handleEdgeRender = useCallback<EdgeRenderHandler>(
-    (key, renderValues) => {
-      setRenderedEdgesData(prev => ({ ...prev, [key]: renderValues }));
-    },
-    []
-  );
-
   const handleEdgeRemove = useCallback<EdgeRemoveHandler>(key => {
-    setEdgesData(prev => {
-      const { [key]: _, ...rest } = prev;
-      return rest;
-    });
-    setRenderedEdgesData(prev => {
-      const { [key]: _, ...rest } = prev;
-      return rest;
-    });
+    const edgeData = edgesData[key];
+    if (!edgeData) return;
+    cancelEdgeAnimations(edgeData);
+    removedEdges.add(key);
   }, []);
 
   const contextValue = useMemo<ComponentsDataContextType<V, E>>(
@@ -216,10 +190,8 @@ export default function ComponentsDataProvider<V, E>({
       edgeLabelsData,
       edgesData,
       handleEdgeRemove,
-      handleEdgeRender,
       handleVertexRemove,
       layoutAnimationSettings,
-      renderedEdgesData,
       renderers,
       settings,
       targetBoundingRect,
@@ -229,7 +201,6 @@ export default function ComponentsDataProvider<V, E>({
       connections,
       verticesData,
       edgesData,
-      renderedEdgesData,
       layoutAnimationSettings,
       edgeLabelsData,
       settings,

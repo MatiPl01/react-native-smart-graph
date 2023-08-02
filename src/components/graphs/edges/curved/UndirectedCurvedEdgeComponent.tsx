@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -19,7 +19,8 @@ function UndirectedCurvedEdgeComponent<E, V>({
   animationProgress,
   componentSettings,
   edge,
-  onRender,
+  labelHeight,
+  labelPosition,
   renderers,
   v1Position,
   v1Radius,
@@ -38,10 +39,14 @@ function UndirectedCurvedEdgeComponent<E, V>({
   );
 
   // Edge label
-  const labelHeight = useDerivedValue(
-    () =>
-      ((v1Radius.value + v2Radius.value) / 2) *
-      (componentSettings.label?.scale ?? LABEL_COMPONENT_SETTINGS.scale)
+  useAnimatedReaction(
+    () => ({ r1: v1Radius.value, r2: v2Radius.value }),
+    ({ r1, r2 }) => {
+      labelHeight.value =
+        ((r1 + r2) / 2) *
+        (componentSettings.label?.scale ?? LABEL_COMPONENT_SETTINGS.scale);
+    },
+    [componentSettings.label?.scale]
   );
 
   useAnimatedReaction(
@@ -71,18 +76,10 @@ function UndirectedCurvedEdgeComponent<E, V>({
         orthogonalUnitVector,
         offset
       );
-      parabolaX.value = x;
-      parabolaY.value = y;
+      labelPosition.x.value = parabolaX.value = x;
+      labelPosition.y.value = parabolaY.value = y;
     }
   );
-
-  useEffect(() => {
-    onRender(edge.key, {
-      animationProgress,
-      labelHeight,
-      labelPosition: { x: parabolaX, y: parabolaY }
-    });
-  }, [edge.key]);
 
   // Edge curve path
   const path = useDerivedValue(() => {
