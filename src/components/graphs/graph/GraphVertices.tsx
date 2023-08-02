@@ -1,6 +1,6 @@
 import VertexComponent from '@/components/graphs/vertices/VertexComponent';
 import { FocusContextType } from '@/providers/canvas';
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData } from '@/providers/graph';
 import { VertexComponentData, VertexRemoveHandler } from '@/types/components';
 import { VertexRenderFunction } from '@/types/renderer';
 import { VertexSettingsWithDefaults } from '@/types/settings';
@@ -22,7 +22,7 @@ function GraphVertices<V, E>({
   ));
 }
 
-export default withGraphData(
+export default withComponentsData(
   GraphVertices,
   ({ handleVertexRemove, renderers, settings, verticesData }) => ({
     componentSettings: settings.components.vertex,

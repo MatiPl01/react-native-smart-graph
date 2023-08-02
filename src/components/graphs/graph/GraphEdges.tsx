@@ -6,7 +6,7 @@ import {
 } from 'react-native-reanimated';
 
 import EdgeComponent from '@/components/graphs/edges/EdgeComponent';
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData } from '@/providers/graph';
 import {
   EdgeComponentData,
   EdgeComponentProps,
@@ -46,7 +46,7 @@ function GraphEdges<E, V>({
   );
 }
 
-export default withGraphData(
+export default withComponentsData(
   GraphEdges,
   ({ edgesData, handleEdgeRemove, renderers, settings }) => {
     const { vertex: _, ...componentSettings } = settings.components;

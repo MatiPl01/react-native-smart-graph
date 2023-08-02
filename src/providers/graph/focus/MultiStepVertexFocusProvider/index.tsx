@@ -9,8 +9,8 @@ import {
 
 import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withGraphData } from '@/providers/graph/data/components';
-import { useVertexFocusContext } from '@/providers/graph/transform/VertexFocusProvider';
+import { withComponentsData } from '@/providers/graph/data/components';
+import { useVertexFocusContext } from '@/providers/graph/focus/VertexFocusProvider';
 import { VertexComponentData } from '@/types/components';
 import { FocusStepData } from '@/types/focus';
 import { MultiStepFocusSettings } from '@/types/settings';
@@ -183,7 +183,7 @@ function MultiStepVertexFocusProvider<V, E>({
   return <>{children}</>;
 }
 
-export default withGraphData(
+export default withComponentsData(
   MultiStepVertexFocusProvider,
   ({ verticesData }) => ({ verticesData })
 );

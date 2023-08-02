@@ -2,7 +2,7 @@ import { Group } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
 import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData } from '@/providers/graph';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { EdgeLabelRendererFunction } from '@/types/renderer';
 
@@ -33,7 +33,7 @@ function GraphEdgeLabels<E>({
   );
 }
 
-export default withGraphData(
+export default withComponentsData(
   GraphEdgeLabels,
   ({ edgeLabelsData, renderers }) => ({
     edgeLabelsData,

@@ -15,7 +15,7 @@ import {
 
 import { useFocusObserver } from '@/hooks';
 import { FocusStatus } from '@/providers/canvas';
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
@@ -25,6 +25,7 @@ import {
   getFocusedVertexTransformation,
   updateFocusTransformation
 } from '@/utils/focus';
+import { withGraphData } from '../data/context';
 
 type VertexFocusContextType = {
   isVertexFocused: SharedValue<boolean>;
@@ -46,7 +47,7 @@ export const useVertexFocusContext = () => {
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
-  vertexRadius: number;
+  vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
@@ -57,6 +58,7 @@ function VertexFocusProvider<V, E>({
   verticesData
 }: VertexFocusProviderProps<V, E>) {
   // CONTEXTS
+  // Canvas contexts
   const {
     dataContext: { canvasDimensions, initialScale, scales: availableScales },
     focusContext
@@ -83,8 +85,8 @@ function VertexFocusProvider<V, E>({
     () =>
       getFocusedVertexData(
         focusedVertexWithPosition,
-        vertexRadius,
-        availableScales.value,
+        vertexRadius.value,
+        availableScales.value, // TODO - change everything to react to shared value changes
         initialScale.value,
         data.settings
       ),
@@ -227,6 +229,12 @@ function VertexFocusProvider<V, E>({
   );
 }
 
-export default withGraphData(VertexFocusProvider, ({ verticesData }) => ({
-  verticesData
-}));
+export default withGraphData(
+  withComponentsData(VertexFocusProvider, ({ verticesData }) => ({
+    verticesData
+  })),
+  ({ graph, settings }) => ({
+    graph,
+    vertexRadius: settings.components.vertex.radius
+  })
+);

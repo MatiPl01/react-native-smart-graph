@@ -64,8 +64,8 @@ function GraphComponentComposer<
   renderLayer,
   ...restProps
 }: P & AccessibleOverlayContextType) {
-  const props = restProps as unknown as P;
-  validateProps<V, E, P>(props);
+  const graphProps = restProps as unknown as P;
+  validateProps<V, E, P>(graphProps);
   // CONTEXTS
   const dataContext = useCanvasDataContext();
   const transformContext = useTransformContext();
@@ -99,7 +99,9 @@ function GraphComponentComposer<
       onLayout={transformContext.handleCanvasRender}
       style={styles.canvas}>
       <Group transform={canvasTransform}>
-        <GraphProvider<V, E> {...props} canvasContexts={canvasContexts}>
+        <GraphProvider<V, E>
+          graphProps={graphProps}
+          canvasContexts={canvasContexts}>
           <GraphComponent />
         </GraphProvider>
       </Group>

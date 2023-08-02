@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import {
@@ -18,7 +18,7 @@ export type CanvasContexts = {
   transformContext: TransformContextType;
 };
 
-export const CanvasContextsContext = createContext(null as unknown as object);
+const CanvasContextsContext = createContext(null as unknown as object);
 
 export const useCanvasContexts = () => {
   const contextValue = useContext(CanvasContextsContext);
@@ -31,3 +31,18 @@ export const useCanvasContexts = () => {
 
   return contextValue as CanvasContexts;
 };
+
+type CanvasContextsProviderProps = PropsWithChildren<{
+  canvasContexts: CanvasContexts;
+}>;
+
+export default function CanvasContextsProvider({
+  canvasContexts,
+  children
+}: CanvasContextsProviderProps) {
+  return (
+    <CanvasContextsContext.Provider value={canvasContexts}>
+      {children}
+    </CanvasContextsContext.Provider>
+  );
+}

@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react';
 import { SharedValue, useFrameCallback } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData } from '@/providers/graph';
 import { GraphConnections } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
 import { ForcesSettingsWithDefaults } from '@/types/settings';
@@ -62,7 +62,7 @@ function ForcesLayoutProvider({
   return <>{children}</>;
 }
 
-export default withGraphData(
+export default withComponentsData(
   ForcesLayoutProvider,
   ({ connections, targetBoundingRect }) => ({
     connections,

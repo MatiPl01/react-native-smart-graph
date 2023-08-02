@@ -12,6 +12,7 @@ import GraphVertices from './GraphVertices';
 
 function GraphComponent() {
   // CONTEXTS
+  // Canvas contexts
   const {
     dataContext: { boundingRect },
     focusContext

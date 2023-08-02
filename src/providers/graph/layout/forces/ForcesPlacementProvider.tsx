@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { runOnUI } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
@@ -55,6 +55,12 @@ function ForcesPlacementProvider<V, E>({
   settings,
   verticesData
 }: ForcesPlacementProviderProps<V, E>) {
+  // CONTEXTS
+  // Canvas contexts
+  const {
+    transformContext: { handleGraphRender: onRender }
+  } = useCanvasContexts();
+
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
   // correctly positioned yet (By default vertices are positioned at
@@ -73,10 +79,6 @@ function ForcesPlacementProvider<V, E>({
   const isFirstRenderRef = useRef(true);
   // Ref to track if the component is rendered for the second time
   const isSecondRenderRef = useRef(false);
-
-  const {
-    transformContext: { handleGraphRender: onRender }
-  } = useCanvasContexts();
 
   useEffect(() => {
     // Skip the first render (when verticesData is empty)
@@ -165,7 +167,7 @@ function ForcesPlacementProvider<V, E>({
   );
 }
 
-export default withGraphData(
+export default withComponentsData(
   ForcesPlacementProvider,
   ({ layoutAnimationSettings, verticesData }) => ({
     layoutAnimationSettings,

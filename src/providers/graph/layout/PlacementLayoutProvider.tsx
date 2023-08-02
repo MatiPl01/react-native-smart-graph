@@ -6,7 +6,7 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
@@ -36,6 +36,12 @@ function GraphPlacementLayoutProvider<V, E>({
   targetBoundingRect,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
+  // CONTEXTS
+  // Canvas contexts
+  const {
+    transformContext: { handleGraphRender: onRender }
+  } = useCanvasContexts();
+
   const isFirstRender = useSharedValue(true);
 
   const layoutAnimationData = useMemo(
@@ -52,10 +58,6 @@ function GraphPlacementLayoutProvider<V, E>({
       settings.placement
     ]
   );
-
-  const {
-    transformContext: { handleGraphRender: onRender }
-  } = useCanvasContexts();
 
   useAnimatedReaction(
     () => null,
@@ -91,7 +93,7 @@ function GraphPlacementLayoutProvider<V, E>({
   return <>{children}</>;
 }
 
-export default withGraphData(
+export default withComponentsData(
   GraphPlacementLayoutProvider,
   ({
     edgesData,

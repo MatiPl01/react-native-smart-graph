@@ -1,4 +1,4 @@
 export {
   default as ComponentsDataProvider,
-  withGraphData
+  withComponentsData
 } from './ComponentsDataProvider';

@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { SharedValue } from 'react-native-reanimated';
+
 // https://stackoverflow.com/questions/57835286/deep-recursive-requiredt-on-specific-properties
 export type DeepRequired<T, P extends Array<string>> = T extends object
   ? Omit<T, Extract<keyof T, P[0]>> &
@@ -30,3 +33,7 @@ export type DeepRequiredAll<T> = {
 } & Required<T>;
 
 export type Maybe<T> = T | null | undefined;
+
+export type Sharedify<T> = {
+  [K in keyof T]: T[K] extends object ? Sharedify<T[K]> : SharedValue<T[K]>;
+};

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Context,
   createContext,
@@ -8,7 +7,6 @@ import {
   useMemo,
   useState
 } from 'react';
-import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useGraphObserver } from '@/hooks';
 import {
@@ -20,11 +18,9 @@ import {
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { DataProviderReturnType } from '@/types/data';
 import { Graph, GraphConnections } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
-import { GraphRenderersWithDefaults } from '@/types/renderer';
 import {
   AnimationSettingsWithDefaults,
-  GraphSettingsWithDefaults
+  GraphAnimationsSettingsWithDefaults
 } from '@/types/settings';
 import {
   cancelEdgeAnimations,
@@ -36,6 +32,7 @@ import {
   updateGraphVerticesData
 } from '@/utils/components';
 import { withMemoContext } from '@/utils/contexts';
+import { withGraphData } from '../context';
 
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
@@ -44,29 +41,39 @@ export type ComponentsDataContextType<V, E> = {
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
-  renderers: GraphRenderersWithDefaults<V, E>;
-  settings: GraphSettingsWithDefaults<V>;
-  targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
 const ComponentsDataContext = createContext(null as unknown as object);
 
+export const withComponentsData = <
+  C extends ComponentsDataContextType<unknown, unknown>, // context type
+  P extends object, // component props
+  R extends Partial<P> // values returned by selector
+>(
+  Component: React.ComponentType<P>,
+  selector: (contextValue: C) => R
+) =>
+  withMemoContext(
+    Component,
+    ComponentsDataContext as unknown as Context<C>,
+    selector
+  ) as DataProviderReturnType<P, R>;
+
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
-  renderers: GraphRenderersWithDefaults<V, E>;
-  settings: GraphSettingsWithDefaults<V>;
+  graphAnimationsSettings: GraphAnimationsSettingsWithDefaults;
+  renderLabels: boolean;
 }>;
 
-export default function ComponentsDataProvider<V, E>({
+function ComponentsDataProvider<V, E>({
   children,
   graph,
-  renderers,
-  settings
+  graphAnimationsSettings,
+  renderLabels
 }: ComponentsDataProviderProps<V, E>) {
   // GRAPH CHANGES OBSERVER
-  const [{ animationsSettings, orderedEdges, vertices }] =
-    useGraphObserver(graph);
+  const [data] = useGraphObserver(graph);
 
   // GRAPH COMPONENTS DATA
   // VERTICES
@@ -98,12 +105,11 @@ export default function ComponentsDataProvider<V, E>({
   // (animation settings related to vertices and edges are stored
   // in their respective data objects)
   const layoutAnimationSettings = useMemo<AnimationSettingsWithDefaults>(
-    () =>
-      ({
-        ...settings.animations.layout,
-        ...animationsSettings.layout
-      } as unknown as AnimationSettingsWithDefaults),
-    [animationsSettings, settings.animations.layout]
+    () => ({
+      ...graphAnimationsSettings.layout,
+      ...data.animationsSettings.layout
+    }),
+    [data, graphAnimationsSettings.layout]
   );
 
   // GRAPH CONNECTIONS
@@ -111,73 +117,64 @@ export default function ComponentsDataProvider<V, E>({
   // worklets which are not able to access graph object directly)
   const connections = useMemo<GraphConnections>(
     () => graph.connections,
-    [vertices, orderedEdges]
+    [data]
   );
 
-  // VALUES UPDATED BY OTHER PROVIDERS
-  // Target bounding rect
-  const targetBoundingRect = useSharedValue<BoundingRect>({
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0
-  });
-
   useEffect(() => {
-    const { data, shouldRender } = updateGraphVerticesData(
+    const { data: updatedData, shouldRender } = updateGraphVerticesData(
       verticesData,
-      vertices,
+      data.vertices,
       removedVertices,
-      animationsSettings.vertices,
-      settings.animations.vertices
+      data.animationsSettings.vertices,
+      graphAnimationsSettings.vertices
     );
     if (shouldRender) {
-      setVerticesData(data);
+      setVerticesData(updatedData);
     }
 
     return () => {
-      for (const vertexData of Object.values(data)) {
+      for (const vertexData of Object.values(updatedData)) {
         cancelVertexAnimations(vertexData);
       }
     };
-  }, [vertices]);
+  }, [data]);
 
   useEffect(() => {
-    const { data, shouldRender } = updateGraphEdgesData(
+    const { data: updatedData, shouldRender } = updateGraphEdgesData(
       edgesData,
-      orderedEdges,
+      data.orderedEdges,
       verticesData,
       removedEdges,
-      animationsSettings.edges,
-      settings.animations.edges
+      data.animationsSettings.edges,
+      graphAnimationsSettings.edges
     );
     if (shouldRender) {
-      setEdgesData(data);
+      setEdgesData(updatedData);
     }
 
     return () => {
-      for (const edgeData of Object.values(data)) {
+      for (const edgeData of Object.values(updatedData)) {
         cancelEdgeAnimations(edgeData);
       }
     };
-  }, [orderedEdges, verticesData]);
+  }, [data, verticesData]);
 
   useEffect(() => {
-    if (!renderers.label) {
+    if (!renderLabels) {
       // Remove labels if there is no label renderer
       if (Object.keys(edgeLabelsData).length > 0) {
         setEdgeLabelsData({});
       }
       return;
     }
-    const { data, shouldRender } = updateGraphEdgeLabelsData(
+    const { data: updatedData, shouldRender } = updateGraphEdgeLabelsData(
       edgeLabelsData,
       edgesData
     );
     if (shouldRender) {
-      setEdgeLabelsData(data);
+      setEdgeLabelsData(updatedData);
     }
-  }, [edgesData, renderers.label]);
+  }, [edgesData, renderLabels]);
 
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
     const vertexData = verticesData[key];
@@ -201,9 +198,6 @@ export default function ComponentsDataProvider<V, E>({
       handleEdgeRemove,
       handleVertexRemove,
       layoutAnimationSettings,
-      renderers,
-      settings,
-      targetBoundingRect,
       verticesData
     }),
     [
@@ -211,9 +205,7 @@ export default function ComponentsDataProvider<V, E>({
       verticesData,
       edgesData,
       layoutAnimationSettings,
-      edgeLabelsData,
-      settings,
-      renderers
+      edgeLabelsData
     ]
   );
 
@@ -224,16 +216,11 @@ export default function ComponentsDataProvider<V, E>({
   );
 }
 
-export const withGraphData = <
-  C extends ComponentsDataContextType<unknown, unknown>, // context type
-  P extends object, // component props
-  R extends Partial<P> // values returned by selector
->(
-  Component: React.ComponentType<P>,
-  selector: (contextValue: C) => R
-) =>
-  withMemoContext(
-    Component,
-    ComponentsDataContext as unknown as Context<C>,
-    selector
-  ) as DataProviderReturnType<P, R>;
+export default withGraphData(
+  ComponentsDataProvider,
+  ({ graph, settings, renderers }) => ({
+    graph,
+    graphAnimationsSettings: settings.animations,
+    renderLabels: !!renderers.label
+  })
+);
