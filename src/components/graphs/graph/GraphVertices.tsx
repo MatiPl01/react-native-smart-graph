@@ -26,7 +26,6 @@ export default withGraphData(
   GraphVertices,
   ({ handleVertexRemove, renderers, settings, verticesData }) => ({
     componentSettings: settings.components.vertex,
-    handleVertexRemove,
     onRemove: handleVertexRemove,
     renderer: renderers.vertex,
     verticesData
