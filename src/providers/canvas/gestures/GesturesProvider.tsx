@@ -91,7 +91,7 @@ export default function GesturesProvider({
 
   const handleGestureEnd = () => {
     'worklet';
-    // Don't do anuthing if there is still an active gesture
+    // Don't do anything if there is still an active gesture
     if (isPanActive.value || isPinchActive.value) {
       return;
     }

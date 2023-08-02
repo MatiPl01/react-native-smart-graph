@@ -10,9 +10,10 @@ import {
 import { runOnUI } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
+import { useCanvasContexts } from '@/providers/graph/contexts';
 import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
-import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
+import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   AnimationSettingsWithDefaults,
   GraphSettingsWithDefaults
@@ -43,7 +44,6 @@ export const useForcesPlacementContext = () => {
 export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
-  onRender: (boundingRect: BoundingRect) => void;
   settings: GraphSettingsWithDefaults<V>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
@@ -52,7 +52,6 @@ function ForcesPlacementProvider<V, E>({
   children,
   graph,
   layoutAnimationSettings,
-  onRender,
   settings,
   verticesData
 }: ForcesPlacementProviderProps<V, E>) {
@@ -74,6 +73,10 @@ function ForcesPlacementProvider<V, E>({
   const isFirstRenderRef = useRef(true);
   // Ref to track if the component is rendered for the second time
   const isSecondRenderRef = useRef(false);
+
+  const {
+    transformContext: { handleGraphRender: onRender }
+  } = useCanvasContexts();
 
   useEffect(() => {
     // Skip the first render (when verticesData is empty)

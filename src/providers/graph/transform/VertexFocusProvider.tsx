@@ -14,11 +14,11 @@ import {
 } from 'react-native-reanimated';
 
 import { useFocusObserver } from '@/hooks';
-import { FocusContextType, FocusStatus } from '@/providers/canvas';
+import { FocusStatus } from '@/providers/canvas';
 import { withGraphData } from '@/providers/graph';
+import { useCanvasContexts } from '@/providers/graph/contexts';
 import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
-import { AnimatedDimensions } from '@/types/layout';
 import { FocusedVertexData } from '@/types/settings/focus';
 import {
   getFocusedVertexData,
@@ -45,25 +45,23 @@ export const useVertexFocusContext = () => {
 };
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
-  availableScales: SharedValue<number[]>;
-  canvasDimensions: AnimatedDimensions;
-  focusContext: FocusContextType;
   graph: Graph<V, E>;
-  initialScale: SharedValue<number>;
   vertexRadius: number;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function VertexFocusProvider<V, E>({
-  availableScales,
-  canvasDimensions,
   children,
-  focusContext,
   graph,
-  initialScale,
   vertexRadius,
   verticesData
 }: VertexFocusProviderProps<V, E>) {
+  // CONTEXTS
+  const {
+    dataContext: { canvasDimensions, initialScale, scales: availableScales },
+    focusContext
+  } = useCanvasContexts();
+
   // OBSERVER
   // Vertex focus observer
   const [data] = useFocusObserver(graph);

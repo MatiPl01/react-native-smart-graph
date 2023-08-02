@@ -7,6 +7,7 @@ import {
 } from 'react-native-reanimated';
 
 import { withGraphData } from '@/providers/graph';
+import { useCanvasContexts } from '@/providers/graph/contexts';
 import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
@@ -21,7 +22,6 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   edgesData: Record<string, EdgeComponentData<E, V>>;
   graph: Graph<V, E>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
-  onRender: (boundingRect: BoundingRect) => void;
   settings: GraphSettingsWithDefaults<V>;
   targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V, E>>;
@@ -32,7 +32,6 @@ function GraphPlacementLayoutProvider<V, E>({
   edgesData,
   graph,
   layoutAnimationSettings,
-  onRender,
   settings,
   targetBoundingRect,
   verticesData
@@ -53,6 +52,10 @@ function GraphPlacementLayoutProvider<V, E>({
       settings.placement
     ]
   );
+
+  const {
+    transformContext: { handleGraphRender: onRender }
+  } = useCanvasContexts();
 
   useAnimatedReaction(
     () => null,

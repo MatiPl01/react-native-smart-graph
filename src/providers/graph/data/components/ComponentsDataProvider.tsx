@@ -74,7 +74,7 @@ export default function ComponentsDataProvider<V, E>({
   const [verticesData, setVerticesData] = useState<
     Record<string, VertexComponentData<V, E>>
   >({});
-  // Store keys of removed vertices for thich the removal animation
+  // Store keys of removed vertices for which the removal animation
   // has been completed and vertices are waiting to be unmounted
   const removedVertices = useMemo(() => new Set<string>(), []);
 
@@ -83,7 +83,7 @@ export default function ComponentsDataProvider<V, E>({
   const [edgesData, setEdgesData] = useState<
     Record<string, EdgeComponentData<E, V>>
   >({});
-  // Store keys of removed edges for thich the removal animation
+  // Store keys of removed edges for which the removal animation
   // has been completed and edges are waiting to be unmounted
   const removedEdges = useMemo(() => new Set<string>(), []);
 

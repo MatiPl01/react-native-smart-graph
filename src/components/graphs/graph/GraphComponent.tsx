@@ -3,22 +3,20 @@ import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
-import { CanvasDataContextType, FocusContextType } from '@/providers/canvas';
+import { useCanvasContexts } from '@/providers/graph/contexts';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
 import GraphEdgesMask from './GraphEdgesMask';
 import GraphVertices from './GraphVertices';
 
-type GraphComponentProps = {
-  canvasDataContext: CanvasDataContextType;
-  focusContext: FocusContextType;
-};
+function GraphComponent() {
+  // CONTEXTS
+  const {
+    dataContext: { boundingRect },
+    focusContext
+  } = useCanvasContexts();
 
-function GraphComponent({
-  canvasDataContext: { boundingRect },
-  focusContext
-}: GraphComponentProps) {
   // A helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
   // Update the focusProgress

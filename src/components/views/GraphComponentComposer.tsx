@@ -1,4 +1,5 @@
 import { Canvas, Group } from '@shopify/react-native-skia';
+import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
@@ -10,10 +11,13 @@ import {
   withOverlay
 } from '@/contexts/OverlayProvider';
 import {
+  useAutoSizingContext,
   useCanvasDataContext,
   useFocusContext,
+  useGesturesContext,
   useTransformContext
 } from '@/providers/canvas';
+import { CanvasContexts } from '@/providers/graph/contexts';
 import GraphProvider from '@/providers/graph/GraphProvider';
 
 const validateProps = <
@@ -23,7 +27,7 @@ const validateProps = <
     | DirectedGraphComponentProps<V, E>
     | UndirectedGraphComponentProps<V, E>
 >(
-  props: P & AccessibleOverlayContextType
+  props: P
 ) => {
   // TODO - add more validations
   // FOCUS
@@ -55,36 +59,48 @@ function GraphComponentComposer<
   P extends
     | DirectedGraphComponentProps<V, E>
     | UndirectedGraphComponentProps<V, E>
->(props: P & AccessibleOverlayContextType) {
+>({
+  removeLayer,
+  renderLayer,
+  ...restProps
+}: P & AccessibleOverlayContextType) {
+  const props = restProps as unknown as P;
   validateProps<V, E, P>(props);
   // CONTEXTS
-  // Canvas data context
-  const canvasDataContext = useCanvasDataContext();
-  // Transform context
+  const dataContext = useCanvasDataContext();
   const transformContext = useTransformContext();
-  // Focus context
+  const autoSizingContext = useAutoSizingContext();
   const focusContext = useFocusContext();
+  const gesturesContext = useGesturesContext();
 
   const canvasTransform = useDerivedValue(() => [
-    { translateX: canvasDataContext.currentTranslation.x.value },
-    { translateY: canvasDataContext.currentTranslation.y.value },
-    { scale: canvasDataContext.currentScale.value }
+    { translateX: dataContext.currentTranslation.x.value },
+    { translateY: dataContext.currentTranslation.y.value },
+    { scale: dataContext.currentScale.value }
   ]);
+
+  const canvasContexts = useMemo<CanvasContexts>(
+    () => ({
+      autoSizingContext,
+      dataContext,
+      focusContext,
+      gesturesContext,
+      overlayContext: {
+        removeLayer,
+        renderLayer
+      },
+      transformContext
+    }),
+    []
+  );
 
   return (
     <Canvas
       onLayout={transformContext.handleCanvasRender}
       style={styles.canvas}>
       <Group transform={canvasTransform}>
-        <GraphProvider<V, E>
-          {...props}
-          canvasDataContext={canvasDataContext}
-          focusContext={focusContext}
-          transformContext={transformContext}>
-          <GraphComponent
-            canvasDataContext={canvasDataContext}
-            focusContext={focusContext}
-          />
+        <GraphProvider<V, E> {...props} canvasContexts={canvasContexts}>
+          <GraphComponent />
         </GraphProvider>
       </Group>
     </Canvas>

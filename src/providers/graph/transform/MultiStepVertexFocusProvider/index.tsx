@@ -8,8 +8,8 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
-import { CanvasDataContextType, FocusContextType } from '@/providers/canvas';
-import { withGraphData } from '@/providers/graph/data';
+import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withGraphData } from '@/providers/graph/data/components';
 import { useVertexFocusContext } from '@/providers/graph/transform/VertexFocusProvider';
 import { VertexComponentData } from '@/types/components';
 import { FocusStepData } from '@/types/focus';
@@ -20,23 +20,21 @@ import { getFocusSteps } from '@/utils/focus';
 import { useStateMachine } from './StateMachine';
 
 type MultiStepFocusProviderProps<V, E> = PropsWithChildren<{
-  canvasDataContext: CanvasDataContextType;
-  focusContext: FocusContextType;
   settings: MultiStepFocusSettings;
   vertexRadius: number;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function MultiStepVertexFocusProvider<V, E>({
-  canvasDataContext,
   children,
-  focusContext,
   settings,
   vertexRadius,
   verticesData
 }: MultiStepFocusProviderProps<V, E>) {
-  // CONTEXT VALUES
-  // Vertex focus context values
+  // CONTEXTS
+  // Canvas contexts
+  const { dataContext: canvasDataContext, focusContext } = useCanvasContexts();
+  // Graph contexts
   const { isVertexFocused } = useVertexFocusContext();
 
   // MULTI STEP FOCUS DATA

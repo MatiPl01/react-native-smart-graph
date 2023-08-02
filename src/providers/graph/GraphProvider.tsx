@@ -4,16 +4,9 @@ import {
   DirectedGraphComponentProps,
   UndirectedGraphComponentProps
 } from '@/components/graphs';
-import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
-import {
-  CanvasDataContextType,
-  FocusContextType,
-  TransformContextType
-} from '@/providers/canvas';
 import { ContextProviderComposer } from '@/providers/utils';
 import { AnimatedCanvasTransform } from '@/types/canvas';
 import { Graph } from '@/types/graphs';
-import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
 import { GraphSettingsWithDefaults } from '@/types/settings';
 import {
   updateGraphRenderersWithDefaults,
@@ -21,7 +14,11 @@ import {
 } from '@/utils/components';
 import { deepMemoComparator } from '@/utils/equality';
 
-import { ComponentsDataProvider } from './data';
+import {
+  CanvasContexts,
+  CanvasContextsContext
+} from './contexts/CanvasContextsProvider';
+import { ComponentsDataProvider } from './data/components';
 import { PressEventsProvider, PressEventsProviderProps } from './events';
 import {
   ContainerDimensionsProvider,
@@ -35,15 +32,13 @@ import { MultiStepVertexFocusProvider, VertexFocusProvider } from './transform';
 
 const getLayoutProviders = <V, E>(
   graph: Graph<V, E>,
-  settings: GraphSettingsWithDefaults<V>,
-  onRender: (boundingRect: BoundingRect) => void
+  settings: GraphSettingsWithDefaults<V>
 ) => {
   switch (settings.layout.managedBy) {
     case 'forces':
       return [
         <ForcesPlacementProvider<ForcesPlacementProviderProps<V, E>>
           graph={graph}
-          onRender={onRender}
           settings={settings}
         />,
         <ForcesLayoutProvider forcesSettings={settings.layout.settings} />
@@ -53,7 +48,6 @@ const getLayoutProviders = <V, E>(
       return [
         <PlacementLayoutProvider<GraphPlacementLayoutProviderProps<V, E>>
           graph={graph}
-          onRender={onRender}
           settings={settings}
         />
       ];
@@ -62,15 +56,11 @@ const getLayoutProviders = <V, E>(
 
 const getEventsProviders = <V, E>(
   transform: AnimatedCanvasTransform,
-  boundingRect: AnimatedBoundingRect,
-  settings: GraphSettingsWithDefaults<V>,
-  renderLayer: (zIndex: number, layer: JSX.Element) => void
+  settings: GraphSettingsWithDefaults<V>
 ) => {
   if (settings.events) {
     return [
       <PressEventsProvider<PressEventsProviderProps<V, E>>
-        boundingRect={boundingRect}
-        renderLayer={renderLayer}
         settings={settings.events}
         transform={transform}
       />
@@ -81,23 +71,16 @@ const getEventsProviders = <V, E>(
 
 type GraphProviderProps<V, E> = PropsWithChildren<
   {
-    canvasDataContext: CanvasDataContextType;
-    focusContext: FocusContextType;
-    transformContext: TransformContextType;
-  } & AccessibleOverlayContextType &
-    (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
+    canvasContexts: CanvasContexts;
+  } & (DirectedGraphComponentProps<V, E> | UndirectedGraphComponentProps<V, E>)
 >;
 
-// eslint-disable-next-line import/no-unused-modules
 function GraphProvider<V, E>({
-  canvasDataContext,
+  canvasContexts,
   children,
-  focusContext,
   graph,
-  renderLayer,
   renderers,
-  settings,
-  transformContext
+  settings
 }: GraphProviderProps<V, E>) {
   const memoSettings = useMemo(
     () => updateGraphSettingsWithDefaults(graph.isDirected(), settings),
@@ -116,9 +99,9 @@ function GraphProvider<V, E>({
 
   const transform = useMemo(
     () => ({
-      scale: canvasDataContext.currentScale,
-      translateX: canvasDataContext.currentTranslation.x,
-      translateY: canvasDataContext.currentTranslation.y
+      scale: canvasContexts.dataContext.currentScale,
+      translateX: canvasContexts.dataContext.currentTranslation.x,
+      translateY: canvasContexts.dataContext.currentTranslation.y
     }),
     []
   );
@@ -136,32 +119,18 @@ function GraphProvider<V, E>({
       // LAYOUT
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
-      ...getLayoutProviders(
-        graph,
-        memoSettings,
-        transformContext.handleGraphRender
-      ),
+      ...getLayoutProviders(graph, memoSettings),
       // Provider used to compute the dimensions of the container
       <ContainerDimensionsProvider
-        boundingRect={canvasDataContext.boundingRect}
         vertexRadius={memoSettings.components.vertex.radius}
       />,
       // EVENTS
       // Press events provider
-      ...getEventsProviders(
-        transform,
-        canvasDataContext.boundingRect,
-        memoSettings,
-        renderLayer
-      ),
+      ...getEventsProviders(transform, memoSettings),
       // FOCUS
       // Provider used to focus on a specific vertex
       <VertexFocusProvider
-        availableScales={canvasDataContext.scales}
-        canvasDimensions={canvasDataContext.canvasDimensions}
-        focusContext={focusContext}
         graph={graph}
-        initialScale={canvasDataContext.initialScale}
         vertexRadius={memoSettings.components.vertex.radius}
       />,
       // Provider used to focus one of the vertices specified in an
@@ -169,8 +138,6 @@ function GraphProvider<V, E>({
       ...(memoSettings.focus
         ? [
             <MultiStepVertexFocusProvider
-              canvasDataContext={canvasDataContext}
-              focusContext={focusContext}
               settings={memoSettings.focus}
               vertexRadius={memoSettings.components.vertex.radius}
             />
@@ -181,9 +148,11 @@ function GraphProvider<V, E>({
   );
 
   return (
-    <ContextProviderComposer providers={providers}>
-      {children}
-    </ContextProviderComposer>
+    <CanvasContextsContext.Provider value={canvasContexts}>
+      <ContextProviderComposer providers={providers}>
+        {children}
+      </ContextProviderComposer>
+    </CanvasContextsContext.Provider>
   );
 }
 

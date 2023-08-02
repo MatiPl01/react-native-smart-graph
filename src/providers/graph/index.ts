@@ -1,4 +1,4 @@
 export {
   type ComponentsDataContextType,
   withGraphData
-} from './data/ComponentsDataProvider';
+} from './data/components/ComponentsDataProvider';
