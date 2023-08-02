@@ -4,7 +4,11 @@ import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 
 import { CanvasDataContext, CanvasDataContextType } from './context';
-import { clearContextValue, createContextValue } from './utils';
+import {
+  clearContextValue,
+  createContextValue,
+  updateContextValue
+} from './utils';
 
 export type CanvasDataProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
@@ -24,6 +28,8 @@ export default function CanvasDataProvider({
   );
 
   useEffect(() => {
+    updateContextValue(contextValue, userSettings);
+
     return () => {
       clearContextValue(contextValue);
     };

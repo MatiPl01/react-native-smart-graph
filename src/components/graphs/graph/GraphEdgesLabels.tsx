@@ -19,14 +19,16 @@ function GraphEdgeLabels<E>({
 }: GraphEdgeLabelsProps<E>) {
   return (
     <Group opacity={focusProgress}>
-      {Object.entries(edgeLabelsData).map(([key, data]) => (
-        <EdgeLabelComponent
-          edgeKey={key}
-          key={key}
-          {...data}
-          renderer={renderer}
-        />
-      ))}
+      {Object.entries(edgeLabelsData).map(([key, data]) =>
+        renderer ? (
+          <EdgeLabelComponent
+            edgeKey={key}
+            key={key}
+            {...data}
+            renderer={renderer}
+          />
+        ) : null
+      )}
     </Group>
   );
 }

@@ -70,7 +70,7 @@ const GraphViewComposer = memo(function () {
         {/* Renders overlay layers set using the OverlayContext */}
         {overlayOutlet}
       </OverlayProvider>
-      {/* Render other component than canvas (e.g. graph controls) */}
+      {/* Render other components than canvas (e.g. graph controls) */}
       <View style={styles.overlay}>{overlay}</View>
     </>
   );

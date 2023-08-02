@@ -1,8 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { cancelAnimation, makeMutable } from 'react-native-reanimated';
+import {
+  cancelAnimation,
+  makeMutable,
+  SharedValue
+} from 'react-native-reanimated';
 
 import { DEFAULT_SETTINGS } from '@/constants/views';
 import { GraphViewSettings } from '@/types/settings';
+import { deepEqual } from '@/utils/equality';
+import { updateSpacing } from '@/utils/layout';
 
 import { CanvasDataContextType } from './context';
 
@@ -43,19 +49,34 @@ export const createContextValue = (
     userSettings.scales?.[0] ?? DEFAULT_SETTINGS.scales[0]!
   ),
   objectFit: makeMutable(userSettings.objectFit ?? DEFAULT_SETTINGS.objectFit),
-  padding: makeMutable({
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: 0
-  }),
+  padding: makeMutable(updateSpacing(userSettings.padding)),
   scales: makeMutable(userSettings.scales ?? DEFAULT_SETTINGS.scales)
 });
 
 export const updateContextValue = (
   value: CanvasDataContextType,
   userSettings: GraphViewSettings
-): void => {};
+): void => {
+  const updateProperty = <T>(
+    name: keyof GraphViewSettings,
+    property: SharedValue<T>
+  ): void => {
+    const newValue = (userSettings[name] ?? DEFAULT_SETTINGS[name]) as T;
+    if (!deepEqual(property.value, newValue)) {
+      property.value = newValue;
+    }
+  };
+
+  if (userSettings.padding) {
+    userSettings.padding = updateSpacing(userSettings.padding);
+  }
+
+  updateProperty('autoSizingTimeout', value.autoSizingTimeout);
+  updateProperty('initialScale', value.initialScale);
+  updateProperty('objectFit', value.objectFit);
+  updateProperty('scales', value.scales);
+  updateProperty('padding', value.padding);
+};
 
 export const clearContextValue = (value: CanvasDataContextType): void => {
   cancelAnimation(value.autoSizingEnabled);

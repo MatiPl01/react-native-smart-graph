@@ -27,12 +27,15 @@ import {
   GraphSettingsWithDefaults
 } from '@/types/settings';
 import {
+  cancelEdgeAnimations,
+  cancelVertexAnimations
+} from '@/utils/animations';
+import {
   updateGraphEdgeLabelsData,
   updateGraphEdgesData,
   updateGraphVerticesData
 } from '@/utils/components';
 import { withMemoContext } from '@/utils/contexts';
-import { cancelEdgeAnimations, cancelVertexAnimations } from '@/utils/data';
 
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
