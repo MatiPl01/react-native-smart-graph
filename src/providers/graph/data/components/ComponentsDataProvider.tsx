@@ -53,12 +53,12 @@ export const withComponentsData = <
 >(
   Component: React.ComponentType<P>,
   selector: (contextValue: C) => R
-) =>
-  withMemoContext(
-    Component,
-    ComponentsDataContext as unknown as Context<C>,
-    selector
-  ) as DataProviderReturnType<P, R>;
+) => Component; // TODO - this is temporary
+// withMemoContext(
+//   Component,
+//   ComponentsDataContext as unknown as Context<C>,
+//   selector
+// ) as DataProviderReturnType<P, R>;
 
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
@@ -72,6 +72,8 @@ function ComponentsDataProvider<V, E>({
   graphAnimationsSettings,
   renderLabels
 }: ComponentsDataProviderProps<V, E>) {
+  console.log('ComponentsDataProvider');
+  return <>{children}</>;
   // GRAPH CHANGES OBSERVER
   const [data] = useGraphObserver(graph);
 

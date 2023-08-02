@@ -9,9 +9,9 @@ import { GraphEventsSettings } from '@/types/settings';
 import OverlayLayer from './OverlayLayer';
 
 export type PressEventsProviderProps<V, E> = PropsWithChildren<{
-  settings: GraphEventsSettings<V>;
-  transform: AnimatedCanvasTransform;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  // settings: GraphEventsSettings<V>;
+  // transform: AnimatedCanvasTransform;
+  // verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function PressEventsProvider<V, E>({
@@ -20,6 +20,8 @@ function PressEventsProvider<V, E>({
   transform,
   verticesData
 }: PressEventsProviderProps<V, E>) {
+  console.log('PressEventsProvider');
+  return <>{children}</>;
   // CONTEXTS
   // Canvas contexts
   const {

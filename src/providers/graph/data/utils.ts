@@ -12,4 +12,5 @@ export const createContextValue = <V, E>(
   userSettings: GraphData<V, E>
 ): GraphDataContextType<V, E> => {
   // TODO: Implement this
+  return {};
 };

@@ -3,7 +3,9 @@ import { Graph } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
 import { GraphRenderers } from '@/types/renderer';
 import {
+  FocusPoints,
   GraphAnimationsSettingsWithDefaults,
+  GraphLayoutSettings,
   GraphSettingsWithDefaults
 } from '@/types/settings';
 import { Sharedify } from '@/types/utils';
@@ -16,10 +18,19 @@ export type GraphDataContextType<V, E> = {
   renderers: GraphRenderers<V, E>;
   targetBoundingRect: SharedValue<BoundingRect>;
   settings: {
+    events: GraphSettingsWithDefaults<V>['events'];
     animations: GraphAnimationsSettingsWithDefaults;
-  } & Sharedify<
-    Pick<GraphSettingsWithDefaults<V>, 'components' | 'layout' | 'placement'>
-  >;
+    focus?: {
+      disableGestures?: SharedValue<boolean>;
+      points: SharedValue<FocusPoints>;
+      progress: SharedValue<number>;
+    };
+    layout: Sharedify<
+      Omit<GraphSettingsWithDefaults<V>['layout'], 'managedBy'>
+    > & {
+      managedBy: GraphLayoutSettings['managedBy'];
+    };
+  } & Sharedify<Pick<GraphSettingsWithDefaults<V>, 'components' | 'placement'>>;
 };
 
 export const GraphDataContext = createContext(null as unknown as object);
@@ -27,15 +38,14 @@ export const GraphDataContext = createContext(null as unknown as object);
 export const withGraphData = <
   V,
   E,
-  C extends GraphDataContextType<V, E>, // context type
   P extends object, // component props
   R extends Partial<P> // values returned by selector
 >(
   Component: React.ComponentType<P>,
-  selector: (contextValue: C) => R
-) =>
-  withMemoContext(
-    Component,
-    GraphDataContext as unknown as Context<C>,
-    selector
-  ) as DataProviderReturnType<P, R>;
+  selector: (contextValue: GraphDataContextType<V, E>) => R
+) => Component as DataProviderReturnType<P, R>; // TODO - this is temporary
+// withMemoContext(
+//   Component,
+//   GraphDataContext as unknown as Context<C>,
+//   selector
+// ) as DataProviderReturnType<P, R>;

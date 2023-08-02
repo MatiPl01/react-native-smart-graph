@@ -20,9 +20,9 @@ import { getFocusSteps } from '@/utils/focus';
 import { useStateMachine } from './StateMachine';
 
 type MultiStepFocusProviderProps<V, E> = PropsWithChildren<{
-  settings: MultiStepFocusSettings;
-  vertexRadius: number;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  // settings: MultiStepFocusSettings;
+  // vertexRadius: number;
+  // verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function MultiStepVertexFocusProvider<V, E>({
@@ -31,6 +31,8 @@ function MultiStepVertexFocusProvider<V, E>({
   vertexRadius,
   verticesData
 }: MultiStepFocusProviderProps<V, E>) {
+  console.log('MultiStepVertexFocusProvider');
+  return <>{children}</>;
   // CONTEXTS
   // Canvas contexts
   const { dataContext: canvasDataContext, focusContext } = useCanvasContexts();

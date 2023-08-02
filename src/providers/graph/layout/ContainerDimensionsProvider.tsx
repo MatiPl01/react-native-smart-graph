@@ -14,6 +14,8 @@ function ContainerDimensionsProvider({
   children,
   targetBoundingRect
 }: ContainerDimensionsProviderProps) {
+  console.log('ContainerDimensionsProvider');
+  return <>{children}</>;
   // CONTEXTS
   // Canvas contexts
   const {

@@ -42,10 +42,10 @@ export const useForcesPlacementContext = () => {
 };
 
 export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
-  graph: Graph<V, E>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  settings: GraphSettingsWithDefaults<V>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  // graph: Graph<V, E>;
+  // layoutAnimationSettings: AnimationSettingsWithDefaults;
+  // settings: GraphSettingsWithDefaults<V>;
+  // verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function ForcesPlacementProvider<V, E>({
@@ -55,6 +55,9 @@ function ForcesPlacementProvider<V, E>({
   settings,
   verticesData
 }: ForcesPlacementProviderProps<V, E>) {
+  console.log('ForcesPlacementProvider');
+  return <>{children}</>;
+
   // CONTEXTS
   // Canvas contexts
   const {

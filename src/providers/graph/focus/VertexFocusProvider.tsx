@@ -57,6 +57,8 @@ function VertexFocusProvider<V, E>({
   vertexRadius,
   verticesData
 }: VertexFocusProviderProps<V, E>) {
+  console.log('VertexFocusProvider');
+  return <>{children}</>;
   // CONTEXTS
   // Canvas contexts
   const {

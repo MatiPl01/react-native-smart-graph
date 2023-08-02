@@ -15,9 +15,9 @@ import {
 import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
-  connections: GraphConnections;
-  forcesSettings: ForcesSettingsWithDefaults;
-  targetBoundingRect: SharedValue<BoundingRect>;
+  // connections: GraphConnections;
+  // forcesSettings: ForcesSettingsWithDefaults;
+  // targetBoundingRect: SharedValue<BoundingRect>;
 }>;
 
 function ForcesLayoutProvider({
@@ -26,6 +26,9 @@ function ForcesLayoutProvider({
   forcesSettings,
   targetBoundingRect
 }: ForcesLayoutProviderProps) {
+  console.log('ForcesLayoutProvider');
+  return <>{children}</>;
+
   // CONTEXTS
   // Forces placement context
   const { lockedVertices, placedVerticesPositions } =

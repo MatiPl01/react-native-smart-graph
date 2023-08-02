@@ -19,12 +19,12 @@ import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
-  edgesData: Record<string, EdgeComponentData<E, V>>;
-  graph: Graph<V, E>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  settings: GraphSettingsWithDefaults<V>;
-  targetBoundingRect: SharedValue<BoundingRect>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  // edgesData: Record<string, EdgeComponentData<E, V>>;
+  // graph: Graph<V, E>;
+  // layoutAnimationSettings: AnimationSettingsWithDefaults;
+  // settings: GraphSettingsWithDefaults<V>;
+  // targetBoundingRect: SharedValue<BoundingRect>;
+  // verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
@@ -36,6 +36,8 @@ function GraphPlacementLayoutProvider<V, E>({
   targetBoundingRect,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
+  console.log('GraphPlacementLayoutProvider');
+  return <>{children}</>;
   // CONTEXTS
   // Canvas contexts
   const {
