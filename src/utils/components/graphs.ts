@@ -17,18 +17,10 @@ import {
 } from '@/constants/components';
 import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
 import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
-import {
-  EdgeComponentData,
-  EdgeComponentRenderData,
-  VertexComponentData
-} from '@/types/components';
+import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { OrderedEdges, Vertex } from '@/types/graphs';
-import {
-  EdgeLabelRendererFunction,
-  GraphRenderers,
-  GraphRenderersWithDefaults
-} from '@/types/renderer';
+import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
 import {
   DirectedGraphComponentsSettings,
   GraphSettings,
@@ -36,14 +28,12 @@ import {
 } from '@/types/settings';
 import {
   AnimationSettings,
-  AnimationSettingsWithDefaults,
-  AnimationsSettings
+  AnimationSettingsWithDefaults
 } from '@/types/settings/animations';
 import {
   GraphLayoutSettings,
   GraphLayoutSettingsWithDefaults
 } from '@/types/settings/graph/layout';
-import { deepEqual } from '@/utils/equality';
 
 export const updateGraphSettingsWithDefaults = <V>(
   isGraphDirected: boolean,
@@ -145,15 +135,20 @@ export const updateGraphVerticesData = <V, E>(
 
   // Add new vertices
   for (const vertex of currentVertices) {
-    const oldVertex = oldVerticesData[vertex.key];
     // Remove vertex from the removed vertices set if it is in graph
     if (removedVertices.has(vertex.key)) {
       removedVertices.delete(vertex.key);
     }
-    // Continue if vertex is already in the graph and is not removed
-    if (oldVertex && !oldVertex.removed) {
+
+    // Continue if vertex is already in the graph, is not removed
+    // and data is not changed
+    const oldVertex = oldVerticesData[vertex.key];
+    // The shallow equality check is enough here because the vertex data
+    // shouldn't be modified in place
+    if (oldVertex && !oldVertex.removed && oldVertex.vertex === vertex) {
       continue;
     }
+
     shouldRender = true;
     // Create the vertex data
     updatedVerticesData[vertex.key] = {
@@ -186,7 +181,6 @@ export const updateGraphVerticesData = <V, E>(
       if (!vertexData.removed) {
         shouldRender = true;
         updatedVerticesData[key] = {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           ...vertexData,
           animationSettings: {
             ...defaultAnimationSettings,
@@ -215,112 +209,132 @@ export const updateGraphEdgesData = <V, E>(
   oldEdgesData: Record<string, EdgeComponentData<E, V>>,
   currentEdges: OrderedEdges<E, V>,
   verticesData: Record<string, VertexComponentData<V, E>>,
-  currentAnimationsSettings: AnimationsSettings,
-  settings: GraphSettingsWithDefaults<V>,
-  renderers: GraphRenderersWithDefaults<V, E>
+  removedEdges: Set<string>,
+  currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
+  defaultAnimationSettings: AnimationSettingsWithDefaults
 ): {
   data: Record<string, EdgeComponentData<E, V>>;
-  wasUpdated: boolean;
+  shouldRender: boolean;
 } => {
   const updatedEdgesData = { ...oldEdgesData };
-  let wasUpdated = false; // Flag to indicate if edges data was updated
+  let shouldRender = false; // Flag to indicate if edges data was updated
 
   // Add new edges to edges data
-  currentEdges.forEach(({ edge, edgesCount, order }) => {
-    const [v1, v2] = edge.vertices;
+  for (const edgeData of currentEdges) {
+    // Remove edge from the removed edges set if it is in graph
+    if (removedEdges.has(edgeData.edge.key)) {
+      removedEdges.delete(edgeData.edge.key);
+    }
+
+    // Continue if edge is already in the graph, is not removed and data
+    // is not changed
+    const oldEdge = oldEdgesData[edgeData.edge.key];
+    if (oldEdge && !oldEdge.removed && oldEdge.edge === edgeData.edge) {
+      // Update shared values if they were changed
+      if (oldEdge.order.value !== edgeData.order) {
+        oldEdge.order.value = edgeData.order;
+      }
+      if (oldEdge.edgesCount.value !== edgeData.edgesCount) {
+        oldEdge.edgesCount.value = edgeData.edgesCount;
+      }
+      continue;
+    }
+
+    // Continue if vertices of the edge are not rendered yet
+    const [v1, v2] = edgeData.edge.vertices;
     const v1Data = verticesData[v1.key];
     const v2Data = verticesData[v2.key];
+    if (!v1Data || !v2Data) continue;
 
-    const oldEdgeData = oldEdgesData[edge.key];
-
-    if (
-      v1Data &&
-      v2Data &&
-      (!oldEdgeData ||
-        oldEdgeData?.removed ||
-        oldEdgeData?.edgesCount !== edgesCount ||
-        renderers.edge !== oldEdgeData.edgeRenderer ||
-        renderers.arrow !== oldEdgeData.arrowRenderer ||
-        !deepEqual(oldEdgeData.componentSettings, settings.components.edge) ||
-        !deepEqual(settings.animations.edges, oldEdgeData.animationSettings))
-    ) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { vertex: _, ...componentSettings } = settings.components;
-      wasUpdated = true;
-      updatedEdgesData[edge.key] = {
-        animationSettings: {
-          ...settings.animations.edges,
-          ...currentAnimationsSettings.edges[edge.key]
-        } as unknown as AnimationSettingsWithDefaults,
-        arrowRenderer: renderers.arrow,
-        componentSettings,
-        edge,
-        edgeRenderer: renderers.edge,
-        edgesCount,
-        order,
-        removed: false,
-        v1Position: v1Data.position,
-        v1Radius: v1Data.currentRadius,
-        v2Position: v2Data.position,
-        v2Radius: v2Data.currentRadius
-      };
-    }
-  });
+    shouldRender = true;
+    // Create the edge data
+    updatedEdgesData[edgeData.edge.key] = {
+      ...(oldEdge ?? {
+        animationProgress: makeMutable(0),
+        // Create shared values only for new edges
+        displayed: makeMutable(true),
+        edgesCount: makeMutable(edgeData.edgesCount),
+        labelHeight: makeMutable(0),
+        labelPosition: {
+          x: makeMutable(0),
+          y: makeMutable(0)
+        },
+        order: makeMutable(edgeData.order)
+      }),
+      animationSettings: {
+        ...defaultAnimationSettings,
+        ...currentAnimationsSettings
+      },
+      edge: edgeData.edge,
+      removed: false,
+      v1Position: v1Data.position,
+      v1Radius: v1Data.currentRadius,
+      v2Position: v2Data.position,
+      v2Radius: v2Data.currentRadius
+    };
+  }
 
   // Keys of edges that are currently in the graph
   const currentEdgesKeys = new Set(currentEdges.map(e => e.edge.key));
 
   // Mark edges as removed if there were removed from the graph model
-  Object.keys(oldEdgesData).forEach(key => {
-    if (!currentEdgesKeys.has(key)) {
-      wasUpdated = true;
-      updatedEdgesData[key] = {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...updatedEdgesData[key]!,
-        animationSettings: {
-          ...settings.animations.edges,
-          ...currentAnimationsSettings.edges[key]
-        } as unknown as AnimationSettingsWithDefaults,
-        removed: true
-      };
+  for (const key in oldEdgesData) {
+    const edgeData = oldEdgesData[key];
+    if (edgeData && !currentEdgesKeys.has(key)) {
+      if (!edgeData.removed) {
+        shouldRender = true;
+        updatedEdgesData[key] = {
+          ...edgeData,
+          animationSettings: {
+            ...defaultAnimationSettings,
+            ...currentAnimationsSettings
+          },
+          removed: true
+        };
+      }
     }
-  });
+  }
+
+  // Remove edges from edges data if their removeal animation is finished
+  // and they weren't added back to the graph model
+  for (const key of removedEdges) {
+    delete updatedEdgesData[key];
+    removedEdges.delete(key);
+  }
 
   return {
     data: updatedEdgesData,
-    wasUpdated
+    shouldRender
   };
 };
 
 export const updateGraphEdgeLabelsData = <V, E>(
   oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
-  edgesData: Record<string, EdgeComponentData<E, V>>,
-  renderedEdgesData: Record<string, EdgeComponentRenderData>,
-  labelRenderer: EdgeLabelRendererFunction<E>
+  edgesData: Record<string, EdgeComponentData<E, V>>
 ): {
   data: Record<string, EdgeLabelComponentData<E>>;
-  wasUpdated: boolean;
+  shouldRender: boolean;
 } => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
-  let wasUpdated = false; // Flag to indicate if edges data was updated
+  let shouldRender = false; // Flag to indicate if edges data was updated
 
   // Add new labels data
-  Object.entries(renderedEdgesData).forEach(([key, data]) => {
+  Object.entries(edgesData).forEach(([key, data]) => {
     const edgeData = edgesData[key];
 
     const oldLabelData = oldEdgeLabelsData[key];
 
+    // Update label data if it is not rendered yet or its value was changed
     if (
       edgeData &&
-      (!oldLabelData || labelRenderer !== oldLabelData.renderer)
+      (!oldLabelData || oldLabelData.value !== edgeData.edge.value)
     ) {
-      wasUpdated = true;
+      shouldRender = true;
       updatedEdgeLabelsData[key] = {
         animationProgress: data.animationProgress,
         centerX: data.labelPosition.x,
         centerY: data.labelPosition.y,
         height: data.labelHeight,
-        renderer: labelRenderer,
         v1Position: edgeData.v1Position,
         v2Position: edgeData.v2Position,
         value: edgeData.edge.value
@@ -329,19 +343,19 @@ export const updateGraphEdgeLabelsData = <V, E>(
   });
 
   // Keys of edges that are currently in the graph
-  const currentEdgesKeys = new Set(Object.keys(renderedEdgesData));
+  const currentEdgesKeys = new Set(Object.keys(edgesData));
 
   // Remove labels data of edges that are no longer displayed
   // (their unmount animation is finished)
-  Object.keys(oldEdgeLabelsData).forEach(key => {
+  for (const key in oldEdgeLabelsData) {
     if (!currentEdgesKeys.has(key)) {
-      wasUpdated = true;
+      shouldRender = true;
       delete updatedEdgeLabelsData[key];
     }
-  });
+  }
 
   return {
     data: updatedEdgeLabelsData,
-    wasUpdated
+    shouldRender
   };
 };

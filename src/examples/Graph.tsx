@@ -1,52 +1,66 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { useEffect, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   GraphView,
-  DirectedGraph,
-  DirectedGraphComponent
+  VertexPressHandler,
+  DefaultEdgeLabelRenderer,
+  UndirectedGraphComponent,
+  UndirectedGraphData,
+  UndirectedGraph
 } from 'react-native-smart-graph';
 
-const VERTICES_COUNT = 25;
-const INTERVAL = 1000;
-
-const VERTICES = new Array(VERTICES_COUNT).fill(null).map((_, i) => ({
-  key: `${i}`
-}));
-
-let direction = 1;
+const GRAPH: UndirectedGraphData = {
+  vertices: [
+    { key: 'V1' },
+    { key: 'V2' },
+    { key: 'V3' },
+    { key: 'V4' },
+    { key: 'V5' },
+    { key: 'V6' },
+    { key: 'V7' },
+    { key: 'V8' }
+  ],
+  edges: [
+    { key: 'E1', vertices: ['V1', 'V2'] },
+    { key: 'E2', vertices: ['V2', 'V3'] },
+    { key: 'E3', vertices: ['V2', 'V4'] },
+    { key: 'E4', vertices: ['V2', 'V5'] },
+    { key: 'E5', vertices: ['V5', 'V6'] },
+    { key: 'E6', vertices: ['V1', 'V7'] },
+    { key: 'E7', vertices: ['V5', 'V8'] },
+    { key: 'E71', vertices: ['V5', 'V8'] },
+    { key: 'E72', vertices: ['V5', 'V8'] }
+  ]
+};
 
 export default function Graph() {
-  const graph = useMemo(
-    () =>
-      new DirectedGraph({
-        vertices: [{ key: '-1' }] // TODO - fix not rendering when no vertices
-      }),
+  const [orbitsRoot, setOrbitsRoot] = useState('');
+
+  const graph = useMemo(() => new UndirectedGraph(GRAPH), []);
+
+  const handEVertexPress = useCallback<VertexPressHandler>(
+    ({ vertex: { key } }) => {
+      setOrbitsRoot(key);
+    },
     []
   );
 
-  useEffect(() => {
-    setInterval(() => {
-      if (direction === 1) {
-        graph.insertBatch({
-          vertices: VERTICES
-        });
-      } else {
-        graph.removeBatch({
-          vertices: VERTICES.map(({ key }) => key)
-        });
-      }
-      direction *= -1;
-    }, INTERVAL);
-  }, []);
-
   return (
     <GraphView objectFit='contain'>
-      <DirectedGraphComponent
+      <UndirectedGraphComponent
+        renderers={{
+          label: DefaultEdgeLabelRenderer
+        }}
         settings={{
           // --- Placement settings ---
           placement: {
-            strategy: 'random',
-            mesh: 'random'
+            strategy: 'orbits',
+            minVertexSpacing: 50,
+            layerSizing: 'auto', // <- doesn't have to be explicitly specified (it's a default option)
+            roots: [orbitsRoot]
+          },
+          // --- End of placement settings ---
+          events: {
+            onVertexPress: handEVertexPress
           }
         }}
         graph={graph}

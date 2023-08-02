@@ -18,7 +18,6 @@ import {
   CurvedEdgeSettings,
   EdgeArrowSettings,
   EdgeLabelSettings,
-  GraphSettingsWithDefaults,
   StraightEdgeSettings
 } from '@/types/settings';
 import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
@@ -26,8 +25,10 @@ import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
 type SharedEdgeComponentProps = SharedRenderersProps & {
   animatedEdgesCount: SharedValue<number>;
   animatedOrder: SharedValue<number>;
+  animationProgress: SharedValue<number>;
   animationSettings: AnimationSettingsWithDefaults;
-  onRender: EdgeRenderHandler;
+  labelHeight: SharedValue<number>;
+  labelPosition: AnimatedVectorCoordinates;
   v1Position: AnimatedVectorCoordinates;
   v1Radius: SharedValue<number>;
   v2Position: AnimatedVectorCoordinates;
@@ -81,41 +82,31 @@ export type EdgeComponentProps<E, V> = Omit<
   | DirectedStraightEdgeComponentProps<E, V>
   | UndirectedCurvedEdgeComponentProps<E, V>
   | UndirectedStraightEdgeComponentProps<E, V>,
-  'animatedEdgesCount' | 'animatedOrder' | 'animationProgress' | 'renderers'
+  'animatedEdgesCount' | 'animatedOrder' | 'renderers'
 > & {
   arrowRenderer?: EdgeArrowRenderFunction;
   edgeRenderer: EdgeRenderFunction<E>;
-  edgesCount: number;
+  edgesCount: SharedValue<number>;
   labelRenderer?: EdgeLabelRendererFunction<E>;
   onRemove: (key: string) => void;
-  order: number;
+  order: SharedValue<number>;
   removed: boolean;
 };
 
 export type EdgeComponentData<E, V> = {
+  animationProgress: SharedValue<number>;
   animationSettings: AnimationSettingsWithDefaults;
-  arrowRenderer?: EdgeArrowRenderFunction;
-  componentSettings: Omit<GraphSettingsWithDefaults<V>['components'], 'vertex'>;
+  displayed: SharedValue<boolean>;
   edge: Edge<E, V>;
-  edgeRenderer: EdgeRenderFunction<E>;
-  edgesCount: number;
-  order: number;
+  edgesCount: SharedValue<number>;
+  labelHeight: SharedValue<number>;
+  labelPosition: AnimatedVectorCoordinates;
+  order: SharedValue<number>;
   removed: boolean;
   v1Position: AnimatedVectorCoordinates;
   v1Radius: SharedValue<number>;
   v2Position: AnimatedVectorCoordinates;
   v2Radius: SharedValue<number>;
 };
-
-export type EdgeComponentRenderData = {
-  animationProgress: SharedValue<number>;
-  labelHeight: SharedValue<number>;
-  labelPosition: AnimatedVectorCoordinates;
-};
-
-export type EdgeRenderHandler = (
-  key: string,
-  renderData: EdgeComponentRenderData
-) => void;
 
 export type EdgeRemoveHandler = (key: string) => void;
