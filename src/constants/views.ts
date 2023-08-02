@@ -1,5 +1,9 @@
-export const INITIAL_SCALE = 1; // 1 = 100% canvas size
+import { GraphViewSettingsWithDefaults } from '@/types/settings';
 
-export const DEFAULT_SCALES = [0.25, INITIAL_SCALE, 2, 4];
-
-export const AUTO_SIZING_TIMEOUT = 2000; // 2 seconds
+export const DEFAULT_SETTINGS: GraphViewSettingsWithDefaults = {
+  autoSizingTimeout: 2000,
+  initialScale: 1,
+  objectFit: 'none',
+  padding: 0,
+  scales: [0.25, 1, 2, 4]
+};
