@@ -4,7 +4,7 @@ import GraphComponentComposer from '@/components/views/GraphComponentComposer';
 import { DirectedGraph } from '@/models/graphs';
 import { DirectedGraphRenderers } from '@/types/renderer';
 import { DirectedGraphSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/equality';
+import { deepMemoComparator } from '@/utils/objects';
 
 export type DirectedGraphComponentProps<V, E> = {
   graph: DirectedGraph<V, E>;

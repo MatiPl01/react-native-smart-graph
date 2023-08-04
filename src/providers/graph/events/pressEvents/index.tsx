@@ -2,9 +2,6 @@ import { PropsWithChildren, useEffect } from 'react';
 
 import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { AnimatedCanvasTransform } from '@/types/canvas';
-import { VertexComponentData } from '@/types/components';
-import { GraphEventsSettings } from '@/types/settings';
 
 import OverlayLayer from './OverlayLayer';
 

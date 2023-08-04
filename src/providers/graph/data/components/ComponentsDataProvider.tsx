@@ -1,5 +1,4 @@
 import {
-  Context,
   createContext,
   PropsWithChildren,
   useCallback,
@@ -9,6 +8,7 @@ import {
 } from 'react';
 
 import { useGraphObserver } from '@/hooks';
+import { withGraphData } from '@/providers/graph/data/context';
 import {
   EdgeComponentData,
   EdgeRemoveHandler,
@@ -16,7 +16,6 @@ import {
   VertexRemoveHandler
 } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-import { DataProviderReturnType } from '@/types/data';
 import { Graph, GraphConnections } from '@/types/graphs';
 import {
   AnimationSettingsWithDefaults,
@@ -31,8 +30,6 @@ import {
   updateGraphEdgesData,
   updateGraphVerticesData
 } from '@/utils/components';
-import { withMemoContext } from '@/utils/contexts';
-import { withGraphData } from '../context';
 
 export type ComponentsDataContextType<V, E> = {
   connections: GraphConnections;
@@ -220,7 +217,7 @@ function ComponentsDataProvider<V, E>({
 
 export default withGraphData(
   ComponentsDataProvider,
-  ({ graph, settings, renderers }) => ({
+  ({ graph, renderers, settings }) => ({
     graph,
     graphAnimationsSettings: settings.animations,
     renderLabels: !!renderers.label

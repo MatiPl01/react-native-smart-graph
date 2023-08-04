@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
+
 import { GraphDataContext, GraphDataContextType } from './context';
-import { GraphData, createContextValue } from './utils';
+import { createContextValue, GraphData } from './utils';
 
 type GraphDataProviderProps<V, E> = PropsWithChildren<GraphData<V, E>>;
 

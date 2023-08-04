@@ -16,6 +16,14 @@ export type GraphPlacementSettings =
   | RandomPlacementSettings
   | TreesPlacementSettings;
 
+export type GraphPlacementSettingsWithDefaults =
+  | DeepRequiredAll<
+      | CircularPlacementSettings
+      | OrbitsPlacementSettings
+      | TreesPlacementSettings
+    >
+  | RandomPlacementSettingsWithDefaults;
+
 type SortablePlacementSettings = {
   sortComparator?: (key1: string, key2: string) => number;
   sortVertices?: boolean;
@@ -39,12 +47,16 @@ export type UnboundRandomPlacementSettings = {
   minVertexSpacing?: number;
 };
 
-export type UnboundRandomPlacementSettingsWithDefaults =
-  DeepRequiredAll<UnboundRandomPlacementSettings>;
-
 export type RandomPlacementSettings = {
   strategy: 'random';
 } & (BoundRandomPlacementSettings | UnboundRandomPlacementSettings);
+
+export type RandomPlacementSettingsWithDefaults = {
+  strategy: 'random';
+} & (
+  | DeepRequiredAll<BoundRandomPlacementSettings>
+  | UnboundRandomPlacementSettings
+);
 
 export type OrbitsLayerSizing =
   | 'auto'

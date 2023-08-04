@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
-
-const isSharedValue = (value: unknown): boolean =>
-  typeof value === 'object' && value !== null && Object.hasOwn(value, 'value');
+import { isSharedValue } from 'react-native-reanimated';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const deepEqual = (value1: any, value2: any): boolean => {
@@ -180,3 +180,81 @@ export const deepMemoComparator =
 
     return true;
   };
+
+/*
+ * Customizes values of the properties that are being merged.
+ *
+ * @param oldValue - the value of the property in the old object
+ * @param newValue - the value of the property in the new object
+ *
+ * @returns - the resulting value that will be used after merging
+ *            the old and new values (if undefined is returned, the value
+ *            will be removed from the resulting object)
+ */
+type CustomizerValue = boolean | null | number | object | string | undefined;
+type Customizer = (props: {
+  key: string;
+  newValue: CustomizerValue;
+  oldValue: CustomizerValue;
+}) => CustomizerValue;
+
+export const mergeObjects = <R>(
+  oldObject: Record<string, any>,
+  newObject: Record<string, any>,
+  customizer?: Customizer,
+  propKey = ''
+): R => {
+  // Use the customizer if it is provided
+  let newObj = newObject;
+  if (customizer) {
+    // Call the customizer with the old and new values
+    const value = customizer({
+      key: propKey,
+      newValue: newObject,
+      oldValue: oldObject
+    });
+    // If the customizer returns undefined, remove the value from the resulting object
+    if (value === undefined) return undefined as R;
+    // If oldObject is returned, the value will not be modified
+    if (value === oldObject) return oldObject as R;
+    // Otherwise, use the value returned by the customizer as the new Object
+    // and continue with the merge
+    newObj = value as any;
+  }
+
+  // If at least one of the values is not an object or is null, return the new value
+  if (
+    typeof oldObject !== 'object' ||
+    oldObject === null ||
+    typeof newObj !== 'object' ||
+    newObj === null
+  ) {
+    return newObj as R;
+  }
+
+  // Iterate over the new object and merge its properties with the old object
+  const result = (
+    Array.isArray(newObj) && Array.isArray(oldObject) ? [] : {}
+  ) as Record<string, any>;
+  let isModified = false;
+
+  for (const key in newObj) {
+    const value = mergeObjects(
+      oldObject[key],
+      (newObj as Record<string, any>)[key],
+      customizer,
+      key
+    );
+    isModified ||= value !== oldObject[key];
+    result[key] = value;
+  }
+
+  // Add keys from the old object that are not in the new object
+  for (const key in oldObject) {
+    if (!Object.hasOwn(newObject, key)) {
+      result[key] = oldObject[key];
+    }
+  }
+
+  return (isModified ? result : oldObject) as R;
+};

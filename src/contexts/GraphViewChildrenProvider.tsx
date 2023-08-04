@@ -13,7 +13,7 @@ import {
   DirectedGraphComponentProps,
   UndirectedGraphComponentProps
 } from '@/components/graphs';
-import { deepMemoComparator } from '@/utils/equality';
+import { deepMemoComparator } from '@/utils/objects';
 
 type GraphViewChildrenContextType<
   V,

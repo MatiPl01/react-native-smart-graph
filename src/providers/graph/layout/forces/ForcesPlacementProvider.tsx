@@ -11,13 +11,7 @@ import { runOnUI } from 'react-native-reanimated';
 
 import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { VertexComponentData } from '@/types/components';
-import { Graph } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import {
-  AnimationSettingsWithDefaults,
-  GraphSettingsWithDefaults
-} from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { updateNewVerticesPositions } from '@/utils/forces';
 import { placeVertices } from '@/utils/placement';

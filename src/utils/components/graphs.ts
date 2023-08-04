@@ -9,11 +9,11 @@ import {
   DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
 } from '@/constants/animations';
 import {
-  ARROW_COMPONENT_SETTINGS,
   CURVED_EDGE_COMPONENT_SETTINGS,
-  LABEL_COMPONENT_SETTINGS,
-  STRAIGHT_EDGE_COMPONENT_SETTINGS,
-  VERTEX_COMPONENT_SETTINGS
+  DEFAULT_ARROW_COMPONENT_SETTINGS,
+  DEFAULT_LABEL_COMPONENT_SETTINGS,
+  DEFAULT_STRAIGHT_EDGE_COMPONENT_SETTINGS,
+  DEFAULT_VERTEX_COMPONENT_SETTINGS
 } from '@/constants/components';
 import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
 import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
@@ -61,23 +61,23 @@ export const updateGraphSettingsWithDefaults = <V>(
     edge: {
       ...(settings?.components?.edge?.type === 'curved'
         ? CURVED_EDGE_COMPONENT_SETTINGS
-        : STRAIGHT_EDGE_COMPONENT_SETTINGS),
+        : DEFAULT_STRAIGHT_EDGE_COMPONENT_SETTINGS),
       ...settings?.components?.edge
     },
     ...(isGraphDirected
       ? {
           arrow: {
-            ...ARROW_COMPONENT_SETTINGS,
+            ...DEFAULT_ARROW_COMPONENT_SETTINGS,
             ...(settings?.components as DirectedGraphComponentsSettings)?.arrow
           }
         }
       : {}),
     label: {
-      ...LABEL_COMPONENT_SETTINGS,
+      ...DEFAULT_LABEL_COMPONENT_SETTINGS,
       ...settings?.components?.label
     },
     vertex: {
-      ...VERTEX_COMPONENT_SETTINGS,
+      ...DEFAULT_VERTEX_COMPONENT_SETTINGS,
       ...settings?.components?.vertex
     }
   },

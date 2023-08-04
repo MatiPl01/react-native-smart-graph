@@ -1,3 +1,6 @@
+import { Context, createContext } from 'react';
+import { SharedValue } from 'react-native-reanimated';
+
 import { DataProviderReturnType } from '@/types/data';
 import { Graph } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
@@ -10,16 +13,13 @@ import {
 } from '@/types/settings';
 import { Sharedify } from '@/types/utils';
 import { withMemoContext } from '@/utils/contexts';
-import { Context, createContext } from 'react';
-import { SharedValue } from 'react-native-reanimated';
 
 export type GraphDataContextType<V, E> = {
   graph: Graph<V, E>;
   renderers: GraphRenderers<V, E>;
-  targetBoundingRect: SharedValue<BoundingRect>;
   settings: {
-    events: GraphSettingsWithDefaults<V>['events'];
     animations: GraphAnimationsSettingsWithDefaults;
+    events?: GraphSettingsWithDefaults<V>['events'];
     focus?: {
       disableGestures?: SharedValue<boolean>;
       points: SharedValue<FocusPoints>;
@@ -31,6 +31,7 @@ export type GraphDataContextType<V, E> = {
       managedBy: GraphLayoutSettings['managedBy'];
     };
   } & Sharedify<Pick<GraphSettingsWithDefaults<V>, 'components' | 'placement'>>;
+  targetBoundingRect: SharedValue<BoundingRect>;
 };
 
 export const GraphDataContext = createContext(null as unknown as object);
@@ -43,9 +44,9 @@ export const withGraphData = <
 >(
   Component: React.ComponentType<P>,
   selector: (contextValue: GraphDataContextType<V, E>) => R
-) => Component as DataProviderReturnType<P, R>; // TODO - this is temporary
-// withMemoContext(
-//   Component,
-//   GraphDataContext as unknown as Context<C>,
-//   selector
-// ) as DataProviderReturnType<P, R>;
+) =>
+  withMemoContext(
+    Component,
+    GraphDataContext as unknown as Context<GraphDataContextType<V, E>>,
+    selector
+  ) as DataProviderReturnType<P, R>;

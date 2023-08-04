@@ -85,7 +85,7 @@ Specifies what is the **width** of the container which the `x` coordinate will b
 
 | Type   | Default        | Required |
 | ------ | -------------- | -------- |
-| number | _window width_ | no       |
+| number | _canvas width_ | no       |
 
 #### `containerHeight` (when `mesh` is set to `'random'`)
 
@@ -93,7 +93,7 @@ Specifies what is the **height\*\*** of the container which the `y` coordinate w
 
 | Type   | Default         | Required |
 | ------ | --------------- | -------- |
-| number | _window height_ | no       |
+| number | _canvas height_ | no       |
 
 ## Examples
 

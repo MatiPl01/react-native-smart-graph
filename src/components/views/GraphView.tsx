@@ -1,7 +1,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { DEFAULT_SETTINGS } from '@/constants/views';
+import { DEFAULT_SETTINGS } from '@/constants/view';
 import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
@@ -9,7 +9,7 @@ import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, { useGesturesContext } from '@/providers/canvas';
 import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
-import { deepMemoComparator } from '@/utils/equality';
+import { deepMemoComparator } from '@/utils/objects';
 
 type GraphViewProps = PropsWithChildren<{
   autoSizingTimeout?: number;

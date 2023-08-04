@@ -4,7 +4,7 @@ import GraphComponentComposer from '@/components/views/GraphComponentComposer';
 import { UndirectedGraph } from '@/models/graphs';
 import { UndirectedGraphRenderers } from '@/types/renderer';
 import { UndirectedGraphSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/equality';
+import { deepMemoComparator } from '@/utils/objects';
 
 export type UndirectedGraphComponentProps<V, E> = {
   graph: UndirectedGraph<V, E>;

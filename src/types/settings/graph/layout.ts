@@ -1,15 +1,13 @@
 import { ForcesSettings } from '@/types/settings/forces';
 import { DeepRequiredAll } from '@/types/utils';
 
-export type GraphMeshType = 'auto' | 'forces';
-
 export type AutoLayoutSettings = {
-  managedBy: 'placement';
+  type: 'auto';
 };
 
 export type ForcesLayoutSettings = {
-  managedBy: 'forces';
   settings?: ForcesSettings;
+  type: 'forces';
 };
 
 export type ForcesLayoutSettingsWithDefaults =
@@ -20,3 +18,5 @@ export type GraphLayoutSettings = AutoLayoutSettings | ForcesLayoutSettings;
 export type GraphLayoutSettingsWithDefaults =
   | AutoLayoutSettings
   | ForcesLayoutSettingsWithDefaults;
+
+export type LayoutType = GraphLayoutSettingsWithDefaults['type'];

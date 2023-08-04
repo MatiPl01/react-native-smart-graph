@@ -1,20 +1,12 @@
 import { PropsWithChildren, useMemo } from 'react';
 import {
   runOnJS,
-  SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
 
 import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
-import { Graph } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
-import {
-  AnimationSettingsWithDefaults,
-  GraphSettingsWithDefaults
-} from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 

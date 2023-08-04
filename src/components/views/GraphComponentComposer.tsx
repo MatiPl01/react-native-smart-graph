@@ -100,8 +100,8 @@ function GraphComponentComposer<
       style={styles.canvas}>
       <Group transform={canvasTransform}>
         <GraphProvider<V, E>
-          graphProps={graphProps}
-          canvasContexts={canvasContexts}>
+          canvasContexts={canvasContexts}
+          graphProps={graphProps}>
           <GraphComponent />
         </GraphProvider>
       </Group>

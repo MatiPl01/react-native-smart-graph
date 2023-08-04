@@ -11,9 +11,7 @@ import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData } from '@/providers/graph/data/components';
 import { useVertexFocusContext } from '@/providers/graph/focus/VertexFocusProvider';
-import { VertexComponentData } from '@/types/components';
 import { FocusStepData } from '@/types/focus';
-import { MultiStepFocusSettings } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
 import { getFocusSteps } from '@/utils/focus';
 

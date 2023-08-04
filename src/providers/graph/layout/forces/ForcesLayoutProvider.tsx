@@ -1,10 +1,7 @@
 import { PropsWithChildren } from 'react';
-import { SharedValue, useFrameCallback } from 'react-native-reanimated';
+import { useFrameCallback } from 'react-native-reanimated';
 
 import { withComponentsData } from '@/providers/graph';
-import { GraphConnections } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
-import { ForcesSettingsWithDefaults } from '@/types/settings';
 import { animateToValue } from '@/utils/animations';
 import { applyForces } from '@/utils/forces';
 import {

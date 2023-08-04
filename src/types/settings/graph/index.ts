@@ -1,3 +1,4 @@
+import { DeepRequiredAll } from '@/types/utils';
 import {
   GraphAnimationsSettings,
   GraphAnimationsSettingsWithDefaults
@@ -13,7 +14,7 @@ import { MultiStepFocusSettings } from './focus';
 import { GraphLayoutSettings, GraphLayoutSettingsWithDefaults } from './layout';
 import {
   GraphPlacementSettings,
-  UnboundRandomPlacementSettingsWithDefaults
+  GraphPlacementSettingsWithDefaults,
 } from './placement';
 
 export * from './animations';
@@ -41,19 +42,25 @@ export type UndirectedGraphSettings<V> = SharedGraphSettings<V> & {
 
 export type GraphSettings<V> =
   | DirectedGraphSettings<V>
-  | UndirectedGraphSettings<V>;
+  | UndirectedGraphSettings<V>;]
 
-export type GraphSettingsWithDefaults<V> = (
-  | (Omit<DirectedGraphSettings<V>, 'animations' | 'components'> & {
-      components: DirectedGraphComponentsSettingsWithDefaults;
-    })
-  | (Omit<UndirectedGraphSettings<V>, 'animations' | 'components'> & {
-      components: UndirectedGraphComponentsSettingsWithDefaults;
-    })
-) & {
+export type SharedDefaultGraphSettings = {
   animations: GraphAnimationsSettingsWithDefaults;
   layout: GraphLayoutSettingsWithDefaults;
-  placement:
-    | GraphPlacementSettings
-    | UnboundRandomPlacementSettingsWithDefaults;
+  placement: GraphPlacementSettingsWithDefaults;
 };
+
+export type DirectedGraphSettingsWithDefaults<V> = SharedDefaultGraphSettings &
+  Omit<DirectedGraphSettings<V>, 'animations' | 'components'> & {
+    components: DirectedGraphComponentsSettingsWithDefaults;
+  };
+
+export type UndirectedGraphSettingsWithDefaults<V> =
+  SharedDefaultGraphSettings &
+    Omit<UndirectedGraphSettings<V>, 'animations' | 'components'> & {
+      components: UndirectedGraphComponentsSettingsWithDefaults;
+    };
+
+export type GraphSettingsWithDefaults<V> =
+  | DirectedGraphSettingsWithDefaults<V>
+  | UndirectedGraphSettingsWithDefaults<V>;

@@ -1,4 +1,4 @@
-import { DeepRequired, DeepRequiredAll } from '@/types/utils';
+import { DeepRequiredAll } from '@/types/utils';
 
 export type VertexSettings = {
   radius?: number;
@@ -21,6 +21,10 @@ export type EdgeLabelSettings = {
 
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
+export type EdgeSettingsWithDefaults = DeepRequiredAll<EdgeSettings>;
+
+export type EdgeType = EdgeSettings['type'];
+
 export type EdgeArrowSettings = {
   scale?: number; // scale relative to vertex radius
 };
@@ -31,18 +35,17 @@ type SharedGraphComponentsSettings = {
   vertex?: VertexSettings;
 };
 
+export type SharedGraphComponentsSettingsWithDefaults =
+  DeepRequiredAll<SharedGraphComponentsSettings>;
+
 export type DirectedGraphComponentsSettings = SharedGraphComponentsSettings & {
   arrow?: EdgeArrowSettings;
 };
 
 export type UndirectedGraphComponentsSettings = SharedGraphComponentsSettings;
 
-export type DirectedGraphComponentsSettingsWithDefaults = DeepRequired<
-  DirectedGraphComponentsSettings,
-  ['edge', 'type'] | ['label', 'scale'] | ['vertex', 'radius']
->;
+export type DirectedGraphComponentsSettingsWithDefaults =
+  DeepRequiredAll<DirectedGraphComponentsSettings>;
 
-export type UndirectedGraphComponentsSettingsWithDefaults = DeepRequired<
-  UndirectedGraphComponentsSettings,
-  ['edge', 'type'] | ['label', 'scale'] | ['vertex', 'radius']
->;
+export type UndirectedGraphComponentsSettingsWithDefaults =
+  DeepRequiredAll<UndirectedGraphComponentsSettings>;

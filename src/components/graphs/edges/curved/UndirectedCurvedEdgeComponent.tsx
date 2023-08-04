@@ -5,7 +5,7 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
+import { DEFAULT_LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import {
   animatedVectorCoordinatesToVector,
@@ -44,7 +44,8 @@ function UndirectedCurvedEdgeComponent<E, V>({
     ({ r1, r2 }) => {
       labelHeight.value =
         ((r1 + r2) / 2) *
-        (componentSettings.label?.scale ?? LABEL_COMPONENT_SETTINGS.scale);
+        (componentSettings.label?.scale ??
+          DEFAULT_LABEL_COMPONENT_SETTINGS.scale);
     },
     [componentSettings.label?.scale]
   );

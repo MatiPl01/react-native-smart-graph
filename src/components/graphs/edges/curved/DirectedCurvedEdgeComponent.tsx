@@ -7,7 +7,7 @@ import {
 } from 'react-native-reanimated';
 
 import EdgeArrowComponent from '@/components/graphs/arrows/EdgeArrowComponent';
-import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
+import { DEFAULT_LABEL_COMPONENT_SETTINGS } from '@/constants/components';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components/edges';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import {
@@ -64,7 +64,8 @@ function DirectedCurvedEdgeComponent<E, V>({
     ({ r1, r2 }) => {
       labelHeight.value =
         ((r1 + r2) / 2) *
-        (componentSettings.label?.scale ?? LABEL_COMPONENT_SETTINGS.scale);
+        (componentSettings.label?.scale ??
+          DEFAULT_LABEL_COMPONENT_SETTINGS.scale);
     },
     [componentSettings.label?.scale]
   );

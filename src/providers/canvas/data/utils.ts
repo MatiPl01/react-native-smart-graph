@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  cancelAnimation,
-  makeMutable,
-  SharedValue
-} from 'react-native-reanimated';
 
-import { DEFAULT_SETTINGS } from '@/constants/views';
+import { makeMutable } from 'react-native-reanimated';
+
+import { DEFAULT_VIEW_SETTINGS as DEFAULT_SETTINGS } from '@/configs/view';
 import { GraphViewSettings } from '@/types/settings';
-import { deepEqual } from '@/utils/equality';
+import { cancelAnimations } from '@/utils/animations';
 import { updateSpacing } from '@/utils/layout';
 
 import { CanvasDataContextType } from './context';
@@ -49,7 +46,9 @@ export const createContextValue = (
     userSettings.scales?.[0] ?? DEFAULT_SETTINGS.scales[0]!
   ),
   objectFit: makeMutable(userSettings.objectFit ?? DEFAULT_SETTINGS.objectFit),
-  padding: makeMutable(updateSpacing(userSettings.padding)),
+  padding: makeMutable(
+    updateSpacing(userSettings.padding ?? DEFAULT_SETTINGS.padding)
+  ),
   scales: makeMutable(userSettings.scales ?? DEFAULT_SETTINGS.scales)
 });
 
@@ -57,47 +56,23 @@ export const updateContextValue = (
   value: CanvasDataContextType,
   userSettings: GraphViewSettings
 ): void => {
-  const updateProperty = <T>(
-    name: keyof GraphViewSettings,
-    property: SharedValue<T>
-  ): void => {
-    const newValue = (userSettings[name] ?? DEFAULT_SETTINGS[name]) as T;
-    if (!deepEqual(property.value, newValue)) {
-      property.value = newValue;
-    }
-  };
-
-  if (userSettings.padding) {
-    userSettings.padding = updateSpacing(userSettings.padding);
-  }
-
-  updateProperty('autoSizingTimeout', value.autoSizingTimeout);
-  updateProperty('initialScale', value.initialScale);
-  updateProperty('objectFit', value.objectFit);
-  updateProperty('scales', value.scales);
-  updateProperty('padding', value.padding);
+  value.autoSizingTimeout.value =
+    userSettings.autoSizingTimeout ?? DEFAULT_SETTINGS.autoSizingTimeout;
+  value.autoSizingEnabled.value = userSettings.autoSizingTimeout !== -1; // disable auto sizing if timeout is -1 (TODO: add to docs)
+  value.initialScale.value =
+    userSettings.initialScale ?? DEFAULT_SETTINGS.initialScale;
+  value.initialScaleProvided.value = userSettings.initialScale !== undefined;
+  value.maxScale.value =
+    userSettings.scales?.[userSettings.scales.length - 1] ??
+    DEFAULT_SETTINGS.scales[DEFAULT_SETTINGS.scales.length - 1]!;
+  value.minScale.value =
+    userSettings.scales?.[0] ?? DEFAULT_SETTINGS.scales[0]!;
+  value.objectFit.value = userSettings.objectFit ?? DEFAULT_SETTINGS.objectFit;
+  value.padding.value = updateSpacing(
+    userSettings.padding ?? DEFAULT_SETTINGS.padding
+  );
+  value.scales.value = userSettings.scales ?? DEFAULT_SETTINGS.scales;
 };
 
-export const clearContextValue = (value: CanvasDataContextType): void => {
-  cancelAnimation(value.autoSizingEnabled);
-  cancelAnimation(value.autoSizingTimeout);
-  cancelAnimation(value.boundingRect.bottom);
-  cancelAnimation(value.boundingRect.left);
-  cancelAnimation(value.boundingRect.right);
-  cancelAnimation(value.boundingRect.top);
-  cancelAnimation(value.canvasDimensions.height);
-  cancelAnimation(value.canvasDimensions.width);
-  cancelAnimation(value.currentScale);
-  cancelAnimation(value.currentTranslation.x);
-  cancelAnimation(value.currentTranslation.y);
-  cancelAnimation(value.gesturesDisabled);
-  cancelAnimation(value.initialScale);
-  cancelAnimation(value.initialScaleProvided);
-  cancelAnimation(value.isGestureActive);
-  cancelAnimation(value.isRendered);
-  cancelAnimation(value.maxScale);
-  cancelAnimation(value.minScale);
-  cancelAnimation(value.objectFit);
-  cancelAnimation(value.padding);
-  cancelAnimation(value.scales);
-};
+export const clearContextValue = (value: CanvasDataContextType) =>
+  cancelAnimations(value);

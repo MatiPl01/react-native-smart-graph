@@ -17,6 +17,7 @@ import { useFocusObserver } from '@/hooks';
 import { FocusStatus } from '@/providers/canvas';
 import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withGraphData } from '@/providers/graph/data/context';
 import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { FocusedVertexData } from '@/types/settings/focus';
@@ -25,7 +26,6 @@ import {
   getFocusedVertexTransformation,
   updateFocusTransformation
 } from '@/utils/focus';
-import { withGraphData } from '../data/context';
 
 type VertexFocusContextType = {
   isVertexFocused: SharedValue<boolean>;

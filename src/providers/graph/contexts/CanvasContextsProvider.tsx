@@ -1,4 +1,4 @@
-import { PropsWithChildren, createContext, useContext } from 'react';
+import { createContext, PropsWithChildren, useContext } from 'react';
 
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import {

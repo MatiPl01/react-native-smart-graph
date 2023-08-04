@@ -5,22 +5,22 @@ import {
   UndirectedGraphComponentProps
 } from '@/components/graphs';
 import { ContextProviderComposer } from '@/providers/utils';
-import { deepMemoComparator } from '@/utils/equality';
+import ConditionalProvider from '@/providers/utils/ConditionalProvider';
+import { deepMemoComparator } from '@/utils/objects';
 
 import CanvasContextsProvider, {
   CanvasContexts
 } from './contexts/CanvasContextsProvider';
 import { ComponentsDataProvider } from './data/components';
+import GraphDataProvider from './data/GraphDataProvider';
 import { PressEventsProvider } from './events';
+import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
 import {
   ContainerDimensionsProvider,
   ForcesLayoutProvider,
   ForcesPlacementProvider,
   PlacementLayoutProvider
 } from './layout';
-import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
-import GraphDataProvider from './data/GraphDataProvider';
-import ConditionalProvider from '../utils/ConditionalProvider';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
   canvasContexts: CanvasContexts;
@@ -44,17 +44,17 @@ function GraphProvider<V, E>({
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
       <ConditionalProvider.Switch
-        match={({ settings }) => settings.layout.managedBy}
         case={{
-          // Provider used to place and move vertices on graph changes
-          placement: <PlacementLayoutProvider />,
           forces: [
             // Provider used to place vertices on graph changes
             <ForcesPlacementProvider />,
             // Provider used to animate vertices based on calculated forces
             <ForcesLayoutProvider />
-          ]
+          ],
+          // Provider used to place and move vertices on graph changes
+          placement: <PlacementLayoutProvider />
         }}
+        match={({ settings }) => settings.layout.managedBy}
       />,
       // CONTAINER
       // Provider used to compute the dimensions of the container
