@@ -1,9 +1,9 @@
-import { GraphConnections } from '@/types/graphs';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { GraphConnections } from '@/types/models';
 import {
-  GetLayerRadiusFunction,
+  AllOrbitsPlacementSettings,
   GraphLayout,
-  OrbitsLayerSizingSettings,
-  OrbitsPlacementSettingsWithDefaults,
+  LayerRadiusGetter,
   PlacedVerticesPositions
 } from '@/types/settings';
 import {
@@ -95,7 +95,7 @@ const getNonDecreasingLayerRadiuses = (
 
 const getCustomLayerRadiuses = (
   layersCount: number,
-  getLayerRadius: GetLayerRadiusFunction
+  getLayerRadius: LayerRadiusGetter
 ): Array<number> => {
   'worklet';
   const layersRadius = [0];
@@ -137,10 +137,10 @@ const getLayerRadiuses = (
   minLayerRadiuses: Record<string, number>,
   minVertexSpacing: number,
   vertexRadius: number,
-  layerSizingSettings: OrbitsLayerSizingSettings
+  settings: AllOrbitsPlacementSettings
 ): Array<number> => {
   'worklet';
-  switch (layerSizingSettings.layerSizing) {
+  switch (settings.layerSizing) {
     case 'equal':
       return getEqualLayerRadiuses(minLayerRadiuses);
     case 'quad-increasing':
@@ -154,7 +154,7 @@ const getLayerRadiuses = (
     case 'custom':
       return getCustomLayerRadiuses(
         Object.keys(minLayerRadiuses).length,
-        layerSizingSettings.getLayerRadius
+        settings.getLayerRadius
       );
     case 'auto':
     default:
@@ -178,7 +178,7 @@ const calcLayerRadiuses = (
   arrangedVertices: ArrangedVertices,
   minVertexSpacing: number,
   vertexRadius: number,
-  layerSizingSettings: OrbitsLayerSizingSettings
+  settings: AllOrbitsPlacementSettings
 ): Record<number, number> => {
   'worklet';
   // Calc min layer radiuses
@@ -199,7 +199,7 @@ const calcLayerRadiuses = (
     minLayerRadiuses,
     minVertexSpacing,
     vertexRadius,
-    layerSizingSettings
+    settings
   );
 };
 
@@ -279,7 +279,7 @@ export default function placeVerticesOnOrbits(
   connections: GraphConnections,
   vertexRadius: number,
   isGraphDirected: boolean,
-  settings: OrbitsPlacementSettingsWithDefaults
+  settings: AllOrbitsPlacementSettings
 ): GraphLayout {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];

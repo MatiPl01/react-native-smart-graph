@@ -6,20 +6,20 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import {
+  AllAnimationSettings,
   AnimationSettings,
-  AnimationSettingsWithDefaults,
-  AnimationsSettings,
   BatchModificationAnimationSettings,
+  GraphAnimationsSettings,
   SingleModificationAnimationSettings
-} from '@/types/settings/animations';
+} from '@/types/settings';
 
 export const animateVerticesToFinalPositions = (
   animatedPositions: Record<string, AnimatedVectorCoordinates>,
   finalPositions: Record<string, Vector>,
-  { duration, easing, onComplete }: AnimationSettingsWithDefaults
+  { duration, easing, onComplete }: AllAnimationSettings
 ) => {
   'worklet';
   const finalPositionsEntries = Object.entries(finalPositions);
@@ -77,7 +77,7 @@ const isBatchModificationSettingsObjectWithEdgesAndVertices = (
 export const createAnimationsSettingsForSingleModification = (
   component: { edge?: string; vertex?: string },
   animationsSettings?: SingleModificationAnimationSettings
-): AnimationsSettings => {
+): GraphAnimationsSettings => {
   if (!animationsSettings) {
     return {
       edges: {},
@@ -121,9 +121,9 @@ export const createAnimationsSettingsForSingleModification = (
 };
 
 export const createAnimationsSettingsForBatchModification = (
-  components: { edges?: string[]; vertices?: string[] },
+  components: { edges?: Array<string>; vertices?: Array<string> },
   animationsSettings?: BatchModificationAnimationSettings
-): AnimationsSettings => {
+): GraphAnimationsSettings => {
   if (!animationsSettings) {
     return {
       edges: {},

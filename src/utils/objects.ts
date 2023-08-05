@@ -1,6 +1,3 @@
-/* eslint-disable import/no-unused-modules */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -98,8 +95,8 @@ const updateSettings = <S extends ExcludeSettings | IncludeSettings>(
   } as S;
 };
 
-type ExcludeSettings = { exclude?: string[]; shallow?: string[] };
-type IncludeSettings = { include?: string[]; shallow?: string[] };
+type ExcludeSettings = { exclude?: Array<string>; shallow?: Array<string> };
+type IncludeSettings = { include?: Array<string>; shallow?: Array<string> };
 
 const isIncludeSettingsObject = (
   settings?: ExcludeSettings | IncludeSettings

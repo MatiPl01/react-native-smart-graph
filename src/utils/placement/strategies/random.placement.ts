@@ -2,9 +2,9 @@ import { Vector } from '@shopify/react-native-skia';
 
 import { WINDOW_DIMENSIONS } from '@/constants/device';
 import {
+  AllRandomPlacementSettings,
   GraphLayout,
-  PlacedVerticesPositions,
-  RandomPlacementSettingsWithDefaults
+  PlacedVerticesPositions
 } from '@/types/settings';
 import { zipArrays } from '@/utils/arrays';
 import { alignPositionsToCenter } from '@/utils/placement/shared';
@@ -14,7 +14,7 @@ type CalcVerticesPositionsProps = {
   density: number;
   minVertexSpacing: number;
   vertexRadius: number;
-  vertices: string[];
+  vertices: Array<string>;
 };
 
 const calcVerticesGridPositions = (
@@ -118,7 +118,7 @@ const calcVerticesTriangularPositions = (
 };
 
 const calcVerticesRandomPositions = (
-  vertices: string[],
+  vertices: Array<string>,
   vertexRadius: number,
   width: number,
   height: number
@@ -141,7 +141,7 @@ const calcVerticesRandomPositions = (
 export default function placeVerticesRandomly(
   vertices: Array<string>,
   vertexRadius: number,
-  settings: RandomPlacementSettingsWithDefaults
+  settings: AllRandomPlacementSettings
 ): GraphLayout {
   'worklet';
   if (settings.mesh === 'random') {

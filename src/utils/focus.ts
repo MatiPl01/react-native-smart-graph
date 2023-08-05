@@ -1,17 +1,11 @@
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
-import {
-  DEFAULT_ALIGNMENT_SETTINGS,
-  DEFAULT_FOCUS_SCALE_MULTIPLIER
-} from '@/constants/focus';
 import { FocusContextType } from '@/providers/canvas';
-import { FocusStepData } from '@/types/focus';
+import { FocusedVertexData, FocusStepData } from '@/types/data';
 import {
   Alignment,
   AnimatedVectorCoordinates,
   Dimensions
 } from '@/types/layout';
-import { AnimationSettingsWithDefaults } from '@/types/settings';
-import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
+import { AllFocusSettings } from '@/types/settings';
 
 import {
   getAlignedVertexAbsolutePosition,
@@ -24,39 +18,20 @@ export const getFocusedVertexData = (
     position: AnimatedVectorCoordinates;
   } | null,
   vertexRadius: number,
-  availableScales: number[],
-  initialScale: number,
-  settings?: FocusSettings
+  settings: AllFocusSettings
 ): FocusedVertexData => {
   'worklet';
-  const animationSettings =
-    settings?.animation !== null
-      ? ({
-          ...DEFAULT_FOCUS_ANIMATION_SETTINGS,
-          ...settings?.animation
-        } as AnimationSettingsWithDefaults)
-      : null;
-
   if (!focusedVertexWithPosition) {
-    return { animation: animationSettings };
+    return { animation: settings.animation };
   }
 
   return {
-    animation: animationSettings,
+    animation: settings.animation,
     vertex: {
       ...focusedVertexWithPosition,
-      alignment: {
-        ...DEFAULT_ALIGNMENT_SETTINGS,
-        ...settings?.alignment
-      },
+      alignment: settings.alignment,
       radius: vertexRadius,
-      scale:
-        settings?.vertexScale ??
-        Math.min(
-          initialScale * DEFAULT_FOCUS_SCALE_MULTIPLIER,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          availableScales[availableScales.length - 1]!
-        )
+      scale: settings.vertexScale
     }
   };
 };
@@ -118,9 +93,8 @@ export const getFocusedVertexTransformation = ({
 };
 
 type FocusConfig = {
-  availableScales: number[];
   canvasDimensions: Dimensions;
-  initialScale: number;
+  disableGestures: boolean;
   vertexRadius: number;
 };
 
@@ -133,16 +107,15 @@ export const getMultiStepVertexTransformation = <V, E>(
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { alignment, position, radius, scale } = getFocusedVertexData(
     {
-      key: stepData.value.key,
+      key: stepData.point.key,
       position: stepData.vertex.position
     },
     config.vertexRadius,
-    config.availableScales,
-    config.initialScale,
     {
-      alignment: stepData.value.alignment,
+      alignment: stepData.point.alignment,
       animation: null,
-      vertexScale: stepData.value.vertexScale
+      disableGestures: config.disableGestures,
+      vertexScale: stepData.point.vertexScale
     }
   ).vertex!;
 

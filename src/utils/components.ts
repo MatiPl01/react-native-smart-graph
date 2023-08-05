@@ -1,11 +1,11 @@
 import { runOnJS, SharedValue, withTiming } from 'react-native-reanimated';
 
-import { AnimationSettingsWithDefaults } from '@/types/settings/animations';
+import { AllAnimationSettings } from '@/types/settings';
 
 export const updateComponentAnimationState = (
   key: string,
   animationProgress: SharedValue<number>,
-  animationSettings: AnimationSettingsWithDefaults,
+  animationSettings: AllAnimationSettings,
   removed: boolean,
   onRemove: (k: string) => void
 ): void => {

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vector } from '@shopify/react-native-skia';
 
-import { VertexComponentData } from '@/types/components';
-import { GraphConnections } from '@/types/graphs';
+import { VertexComponentData } from '@/types/data';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
 import { grahamScan } from '@/utils/algorithms';
 import { findCenterOfPoints } from '@/utils/layout';
 import {
@@ -123,7 +123,7 @@ const findForcesPlacementPosition = (
   // the center of the hull)
   const neighborsPositions = neighbors
     .map(key => placedVerticesPositions[key])
-    .filter(Boolean) as Vector[];
+    .filter(Boolean) as Array<Vector>;
   const neighborsCenter = findCenterOfPoints(neighborsPositions)!;
 
   return placeVertexOnConvexHull(

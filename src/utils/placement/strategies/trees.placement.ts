@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GraphConnections } from '@/types/graphs';
+import { GraphConnections } from '@/types/models';
 import {
+  AllTreesPlacementSettings,
   GraphLayout,
-  PlacedVerticesPositions,
-  TreesPlacementSettingsWithDefaults
+  PlacedVerticesPositions
 } from '@/types/settings';
 import {
   bfs,
@@ -112,7 +112,7 @@ export default function placeVerticesOnTrees(
   connections: GraphConnections,
   vertexRadius: number,
   isGraphDirected: boolean,
-  settings: TreesPlacementSettingsWithDefaults
+  settings: AllTreesPlacementSettings
 ): GraphLayout {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];

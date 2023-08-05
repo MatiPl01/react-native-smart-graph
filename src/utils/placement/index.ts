@@ -1,8 +1,5 @@
-import { GraphConnections } from '@/types/graphs';
-import {
-  GraphLayout,
-  GraphPlacementSettingsWithDefaults
-} from '@/types/settings';
+import { GraphConnections } from '@/types/models';
+import { AllGraphPlacementSettings, GraphLayout } from '@/types/settings';
 import { findGraphComponents } from '@/utils/algorithms';
 
 import placeVerticesOnCircle from './strategies/circle.placement';
@@ -16,7 +13,7 @@ export * from './shared';
 export const placeVertices = (
   connections: GraphConnections,
   vertexRadius: number,
-  settings: GraphPlacementSettingsWithDefaults,
+  settings: AllGraphPlacementSettings,
   isGraphDirected = false
 ): GraphLayout => {
   'worklet';

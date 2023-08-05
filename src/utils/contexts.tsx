@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { Context, memo, useContext } from 'react';
 
 export const withMemoContext = <

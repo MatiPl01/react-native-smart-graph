@@ -9,12 +9,10 @@ export type AutoLayoutSettings = {
  * FORCE LAYOUT
  */
 export type ForceLayoutSettings = {
-  settings?: {
-    attractionForceFactor?: number;
-    attractionScale?: number;
-    repulsionScale?: number;
-    strategy: 'default';
-  };
+  attractionForceFactor?: number;
+  attractionScale?: number;
+  repulsionScale?: number;
+  strategy: 'default';
   type: 'force';
 };
 

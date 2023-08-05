@@ -1,5 +1,5 @@
 import {
-  CircularPlacementSettingsWithDefaults,
+  AllCirclePlacementSettings,
   GraphLayout,
   PlacedVerticesPositions
 } from '@/types/settings';
@@ -31,11 +31,9 @@ const getLayout = (
   };
 };
 
-export default function placeVerticesOnCircle(
-  vertices: Array<string>,
-  vertexRadius: number,
-  settings: CircularPlacementSettingsWithDefaults
-): GraphLayout {
+export default function placeVerticesOnCircle<
+  S extends Omit<AllCirclePlacementSettings, 'strategy'>
+>(vertices: Array<string>, vertexRadius: number, settings: S): GraphLayout {
   'worklet';
   const updatedVertices = settings?.sortVertices
     ? vertices.sort(settings?.sortComparator ?? defaultSortComparator)

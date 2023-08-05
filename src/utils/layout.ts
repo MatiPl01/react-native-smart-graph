@@ -89,7 +89,7 @@ export const updateSpacing = (spacing?: Spacing): BoundingRect => {
   }
   if (isAllSpacing(spacing)) {
     return Object.fromEntries(
-      ([...Object.keys(ALL_SPACING_KEYS)] as (keyof BoundingRect)[]).map(
+      ([...Object.keys(ALL_SPACING_KEYS)] as Array<keyof BoundingRect>).map(
         key => [key, spacing[key] ?? 0]
       )
     ) as BoundingRect;

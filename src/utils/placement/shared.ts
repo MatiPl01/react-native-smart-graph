@@ -1,15 +1,6 @@
 import potpack from '@/lib/potpack';
-import {
-  AnimatedBoundingRect,
-  AnimatedDimensions,
-  BoundingRect,
-  Dimensions
-} from '@/types/layout';
-import {
-  AnimatedPlacedVerticesPositions,
-  GraphLayout,
-  PlacedVerticesPositions
-} from '@/types/settings';
+import { AnimatedDimensions, BoundingRect, Dimensions } from '@/types/layout';
+import { GraphLayout, PlacedVerticesPositions } from '@/types/settings';
 
 export enum Symmetry {
   NONE,
@@ -70,61 +61,10 @@ export const calcContainerBoundingRect = (
   }
 
   return {
-    // bottom: maxY + vertexRadius + minVertexSpacing / 2,
-    // left: minX - vertexRadius - minVertexSpacing / 2,
-    // right: maxX + vertexRadius + minVertexSpacing / 2,
-    // top: minY - vertexRadius - minVertexSpacing / 2
     bottom: maxY + padding,
     left: minX - padding,
     right: maxX + padding,
     top: minY - padding
-  };
-};
-
-export const calcAnimatedContainerBoundingRect = (
-  placedVertices: AnimatedPlacedVerticesPositions,
-  vertexRadius: number
-): BoundingRect => {
-  'worklet';
-  const positions = Object.values(placedVertices);
-  if (!positions.length) {
-    return {
-      bottom: 0,
-      left: 0,
-      right: 0,
-      top: 0
-    };
-  }
-
-  let left = Infinity;
-  let right = -Infinity;
-  let top = Infinity;
-  let bottom = -Infinity;
-
-  for (const { x, y } of positions) {
-    left = Math.min(left, x.value);
-    right = Math.max(right, x.value);
-    top = Math.min(top, y.value);
-    bottom = Math.max(bottom, y.value);
-  }
-
-  return {
-    bottom: bottom + vertexRadius,
-    left: left - vertexRadius,
-    right: right + vertexRadius,
-    top: top - vertexRadius
-  };
-};
-
-export const animatedBoundingRectToRect = (
-  boundingRect: AnimatedBoundingRect
-): BoundingRect => {
-  'worklet';
-  return {
-    bottom: boundingRect.bottom.value,
-    left: boundingRect.left.value,
-    right: boundingRect.right.value,
-    top: boundingRect.top.value
   };
 };
 
