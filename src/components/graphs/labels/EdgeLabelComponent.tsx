@@ -8,7 +8,7 @@ import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   EdgeLabelRendererFunction,
   SharedRenderersProps
-} from '@/types/renderer';
+} from '@/types/renderers';
 
 type EdgeLabelComponentProps<E> = SharedRenderersProps & {
   centerX: SharedValue<number>;

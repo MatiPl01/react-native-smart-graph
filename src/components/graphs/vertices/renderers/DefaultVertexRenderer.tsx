@@ -7,7 +7,7 @@ import {
 
 import FONTS from '@/assets/fonts';
 import { DEFAULT_VERTEX_RENDERER_SETTINGS } from '@/constants/renderers';
-import { VertexRendererProps } from '@/types/renderer';
+import { VertexRendererProps } from '@/types/renderers';
 
 export default function DefaultVertexRenderer<V>({
   animationProgress,

@@ -53,8 +53,8 @@ export const createContextValue = (
 });
 
 export const updateContextValue = (
-  value: CanvasDataContextType,
-  userSettings: GraphViewSettings
+  userSettings: GraphViewSettings,
+  value: CanvasDataContextType
 ): void => {
   value.autoSizingTimeout.value =
     userSettings.autoSizingTimeout ?? DEFAULT_SETTINGS.autoSizingTimeout;

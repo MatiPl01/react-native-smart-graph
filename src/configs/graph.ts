@@ -1,10 +1,16 @@
 /* eslint-disable import/no-unused-modules */
 import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
 import {
+  EdgeLabelRendererFunction,
+  EdgeRenderFunction,
+  GraphRenderersWithDefaults
+} from '@/types/renderers';
+import {
   EdgeSettingsWithDefaults,
   EdgeType,
   GraphLayoutSettingsWithDefaults,
   GraphPlacementSettingsWithDefaults,
+  GraphSettings,
   GraphSettingsWithDefaults,
   LayoutType,
   PlacementStrategy,
@@ -12,6 +18,17 @@ import {
   RandomPlacementSettingsWithDefaults
 } from '@/types/settings';
 
+import {
+  DefaultCurvedEdgeRenderer,
+  DefaultEdgeArrowRenderer,
+  DefaultEdgeLabelRenderer,
+  DefaultStraightEdgeRenderer,
+  DefaultVertexRenderer
+} from '..';
+
+/*
+ * SETTINGS
+ */
 export const DEFAULT_EDGE_SETTINGS: Record<EdgeType, EdgeSettingsWithDefaults> =
   {
     curved: {
@@ -34,6 +51,7 @@ export const DEFAULT_RANDOM_PLACEMENT_SETTINGS: Record<
     strategy: 'random'
   },
   random: {
+    mesh: 'random',
     strategy: 'random'
   },
   triangular: {
@@ -127,3 +145,29 @@ export const DEFAULT_GRAPH_SETTINGS: GraphSettingsWithDefaults<unknown> = {
   // PLACEMENT STRATEGIES SETTINGS
   placement: DEFAULT_PLACEMENT_SETTINGS.random
 };
+
+/*
+ * RENDERERS
+ */
+export const DEFAULT_EDGE_RENDERERS: Record<
+  EdgeType,
+  EdgeRenderFunction<unknown>
+> = {
+  curved: DefaultCurvedEdgeRenderer,
+  straight: DefaultStraightEdgeRenderer
+};
+
+export const DEFAULT_EDGE_LABEL_RENDERERS: EdgeLabelRendererFunction<unknown> =
+  DefaultEdgeLabelRenderer;
+
+export const getDefaultGraphRenderers = <V, E>(
+  settings: GraphSettings<V>
+): GraphRenderersWithDefaults<V, E> => ({
+  arrow: DefaultEdgeArrowRenderer,
+  edge: DEFAULT_EDGE_RENDERERS[
+    settings.components?.edge?.type ??
+      DEFAULT_GRAPH_SETTINGS.components.edge.type
+  ],
+  label: undefined, // Label is not rendered by default
+  vertex: DefaultVertexRenderer
+});

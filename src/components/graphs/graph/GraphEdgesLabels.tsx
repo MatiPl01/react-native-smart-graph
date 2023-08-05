@@ -4,7 +4,7 @@ import { SharedValue } from 'react-native-reanimated';
 import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
 import { withComponentsData } from '@/providers/graph';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-import { EdgeLabelRendererFunction } from '@/types/renderer';
+import { EdgeLabelRendererFunction } from '@/types/renderers';
 
 type GraphEdgeLabelsProps<E> = {
   edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;

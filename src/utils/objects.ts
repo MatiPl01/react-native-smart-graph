@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -5,6 +6,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 import { isSharedValue } from 'react-native-reanimated';
+
+import { DeepPartial } from '@/types/utils';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const deepEqual = (value1: any, value2: any): boolean => {
@@ -181,80 +184,45 @@ export const deepMemoComparator =
     return true;
   };
 
-/*
- * Customizes values of the properties that are being merged.
- *
- * @param oldValue - the value of the property in the old object
- * @param newValue - the value of the property in the new object
- *
- * @returns - the resulting value that will be used after merging
- *            the old and new values (if undefined is returned, the value
- *            will be removed from the resulting object)
- */
-type CustomizerValue = boolean | null | number | object | string | undefined;
-type Customizer = (props: {
-  key: string;
-  newValue: CustomizerValue;
-  oldValue: CustomizerValue;
-}) => CustomizerValue;
+const deepMergeHelper = <T extends Record<string, any>>(
+  obj1: T,
+  obj2?: DeepPartial<T>
+): T => {
+  if (obj2 === undefined) return obj1;
 
-export const mergeObjects = <R>(
-  oldObject: Record<string, any>,
-  newObject: Record<string, any>,
-  customizer?: Customizer,
-  propKey = ''
-): R => {
-  // Use the customizer if it is provided
-  let newObj = newObject;
-  if (customizer) {
-    // Call the customizer with the old and new values
-    const value = customizer({
-      key: propKey,
-      newValue: newObject,
-      oldValue: oldObject
-    });
-    // If the customizer returns undefined, remove the value from the resulting object
-    if (value === undefined) return undefined as R;
-    // If oldObject is returned, the value will not be modified
-    if (value === oldObject) return oldObject as R;
-    // Otherwise, use the value returned by the customizer as the new Object
-    // and continue with the merge
-    newObj = value as any;
-  }
-
-  // If at least one of the values is not an object or is null, return the new value
-  if (
-    typeof oldObject !== 'object' ||
-    oldObject === null ||
-    typeof newObj !== 'object' ||
-    newObj === null
-  ) {
-    return newObj as R;
-  }
-
-  // Iterate over the new object and merge its properties with the old object
-  const result = (
-    Array.isArray(newObj) && Array.isArray(oldObject) ? [] : {}
-  ) as Record<string, any>;
+  const result = (Array.isArray(obj1) && Array.isArray(obj2) ? [] : {}) as T;
   let isModified = false;
 
-  for (const key in newObj) {
-    const value = mergeObjects(
-      oldObject[key],
-      (newObj as Record<string, any>)[key],
-      customizer,
-      key
-    );
-    isModified ||= value !== oldObject[key];
-    result[key] = value;
-  }
-
-  // Add keys from the old object that are not in the new object
-  for (const key in oldObject) {
-    if (!Object.hasOwn(newObject, key)) {
-      result[key] = oldObject[key];
+  for (const key in obj2) {
+    if (
+      Object.hasOwn(obj1, key) &&
+      typeof obj1[key] === 'object' &&
+      obj1[key] !== null &&
+      typeof obj2[key] === 'object' &&
+      obj2[key] !== null
+    ) {
+      const mergedChild = deepMerge(obj1[key], obj2[key]);
+      isModified = isModified || mergedChild !== obj1[key];
+      result[key] = mergedChild;
+    } else {
+      result[key] = obj1[key];
+      isModified = isModified || obj2[key] !== obj1[key];
     }
   }
 
-  return (isModified ? result : oldObject) as R;
+  for (const key in obj1) {
+    if (!Object.hasOwn(obj2, key)) {
+      result[key] = obj1[key];
+      isModified = true;
+    }
+  }
+
+  return isModified ? result : obj1;
+};
+
+export const deepMerge = <T extends Record<string, any>>(
+  obj1: T,
+  ...objs: Array<DeepPartial<T> | undefined>
+): T => {
+  return objs.reduce((acc, obj) => deepMergeHelper(acc, obj), obj1);
 };

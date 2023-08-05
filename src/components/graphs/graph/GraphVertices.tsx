@@ -2,7 +2,7 @@ import VertexComponent from '@/components/graphs/vertices/VertexComponent';
 import { FocusContextType } from '@/providers/canvas';
 import { withComponentsData } from '@/providers/graph';
 import { VertexComponentData, VertexRemoveHandler } from '@/types/components';
-import { VertexRenderFunction } from '@/types/renderer';
+import { VertexRenderFunction } from '@/types/renderers';
 import { VertexSettingsWithDefaults } from '@/types/settings';
 
 type GraphVerticesProps<V, E> = {

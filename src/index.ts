@@ -63,7 +63,7 @@ export {
   type StraightEdgeRendererProps,
   type UndirectedGraphRenderers,
   type VertexRendererProps
-} from '@/types/renderer';
+} from '@/types/renderers';
 export {
   type AnimationSettings,
   type AnimationsSettings,

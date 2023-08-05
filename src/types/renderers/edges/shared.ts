@@ -1,7 +1,7 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedVector } from '@/types/layout';
-import { SharedRenderersProps } from '@/types/renderer/shared';
+import { SharedRenderersProps } from '@/types/renderers/shared';
 
 // Edge arrow
 export type EdgeArrowRendererProps = SharedRenderersProps & {

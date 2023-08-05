@@ -3,20 +3,19 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { DataProviderReturnType } from '@/types/data';
 import { Graph } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
-import { GraphRenderers } from '@/types/renderer';
+import { GraphRenderersWithDefaults } from '@/types/renderers';
 import {
   FocusPoints,
   GraphAnimationsSettingsWithDefaults,
-  GraphLayoutSettings,
-  GraphSettingsWithDefaults
+  GraphSettingsWithDefaults,
+  LayoutType
 } from '@/types/settings';
 import { Sharedify } from '@/types/utils';
 import { withMemoContext } from '@/utils/contexts';
 
 export type GraphDataContextType<V, E> = {
   graph: Graph<V, E>;
-  renderers: GraphRenderers<V, E>;
+  renderers: GraphRenderersWithDefaults<V, E>;
   settings: {
     animations: GraphAnimationsSettingsWithDefaults;
     events?: GraphSettingsWithDefaults<V>['events'];
@@ -25,13 +24,10 @@ export type GraphDataContextType<V, E> = {
       points: SharedValue<FocusPoints>;
       progress: SharedValue<number>;
     };
-    layout: Sharedify<
-      Omit<GraphSettingsWithDefaults<V>['layout'], 'managedBy'>
-    > & {
-      managedBy: GraphLayoutSettings['managedBy'];
+    layout: Sharedify<Omit<GraphSettingsWithDefaults<V>['layout'], 'type'>> & {
+      type: LayoutType;
     };
   } & Sharedify<Pick<GraphSettingsWithDefaults<V>, 'components' | 'placement'>>;
-  targetBoundingRect: SharedValue<BoundingRect>;
 };
 
 export const GraphDataContext = createContext(null as unknown as object);

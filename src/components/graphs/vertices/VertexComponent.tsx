@@ -5,7 +5,7 @@ import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { useComponentFocus } from '@/hooks/focus';
 import { FocusContextType } from '@/providers/canvas';
 import { VertexComponentData, VertexRemoveHandler } from '@/types/components';
-import { VertexRendererProps, VertexRenderFunction } from '@/types/renderer';
+import { VertexRendererProps, VertexRenderFunction } from '@/types/renderers';
 import { VertexSettingsWithDefaults } from '@/types/settings';
 import { updateComponentAnimationState } from '@/utils/components';
 

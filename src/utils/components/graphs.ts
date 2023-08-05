@@ -20,7 +20,7 @@ import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
 import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
 import { OrderedEdges, Vertex } from '@/types/graphs';
-import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderer';
+import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderers';
 import {
   DirectedGraphComponentsSettings,
   GraphSettings,

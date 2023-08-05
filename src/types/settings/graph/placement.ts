@@ -1,7 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
 import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
-import { DeepRequiredAll } from '@/types/utils';
+import { DeepRequired, DeepRequiredAll } from '@/types/utils';
 
 export type PlacementStrategy =
   | 'circle'
@@ -54,8 +54,8 @@ export type RandomPlacementSettings = {
 export type RandomPlacementSettingsWithDefaults = {
   strategy: 'random';
 } & (
-  | DeepRequiredAll<BoundRandomPlacementSettings>
-  | UnboundRandomPlacementSettings
+  | DeepRequired<BoundRandomPlacementSettings, ['mesh']>
+  | DeepRequiredAll<UnboundRandomPlacementSettings>
 );
 
 export type OrbitsLayerSizing =

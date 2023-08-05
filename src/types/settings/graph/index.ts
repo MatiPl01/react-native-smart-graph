@@ -1,4 +1,3 @@
-import { DeepRequiredAll } from '@/types/utils';
 import {
   GraphAnimationsSettings,
   GraphAnimationsSettingsWithDefaults
@@ -14,7 +13,7 @@ import { MultiStepFocusSettings } from './focus';
 import { GraphLayoutSettings, GraphLayoutSettingsWithDefaults } from './layout';
 import {
   GraphPlacementSettings,
-  GraphPlacementSettingsWithDefaults,
+  GraphPlacementSettingsWithDefaults
 } from './placement';
 
 export * from './animations';
@@ -42,7 +41,7 @@ export type UndirectedGraphSettings<V> = SharedGraphSettings<V> & {
 
 export type GraphSettings<V> =
   | DirectedGraphSettings<V>
-  | UndirectedGraphSettings<V>;]
+  | UndirectedGraphSettings<V>;
 
 export type SharedDefaultGraphSettings = {
   animations: GraphAnimationsSettingsWithDefaults;
@@ -62,5 +61,4 @@ export type UndirectedGraphSettingsWithDefaults<V> =
     };
 
 export type GraphSettingsWithDefaults<V> =
-  | DirectedGraphSettingsWithDefaults<V>
-  | UndirectedGraphSettingsWithDefaults<V>;
+  DirectedGraphSettingsWithDefaults<V> & UndirectedGraphSettingsWithDefaults<V>;

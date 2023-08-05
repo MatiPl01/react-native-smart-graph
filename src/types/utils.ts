@@ -37,3 +37,7 @@ export type Maybe<T> = T | null | undefined;
 export type Sharedify<T> = {
   [K in keyof T]: T[K] extends object ? Sharedify<T[K]> : SharedValue<T[K]>;
 };
+
+export type DeepPartial<T> = T extends object
+  ? { [P in keyof T]?: DeepPartial<T[P]> }
+  : T;

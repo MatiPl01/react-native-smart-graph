@@ -9,11 +9,11 @@ import {
   EdgeRenderFunction,
   SharedRenderersProps,
   UndirectedStraightEdgeRenderers
-} from '@/types/renderer';
+} from '@/types/renderers';
 import {
   DirectedCurvedEdgeRenderers,
   UndirectedCurvedEdgeRenderers
-} from '@/types/renderer/edges/curved';
+} from '@/types/renderers/edges/curved';
 import {
   CurvedEdgeSettings,
   EdgeArrowSettings,

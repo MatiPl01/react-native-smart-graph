@@ -2,7 +2,7 @@ import { Line } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
-import { StraightEdgeRendererProps } from '@/types/renderer';
+import { StraightEdgeRendererProps } from '@/types/renderers';
 
 export default function DefaultStraightEdgeRenderer<E>({
   animationProgress,

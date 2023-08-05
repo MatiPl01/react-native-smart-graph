@@ -28,7 +28,7 @@ export default function CanvasDataProvider({
   );
 
   useEffect(() => {
-    updateContextValue(contextValue, userSettings);
+    updateContextValue(userSettings, contextValue);
 
     return () => {
       clearContextValue(contextValue);

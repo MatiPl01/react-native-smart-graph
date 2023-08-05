@@ -1,7 +1,12 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 
 import { GraphDataContext, GraphDataContextType } from './context';
-import { createContextValue, GraphData } from './utils';
+import {
+  clearContextValue,
+  createContextValue,
+  GraphData,
+  updateContextValue
+} from './utils';
 
 type GraphDataProviderProps<V, E> = PropsWithChildren<GraphData<V, E>>;
 
@@ -14,7 +19,11 @@ export default function GraphDataProvider<V, E>({
   );
 
   useEffect(() => {
-    // TODO add context value update logic
+    setContextValue(value => updateContextValue(userSettings, value));
+
+    return () => {
+      clearContextValue(contextValue);
+    };
   }, [userSettings]);
 
   return (

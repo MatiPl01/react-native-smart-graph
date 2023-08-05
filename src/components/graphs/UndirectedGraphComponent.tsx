@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import GraphComponentComposer from '@/components/views/GraphComponentComposer';
 import { UndirectedGraph } from '@/models/graphs';
-import { UndirectedGraphRenderers } from '@/types/renderer';
+import { UndirectedGraphRenderers } from '@/types/renderers';
 import { UndirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 

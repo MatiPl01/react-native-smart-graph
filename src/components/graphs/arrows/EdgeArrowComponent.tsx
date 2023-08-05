@@ -4,7 +4,7 @@ import { AnimatedVector } from '@/types/layout';
 import {
   EdgeArrowRenderFunction,
   SharedRenderersProps
-} from '@/types/renderer';
+} from '@/types/renderers';
 import { EdgeArrowSettings } from '@/types/settings';
 import { translateAlongVector } from '@/utils/vectors';
 

@@ -4,7 +4,7 @@ import { AnimatedPath } from '@/types/layout';
 import {
   EdgeLabelRendererFunction,
   SharedRenderersProps
-} from '@/types/renderer/shared';
+} from '@/types/renderers/shared';
 
 import { EdgeArrowRenderFunction } from './shared';
 

@@ -1,5 +1,5 @@
 import { AnimatedVector } from '@/types/layout';
-import { SharedRenderersProps } from '@/types/renderer/shared';
+import { SharedRenderersProps } from '@/types/renderers/shared';
 
 import { EdgeArrowRenderFunction } from './shared';
 

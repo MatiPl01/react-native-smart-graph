@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import GraphComponentComposer from '@/components/views/GraphComponentComposer';
 import { DirectedGraph } from '@/models/graphs';
-import { DirectedGraphRenderers } from '@/types/renderer';
+import { DirectedGraphRenderers } from '@/types/renderers';
 import { DirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 

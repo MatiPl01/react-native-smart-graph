@@ -3,7 +3,7 @@ import React from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
-import { EdgeArrowRendererProps } from '@/types/renderer';
+import { EdgeArrowRendererProps } from '@/types/renderers';
 
 export default function DefaultEdgeArrowRenderer({
   animationProgress,
