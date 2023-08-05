@@ -1,6 +1,5 @@
-import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import {
-  CircularPlacementSettings,
+  CircularPlacementSettingsWithDefaults,
   GraphLayout,
   PlacedVerticesPositions
 } from '@/types/settings';
@@ -35,7 +34,7 @@ const getLayout = (
 export default function placeVerticesOnCircle(
   vertices: Array<string>,
   vertexRadius: number,
-  settings: CircularPlacementSettings
+  settings: CircularPlacementSettingsWithDefaults
 ): GraphLayout {
   'worklet';
   const updatedVertices = settings?.sortVertices
@@ -46,7 +45,7 @@ export default function placeVerticesOnCircle(
   const { angleStep, containerRadius, radius } = getLayout(
     updatedVertices.length,
     vertexRadius,
-    settings?.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing
+    settings.minVertexSpacing
   );
 
   return {

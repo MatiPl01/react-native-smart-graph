@@ -93,15 +93,24 @@ export type OrbitsPlacementSettings = (SharedPlacementSettings & {
 }) &
   OrbitsLayerSizingSettings;
 
+export type OrbitsPlacementSettingsWithDefaults =
+  DeepRequiredAll<OrbitsPlacementSettings>;
+
 export type CircularPlacementSettings = SharedPlacementSettings &
   SortablePlacementSettings & {
     strategy: 'circle' | 'circles';
   };
 
+export type CircularPlacementSettingsWithDefaults =
+  DeepRequiredAll<CircularPlacementSettings>;
+
 export type TreesPlacementSettings = SharedPlacementSettings & {
   roots?: Array<string>;
   strategy: 'trees';
 };
+
+export type TreesPlacementSettingsWithDefaults =
+  DeepRequiredAll<TreesPlacementSettings>;
 
 export type PlacedVerticesPositions = Record<string, Vector>;
 export type AnimatedPlacedVerticesPositions = Record<

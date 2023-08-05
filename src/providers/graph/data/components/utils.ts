@@ -112,7 +112,13 @@ export const updateContextValue = <V, E>(
         handleVertexRemove: value?.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
         layoutAnimationSettings: newLayoutAnimationSettings,
-        targetBoundingRect: value?.targetBoundingRect, // Prevent removing
+        // Prevent removing or create the initial value if it doesn't exist
+        targetBoundingRect: value?.targetBoundingRect ?? {
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
+        },
         verticesData: newVerticesData
       }
     },

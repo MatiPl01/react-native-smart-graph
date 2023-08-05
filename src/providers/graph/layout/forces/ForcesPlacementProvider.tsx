@@ -7,14 +7,21 @@ import {
   useRef,
   useState
 } from 'react';
-import { runOnUI } from 'react-native-reanimated';
+import { runOnUI, SharedValue } from 'react-native-reanimated';
 
-import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { updateNewVerticesPositions } from '@/utils/forces';
 import { placeVertices } from '@/utils/placement';
+import { Graph } from '@/types/graphs';
+import {
+  AnimationSettingsWithDefaults,
+  GraphPlacementSettingsWithDefaults
+} from '@/types/settings';
+import { VertexComponentData } from '@/types/components';
+import { withComponentsData } from '../../data/components/context';
+import { withGraphSettings } from '../../data/settings/context';
 
 type ForcesPlacementContextType = {
   lockedVertices: Record<string, boolean>;
@@ -36,22 +43,21 @@ export const useForcesPlacementContext = () => {
 };
 
 export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
-  // graph: Graph<V, E>;
-  // layoutAnimationSettings: AnimationSettingsWithDefaults;
-  // settings: GraphSettingsWithDefaults<V>;
-  // verticesData: Record<string, VertexComponentData<V, E>>;
+  graph: Graph<V, E>;
+  layoutAnimationSettings: AnimationSettingsWithDefaults;
+  vertexRadius: SharedValue<number>;
+  placementSettings: GraphPlacementSettingsWithDefaults;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function ForcesPlacementProvider<V, E>({
   children,
   graph,
   layoutAnimationSettings,
-  settings,
+  vertexRadius,
+  placementSettings,
   verticesData
 }: ForcesPlacementProviderProps<V, E>) {
-  console.log('ForcesPlacementProvider');
-  return <>{children}</>;
-
   // CONTEXTS
   // Canvas contexts
   const {
@@ -108,8 +114,8 @@ function ForcesPlacementProvider<V, E>({
 
     const { boundingRect, verticesPositions } = placeVertices(
       graph.connections,
-      settings.components.vertex.radius,
-      settings.placement
+      vertexRadius.value,
+      placementSettings
     );
     onRender(boundingRect);
 
@@ -137,7 +143,7 @@ function ForcesPlacementProvider<V, E>({
       placedVerticesPositions,
       verticesData,
       graph.connections,
-      settings.components.vertex.radius
+      vertexRadius.value
     );
   };
 
@@ -164,10 +170,16 @@ function ForcesPlacementProvider<V, E>({
   );
 }
 
-export default withComponentsData(
-  ForcesPlacementProvider,
-  ({ layoutAnimationSettings, verticesData }) => ({
-    layoutAnimationSettings,
-    verticesData
+export default withGraphSettings(
+  withComponentsData(
+    ForcesPlacementProvider,
+    ({ verticesData, layoutAnimationSettings }) => ({
+      verticesData,
+      layoutAnimationSettings
+    })
+  ),
+  ({ settings }) => ({
+    vertexRadius: settings.components.vertex.radius,
+    placementSettings: settings.placement
   })
 );

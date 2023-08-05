@@ -1,14 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  DEFAULT_ORBITS_MAX_SECTOR_ANGLE,
-  SHARED_PLACEMENT_SETTINGS
-} from '@/constants/placement';
 import { GraphConnections } from '@/types/graphs';
 import {
   GetLayerRadiusFunction,
   GraphLayout,
   OrbitsLayerSizingSettings,
-  OrbitsPlacementSettings,
+  OrbitsPlacementSettingsWithDefaults,
   PlacedVerticesPositions
 } from '@/types/settings';
 import {
@@ -284,7 +279,7 @@ export default function placeVerticesOnOrbits(
   connections: GraphConnections,
   vertexRadius: number,
   isGraphDirected: boolean,
-  settings: OrbitsPlacementSettings
+  settings: OrbitsPlacementSettingsWithDefaults
 ): GraphLayout {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];
@@ -311,11 +306,10 @@ export default function placeVerticesOnOrbits(
     const arrangedVertices = arrangeVertices(
       updatedConnections,
       rootVertex,
-      settings.maxSectorAngle ?? DEFAULT_ORBITS_MAX_SECTOR_ANGLE
+      settings.maxSectorAngle
     );
     // Calculate the layout of the component
-    const minVertexSpacing =
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+    const minVertexSpacing = settings.minVertexSpacing;
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
       minVertexSpacing,

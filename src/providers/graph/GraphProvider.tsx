@@ -17,6 +17,7 @@ import {
   ForcesPlacementProvider,
   PlacementLayoutProvider
 } from './layout';
+import GraphSettingsProvider from './data/settings/GraphSettingsProvider';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
   canvasContexts: CanvasContexts;
@@ -53,20 +54,20 @@ function GraphProvider<V, E>({
       // CONTAINER
       // Provider used to compute the dimensions of the container
       <ContainerDimensionsProvider />,
-      // EVENTS
-      // Press events provider
-      <ConditionalProvider.If
-        if={({ settings }) => !!settings.events}
-        then={<PressEventsProvider />}
-      />,
       // FOCUS
       // Provider used to focus on a specific vertex
       <VertexFocusProvider />,
       // Provider used to focus one of the vertices specified in an
       // array based on the user-defined progress
+      // <ConditionalProvider.If // TODO - fix this
+      //   if={({ settings }) => !!settings.focus}
+      //   then={<MultiStepVertexFocusProvider />}
+      // />,
+      // EVENTS
+      // Press events provider
       <ConditionalProvider.If
-        if={({ settings }) => !!settings.focus}
-        then={<MultiStepVertexFocusProvider />}
+        if={({ settings }) => !!settings.events}
+        then={<PressEventsProvider />}
       />
     ],
     []
@@ -76,7 +77,7 @@ function GraphProvider<V, E>({
     <CanvasContextsProvider canvasContexts={canvasContexts}>
       <GraphSettingsProvider {...graphProps}>
         <ContextProviderComposer providers={providers}>
-          {/* {children} */}
+          {children}
         </ContextProviderComposer>
       </GraphSettingsProvider>
     </CanvasContextsProvider>

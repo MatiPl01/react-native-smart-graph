@@ -7,14 +7,17 @@ import {
 } from 'react-native-reanimated';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withComponentsData } from '@/providers/graph/data/components/ComponentsDataProvider';
 import { withGraphSettings } from '@/providers/graph/data/settings/context';
 import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
 import { BoundingRect } from '@/types/layout';
-import { AnimationSettingsWithDefaults } from '@/types/settings';
+import {
+  AnimationSettingsWithDefaults,
+  GraphPlacementSettingsWithDefaults
+} from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
+import { withComponentsData } from '@/providers/graph/data/components/context';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
@@ -24,6 +27,7 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   targetBoundingRect: SharedValue<BoundingRect>;
   vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
+  placementSettings: GraphPlacementSettingsWithDefaults;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
@@ -33,6 +37,8 @@ function GraphPlacementLayoutProvider<V, E>({
   layoutAnimationSettings,
   targetBoundingRect,
   vertexRadius,
+  isGraphDirected,
+  placementSettings,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
   // CONTEXTS
@@ -51,8 +57,8 @@ function GraphPlacementLayoutProvider<V, E>({
       const { boundingRect, verticesPositions } = placeVertices(
         connections,
         radius,
-        layoutAnimationData.settings,
-        layoutAnimationData.isGraphDirected
+        placementSettings,
+        isGraphDirected.value
       );
 
       if (isFirstRender.value) {
@@ -73,7 +79,7 @@ function GraphPlacementLayoutProvider<V, E>({
         layoutAnimationSettings
       );
     },
-    [verticesData, edgesData]
+    [verticesData, placementSettings, edgesData]
   );
 
   return <>{children}</>;
@@ -99,6 +105,7 @@ export default withGraphSettings(
     })
   ),
   ({ settings }) => ({
-    vertexRadius: settings.components.vertex.radius
+    vertexRadius: settings.components.vertex.radius,
+    placementSettings: settings.placement
   })
 );

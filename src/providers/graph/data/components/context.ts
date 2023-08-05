@@ -28,7 +28,7 @@ export type GraphComponentsContextType<V, E> = {
 
 export const GraphComponentsContext = createContext(null as unknown as object);
 
-export const withGraphComponents = <
+export const withComponentsData = <
   V,
   E,
   P extends object, // component props
