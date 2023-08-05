@@ -6,8 +6,8 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import {
   AnimationSettings,
   AnimationSettingsWithDefaults,

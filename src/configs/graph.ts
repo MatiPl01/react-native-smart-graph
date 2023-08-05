@@ -3,24 +3,18 @@ import {
   DEFAULT_ANIMATION_SETTINGS,
   DEFAULT_FOCUS_ANIMATION_SETTINGS
 } from '@/constants/animations';
+import { AllEdgeSettings } from '@/types/settings/private/graph/components';
+import { AllGraphLayoutSettings } from '@/types/settings/private/graph/layout';
 import {
-  EdgeLabelRendererFunction,
-  EdgeRenderFunction,
-  GraphRenderersWithDefaults
-} from '@/types/renderers';
+  AllGraphPlacementSettings,
+  AllRandomPlacementSettings
+} from '@/types/settings/private/graph/placement';
+import { EdgeType } from '@/types/settings/public/graph/components';
+import { LayoutType } from '@/types/settings/public/graph/layout';
 import {
-  EdgeSettingsWithDefaults,
-  EdgeType,
-  FocusSettingsWithDefaults,
-  GraphLayoutSettingsWithDefaults,
-  GraphPlacementSettingsWithDefaults,
-  GraphSettings,
-  GraphSettingsWithDefaults,
-  LayoutType,
   PlacementStrategy,
-  RandomMeshType,
-  RandomPlacementSettingsWithDefaults
-} from '@/types/settings';
+  RandomMeshType
+} from '@/types/settings/public/graph/placement';
 
 import {
   DefaultCurvedEdgeRenderer,
@@ -33,20 +27,19 @@ import {
 /*
  * SETTINGS
  */
-export const DEFAULT_EDGE_SETTINGS: Record<EdgeType, EdgeSettingsWithDefaults> =
-  {
-    curved: {
-      type: 'curved'
-    },
-    straight: {
-      maxOffsetFactor: 0.5,
-      type: 'straight'
-    }
-  };
+export const DEFAULT_EDGE_SETTINGS: Record<EdgeType, AllEdgeSettings> = {
+  curved: {
+    type: 'curved'
+  },
+  straight: {
+    maxOffsetFactor: 0.5,
+    type: 'straight'
+  }
+};
 
 export const DEFAULT_RANDOM_PLACEMENT_SETTINGS: Record<
   RandomMeshType,
-  RandomPlacementSettingsWithDefaults
+  AllRandomPlacementSettings
 > = {
   grid: {
     density: 0.5,
@@ -82,7 +75,7 @@ const sharedRootsPlacementSettings = {
 
 export const DEFAULT_PLACEMENT_SETTINGS: Record<
   PlacementStrategy,
-  GraphPlacementSettingsWithDefaults
+  AllGraphPlacementSettings
 > = {
   circle: {
     ...sharedCircularPlacementSettings,
@@ -108,19 +101,19 @@ export const DEFAULT_PLACEMENT_SETTINGS: Record<
 
 export const DEFAULT_LAYOUT_SETTINGS: Record<
   LayoutType,
-  GraphLayoutSettingsWithDefaults
+  AllGraphLayoutSettings
 > = {
   auto: {
     type: 'auto'
   },
-  forces: {
+  force: {
     settings: {
       attractionForceFactor: 1,
       attractionScale: 1,
       repulsionScale: 100000,
       strategy: 'default'
     },
-    type: 'forces'
+    type: 'force'
   }
 };
 

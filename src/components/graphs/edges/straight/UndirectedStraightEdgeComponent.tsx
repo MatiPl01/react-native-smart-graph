@@ -1,8 +1,8 @@
 import { memo } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
 import {
   addVectors,
   animatedVectorCoordinatesToVector,
@@ -24,7 +24,7 @@ const calcTranslationOffset = (
     : 0;
 };
 
-function UndirectedStraightEdgeComponent<E, V>({
+function UndirectedStraightEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   animationProgress,
@@ -37,7 +37,7 @@ function UndirectedStraightEdgeComponent<E, V>({
   v1Radius,
   v2Position,
   v2Radius
-}: UndirectedStraightEdgeComponentProps<E, V>) {
+}: UndirectedStraightEdgeComponentProps<V, E>) {
   // Edge line
   const p1 = useSharedValue({
     x: v1Position.x.value,
@@ -122,6 +122,6 @@ function UndirectedStraightEdgeComponent<E, V>({
   );
 }
 
-export default memo(UndirectedStraightEdgeComponent) as <E, V>(
-  props: UndirectedStraightEdgeComponentProps<E, V>
+export default memo(UndirectedStraightEdgeComponent) as <V, E>(
+  props: UndirectedStraightEdgeComponentProps<V, E>
 ) => JSX.Element;

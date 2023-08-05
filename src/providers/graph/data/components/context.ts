@@ -1,6 +1,7 @@
 import { Context, createContext } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
+import { BoundingRect } from '@/types/layout';
 import {
   EdgeComponentData,
   EdgeRemoveHandler,
@@ -8,16 +9,14 @@ import {
   VertexRemoveHandler
 } from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-import { DataProviderReturnType } from '@/types/data';
 import { GraphConnections } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { withMemoContext } from '@/utils/contexts';
 
 export type GraphComponentsContextType<V, E> = {
   connections: GraphConnections;
   edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
-  edgesData: Record<string, EdgeComponentData<E, V>>;
+  edgesData: Record<string, EdgeComponentData<V, E>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
   isGraphDirected: SharedValue<boolean>;
@@ -43,4 +42,4 @@ export const withComponentsData = <
       GraphComponentsContextType<V, E>
     >,
     selector
-  ) as DataProviderReturnType<P, R>;
+  );

@@ -29,7 +29,7 @@ const calcTranslationOffset = (
     : maxTranslationOffset * (edgesCount - 1);
 };
 
-function DirectedStraightEdgeComponent<E, V>({
+function DirectedStraightEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   animationProgress,
@@ -42,7 +42,7 @@ function DirectedStraightEdgeComponent<E, V>({
   v1Radius,
   v2Position,
   v2Radius
-}: DirectedStraightEdgeComponentProps<E, V>) {
+}: DirectedStraightEdgeComponentProps<V, E>) {
   // Edge line
   const p1 = useSharedValue({
     x: v1Position.x.value,
@@ -134,6 +134,6 @@ function DirectedStraightEdgeComponent<E, V>({
   );
 }
 
-export default memo(DirectedStraightEdgeComponent) as <E, V>(
-  props: DirectedStraightEdgeComponentProps<E, V>
+export default memo(DirectedStraightEdgeComponent) as <V, E>(
+  props: DirectedStraightEdgeComponentProps<V, E>
 ) => JSX.Element;

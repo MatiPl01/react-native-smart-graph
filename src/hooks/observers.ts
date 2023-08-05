@@ -12,8 +12,8 @@ import { FocusSettingsWithDefaults } from '@/types/settings/focus';
 
 export type GraphState<V, E> = {
   animationsSettings: AnimationsSettings;
-  edges: Array<Edge<E, V>>;
-  orderedEdges: OrderedEdges<E, V>;
+  edges: Array<Edge<V, E>>;
+  orderedEdges: OrderedEdges<V, E>;
   vertices: Array<Vertex<V, E>>;
 };
 

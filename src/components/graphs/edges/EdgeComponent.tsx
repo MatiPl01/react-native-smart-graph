@@ -19,7 +19,7 @@ import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponen
 import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeComponent';
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
-function EdgeComponent<E, V>({
+function EdgeComponent<V, E>({
   animationProgress,
   animationSettings,
   arrowRenderer,
@@ -30,7 +30,7 @@ function EdgeComponent<E, V>({
   order,
   removed,
   ...restProps
-}: EdgeComponentProps<E, V>) {
+}: EdgeComponentProps<V, E>) {
   // ANIMATION
 
   // EDGE ORDERING
@@ -82,26 +82,26 @@ function EdgeComponent<E, V>({
     case 'straight':
       return edge.isDirected() ? (
         <DirectedStraightEdgeComponent
-          {...(sharedProps as DirectedStraightEdgeComponentProps<E, V>)}
+          {...(sharedProps as DirectedStraightEdgeComponentProps<V, E>)}
         />
       ) : (
         <UndirectedStraightEdgeComponent
-          {...(sharedProps as UndirectedStraightEdgeComponentProps<E, V>)}
+          {...(sharedProps as UndirectedStraightEdgeComponentProps<V, E>)}
         />
       );
     case 'curved':
       return edge.isDirected() ? (
         <DirectedCurvedEdgeComponent
-          {...(sharedProps as DirectedCurvedEdgeComponentProps<E, V>)}
+          {...(sharedProps as DirectedCurvedEdgeComponentProps<V, E>)}
         />
       ) : (
         <UndirectedCurvedEdgeComponent
-          {...(sharedProps as UndirectedCurvedEdgeComponentProps<E, V>)}
+          {...(sharedProps as UndirectedCurvedEdgeComponentProps<V, E>)}
         />
       );
   }
 }
 
-export default memo(EdgeComponent) as <E, V>(
-  props: EdgeComponentProps<E, V>
+export default memo(EdgeComponent) as <V, E>(
+  props: EdgeComponentProps<V, E>
 ) => JSX.Element;

@@ -206,13 +206,13 @@ const updateGraphVerticesData = <V, E>(
 };
 
 const updateGraphEdgesData = <V, E>(
-  oldEdgesData: Record<string, EdgeComponentData<E, V>>,
-  currentEdges: OrderedEdges<E, V>,
+  oldEdgesData: Record<string, EdgeComponentData<V, E>>,
+  currentEdges: OrderedEdges<V, E>,
   verticesData: Record<string, VertexComponentData<V, E>>,
   removedEdges: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AnimationSettingsWithDefaults
-): Record<string, EdgeComponentData<E, V>> => {
+): Record<string, EdgeComponentData<V, E>> => {
   const updatedEdgesData = { ...oldEdgesData };
   let isModified = false; // Flag to indicate if edges data was updated
 
@@ -304,7 +304,7 @@ const updateGraphEdgesData = <V, E>(
 
 const updateGraphEdgeLabelsData = <V, E>(
   oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
-  edgesData: Record<string, EdgeComponentData<E, V>>
+  edgesData: Record<string, EdgeComponentData<V, E>>
 ): Record<string, EdgeLabelComponentData<E>> => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
   let isModified = false; // Flag to indicate if edges data was updated

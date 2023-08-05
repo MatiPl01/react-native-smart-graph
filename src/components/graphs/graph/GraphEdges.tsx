@@ -6,27 +6,39 @@ import {
 } from 'react-native-reanimated';
 
 import EdgeComponent from '@/components/graphs/edges/EdgeComponent';
-import { withComponentsData } from '@/providers/graph';
 import {
   EdgeComponentData,
   EdgeComponentProps,
   EdgeRemoveHandler
 } from '@/types/components';
+import { withComponentsData } from '@/providers/graph/data/components/context';
+import {
+  GraphSettingsContextType,
+  withGraphSettings
+} from '@/providers/graph/data/settings/context';
 
-type GraphEdgesProps<E, V> = Pick<
-  EdgeComponentProps<E, V>,
+type ComponentsSettings<V, E> = GraphSettingsContextType<
+  V,
+  E
+>['settings']['components'];
+
+type GraphEdgesProps<V, E> = Pick<
+  EdgeComponentProps<V, E>,
   'arrowRenderer' | 'edgeRenderer' | 'labelRenderer'
 > & {
-  edgesData: Record<string, EdgeComponentData<E, V>>;
+  edgesData: Record<string, EdgeComponentData<V, E>>;
   focusProgress: SharedValue<number>;
   onRemove: EdgeRemoveHandler;
+  edgeSettings: ComponentsSettings<V, E>['edge'];
+  arrowSettings: ComponentsSettings<V, E>['arrow'];
+  labelSettings: ComponentsSettings<V, E>['label'];
 };
 
-function GraphEdges<E, V>({
+function GraphEdges<V, E>({
   edgesData,
   focusProgress,
   ...restProps
-}: GraphEdgesProps<E, V>) {
+}: GraphEdgesProps<V, E>) {
   const opacity = useDerivedValue(() =>
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
   );
@@ -39,25 +51,24 @@ function GraphEdges<E, V>({
             ...restProps,
             ...data,
             key: data.edge.key
-          } as unknown as EdgeComponentProps<E, V>)}
+          } as unknown as EdgeComponentProps<V, E>)}
         />
       ))}
     </Group>
   );
 }
 
-export default withComponentsData(
-  GraphEdges,
-  ({ edgesData, handleEdgeRemove, renderers, settings }) => {
-    const { vertex: _, ...componentSettings } = settings.components;
-
-    return {
-      arrowRenderer: renderers.arrow,
-      componentSettings,
-      edgeRenderer: renderers.edge,
-      edgesData,
-      labelRenderer: renderers.label,
-      onRemove: handleEdgeRemove
-    };
-  }
+export default withGraphSettings(
+  withComponentsData(GraphEdges, ({ edgesData, handleEdgeRemove }) => ({
+    edgesData,
+    onRemove: handleEdgeRemove
+  })),
+  ({ settings, renderers }) => ({
+    arrowRenderer: renderers.arrow,
+    edgeRenderer: renderers.edge,
+    labelRenderer: renderers.label,
+    arrowSettings: settings.components.arrow,
+    edgeSettings: settings.components.edge,
+    labelSettings: settings.components.label
+  })
 );

@@ -3,15 +3,14 @@
 import { makeMutable } from 'react-native-reanimated';
 
 import { DEFAULT_VIEW_SETTINGS as DEFAULT_SETTINGS } from '@/configs/view';
+import { GraphViewData } from '@/types/components/private/view';
 import { GraphViewSettings } from '@/types/settings';
 import { cancelAnimations } from '@/utils/animations';
 import { updateSpacing } from '@/utils/layout';
 
-import { CanvasDataContextType } from './context';
-
 export const createContextValue = (
   userSettings: GraphViewSettings
-): CanvasDataContextType => ({
+): GraphViewData => ({
   autoSizingEnabled: makeMutable(false),
   autoSizingTimeout: makeMutable(
     userSettings.autoSizingTimeout ?? DEFAULT_SETTINGS.autoSizingTimeout
@@ -54,7 +53,7 @@ export const createContextValue = (
 
 export const updateContextValue = (
   userSettings: GraphViewSettings,
-  value: CanvasDataContextType
+  value: GraphViewData
 ): void => {
   value.autoSizingTimeout.value =
     userSettings.autoSizingTimeout ?? DEFAULT_SETTINGS.autoSizingTimeout;
@@ -74,5 +73,5 @@ export const updateContextValue = (
   value.scales.value = userSettings.scales ?? DEFAULT_SETTINGS.scales;
 };
 
-export const clearContextValue = (value: CanvasDataContextType) =>
+export const clearContextValue = (value: GraphViewData) =>
   cancelAnimations(value);

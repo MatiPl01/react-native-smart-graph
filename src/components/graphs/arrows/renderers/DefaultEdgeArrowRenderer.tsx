@@ -2,7 +2,6 @@ import { Group, Vertices } from '@shopify/react-native-skia';
 import React from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
 import { EdgeArrowRendererProps } from '@/types/renderers';
 
 export default function DefaultEdgeArrowRenderer({
@@ -12,7 +11,7 @@ export default function DefaultEdgeArrowRenderer({
   rotation,
   width
 }: EdgeArrowRendererProps) {
-  const color = DEFAULT_EDGE_RENDERER_SETTINGS.color;
+  const color = '#999';
   const colors = [color, color, color];
 
   const vertices = useDerivedValue(() => {

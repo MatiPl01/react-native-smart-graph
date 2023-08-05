@@ -10,7 +10,7 @@ import CanvasContextsProvider, {
 import ComponentsDataProvider from './data/components/ComponentsDataProvider';
 import { GraphData } from './data/settings/utils';
 import { PressEventsProvider } from './events';
-import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
+import { VertexFocusProvider } from './focus';
 import {
   ContainerDimensionsProvider,
   ForcesLayoutProvider,

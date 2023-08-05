@@ -3,8 +3,8 @@ import 'react-native-reanimated';
 
 import { Vector } from '@shopify/react-native-skia';
 
-import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { GraphConnections } from '@/types/graphs';
 import {
   addVectors,
   addVectorsArray,

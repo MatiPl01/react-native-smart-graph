@@ -7,13 +7,13 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
+import { BoundingRect, Dimensions } from '@/types/layout';
+import { Maybe } from '@/types/utils';
 import {
   AutoSizingContextType,
   useCanvasDataContext
 } from '@/providers/canvas';
-import { BoundingRect, Dimensions } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
-import { Maybe } from '@/types/utils';
 import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,

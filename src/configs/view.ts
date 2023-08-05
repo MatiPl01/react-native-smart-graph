@@ -1,6 +1,6 @@
-import { GraphViewSettingsWithDefaults } from '@/types/settings';
+import { DefaultGraphViewSettings } from '@/types/settings/public/view';
 
-export const DEFAULT_VIEW_SETTINGS: GraphViewSettingsWithDefaults = {
+export const DEFAULT_VIEW_SETTINGS: DefaultGraphViewSettings = {
   autoSizingTimeout: 2000,
   initialScale: 1,
   objectFit: 'none',

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Maybe, Mutable } from '@/types/utils';
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
@@ -13,14 +14,13 @@ import {
   BatchModificationAnimationSettings
 } from '@/types/settings';
 import { FocusSettings } from '@/types/settings/focus';
-import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 
 export default abstract class Graph<
   V,
   E,
   GV extends Vertex<V, E>,
-  GE extends Edge<E, V>,
+  GE extends Edge<V, E>,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {

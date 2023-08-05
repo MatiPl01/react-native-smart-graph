@@ -6,39 +6,39 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
+import { BoundingRect } from '@/types/layout';
 import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withComponentsData } from '@/providers/graph/data/components/context';
 import { withGraphSettings } from '@/providers/graph/data/settings/context';
 import { EdgeComponentData, VertexComponentData } from '@/types/components';
 import { GraphConnections } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
 import {
   AnimationSettingsWithDefaults,
   GraphPlacementSettingsWithDefaults
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
-import { withComponentsData } from '@/providers/graph/data/components/context';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
-  edgesData: Record<string, EdgeComponentData<E, V>>;
+  edgesData: Record<string, EdgeComponentData<V, E>>;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AnimationSettingsWithDefaults;
+  placementSettings: GraphPlacementSettingsWithDefaults;
   targetBoundingRect: SharedValue<BoundingRect>;
   vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
-  placementSettings: GraphPlacementSettingsWithDefaults;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
   children,
   connections,
   edgesData,
+  isGraphDirected,
   layoutAnimationSettings,
+  placementSettings,
   targetBoundingRect,
   vertexRadius,
-  isGraphDirected,
-  placementSettings,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
   // CONTEXTS
@@ -105,7 +105,7 @@ export default withGraphSettings(
     })
   ),
   ({ settings }) => ({
-    vertexRadius: settings.components.vertex.radius,
-    placementSettings: settings.placement
+    placementSettings: settings.placement,
+    vertexRadius: settings.components.vertex.radius
   })
 );

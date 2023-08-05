@@ -3,7 +3,7 @@ import {
   DirectedGraphVertex
 } from '@/types/graphs';
 
-export default class DirectedEdge<E, V> implements IDirectedEdge<E, V> {
+export default class DirectedEdge<V, E> implements IDirectedEdge<V, E> {
   constructor(
     private readonly key$: string,
     private readonly value$: E | undefined,

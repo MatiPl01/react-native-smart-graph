@@ -13,7 +13,7 @@ import {
   translateAlongVector
 } from '@/utils/vectors';
 
-function UndirectedCurvedEdgeComponent<E, V>({
+function UndirectedCurvedEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   animationProgress,
@@ -26,7 +26,7 @@ function UndirectedCurvedEdgeComponent<E, V>({
   v1Radius,
   v2Position,
   v2Radius
-}: UndirectedCurvedEdgeComponentProps<E, V>) {
+}: UndirectedCurvedEdgeComponentProps<V, E>) {
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
 
@@ -109,6 +109,6 @@ function UndirectedCurvedEdgeComponent<E, V>({
   );
 }
 
-export default memo(UndirectedCurvedEdgeComponent) as <E, V>(
-  props: UndirectedCurvedEdgeComponentProps<E, V>
+export default memo(UndirectedCurvedEdgeComponent) as <V, E>(
+  props: UndirectedCurvedEdgeComponentProps<V, E>
 ) => JSX.Element;

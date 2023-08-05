@@ -1,5 +1,6 @@
 import DirectedEdge from '@/models/edges/DirectedEdge';
 import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
+import { Maybe } from '@/types/utils';
 import { DirectedEdgeData, VertexData } from '@/types/data';
 import { GraphConnections } from '@/types/graphs';
 import {
@@ -7,7 +8,6 @@ import {
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
-import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
@@ -19,7 +19,7 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
   V,
   E,
   DirectedGraphVertex<V, E>,
-  DirectedEdge<E, V>,
+  DirectedEdge<V, E>,
   DirectedEdgeData<E>
 > {
   constructor(data?: {
@@ -78,7 +78,7 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
     { from: sourceKey, key, to: targetKey, value }: DirectedEdgeData<E>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange = true
-  ): DirectedEdge<E, V> {
+  ): DirectedEdge<V, E> {
     this.checkSelfLoop(sourceKey, targetKey);
     const source = this.getVertex(sourceKey);
     const target = this.getVertex(targetKey);
@@ -90,7 +90,7 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
       throw new Error(`Vertex ${targetKey} does not exist`);
     }
 
-    const edge = new DirectedEdge<E, V>(key, value, source, target);
+    const edge = new DirectedEdge<V, E>(key, value, source, target);
     source.addOutEdge(edge);
     target.addInEdge(edge);
     this.insertEdgeObject(
@@ -127,8 +127,8 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
   }
 
   override orderEdgesBetweenVertices(
-    edges: Array<DirectedEdge<E, V>>
-  ): Array<{ edge: DirectedEdge<E, V>; order: number }> {
+    edges: Array<DirectedEdge<V, E>>
+  ): Array<{ edge: DirectedEdge<V, E>; order: number }> {
     // Display edges that have the same direction next to each other
     let order = 0;
     let oppositeOrder = 0; // For edges in the opposite direction

@@ -1,12 +1,12 @@
 import UndirectedEdge from '@/models/edges/UndirectedEdge';
 import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
+import { Maybe } from '@/types/utils';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
 import { GraphConnections } from '@/types/graphs';
 import {
   AnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
-import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
@@ -18,7 +18,7 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
   V,
   E,
   UndirectedGraphVertex<V, E>,
-  UndirectedEdge<E, V>,
+  UndirectedEdge<V, E>,
   UndirectedEdgeData<E>
 > {
   constructor(data?: {
@@ -85,7 +85,7 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
     { key, value, vertices: [vertex1key, vertex2key] }: UndirectedEdgeData<E>,
     animationSettings?: Maybe<AnimationSettings>,
     notifyChange = true
-  ): UndirectedEdge<E, V> {
+  ): UndirectedEdge<V, E> {
     if (!vertex1key || !vertex2key) {
       throw new Error(`Edge ${key} must have two vertices`);
     }
@@ -101,7 +101,7 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
       throw new Error(`Vertex ${vertex2key} does not exist`);
     }
 
-    const edge = new UndirectedEdge<E, V>(key, value, [vertex1, vertex2]);
+    const edge = new UndirectedEdge<V, E>(key, value, [vertex1, vertex2]);
 
     vertex1.addEdge(edge);
     if (vertex1key !== vertex2key) {
@@ -141,8 +141,8 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
   }
 
   override orderEdgesBetweenVertices(
-    edges: Array<UndirectedEdge<E, V>>
-  ): Array<{ edge: UndirectedEdge<E, V>; order: number }> {
+    edges: Array<UndirectedEdge<V, E>>
+  ): Array<{ edge: UndirectedEdge<V, E>; order: number }> {
     return edges.map((edge, index) => ({
       edge,
       order: index

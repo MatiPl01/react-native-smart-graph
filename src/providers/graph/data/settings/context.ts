@@ -1,14 +1,14 @@
 import { Context, createContext } from 'react';
 
-import { DataProviderReturnType } from '@/types/data';
+import { Sharedify } from '@/types/utils';
 import { Graph } from '@/types/graphs';
 import { GraphRenderersWithDefaults } from '@/types/renderers';
 import {
+  EdgeType,
   GraphAnimationsSettingsWithDefaults,
   GraphSettingsWithDefaults,
   LayoutType
 } from '@/types/settings';
-import { Sharedify } from '@/types/utils';
 import { withMemoContext } from '@/utils/contexts';
 
 export type GraphSettingsContextType<V, E> = {
@@ -16,11 +16,20 @@ export type GraphSettingsContextType<V, E> = {
   renderers: GraphRenderersWithDefaults<V, E>;
   settings: {
     animations: GraphAnimationsSettingsWithDefaults;
+    components: Sharedify<
+      Omit<GraphSettingsWithDefaults<V>['components'], 'edge'>
+    > & {
+      edge: Sharedify<
+        Omit<GraphSettingsWithDefaults<V>['components']['edge'], 'type'>
+      > & {
+        type: EdgeType;
+      };
+    };
     events?: GraphSettingsWithDefaults<V>['events'];
     layout: Sharedify<Omit<GraphSettingsWithDefaults<V>['layout'], 'type'>> & {
       type: LayoutType;
     };
-  } & Sharedify<Pick<GraphSettingsWithDefaults<V>, 'components' | 'placement'>>;
+  } & Sharedify<Pick<GraphSettingsWithDefaults<V>, 'placement'>>;
 };
 
 export const GraphSettingsContext = createContext(null as unknown as object);
@@ -38,4 +47,4 @@ export const withGraphSettings = <
     Component,
     GraphSettingsContext as unknown as Context<GraphSettingsContextType<V, E>>,
     selector
-  ) as DataProviderReturnType<P, R>;
+  );

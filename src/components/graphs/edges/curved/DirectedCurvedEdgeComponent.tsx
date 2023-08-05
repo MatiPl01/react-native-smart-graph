@@ -17,7 +17,7 @@ import {
   translateAlongVector
 } from '@/utils/vectors';
 
-function DirectedCurvedEdgeComponent<E, V>({
+function DirectedCurvedEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   animationProgress,
@@ -30,7 +30,7 @@ function DirectedCurvedEdgeComponent<E, V>({
   v1Radius,
   v2Position,
   v2Radius
-}: DirectedCurvedEdgeComponentProps<E, V>) {
+}: DirectedCurvedEdgeComponentProps<V, E>) {
   // Parabola vertex
   const parabolaX = useSharedValue(
     (v1Position.x.value + v2Position.x.value) / 2
@@ -183,6 +183,6 @@ function DirectedCurvedEdgeComponent<E, V>({
   );
 }
 
-export default memo(DirectedCurvedEdgeComponent) as <E, V>(
-  props: DirectedCurvedEdgeComponentProps<E, V>
+export default memo(DirectedCurvedEdgeComponent) as <V, E>(
+  props: DirectedCurvedEdgeComponentProps<V, E>
 ) => JSX.Element;

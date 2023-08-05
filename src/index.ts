@@ -32,73 +32,8 @@ export * from '@/hooks';
 export * from '@/utils/algorithms';
 
 // TYPES
-export {
-  type DirectedEdgeData,
-  type DirectedGraphData,
-  type UndirectedEdgeData,
-  type UndirectedGraphData,
-  type VertexData
-} from '@/types/data';
-export {
-  type DirectedEdge,
-  type DirectedGraphVertex,
-  type Edge,
-  type Graph,
-  type GraphConnections,
-  type GraphObserver,
-  type UndirectedEdge,
-  type Vertex
-} from '@/types/graphs';
-export {
-  type Alignment,
-  type HorizontalAlignment,
-  type Spacing,
-  type VerticalAlignment
-} from '@/types/layout';
-export {
-  type CurvedEdgeRendererProps,
-  type DirectedGraphRenderers,
-  type EdgeArrowRendererProps,
-  type EdgeLabelRendererProps,
-  type StraightEdgeRendererProps,
-  type UndirectedGraphRenderers,
-  type VertexRendererProps
-} from '@/types/renderers';
-export {
-  type AnimationSettings,
-  type AnimationsSettings,
-  type AutoLayoutSettings,
-  type BatchModificationAnimationSettings,
-  type BoundRandomPlacementSettings,
-  type CircularPlacementSettings,
-  type DefaultForcesStrategySettings,
-  type DirectedGraphComponentsSettings,
-  type DirectedGraphSettings,
-  type EdgeLabelSettings,
-  type FocusPoint,
-  type FocusPoints,
-  type FocusSettings,
-  type ForcesLayoutSettings,
-  type ForcesSettings,
-  type ForcesStrategy,
-  type GetLayerRadiusFunction,
-  type GraphAnimationsSettings,
-  type GraphEventsSettings,
-  type GraphLayoutSettings,
-  type GraphPlacementSettings,
-  type OrbitsLayerSizing,
-  type OrbitsLayerSizingSettings,
-  type OrbitsPlacementSettings,
-  type PlacementStrategy,
-  type RandomMeshType,
-  type RandomPlacementSettings,
-  type SingleModificationAnimationSettings,
-  type TreesPlacementSettings,
-  type UnboundRandomPlacementSettings,
-  type UndirectedGraphComponentsSettings,
-  type UndirectedGraphSettings,
-  type VertexPressEvent,
-  type VertexPressHandler,
-  type VertexSettings
-} from '@/types/settings';
-export { type ObjectFit } from '@/types/views';
+export * from '@/types/components/public';
+export * from '@/types/data/public';
+export * from '@/types/layout/public';
+export * from '@/types/models/public';
+export * from '@/types/settings/public';
