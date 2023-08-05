@@ -85,7 +85,6 @@ export {
   type GraphAnimationsSettings,
   type GraphEventsSettings,
   type GraphLayoutSettings,
-  type GraphMeshType,
   type GraphPlacementSettings,
   type OrbitsLayerSizing,
   type OrbitsLayerSizingSettings,

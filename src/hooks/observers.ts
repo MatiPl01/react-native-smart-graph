@@ -10,7 +10,7 @@ import {
 import { AnimationsSettings } from '@/types/settings/animations';
 import { FocusSettingsWithDefaults } from '@/types/settings/focus';
 
-type GraphState<V, E> = {
+export type GraphState<V, E> = {
   animationsSettings: AnimationsSettings;
   edges: Array<Edge<E, V>>;
   orderedEdges: OrderedEdges<E, V>;

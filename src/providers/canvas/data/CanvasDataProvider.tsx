@@ -3,7 +3,7 @@ import React, { PropsWithChildren, useEffect, useMemo } from 'react';
 import { Spacing } from '@/types/layout';
 import { ObjectFit } from '@/types/views';
 
-import { CanvasDataContext, CanvasDataContextType } from './context';
+import { CanvasDataContext } from './context';
 import {
   clearContextValue,
   createContextValue,
@@ -22,10 +22,7 @@ export default function CanvasDataProvider({
   children,
   ...userSettings
 }: CanvasDataProviderProps) {
-  const contextValue = useMemo<CanvasDataContextType>(
-    () => createContextValue(userSettings),
-    []
-  );
+  const contextValue = useMemo(() => createContextValue(userSettings), []);
 
   useEffect(() => {
     updateContextValue(userSettings, contextValue);

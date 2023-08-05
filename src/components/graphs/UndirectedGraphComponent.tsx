@@ -15,11 +15,7 @@ export type UndirectedGraphComponentProps<V, E> = {
 function UndirectedGraphComponent<V, E>(
   props: UndirectedGraphComponentProps<V, E>
 ) {
-  return (
-    <GraphComponentComposer<V, E, UndirectedGraphComponentProps<V, E>>
-      {...props}
-    />
-  );
+  return <GraphComponentComposer {...props} />;
 }
 
 export default memo(

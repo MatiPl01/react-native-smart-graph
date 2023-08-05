@@ -2,7 +2,6 @@ import { Group, Text, useFont } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
-import { DEFAULT_LABEL_RENDERER_SETTINGS } from '@/constants/renderers';
 import { EdgeLabelRendererProps } from '@/types/renderers';
 
 export default function DefaultEdgeLabelRenderer<E>({
@@ -35,13 +34,7 @@ export default function DefaultEdgeLabelRenderer<E>({
     font && (
       <Group transform={wrapperTransform}>
         <Group transform={labelTransform}>
-          <Text
-            color={DEFAULT_LABEL_RENDERER_SETTINGS.fontColor}
-            font={font}
-            text={key}
-            x={0}
-            y={0}
-          />
+          <Text color='white' font={font} text={key} x={0} y={0} />
         </Group>
       </Group>
     )

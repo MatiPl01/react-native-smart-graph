@@ -6,7 +6,6 @@ import {
 } from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
-import { DEFAULT_VERTEX_RENDERER_SETTINGS } from '@/constants/renderers';
 import { VertexRendererProps } from '@/types/renderers';
 
 export default function DefaultVertexRenderer<V>({
@@ -18,10 +17,7 @@ export default function DefaultVertexRenderer<V>({
   radius,
   scale
 }: VertexRendererProps<V>) {
-  const font = useFont(
-    FONTS.rubikFont,
-    radius * DEFAULT_VERTEX_RENDERER_SETTINGS.font.scale
-  );
+  const font = useFont(FONTS.rubikFont, 2 * radius);
 
   useAnimatedReaction(
     () => ({
@@ -49,24 +45,9 @@ export default function DefaultVertexRenderer<V>({
 
   return (
     <Group opacity={opacity} transform={transform}>
-      <Circle
-        color={DEFAULT_VERTEX_RENDERER_SETTINGS.border.color}
-        r={radius}
-      />
-      <Circle
-        transform={[
-          { scale: 1 - DEFAULT_VERTEX_RENDERER_SETTINGS.border.scale }
-        ]}
-        color={DEFAULT_VERTEX_RENDERER_SETTINGS.color}
-        r={radius}
-      />
-      <Text
-        color={DEFAULT_VERTEX_RENDERER_SETTINGS.font.color}
-        font={font}
-        text={key}
-        x={0}
-        y={0}
-      />
+      <Circle color='gold' r={radius} />
+      <Circle color='black' r={0.75 * radius} />
+      <Text color='white' font={font} text={key} x={0} y={0} />
     </Group>
   );
 }

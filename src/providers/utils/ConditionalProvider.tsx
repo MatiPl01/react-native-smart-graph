@@ -1,9 +1,9 @@
 import React, { PropsWithChildren, ReactElement } from 'react';
 
 import {
-  GraphDataContextType,
-  withGraphData
-} from '@/providers/graph/data/context';
+  GraphSettingsContextType,
+  withGraphSettings
+} from '@/providers/graph/data/settings/context';
 
 import ContextProviderComposer from './ContextProviderComposer';
 
@@ -21,7 +21,7 @@ function WithProviders({ children, providers }: WithProvidersProps) {
 }
 
 type IfProviderProps<V, E> = PropsWithChildren<{
-  if: (data: GraphDataContextType<V, E>) => boolean;
+  if: (data: GraphSettingsContextType<V, E>) => boolean;
   then: Array<ReactElement> | ReactElement;
 }>;
 
@@ -30,7 +30,7 @@ function IfProvider<V, E>({
   if: selector,
   then: providers
 }: IfProviderProps<V, E>) {
-  return withGraphData<V, E, { rendered: boolean }, { rendered: boolean }>(
+  return withGraphSettings<V, E, { rendered: boolean }, { rendered: boolean }>(
     ({ rendered }: { rendered: boolean }) => {
       return rendered ? (
         <WithProviders providers={providers}>{children}</WithProviders>
@@ -44,7 +44,7 @@ function IfProvider<V, E>({
 
 type SwitchProviderProps<V, E, R extends number | string> = PropsWithChildren<{
   case: Record<R, Array<ReactElement> | ReactElement>;
-  match: (data: GraphDataContextType<V, E>) => R;
+  match: (data: GraphSettingsContextType<V, E>) => R;
 }>;
 
 function SwitchProvider<V, E, R extends number | string>({
@@ -52,7 +52,7 @@ function SwitchProvider<V, E, R extends number | string>({
   children,
   match: selector
 }: SwitchProviderProps<V, E, R>) {
-  return withGraphData<V, E, { rendered: R }, { rendered: R }>(
+  return withGraphSettings<V, E, { rendered: R }, { rendered: R }>(
     ({ rendered }: { rendered: R }) => {
       return providers[rendered] ? (
         <WithProviders providers={providers[rendered]}>

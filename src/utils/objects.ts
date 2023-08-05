@@ -5,7 +5,12 @@
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
-import { isSharedValue } from 'react-native-reanimated';
+import {
+  cancelAnimation,
+  isSharedValue,
+  makeMutable,
+  SharedValue
+} from 'react-native-reanimated';
 
 import { DeepPartial } from '@/types/utils';
 
@@ -201,6 +206,11 @@ const deepMergeHelper = <T extends Record<string, any>>(
       typeof obj2[key] === 'object' &&
       obj2[key] !== null
     ) {
+      // If references are equal, no need to merge
+      if (obj1[key] === obj2[key]) {
+        result[key] = obj1[key];
+        continue;
+      }
       const mergedChild = deepMerge(obj1[key], obj2[key]);
       isModified = isModified || mergedChild !== obj1[key];
       result[key] = mergedChild;
@@ -226,3 +236,123 @@ export const deepMerge = <T extends Record<string, any>>(
 ): T => {
   return objs.reduce((acc, obj) => deepMergeHelper(acc, obj), obj1);
 };
+
+type SettingsWithDefaults<C, N, D> = {
+  current?: C;
+  default: D;
+  new?: N;
+};
+
+type SettingsWithoutDefaults<C, N> = {
+  current?: C;
+  new?: N;
+};
+
+const areSettingsWithDefaults = <C, N, D>(
+  settings: SettingsWithDefaults<C, N, D> | SettingsWithoutDefaults<C, N>
+): settings is SettingsWithDefaults<C, N, D> => {
+  return 'default' in settings;
+};
+
+export const updateValues = <
+  C extends D | Record<keyof D, any>,
+  N extends DeepPartial<D>,
+  D extends Record<string, any>,
+  K extends keyof (D | N)
+>(
+  settings: SettingsWithDefaults<C, N, D> | SettingsWithoutDefaults<C, N>,
+  sharedKeys?: Set<K>
+): C & Record<K, SharedValue<any>> => {
+  const result = { ...settings.current } as C;
+  let isModified = false;
+  const keys = areSettingsWithDefaults(settings)
+    ? Object.keys(settings.default)
+    : settings.new
+    ? Object.keys(settings.new)
+    : [];
+
+  // Add or update values
+  for (const key of keys) {
+    const value = areSettingsWithDefaults(settings)
+      ? settings.new?.[key as keyof N] ?? settings.default[key as keyof D]
+      : settings.new?.[key as keyof N];
+
+    // SHARED VALUES
+    if (sharedKeys?.has(key as K)) {
+      const res = result as Record<string, SharedValue<any>>;
+      // If the value passed by the user is a shared value
+      if (isSharedValue(value)) {
+        // If the value doesn't exist in the current settings or the new
+        // shared value was passed by the user, update it
+        if (res[key] !== value) {
+          res[key] = value;
+          isModified = true;
+        }
+      }
+      // Otherwise
+      else {
+        // If the value doesn't exist in the current settings, add it
+        // eslint-disable-next-line no-lonely-if
+        if (!(key in res)) {
+          res[key] = makeMutable(value);
+          isModified = true;
+        }
+        // Otherwise, if the value exists in the current settings and was
+        // changed, update it in place
+        else if (res[key]!.value !== value) {
+          res[key]!.value = value;
+        }
+      }
+    }
+    // NON-SHARED VALUES
+    else {
+      const res = result as Record<string, any>;
+      // If the value doesn't exist in the current settings or exists
+      // but was changed, update it
+      if (res[key] !== value) {
+        res[key] = value;
+        isModified = true;
+      }
+    }
+  }
+
+  // Clear values that no longer exist
+  for (const key in result) {
+    if (!(key in keys)) {
+      if (sharedKeys?.has(key as unknown as K)) {
+        cancelAnimation(result[key]);
+      }
+      delete result[key];
+      isModified = true;
+    }
+  }
+
+  // Return the result if it was modified, otherwise return the current settings
+  // (if modified in place, the current settings will be returned)
+  return isModified ? result : settings.current!;
+};
+
+export const createKeySet = <O extends Record<string, any>>(
+  obj: O,
+  exclude?: Array<string>
+): Set<keyof O> => {
+  const result = new Set(Object.keys(obj));
+  if (exclude) {
+    for (const key of exclude) {
+      result.delete(key);
+    }
+  }
+  return result;
+};
+
+export const removeValueWithKey = <
+  T extends Record<string, any>,
+  K extends keyof T
+>(
+  obj: T,
+  key: K
+): Omit<T, K> =>
+  Object.fromEntries(Object.entries(obj).filter(([k]) => k !== key)) as Omit<
+    T,
+    K
+  >;

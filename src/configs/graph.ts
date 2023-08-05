@@ -1,5 +1,8 @@
 /* eslint-disable import/no-unused-modules */
-import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
+import {
+  DEFAULT_ANIMATION_SETTINGS,
+  DEFAULT_FOCUS_ANIMATION_SETTINGS
+} from '@/constants/animations';
 import {
   EdgeLabelRendererFunction,
   EdgeRenderFunction,
@@ -8,6 +11,7 @@ import {
 import {
   EdgeSettingsWithDefaults,
   EdgeType,
+  FocusSettingsWithDefaults,
   GraphLayoutSettingsWithDefaults,
   GraphPlacementSettingsWithDefaults,
   GraphSettings,
@@ -120,6 +124,18 @@ export const DEFAULT_LAYOUT_SETTINGS: Record<
   }
 };
 
+export const DEFAULT_FOCUS_SETTINGS: FocusSettingsWithDefaults = {
+  alignment: {
+    horizontalAlignment: 'center',
+    horizontalOffset: 0,
+    verticalAlignment: 'center',
+    verticalOffset: 0
+  },
+  animation: DEFAULT_FOCUS_ANIMATION_SETTINGS,
+  disableGestures: false,
+  vertexScale: 4
+};
+
 export const DEFAULT_GRAPH_SETTINGS: GraphSettingsWithDefaults<unknown> = {
   // ANIMATION SETTINGS
   animations: {
@@ -161,11 +177,11 @@ export const DEFAULT_EDGE_LABEL_RENDERERS: EdgeLabelRendererFunction<unknown> =
   DefaultEdgeLabelRenderer;
 
 export const getDefaultGraphRenderers = <V, E>(
-  settings: GraphSettings<V>
+  settings?: GraphSettings<V>
 ): GraphRenderersWithDefaults<V, E> => ({
   arrow: DefaultEdgeArrowRenderer,
   edge: DEFAULT_EDGE_RENDERERS[
-    settings.components?.edge?.type ??
+    settings?.components?.edge?.type ??
       DEFAULT_GRAPH_SETTINGS.components.edge.type
   ],
   label: undefined, // Label is not rendered by default

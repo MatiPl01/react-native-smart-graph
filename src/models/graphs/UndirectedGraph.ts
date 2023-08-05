@@ -30,23 +30,26 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
   }
 
   override get connections(): GraphConnections {
-    return Object.fromEntries(
-      Object.values(this.vertices$).map(vertex => {
-        const neighbors = vertex.edges.map(edge =>
-          edge.vertices[0].key === vertex.key
-            ? edge.vertices[1].key
-            : edge.vertices[0].key
-        );
+    if (!this.cachedConnections) {
+      this.cachedConnections = Object.fromEntries(
+        Object.values(this.vertices$).map(vertex => {
+          const neighbors = vertex.edges.map(edge =>
+            edge.vertices[0].key === vertex.key
+              ? edge.vertices[1].key
+              : edge.vertices[0].key
+          );
 
-        return [
-          vertex.key,
-          {
-            incoming: [],
-            outgoing: neighbors
-          }
-        ];
-      })
-    );
+          return [
+            vertex.key,
+            {
+              incoming: [],
+              outgoing: neighbors
+            }
+          ];
+        })
+      );
+    }
+    return this.cachedConnections;
   }
 
   override insertBatch(

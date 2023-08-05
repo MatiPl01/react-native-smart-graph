@@ -1,4 +1,4 @@
 export {
   type ComponentsDataContextType,
   withComponentsData
-} from './data/components/ComponentsDataProvider';
+} from './data/settings/GraphSettingsProvider';

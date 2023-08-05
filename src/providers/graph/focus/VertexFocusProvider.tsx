@@ -17,7 +17,7 @@ import { useFocusObserver } from '@/hooks';
 import { FocusStatus } from '@/providers/canvas';
 import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withGraphData } from '@/providers/graph/data/context';
+import { withGraphSettings } from '@/providers/graph/data/settings/context';
 import { VertexComponentData } from '@/types/components';
 import { Graph } from '@/types/graphs';
 import { FocusedVertexData } from '@/types/settings/focus';
@@ -231,7 +231,7 @@ function VertexFocusProvider<V, E>({
   );
 }
 
-export default withGraphData(
+export default withGraphSettings(
   withComponentsData(VertexFocusProvider, ({ verticesData }) => ({
     verticesData
   })),

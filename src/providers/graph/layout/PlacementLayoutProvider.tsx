@@ -1,35 +1,40 @@
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren } from 'react';
 import {
   runOnJS,
+  SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
 
-import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withComponentsData } from '@/providers/graph/data/components/ComponentsDataProvider';
+import { withGraphSettings } from '@/providers/graph/data/settings/context';
+import { EdgeComponentData, VertexComponentData } from '@/types/components';
+import { GraphConnections } from '@/types/graphs';
+import { BoundingRect } from '@/types/layout';
+import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
-  // edgesData: Record<string, EdgeComponentData<E, V>>;
-  // graph: Graph<V, E>;
-  // layoutAnimationSettings: AnimationSettingsWithDefaults;
-  // settings: GraphSettingsWithDefaults<V>;
-  // targetBoundingRect: SharedValue<BoundingRect>;
-  // verticesData: Record<string, VertexComponentData<V, E>>;
+  connections: GraphConnections;
+  edgesData: Record<string, EdgeComponentData<E, V>>;
+  isGraphDirected: SharedValue<boolean>;
+  layoutAnimationSettings: AnimationSettingsWithDefaults;
+  targetBoundingRect: SharedValue<BoundingRect>;
+  vertexRadius: SharedValue<number>;
+  verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
   children,
+  connections,
   edgesData,
-  graph,
   layoutAnimationSettings,
-  settings,
   targetBoundingRect,
+  vertexRadius,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
-  console.log('GraphPlacementLayoutProvider');
-  return <>{children}</>;
   // CONTEXTS
   // Canvas contexts
   const {
@@ -38,27 +43,14 @@ function GraphPlacementLayoutProvider<V, E>({
 
   const isFirstRender = useSharedValue(true);
 
-  const layoutAnimationData = useMemo(
-    () => ({
-      connections: graph.connections,
-      isGraphDirected: graph.isDirected(),
-      settings: settings.placement,
-      vertexRadius: settings.components.vertex.radius
-    }),
-    [
-      verticesData,
-      edgesData,
-      settings.components.vertex.radius,
-      settings.placement
-    ]
-  );
-
   useAnimatedReaction(
-    () => null,
-    () => {
+    () => ({
+      radius: vertexRadius.value
+    }),
+    ({ radius }) => {
       const { boundingRect, verticesPositions } = placeVertices(
-        layoutAnimationData.connections,
-        layoutAnimationData.vertexRadius,
+        connections,
+        radius,
         layoutAnimationData.settings,
         layoutAnimationData.isGraphDirected
       );
@@ -81,23 +73,32 @@ function GraphPlacementLayoutProvider<V, E>({
         layoutAnimationSettings
       );
     },
-    [layoutAnimationData]
+    [verticesData, edgesData]
   );
 
   return <>{children}</>;
 }
 
-export default withComponentsData(
-  GraphPlacementLayoutProvider,
-  ({
-    edgesData,
-    layoutAnimationSettings,
-    targetBoundingRect,
-    verticesData
-  }) => ({
-    edgesData,
-    layoutAnimationSettings,
-    targetBoundingRect,
-    verticesData
+export default withGraphSettings(
+  withComponentsData(
+    GraphPlacementLayoutProvider,
+    ({
+      connections,
+      edgesData,
+      isGraphDirected,
+      layoutAnimationSettings,
+      targetBoundingRect,
+      verticesData
+    }) => ({
+      connections,
+      edgesData,
+      isGraphDirected,
+      layoutAnimationSettings,
+      targetBoundingRect,
+      verticesData
+    })
+  ),
+  ({ settings }) => ({
+    vertexRadius: settings.components.vertex.radius
   })
 );

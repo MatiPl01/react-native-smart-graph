@@ -4,8 +4,6 @@ import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
-import { DirectedGraphComponentProps } from '@/components/graphs/DirectedGraphComponent';
-import { UndirectedGraphComponentProps } from '@/components/graphs/UndirectedGraphComponent';
 import {
   AccessibleOverlayContextType,
   withOverlay
@@ -18,17 +16,10 @@ import {
   useTransformContext
 } from '@/providers/canvas';
 import { CanvasContexts } from '@/providers/graph/contexts';
+import { GraphData } from '@/providers/graph/data/settings/utils';
 import GraphProvider from '@/providers/graph/GraphProvider';
 
-const validateProps = <
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->(
-  props: P
-) => {
+const validateProps = <V, E>(props: GraphData<V, E>) => {
   // TODO - add more validations
   // FOCUS
   // Focus points validation
@@ -53,19 +44,13 @@ const validateProps = <
   }
 };
 
-function GraphComponentComposer<
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->({
+function GraphComponentComposer<V, E>({
   removeLayer,
   renderLayer,
   ...restProps
-}: P & AccessibleOverlayContextType) {
-  const graphProps = restProps as unknown as P;
-  validateProps<V, E, P>(graphProps);
+}: GraphData<V, E> & AccessibleOverlayContextType) {
+  const graphProps = restProps;
+  validateProps<V, E>(graphProps);
   // CONTEXTS
   const dataContext = useCanvasDataContext();
   const transformContext = useTransformContext();
@@ -94,6 +79,8 @@ function GraphComponentComposer<
     []
   );
 
+  const graphComponent = useMemo(() => <GraphComponent />, []);
+
   return (
     <Canvas
       onLayout={transformContext.handleCanvasRender}
@@ -102,7 +89,7 @@ function GraphComponentComposer<
         <GraphProvider<V, E>
           canvasContexts={canvasContexts}
           graphProps={graphProps}>
-          <GraphComponent />
+          {graphComponent}
         </GraphProvider>
       </Group>
     </Canvas>
@@ -115,12 +102,6 @@ const styles = StyleSheet.create({
   }
 });
 
-export default withOverlay(GraphComponentComposer) as <
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->(
-  props: P
+export default withOverlay(GraphComponentComposer) as <V, E>(
+  props: GraphData<V, E>
 ) => JSX.Element;

@@ -1,11 +1,8 @@
-// eslint-disable-next-line import/default
-import { EasingFn } from 'react-native-reanimated';
-
 import { AnimationEasing } from '@/types/animations';
 
 export type AnimationSettings = {
   duration?: number;
-  easing?: EasingFn;
+  easing?: AnimationEasing;
   onComplete?: (finished?: boolean) => void;
 };
 

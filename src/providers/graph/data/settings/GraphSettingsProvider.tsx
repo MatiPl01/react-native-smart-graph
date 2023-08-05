@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 
-import { GraphDataContext, GraphDataContextType } from './context';
+import { GraphSettingsContext } from '@/providers/graph/data/settings/context';
+
 import {
   clearContextValue,
   createContextValue,
@@ -8,13 +9,13 @@ import {
   updateContextValue
 } from './utils';
 
-type GraphDataProviderProps<V, E> = PropsWithChildren<GraphData<V, E>>;
+type GraphSettingsProviderProps<V, E> = PropsWithChildren<GraphData<V, E>>;
 
-export default function GraphDataProvider<V, E>({
+export default function GraphSettingsProvider<V, E>({
   children,
   ...userSettings
-}: GraphDataProviderProps<V, E>) {
-  const [contextValue, setContextValue] = useState<GraphDataContextType<V, E>>(
+}: GraphSettingsProviderProps<V, E>) {
+  const [contextValue, setContextValue] = useState(
     createContextValue(userSettings)
   );
 
@@ -27,8 +28,8 @@ export default function GraphDataProvider<V, E>({
   }, [userSettings]);
 
   return (
-    <GraphDataContext.Provider value={contextValue}>
+    <GraphSettingsContext.Provider value={contextValue}>
       {children}
-    </GraphDataContext.Provider>
+    </GraphSettingsContext.Provider>
   );
 }

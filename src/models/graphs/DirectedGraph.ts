@@ -31,15 +31,18 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
   }
 
   override get connections(): GraphConnections {
-    return Object.fromEntries(
-      Object.values(this.vertices$).map(vertex => [
-        vertex.key,
-        {
-          incoming: vertex.inEdges.map(edge => edge.source.key),
-          outgoing: vertex.outEdges.map(edge => edge.target.key)
-        }
-      ])
-    );
+    if (!this.cachedConnections) {
+      this.cachedConnections = Object.fromEntries(
+        Object.values(this.vertices$).map(vertex => [
+          vertex.key,
+          {
+            incoming: vertex.inEdges.map(edge => edge.source.key),
+            outgoing: vertex.outEdges.map(edge => edge.target.key)
+          }
+        ])
+      );
+    }
+    return this.cachedConnections;
   }
 
   override insertBatch(

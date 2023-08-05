@@ -1,9 +1,5 @@
 import { memo, PropsWithChildren, useMemo } from 'react';
 
-import {
-  DirectedGraphComponentProps,
-  UndirectedGraphComponentProps
-} from '@/components/graphs';
 import { ContextProviderComposer } from '@/providers/utils';
 import ConditionalProvider from '@/providers/utils/ConditionalProvider';
 import { deepMemoComparator } from '@/utils/objects';
@@ -11,8 +7,8 @@ import { deepMemoComparator } from '@/utils/objects';
 import CanvasContextsProvider, {
   CanvasContexts
 } from './contexts/CanvasContextsProvider';
-import { ComponentsDataProvider } from './data/components';
-import GraphDataProvider from './data/GraphDataProvider';
+import ComponentsDataProvider from './data/components/ComponentsDataProvider';
+import { GraphData } from './data/settings/utils';
 import { PressEventsProvider } from './events';
 import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
 import {
@@ -24,9 +20,7 @@ import {
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
   canvasContexts: CanvasContexts;
-  graphProps:
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>;
+  graphProps: GraphData<V, E>;
 }>;
 
 function GraphProvider<V, E>({
@@ -45,16 +39,16 @@ function GraphProvider<V, E>({
       // vertices based on calculated positions
       <ConditionalProvider.Switch
         case={{
+          // Provider used to place and move vertices on graph changes
+          auto: <PlacementLayoutProvider />,
           forces: [
             // Provider used to place vertices on graph changes
             <ForcesPlacementProvider />,
             // Provider used to animate vertices based on calculated forces
             <ForcesLayoutProvider />
-          ],
-          // Provider used to place and move vertices on graph changes
-          placement: <PlacementLayoutProvider />
+          ]
         }}
-        match={({ settings }) => settings.layout.managedBy}
+        match={({ settings }) => settings.layout.type}
       />,
       // CONTAINER
       // Provider used to compute the dimensions of the container
@@ -80,11 +74,11 @@ function GraphProvider<V, E>({
 
   return (
     <CanvasContextsProvider canvasContexts={canvasContexts}>
-      <GraphDataProvider {...graphProps}>
+      <GraphSettingsProvider {...graphProps}>
         <ContextProviderComposer providers={providers}>
           {/* {children} */}
         </ContextProviderComposer>
-      </GraphDataProvider>
+      </GraphSettingsProvider>
     </CanvasContextsProvider>
   );
 }

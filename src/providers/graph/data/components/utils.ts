@@ -1,137 +1,134 @@
 import { makeMutable } from 'react-native-reanimated';
 
-import DefaultEdgeArrowRenderer from '@/components/graphs/arrows/renderers/DefaultEdgeArrowRenderer';
-import DefaultCurvedEdgeRenderer from '@/components/graphs/edges/curved/renderers/DefaultCurvedEdgeRenderer';
-import DefaultStraightEdgeRenderer from '@/components/graphs/edges/straight/renderers/DefaultStraightEdgeRenderer';
-import DefaultVertexRenderer from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
+import { GraphState } from '@/hooks';
 import {
-  DEFAULT_ANIMATION_SETTINGS,
-  DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
-} from '@/constants/animations';
-import {
-  CURVED_EDGE_COMPONENT_SETTINGS,
-  DEFAULT_ARROW_COMPONENT_SETTINGS,
-  DEFAULT_LABEL_COMPONENT_SETTINGS,
-  DEFAULT_STRAIGHT_EDGE_COMPONENT_SETTINGS,
-  DEFAULT_VERTEX_COMPONENT_SETTINGS
-} from '@/constants/components';
-import { DEFAULT_FORCES_STRATEGY_SETTINGS } from '@/constants/forces';
-import { RANDOM_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
+  EdgeComponentData,
+  EdgeRemoveHandler,
+  VertexComponentData,
+  VertexRemoveHandler
+} from '@/types/components';
 import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-import { OrderedEdges, Vertex } from '@/types/graphs';
-import { GraphRenderers, GraphRenderersWithDefaults } from '@/types/renderers';
-import {
-  DirectedGraphComponentsSettings,
-  GraphSettings,
-  GraphSettingsWithDefaults
-} from '@/types/settings';
+import { GraphConnections, OrderedEdges, Vertex } from '@/types/graphs';
 import {
   AnimationSettings,
-  AnimationSettingsWithDefaults
-} from '@/types/settings/animations';
-import {
-  GraphLayoutSettings,
-  GraphLayoutSettingsWithDefaults
-} from '@/types/settings/graph/layout';
+  AnimationSettingsWithDefaults,
+  GraphAnimationsSettingsWithDefaults
+} from '@/types/settings';
+import { deepMerge, updateValues } from '@/utils/objects';
 
-export const updateGraphSettingsWithDefaults = <V>(
-  isGraphDirected: boolean,
-  settings?: GraphSettings<V>
-): GraphSettingsWithDefaults<V> => ({
-  ...settings,
-  animations: {
-    edges: {
-      ...DEFAULT_ANIMATION_SETTINGS,
-      ...settings?.animations?.edges
-    } as unknown as AnimationSettingsWithDefaults,
-    layout: {
-      ...(settings?.layout?.managedBy === 'forces'
-        ? DEFAULT_FORCES_LAYOUT_ANIMATION_SETTINGS
-        : DEFAULT_ANIMATION_SETTINGS),
-      ...settings?.animations?.layout
-    } as unknown as AnimationSettingsWithDefaults,
-    vertices: {
-      ...DEFAULT_ANIMATION_SETTINGS,
-      ...settings?.animations?.vertices
-    } as unknown as AnimationSettingsWithDefaults
-  },
-  components: {
-    ...settings?.components,
-    edge: {
-      ...(settings?.components?.edge?.type === 'curved'
-        ? CURVED_EDGE_COMPONENT_SETTINGS
-        : DEFAULT_STRAIGHT_EDGE_COMPONENT_SETTINGS),
-      ...settings?.components?.edge
-    },
-    ...(isGraphDirected
-      ? {
-          arrow: {
-            ...DEFAULT_ARROW_COMPONENT_SETTINGS,
-            ...(settings?.components as DirectedGraphComponentsSettings)?.arrow
-          }
-        }
-      : {}),
-    label: {
-      ...DEFAULT_LABEL_COMPONENT_SETTINGS,
-      ...settings?.components?.label
-    },
-    vertex: {
-      ...DEFAULT_VERTEX_COMPONENT_SETTINGS,
-      ...settings?.components?.vertex
-    }
-  },
-  layout: updateGraphLayoutSettingsWithDefaults(settings?.layout),
-  placement: settings?.placement ?? {
-    strategy: 'random',
-    ...RANDOM_PLACEMENT_SETTINGS
-  }
-});
+import { GraphComponentsContextType } from './context';
 
-const updateGraphLayoutSettingsWithDefaults = (
-  settings?: GraphLayoutSettings
-): GraphLayoutSettingsWithDefaults => {
-  switch (settings?.managedBy) {
-    case 'forces':
-      return {
-        managedBy: 'forces',
-        settings: {
-          ...DEFAULT_FORCES_STRATEGY_SETTINGS,
-          ...settings
-        }
-      };
-    case 'placement':
-    default:
-      return { managedBy: 'placement', ...settings };
-  }
+export type ComponentsData<V, E> = {
+  connections: GraphConnections;
+  graphAnimationsSettings: GraphAnimationsSettingsWithDefaults;
+  isGraphDirected: boolean;
+  // Store keys of removed edges for which the removal animation
+  // has been completed and edges are waiting to be unmounted
+  removedEdges: Set<string>;
+  // Store keys of removed vertices for which the removal animation
+  // has been completed and vertices are waiting to be unmounted
+  removedVertices: Set<string>;
+  renderLabels: boolean;
+  state: GraphState<V, E>;
 };
 
-export const updateGraphRenderersWithDefaults = <V, E>(
-  isGraphDirected: boolean,
-  edgeType: 'curved' | 'straight',
-  renderers?: GraphRenderers<V, E>
-): GraphRenderersWithDefaults<V, E> => ({
-  arrow: isGraphDirected ? DefaultEdgeArrowRenderer : undefined,
-  edge:
-    edgeType === 'straight'
-      ? DefaultStraightEdgeRenderer
-      : DefaultCurvedEdgeRenderer,
-  vertex: DefaultVertexRenderer,
-  ...renderers
-});
+export const createContextValue = <V, E>(
+  data: ComponentsData<V, E>,
+  removeHandlers: {
+    handleEdgeRemove: EdgeRemoveHandler;
+    handleVertexRemove: VertexRemoveHandler;
+  }
+): GraphComponentsContextType<V, E> =>
+  updateContextValue(
+    data,
+    undefined,
+    removeHandlers as GraphComponentsContextType<V, E>
+  );
 
-export const updateGraphVerticesData = <V, E>(
+const sharedKeys = ['isGraphDirected', 'targetBoundingRect'] as const;
+const SHARED_KEYS = new Set(sharedKeys);
+
+export const updateContextValue = <V, E>(
+  newData: ComponentsData<V, E>,
+  currentData?: ComponentsData<V, E>,
+  value?: GraphComponentsContextType<V, E>
+): GraphComponentsContextType<V, E> => {
+  const newLayoutAnimationSettings = value?.layoutAnimationSettings
+    ? deepMerge(
+        value?.layoutAnimationSettings,
+        newData.graphAnimationsSettings.layout,
+        newData.state.animationsSettings.layout
+      )
+    : deepMerge(
+        newData.graphAnimationsSettings.layout,
+        newData.state.animationsSettings.layout
+      );
+
+  // Update vertices data only if vertices have changed
+  const newVerticesData =
+    newData.state.vertices !== currentData?.state.vertices
+      ? updateGraphVerticesData(
+          value?.verticesData ?? {},
+          newData.state.vertices,
+          newData.removedVertices,
+          newData.state.animationsSettings.vertices,
+          newData.graphAnimationsSettings.vertices
+        )
+      : value?.verticesData ?? {};
+
+  // Update edges data only if edges have changed
+  const newEdgesData =
+    newData.state.edges !== currentData?.state.edges
+      ? updateGraphEdgesData(
+          value?.edgesData ?? {},
+          newData.state.orderedEdges,
+          newVerticesData,
+          newData.removedEdges,
+          newData.state.animationsSettings.edges,
+          newData.graphAnimationsSettings.edges
+        )
+      : value?.edgesData ?? {};
+
+  const newLabelsData =
+    // Update edge labels data only if edges have changed and labels are rendered
+    newData.renderLabels && newEdgesData !== value?.edgesData
+      ? updateGraphEdgeLabelsData(value?.edgeLabelsData ?? {}, newEdgesData)
+      : // Remove edge labels data if labels are not rendered anymore
+      !newData.renderLabels && currentData?.renderLabels
+      ? {}
+      : // Use previous edge labels data if labels are rendered and edges have not changed
+        value?.edgeLabelsData ?? {};
+
+  return updateValues(
+    {
+      current: value,
+      new: {
+        // Always take new connections as the graph model takes care of
+        // updating the connections when the graph is updated
+        connections: newData.connections,
+        edgeLabelsData: newLabelsData,
+        edgesData: newEdgesData,
+        handleEdgeRemove: value?.handleEdgeRemove, // Prevent removing
+        handleVertexRemove: value?.handleVertexRemove, // Prevent removing
+        isGraphDirected: newData.isGraphDirected,
+        layoutAnimationSettings: newLayoutAnimationSettings,
+        targetBoundingRect: value?.targetBoundingRect, // Prevent removing
+        verticesData: newVerticesData
+      }
+    },
+    SHARED_KEYS
+  );
+};
+
+const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V, E>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AnimationSettingsWithDefaults
-): {
-  data: Record<string, VertexComponentData<V, E>>;
-  shouldRender: boolean;
-} => {
+): Record<string, VertexComponentData<V, E>> => {
   const updatedVerticesData = { ...oldVerticesData };
-  let shouldRender = false;
+  let isModified = false;
 
   // Add new vertices
   for (const vertex of currentVertices) {
@@ -149,7 +146,7 @@ export const updateGraphVerticesData = <V, E>(
       continue;
     }
 
-    shouldRender = true;
+    isModified = true;
     // Create the vertex data
     updatedVerticesData[vertex.key] = {
       ...(oldVertex ?? {
@@ -179,7 +176,7 @@ export const updateGraphVerticesData = <V, E>(
     const vertexData = oldVerticesData[key];
     if (vertexData && !currentVerticesKeys.has(key)) {
       if (!vertexData.removed) {
-        shouldRender = true;
+        isModified = true;
         updatedVerticesData[key] = {
           ...vertexData,
           animationSettings: {
@@ -192,32 +189,26 @@ export const updateGraphVerticesData = <V, E>(
     }
   }
 
-  // Remove vertices from vertices data if theri removeal animation is finished
+  // Remove vertices from vertices data if their removal animation is finished
   // and they weren't added back to the graph model
   for (const key of removedVertices) {
     delete updatedVerticesData[key];
     removedVertices.delete(key);
   }
 
-  return {
-    data: updatedVerticesData,
-    shouldRender
-  };
+  return isModified ? updatedVerticesData : oldVerticesData;
 };
 
-export const updateGraphEdgesData = <V, E>(
+const updateGraphEdgesData = <V, E>(
   oldEdgesData: Record<string, EdgeComponentData<E, V>>,
   currentEdges: OrderedEdges<E, V>,
   verticesData: Record<string, VertexComponentData<V, E>>,
   removedEdges: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AnimationSettingsWithDefaults
-): {
-  data: Record<string, EdgeComponentData<E, V>>;
-  shouldRender: boolean;
-} => {
+): Record<string, EdgeComponentData<E, V>> => {
   const updatedEdgesData = { ...oldEdgesData };
-  let shouldRender = false; // Flag to indicate if edges data was updated
+  let isModified = false; // Flag to indicate if edges data was updated
 
   // Add new edges to edges data
   for (const edgeData of currentEdges) {
@@ -246,7 +237,7 @@ export const updateGraphEdgesData = <V, E>(
     const v2Data = verticesData[v2.key];
     if (!v1Data || !v2Data) continue;
 
-    shouldRender = true;
+    isModified = true;
     // Create the edge data
     updatedEdgesData[edgeData.edge.key] = {
       ...(oldEdge ?? {
@@ -282,7 +273,7 @@ export const updateGraphEdgesData = <V, E>(
     const edgeData = oldEdgesData[key];
     if (edgeData && !currentEdgesKeys.has(key)) {
       if (!edgeData.removed) {
-        shouldRender = true;
+        isModified = true;
         updatedEdgesData[key] = {
           ...edgeData,
           animationSettings: {
@@ -295,28 +286,22 @@ export const updateGraphEdgesData = <V, E>(
     }
   }
 
-  // Remove edges from edges data if their removeal animation is finished
+  // Remove edges from edges data if their removal animation is finished
   // and they weren't added back to the graph model
   for (const key of removedEdges) {
     delete updatedEdgesData[key];
     removedEdges.delete(key);
   }
 
-  return {
-    data: updatedEdgesData,
-    shouldRender
-  };
+  return isModified ? updatedEdgesData : oldEdgesData;
 };
 
-export const updateGraphEdgeLabelsData = <V, E>(
+const updateGraphEdgeLabelsData = <V, E>(
   oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
   edgesData: Record<string, EdgeComponentData<E, V>>
-): {
-  data: Record<string, EdgeLabelComponentData<E>>;
-  shouldRender: boolean;
-} => {
+): Record<string, EdgeLabelComponentData<E>> => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
-  let shouldRender = false; // Flag to indicate if edges data was updated
+  let isModified = false; // Flag to indicate if edges data was updated
 
   // Add new labels data
   Object.entries(edgesData).forEach(([key, data]) => {
@@ -329,7 +314,7 @@ export const updateGraphEdgeLabelsData = <V, E>(
       edgeData &&
       (!oldLabelData || oldLabelData.value !== edgeData.edge.value)
     ) {
-      shouldRender = true;
+      isModified = true;
       updatedEdgeLabelsData[key] = {
         animationProgress: data.animationProgress,
         centerX: data.labelPosition.x,
@@ -349,13 +334,10 @@ export const updateGraphEdgeLabelsData = <V, E>(
   // (their unmount animation is finished)
   for (const key in oldEdgeLabelsData) {
     if (!currentEdgesKeys.has(key)) {
-      shouldRender = true;
+      isModified = true;
       delete updatedEdgeLabelsData[key];
     }
   }
 
-  return {
-    data: updatedEdgeLabelsData,
-    shouldRender
-  };
+  return isModified ? updatedEdgeLabelsData : oldEdgeLabelsData;
 };

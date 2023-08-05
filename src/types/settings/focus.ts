@@ -1,5 +1,5 @@
 import { Alignment, AnimatedVectorCoordinates } from '@/types/layout';
-import { DeepRequired, Maybe } from '@/types/utils';
+import { DeepRequiredAll, Maybe } from '@/types/utils';
 
 import { AnimationSettings, AnimationSettingsWithDefaults } from './animations';
 
@@ -10,10 +10,9 @@ export type FocusSettings = {
   vertexScale?: number;
 };
 
-export type FocusSettingsWithDefaults = DeepRequired<
-  FocusSettings,
-  ['disableGestures']
->;
+export type FocusSettingsWithDefaults = DeepRequiredAll<
+  Omit<FocusSettings, 'animation'>
+> & { animation: AnimationSettingsWithDefaults };
 
 export type FocusedVertexData = {
   animation: AnimationSettingsWithDefaults | null;

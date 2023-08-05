@@ -2,7 +2,7 @@ import { PropsWithChildren } from 'react';
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withGraphData } from '@/providers/graph/data/context';
+import { withGraphSettings } from '@/providers/graph/data/settings/context';
 import { BoundingRect } from '@/types/layout';
 import { animateToValue } from '@/utils/animations';
 
@@ -43,7 +43,7 @@ function ContainerDimensionsProvider({
   return <>{children}</>;
 }
 
-export default withGraphData(
+export default withGraphSettings(
   ContainerDimensionsProvider,
   ({ targetBoundingRect }) => ({
     targetBoundingRect

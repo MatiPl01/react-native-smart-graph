@@ -27,8 +27,17 @@ export default abstract class Graph<
   private focusedVertexKey: null | string = null;
   private lastFocusChangeSettings: FocusSettings | null = null;
   private lastGraphChangeSettings: AnimationsSettings | null = null;
-
   private readonly observers: Set<GraphObserver> = new Set();
+
+  protected cachedConnections: GraphConnections | null = null;
+  protected cachedEdges: Array<GE> | null = null;
+  protected cachedOrderedEdges: Array<{
+    edge: GE;
+    edgesCount: number;
+    order: number;
+  }> | null = null;
+  protected cachedVertices: Array<GV> | null = null;
+
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
     string,
@@ -92,7 +101,10 @@ export default abstract class Graph<
   }
 
   get edges(): Array<GE> {
-    return Object.values(this.edges$);
+    if (!this.cachedEdges) {
+      this.cachedEdges = Object.values(this.edges$);
+    }
+    return this.cachedEdges;
   }
 
   focus(vertexKey: string, settings?: FocusSettings): void {
@@ -129,6 +141,11 @@ export default abstract class Graph<
     animationsSettings?: Maybe<AnimationsSettings>,
     notifyChange = true
   ): GE {
+    // Invalidate cached edges data
+    this.cachedEdges = null;
+    this.cachedOrderedEdges = null;
+    this.cachedConnections = null;
+
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
@@ -159,6 +176,10 @@ export default abstract class Graph<
     animationSettings?: Maybe<AnimationsSettings>,
     notifyChange = true
   ): GV {
+    // Invalidate cached vertices data
+    this.cachedVertices = null;
+    this.cachedConnections = null;
+
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
@@ -191,29 +212,33 @@ export default abstract class Graph<
   }
 
   get orderedEdges(): Array<{ edge: GE; edgesCount: number; order: number }> {
-    const addedEdgesKeys = new Set<string>();
-    const result: Array<{ edge: GE; edgesCount: number; order: number }> = [];
+    if (!this.cachedOrderedEdges) {
+      const addedEdgesKeys = new Set<string>();
+      const result: Array<{ edge: GE; edgesCount: number; order: number }> = [];
 
-    this.edges.forEach(edge => {
-      if (addedEdgesKeys.has(edge.key)) {
-        return;
-      }
-      const [v1, v2] = edge.vertices;
-      const edgesBetweenVertices =
-        this.edgesBetweenVertices$[v1.key]?.[v2.key] ?? [];
-      this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
-        ({ edge: e, order }) => {
-          result.push({
-            edge: e,
-            edgesCount: edgesBetweenVertices.length,
-            order
-          });
-          addedEdgesKeys.add(edge.key);
+      this.edges.forEach(edge => {
+        if (addedEdgesKeys.has(edge.key)) {
+          return;
         }
-      );
-    });
+        const [v1, v2] = edge.vertices;
+        const edgesBetweenVertices =
+          this.edgesBetweenVertices$[v1.key]?.[v2.key] ?? [];
+        this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
+          ({ edge: e, order }) => {
+            result.push({
+              edge: e,
+              edgesCount: edgesBetweenVertices.length,
+              order
+            });
+            addedEdgesKeys.add(edge.key);
+          }
+        );
+      });
 
-    return result;
+      this.cachedOrderedEdges = result;
+    }
+
+    return this.cachedOrderedEdges;
   }
 
   removeBatch(
@@ -306,7 +331,10 @@ export default abstract class Graph<
   }
 
   get vertices(): Array<GV> {
-    return Object.values(this.vertices$);
+    if (!this.cachedVertices) {
+      this.cachedVertices = Object.values(this.vertices$);
+    }
+    return this.cachedVertices;
   }
 
   abstract get connections(): GraphConnections;
