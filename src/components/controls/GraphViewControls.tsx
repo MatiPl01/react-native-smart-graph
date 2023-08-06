@@ -24,7 +24,7 @@ import {
   useFocusContext,
   useTransformContext
 } from '@/providers/view';
-import { useGraphViewDataContext } from '@/providers/view/data';
+import { useViewDataContext } from '@/providers/view/data';
 import { ObjectFit } from '@/types/layout';
 
 const OBJECT_FIT_BUTTONS: Array<{ icon: IconDefinition; type: ObjectFit }> = [
@@ -59,7 +59,7 @@ export default memo(function GraphViewControls({
 }: GraphViewControlsProps) {
   // CONTEXTS
   // Canvas data context
-  const { initialScale, objectFit } = useGraphViewDataContext();
+  const { initialScale, objectFit } = useViewDataContext();
   // Transform context
   const { resetContainerPosition } = useTransformContext();
   // Auto sizing context

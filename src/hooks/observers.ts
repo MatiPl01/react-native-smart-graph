@@ -1,27 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
 import {
   Edge,
   Graph,
   GraphObserver,
   OrderedEdges,
   Vertex
-} from '@/types/graphs';
-import { AnimationsSettings } from '@/types/settings/animations';
-import { FocusSettingsWithDefaults } from '@/types/settings/focus';
+} from '@/types/models';
+import {
+  AllFocusSettings,
+  GraphModificationAnimationsSettings
+} from '@/types/settings';
+import { deepMerge } from '@/utils/objects';
 
-export type GraphState<V, E> = {
-  animationsSettings: AnimationsSettings;
+export type GraphState<V, E, GE> = {
+  animationsSettings: GraphModificationAnimationsSettings;
   edges: Array<Edge<V, E>>;
-  orderedEdges: OrderedEdges<V, E>;
+  orderedEdges: OrderedEdges<GE>;
   vertices: Array<Vertex<V, E>>;
 };
 
-export const useGraphObserver = <V, E>(
-  graph: Graph<V, E>,
+export const useGraphObserver = <V, E, GE extends Edge<V, E>>(
+  graph: Graph<V, E, GE>,
   active = true
-): [GraphState<V, E>, (isActive: boolean) => void] => {
-  const [state, setState] = useState<GraphState<V, E>>({
+): [GraphState<V, E, GE>, (isActive: boolean) => void] => {
+  const [state, setState] = useState<GraphState<V, E, GE>>({
     animationsSettings: {
       edges: {},
       vertices: {}
@@ -73,18 +77,16 @@ export const useGraphObserver = <V, E>(
 
 type FocusState = {
   focusedVertexKey: null | string;
-  settings: FocusSettingsWithDefaults;
+  settings: AllFocusSettings;
 };
 
-export const useFocusObserver = <V, E>(
-  graph: Graph<V, E>,
+export const useFocusObserver = <V, E, GE extends Edge<V, E>>(
+  graph: Graph<V, E, GE>,
   active = true
 ): [FocusState, (isActive: boolean) => void] => {
   const [state, setState] = useState<FocusState>({
     focusedVertexKey: null,
-    settings: {
-      disableGestures: false // Gestures will be enabled by default
-    }
+    settings: DEFAULT_FOCUS_SETTINGS
   });
 
   const isObservingRef = useRef(false);
@@ -93,10 +95,7 @@ export const useFocusObserver = <V, E>(
     focusChanged(vertexKey, settings) {
       setState({
         focusedVertexKey: vertexKey,
-        settings: {
-          disableGestures: false,
-          ...settings
-        }
+        settings: deepMerge(state.settings, DEFAULT_FOCUS_SETTINGS, settings)
       });
     }
   });

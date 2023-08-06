@@ -1,4 +1,7 @@
+/* eslint-disable import/no-unused-modules */
 import {
+  Context,
+  createContext,
   PropsWithChildren,
   useCallback,
   useEffect,
@@ -7,32 +10,58 @@ import {
 } from 'react';
 
 import { useGraphObserver } from '@/hooks';
-import { withGraphSettings } from '@/providers/graph/data/settings/context';
-import { EdgeRemoveHandler, VertexRemoveHandler } from '@/types/components';
-import { Graph } from '@/types/graphs';
-import { GraphAnimationsSettingsWithDefaults } from '@/types/settings';
+import { GraphComponentsData } from '@/types/components';
+import { EdgeRemoveHandler, VertexRemoveHandler } from '@/types/data';
+import { Edge, Graph } from '@/types/models';
+import { AllGraphAnimationsSettings } from '@/types/settings';
 import {
   cancelEdgeAnimations,
   cancelVertexAnimations
 } from '@/utils/animations';
+import { withMemoContext } from '@/utils/contexts';
 
-import { GraphComponentsContext } from './context';
 import {
   ComponentsData,
   createContextValue,
   updateContextValue
 } from './utils';
 
-type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
-  graph: Graph<V, E>;
-  graphAnimationsSettings: GraphAnimationsSettingsWithDefaults;
+export const GraphComponentsDataContext = createContext(
+  null as unknown as object
+);
+
+export const withComponentsData = <
+  V,
+  E,
+  GE extends Edge<V, E>,
+  P extends object, // component props
+  R extends Partial<P> // values returned by selector
+>(
+  Component: React.ComponentType<P>,
+  selector: (contextValue: GraphComponentsData<V, E, GE>) => R
+) =>
+  withMemoContext(
+    Component,
+    GraphComponentsDataContext as unknown as Context<
+      GraphComponentsData<V, E, GE>
+    >,
+    selector
+  );
+
+type ComponentsDataProviderProps<
+  V,
+  E,
+  GE extends Edge<V, E>
+> = PropsWithChildren<{
+  graph: Graph<V, E, GE>;
+  graphAnimationsSettings: AllGraphAnimationsSettings;
   renderLabels: boolean;
 }>;
 
-function ComponentsDataProvider<V, E>({
+function ComponentsDataProvider<V, E, GE extends Edge<V, E>>({
   children,
   ...userSettings
-}: ComponentsDataProviderProps<V, E>) {
+}: ComponentsDataProviderProps<V, E, GE>) {
   // GRAPH OBSERVER
   const [state] = useGraphObserver(userSettings.graph);
 
@@ -54,10 +83,11 @@ function ComponentsDataProvider<V, E>({
   });
 
   // COMPONENTS DATA
-  const [componentsData, setComponentsData] = useState<ComponentsData<V, E>>(
-    getComponentsData()
-  );
+  const [componentsData, setComponentsData] = useState<
+    ComponentsData<V, E, GE>
+  >(getComponentsData());
 
+  // REMOVE HANDLERS
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
     const vertexData = contextValue.verticesData[key];
     if (!vertexData) return;
@@ -83,15 +113,15 @@ function ComponentsDataProvider<V, E>({
   useEffect(() => {
     const newData = getComponentsData();
     setContextValue(value =>
-      updateContextValue(newData, componentsData, value)
+      updateContextValue(value, newData, componentsData)
     );
     setComponentsData(newData);
   }, [state, userSettings]);
 
   return (
-    <GraphComponentsContext.Provider value={contextValue}>
+    <GraphComponentsDataContext.Provider value={contextValue}>
       {children}
-    </GraphComponentsContext.Provider>
+    </GraphComponentsDataContext.Provider>
   );
 }
 

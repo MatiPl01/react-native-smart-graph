@@ -1,4 +1,4 @@
 export {
   default as GraphViewDataProvider,
-  useGraphViewDataContext
+  useViewDataContext
 } from './GraphViewDataProvider';

@@ -5,19 +5,19 @@ import {
   UndirectedGraphWithStraightEdgeRenderers
 } from '@/types/components/public';
 
-type AllUndirectedGraphWithStraightEdgeRenderers<V, E> = Required<
+export type AllUndirectedGraphWithStraightEdgeRenderers<V, E> = Required<
   UndirectedGraphWithStraightEdgeRenderers<V, E>
 >;
 
-type AllUndirectedGraphWithCurvedEdgeRenderers<V, E> = Required<
+export type AllUndirectedGraphWithCurvedEdgeRenderers<V, E> = Required<
   UndirectedGraphWithCurvedEdgeRenderers<V, E>
 >;
 
-type AllDirectedGraphWithStraightEdgeRenderers<V, E> = Required<
+export type AllDirectedGraphWithStraightEdgeRenderers<V, E> = Required<
   DirectedGraphWithStraightEdgeRenderers<V, E>
 >;
 
-type AllDirectedGraphWithCurvedEdgeRenderers<V, E> = Required<
+export type AllDirectedGraphWithCurvedEdgeRenderers<V, E> = Required<
   DirectedGraphWithCurvedEdgeRenderers<V, E>
 >;
 
@@ -28,3 +28,7 @@ export type AllUndirectedGraphRenderers<V, E> =
 export type AllDirectedGraphRenderers<V, E> =
   AllDirectedGraphWithStraightEdgeRenderers<V, E> &
     AllDirectedGraphWithCurvedEdgeRenderers<V, E>;
+
+export type AllGraphRenderers<V, E> =
+  | AllDirectedGraphRenderers<V, E>
+  | AllUndirectedGraphRenderers<V, E>;

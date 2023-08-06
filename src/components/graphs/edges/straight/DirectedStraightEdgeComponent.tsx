@@ -32,16 +32,18 @@ const calcTranslationOffset = (
 function DirectedStraightEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
-  animationProgress,
-  edge,
-  labelHeight,
-  labelPosition,
+  data: {
+    animationProgress,
+    edge,
+    labelHeight,
+    labelPosition,
+    v1Position,
+    v1Radius,
+    v2Position,
+    v2Radius
+  },
   renderers,
-  settings,
-  v1Position,
-  v1Radius,
-  v2Position,
-  v2Radius
+  settings
 }: DirectedStraightEdgeComponentProps<V, E>) {
   // Edge line
   const p1 = useSharedValue({

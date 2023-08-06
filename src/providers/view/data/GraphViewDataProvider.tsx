@@ -17,12 +17,12 @@ import {
 
 const GraphViewDataContext = createContext(null as unknown as object);
 
-export const useGraphViewDataContext = () => {
+export const useViewDataContext = () => {
   const contextValue = useContext(GraphViewDataContext);
 
   if (!contextValue) {
     throw new Error(
-      'useGraphViewDataContext must be used within a GraphViewDataProvider'
+      'useViewDataContext must be used within a GraphViewDataProvider'
     );
   }
 

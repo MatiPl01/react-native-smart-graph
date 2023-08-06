@@ -14,7 +14,7 @@ import {
   useFocusContext,
   useTransformContext
 } from '@/providers/view';
-import { useGraphViewDataContext } from '@/providers/view/data';
+import { useViewDataContext } from '@/providers/view/data';
 import { Maybe } from '@/types/utils';
 import { averageVector } from '@/utils/vectors';
 
@@ -57,7 +57,7 @@ export default function GesturesProvider({
     maxScale,
     minScale,
     scales
-  } = useGraphViewDataContext();
+  } = useViewDataContext();
   // Transform context values
   const { getTranslateClamp, scaleContentTo } = useTransformContext();
   // Auto sizing context values

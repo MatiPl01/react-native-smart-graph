@@ -15,17 +15,17 @@ import { FocusSettings } from '@/types/settings/public/graph/focus';
 import { Maybe } from '@/types/utils';
 
 /* eslint-disable import/no-unused-modules */
-export interface Graph<V, E> {
+export interface Graph<V, E, GE extends Edge<V, E>> {
   addObserver(observer: GraphObserver): void;
   blur(settings?: Maybe<AnimationSettings>): void;
   clear(animationSettings?: Maybe<BatchModificationAnimationSettings>): void;
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
-  get edges(): Array<Edge<V, E>>;
-  get orderedEdges(): OrderedEdges<V, E>;
+  get edges(): Array<GE>;
+  get orderedEdges(): OrderedEdges<GE>;
   get vertices(): Array<Vertex<V, E>>;
-  getEdge(key: string): Edge<V, E> | null;
-  getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<V, E>>;
+  getEdge(key: string): GE | null;
+  getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE>;
   getVertex(key: string): Vertex<V, E> | null;
   hasEdge(key: string): boolean;
   hasVertex(key: string): boolean;
@@ -41,7 +41,7 @@ export interface Graph<V, E> {
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange?: boolean
-  ): Edge<V, E>;
+  ): GE;
   insertVertex(
     data: VertexData<V>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,

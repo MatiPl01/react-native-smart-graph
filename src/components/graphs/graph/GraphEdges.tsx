@@ -2,19 +2,17 @@ import { Group } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import { interpolate, useDerivedValue } from 'react-native-reanimated';
 
-import EdgeComponent from '@/components/graphs/edges/EdgeComponent';
-import { withComponentsData } from '@/providers/graph/data/components/context';
-import { withGraphSettings } from '@/providers/graph/data/settings/context';
-import { GraphEdgesProps, InnerEdgeComponentProps } from '@/types/components';
+import { EdgeComponent } from '@/components/graphs/edges';
+import { GraphEdgesProps } from '@/types/components';
 
-function GraphEdges<V, E, P extends InnerEdgeComponentProps<V, E>>({
+function GraphEdges<V, E>({
   arrowSettings,
   edgeSettings,
   edgesData,
   focusProgress,
   labelSettings,
   ...restProps
-}: GraphEdgesProps<V, E, P>) {
+}: GraphEdgesProps<V, E>) {
   const opacity = useDerivedValue(() =>
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
   );
@@ -31,7 +29,7 @@ function GraphEdges<V, E, P extends InnerEdgeComponentProps<V, E>>({
   return (
     <Group opacity={opacity}>
       {Object.values(edgesData).map(data => (
-        <EdgeComponent<V, E, P>
+        <EdgeComponent<V, E>
           {...{
             ...restProps,
             ...data,

@@ -6,22 +6,22 @@ import {
   StraightEdgeSettings,
   VertexSettings
 } from '@/types/settings/public';
-import { DeepRequiredAll, Sharedify } from '@/types/utils';
+import { DeepRequire, DeepSharedify } from '@/types/utils';
 
 /*
  * DEFAULT SETTINGS
  */
-type AllVertexSettings = DeepRequiredAll<VertexSettings>;
+type AllVertexSettings = DeepRequire<VertexSettings>;
 
-export type AllEdgeSettings = DeepRequiredAll<EdgeSettings>;
+export type AllEdgeSettings = DeepRequire<EdgeSettings>;
 
-export type AllStraightEdgeSettings = DeepRequiredAll<StraightEdgeSettings>;
+export type AllStraightEdgeSettings = DeepRequire<StraightEdgeSettings>;
 
-export type AllCurvedEdgeSettings = DeepRequiredAll<CurvedEdgeSettings>;
+export type AllCurvedEdgeSettings = DeepRequire<CurvedEdgeSettings>;
 
-export type AllArrowSettings = DeepRequiredAll<ArrowSettings>;
+export type AllArrowSettings = DeepRequire<ArrowSettings>;
 
-export type AllLabelSettings = DeepRequiredAll<LabelSettings>;
+export type AllLabelSettings = DeepRequire<LabelSettings>;
 
 export type AllUndirectedGraphComponentsSettings = {
   edge: AllEdgeSettings;
@@ -38,14 +38,14 @@ export type AllDirectedGraphComponentsSettings =
  * INTERNAL SETTINGS
  */
 type InternalStraightEdgeSettings = Pick<AllStraightEdgeSettings, 'type'> &
-  Sharedify<Omit<AllStraightEdgeSettings, 'type'>>;
+  DeepSharedify<Omit<AllStraightEdgeSettings, 'type'>>;
 
 type InternalCurvedEdgeSettings = Pick<AllCurvedEdgeSettings, 'type'> &
-  Sharedify<Omit<AllCurvedEdgeSettings, 'type'>>;
+  DeepSharedify<Omit<AllCurvedEdgeSettings, 'type'>>;
 
-type InternalArrowSettings = Sharedify<AllArrowSettings>;
+type InternalArrowSettings = DeepSharedify<AllArrowSettings>;
 
-type InternalLabelSettings = Sharedify<AllLabelSettings>;
+type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
 
 export type InternalUndirectedStraightEdgeSettings = {
   edge: InternalStraightEdgeSettings;
@@ -75,4 +75,4 @@ export type InternalUndirectedEdgeSettings =
   | InternalUndirectedCurvedEdgeSettings
   | InternalUndirectedStraightEdgeSettings;
 
-export type InternalVertexSettings = Sharedify<AllVertexSettings>;
+export type InternalVertexSettings = DeepSharedify<AllVertexSettings>;

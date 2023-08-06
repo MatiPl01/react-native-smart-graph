@@ -13,7 +13,7 @@ import {
   DEFAULT_GESTURE_ANIMATION_SETTINGS
 } from '@/constants/animations';
 import { useAutoSizingContext } from '@/providers/view';
-import { useGraphViewDataContext } from '@/providers/view/data';
+import { useViewDataContext } from '@/providers/view/data';
 import {
   BlurData,
   FocusData,
@@ -84,7 +84,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     currentTranslation,
     gesturesDisabled,
     initialScale
-  } = useGraphViewDataContext();
+  } = useViewDataContext();
   // Canvas transform context values
   const {
     getTranslateClamp,

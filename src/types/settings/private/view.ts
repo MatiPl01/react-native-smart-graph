@@ -1,4 +1,4 @@
 import { GraphViewSettings } from '@/types/settings/public/view';
-import { DeepRequiredAll } from '@/types/utils';
+import { DeepRequire } from '@/types/utils';
 
-export type AllGraphViewSettings = DeepRequiredAll<GraphViewSettings>;
+export type AllGraphViewSettings = DeepRequire<GraphViewSettings>;

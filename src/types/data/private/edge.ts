@@ -2,7 +2,7 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { AllAnimationSettings } from '@/types/settings';
+import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 
 export type EdgeComponentData<GE> = {
   animationProgress: SharedValue<number>;

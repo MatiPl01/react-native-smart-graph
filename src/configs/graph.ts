@@ -6,13 +6,12 @@ import {
 import { CurvedEdgeRenderer } from '@/types/components';
 import { Graph } from '@/types/models';
 import {
-  AllDirectedGraphSettings,
   AllEdgeSettings,
   AllFocusSettings,
+  AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
   AllGraphPlacementSettings,
   AllRandomPlacementSettings,
-  AllUndirectedGraphSettings,
   EdgeType,
   GraphSettings,
   LayoutType,

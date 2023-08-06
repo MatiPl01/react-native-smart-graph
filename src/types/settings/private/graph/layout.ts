@@ -2,8 +2,8 @@ import {
   ForceLayoutSettings,
   GraphLayoutSettings
 } from '@/types/settings/public/graph/layout';
-import { DeepRequiredAll } from '@/types/utils';
+import { DeepRequire } from '@/types/utils';
 
-export type AllGraphLayoutSettings = DeepRequiredAll<GraphLayoutSettings>;
+export type AllGraphLayoutSettings = DeepRequire<GraphLayoutSettings>;
 
-export type AllForcesStrategySettings = DeepRequiredAll<ForceLayoutSettings>;
+export type AllForcesStrategySettings = DeepRequire<ForceLayoutSettings>;

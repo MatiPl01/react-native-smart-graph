@@ -11,19 +11,15 @@ import { EdgeComponentData, EdgeRemoveHandler } from '@/types/data';
 import { DirectedEdge, UndirectedEdge } from '@/types/models';
 import {
   AllArrowSettings,
-  AllCurvedEdgeSettings,
+  AllEdgeSettings,
   AllLabelSettings,
-  AllStraightEdgeSettings,
   InternalDirectedCurvedEdgeSettings,
   InternalDirectedStraightEdgeSettings,
   InternalUndirectedCurvedEdgeSettings,
   InternalUndirectedStraightEdgeSettings
 } from '@/types/settings';
 
-import {
-  AllDirectedGraphRenderers,
-  AllUndirectedGraphRenderers
-} from './renderers';
+import { AllGraphRenderers } from './renderers';
 
 type SharedEdgeComponentProps = {
   animatedEdgesCount: SharedValue<number>;
@@ -70,34 +66,26 @@ export type InnerEdgeComponentProps<V, E> =
   | DirectedEdgeComponentProps<V, E>
   | UndirectedEdgeComponentProps<V, E>;
 
-export type EdgeComponentProps<
-  V,
-  E,
-  P extends InnerEdgeComponentProps<V, E>
-> = Omit<P, 'animatedEdgesCount' | 'animatedOrder' | 'renderers'> & {
+export type EdgeComponentProps<V, E> = Omit<
+  InnerEdgeComponentProps<V, E>,
+  'animatedEdgesCount' | 'animatedOrder' | 'renderers'
+> & {
   edgesCount: SharedValue<number>;
   onRemove: EdgeRemoveHandler;
   order: SharedValue<number>;
   removed: boolean;
-  renderers: P extends
-    | DirectedCurvedEdgeComponentProps<V, E>
-    | DirectedStraightEdgeComponentProps<V, E>
-    ? AllDirectedGraphRenderers<V, E>
-    : AllUndirectedGraphRenderers<V, E>;
+  renderers: AllGraphRenderers<V, E>;
 };
 
-export type GraphEdgesProps<
-  V,
-  E,
-  P extends InnerEdgeComponentProps<V, E>
-> = Omit<EdgeComponentProps<V, E, P>, 'renderers' | 'settings'> & {
+export type GraphEdgesProps<V, E> = Omit<
+  EdgeComponentProps<V, E>,
+  'renderers' | 'settings'
+> & {
   arrowSettings: AllArrowSettings;
-  edgeSettings: P extends
-    | DirectedCurvedEdgeComponentProps<V, E>
-    | UndirectedCurvedEdgeComponentProps<V, E>
-    ? AllCurvedEdgeSettings
-    : AllStraightEdgeSettings;
-  edgesData: Record<string, P['data']>;
+  edgeSettings: AllEdgeSettings;
+  edgesData:
+    | Record<string, EdgeComponentData<DirectedEdge<V, E>>>
+    | Record<string, EdgeComponentData<UndirectedEdge<V, E>>>;
   focusProgress: SharedValue<number>;
   labelSettings: AllLabelSettings;
   onRemove: EdgeRemoveHandler;

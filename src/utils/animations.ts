@@ -12,7 +12,7 @@ import {
   AllAnimationSettings,
   AnimationSettings,
   BatchModificationAnimationSettings,
-  GraphAnimationsSettings,
+  GraphModificationAnimationsSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
 
@@ -77,7 +77,7 @@ const isBatchModificationSettingsObjectWithEdgesAndVertices = (
 export const createAnimationsSettingsForSingleModification = (
   component: { edge?: string; vertex?: string },
   animationsSettings?: SingleModificationAnimationSettings
-): GraphAnimationsSettings => {
+): GraphModificationAnimationsSettings => {
   if (!animationsSettings) {
     return {
       edges: {},
@@ -123,7 +123,7 @@ export const createAnimationsSettingsForSingleModification = (
 export const createAnimationsSettingsForBatchModification = (
   components: { edges?: Array<string>; vertices?: Array<string> },
   animationsSettings?: BatchModificationAnimationSettings
-): GraphAnimationsSettings => {
+): GraphModificationAnimationsSettings => {
   if (!animationsSettings) {
     return {
       edges: {},
@@ -222,9 +222,7 @@ export const cancelVertexAnimations = <V, E>(
   cancelAnimation(vertexData.displayed);
 };
 
-export const cancelEdgeAnimations = <V, E>(
-  edgeData: EdgeComponentData<V, E>
-) => {
+export const cancelEdgeAnimations = <GE>(edgeData: EdgeComponentData<GE>) => {
   cancelAnimation(edgeData.animationProgress);
   cancelAnimation(edgeData.displayed);
   cancelAnimation(edgeData.edgesCount);

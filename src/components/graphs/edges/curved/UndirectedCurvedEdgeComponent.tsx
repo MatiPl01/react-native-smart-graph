@@ -15,16 +15,18 @@ import {
 function UndirectedCurvedEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
-  animationProgress,
-  edge,
-  labelHeight,
-  labelPosition,
+  data: {
+    animationProgress,
+    edge,
+    labelHeight,
+    labelPosition,
+    v1Position,
+    v1Radius,
+    v2Position,
+    v2Radius
+  },
   renderers,
-  settings,
-  v1Position,
-  v1Radius,
-  v2Position,
-  v2Radius
+  settings
 }: UndirectedCurvedEdgeComponentProps<V, E>) {
   const p1 = useDerivedValue(() => ({
     x: v1Position.x.value,

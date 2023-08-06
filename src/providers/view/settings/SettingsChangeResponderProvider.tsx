@@ -6,7 +6,7 @@ import {
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useAutoSizingContext } from '@/providers/view/auto';
-import { useGraphViewDataContext } from '@/providers/view/data';
+import { useViewDataContext } from '@/providers/view/data';
 import {
   useFocusContext,
   useTransformContext
@@ -19,8 +19,7 @@ export default function SettingsChangeResponderProvider({
 }) {
   // CONTEXT VALUES
   // Canvas data context values
-  const { initialScaleProvided, isRendered, objectFit } =
-    useGraphViewDataContext();
+  const { initialScaleProvided, isRendered, objectFit } = useViewDataContext();
   // Transform context values
   const { resetContainerPosition } = useTransformContext();
   // Auto sizing context values

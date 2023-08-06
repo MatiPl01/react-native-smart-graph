@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
@@ -6,10 +7,15 @@ import {
 } from 'react-native-reanimated';
 
 import {
-  DirectedStraightEdgeComponentProps,
+  DirectedCurvedEdgeComponentProps,
+  DirectedEdgeComponentProps,
   EdgeComponentProps,
-  InnerEdgeComponentProps
+  InnerEdgeComponentProps,
+  UndirectedCurvedEdgeComponentProps,
+  UndirectedEdgeComponentProps
 } from '@/types/components';
+import { EdgeComponentData } from '@/types/data';
+import { DirectedEdge, UndirectedEdge } from '@/types/models';
 import { updateComponentAnimationState } from '@/utils/components';
 
 import DirectedCurvedEdgeComponent from './curved/DirectedCurvedEdgeComponent';
@@ -17,25 +23,50 @@ import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponen
 import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeComponent';
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
-const areDirectedStraightEdgeComponentProps = <V, E>(
-  props: InnerEdgeComponentProps<V, E>
-): props is DirectedStraightEdgeComponentProps<V, E> => {
-  return true;
+type InnerEdgeProps<V, E> = Omit<InnerEdgeComponentProps<V, E>, 'data'> & {
+  data:
+    | EdgeComponentData<DirectedEdge<V, E>>
+    | EdgeComponentData<UndirectedEdge<V, E>>;
 };
 
-function EdgeComponent<V, E, P extends InnerEdgeComponentProps<V, E>>(
-  props: EdgeComponentProps<V, E, P>
-) {
-  const {
-    animationProgress,
-    animationSettings,
-    edge,
-    edgesCount,
-    onRemove,
-    order,
-    removed,
-    ...restProps
-  } = props;
+const areDirectedEdgeProps = <V, E>(
+  props: InnerEdgeProps<V, E>
+): props is DirectedEdgeComponentProps<V, E> => {
+  return props.data.edge.isDirected();
+};
+
+const areUndirectedEdgeProps = <V, E>(
+  props: InnerEdgeProps<V, E>
+): props is UndirectedEdgeComponentProps<V, E> => {
+  return !props.data.edge.isDirected();
+};
+
+function areCurvedEdgeProps<V, E>(
+  props: UndirectedEdgeComponentProps<V, E>
+): props is UndirectedCurvedEdgeComponentProps<V, E>;
+
+function areCurvedEdgeProps<V, E>(
+  props: DirectedEdgeComponentProps<V, E>
+): props is DirectedCurvedEdgeComponentProps<V, E>;
+
+function areCurvedEdgeProps<V, E>(
+  props: InnerEdgeProps<V, E>
+): props is
+  | DirectedCurvedEdgeComponentProps<V, E>
+  | UndirectedCurvedEdgeComponentProps<V, E> {
+  return props.settings.edge.type === 'curved';
+}
+
+function EdgeComponent<V, E>({
+  data,
+  edgesCount,
+  onRemove,
+  order,
+  removed,
+  renderers,
+  settings
+}: EdgeComponentProps<V, E>) {
+  const { animationProgress, animationSettings, edge } = data;
 
   // EDGE ORDERING
   // Target edge order
@@ -67,35 +98,32 @@ function EdgeComponent<V, E, P extends InnerEdgeComponentProps<V, E>>(
     }
   );
 
-  const innerProps = {
-    ...restProps,
+  const innerProps: InnerEdgeProps<V, E> = {
     animatedEdgesCount,
     animatedOrder,
-    animationProgress,
-    animationSettings,
-    edge
+    data,
+    renderers,
+    settings
   };
 
-  switch (innerProps.settings.edge.type) {
-    case 'straight':
-      return areDirectedStraightEdgeComponentProps(innerProps) ? (
-        <DirectedStraightEdgeComponent {...innerProps} />
-      ) : (
-        <UndirectedStraightEdgeComponent {...innerProps} />
-      );
-    case 'curved':
-      return areDirectedGraphRenderers(renderers) ? (
-        <DirectedCurvedEdgeComponent {...innerProps} />
-      ) : (
-        <UndirectedCurvedEdgeComponent {...innerProps} />
-      );
+  if (areDirectedEdgeProps(innerProps)) {
+    return areCurvedEdgeProps(innerProps) ? (
+      <DirectedCurvedEdgeComponent {...innerProps} />
+    ) : (
+      <DirectedStraightEdgeComponent {...innerProps} />
+    );
   }
+  if (areUndirectedEdgeProps(innerProps)) {
+    return areCurvedEdgeProps(innerProps) ? (
+      <UndirectedCurvedEdgeComponent {...innerProps} />
+    ) : (
+      <UndirectedStraightEdgeComponent {...innerProps} />
+    );
+  }
+
+  return null; // Should never happen
 }
 
-export default memo(EdgeComponent) as <
-  V,
-  E,
-  P extends InnerEdgeComponentProps<V, E>
->(
-  props: EdgeComponentProps<V, E, P>
+export default memo(EdgeComponent) as <V, E>(
+  props: EdgeComponentProps<V, E>
 ) => JSX.Element;

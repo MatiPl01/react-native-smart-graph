@@ -15,6 +15,10 @@ export default class DirectedEdge<V, E> implements IDirectedEdge<V, E> {
     return true;
   }
 
+  get isLoop(): boolean {
+    return this.source.key === this.target.key;
+  }
+
   get key(): string {
     return this.key$;
   }

@@ -1,26 +1,26 @@
 import { makeMutable } from 'react-native-reanimated';
 
 import { GraphState } from '@/hooks';
+import { GraphComponentsData } from '@/types/components';
 import {
   EdgeComponentData,
   EdgeRemoveHandler,
+  LabelComponentData,
   VertexComponentData,
   VertexRemoveHandler
-} from '@/types/components';
-import { LabelComponentData } from '@/types/components/edgeLabels';
-import { GraphConnections, OrderedEdges, Vertex } from '@/types/graphs';
+} from '@/types/data';
+import { Edge, GraphConnections, OrderedEdges, Vertex } from '@/types/models';
 import {
-  AnimationSettings,
-  AnimationSettingsWithDefaults,
-  GraphAnimationsSettingsWithDefaults
+  AllAnimationSettings,
+  AllGraphAnimationsSettings,
+  AnimationSettings
 } from '@/types/settings';
+import { PartialWithRequired } from '@/types/utils';
 import { deepMerge, updateValues } from '@/utils/objects';
 
-import { GraphComponentsContextType } from './context';
-
-export type ComponentsData<V, E> = {
+export type ComponentsData<V, E, GE> = {
   connections: GraphConnections;
-  graphAnimationsSettings: GraphAnimationsSettingsWithDefaults;
+  graphAnimationsSettings: AllGraphAnimationsSettings;
   isGraphDirected: boolean;
   // Store keys of removed edges for which the removal animation
   // has been completed and edges are waiting to be unmounted
@@ -29,33 +29,32 @@ export type ComponentsData<V, E> = {
   // has been completed and vertices are waiting to be unmounted
   removedVertices: Set<string>;
   renderLabels: boolean;
-  state: GraphState<V, E>;
+  state: GraphState<V, E, GE>;
 };
 
-export const createContextValue = <V, E>(
-  data: ComponentsData<V, E>,
+export const createContextValue = <V, E, GE extends Edge<V, E>>(
+  data: ComponentsData<V, E, GE>,
   removeHandlers: {
     handleEdgeRemove: EdgeRemoveHandler;
     handleVertexRemove: VertexRemoveHandler;
   }
-): GraphComponentsContextType<V, E> =>
-  updateContextValue(
-    data,
-    undefined,
-    removeHandlers as GraphComponentsContextType<V, E>
-  );
+): GraphComponentsData<V, E, GE> => updateContextValue(removeHandlers, data);
 
 const sharedKeys = ['isGraphDirected', 'targetBoundingRect'] as const;
 const SHARED_KEYS = new Set(sharedKeys);
 
-export const updateContextValue = <V, E>(
-  newData: ComponentsData<V, E>,
-  currentData?: ComponentsData<V, E>,
-  value?: GraphComponentsContextType<V, E>
-): GraphComponentsContextType<V, E> => {
-  const newLayoutAnimationSettings = value?.layoutAnimationSettings
+export const updateContextValue = <V, E, GE extends Edge<V, E>>(
+  value: PartialWithRequired<
+    GraphComponentsData<V, E, GE>,
+    'handleEdgeRemove' | 'handleVertexRemove'
+  >,
+  newData: ComponentsData<V, E, GE>,
+  currentData?: ComponentsData<V, E, GE>
+): GraphComponentsData<V, E, GE> => {
+  const currentLayoutAnimationSettings = value?.layoutAnimationSettings;
+  const newLayoutAnimationSettings = currentLayoutAnimationSettings
     ? deepMerge(
-        value?.layoutAnimationSettings,
+        currentLayoutAnimationSettings,
         newData.graphAnimationsSettings.layout,
         newData.state.animationsSettings.layout
       )
@@ -108,16 +107,16 @@ export const updateContextValue = <V, E>(
         connections: newData.connections,
         edgeLabelsData: newLabelsData,
         edgesData: newEdgesData,
-        handleEdgeRemove: value?.handleEdgeRemove, // Prevent removing
-        handleVertexRemove: value?.handleVertexRemove, // Prevent removing
+        handleEdgeRemove: value.handleEdgeRemove, // Prevent removing
+        handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
         layoutAnimationSettings: newLayoutAnimationSettings,
         // Prevent removing or create the initial value if it doesn't exist
         targetBoundingRect: value?.targetBoundingRect ?? {
-          top: 0,
+          bottom: 0,
           left: 0,
           right: 0,
-          bottom: 0
+          top: 0
         },
         verticesData: newVerticesData
       }
@@ -131,7 +130,7 @@ const updateGraphVerticesData = <V, E>(
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
-  defaultAnimationSettings: AnimationSettingsWithDefaults
+  defaultAnimationSettings: AllAnimationSettings
 ): Record<string, VertexComponentData<V, E>> => {
   const updatedVerticesData = { ...oldVerticesData };
   let isModified = false;
@@ -205,14 +204,14 @@ const updateGraphVerticesData = <V, E>(
   return isModified ? updatedVerticesData : oldVerticesData;
 };
 
-const updateGraphEdgesData = <V, E>(
-  oldEdgesData: Record<string, EdgeComponentData<V, E>>,
-  currentEdges: OrderedEdges<V, E>,
+const updateGraphEdgesData = <V, E, GE extends Edge<V, E>>(
+  oldEdgesData: Record<string, EdgeComponentData<GE>>,
+  currentEdges: OrderedEdges<GE>,
   verticesData: Record<string, VertexComponentData<V, E>>,
   removedEdges: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
-  defaultAnimationSettings: AnimationSettingsWithDefaults
-): Record<string, EdgeComponentData<V, E>> => {
+  defaultAnimationSettings: AllAnimationSettings
+): Record<string, EdgeComponentData<GE>> => {
   const updatedEdgesData = { ...oldEdgesData };
   let isModified = false; // Flag to indicate if edges data was updated
 
@@ -302,9 +301,9 @@ const updateGraphEdgesData = <V, E>(
   return isModified ? updatedEdgesData : oldEdgesData;
 };
 
-const updateGraphEdgeLabelsData = <V, E>(
+const updateGraphEdgeLabelsData = <V, E, GE extends Edge<V, E>>(
   oldEdgeLabelsData: Record<string, LabelComponentData<E>>,
-  edgesData: Record<string, EdgeComponentData<V, E>>
+  edgesData: Record<string, EdgeComponentData<GE>>
 ): Record<string, LabelComponentData<E>> => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
   let isModified = false; // Flag to indicate if edges data was updated

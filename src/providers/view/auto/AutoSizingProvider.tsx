@@ -9,7 +9,7 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useGraphViewDataContext } from '@/providers/view/data';
+import { useViewDataContext } from '@/providers/view/data';
 import { useTransformContext } from '@/providers/view/transform';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
@@ -58,7 +58,7 @@ export default function AutoSizingProvider({
     currentTranslation: { x: translateX, y: translateY },
     objectFit,
     padding
-  } = useGraphViewDataContext();
+  } = useViewDataContext();
   // Transform context values
   const { resetContainerPositionOnProgress } = useTransformContext();
 

@@ -8,7 +8,7 @@ import {
 } from 'react-native-reanimated';
 
 import { AutoSizingContextType } from '@/providers/view/auto';
-import { useGraphViewDataContext } from '@/providers/view/data';
+import { useViewDataContext } from '@/providers/view/data';
 import { BoundingRect, Dimensions, ObjectFit } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
@@ -102,7 +102,7 @@ export default function TransformProvider({
     minScale,
     objectFit,
     padding
-  } = useGraphViewDataContext();
+  } = useViewDataContext();
 
   // Other values
   const initialCanvasDimensions = useSharedValue<Dimensions | null>(null);

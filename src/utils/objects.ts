@@ -9,7 +9,7 @@ import {
   SharedValue
 } from 'react-native-reanimated';
 
-import { DeepPartial } from '@/types/utils';
+import { DeepPartial, SharedifyBy } from '@/types/utils';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const deepEqual = (value1: any, value2: any): boolean => {
@@ -259,7 +259,7 @@ export const updateValues = <
 >(
   settings: SettingsWithDefaults<C, N, D> | SettingsWithoutDefaults<C, N>,
   sharedKeys?: Set<K>
-): C & Record<K, SharedValue<any>> => {
+): SharedifyBy<D & N, K> => {
   const result = { ...settings.current } as C;
   let isModified = false;
   const keys = areSettingsWithDefaults(settings)

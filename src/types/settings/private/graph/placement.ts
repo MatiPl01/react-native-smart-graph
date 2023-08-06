@@ -11,7 +11,7 @@ import {
   TreesPlacementSettings,
   UnboundRandomPlacementSettings
 } from '@/types/settings/public';
-import { DeepRequired, DeepRequiredAll } from '@/types/utils';
+import { DeepRequired, DeepRequire } from '@/types/utils';
 
 export type PlacedVerticesPositions = Record<string, Vector>;
 
@@ -31,26 +31,23 @@ export type GraphLayout = {
 // Random
 export type AllRandomPlacementSettings =
   | DeepRequired<BoundRandomPlacementSettings, ['mesh']>
-  | DeepRequiredAll<UnboundRandomPlacementSettings>;
+  | DeepRequire<UnboundRandomPlacementSettings>;
 
 // Circle
-export type AllCirclePlacementSettings =
-  DeepRequiredAll<CirclePlacementSettings>;
+export type AllCirclePlacementSettings = DeepRequire<CirclePlacementSettings>;
 
 // Circles
-export type AllCirclesPlacementSettings =
-  DeepRequiredAll<CirclesPlacementSettings>;
+export type AllCirclesPlacementSettings = DeepRequire<CirclesPlacementSettings>;
 
 // Trees
-export type AllTreesPlacementSettings = DeepRequiredAll<TreesPlacementSettings>;
+export type AllTreesPlacementSettings = DeepRequire<TreesPlacementSettings>;
 
 // Orbits
-export type AllOrbitsPlacementSettings =
-  DeepRequiredAll<OrbitsPlacementSettings>;
+export type AllOrbitsPlacementSettings = DeepRequire<OrbitsPlacementSettings>;
 
 /*
  * GRAPH PLACEMENT SETTINGS WITH ALL REQUIRED FIELDS
  */
 export type AllGraphPlacementSettings =
   | AllRandomPlacementSettings
-  | DeepRequiredAll<Exclude<GraphPlacementSettings, RandomPlacementSettings>>;
+  | DeepRequire<Exclude<GraphPlacementSettings, RandomPlacementSettings>>;
