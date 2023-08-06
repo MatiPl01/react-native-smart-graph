@@ -15,18 +15,27 @@ import {
   VertexRemoveHandler
 } from '@/types/data';
 import { BoundingRect } from '@/types/layout';
-import { Edge, Graph, GraphConnections } from '@/types/models';
+import { Edge, GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   AllGraphAnimationsSettings,
   DirectedGraphSettings,
   DirectedGraphWithCurvedEdgeSettings,
+  GraphEventsSettings,
+  InternalAllGraphLayoutSettings,
+  InternalAllGraphPlacementSettings,
+  InternalDirectedGraphWithCurvedEdgesComponentsSettings,
+  InternalDirectedGraphWithStraightEdgesComponentsSettings,
+  InternalUndirectedGraphWithCurvedEdgesComponentsSettings,
+  InternalUndirectedGraphWithStraightEdgesComponentsSettings,
   UndirectedGraphSettings,
   UndirectedGraphWithCurvedEdgeSettings
 } from '@/types/settings';
+import { DeepUnsharedify } from '@/types/utils';
 
-import { AllDirectedGraphRenderers, AllGraphRenderers } from './renderers';
-
+/*
+ * COMPONENTS PROPS
+ */
 export type DirectedGraphComponentProps<
   V,
   E,
@@ -63,11 +72,57 @@ export type GraphComponentsData<V, E, GE extends Edge<V, E>> = {
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
-export type InternalGraphSettings<V, E, GE extends Edge<V, E>> = {
-  graph: Graph<V, E, GE>;
-  renderers: AllDirectedGraphRenderers<V, E>;
-  settings: {
-    animations: AllGraphAnimationsSettings;
-    components:
+/*
+ * INTERNAL GRAPH SETTINGS
+ */
+type SharedInternalGraphSettings<V> = {
+  animations: AllGraphAnimationsSettings;
+  events?: GraphEventsSettings<V>;
+  layout: InternalAllGraphLayoutSettings;
+  placement: InternalAllGraphPlacementSettings;
+};
+
+type InternalUndirectedGraphWithStraightEdgeSettings<V, E> = {
+  graph: UndirectedGraph<V, E>;
+  renderers: UndirectedGraphWithStraightEdgeRenderers<V, E>;
+  settings: SharedInternalGraphSettings<V> & {
+    components: InternalUndirectedGraphWithStraightEdgesComponentsSettings;
   };
 };
+
+type InternalUndirectedGraphWithCurvedEdgeSettings<V, E> = {
+  graph: UndirectedGraph<V, E>;
+  renderers: UndirectedGraphWithCurvedEdgeRenderers<V, E>;
+  settings: SharedInternalGraphSettings<V> & {
+    components: InternalUndirectedGraphWithCurvedEdgesComponentsSettings;
+  };
+};
+
+type InternalDirectedGraphWithStraightEdgeSettings<V, E> = {
+  graph: DirectedGraph<V, E>;
+  renderers: DirectedGraphWithStraightEdgeRenderers<V, E>;
+  settings: SharedInternalGraphSettings<V> & {
+    components: InternalDirectedGraphWithStraightEdgesComponentsSettings;
+  };
+};
+
+type InternalDirectedGraphWithCurvedEdgeSettings<V, E> = {
+  graph: DirectedGraph<V, E>;
+  renderers: DirectedGraphWithCurvedEdgeRenderers<V, E>;
+  settings: SharedInternalGraphSettings<V> & {
+    components: InternalDirectedGraphWithCurvedEdgesComponentsSettings;
+  };
+};
+
+export type GraphSettingsData<V, E> =
+  | InternalDirectedGraphWithCurvedEdgeSettings<V, E>
+  | InternalDirectedGraphWithStraightEdgeSettings<V, E>
+  | InternalUndirectedGraphWithCurvedEdgeSettings<V, E>
+  | InternalUndirectedGraphWithStraightEdgeSettings<V, E>;
+
+/*
+ * DEFAULT GRAPH SETTINGS
+ */
+export type AllGraphSettingsData<V, E> = DeepUnsharedify<
+  GraphSettingsData<V, E>
+>;

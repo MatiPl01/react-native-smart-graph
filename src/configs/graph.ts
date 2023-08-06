@@ -1,19 +1,29 @@
 /* eslint-disable import/no-unused-modules */
 import {
+  DefaultArrowRenderer,
+  DefaultCurvedEdgeRenderer,
+  DefaultLabelRenderer,
+  DefaultStraightEdgeRenderer,
+  DefaultVertexRenderer
+} from '@/components';
+import {
   DEFAULT_ANIMATION_SETTINGS,
   DEFAULT_FOCUS_ANIMATION_SETTINGS
 } from '@/constants/animations';
-import { CurvedEdgeRenderer } from '@/types/components';
-import { Graph } from '@/types/models';
+import { AllGraphSettingsData } from '@/types/components';
+import { GraphData } from '@/types/data';
+import { Edge } from '@/types/models';
 import {
-  AllEdgeSettings,
+  AllArrowSettings,
+  AllCurvedEdgeSettings,
   AllFocusSettings,
   AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
   AllGraphPlacementSettings,
+  AllLabelSettings,
   AllRandomPlacementSettings,
-  EdgeType,
-  GraphSettings,
+  AllStraightEdgeSettings,
+  AllVertexSettings,
   LayoutType,
   PlacementStrategy,
   RandomMeshType
@@ -22,38 +32,7 @@ import {
 /*
  * SETTINGS
  */
-export const DEFAULT_EDGE_SETTINGS: Record<EdgeType, AllEdgeSettings> = {
-  curved: {
-    type: 'curved'
-  },
-  straight: {
-    maxOffsetFactor: 0.5,
-    type: 'straight'
-  }
-};
-
-export const DEFAULT_RANDOM_PLACEMENT_SETTINGS: Record<
-  RandomMeshType,
-  AllRandomPlacementSettings
-> = {
-  grid: {
-    density: 0.5,
-    mesh: 'grid',
-    minVertexSpacing: 20,
-    strategy: 'random'
-  },
-  random: {
-    mesh: 'random',
-    strategy: 'random'
-  },
-  triangular: {
-    density: 0.5,
-    mesh: 'triangular',
-    minVertexSpacing: 20,
-    strategy: 'random'
-  }
-};
-
+// PLACEMENT
 const sharedCircularPlacementSettings = {
   minVertexSpacing: 20,
   sortComparator: (key1: string, key2: string) => {
@@ -69,9 +48,9 @@ const sharedRootsPlacementSettings = {
 };
 
 export const DEFAULT_PLACEMENT_SETTINGS: Record<
-  PlacementStrategy,
+  Exclude<PlacementStrategy, 'random'>,
   AllGraphPlacementSettings
-> = {
+> & { random: Record<RandomMeshType, AllRandomPlacementSettings> } = {
   circle: {
     ...sharedCircularPlacementSettings,
     strategy: 'circle'
@@ -87,13 +66,31 @@ export const DEFAULT_PLACEMENT_SETTINGS: Record<
     strategy: 'orbits',
     symmetrical: true
   },
-  random: DEFAULT_RANDOM_PLACEMENT_SETTINGS.grid,
+  random: {
+    grid: {
+      density: 0.5,
+      mesh: 'grid',
+      minVertexSpacing: 20,
+      strategy: 'random'
+    },
+    random: {
+      mesh: 'random',
+      strategy: 'random'
+    },
+    triangular: {
+      density: 0.5,
+      mesh: 'triangular',
+      minVertexSpacing: 20,
+      strategy: 'random'
+    }
+  },
   trees: {
     ...sharedRootsPlacementSettings,
     strategy: 'trees'
   }
 };
 
+// LAYOUT
 export const DEFAULT_LAYOUT_SETTINGS: Record<
   LayoutType,
   AllGraphLayoutSettings
@@ -110,6 +107,7 @@ export const DEFAULT_LAYOUT_SETTINGS: Record<
   }
 };
 
+// FOCUS
 export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
   alignment: {
     horizontalAlignment: 'center',
@@ -122,64 +120,81 @@ export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
   vertexScale: 4
 };
 
-export const DEFAULT_UNDIRECTED_GRAPH_SETTINGS: AllUndirectedGraphSettings<unknown> =
-  {
-    // ANIMATION SETTINGS
-    animations: {
-      edges: DEFAULT_ANIMATION_SETTINGS,
-      layout: DEFAULT_ANIMATION_SETTINGS,
-      vertices: DEFAULT_ANIMATION_SETTINGS
-    },
-    // GRAPH COMPONENTS SETTINGS
-    components: {
-      edge: DEFAULT_EDGE_SETTINGS.straight,
-      label: {
-        scale: 0.75
-      },
-      vertex: {
-        radius: 20
-      }
-    },
-    // LAYOUT SETTINGS
-    layout: DEFAULT_LAYOUT_SETTINGS.auto,
-    // PLACEMENT STRATEGIES SETTINGS
-    placement: DEFAULT_PLACEMENT_SETTINGS.random
+// COMPONENTS
+export const DEFAULT_COMPONENTS_SETTINGS: {
+  arrow: AllArrowSettings;
+  edge: {
+    curved: AllCurvedEdgeSettings;
+    straight: AllStraightEdgeSettings;
   };
-
-export const DEFAULT_DIRECTED_GRAPH_SETTINGS: AllDirectedGraphSettings<unknown> =
-  {
-    ...DEFAULT_UNDIRECTED_GRAPH_SETTINGS,
-    components: {
-      ...DEFAULT_UNDIRECTED_GRAPH_SETTINGS.components,
-      arrow: {
-        scale: 0.5
-      }
-    }
-  };
-
-/*
- * RENDERERS
- */
-export const DEFAULT_EDGE_RENDERERS: {
-  curved: CurvedEdgeRenderer<unknown>;
-  straight: CurvedEdgeRenderer<unknown>;
+  label: AllLabelSettings;
+  vertex: AllVertexSettings;
 } = {
-  curved: DefaultCurvedEdgeRenderer,
-  straight: DefaultStraightEdgeRenderer
+  arrow: {
+    scale: 0.5
+  },
+  edge: {
+    curved: {
+      type: 'curved'
+    },
+    straight: {
+      maxOffsetFactor: 0.5,
+      type: 'straight'
+    }
+  },
+  label: {
+    displayed: false,
+    scale: 0.5
+  },
+  vertex: {
+    radius: 20
+  }
 };
 
-export const DEFAULT_EDGE_LABEL_RENDERERS: LabelRenderer<unknown> =
-  DefaultEdgeLabelRenderer;
+// ANIMATIONS
+const DEFAULT_ANIMATIONS_SETTINGS: AllGraphAnimationsSettings = {
+  edges: DEFAULT_ANIMATION_SETTINGS,
+  layout: DEFAULT_ANIMATION_SETTINGS,
+  vertices: DEFAULT_ANIMATION_SETTINGS
+};
 
-export const getDefaultGraphRenderers = <V, E>(
-  graph: Graph<V, E>
-  settings?: GraphSettings<V>
-): GraphRenderersWithDefaults<V, E> => ({
-  arrow: DefaultEdgeArrowRenderer,
-  edge: DEFAULT_EDGE_RENDERERS[
-    settings?.components?.edge?.type ??
-      DEFAULT_GRAPH_SETTINGS.components.edge.type
-  ],
-  label: undefined, // Label is not rendered by default
-  vertex: DefaultVertexRenderer
+export const getDefaultSettings = <V, E, ED extends Edge<V, E>>(
+  data: GraphData<V, E, ED>
+): Omit<AllGraphSettingsData<V, E>, 'graph'> => ({
+  renderers: {
+    arrow: data.graph.isDirected() ? DefaultArrowRenderer : undefined,
+    edge:
+      data.settings?.components.edge?.type === 'curved'
+        ? DefaultCurvedEdgeRenderer
+        : DefaultStraightEdgeRenderer,
+    label: data.settings?.components.label?.displayed
+      ? DefaultLabelRenderer
+      : undefined, // TODO - add to docs that is displayed based on settings
+    vertex: DefaultVertexRenderer
+  },
+  settings: {
+    animations: DEFAULT_ANIMATIONS_SETTINGS,
+    components: {
+      // TODO - fix
+      arrow: data.graph.isDirected()
+        ? DEFAULT_COMPONENTS_SETTINGS.arrow
+        : undefined,
+      // TODO - fix
+      edge: DEFAULT_COMPONENTS_SETTINGS.edge[
+        data.settings?.components.edge?.type ?? 'straight'
+      ],
+      label: DEFAULT_COMPONENTS_SETTINGS.label,
+      vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
+    },
+    layout: data.settings?.layout
+      ? DEFAULT_LAYOUT_SETTINGS[data.settings.layout.type]
+      : DEFAULT_LAYOUT_SETTINGS.auto,
+    placement: data.settings?.placement
+      ? data.settings.placement.strategy === 'random'
+        ? DEFAULT_PLACEMENT_SETTINGS[data.settings.placement.strategy][
+            data.settings.placement.mesh ?? 'grid'
+          ]
+        : DEFAULT_PLACEMENT_SETTINGS[data.settings.placement.strategy]
+      : DEFAULT_PLACEMENT_SETTINGS.random.grid
+  }
 });

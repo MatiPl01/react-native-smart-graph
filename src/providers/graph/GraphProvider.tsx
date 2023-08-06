@@ -1,7 +1,7 @@
 import { memo, PropsWithChildren, useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
-import ConditionalProvider from '@/providers/utils/ConditionalProvider';
+import ConditionalProvider from '@/providers/graph/ConditionalProvider';
 import { deepMemoComparator } from '@/utils/objects';
 
 import CanvasContextsProvider, {

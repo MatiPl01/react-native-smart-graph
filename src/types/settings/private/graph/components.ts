@@ -6,12 +6,12 @@ import {
   StraightEdgeSettings,
   VertexSettings
 } from '@/types/settings/public';
-import { DeepRequire, DeepSharedify } from '@/types/utils';
+import { DeepRequire, DeepSharedify, SharedifyWithout } from '@/types/utils';
 
 /*
  * DEFAULT SETTINGS
  */
-type AllVertexSettings = DeepRequire<VertexSettings>;
+export type AllVertexSettings = DeepRequire<VertexSettings>;
 
 export type AllEdgeSettings = DeepRequire<EdgeSettings>;
 
@@ -25,7 +25,7 @@ export type AllLabelSettings = DeepRequire<LabelSettings>;
 
 export type AllUndirectedGraphComponentsSettings = {
   edge: AllEdgeSettings;
-  label: AllLabelSettings;
+  label?: AllLabelSettings;
   vertex: VertexSettings;
 };
 
@@ -45,16 +45,16 @@ type InternalCurvedEdgeSettings = Pick<AllCurvedEdgeSettings, 'type'> &
 
 type InternalArrowSettings = DeepSharedify<AllArrowSettings>;
 
-type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
+type InternalLabelSettings = SharedifyWithout<AllLabelSettings, 'displayed'>;
 
 export type InternalUndirectedStraightEdgeSettings = {
   edge: InternalStraightEdgeSettings;
-  label: InternalLabelSettings;
+  label?: InternalLabelSettings;
 };
 
 export type InternalUndirectedCurvedEdgeSettings = {
   edge: InternalCurvedEdgeSettings;
-  label: InternalLabelSettings;
+  label?: InternalLabelSettings;
 };
 
 export type InternalDirectedStraightEdgeSettings =
@@ -76,3 +76,23 @@ export type InternalUndirectedEdgeSettings =
   | InternalUndirectedStraightEdgeSettings;
 
 export type InternalVertexSettings = DeepSharedify<AllVertexSettings>;
+
+/*
+ * INTERNAL GRAPH COMPONENTS SETTINGS
+ */
+type SharedInternalGraphComponentsSettings = {
+  vertex: InternalVertexSettings;
+};
+
+export type InternalUndirectedGraphWithStraightEdgesComponentsSettings =
+  SharedInternalGraphComponentsSettings &
+    InternalUndirectedStraightEdgeSettings;
+
+export type InternalUndirectedGraphWithCurvedEdgesComponentsSettings =
+  SharedInternalGraphComponentsSettings & InternalUndirectedCurvedEdgeSettings;
+
+export type InternalDirectedGraphWithStraightEdgesComponentsSettings =
+  SharedInternalGraphComponentsSettings & InternalDirectedStraightEdgeSettings;
+
+export type InternalDirectedGraphWithCurvedEdgesComponentsSettings =
+  SharedInternalGraphComponentsSettings & InternalDirectedCurvedEdgeSettings;

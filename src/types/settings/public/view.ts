@@ -5,5 +5,5 @@ export type GraphViewSettings = {
   initialScale?: number;
   objectFit?: ObjectFit;
   padding?: Spacing;
-  scales?: number[];
+  scales?: Array<number>;
 };

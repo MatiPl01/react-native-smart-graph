@@ -11,7 +11,7 @@ import {
   TreesPlacementSettings,
   UnboundRandomPlacementSettings
 } from '@/types/settings/public';
-import { DeepRequired, DeepRequire } from '@/types/utils';
+import { DeepRequire, Sharedify, SharedifyWithout } from '@/types/utils';
 
 export type PlacedVerticesPositions = Record<string, Vector>;
 
@@ -30,7 +30,7 @@ export type GraphLayout = {
  */
 // Random
 export type AllRandomPlacementSettings =
-  | DeepRequired<BoundRandomPlacementSettings, ['mesh']>
+  | BoundRandomPlacementSettings
   | DeepRequire<UnboundRandomPlacementSettings>;
 
 // Circle
@@ -51,3 +51,37 @@ export type AllOrbitsPlacementSettings = DeepRequire<OrbitsPlacementSettings>;
 export type AllGraphPlacementSettings =
   | AllRandomPlacementSettings
   | DeepRequire<Exclude<GraphPlacementSettings, RandomPlacementSettings>>;
+
+/*
+ * INTERNAL PLACEMENT SETTINGS
+ */
+// Random
+type InternalRandomPlacementSettings = Sharedify<AllRandomPlacementSettings>;
+
+// Circle
+type InternalCirclePlacementSettings = SharedifyWithout<
+  AllCirclePlacementSettings,
+  'sortComparator'
+>;
+
+// Circles
+type InternalCirclesPlacementSettings = SharedifyWithout<
+  AllCirclesPlacementSettings,
+  'sortComparator'
+>;
+
+// Trees
+type InternalTreesPlacementSettings = Sharedify<AllTreesPlacementSettings>;
+
+// Orbits
+type InternalOrbitsPlacementSettings = Sharedify<AllOrbitsPlacementSettings>;
+
+/*
+ * INTERNAL GRAPH PLACEMENT SETTINGS
+ */
+export type InternalAllGraphPlacementSettings =
+  | InternalCirclePlacementSettings
+  | InternalCirclesPlacementSettings
+  | InternalOrbitsPlacementSettings
+  | InternalRandomPlacementSettings
+  | InternalTreesPlacementSettings;

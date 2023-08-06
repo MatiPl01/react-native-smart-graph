@@ -17,6 +17,7 @@ export type CurvedEdgeSettings = {
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
 export type LabelSettings = {
+  displayed?: boolean;
   scale?: number;
 };
 

@@ -1,11 +1,6 @@
 import React, { PropsWithChildren, ReactElement } from 'react';
 
-import {
-  GraphSettingsContextType,
-  withGraphSettings
-} from '@/providers/graph/data/settings/context';
-
-import ContextProviderComposer from './ContextProviderComposer';
+import ContextProviderComposer from '../utils/ContextProviderComposer';
 
 type WithProvidersProps = PropsWithChildren<{
   providers: Array<ReactElement> | ReactElement;
