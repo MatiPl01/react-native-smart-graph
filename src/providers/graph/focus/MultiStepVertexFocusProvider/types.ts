@@ -1,8 +1,9 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { CanvasDataContextType, FocusContextType } from '@/providers/view';
-import { FocusStepData } from '@/types/focus';
-import { MultiStepFocusSettings } from '@/types/settings';
+import { FocusContextType } from '@/providers/view';
+import { GraphViewData } from '@/types/components';
+import { FocusStepData } from '@/types/data';
+import { InternalMultiStepFocusSettings } from '@/types/settings';
 
 export enum MachineState {
   BLUR = 'BLUR',
@@ -16,14 +17,14 @@ export enum MachineState {
 export type StateProps<V, E> = {
   afterStep: FocusStepData<V, E> | null;
   beforeStep: FocusStepData<V, E> | null;
-  canvasDataContext: CanvasDataContextType;
   currentProgress: number;
   focusContext: FocusContextType;
   previousProgress: number;
-  settings: MultiStepFocusSettings;
+  settings: InternalMultiStepFocusSettings;
   syncProgress: number;
   targetKey: SharedValue<null | string>;
-  vertexRadius: number;
+  vertexRadius: SharedValue<number>;
+  viewDataContext: GraphViewData;
 };
 
 export type StateHandler = <V, E>(props: StateProps<V, E>) => MachineState;

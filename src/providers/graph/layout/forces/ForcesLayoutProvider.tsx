@@ -1,6 +1,10 @@
 import { PropsWithChildren } from 'react';
 import { SharedValue, useFrameCallback } from 'react-native-reanimated';
 
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { BoundingRect } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
+import { InternalForceLayoutSettings } from '@/types/settings';
 import { animateToValue } from '@/utils/animations';
 import { applyForces } from '@/utils/forces';
 import {
@@ -9,15 +13,10 @@ import {
 } from '@/utils/placement';
 
 import { useForcesPlacementContext } from './ForcesPlacementProvider';
-import { GraphConnections } from '@/types/graphs';
-import { ForcesSettingsWithDefaults } from '@/types/settings';
-import { BoundingRect } from '@/types/layout';
-import { withComponentsData } from '../../data/components/context';
-import { withGraphSettings } from '../../data/settings/context';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
   connections: GraphConnections;
-  forcesSettings: ForcesSettingsWithDefaults;
+  forcesSettings: InternalForceLayoutSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
 }>;
 
@@ -34,12 +33,13 @@ function ForcesLayoutProvider({
 
   useFrameCallback(() => {
     const targetPositions = alignPositionsToCenter(
-      applyForces(
-        connections,
-        lockedVertices,
-        placedVerticesPositions,
-        forcesSettings
-      )
+      applyForces(connections, lockedVertices, placedVerticesPositions, {
+        attractionForceFactor: forcesSettings.attractionForceFactor.value,
+        attractionScale: forcesSettings.attractionScale.value,
+        repulsionScale: forcesSettings.repulsionScale.value,
+        strategy: forcesSettings.strategy.value,
+        type: forcesSettings.type
+      })
     ).verticesPositions;
 
     // Update the target bounding rect
@@ -72,6 +72,6 @@ export default withGraphSettings(
     })
   ),
   ({ settings }) => ({
-    forcesSettings: settings.layout
+    forcesSettings: settings.layout as InternalForceLayoutSettings
   })
 );

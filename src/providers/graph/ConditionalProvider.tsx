@@ -1,6 +1,9 @@
 import React, { PropsWithChildren, ReactElement } from 'react';
 
-import ContextProviderComposer from '../utils/ContextProviderComposer';
+import { ContextProviderComposer } from '@/providers/utils';
+import { GraphSettingsData } from '@/types/components';
+
+import { withGraphSettings } from './data';
 
 type WithProvidersProps = PropsWithChildren<{
   providers: Array<ReactElement> | ReactElement;
@@ -16,7 +19,7 @@ function WithProviders({ children, providers }: WithProvidersProps) {
 }
 
 type IfProviderProps<V, E> = PropsWithChildren<{
-  if: (data: GraphSettingsContextType<V, E>) => boolean;
+  if: (data: GraphSettingsData<V, E>) => boolean;
   then: Array<ReactElement> | ReactElement;
 }>;
 
@@ -25,7 +28,12 @@ function IfProvider<V, E>({
   if: selector,
   then: providers
 }: IfProviderProps<V, E>) {
-  return withGraphSettings<V, E, { rendered: boolean }, { rendered: boolean }>(
+  const WrappedComponent = withGraphSettings<
+    V,
+    E,
+    { rendered: boolean },
+    { rendered: boolean }
+  >(
     ({ rendered }: { rendered: boolean }) => {
       return rendered ? (
         <WithProviders providers={providers}>{children}</WithProviders>
@@ -34,12 +42,14 @@ function IfProvider<V, E>({
       );
     },
     value => ({ rendered: selector(value) })
-  )({});
+  );
+
+  return <WrappedComponent />;
 }
 
 type SwitchProviderProps<V, E, R extends number | string> = PropsWithChildren<{
   case: Record<R, Array<ReactElement> | ReactElement>;
-  match: (data: GraphSettingsContextType<V, E>) => R;
+  match: (data: GraphSettingsData<V, E>) => R;
 }>;
 
 function SwitchProvider<V, E, R extends number | string>({
@@ -47,7 +57,12 @@ function SwitchProvider<V, E, R extends number | string>({
   children,
   match: selector
 }: SwitchProviderProps<V, E, R>) {
-  return withGraphSettings<V, E, { rendered: R }, { rendered: R }>(
+  const WrappedComponent = withGraphSettings<
+    V,
+    E,
+    { rendered: R },
+    { rendered: R }
+  >(
     ({ rendered }: { rendered: R }) => {
       return providers[rendered] ? (
         <WithProviders providers={providers[rendered]}>
@@ -58,7 +73,9 @@ function SwitchProvider<V, E, R extends number | string>({
       );
     },
     value => ({ rendered: selector(value) })
-  )({});
+  );
+
+  return <WrappedComponent />;
 }
 
 const ConditionalProvider = {

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import {
   Context,
   createContext,
@@ -10,6 +9,7 @@ import {
 } from 'react';
 
 import { useGraphObserver } from '@/hooks';
+import { withGraphSettings } from '@/providers/graph/data/settings';
 import { GraphComponentsData } from '@/types/components';
 import { EdgeRemoveHandler, VertexRemoveHandler } from '@/types/data';
 import { Graph } from '@/types/models';
@@ -26,9 +26,7 @@ import {
   updateContextValue
 } from './utils';
 
-export const GraphComponentsDataContext = createContext(
-  null as unknown as object
-);
+const GraphComponentsDataContext = createContext(null as unknown as object);
 
 export const withComponentsData = <
   V,

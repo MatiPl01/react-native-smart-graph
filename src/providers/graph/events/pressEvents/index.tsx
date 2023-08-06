@@ -1,17 +1,16 @@
 import { PropsWithChildren, useEffect } from 'react';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { VertexComponentData } from '@/types/data';
+import { AnimatedTransformation } from '@/types/layout';
+import { GraphEventsSettings } from '@/types/settings';
 
 import OverlayLayer from './OverlayLayer';
-import { GraphEventsSettings } from '@/types/settings';
-import { AnimatedCanvasTransform } from '@/types/canvas';
-import { VertexComponentData } from '@/types/components';
-import { withComponentsData } from '../../data/components/context';
-import { withGraphSettings } from '../../data/settings/context';
 
 export type PressEventsProviderProps<V, E> = PropsWithChildren<{
   settings: GraphEventsSettings<V>;
-  transform: AnimatedCanvasTransform;
+  transform: AnimatedTransformation;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
@@ -51,5 +50,5 @@ export default withGraphSettings(
   withComponentsData(PressEventsProvider, ({ verticesData }) => ({
     verticesData
   })),
-  ({ settings }) => ({ events: settings.events })
+  ({ settings }) => ({ settings: settings.events })
 );

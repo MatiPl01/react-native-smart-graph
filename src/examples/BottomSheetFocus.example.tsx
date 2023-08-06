@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 import {
-  DefaultStraightEdgeRenderer,
   DirectedEdgeData,
   DirectedGraph,
   DirectedGraphComponent,
@@ -99,9 +98,6 @@ export default function BottomSheetFocus() {
     <>
       <GraphView objectFit='contain'>
         <DirectedGraphComponent
-          renderers={{
-            edge: DefaultStraightEdgeRenderer
-          }}
           settings={{
             focus: {
               points: focusPoints,

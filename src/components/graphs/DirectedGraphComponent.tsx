@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import GraphComponentComposer from '@/components/views/GraphComponentComposer';
+import { GraphComponentComposer } from '@/components/views';
 import { DirectedGraphComponentProps } from '@/types/components';
 import { DirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';

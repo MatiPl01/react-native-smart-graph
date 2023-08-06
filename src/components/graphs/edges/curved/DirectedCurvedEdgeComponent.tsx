@@ -7,7 +7,7 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import EdgeArrowComponent from '@/components/graphs/arrows/ArrowComponent';
+import { ArrowComponent } from '@/components/graphs/arrows';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import {
@@ -171,14 +171,12 @@ function DirectedCurvedEdgeComponent<V, E>({
       {renderers.edge({
         animationProgress,
         key: edge.key,
-        p1,
-        p2,
         parabolaX,
         parabolaY,
         path,
         value: edge.value
       })}
-      <EdgeArrowComponent
+      <ArrowComponent
         animationProgress={animationProgress}
         directionVector={dirVec}
         height={arrowHeight}

@@ -63,6 +63,15 @@ function GraphComponentComposer<V, E>({
     { scale: dataContext.currentScale.value }
   ]);
 
+  const animatedTransform = useMemo(
+    () => ({
+      scale: dataContext.currentScale,
+      translateX: dataContext.currentTranslation.x,
+      translateY: dataContext.currentTranslation.y
+    }),
+    []
+  );
+
   const canvasContexts = useMemo<CanvasContexts>(
     () => ({
       autoSizingContext,
@@ -85,7 +94,10 @@ function GraphComponentComposer<V, E>({
       onLayout={transformContext.handleCanvasRender}
       style={styles.canvas}>
       <Group transform={canvasTransform}>
-        <GraphProvider canvasContexts={canvasContexts} graphProps={graphProps}>
+        <GraphProvider
+          canvasContexts={canvasContexts}
+          graphProps={graphProps}
+          transform={animatedTransform}>
           {graphComponent}
         </GraphProvider>
       </Group>

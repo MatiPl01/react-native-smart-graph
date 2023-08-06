@@ -8,12 +8,15 @@ import { withGraphSettings } from '@/providers/graph/data';
 import { GraphEdgesProps } from '@/types/components';
 
 function GraphEdges<V, E>({
+  arrowRenderer,
   arrowSettings,
+  edgeRenderer,
   edgeSettings,
   edgesData,
   focusProgress,
+  labelRenderer,
   labelSettings,
-  ...restProps
+  onRemove
 }: GraphEdgesProps<V, E>) {
   const opacity = useDerivedValue(() =>
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
@@ -28,16 +31,20 @@ function GraphEdges<V, E>({
     [arrowSettings, edgeSettings, labelSettings]
   );
 
+  const renderers = useMemo(
+    () => ({ arrow: arrowRenderer, edge: edgeRenderer, label: labelRenderer }),
+    [arrowRenderer, edgeRenderer, labelRenderer]
+  );
+
   return (
     <Group opacity={opacity}>
       {Object.values(edgesData).map(data => (
         <EdgeComponent<V, E>
-          {...{
-            ...restProps,
-            ...data,
-            key: data.edge.key,
-            settings
-          }}
+          data={data}
+          key={data.edge.key}
+          onRemove={onRemove}
+          renderers={renderers}
+          settings={settings}
         />
       ))}
     </Group>

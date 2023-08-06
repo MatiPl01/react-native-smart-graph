@@ -32,14 +32,17 @@ export type VertexRenderer<V> = (
 /*
  * EDGE
  */
-export type StraightEdgeRendererProps<E> = SharedRenderersProps & {
+type SharedEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
-  p1: AnimatedVector;
-  p2: AnimatedVector;
   value?: E;
 };
 
-export type CurvedEdgeRendererProps<E> = StraightEdgeRendererProps<E> & {
+export type StraightEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
+  p1: AnimatedVector;
+  p2: AnimatedVector;
+};
+
+export type CurvedEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
   parabolaX: SharedValue<number>;
   parabolaY: SharedValue<number>;
   path: AnimatedPath;

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import {
   DefaultArrowRenderer,
   DefaultCurvedEdgeRenderer,
@@ -10,22 +9,24 @@ import {
   DEFAULT_ANIMATION_SETTINGS,
   DEFAULT_FOCUS_ANIMATION_SETTINGS
 } from '@/constants/animations';
-import { AllGraphSettingsData } from '@/types/components';
+import { AllGraphSettings } from '@/types/components';
 import { GraphData } from '@/types/data';
 import {
   AllArrowSettings,
+  AllBoundRandomPlacementSettings,
+  AllCirclePlacementSettings,
+  AllCirclesPlacementSettings,
   AllCurvedEdgeSettings,
   AllFocusSettings,
   AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
-  AllGraphPlacementSettings,
   AllLabelSettings,
-  AllRandomPlacementSettings,
+  AllOrbitsPlacementSettings,
   AllStraightEdgeSettings,
+  AllTreesPlacementSettings,
+  AllUnboundRandomPlacementSettings,
   AllVertexSettings,
-  LayoutType,
-  PlacementStrategy,
-  RandomMeshType
+  LayoutType
 } from '@/types/settings';
 
 /*
@@ -46,10 +47,17 @@ const sharedRootsPlacementSettings = {
   roots: []
 };
 
-export const DEFAULT_PLACEMENT_SETTINGS: Record<
-  Exclude<PlacementStrategy, 'random'>,
-  AllGraphPlacementSettings
-> & { random: Record<RandomMeshType, AllRandomPlacementSettings> } = {
+export const DEFAULT_PLACEMENT_SETTINGS: {
+  circle: AllCirclePlacementSettings;
+  circles: AllCirclesPlacementSettings;
+  orbits: AllOrbitsPlacementSettings;
+  random: {
+    grid: AllUnboundRandomPlacementSettings;
+    random: AllBoundRandomPlacementSettings;
+    triangular: AllUnboundRandomPlacementSettings;
+  };
+  trees: AllTreesPlacementSettings;
+} = {
   circle: {
     ...sharedCircularPlacementSettings,
     strategy: 'circle'
@@ -159,28 +167,26 @@ const DEFAULT_ANIMATIONS_SETTINGS: AllGraphAnimationsSettings = {
 
 export const getDefaultConfig = <V, E>(
   data: GraphData<V, E>
-): Omit<AllGraphSettingsData<V, E>, 'graph'> => ({
+): Omit<AllGraphSettings<V, E>, 'graph'> => ({
   renderers: {
     arrow: data.graph.isDirected() ? DefaultArrowRenderer : undefined,
     edge:
-      data.settings?.components.edge?.type === 'curved'
+      data.settings?.components?.edge?.type === 'curved'
         ? DefaultCurvedEdgeRenderer
         : DefaultStraightEdgeRenderer,
-    label: data.settings?.components.label?.displayed
+    label: data.settings?.components?.label?.displayed
       ? DefaultLabelRenderer
-      : undefined, // TODO - add to docs that is displayed based on settings
+      : undefined,
     vertex: DefaultVertexRenderer
   },
   settings: {
     animations: DEFAULT_ANIMATIONS_SETTINGS,
     components: {
-      // TODO - fix
       arrow: data.graph.isDirected()
         ? DEFAULT_COMPONENTS_SETTINGS.arrow
         : undefined,
-      // TODO - fix
       edge: DEFAULT_COMPONENTS_SETTINGS.edge[
-        data.settings?.components.edge?.type ?? 'straight'
+        data.settings?.components?.edge?.type ?? 'straight'
       ],
       label: DEFAULT_COMPONENTS_SETTINGS.label,
       vertex: DEFAULT_COMPONENTS_SETTINGS.vertex

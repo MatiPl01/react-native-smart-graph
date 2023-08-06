@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import {
   Context,
   createContext,
@@ -17,7 +16,7 @@ import {
   updateContextValue
 } from './utils';
 
-export const GraphSettingsContext = createContext(null as unknown as object);
+const GraphSettingsContext = createContext(null as unknown as object);
 
 export const withGraphSettings = <
   V,

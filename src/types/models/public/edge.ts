@@ -1,4 +1,5 @@
 /* eslint-disable import/no-unused-modules */
+import { GraphEdge } from '@/types/data';
 import {
   DirectedGraphVertex,
   UndirectedGraphVertex,
@@ -22,8 +23,12 @@ export interface UndirectedEdge<V, E> extends Edge<V, E> {
   get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>];
 }
 
-export type OrderedEdges<V = void, E = void> = Array<{
-  edge: Edge<V, E>;
+export type OrderedEdges<
+  V = void,
+  E = void,
+  GE extends GraphEdge<V, E> = GraphEdge<V, E>
+> = Array<{
+  edge: GE;
   edgesCount: number;
   order: number;
 }>;

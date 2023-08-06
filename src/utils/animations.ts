@@ -222,7 +222,9 @@ export const cancelVertexAnimations = <V, E>(
   cancelAnimation(vertexData.displayed);
 };
 
-export const cancelEdgeAnimations = <GE>(edgeData: EdgeComponentData<GE>) => {
+export const cancelEdgeAnimations = <V, E>(
+  edgeData: EdgeComponentData<V, E>
+) => {
   cancelAnimation(edgeData.animationProgress);
   cancelAnimation(edgeData.displayed);
   cancelAnimation(edgeData.edgesCount);

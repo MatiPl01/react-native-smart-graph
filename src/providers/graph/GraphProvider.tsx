@@ -1,33 +1,36 @@
 import { memo, PropsWithChildren, useMemo } from 'react';
 
-import { ContextProviderComposer } from '@/providers/utils';
 import ConditionalProvider from '@/providers/graph/ConditionalProvider';
+import { ContextProviderComposer } from '@/providers/utils';
+import { GraphData } from '@/types/data';
+import { AnimatedTransformation } from '@/types/layout';
 import { deepMemoComparator } from '@/utils/objects';
 
 import CanvasContextsProvider, {
   CanvasContexts
 } from './contexts/CanvasContextsProvider';
 import ComponentsDataProvider from './data/components/ComponentsDataProvider';
-import { GraphData } from './data/settings/utils';
+import GraphSettingsProvider from './data/settings/GraphSettingsProvider';
 import { PressEventsProvider } from './events';
-import { VertexFocusProvider } from './focus';
+import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
 import {
   ContainerDimensionsProvider,
   ForcesLayoutProvider,
   ForcesPlacementProvider,
   PlacementLayoutProvider
 } from './layout';
-import GraphSettingsProvider from './data/settings/GraphSettingsProvider';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
   canvasContexts: CanvasContexts;
   graphProps: GraphData<V, E>;
+  transform: AnimatedTransformation;
 }>;
 
 function GraphProvider<V, E>({
   canvasContexts,
   children,
-  graphProps
+  graphProps,
+  transform
 }: GraphProviderProps<V, E>) {
   const providers = useMemo(
     () => [
@@ -42,7 +45,7 @@ function GraphProvider<V, E>({
         case={{
           // Provider used to place and move vertices on graph changes
           auto: <PlacementLayoutProvider />,
-          forces: [
+          force: [
             // Provider used to place vertices on graph changes
             <ForcesPlacementProvider />,
             // Provider used to animate vertices based on calculated forces
@@ -59,15 +62,15 @@ function GraphProvider<V, E>({
       <VertexFocusProvider />,
       // Provider used to focus one of the vertices specified in an
       // array based on the user-defined progress
-      // <ConditionalProvider.If // TODO - fix this
-      //   if={({ settings }) => !!settings.focus}
-      //   then={<MultiStepVertexFocusProvider />}
-      // />,
+      <ConditionalProvider.If
+        if={({ settings }) => !!settings.focus}
+        then={<MultiStepVertexFocusProvider />}
+      />,
       // EVENTS
       // Press events provider
       <ConditionalProvider.If
         if={({ settings }) => !!settings.events}
-        then={<PressEventsProvider />}
+        then={<PressEventsProvider transform={transform} />}
       />
     ],
     []

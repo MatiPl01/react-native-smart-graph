@@ -6,15 +6,14 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { BoundingRect } from '@/types/layout';
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withComponentsData } from '@/providers/graph/data/components/context';
-import { withGraphSettings } from '@/providers/graph/data/settings/context';
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
-import { GraphConnections } from '@/types/graphs';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
+import { BoundingRect } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
 import {
-  AnimationSettingsWithDefaults,
-  GraphPlacementSettingsWithDefaults
+  AllAnimationSettings,
+  AllGraphPlacementSettings
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
@@ -23,8 +22,8 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
   edgesData: Record<string, EdgeComponentData<V, E>>;
   isGraphDirected: SharedValue<boolean>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  placementSettings: GraphPlacementSettingsWithDefaults;
+  layoutAnimationSettings: AllAnimationSettings;
+  placementSettings: AllGraphPlacementSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
   vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;

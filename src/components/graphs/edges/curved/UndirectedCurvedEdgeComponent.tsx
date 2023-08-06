@@ -108,8 +108,6 @@ function UndirectedCurvedEdgeComponent<V, E>({
   return renderers.edge({
     animationProgress,
     key: edge.key,
-    p1,
-    p2,
     parabolaX,
     parabolaY,
     path,

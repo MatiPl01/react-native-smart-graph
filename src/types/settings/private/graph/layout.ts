@@ -1,14 +1,27 @@
 import {
+  AutoLayoutSettings,
   ForceLayoutSettings,
   GraphLayoutSettings
-} from '@/types/settings/public/graph/layout';
-import { DeepRequire, SharedifyWithout } from '@/types/utils';
+} from '@/types/settings/public';
+import { DeepRequired, SharedifyWithout } from '@/types/utils';
 
-export type AllGraphLayoutSettings = DeepRequire<GraphLayoutSettings>;
+type AllAutoLayoutSettings = DeepRequired<AutoLayoutSettings>;
 
-export type AllForcesStrategySettings = DeepRequire<ForceLayoutSettings>;
+export type AllForceLayoutSettings = DeepRequired<ForceLayoutSettings>;
 
-export type InternalAllGraphLayoutSettings = SharedifyWithout<
+export type AllGraphLayoutSettings = DeepRequired<GraphLayoutSettings>;
+
+export type InternalForceLayoutSettings = SharedifyWithout<
+  AllForceLayoutSettings,
+  'type'
+>;
+
+export type InternalAutoLayoutSettings = SharedifyWithout<
+  AllAutoLayoutSettings,
+  'type'
+>;
+
+export type InternalGraphLayoutSettings = SharedifyWithout<
   AllGraphLayoutSettings,
   'type'
 >;

@@ -255,11 +255,11 @@ export const updateValues = <
   C extends D | Record<keyof D, any>,
   N extends DeepPartial<D>,
   D extends Record<string, any>,
-  K extends keyof (D | N)
+  K extends string = never
 >(
   settings: SettingsWithDefaults<C, N, D> | SettingsWithoutDefaults<C, N>,
   sharedKeys?: Set<K>
-): SharedifyBy<D & N, K> => {
+): C & SharedifyBy<N, K> => {
   const result = { ...settings.current } as C;
   let isModified = false;
   const keys = areSettingsWithDefaults(settings)
@@ -326,7 +326,7 @@ export const updateValues = <
 
   // Return the result if it was modified, otherwise return the current settings
   // (if modified in place, the current settings will be returned)
-  return (isModified ? result : settings.current!) as SharedifyBy<D & N, K>;
+  return (isModified ? result : settings.current!) as C & SharedifyBy<N, K>;
 };
 
 export const createKeySet = <O extends Record<string, any>>(

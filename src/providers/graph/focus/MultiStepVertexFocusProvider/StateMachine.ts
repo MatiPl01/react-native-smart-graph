@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
+import { SharedValue, useSharedValue } from 'react-native-reanimated';
 
-import { CanvasDataContextType, FocusContextType } from '@/providers/view';
-import { MultiStepFocusSettings } from '@/types/settings';
+import { FocusContextType } from '@/providers/view';
+import { GraphViewData } from '@/types/components';
+import { InternalMultiStepFocusSettings } from '@/types/settings';
 import { isBetween } from '@/utils/math';
 
 import { MachineContext, MachineState, StateHandler } from './types';
@@ -45,7 +46,7 @@ const focusStartState: StateHandler = props => {
     focusContext.startFocus(
       {
         customSource: !!sourceStep,
-        gesturesDisabled: disableGestures,
+        gesturesDisabled: disableGestures?.value,
         key: targetKey
       },
       null
@@ -111,10 +112,10 @@ const focusTransitionState: StateHandler = props => {
   if (
     (currentProgress < previousProgress &&
       beforeStep &&
-      targetKey !== beforeStep.value.key) ||
+      targetKey !== beforeStep.point.key) ||
     (currentProgress > previousProgress &&
       afterStep &&
-      targetKey !== afterStep.value.key)
+      targetKey !== afterStep.point.key)
   ) {
     return MachineState.FOCUS_START;
   }
@@ -239,9 +240,9 @@ FOCUS_START -- A --> FOCUS_TRANSITION -- D --> FOCUS --- K ---> BLUR_START -- F 
 */
 export const useStateMachine = <V, E>(
   focusContext: FocusContextType,
-  canvasDataContext: CanvasDataContextType,
-  settings: MultiStepFocusSettings,
-  vertexRadius: number
+  viewDataContext: GraphViewData,
+  settings: InternalMultiStepFocusSettings,
+  vertexRadius: SharedValue<number>
 ): MachineContext<V, E> => {
   const state = useSharedValue<MachineState>(MachineState.BLUR);
   const targetKey = useSharedValue<null | string>(null);
@@ -263,14 +264,14 @@ export const useStateMachine = <V, E>(
           result = STATE_HANDLERS[state.value]({
             afterStep,
             beforeStep,
-            canvasDataContext,
             currentProgress,
             focusContext,
             previousProgress,
             settings,
             syncProgress,
             targetKey,
-            vertexRadius
+            vertexRadius,
+            viewDataContext
           });
         } while (result !== state.value);
         state.value = result;

@@ -17,7 +17,7 @@ export default withGraphSettings(
     verticesData
   })),
   ({ renderers, settings }) => ({
-    componentSettings: settings.components.vertex,
-    renderer: renderers.vertex
+    renderer: renderers.vertex,
+    settings: settings.components.vertex
   })
 );

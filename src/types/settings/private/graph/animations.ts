@@ -2,9 +2,9 @@ import {
   AnimationSettings,
   GraphAnimationsSettings
 } from '@/types/settings/public/graph/animations';
-import { DeepRequire } from '@/types/utils';
+import { DeepRequired } from '@/types/utils';
 
-export type AllAnimationSettings = DeepRequire<
+export type AllAnimationSettings = DeepRequired<
   Omit<AnimationSettings, 'onComplete'>
 > &
   Pick<AnimationSettings, 'onComplete'>;

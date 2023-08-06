@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
-  Edge,
+  DirectedEdge,
   Graph as IGraph,
   GraphConnections,
   GraphObserver,
+  OrderedEdges,
+  UndirectedEdge,
   Vertex
 } from '@/types/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
   FocusSettings,
-  GraphAnimationsSettings
+  GraphModificationAnimationsSettings
 } from '@/types/settings';
 import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
@@ -20,13 +22,14 @@ export default abstract class Graph<
   V,
   E,
   GV extends Vertex<V, E>,
-  GE extends Edge<V, E>,
+  GE extends DirectedEdge<V, E> | UndirectedEdge<V, E>,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
   private focusedVertexKey: null | string = null;
   private lastFocusChangeSettings: FocusSettings | null = null;
-  private lastGraphChangeSettings: GraphAnimationsSettings | null = null;
+  private lastGraphChangeSettings: GraphModificationAnimationsSettings | null =
+    null;
   private readonly observers: Set<GraphObserver> = new Set();
 
   protected cachedConnections: GraphConnections | null = null;
@@ -138,7 +141,7 @@ export default abstract class Graph<
 
   protected insertEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<GraphAnimationsSettings>,
+    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): GE {
     // Invalidate cached edges data
@@ -173,7 +176,7 @@ export default abstract class Graph<
 
   protected insertVertexObject(
     vertex: GV,
-    animationSettings?: Maybe<GraphAnimationsSettings>,
+    animationSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): GV {
     // Invalidate cached vertices data
@@ -199,7 +202,7 @@ export default abstract class Graph<
   }
 
   protected notifyGraphChange(
-    animationsSettings?: Maybe<GraphAnimationsSettings>
+    animationsSettings?: Maybe<GraphModificationAnimationsSettings>
   ): void {
     const updatedAnimationSettings = animationsSettings ?? {
       edges: {},
@@ -211,10 +214,10 @@ export default abstract class Graph<
     });
   }
 
-  get orderedEdges(): Array<{ edge: GE; edgesCount: number; order: number }> {
+  get orderedEdges(): OrderedEdges<V, E, GE> {
     if (!this.cachedOrderedEdges) {
       const addedEdgesKeys = new Set<string>();
-      const result: Array<{ edge: GE; edgesCount: number; order: number }> = [];
+      const result: OrderedEdges<V, E, GE> = [];
 
       this.edges.forEach(edge => {
         if (addedEdgesKeys.has(edge.key)) {
@@ -269,7 +272,7 @@ export default abstract class Graph<
 
   protected removeEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<GraphAnimationsSettings>,
+    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): void {
     // Remove edge from edges between vertices

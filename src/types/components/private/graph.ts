@@ -2,10 +2,17 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
 import {
+  ArrowRenderer,
+  CurvedEdgeRenderer,
+  StraightEdgeRenderer
+} from '@/types/components';
+import {
   DirectedGraphWithCurvedEdgeRenderers,
   DirectedGraphWithStraightEdgeRenderers,
+  LabelRenderer,
   UndirectedGraphWithCurvedEdgeRenderers,
-  UndirectedGraphWithStraightEdgeRenderers
+  UndirectedGraphWithStraightEdgeRenderers,
+  VertexRenderer
 } from '@/types/components/public';
 import {
   EdgeComponentData,
@@ -15,23 +22,25 @@ import {
   VertexRemoveHandler
 } from '@/types/data';
 import { BoundingRect } from '@/types/layout';
-import { GraphConnections } from '@/types/models';
+import { Graph, GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   AllGraphAnimationsSettings,
+  AllGraphLayoutSettings,
+  AllGraphPlacementSettings,
   DirectedGraphSettings,
   DirectedGraphWithCurvedEdgeSettings,
   GraphEventsSettings,
-  InternalAllGraphLayoutSettings,
-  InternalAllGraphPlacementSettings,
-  InternalDirectedGraphWithCurvedEdgesComponentsSettings,
-  InternalDirectedGraphWithStraightEdgesComponentsSettings,
-  InternalUndirectedGraphWithCurvedEdgesComponentsSettings,
-  InternalUndirectedGraphWithStraightEdgesComponentsSettings,
+  InternalGraphLayoutSettings,
+  InternalMultiStepFocusSettings,
+  MultiStepFocusSettings,
   UndirectedGraphSettings,
   UndirectedGraphWithCurvedEdgeSettings
 } from '@/types/settings';
-import { DeepUnsharedify } from '@/types/utils';
+import {
+  AllGraphComponentsSettings,
+  InternalGraphComponentsSettings
+} from '@/types/settings/private/graph/components';
 
 /*
  * COMPONENTS PROPS
@@ -73,56 +82,40 @@ export type GraphComponentsData<V, E> = {
 };
 
 /*
- * INTERNAL GRAPH SETTINGS
- */
-type SharedInternalGraphSettings<V> = {
-  animations: AllGraphAnimationsSettings;
-  events?: GraphEventsSettings<V>;
-  layout: InternalAllGraphLayoutSettings;
-  placement: InternalAllGraphPlacementSettings;
-};
-
-type InternalUndirectedGraphWithStraightEdgeSettings<V, E> = {
-  graph: UndirectedGraph<V, E>;
-  renderers: UndirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings: SharedInternalGraphSettings<V> & {
-    components: InternalUndirectedGraphWithStraightEdgesComponentsSettings;
-  };
-};
-
-type InternalUndirectedGraphWithCurvedEdgeSettings<V, E> = {
-  graph: UndirectedGraph<V, E>;
-  renderers: UndirectedGraphWithCurvedEdgeRenderers<V, E>;
-  settings: SharedInternalGraphSettings<V> & {
-    components: InternalUndirectedGraphWithCurvedEdgesComponentsSettings;
-  };
-};
-
-type InternalDirectedGraphWithStraightEdgeSettings<V, E> = {
-  graph: DirectedGraph<V, E>;
-  renderers: DirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings: SharedInternalGraphSettings<V> & {
-    components: InternalDirectedGraphWithStraightEdgesComponentsSettings;
-  };
-};
-
-type InternalDirectedGraphWithCurvedEdgeSettings<V, E> = {
-  graph: DirectedGraph<V, E>;
-  renderers: DirectedGraphWithCurvedEdgeRenderers<V, E>;
-  settings: SharedInternalGraphSettings<V> & {
-    components: InternalDirectedGraphWithCurvedEdgesComponentsSettings;
-  };
-};
-
-export type GraphSettingsData<V, E> =
-  | InternalDirectedGraphWithCurvedEdgeSettings<V, E>
-  | InternalDirectedGraphWithStraightEdgeSettings<V, E>
-  | InternalUndirectedGraphWithCurvedEdgeSettings<V, E>
-  | InternalUndirectedGraphWithStraightEdgeSettings<V, E>;
-
-/*
  * DEFAULT GRAPH SETTINGS
  */
-export type AllGraphSettingsData<V, E> = DeepUnsharedify<
-  GraphSettingsData<V, E>
->;
+export type AllGraphSettings<V, E> = {
+  graph: Graph<V, E>;
+  renderers: {
+    arrow?: ArrowRenderer;
+    edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
+    label?: LabelRenderer<E>;
+    vertex: VertexRenderer<V>;
+  };
+  settings: {
+    animations: AllGraphAnimationsSettings;
+    components: AllGraphComponentsSettings;
+    events?: GraphEventsSettings<V>;
+    focus?: MultiStepFocusSettings;
+    layout: AllGraphLayoutSettings;
+    placement: AllGraphPlacementSettings;
+  };
+};
+
+/*
+ * INTERNAL GRAPH SETTINGS
+ */
+export type GraphSettingsData<V, E> = Omit<
+  AllGraphSettings<V, E>,
+  'settings'
+> & {
+  settings: Pick<
+    AllGraphSettings<V, E>['settings'],
+    'animations' | 'events'
+  > & {
+    components: InternalGraphComponentsSettings;
+    focus?: InternalMultiStepFocusSettings;
+    layout: InternalGraphLayoutSettings;
+    placement: AllGraphPlacementSettings;
+  };
+};

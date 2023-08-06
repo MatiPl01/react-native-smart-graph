@@ -1,3 +1,11 @@
+/**
+ * This code was taken from the potpack library and modified to work with
+ * react-native-reanimated.
+ *
+ * Reference:
+ * https://github.com/mapbox/potpack
+ */
+
 interface PotpackBox {
   h: number;
   w: number;

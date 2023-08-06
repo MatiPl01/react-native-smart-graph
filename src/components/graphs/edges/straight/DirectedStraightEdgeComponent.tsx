@@ -6,7 +6,7 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import EdgeArrowComponent from '@/components/graphs/arrows/ArrowComponent';
+import { ArrowComponent } from '@/components/graphs/arrows';
 import { DirectedStraightEdgeComponentProps } from '@/types/components';
 import {
   addVectors,
@@ -129,7 +129,7 @@ function DirectedStraightEdgeComponent<V, E>({
         p2,
         value: edge.value
       })}
-      <EdgeArrowComponent
+      <ArrowComponent
         animationProgress={animationProgress}
         directionVector={dirVec}
         height={arrowHeight}

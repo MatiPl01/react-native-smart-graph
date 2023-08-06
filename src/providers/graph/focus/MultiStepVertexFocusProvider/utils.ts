@@ -1,4 +1,4 @@
-import { FocusStepData } from '@/types/focus';
+import { FocusStepData } from '@/types/data';
 import {
   getMultiStepVertexTransformation,
   updateFocusTransformation
@@ -16,23 +16,23 @@ export const getTargetKey = <V, E>({
 }: StateProps<V, E>): null | string => {
   'worklet';
   if (currentProgress < previousProgress) {
-    return beforeStep?.value.key ?? null;
+    return beforeStep?.point.key ?? null;
   } else if (currentProgress > previousProgress) {
-    return afterStep?.value.key ?? null;
+    return afterStep?.point.key ?? null;
   }
   if (
     beforeStep &&
-    (beforeStep.value.key === prevTargetKey || prevTargetKey === null) &&
+    (beforeStep.point.key === prevTargetKey || prevTargetKey === null) &&
     currentProgress > beforeStep.startsAt
   ) {
-    return afterStep?.value.key ?? null;
+    return afterStep?.point.key ?? null;
   }
   if (
     afterStep &&
-    (afterStep.value.key === prevTargetKey || prevTargetKey === null) &&
+    (afterStep.point.key === prevTargetKey || prevTargetKey === null) &&
     currentProgress < afterStep.startsAt
   ) {
-    return beforeStep?.value.key ?? null;
+    return beforeStep?.point.key ?? null;
   }
   return prevTargetKey;
 };
@@ -67,10 +67,10 @@ export const getTransitionBounds = <V, E>({
   let targetStep: FocusStepData<V, E> | null = null;
   let sourceStep: FocusStepData<V, E> | null = null;
 
-  if (targetKey === beforeStep?.value.key) {
+  if (targetKey === beforeStep?.point.key) {
     targetStep = beforeStep;
     sourceStep = afterStep;
-  } else if (targetKey === afterStep?.value.key) {
+  } else if (targetKey === afterStep?.point.key) {
     targetStep = afterStep;
     sourceStep = beforeStep;
   } else if (targetKey === null) {
@@ -95,16 +95,17 @@ export const updateTransitionPoints = <V, E>(
   startUpdated?: boolean;
 } => {
   'worklet';
-  const { canvasDataContext, focusContext, vertexRadius } = props;
+  const { focusContext, vertexRadius, viewDataContext } = props;
   const { source: sourceStep, target: targetStep } = getTransitionBounds(props);
 
   const transformationConfig = {
-    availableScales: canvasDataContext.scales.value,
+    availableScales: viewDataContext.scales.value,
     canvasDimensions: animatedCanvasDimensionsToDimensions(
-      canvasDataContext.canvasDimensions
+      viewDataContext.canvasDimensions
     ),
-    initialScale: canvasDataContext.initialScale.value,
-    vertexRadius
+    disableGestures: false, // TODO: Add support for disabling gestures
+    initialScale: viewDataContext.initialScale.value,
+    vertexRadius: vertexRadius.value // TODO - make this work with shared values
   };
   const targetTransformation = targetStep
     ? getMultiStepVertexTransformation(targetStep, transformationConfig)

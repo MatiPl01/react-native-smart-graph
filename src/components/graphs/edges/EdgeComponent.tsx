@@ -14,8 +14,6 @@ import {
   UndirectedCurvedEdgeComponentProps,
   UndirectedEdgeComponentProps
 } from '@/types/components';
-import { EdgeComponentData } from '@/types/data';
-import { DirectedEdge, UndirectedEdge } from '@/types/models';
 import { updateComponentAnimationState } from '@/utils/components';
 
 import DirectedCurvedEdgeComponent from './curved/DirectedCurvedEdgeComponent';
@@ -23,11 +21,11 @@ import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponen
 import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeComponent';
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
-type InnerEdgeProps<V, E> = Omit<InnerEdgeComponentProps<V, E>, 'data'> & {
-  data:
-    | EdgeComponentData<DirectedEdge<V, E>>
-    | EdgeComponentData<UndirectedEdge<V, E>>;
-};
+type InnerEdgeProps<V, E> = Omit<
+  InnerEdgeComponentProps<V, E>,
+  'renderers' | 'settings'
+> &
+  Pick<EdgeComponentProps<V, E>, 'renderers' | 'settings'>;
 
 const areDirectedEdgeProps = <V, E>(
   props: InnerEdgeProps<V, E>
@@ -59,10 +57,7 @@ function areCurvedEdgeProps<V, E>(
 
 function EdgeComponent<V, E>({
   data,
-  edgesCount,
   onRemove,
-  order,
-  removed,
   renderers,
   settings
 }: EdgeComponentProps<V, E>) {
@@ -70,8 +65,8 @@ function EdgeComponent<V, E>({
 
   // EDGE ORDERING
   // Target edge order
-  const animatedOrder = useSharedValue(order.value);
-  const animatedEdgesCount = useSharedValue(edgesCount.value);
+  const animatedOrder = useSharedValue(data.order.value);
+  const animatedEdgesCount = useSharedValue(data.edgesCount.value);
 
   // Edge mount/unmount animation
   useEffect(() => {
@@ -79,16 +74,16 @@ function EdgeComponent<V, E>({
       edge.key,
       animationProgress,
       animationSettings,
-      removed,
+      data.removed,
       onRemove
     );
-  }, [removed, animationSettings]);
+  }, [data.removed, animationSettings]);
 
   // Use separate order and count values to make their changes animated
   useAnimatedReaction(
     () => ({
-      count: edgesCount.value,
-      ord: order.value
+      count: data.edgesCount.value,
+      ord: data.order.value
     }),
     ({ count, ord }) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -98,7 +93,7 @@ function EdgeComponent<V, E>({
     }
   );
 
-  const innerProps: InnerEdgeProps<V, E> = {
+  const innerProps = {
     animatedEdgesCount,
     animatedOrder,
     data,

@@ -6,7 +6,7 @@ import { Alignment, AnimatedVectorCoordinates } from '@/types/layout';
 import { Vertex } from '@/types/models/public/vertex';
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 import { FocusPoint } from '@/types/settings/public/graph/focus';
-import { DeepRequire, Maybe } from '@/types/utils';
+import { DeepRequired, Maybe } from '@/types/utils';
 
 export type VertexComponentData<V, E> = {
   animationSettings: AllAnimationSettings;
@@ -53,7 +53,7 @@ export type FocusEndHandler = (
 ) => void;
 
 export type FocusStepData<V, E> = {
-  point: DeepRequire<FocusPoint>;
+  point: DeepRequired<FocusPoint>;
   startsAt: number;
   vertex: VertexComponentData<V, E>;
 };
