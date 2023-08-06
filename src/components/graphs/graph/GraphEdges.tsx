@@ -1,57 +1,43 @@
 import { Group } from '@shopify/react-native-skia';
-import {
-  interpolate,
-  SharedValue,
-  useDerivedValue
-} from 'react-native-reanimated';
+import { useMemo } from 'react';
+import { interpolate, useDerivedValue } from 'react-native-reanimated';
 
 import EdgeComponent from '@/components/graphs/edges/EdgeComponent';
-import {
-  EdgeComponentData,
-  EdgeComponentProps,
-  EdgeRemoveHandler
-} from '@/types/components';
 import { withComponentsData } from '@/providers/graph/data/components/context';
-import {
-  GraphSettingsContextType,
-  withGraphSettings
-} from '@/providers/graph/data/settings/context';
+import { withGraphSettings } from '@/providers/graph/data/settings/context';
+import { GraphEdgesProps, InnerEdgeComponentProps } from '@/types/components';
 
-type ComponentsSettings<V, E> = GraphSettingsContextType<
-  V,
-  E
->['settings']['components'];
-
-type GraphEdgesProps<V, E> = Pick<
-  EdgeComponentProps<V, E>,
-  'arrowRenderer' | 'edgeRenderer' | 'labelRenderer'
-> & {
-  edgesData: Record<string, EdgeComponentData<V, E>>;
-  focusProgress: SharedValue<number>;
-  onRemove: EdgeRemoveHandler;
-  edgeSettings: ComponentsSettings<V, E>['edge'];
-  arrowSettings: ComponentsSettings<V, E>['arrow'];
-  labelSettings: ComponentsSettings<V, E>['label'];
-};
-
-function GraphEdges<V, E>({
+function GraphEdges<V, E, P extends InnerEdgeComponentProps<V, E>>({
+  arrowSettings,
+  edgeSettings,
   edgesData,
   focusProgress,
+  labelSettings,
   ...restProps
-}: GraphEdgesProps<V, E>) {
+}: GraphEdgesProps<V, E, P>) {
   const opacity = useDerivedValue(() =>
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
+  );
+
+  const settings = useMemo(
+    () => ({
+      arrow: arrowSettings,
+      edge: edgeSettings,
+      label: labelSettings
+    }),
+    [arrowSettings, edgeSettings, labelSettings]
   );
 
   return (
     <Group opacity={opacity}>
       {Object.values(edgesData).map(data => (
-        <EdgeComponent
-          {...({
+        <EdgeComponent<V, E, P>
+          {...{
             ...restProps,
             ...data,
-            key: data.edge.key
-          } as unknown as EdgeComponentProps<V, E>)}
+            key: data.edge.key,
+            settings
+          }}
         />
       ))}
     </Group>
@@ -63,12 +49,12 @@ export default withGraphSettings(
     edgesData,
     onRemove: handleEdgeRemove
   })),
-  ({ settings, renderers }) => ({
+  ({ renderers, settings }) => ({
     arrowRenderer: renderers.arrow,
-    edgeRenderer: renderers.edge,
-    labelRenderer: renderers.label,
     arrowSettings: settings.components.arrow,
+    edgeRenderer: renderers.edge,
     edgeSettings: settings.components.edge,
+    labelRenderer: renderers.label,
     labelSettings: settings.components.label
   })
 );

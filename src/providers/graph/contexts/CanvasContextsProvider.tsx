@@ -3,15 +3,15 @@ import { createContext, PropsWithChildren, useContext } from 'react';
 import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
 import {
   AutoSizingContextType,
-  CanvasDataContextType,
   FocusContextType,
   GesturesContextType,
   TransformContextType
-} from '@/providers/canvas';
+} from '@/providers/view';
+import { GraphViewData } from '@/types/components';
 
 export type CanvasContexts = {
   autoSizingContext: AutoSizingContextType;
-  dataContext: CanvasDataContextType;
+  dataContext: GraphViewData;
   focusContext: FocusContextType;
   gesturesContext: GesturesContextType;
   overlayContext: AccessibleOverlayContextType;

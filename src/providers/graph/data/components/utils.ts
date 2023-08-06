@@ -7,7 +7,7 @@ import {
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/components';
-import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
+import { LabelComponentData } from '@/types/components/edgeLabels';
 import { GraphConnections, OrderedEdges, Vertex } from '@/types/graphs';
 import {
   AnimationSettings,
@@ -303,9 +303,9 @@ const updateGraphEdgesData = <V, E>(
 };
 
 const updateGraphEdgeLabelsData = <V, E>(
-  oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
+  oldEdgeLabelsData: Record<string, LabelComponentData<E>>,
   edgesData: Record<string, EdgeComponentData<V, E>>
-): Record<string, EdgeLabelComponentData<E>> => {
+): Record<string, LabelComponentData<E>> => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
   let isModified = false; // Flag to indicate if edges data was updated
 

@@ -12,14 +12,15 @@ import {
   DEFAULT_FOCUS_ANIMATION_SETTINGS,
   DEFAULT_GESTURE_ANIMATION_SETTINGS
 } from '@/constants/animations';
-import { useAutoSizingContext, useCanvasDataContext } from '@/providers/canvas';
+import { useAutoSizingContext } from '@/providers/view';
+import { useGraphViewDataContext } from '@/providers/view/data';
 import {
   BlurData,
   FocusData,
-  FocusEndFunction,
-  FocusStartFunction
-} from '@/types/focus';
-import { AnimationSettingsWithDefaults } from '@/types/settings';
+  FocusEndHandler,
+  FocusStartHandler
+} from '@/types/data';
+import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
 import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
 
@@ -37,7 +38,7 @@ export type FocusContextType = {
     translationX: SharedValue<number>;
     translationY: SharedValue<number>;
   };
-  endFocus: FocusEndFunction;
+  endFocus: FocusEndHandler;
   focus: {
     end: FocusVertexTransition;
     key: SharedValue<null | string>;
@@ -45,7 +46,7 @@ export type FocusContextType = {
   };
   focusStatus: SharedValue<FocusStatus>;
   previousKey: SharedValue<null | string>;
-  startFocus: FocusStartFunction;
+  startFocus: FocusStartHandler;
   status: SharedValue<FocusStatus>;
   transitionProgress: SharedValue<number>;
 };
@@ -83,7 +84,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     currentTranslation,
     gesturesDisabled,
     initialScale
-  } = useCanvasDataContext();
+  } = useGraphViewDataContext();
   // Canvas transform context values
   const {
     getTranslateClamp,
@@ -120,8 +121,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
 
   // HELPER VALUES
   // Focus/Blur transition
-  const animationSettings =
-    useSharedValue<AnimationSettingsWithDefaults | null>(null);
+  const animationSettings = useSharedValue<AllAnimationSettings | null>(null);
   const transitionStartPosition = useSharedValue({ x: 0, y: 0 });
   const transitionStartScale = useSharedValue(0);
   const transitionProgress = useSharedValue(1);
@@ -132,9 +132,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   /**
    * PRIVATE FUNCTIONS
    */
-  const updateTransitionProgress = (
-    animSettings: AnimationSettingsWithDefaults
-  ) => {
+  const updateTransitionProgress = (animSettings: AllAnimationSettings) => {
     'worklet';
     transitionProgress.value = 0;
     const { onComplete, ...timingConfig } = animSettings;
@@ -153,7 +151,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const startTransition = (
     key: null | string,
     transitionType: FocusStatus.BLUR_TRANSITION | FocusStatus.FOCUS_TRANSITION,
-    animSettings: AnimationSettingsWithDefaults | null
+    animSettings: AllAnimationSettings | null
   ) => {
     'worklet';
     // Set initial values for the transition
@@ -172,9 +170,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     if (animSettings) updateTransitionProgress(animSettings);
   };
 
-  const handleContainerReset = (
-    animSettings: AnimationSettingsWithDefaults | null
-  ) => {
+  const handleContainerReset = (animSettings: AllAnimationSettings | null) => {
     'worklet';
     // Reset the container position with animation if it is provided
     if (animSettings) {
@@ -204,7 +200,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // Focus setter
   const startFocus = (
     data: FocusData,
-    animSettings?: Maybe<AnimationSettingsWithDefaults>
+    animSettings?: Maybe<AllAnimationSettings>
   ) => {
     'worklet';
     // Reset blur settings
@@ -226,7 +222,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   // Blur setter
   const endFocus = (
     data?: Maybe<BlurData>,
-    animSettings?: Maybe<AnimationSettingsWithDefaults>
+    animSettings?: Maybe<AllAnimationSettings>
   ) => {
     'worklet';
     const updatedAnimSettings = (animationSettings.value =

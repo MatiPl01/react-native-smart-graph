@@ -1,15 +1,14 @@
 import { memo } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import { UndirectedStraightEdgeComponentProps } from '@/types/components/edges';
+import { UndirectedStraightEdgeComponentProps } from '@/types/components';
 import {
   addVectors,
-  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   multiplyVector
 } from '@/utils/vectors';
 
+/* eslint-disable import/no-unused-modules */
 const calcTranslationOffset = (
   order: number,
   edgesCount: number,
@@ -28,11 +27,11 @@ function UndirectedStraightEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   animationProgress,
-  componentSettings,
   edge,
   labelHeight,
   labelPosition,
   renderers,
+  settings,
   v1Position,
   v1Radius,
   v2Position,
@@ -52,35 +51,28 @@ function UndirectedStraightEdgeComponent<V, E>({
   const v2Key = edge.vertices[1].key;
 
   useAnimatedReaction(
-    () => {
-      let v1: AnimatedVectorCoordinates, v2: AnimatedVectorCoordinates;
-
+    () => ({
+      edgesCount: animatedEdgesCount.value,
+      labelScale: settings.label.scale.value,
+      maxOffsetFactor: settings.edge.maxOffsetFactor.value,
+      order: animatedOrder.value,
+      r1: v1Radius.value,
+      r2: v2Radius.value,
+      v1: { x: v1Position.x.value, y: v1Position.y.value },
+      v2: { x: v2Position.x.value, y: v2Position.y.value }
+    }),
+    ({ edgesCount, labelScale, maxOffsetFactor, order, r1, r2, v1, v2 }) => {
       // Ensure that the order of edges is always the same
       // no matter which vertex was specified first on the edge
       // vertices array
       if (v1Key.localeCompare(v2Key) > 0) {
-        v1 = v2Position;
-        v2 = v1Position;
-      } else {
-        v1 = v1Position;
-        v2 = v2Position;
+        [v1, v2] = [v2, v1];
       }
-
-      return {
-        edgesCount: animatedEdgesCount.value,
-        order: animatedOrder.value,
-        r1: v1Radius.value,
-        r2: v2Radius.value,
-        v1: animatedVectorCoordinatesToVector(v1),
-        v2: animatedVectorCoordinatesToVector(v2)
-      };
-    },
-    ({ edgesCount, order, r1, r2, v1, v2 }) => {
       const calcOffset = calcTranslationOffset.bind(
         null,
         order,
         edgesCount,
-        componentSettings.edge.maxOffsetFactor
+        maxOffsetFactor
       );
 
       const p1Offset = calcOffset(r1);
@@ -94,34 +86,24 @@ function UndirectedStraightEdgeComponent<V, E>({
       p2.value = addVectors(v2, p2Translation);
       // Update edge label max size
       const maxSize =
-        (componentSettings.edge.maxOffsetFactor * (r1 + r2)) /
-        (edgesCount > 0 ? edgesCount - 1 : 1);
+        (maxOffsetFactor * (r1 + r2)) / (edgesCount > 0 ? edgesCount - 1 : 1);
       const avgRadius = (r1 + r2) / 2;
-      if (componentSettings.label?.scale) {
-        labelHeight.value = Math.min(
-          maxSize,
-          componentSettings.label.scale * avgRadius
-        );
-      }
+      labelHeight.value = Math.min(maxSize, labelScale * avgRadius);
       // Update label position
       labelPosition.x.value = (p1.value.x + p2.value.x) / 2;
       labelPosition.y.value = (p1.value.y + p2.value.y) / 2;
     }
   );
 
-  return (
-    <>
-      {renderers.edge({
-        animationProgress,
-        key: edge.key,
-        p1,
-        p2,
-        value: edge.value
-      })}
-    </>
-  );
+  return renderers.edge({
+    animationProgress,
+    key: edge.key,
+    p1,
+    p2,
+    value: edge.value
+  });
 }
 
-export default memo(UndirectedStraightEdgeComponent) as <V, E>(
-  props: UndirectedStraightEdgeComponentProps<V, E>
-) => JSX.Element;
+export default memo(
+  UndirectedStraightEdgeComponent
+) as typeof UndirectedStraightEdgeComponent;

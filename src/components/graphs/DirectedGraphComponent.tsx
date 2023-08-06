@@ -1,19 +1,12 @@
 import { memo } from 'react';
 
 import GraphComponentComposer from '@/components/views/GraphComponentComposer';
-import { DirectedGraph } from '@/models/graphs';
-import { DirectedGraphRenderers } from '@/types/renderers';
+import { DirectedGraphComponentProps } from '@/types/components';
 import { DirectedGraphSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 
-export type DirectedGraphComponentProps<V, E> = {
-  graph: DirectedGraph<V, E>;
-  renderers?: DirectedGraphRenderers<V, E>;
-  settings?: DirectedGraphSettings<V>;
-};
-
-function DirectedGraphComponent<V, E>(
-  props: DirectedGraphComponentProps<V, E>
+function DirectedGraphComponent<V, E, S extends DirectedGraphSettings<V>>(
+  props: DirectedGraphComponentProps<V, E, S>
 ) {
   return <GraphComponentComposer {...props} />;
 }

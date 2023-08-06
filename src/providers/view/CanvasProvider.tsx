@@ -3,12 +3,14 @@ import { useMemo } from 'react';
 import { ContextProviderComposer } from '@/providers/utils';
 
 import { AutoSizingProvider } from './auto';
-import { CanvasDataProvider, CanvasDataProviderProps } from './data';
+import GraphViewDataProvider, {
+  GraphViewDataProviderProps
+} from './data/GraphViewDataProvider';
 import { GesturesProvider } from './gestures';
 import { SettingsChangeResponderProvider } from './settings';
 import { FocusProvider, TransformProvider } from './transform';
 
-type CanvasProviderProps = CanvasDataProviderProps;
+type CanvasProviderProps = GraphViewDataProviderProps;
 
 export default function CanvasProvider({
   children,
@@ -43,10 +45,10 @@ export default function CanvasProvider({
     // across other providers
     // (is used separately to prevent re-renders of other providers
     // as this is the only provider that re-renders on props change)
-    <CanvasDataProvider {...restProps}>
+    <GraphViewDataProvider {...restProps}>
       <ContextProviderComposer providers={providers}>
         {children}
       </ContextProviderComposer>
-    </CanvasDataProvider>
+    </GraphViewDataProvider>
   );
 }

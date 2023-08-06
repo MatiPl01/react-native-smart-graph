@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 import { DEFAULT_VIEW_SETTINGS } from '@/configs/view';
 import GraphViewChildrenProvider from '@/contexts/GraphViewChildrenProvider';
-import CanvasProvider from '@/providers/canvas';
+import CanvasProvider from '@/providers/view';
 import { GraphViewSettings } from '@/types/settings/public/view';
 
 type GraphViewProps = PropsWithChildren<GraphViewSettings>;

@@ -1,12 +1,16 @@
-import UndirectedEdge from '@/models/edges/UndirectedEdge';
-import UndirectedGraphVertex from '@/models/vertices/UndirectedGraphVertex';
-import { Maybe } from '@/types/utils';
+import { UndirectedEdge } from '@/models/edges';
+import { UndirectedGraphVertex } from '@/models/vertices';
 import { UndirectedEdgeData, VertexData } from '@/types/data';
-import { GraphConnections } from '@/types/graphs';
+import {
+  GraphConnections,
+  UndirectedEdge as IUndirectedEdge,
+  UndirectedGraphVertex as IUndirectedGraphVertex
+} from '@/types/models';
 import {
   AnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
@@ -17,8 +21,8 @@ import Graph from './Graph';
 export default class UndirectedGraph<V = void, E = void> extends Graph<
   V,
   E,
-  UndirectedGraphVertex<V, E>,
-  UndirectedEdge<V, E>,
+  IUndirectedGraphVertex<V, E>,
+  IUndirectedEdge<V, E>,
   UndirectedEdgeData<E>
 > {
   constructor(data?: {
@@ -85,7 +89,7 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
     { key, value, vertices: [vertex1key, vertex2key] }: UndirectedEdgeData<E>,
     animationSettings?: Maybe<AnimationSettings>,
     notifyChange = true
-  ): UndirectedEdge<V, E> {
+  ): IUndirectedEdge<V, E> {
     if (!vertex1key || !vertex2key) {
       throw new Error(`Edge ${key} must have two vertices`);
     }
@@ -124,7 +128,7 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
     { key, value }: VertexData<V>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange = true
-  ): UndirectedGraphVertex<V, E> {
+  ): IUndirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new UndirectedGraphVertex<V, E>(key, value),
       animationSettings &&

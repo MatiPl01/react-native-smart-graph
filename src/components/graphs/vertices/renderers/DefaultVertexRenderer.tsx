@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
 import {
   interpolate,
@@ -6,7 +7,7 @@ import {
 } from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
-import { VertexRendererProps } from '@/types/renderers';
+import { VertexRendererProps } from '@/types/components';
 
 export default function DefaultVertexRenderer<V>({
   animationProgress,

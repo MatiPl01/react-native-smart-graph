@@ -1,7 +1,7 @@
 import {
   DirectedEdge as IDirectedEdge,
   DirectedGraphVertex
-} from '@/types/graphs';
+} from '@/types/models';
 
 export default class DirectedEdge<V, E> implements IDirectedEdge<V, E> {
   constructor(

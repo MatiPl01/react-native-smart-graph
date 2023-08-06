@@ -1,17 +1,18 @@
+/* eslint-disable import/no-unused-modules */
 import { Group, Text, useFont } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
-import { EdgeLabelRendererProps } from '@/types/renderers';
+import { LabelRendererProps } from '@/types/components';
 
-export default function DefaultEdgeLabelRenderer<E>({
+export default function DefaultLabelRenderer<E>({
   animationProgress,
   centerX,
   centerY,
   edgeRotation,
   height,
   key
-}: EdgeLabelRendererProps<E>) {
+}: LabelRendererProps<E>) {
   const FONT_SIZE = 16;
   const font = useFont(FONTS.rubikFont, FONT_SIZE);
 

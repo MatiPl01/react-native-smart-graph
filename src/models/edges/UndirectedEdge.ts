@@ -1,7 +1,7 @@
 import {
   UndirectedEdge as IUndirectedEdge,
   UndirectedGraphVertex
-} from '@/types/graphs';
+} from '@/types/models';
 
 export default class UndirectedEdge<V, E> implements IUndirectedEdge<V, E> {
   constructor(

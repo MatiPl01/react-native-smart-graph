@@ -2,4 +2,13 @@
 import { FocusSettings } from '@/types/settings/public';
 import { DeepRequiredAll } from '@/types/utils';
 
-export type AllFocusSettings = DeepRequiredAll<FocusSettings>;
+import { AllAnimationSettings } from './animations';
+
+/*
+ * SINGLE VERTEX FOCUS
+ */
+export type AllFocusSettings = DeepRequiredAll<
+  Omit<FocusSettings, 'animation'>
+> & {
+  animation: AllAnimationSettings;
+};

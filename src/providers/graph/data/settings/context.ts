@@ -1,14 +1,7 @@
 import { Context, createContext } from 'react';
 
+import { EdgeType, LayoutType } from '@/types/settings';
 import { Sharedify } from '@/types/utils';
-import { Graph } from '@/types/graphs';
-import { GraphRenderersWithDefaults } from '@/types/renderers';
-import {
-  EdgeType,
-  GraphAnimationsSettingsWithDefaults,
-  GraphSettingsWithDefaults,
-  LayoutType
-} from '@/types/settings';
 import { withMemoContext } from '@/utils/contexts';
 
 export type GraphSettingsContextType<V, E> = {

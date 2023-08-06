@@ -21,11 +21,11 @@ import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import {
   FocusStatus,
   useAutoSizingContext,
-  useCanvasDataContext,
   useFocusContext,
   useTransformContext
-} from '@/providers/canvas';
-import { ObjectFit } from '@/types/views';
+} from '@/providers/view';
+import { useGraphViewDataContext } from '@/providers/view/data';
+import { ObjectFit } from '@/types/layout';
 
 const OBJECT_FIT_BUTTONS: Array<{ icon: IconDefinition; type: ObjectFit }> = [
   {
@@ -59,7 +59,7 @@ export default memo(function GraphViewControls({
 }: GraphViewControlsProps) {
   // CONTEXTS
   // Canvas data context
-  const { initialScale, objectFit } = useCanvasDataContext();
+  const { initialScale, objectFit } = useGraphViewDataContext();
   // Transform context
   const { resetContainerPosition } = useTransformContext();
   // Auto sizing context

@@ -14,7 +14,7 @@ import {
 } from 'react-native-reanimated';
 
 import { useFocusObserver } from '@/hooks';
-import { FocusStatus } from '@/providers/canvas';
+import { FocusStatus } from '@/providers/view';
 import { withComponentsData } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withGraphSettings } from '@/providers/graph/data/settings/context';

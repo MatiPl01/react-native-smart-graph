@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Maybe, Mutable } from '@/types/utils';
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   Edge,
@@ -7,13 +6,14 @@ import {
   GraphConnections,
   GraphObserver,
   Vertex
-} from '@/types/graphs';
+} from '@/types/models';
 import {
   AnimationSettings,
-  AnimationsSettings,
-  BatchModificationAnimationSettings
+  BatchModificationAnimationSettings,
+  FocusSettings,
+  GraphAnimationsSettings
 } from '@/types/settings';
-import { FocusSettings } from '@/types/settings/focus';
+import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 
 export default abstract class Graph<
@@ -26,7 +26,7 @@ export default abstract class Graph<
 {
   private focusedVertexKey: null | string = null;
   private lastFocusChangeSettings: FocusSettings | null = null;
-  private lastGraphChangeSettings: AnimationsSettings | null = null;
+  private lastGraphChangeSettings: GraphAnimationsSettings | null = null;
   private readonly observers: Set<GraphObserver> = new Set();
 
   protected cachedConnections: GraphConnections | null = null;
@@ -138,7 +138,7 @@ export default abstract class Graph<
 
   protected insertEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<AnimationsSettings>,
+    animationsSettings?: Maybe<GraphAnimationsSettings>,
     notifyChange = true
   ): GE {
     // Invalidate cached edges data
@@ -173,7 +173,7 @@ export default abstract class Graph<
 
   protected insertVertexObject(
     vertex: GV,
-    animationSettings?: Maybe<AnimationsSettings>,
+    animationSettings?: Maybe<GraphAnimationsSettings>,
     notifyChange = true
   ): GV {
     // Invalidate cached vertices data
@@ -199,7 +199,7 @@ export default abstract class Graph<
   }
 
   protected notifyGraphChange(
-    animationsSettings?: Maybe<AnimationsSettings>
+    animationsSettings?: Maybe<GraphAnimationsSettings>
   ): void {
     const updatedAnimationSettings = animationsSettings ?? {
       edges: {},
@@ -269,7 +269,7 @@ export default abstract class Graph<
 
   protected removeEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<AnimationsSettings>,
+    animationsSettings?: Maybe<GraphAnimationsSettings>,
     notifyChange = true
   ): void {
     // Remove edge from edges between vertices

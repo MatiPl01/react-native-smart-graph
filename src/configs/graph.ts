@@ -3,26 +3,22 @@ import {
   DEFAULT_ANIMATION_SETTINGS,
   DEFAULT_FOCUS_ANIMATION_SETTINGS
 } from '@/constants/animations';
-import { AllEdgeSettings } from '@/types/settings/private/graph/components';
-import { AllGraphLayoutSettings } from '@/types/settings/private/graph/layout';
+import { CurvedEdgeRenderer } from '@/types/components';
+import { Graph } from '@/types/models';
 import {
+  AllDirectedGraphSettings,
+  AllEdgeSettings,
+  AllFocusSettings,
+  AllGraphLayoutSettings,
   AllGraphPlacementSettings,
-  AllRandomPlacementSettings
-} from '@/types/settings/private/graph/placement';
-import { EdgeType } from '@/types/settings/public/graph/components';
-import { LayoutType } from '@/types/settings/public/graph/layout';
-import {
+  AllRandomPlacementSettings,
+  AllUndirectedGraphSettings,
+  EdgeType,
+  GraphSettings,
+  LayoutType,
   PlacementStrategy,
   RandomMeshType
-} from '@/types/settings/public/graph/placement';
-
-import {
-  DefaultCurvedEdgeRenderer,
-  DefaultEdgeArrowRenderer,
-  DefaultEdgeLabelRenderer,
-  DefaultStraightEdgeRenderer,
-  DefaultVertexRenderer
-} from '..';
+} from '@/types/settings';
 
 /*
  * SETTINGS
@@ -107,17 +103,15 @@ export const DEFAULT_LAYOUT_SETTINGS: Record<
     type: 'auto'
   },
   force: {
-    settings: {
-      attractionForceFactor: 1,
-      attractionScale: 1,
-      repulsionScale: 100000,
-      strategy: 'default'
-    },
+    attractionForceFactor: 1,
+    attractionScale: 1,
+    repulsionScale: 100000,
+    strategy: 'default',
     type: 'force'
   }
 };
 
-export const DEFAULT_FOCUS_SETTINGS: FocusSettingsWithDefaults = {
+export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
   alignment: {
     horizontalAlignment: 'center',
     horizontalOffset: 0,
@@ -129,47 +123,57 @@ export const DEFAULT_FOCUS_SETTINGS: FocusSettingsWithDefaults = {
   vertexScale: 4
 };
 
-export const DEFAULT_GRAPH_SETTINGS: GraphSettingsWithDefaults<unknown> = {
-  // ANIMATION SETTINGS
-  animations: {
-    edges: DEFAULT_ANIMATION_SETTINGS,
-    layout: DEFAULT_ANIMATION_SETTINGS,
-    vertices: DEFAULT_ANIMATION_SETTINGS
-  },
-  // GRAPH COMPONENTS SETTINGS
-  components: {
-    arrow: {
-      scale: 0.5
+export const DEFAULT_UNDIRECTED_GRAPH_SETTINGS: AllUndirectedGraphSettings<unknown> =
+  {
+    // ANIMATION SETTINGS
+    animations: {
+      edges: DEFAULT_ANIMATION_SETTINGS,
+      layout: DEFAULT_ANIMATION_SETTINGS,
+      vertices: DEFAULT_ANIMATION_SETTINGS
     },
-    edge: DEFAULT_EDGE_SETTINGS.straight,
-    label: {
-      scale: 0.75
+    // GRAPH COMPONENTS SETTINGS
+    components: {
+      edge: DEFAULT_EDGE_SETTINGS.straight,
+      label: {
+        scale: 0.75
+      },
+      vertex: {
+        radius: 20
+      }
     },
-    vertex: {
-      radius: 20
+    // LAYOUT SETTINGS
+    layout: DEFAULT_LAYOUT_SETTINGS.auto,
+    // PLACEMENT STRATEGIES SETTINGS
+    placement: DEFAULT_PLACEMENT_SETTINGS.random
+  };
+
+export const DEFAULT_DIRECTED_GRAPH_SETTINGS: AllDirectedGraphSettings<unknown> =
+  {
+    ...DEFAULT_UNDIRECTED_GRAPH_SETTINGS,
+    components: {
+      ...DEFAULT_UNDIRECTED_GRAPH_SETTINGS.components,
+      arrow: {
+        scale: 0.5
+      }
     }
-  },
-  // LAYOUT SETTINGS
-  layout: DEFAULT_LAYOUT_SETTINGS.auto,
-  // PLACEMENT STRATEGIES SETTINGS
-  placement: DEFAULT_PLACEMENT_SETTINGS.random
-};
+  };
 
 /*
  * RENDERERS
  */
-export const DEFAULT_EDGE_RENDERERS: Record<
-  EdgeType,
-  EdgeRenderFunction<unknown>
-> = {
+export const DEFAULT_EDGE_RENDERERS: {
+  curved: CurvedEdgeRenderer<unknown>;
+  straight: CurvedEdgeRenderer<unknown>;
+} = {
   curved: DefaultCurvedEdgeRenderer,
   straight: DefaultStraightEdgeRenderer
 };
 
-export const DEFAULT_EDGE_LABEL_RENDERERS: EdgeLabelRendererFunction<unknown> =
+export const DEFAULT_EDGE_LABEL_RENDERERS: LabelRenderer<unknown> =
   DefaultEdgeLabelRenderer;
 
 export const getDefaultGraphRenderers = <V, E>(
+  graph: Graph<V, E>
   settings?: GraphSettings<V>
 ): GraphRenderersWithDefaults<V, E> => ({
   arrow: DefaultEdgeArrowRenderer,

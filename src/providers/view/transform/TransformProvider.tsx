@@ -7,14 +7,11 @@ import {
   withTiming
 } from 'react-native-reanimated';
 
-import { BoundingRect, Dimensions } from '@/types/layout';
+import { AutoSizingContextType } from '@/providers/view/auto';
+import { useGraphViewDataContext } from '@/providers/view/data';
+import { BoundingRect, Dimensions, ObjectFit } from '@/types/layout';
+import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
-import {
-  AutoSizingContextType,
-  useCanvasDataContext
-} from '@/providers/canvas';
-import { AnimationSettingsWithDefaults } from '@/types/settings';
-import { ObjectFit } from '@/types/views';
 import {
   calcContainerScale,
   calcContainerTranslation,
@@ -36,7 +33,7 @@ export type TransformContextType = {
   handleCanvasRender: (event: LayoutChangeEvent) => void;
   handleGraphRender: (containerBoundingRect: BoundingRect) => void;
   resetContainerPosition: (settings?: {
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>;
+    animationSettings?: Maybe<AllAnimationSettings>;
     autoSizingContext?: AutoSizingContextType;
     canvasDimensions?: Dimensions;
     containerBoundingRect?: BoundingRect;
@@ -57,13 +54,13 @@ export type TransformContextType = {
   scaleContentTo: (
     newScale: number,
     origin?: Vector,
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    animationSettings?: Maybe<AllAnimationSettings>,
     settings?: { callCallback?: boolean; withClamping?: boolean }
   ) => void;
   translateContentTo: (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    animationSettings?: Maybe<AllAnimationSettings>,
     settings?: { callCallback?: boolean }
   ) => void;
 };
@@ -105,7 +102,7 @@ export default function TransformProvider({
     minScale,
     objectFit,
     padding
-  } = useCanvasDataContext();
+  } = useGraphViewDataContext();
 
   // Other values
   const initialCanvasDimensions = useSharedValue<Dimensions | null>(null);
@@ -186,7 +183,7 @@ export default function TransformProvider({
   const translateContentTo = (
     translate: Vector,
     clampTo?: { x?: [number, number]; y?: [number, number] },
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    animationSettings?: Maybe<AllAnimationSettings>,
     settings?: { callCallback?: boolean }
   ) => {
     'worklet';
@@ -214,7 +211,7 @@ export default function TransformProvider({
   const scaleContentTo = (
     newScale: number,
     origin?: Vector,
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>,
+    animationSettings?: Maybe<AllAnimationSettings>,
     settings?: { callCallback?: boolean; withClamping?: boolean }
   ) => {
     'worklet';
@@ -248,7 +245,7 @@ export default function TransformProvider({
   };
 
   const resetContainerPosition = (settings?: {
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>;
+    animationSettings?: Maybe<AllAnimationSettings>;
     autoSizingContext?: AutoSizingContextType;
     canvasDimensions?: Dimensions;
     containerBoundingRect?: BoundingRect;

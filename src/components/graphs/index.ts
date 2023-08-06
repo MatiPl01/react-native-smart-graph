@@ -1,9 +1,8 @@
-export {
-  default as DirectedGraphComponent,
-  type DirectedGraphComponentProps
-} from './DirectedGraphComponent';
+export * from './arrows';
+export { default as DirectedGraphComponent } from './DirectedGraphComponent';
+export * from './edges';
+export * from './graph';
 export { default as GraphComponent } from './graph/GraphComponent';
-export {
-  default as UndirectedGraphComponent,
-  type UndirectedGraphComponentProps
-} from './UndirectedGraphComponent';
+export * from './labels';
+export { default as UndirectedGraphComponent } from './UndirectedGraphComponent';
+export * from './vertices';

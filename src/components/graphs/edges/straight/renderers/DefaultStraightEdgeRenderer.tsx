@@ -1,7 +1,8 @@
+/* eslint-disable import/no-unused-modules */
 import { Line } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { StraightEdgeRendererProps } from '@/types/renderers';
+import { StraightEdgeRendererProps } from '@/types/components';
 
 export default function DefaultStraightEdgeRenderer<E>({
   animationProgress,

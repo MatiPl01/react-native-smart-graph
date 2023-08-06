@@ -5,12 +5,12 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useAutoSizingContext } from '@/providers/canvas/auto';
-import { useCanvasDataContext } from '@/providers/canvas/data';
+import { useAutoSizingContext } from '@/providers/view/auto';
+import { useGraphViewDataContext } from '@/providers/view/data';
 import {
   useFocusContext,
   useTransformContext
-} from '@/providers/canvas/transform';
+} from '@/providers/view/transform';
 
 export default function SettingsChangeResponderProvider({
   children
@@ -20,7 +20,7 @@ export default function SettingsChangeResponderProvider({
   // CONTEXT VALUES
   // Canvas data context values
   const { initialScaleProvided, isRendered, objectFit } =
-    useCanvasDataContext();
+    useGraphViewDataContext();
   // Transform context values
   const { resetContainerPosition } = useTransformContext();
   // Auto sizing context values

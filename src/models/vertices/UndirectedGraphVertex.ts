@@ -1,7 +1,7 @@
 import {
   UndirectedEdge,
   UndirectedGraphVertex as IUndirectedGraphVertex
-} from '@/types/graphs';
+} from '@/types/models';
 
 import Vertex from './Vertex';
 

@@ -1,34 +1,16 @@
-import {
-  SharedValue,
-  useDerivedValue,
-  useSharedValue
-} from 'react-native-reanimated';
+import { memo } from 'react';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import {
-  EdgeLabelRendererFunction,
-  SharedRenderersProps
-} from '@/types/renderers';
+import { LabelComponentProps } from '@/types/components';
 
-type EdgeLabelComponentProps<E> = SharedRenderersProps & {
-  centerX: SharedValue<number>;
-  centerY: SharedValue<number>;
-  edgeKey: string;
-  height: SharedValue<number>;
-  renderer: EdgeLabelRendererFunction<E>;
-  v1Position: AnimatedVectorCoordinates;
-  v2Position: AnimatedVectorCoordinates;
-  value?: E;
-};
-
-export default function EdgeLabelComponent<E>({
+function LabelComponent<E>({
   edgeKey,
   height,
   renderer,
   v1Position,
   v2Position,
   ...restProps
-}: EdgeLabelComponentProps<E>) {
+}: LabelComponentProps<E>) {
   const edgeLength = useDerivedValue(() =>
     Math.sqrt(
       (v2Position.x.value - v1Position.x.value) ** 2 +
@@ -91,3 +73,5 @@ export default function EdgeLabelComponent<E>({
     ...restProps
   });
 }
+
+export default memo(LabelComponent) as typeof LabelComponent;

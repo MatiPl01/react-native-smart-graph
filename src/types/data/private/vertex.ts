@@ -42,12 +42,12 @@ export type BlurData = {
   origin?: Vector;
 };
 
-export type FocusStartFunction = (
+export type FocusStartHandler = (
   data: FocusData,
   animationSettings?: Maybe<AllAnimationSettings>
 ) => void;
 
-export type FocusEndFunction = (
+export type FocusEndHandler = (
   data?: Maybe<BlurData>,
   animationSettings?: Maybe<AllAnimationSettings>
 ) => void;

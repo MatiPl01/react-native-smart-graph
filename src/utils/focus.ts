@@ -1,4 +1,4 @@
-import { FocusContextType } from '@/providers/canvas';
+import { FocusContextType } from '@/providers/view';
 import { FocusedVertexData, FocusStepData } from '@/types/data';
 import {
   Alignment,

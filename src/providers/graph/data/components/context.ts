@@ -1,21 +1,21 @@
 import { Context, createContext } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
-import { BoundingRect } from '@/types/layout';
 import {
   EdgeComponentData,
   EdgeRemoveHandler,
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/components';
-import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
+import { LabelComponentData } from '@/types/components/edgeLabels';
 import { GraphConnections } from '@/types/graphs';
+import { BoundingRect } from '@/types/layout';
 import { AnimationSettingsWithDefaults } from '@/types/settings';
 import { withMemoContext } from '@/utils/contexts';
 
 export type GraphComponentsContextType<V, E> = {
   connections: GraphConnections;
-  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
+  edgeLabelsData: Record<string, LabelComponentData<E>>;
   edgesData: Record<string, EdgeComponentData<V, E>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;

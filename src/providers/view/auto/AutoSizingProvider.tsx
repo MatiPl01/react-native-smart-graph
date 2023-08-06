@@ -9,18 +9,17 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useCanvasDataContext, useTransformContext } from '@/providers/canvas';
-import { AnimationSettingsWithDefaults } from '@/types/settings';
+import { useGraphViewDataContext } from '@/providers/view/data';
+import { useTransformContext } from '@/providers/view/transform';
+import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
 
 export type AutoSizingContextType = {
   autoSizingEnabled: SharedValue<boolean>;
   disableAutoSizing: () => void;
-  enableAutoSizing: (
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
-  ) => void;
+  enableAutoSizing: (animationSettings?: Maybe<AllAnimationSettings>) => void;
   enableAutoSizingAfterTimeout: (
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AllAnimationSettings>
   ) => void;
 };
 
@@ -59,7 +58,7 @@ export default function AutoSizingProvider({
     currentTranslation: { x: translateX, y: translateY },
     objectFit,
     padding
-  } = useCanvasDataContext();
+  } = useGraphViewDataContext();
   // Transform context values
   const { resetContainerPositionOnProgress } = useTransformContext();
 
@@ -71,7 +70,7 @@ export default function AutoSizingProvider({
   const autoSizingTransitionProgress = useSharedValue(1);
 
   const startAutoSizingTimeout = (
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AllAnimationSettings>
   ) => {
     autoSizingTimeoutRef.current = setTimeout(() => {
       enableAutoSizing(animationSettings);
@@ -85,9 +84,7 @@ export default function AutoSizingProvider({
     }
   };
 
-  const startAutoSizing = (
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
-  ) => {
+  const startAutoSizing = (animationSettings?: Maybe<AllAnimationSettings>) => {
     const animSettings =
       animationSettings === undefined
         ? DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
@@ -114,7 +111,7 @@ export default function AutoSizingProvider({
   };
 
   const enableAutoSizingAfterTimeout = (
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AllAnimationSettings>
   ) => {
     'worklet';
     if (objectFit.value === 'none') return;
@@ -123,7 +120,7 @@ export default function AutoSizingProvider({
   };
 
   const enableAutoSizing = (
-    animationSettings?: Maybe<AnimationSettingsWithDefaults>
+    animationSettings?: Maybe<AllAnimationSettings>
   ) => {
     'worklet';
     if (objectFit.value === 'none') return;
@@ -197,8 +194,7 @@ export default function AutoSizingProvider({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    <AutoSizingContext.Provider value={contextValue as any}>
+    <AutoSizingContext.Provider value={contextValue}>
       {children}
     </AutoSizingContext.Provider>
   );

@@ -1,13 +1,17 @@
-import DirectedEdge from '@/models/edges/DirectedEdge';
-import DirectedGraphVertex from '@/models/vertices/DirectedGraphVertex';
-import { Maybe } from '@/types/utils';
+import { DirectedEdge } from '@/models/edges';
+import { DirectedGraphVertex } from '@/models/vertices';
 import { DirectedEdgeData, VertexData } from '@/types/data';
-import { GraphConnections } from '@/types/graphs';
+import {
+  DirectedEdge as IDirectedEdge,
+  DirectedGraphVertex as IDirectedGraphVertex,
+  GraphConnections
+} from '@/types/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
@@ -18,8 +22,8 @@ import Graph from './Graph';
 export default class DirectedGraph<V = void, E = void> extends Graph<
   V,
   E,
-  DirectedGraphVertex<V, E>,
-  DirectedEdge<V, E>,
+  IDirectedGraphVertex<V, E>,
+  IDirectedEdge<V, E>,
   DirectedEdgeData<E>
 > {
   constructor(data?: {
@@ -110,7 +114,7 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
     { key, value }: VertexData<V>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange = true
-  ): DirectedGraphVertex<V, E> {
+  ): IDirectedGraphVertex<V, E> {
     return this.insertVertexObject(
       new DirectedGraphVertex<V, E>(key, value),
       animationSettings &&

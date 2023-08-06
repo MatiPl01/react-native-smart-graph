@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import { memo } from 'react';
 import {
   useAnimatedReaction,
@@ -5,11 +6,10 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import EdgeArrowComponent from '@/components/graphs/arrows/EdgeArrowComponent';
-import { DirectedStraightEdgeComponentProps } from '@/types/components/edges';
+import EdgeArrowComponent from '@/components/graphs/arrows/ArrowComponent';
+import { DirectedStraightEdgeComponentProps } from '@/types/components';
 import {
   addVectors,
-  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   calcUnitVector,
   multiplyVector,
@@ -33,11 +33,11 @@ function DirectedStraightEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   animationProgress,
-  componentSettings,
   edge,
   labelHeight,
   labelPosition,
   renderers,
+  settings,
   v1Position,
   v1Radius,
   v2Position,
@@ -60,19 +60,32 @@ function DirectedStraightEdgeComponent<V, E>({
 
   useAnimatedReaction(
     () => ({
+      arrowScale: settings.arrow.scale.value,
       edgesCount: animatedEdgesCount.value,
+      labelScale: settings.label.scale.value,
+      maxOffsetFactor: settings.edge.maxOffsetFactor.value,
       order: animatedOrder.value,
       r1: v1Radius.value,
       r2: v2Radius.value,
-      v1: animatedVectorCoordinatesToVector(v1Position),
-      v2: animatedVectorCoordinatesToVector(v2Position)
+      v1: { x: v1Position.x.value, y: v1Position.y.value },
+      v2: { x: v2Position.x.value, y: v2Position.y.value }
     }),
-    ({ edgesCount, order, r1, r2, v1, v2 }) => {
+    ({
+      arrowScale,
+      edgesCount,
+      labelScale,
+      maxOffsetFactor,
+      order,
+      r1,
+      r2,
+      v1,
+      v2
+    }) => {
       const calcOffset = calcTranslationOffset.bind(
         null,
         order,
         edgesCount,
-        componentSettings.edge.maxOffsetFactor
+        maxOffsetFactor
       );
 
       const p1Offset = calcOffset(r1);
@@ -92,20 +105,11 @@ function DirectedStraightEdgeComponent<V, E>({
       );
       // Update edge label max size
       const maxSize =
-        (componentSettings.edge.maxOffsetFactor * (r1 + r2)) /
-        (edgesCount > 0 ? edgesCount - 1 : 1);
+        (maxOffsetFactor * (r1 + r2)) / (edgesCount > 0 ? edgesCount - 1 : 1);
       const avgRadius = (r1 + r2) / 2;
-      if (componentSettings.label?.scale) {
-        labelHeight.value = Math.min(
-          maxSize,
-          componentSettings.label.scale * avgRadius
-        );
-      }
+      labelHeight.value = Math.min(maxSize, labelScale * avgRadius);
       // Update edge arrow max size
-      arrowWidth.value = Math.min(
-        maxSize,
-        componentSettings.arrow.scale * avgRadius
-      );
+      arrowWidth.value = Math.min(maxSize, arrowScale * avgRadius);
       // Update label position
       labelPosition.x.value = (p1.value.x + p2.value.x) / 2;
       labelPosition.y.value = (p1.value.y + p2.value.y) / 2;
@@ -127,13 +131,12 @@ function DirectedStraightEdgeComponent<V, E>({
         height={arrowHeight}
         renderer={renderers.arrow}
         tipPosition={arrowTipPosition}
-        vertexRadius={v2Radius}
         width={arrowWidth}
       />
     </>
   );
 }
 
-export default memo(DirectedStraightEdgeComponent) as <V, E>(
-  props: DirectedStraightEdgeComponentProps<V, E>
-) => JSX.Element;
+export default memo(
+  DirectedStraightEdgeComponent
+) as typeof DirectedStraightEdgeComponent;

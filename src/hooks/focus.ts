@@ -1,6 +1,6 @@
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
-import { FocusContextType } from '@/providers/canvas';
+import { FocusContextType } from '@/providers/view';
 
 export const useComponentFocus = (
   result: SharedValue<number>,

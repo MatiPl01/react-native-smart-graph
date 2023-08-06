@@ -1,7 +1,7 @@
 import {
   DirectedEdge,
   DirectedGraphVertex as IDirectedGraphVertex
-} from '@/types/graphs';
+} from '@/types/models';
 
 import Vertex from './Vertex';
 

@@ -2,14 +2,13 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedVectorCoordinates } from '@/types/layout';
-import { Edge } from '@/types/models/public/edge';
-import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
+import { AllAnimationSettings } from '@/types/settings';
 
-export type EdgeComponentData<V, E> = {
+export type EdgeComponentData<GE> = {
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings;
   displayed: SharedValue<boolean>;
-  edge: Edge<V, E>;
+  edge: GE;
   edgesCount: SharedValue<number>;
   labelHeight: SharedValue<number>;
   labelPosition: AnimatedVectorCoordinates;

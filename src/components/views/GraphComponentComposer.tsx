@@ -14,7 +14,7 @@ import {
   useFocusContext,
   useGesturesContext,
   useTransformContext
-} from '@/providers/canvas';
+} from '@/providers/view';
 import { CanvasContexts } from '@/providers/graph/contexts';
 import { GraphData } from '@/providers/graph/data/settings/utils';
 import GraphProvider from '@/providers/graph/GraphProvider';

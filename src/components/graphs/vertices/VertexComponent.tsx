@@ -3,27 +3,21 @@ import { memo, useEffect, useMemo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
-import { FocusContextType } from '@/providers/canvas';
-import { VertexComponentData, VertexRemoveHandler } from '@/types/components';
-import { VertexRendererProps, VertexRenderFunction } from '@/types/renderers';
-import { VertexSettingsWithDefaults } from '@/types/settings';
+import {
+  VertexComponentProps,
+  VertexRenderer,
+  VertexRendererProps
+} from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
-
-type VertexComponentProps<V, E> = VertexComponentData<V, E> & {
-  componentSettings: VertexSettingsWithDefaults;
-  focusContext: FocusContextType;
-  onRemove: VertexRemoveHandler;
-  renderer: VertexRenderFunction<V>;
-};
 
 function VertexComponent<V, E>({
   animationSettings,
-  componentSettings,
   displayed,
   focusContext,
   onRemove,
   removed,
   renderer,
+  settings,
   vertex,
   ...restProps
 }: VertexComponentProps<V, E>) {
@@ -45,14 +39,14 @@ function VertexComponent<V, E>({
   const rendererProps = useMemo<VertexRendererProps<V>>(
     () => ({
       ...restProps,
-      ...componentSettings,
+      ...settings,
       animationProgress,
       focusKey: focusContext.focus.key,
       focusProgress,
       key: vertex.key,
       value: vertex.value
     }),
-    [componentSettings, vertex]
+    [settings, vertex]
   );
 
   // Update current vertex focus progress based on the global
@@ -87,7 +81,7 @@ function VertexComponent<V, E>({
 
 type RenderedVertexComponentProps<V> = {
   props: VertexRendererProps<V>;
-  renderer: VertexRenderFunction<V>;
+  renderer: VertexRenderer<V>;
 };
 
 const RenderedVertexComponent = memo(function <V>({

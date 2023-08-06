@@ -1,7 +1,8 @@
+/* eslint-disable import/no-unused-modules */
 import { Path } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { CurvedEdgeRendererProps } from '@/types/renderers';
+import { CurvedEdgeRendererProps } from '@/types/components';
 
 export default function DefaultCurvedEdgeRenderer<E>({
   animationProgress,

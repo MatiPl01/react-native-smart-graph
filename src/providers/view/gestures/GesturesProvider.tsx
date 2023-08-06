@@ -11,10 +11,10 @@ import { DEFAULT_GESTURE_ANIMATION_SETTINGS } from '@/constants/animations';
 import {
   FocusStatus,
   useAutoSizingContext,
-  useCanvasDataContext,
   useFocusContext,
   useTransformContext
-} from '@/providers/canvas';
+} from '@/providers/view';
+import { useGraphViewDataContext } from '@/providers/view/data';
 import { Maybe } from '@/types/utils';
 import { averageVector } from '@/utils/vectors';
 
@@ -57,7 +57,7 @@ export default function GesturesProvider({
     maxScale,
     minScale,
     scales
-  } = useCanvasDataContext();
+  } = useGraphViewDataContext();
   // Transform context values
   const { getTranslateClamp, scaleContentTo } = useTransformContext();
   // Auto sizing context values

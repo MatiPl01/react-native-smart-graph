@@ -20,7 +20,7 @@ export type VertexRendererProps<V> = SharedRenderersProps & {
   focusProgress: SharedValue<number>;
   key: string;
   position: AnimatedVectorCoordinates;
-  radius: number;
+  radius: SharedValue<number>;
   scale: SharedValue<number>;
   value?: V;
 };
@@ -32,24 +32,22 @@ export type VertexRenderer<V> = (
 /*
  * EDGE
  */
-export type CurvedEdgeRendererProps<E> = SharedRenderersProps & {
-  key: string;
-  parabolaX: SharedValue<number>;
-  parabolaY: SharedValue<number>;
-  path: AnimatedPath;
-  value?: E;
-};
-
-export type CurvedEdgeRenderer<E> = (
-  props: CurvedEdgeRendererProps<E>
-) => JSX.Element | null;
-
 export type StraightEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
   p1: AnimatedVector;
   p2: AnimatedVector;
   value?: E;
 };
+
+export type CurvedEdgeRendererProps<E> = StraightEdgeRendererProps<E> & {
+  parabolaX: SharedValue<number>;
+  parabolaY: SharedValue<number>;
+  path: AnimatedPath;
+};
+
+export type CurvedEdgeRenderer<E> = (
+  props: CurvedEdgeRendererProps<E>
+) => JSX.Element | null;
 
 export type StraightEdgeRenderer<E> = (
   props: StraightEdgeRendererProps<E>
@@ -80,7 +78,6 @@ export type ArrowRendererProps = SharedRenderersProps & {
   height: SharedValue<number>;
   rotation: SharedValue<number>;
   tipPosition: AnimatedVector;
-  vertexRadius: SharedValue<number>;
   width: SharedValue<number>;
 };
 
@@ -120,3 +117,15 @@ export type DirectedGraphWithCurvedEdgeRenderers<V, E> =
   SharedDirectedGraphRenderers<V, E> & {
     edge: CurvedEdgeRenderer<E>;
   };
+
+export type UndirectedGraphRenderers<V, E> =
+  | UndirectedGraphWithCurvedEdgeRenderers<V, E>
+  | UndirectedGraphWithStraightEdgeRenderers<V, E>;
+
+export type DirectedGraphRenderers<V, E> =
+  | DirectedGraphWithCurvedEdgeRenderers<V, E>
+  | DirectedGraphWithStraightEdgeRenderers<V, E>;
+
+export type GraphRenderers<V, E> =
+  | DirectedGraphRenderers<V, E>
+  | UndirectedGraphRenderers<V, E>;

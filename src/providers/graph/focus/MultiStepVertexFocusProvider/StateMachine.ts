@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
-import { CanvasDataContextType, FocusContextType } from '@/providers/canvas';
+import { CanvasDataContextType, FocusContextType } from '@/providers/view';
 import { MultiStepFocusSettings } from '@/types/settings';
 import { isBetween } from '@/utils/math';
 

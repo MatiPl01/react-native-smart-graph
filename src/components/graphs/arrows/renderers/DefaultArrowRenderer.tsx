@@ -1,16 +1,17 @@
+/* eslint-disable import/no-unused-modules */
 import { Group, Vertices } from '@shopify/react-native-skia';
 import React from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { EdgeArrowRendererProps } from '@/types/renderers';
+import { ArrowRendererProps } from '@/types/components';
 
-export default function DefaultEdgeArrowRenderer({
+export default function DefaultArrowRenderer({
   animationProgress,
   centerPosition,
   height,
   rotation,
   width
-}: EdgeArrowRendererProps) {
+}: ArrowRendererProps) {
   const color = '#999';
   const colors = [color, color, color];
 

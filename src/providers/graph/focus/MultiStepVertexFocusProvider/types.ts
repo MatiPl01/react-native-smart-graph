@@ -1,6 +1,6 @@
 import { SharedValue } from 'react-native-reanimated';
 
-import { CanvasDataContextType, FocusContextType } from '@/providers/canvas';
+import { CanvasDataContextType, FocusContextType } from '@/providers/view';
 import { FocusStepData } from '@/types/focus';
 import { MultiStepFocusSettings } from '@/types/settings';
 

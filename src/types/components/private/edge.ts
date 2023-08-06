@@ -1,72 +1,104 @@
 /* eslint-disable import/no-unused-modules */
 import { SharedValue } from 'react-native-reanimated';
 
-import DirectedEdge from '@/models/edges/DirectedEdge';
 import {
   DirectedGraphWithCurvedEdgeRenderers,
-  DirectedGraphWithStraightEdgeRenderers
-} from '@/types/components/public/renderers';
-import { EdgeRemoveHandler } from '@/types/data/private/edge';
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
+  DirectedGraphWithStraightEdgeRenderers,
+  UndirectedGraphWithCurvedEdgeRenderers,
+  UndirectedGraphWithStraightEdgeRenderers
+} from '@/types/components/public';
+import { EdgeComponentData, EdgeRemoveHandler } from '@/types/data';
+import { DirectedEdge, UndirectedEdge } from '@/types/models';
+import {
+  AllArrowSettings,
+  AllCurvedEdgeSettings,
+  AllLabelSettings,
+  AllStraightEdgeSettings,
+  InternalDirectedCurvedEdgeSettings,
+  InternalDirectedStraightEdgeSettings,
+  InternalUndirectedCurvedEdgeSettings,
+  InternalUndirectedStraightEdgeSettings
+} from '@/types/settings';
+
+import {
+  AllDirectedGraphRenderers,
+  AllUndirectedGraphRenderers
+} from './renderers';
 
 type SharedEdgeComponentProps = {
   animatedEdgesCount: SharedValue<number>;
   animatedOrder: SharedValue<number>;
-  animationProgress: SharedValue<number>;
-  animationSettings: AllAnimationSettings;
-  labelHeight: SharedValue<number>;
-  labelPosition: AnimatedVectorCoordinates;
-  v1Position: AnimatedVectorCoordinates;
-  v1Radius: SharedValue<number>;
-  v2Position: AnimatedVectorCoordinates;
-  v2Radius: SharedValue<number>;
 };
 
 export type DirectedStraightEdgeComponentProps<V, E> =
   SharedEdgeComponentProps & {
-    edge: DirectedEdge<V, E>;
+    data: EdgeComponentData<DirectedEdge<V, E>>;
     renderers: DirectedGraphWithStraightEdgeRenderers<V, E>;
-    settings: {
-      // TODO
-    };
+    settings: InternalDirectedStraightEdgeSettings;
   };
 
 export type DirectedCurvedEdgeComponentProps<V, E> =
   SharedEdgeComponentProps & {
-    edge: DirectedEdge<V, E>;
+    data: EdgeComponentData<DirectedEdge<V, E>>;
     renderers: DirectedGraphWithCurvedEdgeRenderers<V, E>;
-    settings: {
-      // TODO
-    };
+    settings: InternalDirectedCurvedEdgeSettings;
   };
 
 export type UndirectedStraightEdgeComponentProps<V, E> =
   SharedEdgeComponentProps & {
-    edge: DirectedEdge<V, E>;
-    renderers: DirectedGraphWithStraightEdgeRenderers<V, E>;
-    settings: {
-      // TODO
-    };
+    data: EdgeComponentData<UndirectedEdge<V, E>>;
+    renderers: UndirectedGraphWithStraightEdgeRenderers<V, E>;
+    settings: InternalUndirectedStraightEdgeSettings;
   };
 
 export type UndirectedCurvedEdgeComponentProps<V, E> =
   SharedEdgeComponentProps & {
-    edge: DirectedEdge<V, E>;
-    renderers: DirectedGraphWithCurvedEdgeRenderers<V, E>;
-    settings: {
-      // TODO
-    };
+    data: EdgeComponentData<UndirectedEdge<V, E>>;
+    renderers: UndirectedGraphWithCurvedEdgeRenderers<V, E>;
+    settings: InternalUndirectedCurvedEdgeSettings;
   };
 
-export type EdgeComponentProps<V, E> = Omit<
+export type DirectedEdgeComponentProps<V, E> =
   | DirectedCurvedEdgeComponentProps<V, E>
-  | DirectedStraightEdgeComponentProps<V, E>
+  | DirectedStraightEdgeComponentProps<V, E>;
+
+export type UndirectedEdgeComponentProps<V, E> =
   | UndirectedCurvedEdgeComponentProps<V, E>
-  | UndirectedStraightEdgeComponentProps<V, E>,
-  'animatedEdgesCount' | 'animatedOrder'
-> & {
+  | UndirectedStraightEdgeComponentProps<V, E>;
+
+export type InnerEdgeComponentProps<V, E> =
+  | DirectedEdgeComponentProps<V, E>
+  | UndirectedEdgeComponentProps<V, E>;
+
+export type EdgeComponentProps<
+  V,
+  E,
+  P extends InnerEdgeComponentProps<V, E>
+> = Omit<P, 'animatedEdgesCount' | 'animatedOrder' | 'renderers'> & {
+  edgesCount: SharedValue<number>;
   onRemove: EdgeRemoveHandler;
   order: SharedValue<number>;
   removed: boolean;
+  renderers: P extends
+    | DirectedCurvedEdgeComponentProps<V, E>
+    | DirectedStraightEdgeComponentProps<V, E>
+    ? AllDirectedGraphRenderers<V, E>
+    : AllUndirectedGraphRenderers<V, E>;
+};
+
+export type GraphEdgesProps<
+  V,
+  E,
+  P extends InnerEdgeComponentProps<V, E>
+> = Omit<EdgeComponentProps<V, E, P>, 'renderers' | 'settings'> & {
+  arrowSettings: AllArrowSettings;
+  edgeSettings: P extends
+    | DirectedCurvedEdgeComponentProps<V, E>
+    | UndirectedCurvedEdgeComponentProps<V, E>
+    ? AllCurvedEdgeSettings
+    : AllStraightEdgeSettings;
+  edgesData: Record<string, P['data']>;
+  focusProgress: SharedValue<number>;
+  labelSettings: AllLabelSettings;
+  onRemove: EdgeRemoveHandler;
 };

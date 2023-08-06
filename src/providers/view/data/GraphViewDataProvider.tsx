@@ -6,9 +6,8 @@ import React, {
   useMemo
 } from 'react';
 
-import { GraphViewData } from '@/types/components/private/view';
-import { Spacing } from '@/types/layout';
-import { ObjectFit } from '@/types/views';
+import { GraphViewData } from '@/types/components';
+import { ObjectFit, Spacing } from '@/types/layout';
 
 import {
   clearContextValue,
@@ -16,32 +15,32 @@ import {
   updateContextValue
 } from './utils';
 
-const CanvasDataContext = createContext(null as unknown as object);
+const GraphViewDataContext = createContext(null as unknown as object);
 
-export const useCanvasDataContext = () => {
-  const contextValue = useContext(CanvasDataContext);
+export const useGraphViewDataContext = () => {
+  const contextValue = useContext(GraphViewDataContext);
 
   if (!contextValue) {
     throw new Error(
-      'useCanvasDataContext must be used within a CanvasDataProvider'
+      'useGraphViewDataContext must be used within a GraphViewDataProvider'
     );
   }
 
   return contextValue as GraphViewData;
 };
 
-export type CanvasDataProviderProps = PropsWithChildren<{
+export type GraphViewDataProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;
   initialScale?: number;
   objectFit?: ObjectFit;
   padding?: Spacing;
-  scales?: number[];
+  scales?: Array<number>;
 }>;
 
-export default function CanvasDataProvider({
+export default function GraphViewDataProvider({
   children,
   ...userSettings
-}: CanvasDataProviderProps) {
+}: GraphViewDataProviderProps) {
   const contextValue = useMemo(() => createContextValue(userSettings), []);
 
   useEffect(() => {
@@ -53,8 +52,8 @@ export default function CanvasDataProvider({
   }, [userSettings]);
 
   return (
-    <CanvasDataContext.Provider value={contextValue}>
+    <GraphViewDataContext.Provider value={contextValue}>
       {children}
-    </CanvasDataContext.Provider>
+    </GraphViewDataContext.Provider>
   );
 }
