@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import {
+  DefaultStraightEdgeRenderer,
   DirectedEdgeData,
   DirectedGraph,
   DirectedGraphComponent,
@@ -18,8 +19,8 @@ import {
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
 const GRAPH: {
-  edges: DirectedEdgeData[];
-  vertices: VertexData[];
+  edges: Array<DirectedEdgeData>;
+  vertices: Array<VertexData>;
 } = {
   edges: [
     { key: 'E1', from: 'V1', to: 'V2' },
@@ -98,6 +99,9 @@ export default function BottomSheetFocus() {
     <>
       <GraphView objectFit='contain'>
         <DirectedGraphComponent
+          renderers={{
+            edge: DefaultStraightEdgeRenderer
+          }}
           settings={{
             focus: {
               points: focusPoints,
@@ -109,6 +113,11 @@ export default function BottomSheetFocus() {
             placement: {
               strategy: 'orbits'
               // minVertexSpacing: 100
+            },
+            components: {
+              edge: {
+                type: 'curved'
+              }
             }
           }}
           graph={graph}

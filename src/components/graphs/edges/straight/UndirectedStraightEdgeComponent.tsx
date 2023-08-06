@@ -55,7 +55,7 @@ function UndirectedStraightEdgeComponent<V, E>({
   useAnimatedReaction(
     () => ({
       edgesCount: animatedEdgesCount.value,
-      labelScale: settings.label.scale.value,
+      labelScale: settings.label?.scale.value,
       maxOffsetFactor: settings.edge.maxOffsetFactor.value,
       order: animatedOrder.value,
       r1: v1Radius.value,
@@ -90,7 +90,9 @@ function UndirectedStraightEdgeComponent<V, E>({
       const maxSize =
         (maxOffsetFactor * (r1 + r2)) / (edgesCount > 0 ? edgesCount - 1 : 1);
       const avgRadius = (r1 + r2) / 2;
-      labelHeight.value = Math.min(maxSize, labelScale * avgRadius);
+      if (labelScale) {
+        labelHeight.value = Math.min(maxSize, labelScale * avgRadius);
+      }
       // Update label position
       labelPosition.x.value = (p1.value.x + p2.value.x) / 2;
       labelPosition.y.value = (p1.value.y + p2.value.y) / 2;

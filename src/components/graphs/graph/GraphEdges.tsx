@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { interpolate, useDerivedValue } from 'react-native-reanimated';
 
 import { EdgeComponent } from '@/components/graphs/edges';
+import { withComponentsData } from '@/providers/graph';
+import { withGraphSettings } from '@/providers/graph/data';
 import { GraphEdgesProps } from '@/types/components';
 
 function GraphEdges<V, E>({

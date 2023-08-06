@@ -11,30 +11,30 @@ import { GraphLayoutSettings } from './layout';
 import { GraphPlacementSettings } from './placement';
 
 type SharedGraphSettings<V> = {
-  animations: GraphAnimationsSettings;
+  animations?: GraphAnimationsSettings;
   events?: GraphEventsSettings<V>;
-  focus: MultiStepFocusSettings;
-  layout: GraphLayoutSettings;
-  placement: GraphPlacementSettings;
+  focus?: MultiStepFocusSettings;
+  layout?: GraphLayoutSettings;
+  placement?: GraphPlacementSettings;
 };
 
 export type UndirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components: UndirectedGraphWithStraightEdgesComponentsSettings;
+    components?: UndirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type UndirectedGraphWithCurvedEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components: UndirectedGraphWithCurvedEdgesComponentsSettings;
+    components?: UndirectedGraphWithCurvedEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components: DirectedGraphWithStraightEdgesComponentsSettings;
+    components?: DirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithCurvedEdgeSettings<V> = SharedGraphSettings<V> & {
-  components: DirectedGraphWithCurvedEdgesComponentsSettings;
+  components?: DirectedGraphWithCurvedEdgesComponentsSettings;
 };
 
 export type UndirectedGraphSettings<V> =

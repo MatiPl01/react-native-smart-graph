@@ -12,7 +12,7 @@ import {
 import { useGraphObserver } from '@/hooks';
 import { GraphComponentsData } from '@/types/components';
 import { EdgeRemoveHandler, VertexRemoveHandler } from '@/types/data';
-import { Edge, Graph } from '@/types/models';
+import { Graph } from '@/types/models';
 import { AllGraphAnimationsSettings } from '@/types/settings';
 import {
   cancelEdgeAnimations,
@@ -33,35 +33,28 @@ export const GraphComponentsDataContext = createContext(
 export const withComponentsData = <
   V,
   E,
-  GE extends Edge<V, E>,
   P extends object, // component props
   R extends Partial<P> // values returned by selector
 >(
   Component: React.ComponentType<P>,
-  selector: (contextValue: GraphComponentsData<V, E, GE>) => R
+  selector: (contextValue: GraphComponentsData<V, E>) => R
 ) =>
   withMemoContext(
     Component,
-    GraphComponentsDataContext as unknown as Context<
-      GraphComponentsData<V, E, GE>
-    >,
+    GraphComponentsDataContext as unknown as Context<GraphComponentsData<V, E>>,
     selector
   );
 
-type ComponentsDataProviderProps<
-  V,
-  E,
-  GE extends Edge<V, E>
-> = PropsWithChildren<{
-  graph: Graph<V, E, GE>;
+type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
+  graph: Graph<V, E>;
   graphAnimationsSettings: AllGraphAnimationsSettings;
   renderLabels: boolean;
 }>;
 
-function ComponentsDataProvider<V, E, GE extends Edge<V, E>>({
+function ComponentsDataProvider<V, E>({
   children,
   ...userSettings
-}: ComponentsDataProviderProps<V, E, GE>) {
+}: ComponentsDataProviderProps<V, E>) {
   // GRAPH OBSERVER
   const [state] = useGraphObserver(userSettings.graph);
 
@@ -83,9 +76,9 @@ function ComponentsDataProvider<V, E, GE extends Edge<V, E>>({
   });
 
   // COMPONENTS DATA
-  const [componentsData, setComponentsData] = useState<
-    ComponentsData<V, E, GE>
-  >(getComponentsData());
+  const [componentsData, setComponentsData] = useState<ComponentsData<V, E>>(
+    getComponentsData()
+  );
 
   // REMOVE HANDLERS
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {

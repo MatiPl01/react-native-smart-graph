@@ -69,12 +69,17 @@ function DirectedCurvedEdgeComponent<V, E>({
 
   // Edge label
   useAnimatedReaction(
-    () => ({
-      r1: v1Radius.value,
-      r2: v2Radius.value,
-      scale: settings.label.scale.value
-    }),
-    ({ r1, r2, scale }) => {
+    () =>
+      settings.label
+        ? {
+            r1: v1Radius.value,
+            r2: v2Radius.value,
+            scale: settings.label?.scale.value
+          }
+        : null,
+    data => {
+      if (!data) return;
+      const { r1, r2, scale } = data;
       labelHeight.value = ((r1 + r2) / 2) * scale;
     }
   );

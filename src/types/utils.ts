@@ -25,12 +25,14 @@ export type DeepSharedify<T> = {
   [K in keyof T]: T[K] extends object ? DeepSharedify<T[K]> : SharedValue<T[K]>;
 };
 
-export type DeepUnsharedify<T> = T extends undefined
-  ? undefined
-  : T extends SharedValue<infer U> | undefined
-  ? DeepUnsharedify<U> | undefined
-  : T extends object
-  ? { [K in keyof T]: DeepUnsharedify<T[K]> }
+export type DeepUnsharedify<T> = T extends object
+  ? {
+      [K in keyof T]: T[K] extends SharedValue<infer U>
+        ? U
+        : T[K] extends object | undefined
+        ? DeepUnsharedify<T[K]>
+        : T[K];
+    }
   : T;
 
 type UnwrapSharedValue<T> = T extends SharedValue<infer U> ? U : T;

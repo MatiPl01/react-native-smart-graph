@@ -12,7 +12,6 @@ import {
 } from '@/constants/animations';
 import { AllGraphSettingsData } from '@/types/components';
 import { GraphData } from '@/types/data';
-import { Edge } from '@/types/models';
 import {
   AllArrowSettings,
   AllCurvedEdgeSettings,
@@ -158,8 +157,8 @@ const DEFAULT_ANIMATIONS_SETTINGS: AllGraphAnimationsSettings = {
   vertices: DEFAULT_ANIMATION_SETTINGS
 };
 
-export const getDefaultSettings = <V, E, ED extends Edge<V, E>>(
-  data: GraphData<V, E, ED>
+export const getDefaultConfig = <V, E>(
+  data: GraphData<V, E>
 ): Omit<AllGraphSettingsData<V, E>, 'graph'> => ({
   renderers: {
     arrow: data.graph.isDirected() ? DefaultArrowRenderer : undefined,

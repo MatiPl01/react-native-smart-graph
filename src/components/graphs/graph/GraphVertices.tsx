@@ -1,6 +1,5 @@
 import { VertexComponent } from '@/components/graphs/vertices';
-import { withComponentsData } from '@/providers/graph';
-import { withGraphSettings } from '@/providers/graph/data/settings/context';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesProps } from '@/types/components';
 
 function GraphVertices<V, E>({

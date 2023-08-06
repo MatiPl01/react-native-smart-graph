@@ -1,4 +1,3 @@
-export {
-  type ComponentsDataContextType,
-  withComponentsData
-} from './data/settings/GraphSettingsProvider';
+export * from './contexts';
+export * from './data';
+export { default as GraphProvider } from './GraphProvider';

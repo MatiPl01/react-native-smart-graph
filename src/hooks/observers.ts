@@ -14,18 +14,18 @@ import {
 } from '@/types/settings';
 import { deepMerge } from '@/utils/objects';
 
-export type GraphState<V, E, GE> = {
+export type GraphState<V, E> = {
   animationsSettings: GraphModificationAnimationsSettings;
   edges: Array<Edge<V, E>>;
-  orderedEdges: OrderedEdges<GE>;
+  orderedEdges: OrderedEdges<V, E>;
   vertices: Array<Vertex<V, E>>;
 };
 
-export const useGraphObserver = <V, E, GE extends Edge<V, E>>(
-  graph: Graph<V, E, GE>,
+export const useGraphObserver = <V, E>(
+  graph: Graph<V, E>,
   active = true
-): [GraphState<V, E, GE>, (isActive: boolean) => void] => {
-  const [state, setState] = useState<GraphState<V, E, GE>>({
+): [GraphState<V, E>, (isActive: boolean) => void] => {
+  const [state, setState] = useState<GraphState<V, E>>({
     animationsSettings: {
       edges: {},
       vertices: {}
@@ -80,8 +80,8 @@ type FocusState = {
   settings: AllFocusSettings;
 };
 
-export const useFocusObserver = <V, E, GE extends Edge<V, E>>(
-  graph: Graph<V, E, GE>,
+export const useFocusObserver = <V, E>(
+  graph: Graph<V, E>,
   active = true
 ): [FocusState, (isActive: boolean) => void] => {
   const [state, setState] = useState<FocusState>({

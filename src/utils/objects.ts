@@ -326,7 +326,7 @@ export const updateValues = <
 
   // Return the result if it was modified, otherwise return the current settings
   // (if modified in place, the current settings will be returned)
-  return isModified ? result : settings.current!;
+  return (isModified ? result : settings.current!) as SharedifyBy<D & N, K>;
 };
 
 export const createKeySet = <O extends Record<string, any>>(

@@ -1,31 +1,28 @@
-import {
-  DirectedEdgeData,
-  UndirectedEdgeData,
-  VertexData
-} from '@/types/data/public';
-import { Edge, OrderedEdges } from '@/types/models/public/edge';
-import { GraphObserver } from '@/types/models/public/observer';
-import { Vertex, VertexConnections } from '@/types/models/public/vertex';
+import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
+  FocusSettings,
   SingleModificationAnimationSettings
-} from '@/types/settings/public/graph/animations';
-import { FocusSettings } from '@/types/settings/public/graph/focus';
+} from '@/types/settings';
 import { Maybe } from '@/types/utils';
 
+import { Edge, OrderedEdges } from './edge';
+import { GraphObserver } from './observer';
+import { Vertex, VertexConnections } from './vertex';
+
 /* eslint-disable import/no-unused-modules */
-export interface Graph<V, E, GE extends Edge<V, E>> {
+export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
   blur(settings?: Maybe<AnimationSettings>): void;
   clear(animationSettings?: Maybe<BatchModificationAnimationSettings>): void;
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
-  get edges(): Array<GE>;
-  get orderedEdges(): OrderedEdges<GE>;
+  get edges(): Array<Edge<V, E>>;
+  get orderedEdges(): OrderedEdges<V, E>;
   get vertices(): Array<Vertex<V, E>>;
-  getEdge(key: string): GE | null;
-  getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE>;
+  getEdge(key: string): Edge<V, E> | null;
+  getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<V, E>>;
   getVertex(key: string): Vertex<V, E> | null;
   hasEdge(key: string): boolean;
   hasVertex(key: string): boolean;
@@ -41,7 +38,7 @@ export interface Graph<V, E, GE extends Edge<V, E>> {
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange?: boolean
-  ): GE;
+  ): Edge<V, E>;
   insertVertex(
     data: VertexData<V>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,

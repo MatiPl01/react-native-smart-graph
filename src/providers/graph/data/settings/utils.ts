@@ -4,8 +4,11 @@
 import {
   DEFAULT_COMPONENTS_SETTINGS,
   DEFAULT_LAYOUT_SETTINGS,
-  DEFAULT_PLACEMENT_SETTINGS
+  DEFAULT_PLACEMENT_SETTINGS,
+  getDefaultConfig
 } from '@/configs/graph';
+import { GraphSettingsData } from '@/types/components';
+import { GraphData } from '@/types/data';
 import { cancelAnimations } from '@/utils/animations';
 import { createKeySet, deepMerge, updateValues } from '@/utils/objects';
 
@@ -24,7 +27,7 @@ const SHARED_KEYS = {
   focus: new Set(['disableGestures', 'points', 'progress']),
   layout: {
     auto: createKeySet(DEFAULT_LAYOUT_SETTINGS.auto, ['type']),
-    forces: createKeySet(DEFAULT_LAYOUT_SETTINGS.force, ['type'])
+    force: createKeySet(DEFAULT_LAYOUT_SETTINGS.force, ['type'])
   },
   placement: {
     circle: createKeySet(DEFAULT_PLACEMENT_SETTINGS.circle),
@@ -41,121 +44,111 @@ const SHARED_KEYS = {
 
 export const updateContextValue = <V, E>(
   data: GraphData<V, E>,
-  value?: GraphSettingsContextType<V, E>
-): GraphSettingsContextType<V, E> => {
+  value?: GraphSettingsData<V, E>
+): GraphSettingsData<V, E> => {
+  const { graph, renderers, settings } = data;
   // DEFAULTS
-  const defaultGraphRenderers = getDefaultGraphRenderers<V, E>(settings);
-  const defaultLayoutSettings =
-    DEFAULT_LAYOUT_SETTINGS[
-      settings?.layout?.type ?? DEFAULT_GRAPH_SETTINGS.layout.type
-    ];
-  const defaultPlacementSettings =
-    settings?.placement?.strategy === 'random'
-      ? DEFAULT_RANDOM_PLACEMENT_SETTINGS[settings.placement?.mesh ?? 'grid']
-      : DEFAULT_PLACEMENT_SETTINGS[
-          settings?.placement?.strategy ??
-            DEFAULT_GRAPH_SETTINGS.placement.strategy
-        ];
-  const sharedPlacementKeys =
-    defaultPlacementSettings.strategy === 'random'
-      ? SHARED_KEYS.placement[defaultPlacementSettings.strategy][
-          defaultPlacementSettings.mesh ?? 'grid'
+  const { renderers: defaultRenderers, settings: defaultSettings } =
+    getDefaultConfig(data);
+
+  const placementSharedKeys =
+    defaultSettings.placement.strategy === 'random'
+      ? SHARED_KEYS.placement[defaultSettings.placement.strategy][
+          defaultSettings.placement.mesh
         ]
-      : SHARED_KEYS.placement[defaultPlacementSettings.strategy];
-
-  // RENDERERS
-  const newRenderers = updateValues({
-    current: value?.renderers,
-    default: defaultGraphRenderers,
-    new: renderers
-  });
-
-  // SETTINGS
-  const newArrowComponentSettings = updateValues(
-    {
-      default: DEFAULT_GRAPH_SETTINGS.components.arrow,
-      new: (settings as DirectedGraphSettings<V>)?.components?.arrow
-    },
-    SHARED_KEYS.components.arrow
-  );
-  const newEdgeComponentSettings = updateValues(
-    {
-      default: DEFAULT_GRAPH_SETTINGS.components.edge,
-      new: settings?.components?.edge
-    },
-    SHARED_KEYS.components.edge
-  );
-  const newLabelComponentSettings = updateValues(
-    {
-      default: DEFAULT_GRAPH_SETTINGS.components.label,
-      new: settings?.components?.label
-    },
-    SHARED_KEYS.components.label
-  );
-  const newVertexComponentSettings = updateValues(
-    {
-      default: DEFAULT_GRAPH_SETTINGS.components.vertex,
-      new: settings?.components?.vertex
-    },
-    SHARED_KEYS.components.vertex
-  );
-  const newSettings = updateValues({
-    current: value?.settings,
-    new: {
-      animations: value?.settings?.animations
-        ? deepMerge(
-            value?.settings?.animations,
-            DEFAULT_GRAPH_SETTINGS.animations,
-            settings?.animations
-          )
-        : deepMerge(DEFAULT_GRAPH_SETTINGS.animations, settings?.animations),
-      components: updateValues({
-        current: value?.settings?.components,
-        new: {
-          arrow: newArrowComponentSettings,
-          edge: newEdgeComponentSettings,
-          label: newLabelComponentSettings,
-          vertex: newVertexComponentSettings
-        }
-      }),
-      events: updateValues({
-        current: value?.settings?.events,
-        new: settings?.events
-      }),
-      layout: updateValues(
-        {
-          current: value?.settings?.layout,
-          default: defaultLayoutSettings,
-          new: settings?.layout
-        },
-        SHARED_KEYS.layout[defaultLayoutSettings.type]
-      ),
-      placement: updateValues(
-        {
-          current: value?.settings?.placement,
-          default: defaultPlacementSettings,
-          new: settings?.placement
-        },
-        sharedPlacementKeys as Set<any>
-      )
-    }
-  });
+      : SHARED_KEYS.placement[defaultSettings.placement.strategy];
 
   // CONTEXT VALUE
   return updateValues({
     current: value,
     new: {
       graph,
-      renderers: newRenderers,
-      settings: newSettings
+      renderers: updateValues({
+        current: value?.renderers,
+        default: defaultRenderers,
+        new: renderers
+      }),
+      settings: updateValues({
+        current: value?.settings,
+        new: {
+          animations: value?.settings?.animations
+            ? // Ty to re-use existing animations settings
+              deepMerge(
+                value?.settings?.animations,
+                defaultSettings.animations,
+                settings?.animations
+              )
+            : // Otherwise, merge default animations settings with user settings
+              deepMerge(defaultSettings.animations, settings?.animations),
+          components: updateValues({
+            current: value?.settings?.components,
+            new: {
+              arrow: updateValues(
+                // TODO - fix type
+                {
+                  current: value?.settings?.components?.arrow,
+                  default: defaultSettings.components.arrow,
+                  new: settings?.components?.arrow
+                },
+                SHARED_KEYS.components.arrow
+              ),
+              edge: updateValues(
+                {
+                  current: value?.settings?.components?.edge,
+                  default: defaultSettings.components.edge,
+                  new: settings?.components?.edge
+                },
+                SHARED_KEYS.components.edge[
+                  defaultSettings.components.edge.type
+                ] // TODO - fix type
+              ),
+              label: updateValues(
+                {
+                  current: value?.settings?.components?.label,
+                  default: defaultSettings.components.label,
+                  new: settings?.components?.label
+                },
+                SHARED_KEYS.components.label
+              ),
+              vertex: updateValues(
+                {
+                  current: value?.settings?.components?.vertex,
+                  default: defaultSettings.components.vertex,
+                  new: settings?.components?.vertex
+                },
+                SHARED_KEYS.components.vertex
+              )
+            }
+          }),
+          events: updateValues({
+            current: value?.settings?.events,
+            new: settings?.events
+          }),
+          layout: updateValues(
+            {
+              current: value?.settings?.layout,
+              default: defaultSettings.layout,
+              new: settings?.layout
+            },
+            SHARED_KEYS.layout[defaultSettings.layout.type]
+          ),
+          placement: updateValues(
+            {
+              current: value?.settings?.placement,
+              default: defaultSettings.placement,
+              new: settings?.placement // TODO - fix type
+            },
+            placementSharedKeys
+          )
+        }
+      })
     }
   });
 };
 
 export const createContextValue = <V, E>(
   data: GraphData<V, E>
-): GraphSettingsContextType<V, E> => updateContextValue(data);
+): GraphSettingsData<V, E> => updateContextValue(data);
 
-export const clearContextValue = <V, E>(
-  value: GraphSettingsContextType<V, E>
-): void => cancelAnimations(value);
+export const clearContextValue = <V, E>(value: GraphSettingsData<V, E>): void =>
+  cancelAnimations(value);

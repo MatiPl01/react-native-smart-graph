@@ -2,7 +2,7 @@ import { Circle, Rect } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { withComponentsData } from '@/providers/graph/data/components/context';
+import { withComponentsData } from '@/providers/graph';
 import { VertexComponentData } from '@/types/data';
 import { AnimatedBoundingRect } from '@/types/layout';
 

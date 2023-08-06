@@ -2,7 +2,6 @@ export * from './arrows';
 export { default as DirectedGraphComponent } from './DirectedGraphComponent';
 export * from './edges';
 export * from './graph';
-export { default as GraphComponent } from './graph/GraphComponent';
 export * from './labels';
 export { default as UndirectedGraphComponent } from './UndirectedGraphComponent';
 export * from './vertices';

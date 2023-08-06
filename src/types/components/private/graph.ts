@@ -15,7 +15,7 @@ import {
   VertexRemoveHandler
 } from '@/types/data';
 import { BoundingRect } from '@/types/layout';
-import { Edge, GraphConnections } from '@/types/models';
+import { GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   AllGraphAnimationsSettings,
@@ -60,10 +60,10 @@ export type UndirectedGraphComponentProps<
   settings?: S;
 };
 
-export type GraphComponentsData<V, E, GE extends Edge<V, E>> = {
+export type GraphComponentsData<V, E> = {
   connections: GraphConnections;
   edgeLabelsData: Record<string, LabelComponentData<E>>;
-  edgesData: Record<string, EdgeComponentData<GE>>;
+  edgesData: Record<string, EdgeComponentData<V, E>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
   isGraphDirected: SharedValue<boolean>;

@@ -22,8 +22,8 @@ export interface UndirectedEdge<V, E> extends Edge<V, E> {
   get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>];
 }
 
-export type OrderedEdges<GE> = Array<{
-  edge: GE;
+export type OrderedEdges<V = void, E = void> = Array<{
+  edge: Edge<V, E>;
   edgesCount: number;
   order: number;
 }>;

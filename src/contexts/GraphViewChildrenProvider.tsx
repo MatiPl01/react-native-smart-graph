@@ -12,7 +12,7 @@ import React, {
 import {
   DirectedGraphComponentProps,
   UndirectedGraphComponentProps
-} from '@/components/graphs';
+} from '@/types/components';
 import { deepMemoComparator } from '@/utils/objects';
 
 type GraphViewChildrenContextType<

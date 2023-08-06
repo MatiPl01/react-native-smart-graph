@@ -64,7 +64,7 @@ function DirectedStraightEdgeComponent<V, E>({
     () => ({
       arrowScale: settings.arrow.scale.value,
       edgesCount: animatedEdgesCount.value,
-      labelScale: settings.label.scale.value,
+      labelScale: settings.label?.scale.value,
       maxOffsetFactor: settings.edge.maxOffsetFactor.value,
       order: animatedOrder.value,
       r1: v1Radius.value,
@@ -109,7 +109,9 @@ function DirectedStraightEdgeComponent<V, E>({
       const maxSize =
         (maxOffsetFactor * (r1 + r2)) / (edgesCount > 0 ? edgesCount - 1 : 1);
       const avgRadius = (r1 + r2) / 2;
-      labelHeight.value = Math.min(maxSize, labelScale * avgRadius);
+      if (labelScale) {
+        labelHeight.value = Math.min(maxSize, labelScale * avgRadius);
+      }
       // Update edge arrow max size
       arrowWidth.value = Math.min(maxSize, arrowScale * avgRadius);
       // Update label position

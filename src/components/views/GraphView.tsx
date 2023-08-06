@@ -1,10 +1,14 @@
-import { PropsWithChildren, useMemo } from 'react';
-import { View } from 'react-native';
+import { memo, PropsWithChildren, useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { DEFAULT_VIEW_SETTINGS } from '@/configs/view';
-import GraphViewChildrenProvider from '@/contexts/GraphViewChildrenProvider';
-import CanvasProvider from '@/providers/view';
-import { GraphViewSettings } from '@/types/settings/public/view';
+import GraphViewChildrenProvider, {
+  useGraphViewChildrenContext
+} from '@/contexts/GraphViewChildrenProvider';
+import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
+import CanvasProvider, { useGesturesContext } from '@/providers/view';
+import { GraphViewSettings } from '@/types/settings';
+import { deepMemoComparator } from '@/utils/objects';
 
 type GraphViewProps = PropsWithChildren<GraphViewSettings>;
 

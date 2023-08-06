@@ -11,7 +11,6 @@ import {
 import { StyleSheet, View } from 'react-native';
 import { ComposedGesture, GestureDetector } from 'react-native-gesture-handler';
 
-import { DataProviderReturnType } from '@/types/data';
 import { withMemoContext } from '@/utils/contexts';
 
 export type AccessibleOverlayContextType = {
@@ -94,8 +93,7 @@ export function OverlayOutlet({ gestureHandler }: OverlayOutletProps) {
 }
 
 export const withOverlay = <
-  P extends object, // component props
-  R extends Partial<P> // values returned by selector
+  P extends object // component props
 >(
   Component: ComponentType<P>
 ) =>
@@ -108,4 +106,4 @@ export const withOverlay = <
         renderLayer
       };
     }
-  ) as unknown as DataProviderReturnType<P, R>;
+  );

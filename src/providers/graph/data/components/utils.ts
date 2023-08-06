@@ -9,7 +9,7 @@ import {
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/data';
-import { Edge, GraphConnections, OrderedEdges, Vertex } from '@/types/models';
+import { GraphConnections, OrderedEdges, Vertex } from '@/types/models';
 import {
   AllAnimationSettings,
   AllGraphAnimationsSettings,
@@ -18,7 +18,7 @@ import {
 import { PartialWithRequired } from '@/types/utils';
 import { deepMerge, updateValues } from '@/utils/objects';
 
-export type ComponentsData<V, E, GE> = {
+export type ComponentsData<V, E> = {
   connections: GraphConnections;
   graphAnimationsSettings: AllGraphAnimationsSettings;
   isGraphDirected: boolean;
@@ -29,28 +29,28 @@ export type ComponentsData<V, E, GE> = {
   // has been completed and vertices are waiting to be unmounted
   removedVertices: Set<string>;
   renderLabels: boolean;
-  state: GraphState<V, E, GE>;
+  state: GraphState<V, E>;
 };
 
-export const createContextValue = <V, E, GE extends Edge<V, E>>(
-  data: ComponentsData<V, E, GE>,
+export const createContextValue = <V, E>(
+  data: ComponentsData<V, E>,
   removeHandlers: {
     handleEdgeRemove: EdgeRemoveHandler;
     handleVertexRemove: VertexRemoveHandler;
   }
-): GraphComponentsData<V, E, GE> => updateContextValue(removeHandlers, data);
+): GraphComponentsData<V, E> => updateContextValue(removeHandlers, data);
 
 const sharedKeys = ['isGraphDirected', 'targetBoundingRect'] as const;
 const SHARED_KEYS = new Set(sharedKeys);
 
-export const updateContextValue = <V, E, GE extends Edge<V, E>>(
+export const updateContextValue = <V, E>(
   value: PartialWithRequired<
-    GraphComponentsData<V, E, GE>,
+    GraphComponentsData<V, E>,
     'handleEdgeRemove' | 'handleVertexRemove'
   >,
-  newData: ComponentsData<V, E, GE>,
-  currentData?: ComponentsData<V, E, GE>
-): GraphComponentsData<V, E, GE> => {
+  newData: ComponentsData<V, E>,
+  currentData?: ComponentsData<V, E>
+): GraphComponentsData<V, E> => {
   const currentLayoutAnimationSettings = value?.layoutAnimationSettings;
   const newLayoutAnimationSettings = currentLayoutAnimationSettings
     ? deepMerge(
@@ -204,14 +204,14 @@ const updateGraphVerticesData = <V, E>(
   return isModified ? updatedVerticesData : oldVerticesData;
 };
 
-const updateGraphEdgesData = <V, E, GE extends Edge<V, E>>(
-  oldEdgesData: Record<string, EdgeComponentData<GE>>,
-  currentEdges: OrderedEdges<GE>,
+const updateGraphEdgesData = <V, E>(
+  oldEdgesData: Record<string, EdgeComponentData<V, E>>,
+  currentEdges: OrderedEdges<V, E>,
   verticesData: Record<string, VertexComponentData<V, E>>,
   removedEdges: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AllAnimationSettings
-): Record<string, EdgeComponentData<GE>> => {
+): Record<string, EdgeComponentData<V, E>> => {
   const updatedEdgesData = { ...oldEdgesData };
   let isModified = false; // Flag to indicate if edges data was updated
 
@@ -301,9 +301,9 @@ const updateGraphEdgesData = <V, E, GE extends Edge<V, E>>(
   return isModified ? updatedEdgesData : oldEdgesData;
 };
 
-const updateGraphEdgeLabelsData = <V, E, GE extends Edge<V, E>>(
+const updateGraphEdgeLabelsData = <V, E>(
   oldEdgeLabelsData: Record<string, LabelComponentData<E>>,
-  edgesData: Record<string, EdgeComponentData<GE>>
+  edgesData: Record<string, EdgeComponentData<V, E>>
 ): Record<string, LabelComponentData<E>> => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
   let isModified = false; // Flag to indicate if edges data was updated

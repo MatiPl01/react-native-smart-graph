@@ -8,16 +8,15 @@ import {
   AccessibleOverlayContextType,
   withOverlay
 } from '@/contexts/OverlayProvider';
+import { CanvasContexts, GraphProvider } from '@/providers/graph';
 import {
   useAutoSizingContext,
-  useCanvasDataContext,
   useFocusContext,
   useGesturesContext,
-  useTransformContext
+  useTransformContext,
+  useViewDataContext
 } from '@/providers/view';
-import { CanvasContexts } from '@/providers/graph/contexts';
-import { GraphData } from '@/providers/graph/data/settings/utils';
-import GraphProvider from '@/providers/graph/GraphProvider';
+import { GraphData } from '@/types/data';
 
 const validateProps = <V, E>(props: GraphData<V, E>) => {
   // TODO - add more validations
@@ -52,7 +51,7 @@ function GraphComponentComposer<V, E>({
   const graphProps = restProps;
   validateProps<V, E>(graphProps);
   // CONTEXTS
-  const dataContext = useCanvasDataContext();
+  const dataContext = useViewDataContext();
   const transformContext = useTransformContext();
   const autoSizingContext = useAutoSizingContext();
   const focusContext = useFocusContext();
@@ -86,9 +85,7 @@ function GraphComponentComposer<V, E>({
       onLayout={transformContext.handleCanvasRender}
       style={styles.canvas}>
       <Group transform={canvasTransform}>
-        <GraphProvider<V, E>
-          canvasContexts={canvasContexts}
-          graphProps={graphProps}>
+        <GraphProvider canvasContexts={canvasContexts} graphProps={graphProps}>
           {graphComponent}
         </GraphProvider>
       </Group>

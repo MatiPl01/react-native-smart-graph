@@ -2,8 +2,7 @@ import { Group } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
 import { LabelComponent } from '@/components/graphs/labels';
-import { withComponentsData } from '@/providers/graph/data/components/context';
-import { withGraphSettings } from '@/providers/graph/data/settings/context';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { LabelRenderer } from '@/types/components';
 import { LabelComponentData } from '@/types/data';
 
@@ -18,20 +17,13 @@ function GraphEdgeLabels<E>({
   focusProgress,
   renderer
 }: GraphEdgeLabelsProps<E>) {
-  return (
+  return renderer ? (
     <Group opacity={focusProgress}>
-      {Object.entries(edgeLabelsData).map(([key, data]) =>
-        renderer ? (
-          <LabelComponent
-            edgeKey={key}
-            key={key}
-            {...data}
-            renderer={renderer}
-          />
-        ) : null
-      )}
+      {Object.entries(edgeLabelsData).map(([key, data]) => (
+        <LabelComponent edgeKey={key} key={key} {...data} renderer={renderer} />
+      ))}
     </Group>
-  );
+  ) : null;
 }
 
 export default withGraphSettings(

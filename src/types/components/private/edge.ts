@@ -19,8 +19,6 @@ import {
   InternalUndirectedStraightEdgeSettings
 } from '@/types/settings';
 
-import { AllGraphRenderers } from './renderers';
-
 type SharedEdgeComponentProps = {
   animatedEdgesCount: SharedValue<number>;
   animatedOrder: SharedValue<number>;
@@ -68,20 +66,19 @@ export type InnerEdgeComponentProps<V, E> =
 
 export type EdgeComponentProps<V, E> = Omit<
   InnerEdgeComponentProps<V, E>,
-  'animatedEdgesCount' | 'animatedOrder' | 'renderers'
+  'animatedEdgesCount' | 'animatedOrder'
 > & {
   edgesCount: SharedValue<number>;
   onRemove: EdgeRemoveHandler;
   order: SharedValue<number>;
   removed: boolean;
-  renderers: AllGraphRenderers<V, E>;
 };
 
 export type GraphEdgesProps<V, E> = Omit<
   EdgeComponentProps<V, E>,
   'renderers' | 'settings'
 > & {
-  arrowSettings: AllArrowSettings;
+  arrowSettings: Internalgracomse;
   edgeSettings: AllEdgeSettings;
   edgesData:
     | Record<string, EdgeComponentData<DirectedEdge<V, E>>>
