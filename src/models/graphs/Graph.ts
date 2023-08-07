@@ -48,6 +48,19 @@ export default abstract class Graph<
   > = {};
   protected readonly vertices$: Record<string, GV> = {};
 
+  private invalidateEdgesCache(): void {
+    // Invalidate cached edges data
+    this.cachedEdges = null;
+    this.cachedOrderedEdges = null;
+    this.cachedConnections = null;
+  }
+
+  private invalidateVerticesCache(): void {
+    // Invalidate cached vertices data
+    this.cachedVertices = null;
+    this.cachedConnections = null;
+  }
+
   addObserver(observer: GraphObserver): void {
     this.observers.add(observer);
     // Notify about last changes
@@ -144,11 +157,6 @@ export default abstract class Graph<
     animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): GE {
-    // Invalidate cached edges data
-    this.cachedEdges = null;
-    this.cachedOrderedEdges = null;
-    this.cachedConnections = null;
-
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
@@ -170,6 +178,7 @@ export default abstract class Graph<
     this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
     // Add edge to edges
     this.edges$[edge.key] = edge;
+    this.invalidateEdgesCache();
     if (notifyChange) this.notifyGraphChange(animationsSettings);
     return edge;
   }
@@ -179,14 +188,11 @@ export default abstract class Graph<
     animationSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): GV {
-    // Invalidate cached vertices data
-    this.cachedVertices = null;
-    this.cachedConnections = null;
-
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
+    this.invalidateVerticesCache();
     if (notifyChange) this.notifyGraphChange(animationSettings);
     return vertex;
   }
@@ -293,6 +299,7 @@ export default abstract class Graph<
     }
     // Remove the edge from edges
     delete this.edges$[edge.key];
+    this.invalidateEdgesCache();
     if (notifyChange) this.notifyGraphChange(animationsSettings);
   }
 
@@ -320,6 +327,7 @@ export default abstract class Graph<
       this.removeEdge(edgeKey, null, false);
     }
     delete this.vertices$[key];
+    this.invalidateVerticesCache();
     if (notifyChange) {
       this.notifyGraphChange(
         animationSettings &&

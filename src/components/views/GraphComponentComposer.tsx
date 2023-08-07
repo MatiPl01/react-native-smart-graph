@@ -72,6 +72,7 @@ function GraphComponentComposer<V, E>({
     []
   );
 
+  // IMPORTANT: graphComponent must be memoized to prevent re-rendering
   const canvasContexts = useMemo<CanvasContexts>(
     () => ({
       autoSizingContext,
@@ -87,7 +88,8 @@ function GraphComponentComposer<V, E>({
     []
   );
 
-  console.log(graphProps.settings?.components);
+  // IMPORTANT: graphComponent must be memoized to prevent re-rendering
+  const graphComponent = useMemo(() => <GraphComponent />, []);
 
   return (
     <Canvas
@@ -98,7 +100,7 @@ function GraphComponentComposer<V, E>({
           canvasContexts={canvasContexts}
           graphProps={graphProps}
           transform={animatedTransform}>
-          <GraphComponent />
+          {graphComponent}
         </GraphProvider>
       </Group>
     </Canvas>

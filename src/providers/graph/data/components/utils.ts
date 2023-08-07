@@ -16,6 +16,10 @@ import {
   AnimationSettings
 } from '@/types/settings';
 import { PartialWithRequired } from '@/types/utils';
+import {
+  cancelEdgeAnimations,
+  cancelVertexAnimations
+} from '@/utils/animations';
 import { deepMerge, updateValues } from '@/utils/objects';
 
 export type ComponentsData<V, E> = {
@@ -197,6 +201,8 @@ const updateGraphVerticesData = <V, E>(
   // Remove vertices from vertices data if their removal animation is finished
   // and they weren't added back to the graph model
   for (const key of removedVertices) {
+    const vertexData = updatedVerticesData[key];
+    if (vertexData) cancelVertexAnimations(vertexData);
     delete updatedVerticesData[key];
     removedVertices.delete(key);
   }
@@ -294,6 +300,8 @@ const updateGraphEdgesData = <V, E>(
   // Remove edges from edges data if their removal animation is finished
   // and they weren't added back to the graph model
   for (const key of removedEdges) {
+    const edgeData = updatedEdgesData[key];
+    if (edgeData) cancelEdgeAnimations(edgeData);
     delete updatedEdgesData[key];
     removedEdges.delete(key);
   }

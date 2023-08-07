@@ -14,10 +14,6 @@ import { GraphComponentsData } from '@/types/components';
 import { EdgeRemoveHandler, VertexRemoveHandler } from '@/types/data';
 import { Graph } from '@/types/models';
 import { AllGraphAnimationsSettings } from '@/types/settings';
-import {
-  cancelEdgeAnimations,
-  cancelVertexAnimations
-} from '@/utils/animations';
 import { withMemoContext } from '@/utils/contexts';
 
 import {
@@ -82,16 +78,10 @@ function ComponentsDataProvider<V, E>({
 
   // REMOVE HANDLERS
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
-    const vertexData = contextValue.verticesData[key];
-    if (!vertexData) return;
-    cancelVertexAnimations(vertexData);
     removedVertices.add(key);
   }, []);
 
   const handleEdgeRemove = useCallback<EdgeRemoveHandler>(key => {
-    const edgeData = contextValue.edgesData[key];
-    if (!edgeData) return;
-    cancelEdgeAnimations(edgeData);
     removedEdges.add(key);
   }, []);
 
@@ -104,6 +94,7 @@ function ComponentsDataProvider<V, E>({
   );
 
   useEffect(() => {
+    console.log('Something has changed...', removedVertices.size);
     const newData = getComponentsData();
     setContextValue(value =>
       updateContextValue(value, newData, componentsData)
@@ -114,8 +105,6 @@ function ComponentsDataProvider<V, E>({
   useEffect(() => {
     console.log('>>> COMPONENTS DATA UPDATE');
   }, [contextValue]);
-
-  console.log('____ PROBE ____');
 
   return (
     <GraphComponentsDataContext.Provider value={contextValue}>

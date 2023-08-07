@@ -23,6 +23,8 @@ function VertexComponent<V, E>({
 }: VertexComponentProps<V, E>) {
   const key = vertex.key;
 
+  console.log(vertex.key);
+
   // ANIMATION
   // Vertex render animation progress
   // Use a helper value to ensure that the animation progress is never negative
