@@ -1,15 +1,15 @@
 import { Group } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
-import { withGraphData } from '@/providers/graph';
-import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-import { EdgeLabelRendererFunction } from '@/types/renderer';
+import { LabelComponent } from '@/components/graphs/labels';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
+import { LabelRenderer } from '@/types/components';
+import { LabelComponentData } from '@/types/data';
 
 type GraphEdgeLabelsProps<E> = {
-  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
+  edgeLabelsData: Record<string, LabelComponentData<E>>;
   focusProgress: SharedValue<number>;
-  renderer: EdgeLabelRendererFunction<E>;
+  renderer: LabelRenderer<E>;
 };
 
 function GraphEdgeLabels<E>({
@@ -17,26 +17,20 @@ function GraphEdgeLabels<E>({
   focusProgress,
   renderer
 }: GraphEdgeLabelsProps<E>) {
-  return (
+  return renderer ? (
     <Group opacity={focusProgress}>
-      {Object.entries(edgeLabelsData).map(([key, data]) =>
-        renderer ? (
-          <EdgeLabelComponent
-            edgeKey={key}
-            key={key}
-            {...data}
-            renderer={renderer}
-          />
-        ) : null
-      )}
+      {Object.entries(edgeLabelsData).map(([key, data]) => (
+        <LabelComponent edgeKey={key} key={key} {...data} renderer={renderer} />
+      ))}
     </Group>
-  );
+  ) : null;
 }
 
-export default withGraphData(
-  GraphEdgeLabels,
-  ({ edgeLabelsData, renderers }) => ({
-    edgeLabelsData,
+export default withGraphSettings(
+  withComponentsData(GraphEdgeLabels, ({ edgeLabelsData }) => ({
+    edgeLabelsData
+  })),
+  ({ renderers }) => ({
     renderer: renderers.label
   })
 );

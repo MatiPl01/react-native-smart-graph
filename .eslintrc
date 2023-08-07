@@ -238,7 +238,8 @@
     "perfectionist/sort-imports": "off",
     "perfectionist/sort-exports": "off",
     "perfectionist/sort-named-imports": "off",
-    "perfectionist/sort-named-exports": "off"
+    "perfectionist/sort-named-exports": "off",
+    "@typescript-eslint/array-type": ["error", { "default": "generic" }]
   },
   "env": {
     "es2020": true

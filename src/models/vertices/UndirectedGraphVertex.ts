@@ -1,14 +1,14 @@
 import {
   UndirectedEdge,
   UndirectedGraphVertex as IUndirectedGraphVertex
-} from '@/types/graphs';
+} from '@/types/models';
 
 import Vertex from './Vertex';
 
 export default class UndirectedGraphVertex<V, E> extends Vertex<V, E> {
-  private readonly edges$: Record<string, UndirectedEdge<E, V>> = {};
+  private readonly edges$: Record<string, UndirectedEdge<V, E>> = {};
 
-  addEdge(edge: UndirectedEdge<E, V>): void {
+  addEdge(edge: UndirectedEdge<V, E>): void {
     if (edge.key in this.edges$) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
@@ -19,7 +19,7 @@ export default class UndirectedGraphVertex<V, E> extends Vertex<V, E> {
     return this.edges.reduce((acc, edge) => acc + (edge.isLoop ? 2 : 1), 0);
   }
 
-  get edges(): Array<UndirectedEdge<E, V>> {
+  get edges(): Array<UndirectedEdge<V, E>> {
     return Object.values(this.edges$);
   }
 
@@ -29,12 +29,12 @@ export default class UndirectedGraphVertex<V, E> extends Vertex<V, E> {
     );
   }
 
-  removeEdge(key: string): UndirectedEdge<E, V> {
+  removeEdge(key: string): UndirectedEdge<V, E> {
     if (!(key in this.edges$)) {
       throw new Error(`Edge with key ${key} does not exist.`);
     }
     const edge = this.edges$[key];
     delete this.edges$[key];
-    return edge as UndirectedEdge<E, V>;
+    return edge as UndirectedEdge<V, E>;
   }
 }

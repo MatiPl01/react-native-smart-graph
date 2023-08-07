@@ -9,32 +9,16 @@ import React, {
   useState
 } from 'react';
 
-import {
-  DirectedGraphComponentProps,
-  UndirectedGraphComponentProps
-} from '@/components/graphs';
-import { deepMemoComparator } from '@/utils/equality';
+import { deepMemoComparator } from '@/utils/objects';
 
-type GraphViewChildrenContextType<
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
-> = {
-  canvas: Array<React.ReactElement<P>>;
+type GraphViewChildrenContextType = {
+  canvas: Array<React.ReactElement<Record<string, any>>>;
   overlay: Array<React.ReactElement<Record<string, any>>>;
 };
 
 const GraphViewChildrenContext = createContext(null as unknown as object);
 
-export const useGraphViewChildrenContext = <
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->() => {
+export const useGraphViewChildrenContext = () => {
   const contextValue = useContext(GraphViewChildrenContext);
 
   if (!contextValue) {
@@ -43,7 +27,7 @@ export const useGraphViewChildrenContext = <
     );
   }
 
-  return contextValue as GraphViewChildrenContextType<V, E, P>;
+  return contextValue as GraphViewChildrenContextType;
 };
 
 const CANVAS_COMPONENTS = [
@@ -51,26 +35,20 @@ const CANVAS_COMPONENTS = [
   'UndirectedGraphComponent'
 ];
 
-const filterChildren = <
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->(
+const filterChildren = (
   children: React.ReactNode
-): GraphViewChildrenContextType<V, E, P> => {
-  const canvas: Array<React.ReactElement<P>> = [];
-  const overlay: Array<React.ReactElement> = [];
+): GraphViewChildrenContextType => {
+  const canvas: Array<React.ReactElement<Record<string, any>>> = [];
+  const overlay: Array<React.ReactElement<Record<string, any>>> = [];
 
   Children.forEach(children, child => {
     if (isValidElement(child)) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const childName = (child?.type as any)?.type?.name as string;
       if (CANVAS_COMPONENTS.includes(childName)) {
-        canvas.push(child as React.ReactElement<P>);
+        canvas.push(child as React.ReactElement<Record<string, any>>);
       } else {
-        overlay.push(child);
+        overlay.push(child as React.ReactElement<Record<string, any>>);
       }
     }
   });
@@ -81,19 +59,13 @@ const filterChildren = <
   };
 };
 
-const getUpdatedContextValue = <
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->(
+const getUpdatedContextValue = (
   children: React.ReactNode,
-  contextValue: GraphViewChildrenContextType<V, E, P>
-): GraphViewChildrenContextType<V, E, P> => {
-  const filteredChildren = filterChildren<V, E, P>(children);
+  contextValue: GraphViewChildrenContextType
+): GraphViewChildrenContextType => {
+  const filteredChildren = filterChildren(children);
 
-  let canvasChildren: Array<React.ReactElement<P>> = [];
+  let canvasChildren: Array<React.ReactElement<Record<string, any>>> = [];
   let overlayChildren: Array<React.ReactElement<Record<string, any>>> = [];
   let canvasChildrenUpdated = false;
   let overlayChildrenUpdated = false;
@@ -162,14 +134,11 @@ type GraphViewChildrenProviderProps = PropsWithChildren<{
   graphViewChildren: React.ReactNode;
 }>;
 
-export default function GraphViewChildrenProvider<
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->({ children, graphViewChildren }: GraphViewChildrenProviderProps) {
-  const [value, setValue] = useState<GraphViewChildrenContextType<V, E, P>>({
+export default function GraphViewChildrenProvider({
+  children,
+  graphViewChildren
+}: GraphViewChildrenProviderProps) {
+  const [value, setValue] = useState<GraphViewChildrenContextType>({
     canvas: [],
     overlay: []
   });

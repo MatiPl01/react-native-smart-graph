@@ -11,10 +11,9 @@ function ContextProviderComposer({
 }: ContextProviderComposerProps) {
   return (
     <>
-      {providers.reduceRight(
-        (children, parent) => cloneElement(parent, { children }),
-        initialChildren
-      )}
+      {providers.reduceRight((children, parent) => {
+        return cloneElement(parent, { children });
+      }, initialChildren)}
     </>
   );
 }

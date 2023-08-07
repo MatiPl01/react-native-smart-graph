@@ -1,10 +1,10 @@
 import { PropsWithChildren } from 'react';
 import { SharedValue, useFrameCallback } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
-import { GraphConnections } from '@/types/graphs';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { BoundingRect } from '@/types/layout';
-import { ForcesSettingsWithDefaults } from '@/types/settings';
+import { GraphConnections } from '@/types/models';
+import { InternalForceLayoutSettings } from '@/types/settings';
 import { animateToValue } from '@/utils/animations';
 import { applyForces } from '@/utils/forces';
 import {
@@ -16,7 +16,7 @@ import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
   connections: GraphConnections;
-  forcesSettings: ForcesSettingsWithDefaults;
+  forcesSettings: InternalForceLayoutSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
 }>;
 
@@ -33,12 +33,13 @@ function ForcesLayoutProvider({
 
   useFrameCallback(() => {
     const targetPositions = alignPositionsToCenter(
-      applyForces(
-        connections,
-        lockedVertices,
-        placedVerticesPositions,
-        forcesSettings
-      )
+      applyForces(connections, lockedVertices, placedVerticesPositions, {
+        attractionForceFactor: forcesSettings.attractionForceFactor.value,
+        attractionScale: forcesSettings.attractionScale.value,
+        repulsionScale: forcesSettings.repulsionScale.value,
+        strategy: forcesSettings.strategy.value,
+        type: forcesSettings.type
+      })
     ).verticesPositions;
 
     // Update the target bounding rect
@@ -62,10 +63,15 @@ function ForcesLayoutProvider({
   return <>{children}</>;
 }
 
-export default withGraphData(
-  ForcesLayoutProvider,
-  ({ connections, targetBoundingRect }) => ({
-    connections,
-    targetBoundingRect
+export default withGraphSettings(
+  withComponentsData(
+    ForcesLayoutProvider,
+    ({ connections, targetBoundingRect }) => ({
+      connections,
+      targetBoundingRect
+    })
+  ),
+  ({ settings }) => ({
+    forcesSettings: settings.layout as InternalForceLayoutSettings
   })
 );

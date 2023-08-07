@@ -1,7 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { BoundingRect, Dimensions } from '@/types/layout';
-import { ObjectFit } from '@/types/views';
+import { BoundingRect, Dimensions, ObjectFit } from '@/types/layout';
 
 export const calcContainerScale = (
   objectFit: ObjectFit,

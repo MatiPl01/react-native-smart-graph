@@ -1,10 +1,8 @@
 import React from 'react';
-// eslint-disable-next-line import/default
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
-import { AnimatedCanvasTransform } from '@/types/canvas';
-import { VertexComponentData } from '@/types/components';
-import { AnimatedBoundingRect } from '@/types/layout';
+import { VertexComponentData } from '@/types/data';
+import { AnimatedBoundingRect, AnimatedTransformation } from '@/types/layout';
 import { GraphEventsSettings } from '@/types/settings';
 
 import OverlayVertex from './OverlayVertex';
@@ -13,7 +11,7 @@ type OverlayLayerProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
   debug?: boolean;
   settings: GraphEventsSettings<V>;
-  transform: AnimatedCanvasTransform;
+  transform: AnimatedTransformation;
   verticesData: Record<string, VertexComponentData<V, E>>;
 };
 
@@ -43,7 +41,7 @@ export default function OverlayLayer<V, E>({
         { translateX: transform.translateX.value + boundingLeft + dx },
         { translateY: transform.translateY.value + boundingTop + dy },
         { scale }
-      ] as never[], // this is a fix for incorrectly inferred types
+      ] as Array<never>, // this is a fix for incorrectly inferred types
       width
     };
   });

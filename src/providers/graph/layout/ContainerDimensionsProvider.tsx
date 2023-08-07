@@ -1,21 +1,25 @@
 import { PropsWithChildren } from 'react';
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
-import { AnimatedBoundingRect, BoundingRect } from '@/types/layout';
+import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withComponentsData } from '@/providers/graph/data';
+import { BoundingRect } from '@/types/layout';
 import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
-  boundingRect: AnimatedBoundingRect; // This is the real bounding rect of the container
-  targetBoundingRect: SharedValue<BoundingRect>; // This is the target bounding rect of the container
-  vertexRadius: number;
+  targetBoundingRect: SharedValue<BoundingRect>;
 }>;
 
 function ContainerDimensionsProvider({
-  boundingRect,
   children,
   targetBoundingRect
 }: ContainerDimensionsProviderProps) {
+  // CONTEXTS
+  // Canvas contexts
+  const {
+    dataContext: { boundingRect }
+  } = useCanvasContexts();
+
   useAnimatedReaction(
     () => ({
       currentRect: {
@@ -37,7 +41,7 @@ function ContainerDimensionsProvider({
   return <>{children}</>;
 }
 
-export default withGraphData(
+export default withComponentsData(
   ContainerDimensionsProvider,
   ({ targetBoundingRect }) => ({
     targetBoundingRect

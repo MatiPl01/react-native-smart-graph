@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import 'react-native-reanimated';
-
 import { Vector } from '@shopify/react-native-skia';
 
-import { GraphConnections } from '@/types/graphs';
 import { AnimatedVectorCoordinates } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
 import {
   addVectors,
   addVectorsArray,

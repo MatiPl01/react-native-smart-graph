@@ -4,7 +4,7 @@ import {
   GraphComponent,
   GraphComponents,
   GraphConnections
-} from '@/types/graphs';
+} from '@/types/models';
 
 export enum TraverseDirection {
   INCOMING,

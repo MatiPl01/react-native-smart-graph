@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
 import {
-  Edge,
+  DirectedEdge,
   Graph as IGraph,
   GraphConnections,
   GraphObserver,
+  OrderedEdges,
+  UndirectedEdge,
   Vertex
-} from '@/types/graphs';
+} from '@/types/models';
 import {
   AnimationSettings,
-  AnimationsSettings,
-  BatchModificationAnimationSettings
+  BatchModificationAnimationSettings,
+  FocusSettings,
+  GraphModificationAnimationsSettings
 } from '@/types/settings';
-import { FocusSettings } from '@/types/settings/focus';
 import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
 
@@ -20,21 +22,44 @@ export default abstract class Graph<
   V,
   E,
   GV extends Vertex<V, E>,
-  GE extends Edge<E, V>,
+  GE extends DirectedEdge<V, E> | UndirectedEdge<V, E>,
   ED extends DirectedEdgeData<E> | UndirectedEdgeData<E>
 > implements IGraph<V, E>
 {
   private focusedVertexKey: null | string = null;
   private lastFocusChangeSettings: FocusSettings | null = null;
-  private lastGraphChangeSettings: AnimationsSettings | null = null;
-
+  private lastGraphChangeSettings: GraphModificationAnimationsSettings | null =
+    null;
   private readonly observers: Set<GraphObserver> = new Set();
+
+  protected cachedConnections: GraphConnections | null = null;
+  protected cachedEdges: Array<GE> | null = null;
+  protected cachedOrderedEdges: Array<{
+    edge: GE;
+    edgesCount: number;
+    order: number;
+  }> | null = null;
+  protected cachedVertices: Array<GV> | null = null;
+
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
     string,
     Record<string, Array<GE>>
   > = {};
   protected readonly vertices$: Record<string, GV> = {};
+
+  private invalidateEdgesCache(): void {
+    // Invalidate cached edges data
+    this.cachedEdges = null;
+    this.cachedOrderedEdges = null;
+    this.cachedConnections = null;
+  }
+
+  private invalidateVerticesCache(): void {
+    // Invalidate cached vertices data
+    this.cachedVertices = null;
+    this.cachedConnections = null;
+  }
 
   addObserver(observer: GraphObserver): void {
     this.observers.add(observer);
@@ -92,7 +117,10 @@ export default abstract class Graph<
   }
 
   get edges(): Array<GE> {
-    return Object.values(this.edges$);
+    if (!this.cachedEdges) {
+      this.cachedEdges = Object.values(this.edges$);
+    }
+    return this.cachedEdges;
   }
 
   focus(vertexKey: string, settings?: FocusSettings): void {
@@ -126,7 +154,7 @@ export default abstract class Graph<
 
   protected insertEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<AnimationsSettings>,
+    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): GE {
     if (this.edges$[edge.key]) {
@@ -150,19 +178,21 @@ export default abstract class Graph<
     this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
     // Add edge to edges
     this.edges$[edge.key] = edge;
+    this.invalidateEdgesCache();
     if (notifyChange) this.notifyGraphChange(animationsSettings);
     return edge;
   }
 
   protected insertVertexObject(
     vertex: GV,
-    animationSettings?: Maybe<AnimationsSettings>,
+    animationSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): GV {
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
+    this.invalidateVerticesCache();
     if (notifyChange) this.notifyGraphChange(animationSettings);
     return vertex;
   }
@@ -178,7 +208,7 @@ export default abstract class Graph<
   }
 
   protected notifyGraphChange(
-    animationsSettings?: Maybe<AnimationsSettings>
+    animationsSettings?: Maybe<GraphModificationAnimationsSettings>
   ): void {
     const updatedAnimationSettings = animationsSettings ?? {
       edges: {},
@@ -190,30 +220,34 @@ export default abstract class Graph<
     });
   }
 
-  get orderedEdges(): Array<{ edge: GE; edgesCount: number; order: number }> {
-    const addedEdgesKeys = new Set<string>();
-    const result: Array<{ edge: GE; edgesCount: number; order: number }> = [];
+  get orderedEdges(): OrderedEdges<V, E, GE> {
+    if (!this.cachedOrderedEdges) {
+      const addedEdgesKeys = new Set<string>();
+      const result: OrderedEdges<V, E, GE> = [];
 
-    this.edges.forEach(edge => {
-      if (addedEdgesKeys.has(edge.key)) {
-        return;
-      }
-      const [v1, v2] = edge.vertices;
-      const edgesBetweenVertices =
-        this.edgesBetweenVertices$[v1.key]?.[v2.key] ?? [];
-      this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
-        ({ edge: e, order }) => {
-          result.push({
-            edge: e,
-            edgesCount: edgesBetweenVertices.length,
-            order
-          });
-          addedEdgesKeys.add(edge.key);
+      this.edges.forEach(edge => {
+        if (addedEdgesKeys.has(edge.key)) {
+          return;
         }
-      );
-    });
+        const [v1, v2] = edge.vertices;
+        const edgesBetweenVertices =
+          this.edgesBetweenVertices$[v1.key]?.[v2.key] ?? [];
+        this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
+          ({ edge: e, order }) => {
+            result.push({
+              edge: e,
+              edgesCount: edgesBetweenVertices.length,
+              order
+            });
+            addedEdgesKeys.add(edge.key);
+          }
+        );
+      });
 
-    return result;
+      this.cachedOrderedEdges = result;
+    }
+
+    return this.cachedOrderedEdges;
   }
 
   removeBatch(
@@ -244,7 +278,7 @@ export default abstract class Graph<
 
   protected removeEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<AnimationsSettings>,
+    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
   ): void {
     // Remove edge from edges between vertices
@@ -265,6 +299,7 @@ export default abstract class Graph<
     }
     // Remove the edge from edges
     delete this.edges$[edge.key];
+    this.invalidateEdgesCache();
     if (notifyChange) this.notifyGraphChange(animationsSettings);
   }
 
@@ -292,6 +327,7 @@ export default abstract class Graph<
       this.removeEdge(edgeKey, null, false);
     }
     delete this.vertices$[key];
+    this.invalidateVerticesCache();
     if (notifyChange) {
       this.notifyGraphChange(
         animationSettings &&
@@ -306,7 +342,10 @@ export default abstract class Graph<
   }
 
   get vertices(): Array<GV> {
-    return Object.values(this.vertices$);
+    if (!this.cachedVertices) {
+      this.cachedVertices = Object.values(this.vertices$);
+    }
+    return this.cachedVertices;
   }
 
   abstract get connections(): GraphConnections;

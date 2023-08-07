@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import { memo } from 'react';
 import {
   useAnimatedReaction,
@@ -5,28 +6,36 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { LABEL_COMPONENT_SETTINGS } from '@/constants/components';
-import { UndirectedCurvedEdgeComponentProps } from '@/types/components/edges';
+import { UndirectedCurvedEdgeComponentProps } from '@/types/components';
 import {
-  animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
   translateAlongVector
 } from '@/utils/vectors';
 
-function UndirectedCurvedEdgeComponent<E, V>({
+function UndirectedCurvedEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
-  animationProgress,
-  componentSettings,
-  edge,
-  labelHeight,
-  labelPosition,
+  data: {
+    animationProgress,
+    edge,
+    labelHeight,
+    labelPosition,
+    v1Position,
+    v1Radius,
+    v2Position,
+    v2Radius
+  },
   renderers,
-  v1Position,
-  v1Radius,
-  v2Position,
-  v2Radius
-}: UndirectedCurvedEdgeComponentProps<E, V>) {
+  settings
+}: UndirectedCurvedEdgeComponentProps<V, E>) {
+  const p1 = useDerivedValue(() => ({
+    x: v1Position.x.value,
+    y: v1Position.y.value
+  }));
+  const p2 = useDerivedValue(() => ({
+    x: v2Position.x.value,
+    y: v2Position.y.value
+  }));
   const v1Key = edge.vertices[0].key;
   const v2Key = edge.vertices[1].key;
 
@@ -40,38 +49,42 @@ function UndirectedCurvedEdgeComponent<E, V>({
 
   // Edge label
   useAnimatedReaction(
-    () => ({ r1: v1Radius.value, r2: v2Radius.value }),
-    ({ r1, r2 }) => {
-      labelHeight.value =
-        ((r1 + r2) / 2) *
-        (componentSettings.label?.scale ?? LABEL_COMPONENT_SETTINGS.scale);
-    },
-    [componentSettings.label?.scale]
+    () =>
+      settings.label
+        ? {
+            r1: v1Radius.value,
+            r2: v2Radius.value,
+            scale: settings.label.scale.value
+          }
+        : null,
+    data => {
+      if (!data) return;
+      const { r1, r2, scale } = data;
+      labelHeight.value = ((r1 + r2) / 2) * scale;
+    }
   );
 
   useAnimatedReaction(
-    () => {
-      const offset =
+    () => ({
+      offset:
         labelHeight.value *
-        (animatedOrder.value - (animatedEdgesCount.value - 1) / 2);
+        (animatedOrder.value - (animatedEdgesCount.value - 1) / 2),
+      v1: p1.value,
+      v2: p2.value
+    }),
+    ({ offset, v1, v2 }) => {
       // Ensure that the order of edges is always the same
-      // no matter which vertex was specified first on the edge
+      // no matter which vertex was specified first in the edge
       // vertices array
       if (v1Key.localeCompare(v2Key) > 0) {
-        return { offset, v1: v2Position, v2: v1Position };
+        [v1, v2] = [v2, v1];
       }
-      return { offset, v1: v1Position, v2: v2Position };
-    },
-    ({ offset, v1, v2 }) => {
       // Calculate the parabola vertex position
-      const orthogonalUnitVector = calcOrthogonalUnitVector(
-        animatedVectorCoordinatesToVector(v1),
-        animatedVectorCoordinatesToVector(v2)
-      );
+      const orthogonalUnitVector = calcOrthogonalUnitVector(v1, v2);
       const { x, y } = translateAlongVector(
         {
-          x: (v1.x.value + v2.x.value) / 2,
-          y: (v1.y.value + v2.y.value) / 2
+          x: (v1.x + v2.x) / 2,
+          y: (v1.y + v2.y) / 2
         },
         orthogonalUnitVector,
         offset
@@ -89,25 +102,19 @@ function UndirectedCurvedEdgeComponent<E, V>({
     };
 
     // Create the SVG path string with the 'Q' command for a quadratic curve
-    const pathString = `M${v1Position.x.value},${v1Position.y.value} Q${controlPoint.x},${controlPoint.y} ${v2Position.x.value},${v2Position.y.value}`;
-
-    return pathString;
+    return `M${v1Position.x.value},${v1Position.y.value} Q${controlPoint.x},${controlPoint.y} ${v2Position.x.value},${v2Position.y.value}`;
   });
 
-  return (
-    <>
-      {renderers.edge({
-        animationProgress,
-        key: edge.key,
-        parabolaX,
-        parabolaY,
-        path,
-        value: edge.value
-      })}
-    </>
-  );
+  return renderers.edge({
+    animationProgress,
+    key: edge.key,
+    parabolaX,
+    parabolaY,
+    path,
+    value: edge.value
+  });
 }
 
-export default memo(UndirectedCurvedEdgeComponent) as <E, V>(
-  props: UndirectedCurvedEdgeComponentProps<E, V>
-) => JSX.Element;
+export default memo(
+  UndirectedCurvedEdgeComponent
+) as typeof UndirectedCurvedEdgeComponent;

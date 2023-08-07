@@ -1,20 +1,25 @@
 import { Vector } from '@shopify/react-native-skia';
-import { cancelAnimation, runOnJS, withTiming } from 'react-native-reanimated';
+import {
+  cancelAnimation,
+  isSharedValue,
+  runOnJS,
+  withTiming
+} from 'react-native-reanimated';
 
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
 import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
+  AllAnimationSettings,
   AnimationSettings,
-  AnimationSettingsWithDefaults,
-  AnimationsSettings,
   BatchModificationAnimationSettings,
+  GraphModificationAnimationsSettings,
   SingleModificationAnimationSettings
-} from '@/types/settings/animations';
+} from '@/types/settings';
 
 export const animateVerticesToFinalPositions = (
   animatedPositions: Record<string, AnimatedVectorCoordinates>,
   finalPositions: Record<string, Vector>,
-  { duration, easing, onComplete }: AnimationSettingsWithDefaults
+  { duration, easing, onComplete }: AllAnimationSettings
 ) => {
   'worklet';
   const finalPositionsEntries = Object.entries(finalPositions);
@@ -72,7 +77,7 @@ const isBatchModificationSettingsObjectWithEdgesAndVertices = (
 export const createAnimationsSettingsForSingleModification = (
   component: { edge?: string; vertex?: string },
   animationsSettings?: SingleModificationAnimationSettings
-): AnimationsSettings => {
+): GraphModificationAnimationsSettings => {
   if (!animationsSettings) {
     return {
       edges: {},
@@ -116,9 +121,9 @@ export const createAnimationsSettingsForSingleModification = (
 };
 
 export const createAnimationsSettingsForBatchModification = (
-  components: { edges?: string[]; vertices?: string[] },
+  components: { edges?: Array<string>; vertices?: Array<string> },
   animationsSettings?: BatchModificationAnimationSettings
-): AnimationsSettings => {
+): GraphModificationAnimationsSettings => {
   if (!animationsSettings) {
     return {
       edges: {},
@@ -227,4 +232,21 @@ export const cancelEdgeAnimations = <V, E>(
   cancelAnimation(edgeData.labelHeight);
   cancelAnimation(edgeData.labelPosition.x);
   cancelAnimation(edgeData.labelPosition.y);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const cancelAnimations = (value: Record<string, any>) => {
+  // Recursively cancel all animations of values nested in the object
+  for (const key in value) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const v = value[key];
+    if (typeof v === 'object' && v !== null) {
+      if (isSharedValue(v)) {
+        cancelAnimation(v); // Cancel shared value animation
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        cancelAnimations(v); // Recursively cancel all animations of nested values
+      }
+    }
+  }
 };

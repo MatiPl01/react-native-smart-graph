@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 import { memo, useEffect } from 'react';
 import {
   useAnimatedReaction,
@@ -7,10 +8,11 @@ import {
 
 import {
   DirectedCurvedEdgeComponentProps,
-  DirectedStraightEdgeComponentProps,
+  DirectedEdgeComponentProps,
   EdgeComponentProps,
+  InnerEdgeComponentProps,
   UndirectedCurvedEdgeComponentProps,
-  UndirectedStraightEdgeComponentProps
+  UndirectedEdgeComponentProps
 } from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
 
@@ -19,24 +21,52 @@ import UndirectedCurvedEdgeComponent from './curved/UndirectedCurvedEdgeComponen
 import DirectedStraightEdgeComponent from './straight/DirectedStraightEdgeComponent';
 import UndirectedStraightEdgeComponent from './straight/UndirectedStraightEdgeComponent';
 
-function EdgeComponent<E, V>({
-  animationProgress,
-  animationSettings,
-  arrowRenderer,
-  edge,
-  edgeRenderer,
-  edgesCount,
+type InnerEdgeProps<V, E> = Omit<
+  InnerEdgeComponentProps<V, E>,
+  'renderers' | 'settings'
+> &
+  Pick<EdgeComponentProps<V, E>, 'renderers' | 'settings'>;
+
+const areDirectedEdgeProps = <V, E>(
+  props: InnerEdgeProps<V, E>
+): props is DirectedEdgeComponentProps<V, E> => {
+  return props.data.edge.isDirected();
+};
+
+const areUndirectedEdgeProps = <V, E>(
+  props: InnerEdgeProps<V, E>
+): props is UndirectedEdgeComponentProps<V, E> => {
+  return !props.data.edge.isDirected();
+};
+
+function areCurvedEdgeProps<V, E>(
+  props: UndirectedEdgeComponentProps<V, E>
+): props is UndirectedCurvedEdgeComponentProps<V, E>;
+
+function areCurvedEdgeProps<V, E>(
+  props: DirectedEdgeComponentProps<V, E>
+): props is DirectedCurvedEdgeComponentProps<V, E>;
+
+function areCurvedEdgeProps<V, E>(
+  props: InnerEdgeProps<V, E>
+): props is
+  | DirectedCurvedEdgeComponentProps<V, E>
+  | UndirectedCurvedEdgeComponentProps<V, E> {
+  return props.settings.edge.type === 'curved';
+}
+
+function EdgeComponent<V, E>({
+  data,
   onRemove,
-  order,
-  removed,
-  ...restProps
-}: EdgeComponentProps<E, V>) {
-  // ANIMATION
+  renderers,
+  settings
+}: EdgeComponentProps<V, E>) {
+  const { animationProgress, animationSettings, edge } = data;
 
   // EDGE ORDERING
   // Target edge order
-  const animatedOrder = useSharedValue(order.value);
-  const animatedEdgesCount = useSharedValue(edgesCount.value);
+  const animatedOrder = useSharedValue(data.order.value);
+  const animatedEdgesCount = useSharedValue(data.edgesCount.value);
 
   // Edge mount/unmount animation
   useEffect(() => {
@@ -44,64 +74,51 @@ function EdgeComponent<E, V>({
       edge.key,
       animationProgress,
       animationSettings,
-      removed,
+      data.removed,
       onRemove
     );
-  }, [removed, animationSettings]);
+  }, [data.removed, animationSettings]);
 
   // Use separate order and count values to make their changes animated
   useAnimatedReaction(
     () => ({
-      count: edgesCount.value,
-      ord: order.value
+      count: data.edgesCount.value,
+      ord: data.order.value
     }),
     ({ count, ord }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
       animatedOrder.value = withTiming(ord, settingsWithoutCallback);
       animatedEdgesCount.value = withTiming(count, settingsWithoutCallback);
     }
   );
 
-  const sharedProps = {
-    ...restProps,
+  const innerProps = {
     animatedEdgesCount,
     animatedOrder,
-    animationProgress,
-    edge,
-    renderers: arrowRenderer
-      ? {
-          arrow: arrowRenderer,
-          edge: edgeRenderer
-        }
-      : {
-          edge: edgeRenderer
-        }
+    data,
+    renderers,
+    settings
   };
 
-  switch (sharedProps.componentSettings.edge.type) {
-    case 'straight':
-      return edge.isDirected() ? (
-        <DirectedStraightEdgeComponent
-          {...(sharedProps as DirectedStraightEdgeComponentProps<E, V>)}
-        />
-      ) : (
-        <UndirectedStraightEdgeComponent
-          {...(sharedProps as UndirectedStraightEdgeComponentProps<E, V>)}
-        />
-      );
-    case 'curved':
-      return edge.isDirected() ? (
-        <DirectedCurvedEdgeComponent
-          {...(sharedProps as DirectedCurvedEdgeComponentProps<E, V>)}
-        />
-      ) : (
-        <UndirectedCurvedEdgeComponent
-          {...(sharedProps as UndirectedCurvedEdgeComponentProps<E, V>)}
-        />
-      );
+  if (areDirectedEdgeProps(innerProps)) {
+    return areCurvedEdgeProps(innerProps) ? (
+      <DirectedCurvedEdgeComponent {...innerProps} />
+    ) : (
+      <DirectedStraightEdgeComponent {...innerProps} />
+    );
   }
+  if (areUndirectedEdgeProps(innerProps)) {
+    return areCurvedEdgeProps(innerProps) ? (
+      <UndirectedCurvedEdgeComponent {...innerProps} />
+    ) : (
+      <UndirectedStraightEdgeComponent {...innerProps} />
+    );
+  }
+
+  return null; // Should never happen
 }
 
-export default memo(EdgeComponent) as <E, V>(
-  props: EdgeComponentProps<E, V>
+export default memo(EdgeComponent) as <V, E>(
+  props: EdgeComponentProps<V, E>
 ) => JSX.Element;

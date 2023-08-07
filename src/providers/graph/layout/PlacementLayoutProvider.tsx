@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren } from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -6,62 +6,58 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
-import { EdgeComponentData, VertexComponentData } from '@/types/components';
-import { Graph } from '@/types/graphs';
+import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
 import { BoundingRect } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
 import {
-  AnimationSettingsWithDefaults,
-  GraphSettingsWithDefaults
+  AllAnimationSettings,
+  AllGraphPlacementSettings
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
-  edgesData: Record<string, EdgeComponentData<E, V>>;
-  graph: Graph<V, E>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  onRender: (boundingRect: BoundingRect) => void;
-  settings: GraphSettingsWithDefaults<V>;
+  connections: GraphConnections;
+  edgesData: Record<string, EdgeComponentData<V, E>>;
+  isGraphDirected: SharedValue<boolean>;
+  layoutAnimationSettings: AllAnimationSettings;
+  placementSettings: AllGraphPlacementSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
+  vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
   children,
+  connections,
   edgesData,
-  graph,
+  isGraphDirected,
   layoutAnimationSettings,
-  onRender,
-  settings,
+  placementSettings,
   targetBoundingRect,
+  vertexRadius,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
+  // CONTEXTS
+  // Canvas contexts
+  const {
+    transformContext: { handleGraphRender: onRender }
+  } = useCanvasContexts();
+
   const isFirstRender = useSharedValue(true);
 
-  const layoutAnimationData = useMemo(
-    () => ({
-      connections: graph.connections,
-      isGraphDirected: graph.isDirected(),
-      settings: settings.placement,
-      vertexRadius: settings.components.vertex.radius
-    }),
-    [
-      verticesData,
-      edgesData,
-      settings.components.vertex.radius,
-      settings.placement
-    ]
-  );
-
   useAnimatedReaction(
-    () => null,
-    () => {
+    () => ({
+      radius: vertexRadius.value
+    }),
+    ({ radius }) => {
       const { boundingRect, verticesPositions } = placeVertices(
-        layoutAnimationData.connections,
-        layoutAnimationData.vertexRadius,
-        layoutAnimationData.settings,
-        layoutAnimationData.isGraphDirected
+        connections,
+        radius,
+        placementSettings,
+        isGraphDirected.value
       );
 
       if (isFirstRender.value) {
@@ -82,23 +78,33 @@ function GraphPlacementLayoutProvider<V, E>({
         layoutAnimationSettings
       );
     },
-    [layoutAnimationData]
+    [verticesData, placementSettings, edgesData]
   );
 
   return <>{children}</>;
 }
 
-export default withGraphData(
-  GraphPlacementLayoutProvider,
-  ({
-    edgesData,
-    layoutAnimationSettings,
-    targetBoundingRect,
-    verticesData
-  }) => ({
-    edgesData,
-    layoutAnimationSettings,
-    targetBoundingRect,
-    verticesData
+export default withGraphSettings(
+  withComponentsData(
+    GraphPlacementLayoutProvider,
+    ({
+      connections,
+      edgesData,
+      isGraphDirected,
+      layoutAnimationSettings,
+      targetBoundingRect,
+      verticesData
+    }) => ({
+      connections,
+      edgesData,
+      isGraphDirected,
+      layoutAnimationSettings,
+      targetBoundingRect,
+      verticesData
+    })
+  ),
+  ({ settings }) => ({
+    placementSettings: settings.placement,
+    vertexRadius: settings.components.vertex.radius
   })
 );

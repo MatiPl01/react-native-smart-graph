@@ -1,17 +1,6 @@
-import VertexComponent from '@/components/graphs/vertices/VertexComponent';
-import { FocusContextType } from '@/providers/canvas';
-import { withGraphData } from '@/providers/graph';
-import { VertexComponentData, VertexRemoveHandler } from '@/types/components';
-import { VertexRenderFunction } from '@/types/renderer';
-import { VertexSettingsWithDefaults } from '@/types/settings';
-
-type GraphVerticesProps<V, E> = {
-  componentSettings: VertexSettingsWithDefaults;
-  focusContext: FocusContextType;
-  onRemove: VertexRemoveHandler;
-  renderer: VertexRenderFunction<V>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
-};
+import { VertexComponent } from '@/components/graphs/vertices';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
+import { GraphVerticesProps } from '@/types/components';
 
 function GraphVertices<V, E>({
   verticesData,
@@ -22,12 +11,13 @@ function GraphVertices<V, E>({
   ));
 }
 
-export default withGraphData(
-  GraphVertices,
-  ({ handleVertexRemove, renderers, settings, verticesData }) => ({
-    componentSettings: settings.components.vertex,
+export default withGraphSettings(
+  withComponentsData(GraphVertices, ({ handleVertexRemove, verticesData }) => ({
     onRemove: handleVertexRemove,
-    renderer: renderers.vertex,
     verticesData
+  })),
+  ({ renderers, settings }) => ({
+    renderer: renderers.vertex,
+    settings: settings.components.vertex
   })
 );

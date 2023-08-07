@@ -6,7 +6,7 @@ const cross = (v1: Vector, v2: Vector, v3: Vector): number => {
   return (v2.x - v1.x) * (v3.y - v1.y) - (v2.y - v1.y) * (v3.x - v1.x);
 };
 
-export const grahamScan = (points: Vector[]): Vector[] => {
+export const grahamScan = (points: Array<Vector>): Array<Vector> => {
   'worklet';
   if (points.length < 3) {
     return points;
@@ -36,7 +36,7 @@ export const grahamScan = (points: Vector[]): Vector[] => {
   });
 
   // Create the hull
-  const hull: Vector[] = [sortedPoints[0]!, sortedPoints[1]!];
+  const hull: Array<Vector> = [sortedPoints[0]!, sortedPoints[1]!];
   for (let i = 2; i < sortedPoints.length; i++) {
     while (
       hull.length >= 2 &&

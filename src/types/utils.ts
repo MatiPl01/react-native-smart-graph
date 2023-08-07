@@ -1,32 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// https://stackoverflow.com/questions/57835286/deep-recursive-requiredt-on-specific-properties
-export type DeepRequired<T, P extends Array<string>> = T extends object
-  ? Omit<T, Extract<keyof T, P[0]>> &
-      Required<{
-        [K in Extract<keyof T, P[0]>]: NonNullable<
-          DeepRequired<T[K], ShiftUnion<K, P>>
-        >;
-      }>
+import { SharedValue } from 'react-native-reanimated';
+
+export type DeepRequired<T> = {
+  [K in keyof T]: DeepRequired<T[K]>;
+} & Required<T>;
+
+export type RequiredWithout<T, E extends keyof T> = Required<Omit<T, E>> &
+  Partial<Pick<T, E>>;
+
+export type Maybe<T> = T | null | undefined;
+
+export type DeepPartial<T> = T extends object
+  ? { [P in keyof T]?: DeepPartial<T[P]> }
   : T;
 
-type Shift<T extends Array<any>> = ((...t: T) => any) extends (
-  first: any,
-  ...rest: infer Rest
-) => any
-  ? Rest
-  : never;
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-type ShiftUnion<
-  P extends PropertyKey,
-  T extends Array<any>
-> = T extends Array<any> ? (T[0] extends P ? Shift<T> : never) : never;
+export type PartialWithRequired<T, K extends keyof T> = Partial<T> &
+  Required<Pick<T, K>>;
+
+export type Sharedify<T> = {
+  [K in keyof T]: undefined extends T[K]
+    ? Exclude<T[K], undefined> extends infer U
+      ? SharedValue<U> | undefined
+      : never
+    : SharedValue<T[K]>;
+};
+
+export type SharedifyBy<T, K extends keyof T> = Omit<T, K> &
+  Sharedify<Pick<T, K>>;
+
+export type DeepSharedify<T> = {
+  [K in keyof T]: T[K] extends object ? DeepSharedify<T[K]> : SharedValue<T[K]>;
+};
+
+export type SharedifyWithout<T, E extends keyof any = never> = {
+  [K in keyof T]: K extends E ? T[K] : SharedValue<T[K]>;
+};
 
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };
-
-export type DeepRequiredAll<T> = {
-  [K in keyof T]: DeepRequiredAll<T[K]>;
-} & Required<T>;
-
-export type Maybe<T> = T | null | undefined;

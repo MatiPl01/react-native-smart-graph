@@ -1,23 +1,16 @@
-import React, { memo, PropsWithChildren, useMemo } from 'react';
+import { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { DEFAULT_SETTINGS } from '@/constants/views';
+import { DEFAULT_VIEW_SETTINGS } from '@/configs/view';
 import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import CanvasProvider, { useGesturesContext } from '@/providers/canvas';
-import { Spacing } from '@/types/layout';
-import { ObjectFit } from '@/types/views';
-import { deepMemoComparator } from '@/utils/equality';
+import CanvasProvider, { useGesturesContext } from '@/providers/view';
+import { GraphViewSettings } from '@/types/settings';
+import { deepMemoComparator } from '@/utils/objects';
 
-type GraphViewProps = PropsWithChildren<{
-  autoSizingTimeout?: number;
-  initialScale?: number;
-  objectFit?: ObjectFit;
-  padding?: Spacing;
-  scales?: number[];
-}>;
+type GraphViewProps = PropsWithChildren<GraphViewSettings>;
 
 function GraphView({ children, ...providerProps }: GraphViewProps) {
   validateProps(providerProps);
@@ -38,7 +31,9 @@ const validateProps = ({ initialScale, scales }: GraphViewProps) => {
     if (scales.length === 0) {
       throw new Error('At least one scale must be provided');
     }
-    if (scales.indexOf(initialScale ?? DEFAULT_SETTINGS.initialScale) < 0) {
+    if (
+      scales.indexOf(initialScale ?? DEFAULT_VIEW_SETTINGS.initialScale) < 0
+    ) {
       throw new Error('Initial scale must be included in scales');
     }
     if (scales.some(scale => scale <= 0)) {

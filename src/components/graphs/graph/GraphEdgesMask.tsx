@@ -2,8 +2,8 @@ import { Circle, Rect } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
-import { VertexComponentData } from '@/types/components';
+import { withComponentsData } from '@/providers/graph';
+import { VertexComponentData } from '@/types/data';
 import { AnimatedBoundingRect } from '@/types/layout';
 
 type GraphEdgesMaskProps<V, E> = {
@@ -55,8 +55,8 @@ const VertexMask = memo(function <V, E>({
       r={radius}
     />
   );
-}) as <V, E>({ data }: { data: VertexComponentData<V, E> }) => JSX.Element;
+});
 
-export default withGraphData(GraphEdgesMask, ({ verticesData }) => ({
+export default withComponentsData(GraphEdgesMask, ({ verticesData }) => ({
   verticesData
 }));

@@ -1,4 +1,2 @@
-export {
-  default as ComponentsDataProvider,
-  withGraphData
-} from './ComponentsDataProvider';
+export * from './components';
+export * from './settings';

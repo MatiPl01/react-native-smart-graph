@@ -1,6 +1,5 @@
 import { memo, useRef } from 'react';
 import { Pressable } from 'react-native';
-// eslint-disable-next-line import/default
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -9,12 +8,12 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 
-import { VertexComponentData } from '@/types/components';
+import { VertexComponentData } from '@/types/data';
 import {
   AnimatedBoundingRect,
   AnimatedVectorCoordinates
 } from '@/types/layout';
-import { VertexPressHandler } from '@/types/settings/graph/events';
+import { VertexPressHandler } from '@/types/settings';
 
 const LONG_PRESS_ANIMATION_DURATION = 500;
 const LONG_PRESS_DELAY = 300;
@@ -136,7 +135,7 @@ function OverlayVertex<V, E>({
           translateX: position.x.value - boundingRect.left.value - radius.value
         },
         { translateY: position.y.value - boundingRect.top.value - radius.value }
-      ] as never[], // this is a fix wor incorrectly inferred types,
+      ] as Array<never>, // this is a fix wor incorrectly inferred types,
       width: size
     };
   }, [position.x, position.y, radius]);

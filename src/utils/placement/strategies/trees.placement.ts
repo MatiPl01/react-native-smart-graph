@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { GraphConnections } from '@/types/graphs';
+import { GraphConnections } from '@/types/models';
 import {
+  AllTreesPlacementSettings,
   GraphLayout,
-  PlacedVerticesPositions,
-  TreesPlacementSettings
+  PlacedVerticesPositions
 } from '@/types/settings';
 import {
   bfs,
@@ -113,7 +112,7 @@ export default function placeVerticesOnTrees(
   connections: GraphConnections,
   vertexRadius: number,
   isGraphDirected: boolean,
-  settings: TreesPlacementSettings
+  settings: AllTreesPlacementSettings
 ): GraphLayout {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];
@@ -121,9 +120,7 @@ export default function placeVerticesOnTrees(
 
   const graphComponents = findGraphComponents(connections);
 
-  const minVertexSpacing =
-    settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
-
+  const minVertexSpacing = settings.minVertexSpacing;
   for (const component of graphComponents) {
     // Find the root vertex of the component
     const rootVertex = findRootVertex(

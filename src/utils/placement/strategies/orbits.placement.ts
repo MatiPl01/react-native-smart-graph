@@ -1,14 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { GraphConnections } from '@/types/models';
 import {
-  DEFAULT_ORBITS_MAX_SECTOR_ANGLE,
-  SHARED_PLACEMENT_SETTINGS
-} from '@/constants/placement';
-import { GraphConnections } from '@/types/graphs';
-import {
-  GetLayerRadiusFunction,
+  AllOrbitsPlacementSettings,
   GraphLayout,
-  OrbitsLayerSizingSettings,
-  OrbitsPlacementSettings,
+  LayerRadiusGetter,
   PlacedVerticesPositions
 } from '@/types/settings';
 import {
@@ -100,7 +95,7 @@ const getNonDecreasingLayerRadiuses = (
 
 const getCustomLayerRadiuses = (
   layersCount: number,
-  getLayerRadius: GetLayerRadiusFunction
+  getLayerRadius: LayerRadiusGetter
 ): Array<number> => {
   'worklet';
   const layersRadius = [0];
@@ -142,10 +137,10 @@ const getLayerRadiuses = (
   minLayerRadiuses: Record<string, number>,
   minVertexSpacing: number,
   vertexRadius: number,
-  layerSizingSettings: OrbitsLayerSizingSettings
+  settings: AllOrbitsPlacementSettings
 ): Array<number> => {
   'worklet';
-  switch (layerSizingSettings.layerSizing) {
+  switch (settings.layerSizing) {
     case 'equal':
       return getEqualLayerRadiuses(minLayerRadiuses);
     case 'quad-increasing':
@@ -159,7 +154,7 @@ const getLayerRadiuses = (
     case 'custom':
       return getCustomLayerRadiuses(
         Object.keys(minLayerRadiuses).length,
-        layerSizingSettings.getLayerRadius
+        settings.getLayerRadius
       );
     case 'auto':
     default:
@@ -183,7 +178,7 @@ const calcLayerRadiuses = (
   arrangedVertices: ArrangedVertices,
   minVertexSpacing: number,
   vertexRadius: number,
-  layerSizingSettings: OrbitsLayerSizingSettings
+  settings: AllOrbitsPlacementSettings
 ): Record<number, number> => {
   'worklet';
   // Calc min layer radiuses
@@ -204,7 +199,7 @@ const calcLayerRadiuses = (
     minLayerRadiuses,
     minVertexSpacing,
     vertexRadius,
-    layerSizingSettings
+    settings
   );
 };
 
@@ -284,7 +279,7 @@ export default function placeVerticesOnOrbits(
   connections: GraphConnections,
   vertexRadius: number,
   isGraphDirected: boolean,
-  settings: OrbitsPlacementSettings
+  settings: AllOrbitsPlacementSettings
 ): GraphLayout {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];
@@ -311,11 +306,10 @@ export default function placeVerticesOnOrbits(
     const arrangedVertices = arrangeVertices(
       updatedConnections,
       rootVertex,
-      settings.maxSectorAngle ?? DEFAULT_ORBITS_MAX_SECTOR_ANGLE
+      settings.maxSectorAngle
     );
     // Calculate the layout of the component
-    const minVertexSpacing =
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+    const minVertexSpacing = settings.minVertexSpacing;
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
       minVertexSpacing,

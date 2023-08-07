@@ -33,9 +33,9 @@ are added **between a pair of vertices**.
 This property is used to set the **maximum distance** between the **outermost edges** between a pair of vertices. The resulting distance will be calculated
 as the **product** of the `maxOffsetFactor` and the vertex `radius`.
 
-| Type                       | Default    | Required |
-| -------------------------- | ---------- | -------- |
-| 'straight' &#124; 'curved' | 'straight' | no       |
+| Type     | Default | Required |
+| -------- | ------- | -------- |
+| 'number' | 0.5     | no       |
 
 ## Example
 

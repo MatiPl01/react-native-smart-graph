@@ -7,15 +7,16 @@ import {
   useRef,
   useState
 } from 'react';
-import { runOnUI } from 'react-native-reanimated';
+import { runOnUI, SharedValue } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
-import { VertexComponentData } from '@/types/components';
-import { Graph } from '@/types/graphs';
-import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
+import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { VertexComponentData } from '@/types/data';
+import { AnimatedVectorCoordinates } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
 import {
-  AnimationSettingsWithDefaults,
-  GraphSettingsWithDefaults
+  AllAnimationSettings,
+  AllGraphPlacementSettings
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { updateNewVerticesPositions } from '@/utils/forces';
@@ -41,21 +42,27 @@ export const useForcesPlacementContext = () => {
 };
 
 export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
-  graph: Graph<V, E>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  onRender: (boundingRect: BoundingRect) => void;
-  settings: GraphSettingsWithDefaults<V>;
+  connections: GraphConnections;
+  layoutAnimationSettings: AllAnimationSettings;
+  placementSettings: AllGraphPlacementSettings;
+  vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
 function ForcesPlacementProvider<V, E>({
   children,
-  graph,
+  connections,
   layoutAnimationSettings,
-  onRender,
-  settings,
+  placementSettings,
+  vertexRadius,
   verticesData
 }: ForcesPlacementProviderProps<V, E>) {
+  // CONTEXTS
+  // Canvas contexts
+  const {
+    transformContext: { handleGraphRender: onRender }
+  } = useCanvasContexts();
+
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
   // correctly positioned yet (By default vertices are positioned at
@@ -105,9 +112,9 @@ function ForcesPlacementProvider<V, E>({
     isSecondRenderRef.current = false;
 
     const { boundingRect, verticesPositions } = placeVertices(
-      graph.connections,
-      settings.components.vertex.radius,
-      settings.placement
+      connections,
+      vertexRadius.value,
+      placementSettings
     );
     onRender(boundingRect);
 
@@ -134,8 +141,8 @@ function ForcesPlacementProvider<V, E>({
     runOnUI(updateNewVerticesPositions)(
       placedVerticesPositions,
       verticesData,
-      graph.connections,
-      settings.components.vertex.radius
+      connections,
+      vertexRadius.value
     );
   };
 
@@ -162,10 +169,17 @@ function ForcesPlacementProvider<V, E>({
   );
 }
 
-export default withGraphData(
-  ForcesPlacementProvider,
-  ({ layoutAnimationSettings, verticesData }) => ({
-    layoutAnimationSettings,
-    verticesData
+export default withGraphSettings(
+  withComponentsData(
+    ForcesPlacementProvider,
+    ({ connections, layoutAnimationSettings, verticesData }) => ({
+      connections,
+      layoutAnimationSettings,
+      verticesData
+    })
+  ),
+  ({ settings }) => ({
+    placementSettings: settings.placement,
+    vertexRadius: settings.components.vertex.radius
   })
 );
