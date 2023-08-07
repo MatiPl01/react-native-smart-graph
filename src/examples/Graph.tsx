@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   GraphView,
@@ -23,8 +23,15 @@ const GRAPH: DirectedGraphData = {
 
 export default function Graph() {
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
+  const [r, setR] = useState(5);
 
   const graph = useMemo(() => new DirectedGraph(GRAPH), []);
+
+  useEffect(() => {
+    setInterval(() => {
+      setR(() => Math.random() * 10 * r);
+    }, 1000);
+  }, []);
 
   return (
     <>
@@ -33,7 +40,16 @@ export default function Graph() {
         objectFit={objectFit}
         padding={25}
         scales={[0.5, 1, 4]}>
-        <DirectedGraphComponent graph={graph} />
+        <DirectedGraphComponent
+          settings={{
+            components: {
+              vertex: {
+                radius: r
+              }
+            }
+          }}
+          graph={graph}
+        />
         {/* --- GraphViewControls --- */}
         <GraphViewControls
           onObjectFitChange={setObjectFit}

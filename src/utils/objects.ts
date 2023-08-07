@@ -262,17 +262,21 @@ export const updateValues = <
 ): C & SharedifyBy<N, K> => {
   const result = { ...settings.current } as C;
   let isModified = false;
-  const keys = areSettingsWithDefaults(settings)
-    ? Object.keys(settings.default)
-    : settings.new
-    ? Object.keys(settings.new)
-    : [];
+  const keySet = new Set(
+    areSettingsWithDefaults(settings)
+      ? Object.keys(settings.default)
+      : settings.new
+      ? Object.keys(settings.new)
+      : []
+  );
 
   // Add or update values
-  for (const key of keys) {
+  for (const key of keySet) {
     const value = areSettingsWithDefaults(settings)
       ? settings.new?.[key as keyof N] ?? settings.default[key as keyof D]
       : settings.new?.[key as keyof N];
+
+    // console.log({ [key]: value });
 
     // SHARED VALUES
     if (sharedKeys?.has(key as K)) {
@@ -315,7 +319,7 @@ export const updateValues = <
 
   // Clear values that no longer exist
   for (const key in result) {
-    if (!(key in keys)) {
+    if (!keySet.has(key)) {
       if (sharedKeys?.has(key as unknown as K)) {
         cancelAnimation(result[key]);
       }

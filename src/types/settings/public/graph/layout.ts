@@ -12,7 +12,7 @@ export type ForceLayoutSettings = {
   attractionForceFactor?: number;
   attractionScale?: number;
   repulsionScale?: number;
-  strategy: 'default';
+  strategy?: 'default';
   type: 'force';
 };
 

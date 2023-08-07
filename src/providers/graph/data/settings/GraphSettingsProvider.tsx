@@ -39,17 +39,26 @@ export default function GraphSettingsProvider<V, E>({
   children,
   ...userSettings
 }: GraphSettingsProviderProps<V, E>) {
-  const [contextValue, setContextValue] = useState(
+  const [contextValue, setContextValue] = useState(() =>
     createContextValue(userSettings)
   );
 
   useEffect(() => {
     setContextValue(value => updateContextValue(userSettings, value));
+  }, [userSettings]);
 
+  useEffect(() => {
+    // Cleanup on unmount
     return () => {
       clearContextValue(contextValue);
     };
-  }, [userSettings]);
+  }, []);
+
+  useEffect(() => {
+    console.log('update');
+  }, [contextValue]);
+
+  console.log('render', contextValue.settings.components.vertex.radius.value);
 
   return (
     <GraphSettingsContext.Provider value={contextValue}>

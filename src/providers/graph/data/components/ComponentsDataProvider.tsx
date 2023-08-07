@@ -51,10 +51,12 @@ type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
 
 function ComponentsDataProvider<V, E>({
   children,
-  ...userSettings
+  graph,
+  graphAnimationsSettings,
+  renderLabels
 }: ComponentsDataProviderProps<V, E>) {
   // GRAPH OBSERVER
-  const [state] = useGraphObserver(userSettings.graph);
+  const [state] = useGraphObserver(graph);
 
   // HELPER VARIABLES
   // Store keys of removed vertices for which the removal animation
@@ -65,18 +67,18 @@ function ComponentsDataProvider<V, E>({
   const removedEdges = useMemo(() => new Set<string>(), []);
 
   const getComponentsData = () => ({
-    connections: userSettings.graph.connections,
-    isGraphDirected: userSettings.graph.isDirected(),
+    connections: graph.connections,
+    graphAnimationsSettings,
+    isGraphDirected: graph.isDirected(),
     removedEdges,
     removedVertices,
-    state,
-    ...userSettings
+    renderLabels,
+    state
   });
 
   // COMPONENTS DATA
-  const [componentsData, setComponentsData] = useState<ComponentsData<V, E>>(
-    getComponentsData()
-  );
+  const [componentsData, setComponentsData] =
+    useState<ComponentsData<V, E>>(getComponentsData);
 
   // REMOVE HANDLERS
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
@@ -94,7 +96,7 @@ function ComponentsDataProvider<V, E>({
   }, []);
 
   // CONTEXT VALUE
-  const [contextValue, setContextValue] = useState(
+  const [contextValue, setContextValue] = useState(() =>
     createContextValue(componentsData, {
       handleEdgeRemove,
       handleVertexRemove
@@ -107,7 +109,13 @@ function ComponentsDataProvider<V, E>({
       updateContextValue(value, newData, componentsData)
     );
     setComponentsData(newData);
-  }, [state, userSettings]);
+  }, [state, graphAnimationsSettings, renderLabels]);
+
+  useEffect(() => {
+    console.log('>>> COMPONENTS DATA UPDATE');
+  }, [contextValue]);
+
+  console.log('____ PROBE ____');
 
   return (
     <GraphComponentsDataContext.Provider value={contextValue}>

@@ -1,16 +1,15 @@
-import { memo, PropsWithChildren, useMemo } from 'react';
+/* eslint-disable import/no-unused-modules */
+import { PropsWithChildren, useMemo } from 'react';
 
-import ConditionalProvider from '@/providers/graph/ConditionalProvider';
 import { ContextProviderComposer } from '@/providers/utils';
 import { GraphData } from '@/types/data';
 import { AnimatedTransformation } from '@/types/layout';
-import { deepMemoComparator } from '@/utils/objects';
 
+import ConditionalProvider from './ConditionalProvider';
 import CanvasContextsProvider, {
   CanvasContexts
 } from './contexts/CanvasContextsProvider';
-import ComponentsDataProvider from './data/components/ComponentsDataProvider';
-import GraphSettingsProvider from './data/settings/GraphSettingsProvider';
+import { ComponentsDataProvider, GraphSettingsProvider } from './data';
 import { PressEventsProvider } from './events';
 import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
 import {
@@ -26,7 +25,7 @@ type GraphProviderProps<V, E> = PropsWithChildren<{
   transform: AnimatedTransformation;
 }>;
 
-function GraphProvider<V, E>({
+export default function GraphProvider<V, E>({
   canvasContexts,
   children,
   graphProps,
@@ -86,11 +85,3 @@ function GraphProvider<V, E>({
     </CanvasContextsProvider>
   );
 }
-
-export default memo(
-  GraphProvider,
-  deepMemoComparator({
-    include: ['graph', 'renderers', 'settings'],
-    shallow: ['graph']
-  })
-) as typeof GraphProvider;

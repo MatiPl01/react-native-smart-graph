@@ -87,7 +87,7 @@ function GraphComponentComposer<V, E>({
     []
   );
 
-  const graphComponent = useMemo(() => <GraphComponent />, []);
+  console.log(graphProps.settings?.components);
 
   return (
     <Canvas
@@ -98,7 +98,7 @@ function GraphComponentComposer<V, E>({
           canvasContexts={canvasContexts}
           graphProps={graphProps}
           transform={animatedTransform}>
-          {graphComponent}
+          <GraphComponent />
         </GraphProvider>
       </Group>
     </Canvas>

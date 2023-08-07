@@ -45,11 +45,14 @@ export default function GraphViewDataProvider({
 
   useEffect(() => {
     updateContextValue(userSettings, contextValue);
+  }, [userSettings]);
 
+  useEffect(() => {
+    // Cleanup on unmount
     return () => {
       clearContextValue(contextValue);
     };
-  }, [userSettings]);
+  }, []);
 
   return (
     <GraphViewDataContext.Provider value={contextValue}>
