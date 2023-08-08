@@ -61,8 +61,12 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
     notifyChange = true
   ): void {
     // Insert edges and vertices to the graph model
-    vertices?.forEach(data => this.insertVertex(data, null, false));
-    edges?.forEach(data => this.insertEdge(data, null, false));
+    for (const vertexData of vertices ?? []) {
+      this.insertVertex(vertexData, null, false);
+    }
+    for (const edgeData of edges ?? []) {
+      this.insertEdge(edgeData, null, false);
+    }
     // Notify observers after all changes to the graph model are made
     if (notifyChange) {
       this.notifyGraphChange(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, {
   Children,
@@ -11,9 +12,12 @@ import React, {
 
 import { deepMemoComparator } from '@/utils/objects';
 
+type ViewChild = React.ReactElement<Record<string, any>>;
+type ViewChildren = Array<ViewChild>;
+
 type GraphViewChildrenContextType = {
-  canvas: Array<React.ReactElement<Record<string, any>>>;
-  overlay: Array<React.ReactElement<Record<string, any>>>;
+  canvas: ViewChildren;
+  overlay: ViewChildren;
 };
 
 const GraphViewChildrenContext = createContext(null as unknown as object);
@@ -38,17 +42,17 @@ const CANVAS_COMPONENTS = [
 const filterChildren = (
   children: React.ReactNode
 ): GraphViewChildrenContextType => {
-  const canvas: Array<React.ReactElement<Record<string, any>>> = [];
-  const overlay: Array<React.ReactElement<Record<string, any>>> = [];
+  const canvas: ViewChildren = [];
+  const overlay: ViewChildren = [];
 
   Children.forEach(children, child => {
     if (isValidElement(child)) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const childName = (child?.type as any)?.type?.name as string;
       if (CANVAS_COMPONENTS.includes(childName)) {
-        canvas.push(child as React.ReactElement<Record<string, any>>);
+        canvas.push(child as ViewChild);
       } else {
-        overlay.push(child as React.ReactElement<Record<string, any>>);
+        overlay.push(child as ViewChild);
       }
     }
   });
@@ -59,68 +63,66 @@ const filterChildren = (
   };
 };
 
+const updateComponents = (
+  filteredChildren: ViewChildren,
+  previousChildren: ViewChildren,
+  comparator: (
+    prevProps: Record<string, any>,
+    nextProps: Record<string, any>
+  ) => boolean
+): ViewChildren => {
+  let isModified = false;
+  const newChildren: ViewChildren = [];
+
+  // Check if child props have changed
+  if (filterChildren.length !== previousChildren.length) {
+    return filteredChildren;
+  }
+
+  // Use new components only for children that have changed
+  for (let i = 0; i < filteredChildren.length; i++) {
+    const child = filteredChildren[i]!;
+    const prevChild = previousChildren[i]!;
+    if (!comparator(prevChild.props, child.props)) {
+      newChildren[i] = child;
+      isModified = true;
+    } else {
+      newChildren[i] = prevChild;
+    }
+  }
+
+  return isModified ? newChildren : previousChildren;
+};
+
 const getUpdatedContextValue = (
   children: React.ReactNode,
   contextValue: GraphViewChildrenContextType
 ): GraphViewChildrenContextType => {
   const filteredChildren = filterChildren(children);
 
-  let canvasChildren: Array<React.ReactElement<Record<string, any>>> = [];
-  let overlayChildren: Array<React.ReactElement<Record<string, any>>> = [];
-  let canvasChildrenUpdated = false;
-  let overlayChildrenUpdated = false;
+  const canvasChildren = updateComponents(
+    filteredChildren.canvas,
+    contextValue.canvas,
+    deepMemoComparator({
+      include: ['graph', 'settings', 'renderers'],
+      shallow: ['graph']
+    })
+  );
 
-  // Check if canvas child props have changed
-  if (filteredChildren.canvas.length !== contextValue.canvas.length) {
-    canvasChildren = filteredChildren.canvas;
-    canvasChildrenUpdated = true;
-  } else {
-    // Use new components only for canvas children that have changed
-    filteredChildren.canvas.forEach((child, index) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const prevChild = contextValue.canvas[index]!;
-      if (
-        !deepMemoComparator({
-          include: ['graph', 'settings', 'renderers'],
-          shallow: ['graph']
-        })(prevChild.props, child.props)
-      ) {
-        canvasChildren[index] = child;
-        canvasChildrenUpdated = true;
-      } else {
-        canvasChildren[index] = prevChild;
-      }
-    });
-    // Reuse old components if no canvas children have changed
-    if (!canvasChildrenUpdated) {
-      canvasChildren = contextValue.canvas;
-    }
-  }
-
-  // Check if overlay child props have changed
-  if (filteredChildren.overlay.length !== contextValue.overlay.length) {
-    overlayChildren = filteredChildren.overlay;
-    overlayChildrenUpdated = true;
-  } else {
-    // Use new components only for overlay children that have changed
-    filteredChildren.overlay.forEach((child, index) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const prevChild = contextValue.overlay[index]!;
-      if (!deepMemoComparator()(prevChild.props, child.props)) {
-        overlayChildren[index] = child;
-        overlayChildrenUpdated = true;
-      } else {
-        overlayChildren[index] = prevChild;
-      }
-    });
-    // Reuse old components if no overlay children have changed
-    if (!overlayChildrenUpdated) {
-      overlayChildren = contextValue.overlay;
-    }
-  }
+  const overlayChildren = updateComponents(
+    filteredChildren.overlay,
+    contextValue.overlay,
+    deepMemoComparator({
+      include: ['graph', 'settings', 'renderers'],
+      shallow: ['graph']
+    })
+  );
 
   // Return the new context value if any children have changed
-  if (canvasChildrenUpdated || overlayChildrenUpdated) {
+  if (
+    contextValue.canvas !== canvasChildren ||
+    contextValue.overlay !== overlayChildren
+  ) {
     return {
       canvas: canvasChildren,
       overlay: overlayChildren

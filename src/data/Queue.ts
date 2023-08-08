@@ -17,7 +17,9 @@ export const createQueue = <T>() => {
 
     enqueueMany(values: Array<T>): void {
       'worklet';
-      values.forEach(value => linkedList.append(value));
+      for (const value of values) {
+        linkedList.append(value);
+      }
     },
 
     isEmpty(): boolean {

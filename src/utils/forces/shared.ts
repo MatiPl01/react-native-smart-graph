@@ -121,16 +121,18 @@ export const updateVerticesPositions = (
   'worklet';
   const updatedVerticesPositions: Record<string, Vector> = {};
 
-  Object.entries(verticesPositions).forEach(([vertexKey, vertexPosition]) => {
+  for (const vertexKey in verticesPositions) {
     if (lockedVertices[vertexKey]) {
-      return;
+      continue;
     }
     const force = forces[vertexKey] as Vector;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const vertexPosition = verticesPositions[vertexKey]!;
     updatedVerticesPositions[vertexKey] = {
       x: vertexPosition.x.value + force.x,
       y: vertexPosition.y.value + force.y
     };
-  });
+  }
 
   return updatedVerticesPositions;
 };
