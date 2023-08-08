@@ -25,7 +25,7 @@ const validateProps = <V, E>(props: GraphData<V, E>) => {
   if (props.settings?.focus) {
     const focusPoints = props.settings.focus.points;
     const keySet = new Set();
-    Object.keys(focusPoints).forEach(key => {
+    for (const key in focusPoints) {
       if (+key < 0 || +key > 1) {
         throw new Error(
           `Invalid focus points: key ${key} must be between 0 and 1`
@@ -39,7 +39,7 @@ const validateProps = <V, E>(props: GraphData<V, E>) => {
         );
       }
       keySet.add(key);
-    });
+    }
   }
 };
 
@@ -72,7 +72,7 @@ function GraphComponentComposer<V, E>({
     []
   );
 
-  // IMPORTANT: graphComponent must be memoized to prevent re-rendering
+  // IMPORTANT: canvasContexts must be memoized to prevent re-rendering
   const canvasContexts = useMemo<CanvasContexts>(
     () => ({
       autoSizingContext,

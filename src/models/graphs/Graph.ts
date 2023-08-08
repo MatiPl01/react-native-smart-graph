@@ -202,9 +202,9 @@ export default abstract class Graph<
     settings?: FocusSettings
   ): void {
     this.lastFocusChangeSettings = settings ?? null;
-    this.observers.forEach(observer => {
+    for (const observer of this.observers) {
       observer.focusChanged?.(vertexKey, settings);
-    });
+    }
   }
 
   protected notifyGraphChange(
@@ -215,9 +215,9 @@ export default abstract class Graph<
       vertices: {}
     };
     this.lastGraphChangeSettings = updatedAnimationSettings;
-    this.observers.forEach(observer => {
+    for (const observer of this.observers) {
       observer.graphChanged?.(updatedAnimationSettings);
-    });
+    }
   }
 
   get orderedEdges(): OrderedEdges<V, E, GE> {
@@ -225,24 +225,26 @@ export default abstract class Graph<
       const addedEdgesKeys = new Set<string>();
       const result: OrderedEdges<V, E, GE> = [];
 
-      this.edges.forEach(edge => {
+      for (const edge of this.edges) {
         if (addedEdgesKeys.has(edge.key)) {
-          return;
+          continue;
         }
+
         const [v1, v2] = edge.vertices;
         const edgesBetweenVertices =
           this.edgesBetweenVertices$[v1.key]?.[v2.key] ?? [];
-        this.orderEdgesBetweenVertices(edgesBetweenVertices).forEach(
-          ({ edge: e, order }) => {
-            result.push({
-              edge: e,
-              edgesCount: edgesBetweenVertices.length,
-              order
-            });
-            addedEdgesKeys.add(edge.key);
-          }
-        );
-      });
+
+        for (const { edge: e, order } of this.orderEdgesBetweenVertices(
+          edgesBetweenVertices
+        )) {
+          result.push({
+            edge: e,
+            edgesCount: edgesBetweenVertices.length,
+            order
+          });
+          addedEdgesKeys.add(edge.key);
+        }
+      }
 
       this.cachedOrderedEdges = result;
     }
@@ -259,8 +261,12 @@ export default abstract class Graph<
     notifyChange = true
   ): void {
     // Remove edges and vertices from graph
-    data.edges?.forEach(key => this.removeEdge(key, null, false));
-    data.vertices?.forEach(key => this.removeVertex(key, null, false));
+    for (const edgeKey of data.edges ?? []) {
+      this.removeEdge(edgeKey, null, false);
+    }
+    for (const vertexKey of data.vertices ?? []) {
+      this.removeVertex(vertexKey, null, false);
+    }
     // Notify observers after all changes to the graph model are made
     if (notifyChange) {
       this.notifyGraphChange(
