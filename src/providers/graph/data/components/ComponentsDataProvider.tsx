@@ -94,17 +94,12 @@ function ComponentsDataProvider<V, E>({
   );
 
   useEffect(() => {
-    console.log('Something has changed...', removedVertices.size);
     const newData = getComponentsData();
     setContextValue(value =>
       updateContextValue(value, newData, componentsData)
     );
     setComponentsData(newData);
   }, [state, graphAnimationsSettings, renderLabels]);
-
-  useEffect(() => {
-    console.log('>>> COMPONENTS DATA UPDATE');
-  }, [contextValue]);
 
   return (
     <GraphComponentsDataContext.Provider value={contextValue}>

@@ -276,8 +276,6 @@ export const updateValues = <
       ? settings.new?.[key as keyof N] ?? settings.default[key as keyof D]
       : settings.new?.[key as keyof N];
 
-    // console.log({ [key]: value });
-
     // SHARED VALUES
     if (sharedKeys?.has(key as K)) {
       const res = result as Record<string, SharedValue<any>>;

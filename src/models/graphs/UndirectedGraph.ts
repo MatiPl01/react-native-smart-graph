@@ -68,8 +68,12 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
     notifyChange = true
   ): void {
     // Insert edges and vertices to the graph model
-    vertices?.forEach(data => this.insertVertex(data, null, false));
-    edges?.forEach(data => this.insertEdge(data, null, false));
+    for (const vertex of vertices ?? []) {
+      this.insertVertex(vertex, null, false);
+    }
+    for (const edge of edges ?? []) {
+      this.insertEdge(edge, null, false);
+    }
     // Notify observers after all changes to the graph model are made
     if (notifyChange) {
       this.notifyGraphChange(

@@ -31,10 +31,10 @@ function ContainerDimensionsProvider({
       targetRect: targetBoundingRect.value
     }),
     ({ currentRect, targetRect }) => {
-      Object.keys(boundingRect).forEach((key: string) => {
+      for (const key in boundingRect) {
         const k = key as keyof BoundingRect;
         boundingRect[k].value = animateToValue(currentRect[k], targetRect[k]);
-      });
+      }
     }
   );
 

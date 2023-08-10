@@ -65,15 +65,17 @@ export const bfs = (
       if (callback({ depth, parent, startVertex: sv, vertex: key })) {
         return parents;
       }
-      getVertexNeighbors(connections, key, traverseDirection).forEach(
-        neighbor => {
-          queue.enqueue({
-            depth: depth + 1,
-            key: neighbor,
-            parent: key
-          });
-        }
-      );
+      for (const neighbor of getVertexNeighbors(
+        connections,
+        key,
+        traverseDirection
+      )) {
+        queue.enqueue({
+          depth: depth + 1,
+          key: neighbor,
+          parent: key
+        });
+      }
     }
   }
 

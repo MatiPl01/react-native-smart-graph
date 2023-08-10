@@ -54,12 +54,6 @@ export default function GraphSettingsProvider<V, E>({
     };
   }, []);
 
-  useEffect(() => {
-    console.log('update');
-  }, [contextValue]);
-
-  console.log('render', contextValue.settings.components.vertex.radius.value);
-
   return (
     <GraphSettingsContext.Provider value={contextValue}>
       {children}

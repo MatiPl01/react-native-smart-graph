@@ -189,12 +189,13 @@ export const updateNewVerticesPositions = <V, E>(
     vertexRadius
   );
   // Update positions of new vertices
-  Object.entries(newVerticesPositions).forEach(([key, position]) => {
+  for (const key in newVerticesPositions) {
+    const position = newVerticesPositions[key]!;
     const vertexPosition = verticesData[key]?.position;
     if (!vertexPosition) {
       return;
     }
     vertexPosition.x.value = position.x;
     vertexPosition.y.value = position.y;
-  });
+  }
 };

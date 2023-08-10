@@ -317,11 +317,9 @@ const updateGraphEdgeLabelsData = <V, E>(
   let isModified = false; // Flag to indicate if edges data was updated
 
   // Add new labels data
-  Object.entries(edgesData).forEach(([key, data]) => {
+  for (const key in edgesData) {
     const edgeData = edgesData[key];
-
     const oldLabelData = oldEdgeLabelsData[key];
-
     // Update label data if it is not rendered yet or its value was changed
     if (
       edgeData &&
@@ -329,24 +327,21 @@ const updateGraphEdgeLabelsData = <V, E>(
     ) {
       isModified = true;
       updatedEdgeLabelsData[key] = {
-        animationProgress: data.animationProgress,
-        centerX: data.labelPosition.x,
-        centerY: data.labelPosition.y,
-        height: data.labelHeight,
+        animationProgress: edgeData.animationProgress,
+        centerX: edgeData.labelPosition.x,
+        centerY: edgeData.labelPosition.y,
+        height: edgeData.labelHeight,
         v1Position: edgeData.v1Position,
         v2Position: edgeData.v2Position,
         value: edgeData.edge.value
       };
     }
-  });
-
-  // Keys of edges that are currently in the graph
-  const currentEdgesKeys = new Set(Object.keys(edgesData));
+  }
 
   // Remove labels data of edges that are no longer displayed
   // (their unmount animation is finished)
   for (const key in oldEdgeLabelsData) {
-    if (!currentEdgesKeys.has(key)) {
+    if (!edgesData[key]) {
       isModified = true;
       delete updatedEdgeLabelsData[key];
     }

@@ -46,9 +46,10 @@ function ForcesLayoutProvider({
     targetBoundingRect.value = calcContainerBoundingRect(targetPositions);
 
     // Update the positions of the vertices
-    Object.entries(targetPositions).forEach(([key, targetPosition]) => {
+    for (const key in targetPositions) {
       const vertexPosition = placedVerticesPositions[key];
-      if (!vertexPosition) return;
+      const targetPosition = targetPositions[key];
+      if (!vertexPosition || !targetPosition) return;
       vertexPosition.x.value = animateToValue(
         vertexPosition.x.value,
         targetPosition.x
@@ -57,7 +58,7 @@ function ForcesLayoutProvider({
         vertexPosition.y.value,
         targetPosition.y
       );
-    });
+    }
   });
 
   return <>{children}</>;

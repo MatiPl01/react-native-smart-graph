@@ -36,8 +36,6 @@ export const updateContextValue = <V, E>(
   const { renderers: defaultRenderers, settings: defaultSettings } =
     getDefaultConfig(data);
 
-  console.log(settings?.components?.vertex);
-
   // CONTEXT VALUE
   return updateValues({
     current: value,
@@ -133,12 +131,7 @@ export const updateContextValue = <V, E>(
 
 export const createContextValue = <V, E>(
   data: GraphData<V, E>
-): GraphSettingsData<V, E> => {
-  const res = updateContextValue(data);
-
-  console.log('\n\n\n>>> res', res.settings.focus?.points, '\n\n\n\n\n');
-  return res;
-};
+): GraphSettingsData<V, E> => updateContextValue(data);
 
 export const clearContextValue = <V, E>(value: GraphSettingsData<V, E>): void =>
   cancelAnimations(value);
