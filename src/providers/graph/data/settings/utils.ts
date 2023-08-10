@@ -63,14 +63,16 @@ export const updateContextValue = <V, E>(
           components: updateValues({
             current: value?.settings?.components,
             new: {
-              arrow: updateValues(
-                {
-                  current: value?.settings?.components?.arrow,
-                  default: defaultSettings.components.arrow,
-                  new: settings?.components?.arrow
-                },
-                SHARED_KEYS.components.arrow
-              ),
+              arrow: graph.isDirected()
+                ? updateValues(
+                    {
+                      current: value?.settings?.components?.arrow,
+                      default: defaultSettings.components.arrow,
+                      new: settings?.components?.arrow
+                    },
+                    SHARED_KEYS.components.arrow
+                  )
+                : undefined,
               edge: updateValues(
                 {
                   current: value?.settings?.components?.edge,
