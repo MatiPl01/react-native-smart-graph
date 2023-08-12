@@ -43,19 +43,18 @@ function GraphPlacementLayoutProvider<V, E>({
   // CONTEXTS
   // Canvas contexts
   const {
+    dataContext: { canvasDimensions },
     transformContext: { handleGraphRender: onRender }
   } = useCanvasContexts();
 
   const isFirstRender = useSharedValue(true);
 
   useAnimatedReaction(
-    () => ({
-      radius: vertexRadius.value
-    }),
-    ({ radius }) => {
+    () => null,
+    () => {
       const { boundingRect, verticesPositions } = placeVertices(
         connections,
-        radius,
+        vertexRadius.value,
         placementSettings,
         isGraphDirected.value
       );
@@ -79,6 +78,23 @@ function GraphPlacementLayoutProvider<V, E>({
       );
     },
     [verticesData, placementSettings, edgesData]
+  );
+
+  useAnimatedReaction(
+    () => vertexRadius.value,
+    radius => {
+      // TODO - update distances between vertices
+    }
+  );
+
+  useAnimatedReaction(
+    () => ({
+      height: canvasDimensions.height.value,
+      width: canvasDimensions.width.value
+    }),
+    () => {
+      // TODO - update random placement
+    }
   );
 
   return <>{children}</>;
