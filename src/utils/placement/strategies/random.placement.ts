@@ -1,6 +1,6 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { WINDOW_DIMENSIONS } from '@/constants/device';
+import { Dimensions } from '@/types/layout';
 import {
   AllRandomPlacementSettings,
   GraphLayout,
@@ -141,16 +141,16 @@ const calcVerticesRandomPositions = (
 export default function placeVerticesRandomly(
   vertices: Array<string>,
   vertexRadius: number,
+  canvasDimensions: Dimensions,
   settings: AllRandomPlacementSettings
 ): GraphLayout {
   'worklet';
   if (settings.mesh === 'random') {
-    const { height, width } = WINDOW_DIMENSIONS;
     return calcVerticesRandomPositions(
       vertices,
       vertexRadius,
-      settings.containerWidth ?? width,
-      settings.containerHeight ?? height
+      settings.containerWidth ?? canvasDimensions.width,
+      settings.containerHeight ?? canvasDimensions.height
     );
   }
 

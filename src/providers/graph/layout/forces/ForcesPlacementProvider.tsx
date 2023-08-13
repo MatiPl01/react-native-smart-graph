@@ -60,6 +60,7 @@ function ForcesPlacementProvider<V, E>({
   // CONTEXTS
   // Canvas contexts
   const {
+    dataContext: { canvasDimensions },
     transformContext: { handleGraphRender: onRender }
   } = useCanvasContexts();
 
@@ -114,6 +115,10 @@ function ForcesPlacementProvider<V, E>({
     const { boundingRect, verticesPositions } = placeVertices(
       connections,
       vertexRadius.value,
+      {
+        height: canvasDimensions.height.value,
+        width: canvasDimensions.width.value
+      },
       placementSettings
     );
     onRender(boundingRect);

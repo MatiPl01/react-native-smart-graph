@@ -50,13 +50,21 @@ function GraphPlacementLayoutProvider<V, E>({
   const isFirstRender = useSharedValue(true);
 
   useAnimatedReaction(
-    () => null,
-    () => {
+    () => ({
+      canvasDims: {
+        height: canvasDimensions.height.value,
+        width: canvasDimensions.width.value
+      },
+      isDirected: isGraphDirected.value,
+      radius: vertexRadius.value
+    }),
+    ({ canvasDims, isDirected, radius }) => {
       const { boundingRect, verticesPositions } = placeVertices(
         connections,
-        vertexRadius.value,
+        radius,
+        canvasDims,
         placementSettings,
-        isGraphDirected.value
+        isDirected
       );
 
       if (isFirstRender.value) {
@@ -78,23 +86,6 @@ function GraphPlacementLayoutProvider<V, E>({
       );
     },
     [verticesData, placementSettings, edgesData]
-  );
-
-  useAnimatedReaction(
-    () => vertexRadius.value,
-    radius => {
-      // TODO - update distances between vertices
-    }
-  );
-
-  useAnimatedReaction(
-    () => ({
-      height: canvasDimensions.height.value,
-      width: canvasDimensions.width.value
-    }),
-    () => {
-      // TODO - update random placement
-    }
   );
 
   return <>{children}</>;

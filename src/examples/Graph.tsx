@@ -136,9 +136,13 @@ export default function App() {
     <GraphView objectFit='contain'>
       <DirectedGraphComponent
         settings={{
-          layout: {
-            type: 'force'
+          placement: {
+            strategy: 'random',
+            mesh: 'random'
           }
+          // layout: {
+          //   type: 'force'
+          // }
         }}
         graph={graph}
       />
