@@ -1,3 +1,4 @@
+import { Dimensions } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import { AllGraphPlacementSettings, GraphLayout } from '@/types/settings';
 import { findGraphComponents } from '@/utils/algorithms';
@@ -13,6 +14,7 @@ export * from './shared';
 export const placeVertices = (
   connections: GraphConnections,
   vertexRadius: number,
+  canvasDimensions: Dimensions,
   settings: AllGraphPlacementSettings,
   isGraphDirected = false
 ): GraphLayout => {
@@ -49,6 +51,7 @@ export const placeVertices = (
       return placeVerticesRandomly(
         Object.keys(connections),
         vertexRadius,
+        canvasDimensions,
         settings
       );
   }

@@ -43,6 +43,7 @@ function GraphPlacementLayoutProvider<V, E>({
   // CONTEXTS
   // Canvas contexts
   const {
+    dataContext: { canvasDimensions },
     transformContext: { handleGraphRender: onRender }
   } = useCanvasContexts();
 
@@ -50,14 +51,20 @@ function GraphPlacementLayoutProvider<V, E>({
 
   useAnimatedReaction(
     () => ({
+      canvasDims: {
+        height: canvasDimensions.height.value,
+        width: canvasDimensions.width.value
+      },
+      isDirected: isGraphDirected.value,
       radius: vertexRadius.value
     }),
-    ({ radius }) => {
+    ({ canvasDims, isDirected, radius }) => {
       const { boundingRect, verticesPositions } = placeVertices(
         connections,
         radius,
+        canvasDims,
         placementSettings,
-        isGraphDirected.value
+        isDirected
       );
 
       if (isFirstRender.value) {
