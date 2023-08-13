@@ -127,7 +127,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 1000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -136,13 +136,9 @@ export default function App() {
     <GraphView objectFit='contain'>
       <DirectedGraphComponent
         settings={{
-          placement: {
-            strategy: 'random',
-            mesh: 'random'
+          layout: {
+            type: 'force'
           }
-          // layout: {
-          //   type: 'force'
-          // }
         }}
         graph={graph}
       />

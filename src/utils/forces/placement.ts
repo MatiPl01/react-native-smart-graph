@@ -2,10 +2,20 @@
 import { Vector } from '@shopify/react-native-skia';
 
 import { VertexComponentData } from '@/types/data';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import {
+  AnimatedVectorCoordinates,
+  BoundingRect,
+  Dimensions
+} from '@/types/layout';
 import { GraphConnections } from '@/types/models';
+import {
+  AllAnimationSettings,
+  AllGraphPlacementSettings
+} from '@/types/settings';
 import { grahamScan } from '@/utils/algorithms';
+import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { findCenterOfPoints } from '@/utils/layout';
+import { placeVertices } from '@/utils/placement';
 import {
   animatedVectorCoordinatesToVector,
   calcOrthogonalUnitVector,
@@ -167,6 +177,32 @@ const findForcesPlacementPositions = (
     );
     return acc;
   }, {} as Record<string, Vector>);
+};
+
+export const updateInitialVerticesPositions = (
+  animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
+  connections: GraphConnections,
+  vertexRadius: number,
+  canvasDimensions: Dimensions,
+  placementSettings: AllGraphPlacementSettings,
+  animationSettings: AllAnimationSettings,
+  onRender: (boundingRect: BoundingRect) => void
+): void => {
+  'worklet';
+  const { boundingRect, verticesPositions } = placeVertices(
+    connections,
+    vertexRadius,
+    canvasDimensions,
+    placementSettings
+  );
+
+  animateVerticesToFinalPositions(
+    animatedVerticesPositions,
+    verticesPositions,
+    animationSettings
+  );
+
+  onRender(boundingRect);
 };
 
 export const updateNewVerticesPositions = <V, E>(
