@@ -24,7 +24,9 @@ export const animateVerticesToFinalPositions = (
   'worklet';
   const finalPositionsEntries = Object.entries(finalPositions);
 
-  finalPositionsEntries.forEach(([key, finalPosition], idx) => {
+  for (let i = 0; i < finalPositionsEntries.length; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const [key, finalPosition] = finalPositionsEntries[i]!;
     const animatedPosition = animatedPositions[key];
     if (animatedPosition) {
       animatedPosition.x.value = withTiming(finalPosition.x, {
@@ -38,7 +40,7 @@ export const animateVerticesToFinalPositions = (
           easing
         },
         // Call onComplete only once, when the last vertex animation is complete
-        onComplete && idx === finalPositionsEntries.length - 1
+        onComplete && i === finalPositionsEntries.length - 1
           ? (finished?: boolean) => {
               'worklet';
               runOnJS(onComplete)(finished);
@@ -46,7 +48,7 @@ export const animateVerticesToFinalPositions = (
           : undefined
       );
     }
-  });
+  }
 };
 
 const ANIMATION_SETTINGS_KEYS = new Set(['duration', 'easing', 'onComplete']);

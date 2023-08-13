@@ -15,6 +15,7 @@ import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { useVertexFocusContext } from '@/providers/graph/focus/VertexFocusProvider';
 import { FocusStepData, VertexComponentData } from '@/types/data';
 import { InternalMultiStepFocusSettings } from '@/types/settings';
+import { binarySearchLE } from '@/utils/algorithms';
 import { getFocusSteps } from '@/utils/focus';
 
 import { useStateMachine } from './StateMachine';
@@ -67,20 +68,20 @@ function MultiStepVertexFocusProvider<V, E>({
     syncProgress.value = withTiming(1, DEFAULT_GESTURE_ANIMATION_SETTINGS); // TODO - maybe make this customizable
   }, []);
 
-  // const updateInitialStep = useWorkletCallback(
-  //   (progress: null | number, data: Array<FocusStepData<V, E>>) => {
-  //     if (progress === null) {
-  //       initialStep.value = -1;
-  //       return;
-  //     }
-  //     const step = binarySearchLE(data, progress, ({ startsAt }) => startsAt);
-  //     syncProgress.value = 0;
-  //     if (step === initialStep.value) return;
-  //     initialStep.value = step;
-  //     previousStep.value = initialStep.value = step;
-  //   },
-  //   []
-  // );
+  const updateInitialStep = useWorkletCallback(
+    (progress: null | number, data: Array<FocusStepData<V, E>>) => {
+      if (progress === null) {
+        initialStep.value = -1;
+        return;
+      }
+      const step = binarySearchLE(data, progress, ({ startsAt }) => startsAt);
+      syncProgress.value = 0;
+      if (step === initialStep.value) return;
+      initialStep.value = step;
+      previousStep.value = initialStep.value = step;
+    },
+    []
+  );
 
   // Update the orderedFocusPoints array only when the available focus points
   // change (available means that the corresponding vertex is rendered)
@@ -93,11 +94,11 @@ function MultiStepVertexFocusProvider<V, E>({
         .map(([key, point]) => ({
           point: {
             // TODO - move defaults somewhere else
-            vertexScale: 1,
+            vertexScale: DEFAULT_FOCUS_SETTINGS.vertexScale,
             ...point,
             alignment: {
-              ...point.alignment,
-              ...DEFAULT_FOCUS_SETTINGS.alignment
+              ...DEFAULT_FOCUS_SETTINGS.alignment,
+              ...point.alignment
             }
           },
           startsAt: +key,
@@ -124,16 +125,18 @@ function MultiStepVertexFocusProvider<V, E>({
     [verticesData]
   );
 
-  // // Update the initial step when the progress property is replaced, // TODO - fix
-  // // the focus steps data changes or the isEnabled value changes
-  // useAnimatedReaction(
-  //   () => isEnabled.value,
-  //   enabled => {
-  //     if (!enabled) updateInitialStep(null, focusStepsData);
-  //     else updateInitialStep(settings.progress.value, focusStepsData);
-  //   },
-  //   [settings.progress]
-  // );
+  // Update the initial step when the progress property is replaced, // TODO - fix
+  // the focus steps data changes or the isEnabled value changes
+  useAnimatedReaction(
+    () => ({
+      enabled: isEnabled.value,
+      steps: focusStepsData.value
+    }),
+    ({ enabled, steps }) => {
+      if (!enabled) updateInitialStep(null, steps);
+      else updateInitialStep(settings.progress.value, steps);
+    }
+  );
 
   // Start syncing the progress if the progress value changes
   // (For smooth graph transition from current position to the

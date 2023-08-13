@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import Graph from './examples/Graph';
+import BottomSheetFocus from './examples/BottomSheetFocus.example';
 
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <Graph />
+      <BottomSheetFocus />
     </GestureHandlerRootView>
   );
 }
