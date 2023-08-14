@@ -48,14 +48,12 @@ function ForcesLayoutProvider({
   const lastUpdateTimestamp = useSharedValue(0);
 
   const enableForces = () => {
-    console.log('enable');
     // Enable forces if locked vertices change
     frameCallback.setActive(true);
     lastUpdateTimestamp.value = 0;
   };
 
   const disableForces = () => {
-    console.log('disable');
     frameCallback.setActive(false);
   };
 
@@ -82,7 +80,6 @@ function ForcesLayoutProvider({
       updatedVerticesKeys.value = updatedKeys = result.keys;
 
       // Disable forces layout if there are no vertices to update
-      console.log(updatedKeys);
       if (!updatedKeys.length) {
         runOnJS(disableForces)();
         return;
@@ -113,11 +110,12 @@ function ForcesLayoutProvider({
 
   useAnimatedReaction(
     () => ({
+      completed: initialPlacementCompleted.value,
       padding: vertexRadius.value,
       positions: targetPositions.value
     }),
-    ({ padding, positions }) => {
-      if (!initialPlacementCompleted.value) return;
+    ({ completed, padding, positions }) => {
+      if (!completed) return;
       targetBoundingRect.value = calcContainerBoundingRect(positions, {
         padding
       });
