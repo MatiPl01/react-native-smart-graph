@@ -10,8 +10,11 @@ export const applyForces = (
   connections: GraphConnections,
   lockedVertices: Record<string, boolean>,
   verticesPositions: Record<string, AnimatedVectorCoordinates>,
-  settings: AllForceLayoutSettings
-): Record<string, Vector> => {
+  settings: Omit<AllForceLayoutSettings, 'refreshInterval'>
+): {
+  keys: Array<string>;
+  positions: Record<string, Vector>;
+} => {
   'worklet';
   switch (settings.strategy) {
     default:

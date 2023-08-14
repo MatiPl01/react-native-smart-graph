@@ -11,8 +11,10 @@ export type AutoLayoutSettings = {
 export type ForceLayoutSettings = {
   attractionForceFactor?: number;
   attractionScale?: number;
+  minUpdateDistance?: number;
+  refreshInterval?: number;
   repulsionScale?: number;
-  strategy?: 'default';
+  strategy?: 'default'; // TODO - add more in the future
   type: 'force';
 };
 

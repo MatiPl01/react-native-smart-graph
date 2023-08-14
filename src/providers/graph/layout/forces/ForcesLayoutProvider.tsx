@@ -1,10 +1,19 @@
 import { PropsWithChildren } from 'react';
-import { SharedValue, useFrameCallback } from 'react-native-reanimated';
+import {
+  runOnJS,
+  SharedValue,
+  useAnimatedReaction,
+  useFrameCallback,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { BoundingRect } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
-import { InternalForceLayoutSettings } from '@/types/settings';
+import {
+  InternalForceLayoutSettings,
+  PlacedVerticesPositions
+} from '@/types/settings';
 import { animateToValue } from '@/utils/animations';
 import { applyForces } from '@/utils/forces';
 import {
@@ -16,40 +25,81 @@ import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps = PropsWithChildren<{
   connections: GraphConnections;
-  forcesSettings: InternalForceLayoutSettings;
+  settings: InternalForceLayoutSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
+  vertexRadius: SharedValue<number>;
 }>;
 
 function ForcesLayoutProvider({
   children,
   connections,
-  forcesSettings,
-  targetBoundingRect
+  settings,
+  targetBoundingRect,
+  vertexRadius
 }: ForcesLayoutProviderProps) {
   // CONTEXTS
   // Forces placement context
-  const { lockedVertices, placedVerticesPositions } =
+  const { initialPlacementCompleted, lockedVertices, placedVerticesPositions } =
     useForcesPlacementContext();
 
-  useFrameCallback(() => {
-    const targetPositions = alignPositionsToCenter(
-      applyForces(connections, lockedVertices, placedVerticesPositions, {
-        attractionForceFactor: forcesSettings.attractionForceFactor.value,
-        attractionScale: forcesSettings.attractionScale.value,
-        repulsionScale: forcesSettings.repulsionScale.value,
-        strategy: forcesSettings.strategy.value,
-        type: forcesSettings.type
-      })
-    ).verticesPositions;
+  // Helper values
+  const targetPositions = useSharedValue<PlacedVerticesPositions>({});
+  const updatedVerticesKeys = useSharedValue<Array<string>>([]);
+  const lastUpdateTimestamp = useSharedValue(0);
 
-    // Update the target bounding rect
-    targetBoundingRect.value = calcContainerBoundingRect(targetPositions);
+  const enableForces = () => {
+    console.log('enable');
+    // Enable forces if locked vertices change
+    frameCallback.setActive(true);
+    lastUpdateTimestamp.value = 0;
+  };
 
-    // Update the positions of the vertices
-    for (const key in targetPositions) {
+  const disableForces = () => {
+    console.log('disable');
+    frameCallback.setActive(false);
+  };
+
+  const frameCallback = useFrameCallback(({ timestamp }) => {
+    let newPositions = targetPositions.value ?? {};
+    let updatedKeys = updatedVerticesKeys.value ?? [];
+    if (
+      timestamp - lastUpdateTimestamp.value >=
+      settings.refreshInterval.value
+    ) {
+      const result = applyForces(
+        connections,
+        lockedVertices,
+        placedVerticesPositions,
+        {
+          attractionForceFactor: settings.attractionForceFactor.value,
+          attractionScale: settings.attractionScale.value,
+          minUpdateDistance: settings.minUpdateDistance.value,
+          repulsionScale: settings.repulsionScale.value,
+          strategy: settings.strategy.value,
+          type: settings.type
+        }
+      );
+      updatedVerticesKeys.value = updatedKeys = result.keys;
+
+      // Disable forces layout if there are no vertices to update
+      console.log(updatedKeys);
+      if (!updatedKeys.length) {
+        runOnJS(disableForces)();
+        return;
+      }
+
+      targetPositions.value = newPositions = alignPositionsToCenter(
+        result.positions
+      ).verticesPositions;
+      lastUpdateTimestamp.value = timestamp;
+    }
+
+    // Update positions of the vertices
+    for (const key in newPositions) {
       const vertexPosition = placedVerticesPositions[key];
-      const targetPosition = targetPositions[key];
+      const targetPosition = newPositions[key];
       if (!vertexPosition || !targetPosition) return;
+      // Animate vertex position to the target position
       vertexPosition.x.value = animateToValue(
         vertexPosition.x.value,
         targetPosition.x
@@ -59,7 +109,29 @@ function ForcesLayoutProvider({
         targetPosition.y
       );
     }
-  });
+  }, false);
+
+  useAnimatedReaction(
+    () => ({
+      padding: vertexRadius.value,
+      positions: targetPositions.value
+    }),
+    ({ padding, positions }) => {
+      if (!initialPlacementCompleted.value) return;
+      targetBoundingRect.value = calcContainerBoundingRect(positions, {
+        padding
+      });
+    }
+  );
+
+  useAnimatedReaction(
+    () => initialPlacementCompleted.value,
+    completed => {
+      if (!completed) return;
+      runOnJS(enableForces)();
+    },
+    [connections]
+  );
 
   return <>{children}</>;
 }
@@ -73,6 +145,7 @@ export default withGraphSettings(
     })
   ),
   ({ settings }) => ({
-    forcesSettings: settings.layout as InternalForceLayoutSettings
+    settings: settings.layout as InternalForceLayoutSettings,
+    vertexRadius: settings.components.vertex.radius
   })
 );

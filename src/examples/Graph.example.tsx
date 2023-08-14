@@ -127,7 +127,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 5000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);

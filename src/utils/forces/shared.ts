@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vector } from '@shopify/react-native-skia';
 
 import { AnimatedVectorCoordinates } from '@/types/layout';
@@ -8,7 +9,8 @@ import {
   animatedVectorCoordinatesToVector,
   calcUnitVector,
   distanceBetweenVectors,
-  multiplyVector
+  multiplyVector,
+  vectorLength
 } from '@/utils/vectors';
 
 const calcAttractiveForce = (
@@ -116,23 +118,34 @@ export const calcForces = (
 export const updateVerticesPositions = (
   forces: Record<string, Vector>,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>
-): Record<string, Vector> => {
+  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  minUpdateDistance: number
+): {
+  keys: Array<string>;
+  positions: Record<string, Vector>;
+} => {
   'worklet';
   const updatedVerticesPositions: Record<string, Vector> = {};
+  const updatedVerticesKeys: Array<string> = [];
 
   for (const vertexKey in verticesPositions) {
+    const force = forces[vertexKey]!;
     if (lockedVertices[vertexKey]) {
       continue;
     }
-    const force = forces[vertexKey] as Vector;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const vertexPosition = verticesPositions[vertexKey]!;
-    updatedVerticesPositions[vertexKey] = {
-      x: vertexPosition.x.value + force.x,
-      y: vertexPosition.y.value + force.y
-    };
+    const vertexPosition = animatedVectorCoordinatesToVector(
+      verticesPositions[vertexKey]
+    );
+    if (vectorLength(force) < minUpdateDistance) {
+      updatedVerticesPositions[vertexKey] = vertexPosition;
+    } else {
+      updatedVerticesPositions[vertexKey] = addVectors(vertexPosition, force);
+      updatedVerticesKeys.push(vertexKey);
+    }
   }
 
-  return updatedVerticesPositions;
+  return {
+    keys: updatedVerticesKeys,
+    positions: updatedVerticesPositions
+  };
 };

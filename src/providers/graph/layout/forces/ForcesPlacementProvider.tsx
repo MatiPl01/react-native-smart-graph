@@ -7,7 +7,7 @@ import {
   useRef,
   useState
 } from 'react';
-import { runOnUI, SharedValue } from 'react-native-reanimated';
+import { runOnUI, SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
@@ -24,6 +24,7 @@ import {
 } from '@/utils/forces';
 
 type ForcesPlacementContextType = {
+  initialPlacementCompleted: SharedValue<boolean>;
   lockedVertices: Record<string, boolean>;
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>;
 };
@@ -81,6 +82,8 @@ function ForcesPlacementProvider<V, E>({
   );
   // Ref to track if the component is rendered for the first time
   const isFirstRenderRef = useRef(true);
+  // Used to indicate if the initial placement animation was completed
+  const initialPlacementCompleted = useSharedValue(false);
 
   useEffect(() => {
     // Get animated vertices positions
@@ -141,12 +144,15 @@ function ForcesPlacementProvider<V, E>({
     (onComplete?: () => void) => () => {
       // Unlock vertices
       setLockedVertices({});
+      // Mark the initial placement as completed
+      initialPlacementCompleted.value = true;
       // Call the original onComplete handler
       onComplete?.();
     };
 
   const contextValue = useMemo<ForcesPlacementContextType>(
     () => ({
+      initialPlacementCompleted,
       lockedVertices,
       placedVerticesPositions
     }),
