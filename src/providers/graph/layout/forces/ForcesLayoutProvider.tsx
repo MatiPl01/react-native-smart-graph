@@ -54,13 +54,11 @@ function ForcesLayoutProvider<V, E>({
   const lastUpdateTimestamp = useSharedValue(0);
 
   const enableForces = () => {
-    console.log('enable');
     frameCallback.setActive(true);
     lastUpdateTimestamp.value = 0;
   };
 
   const disableForces = () => {
-    console.log('disable');
     frameCallback.setActive(false);
     targetPositions.value = null;
   };
