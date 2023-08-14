@@ -175,6 +175,8 @@ function MultiStepVertexFocusProvider<V, E>({
       if (!currentSteps) return;
       const { afterStep, beforeStep, currentStep } = currentSteps;
 
+      console.log(beforeStep?.point.key, currentStep, afterStep?.point.key);
+
       // Update the state machine
       stateMachine.update(
         progress.current,

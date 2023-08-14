@@ -48,21 +48,14 @@ export default function BottomSheetFocus() {
           verticalOffset: 100
         }
       },
-      0.9: {
-        key: 'V3',
-        alignment: {
-          verticalOffset: 50,
-          verticalAlignment: 'top'
-        }
-      },
       1: {
-        key: 'V2',
-        vertexScale: 2.5,
+        key: 'V1',
+        vertexScale: 1,
         alignment: {
-          verticalOffset: 75,
           horizontalAlignment: 'left',
           verticalAlignment: 'top',
-          horizontalOffset: 25
+          verticalOffset: 50,
+          horizontalOffset: 50
         }
       }
     }),
@@ -96,7 +89,11 @@ export default function BottomSheetFocus() {
 
   return (
     <>
-      <GraphView objectFit='contain'>
+      <GraphView
+        padding={{
+          bottom: 25
+        }}
+        objectFit='contain'>
         <DirectedGraphComponent
           settings={{
             focus: {
