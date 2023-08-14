@@ -2,58 +2,58 @@ import React, { useEffect } from 'react';
 import { DirectedGraph, DirectedGraphComponent, GraphView } from '..';
 
 const ADDED_COMPONENTS = [
-  { key: 'F', value: 'F' },
-  { key: 'G', value: 'G' },
-  { key: 'H', value: 'H' },
-  { key: 'I', value: 'I' },
-  { key: 'J', value: 'J' },
+  // { key: 'F', value: 'F' },
+  // { key: 'G', value: 'G' },
+  // { key: 'H', value: 'H' },
+  // { key: 'I', value: 'I' },
+  // { key: 'J', value: 'J' },
   { key: 'K', value: 'K' },
-  { key: 'L', value: 'L' },
+  // { key: 'L', value: 'L' },
   {
     from: 'E',
     key: 'EK',
     to: 'K',
     value: 'EK'
-  },
-  {
-    from: 'E',
-    key: 'EL',
-    to: 'L',
-    value: 'EL'
-  },
-  {
-    from: 'C',
-    key: 'CF',
-    to: 'F',
-    value: 'CF'
-  },
-  { key: 'M', value: 'M' },
-  { key: 'N', value: 'N' },
-  { key: 'O', value: 'O' },
-  {
-    from: 'C',
-    key: 'CG',
-    to: 'G',
-    value: 'CG'
-  },
-  {
-    from: 'C',
-    key: 'CH',
-    to: 'H',
-    value: 'CH'
-  },
-  {
-    from: 'C',
-    key: 'CI',
-    to: 'I',
-    value: 'CI'
-  },
-  {
-    from: 'C',
-    key: 'CJ',
-    to: 'J',
-    value: 'CJ'
   }
+  // {
+  //   from: 'E',
+  //   key: 'EL',
+  //   to: 'L',
+  //   value: 'EL'
+  // },
+  // {
+  //   from: 'C',
+  //   key: 'CF',
+  //   to: 'F',
+  //   value: 'CF'
+  // },
+  // { key: 'M', value: 'M' },
+  // { key: 'N', value: 'N' },
+  // { key: 'O', value: 'O' },
+  // {
+  //   from: 'C',
+  //   key: 'CG',
+  //   to: 'G',
+  //   value: 'CG'
+  // },
+  // {
+  //   from: 'C',
+  //   key: 'CH',
+  //   to: 'H',
+  //   value: 'CH'
+  // },
+  // {
+  //   from: 'C',
+  //   key: 'CI',
+  //   to: 'I',
+  //   value: 'CI'
+  // },
+  // {
+  //   from: 'C',
+  //   key: 'CJ',
+  //   to: 'J',
+  //   value: 'CJ'
+  // }
 ];
 
 let idx = 0;
@@ -127,7 +127,7 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 200);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);

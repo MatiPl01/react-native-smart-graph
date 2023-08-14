@@ -69,7 +69,8 @@ export const updateContextValue = <V, E>(
 
   // Update vertices data only if vertices have changed
   const newVerticesData =
-    newData.state.vertices !== currentData?.state.vertices
+    newData.state.vertices !== currentData?.state.vertices ||
+    newData.removedVertices.size
       ? updateGraphVerticesData(
           value?.verticesData ?? {},
           newData.state.vertices,
@@ -81,7 +82,8 @@ export const updateContextValue = <V, E>(
 
   // Update edges data only if edges have changed
   const newEdgesData =
-    newData.state.edges !== currentData?.state.edges
+    newData.state.edges !== currentData?.state.edges ||
+    newData.removedEdges.size
       ? updateGraphEdgesData(
           value?.edgesData ?? {},
           newData.state.orderedEdges,
@@ -183,18 +185,16 @@ const updateGraphVerticesData = <V, E>(
   // Mark vertices as removed if they were removed from the graph model
   for (const key in oldVerticesData) {
     const vertexData = oldVerticesData[key];
-    if (vertexData && !currentVerticesKeys.has(key)) {
-      if (!vertexData.removed) {
-        isModified = true;
-        updatedVerticesData[key] = {
-          ...vertexData,
-          animationSettings: {
-            ...defaultAnimationSettings,
-            ...currentAnimationsSettings
-          },
-          removed: true
-        };
-      }
+    if (vertexData && !currentVerticesKeys.has(key) && !vertexData.removed) {
+      isModified = true;
+      updatedVerticesData[key] = {
+        ...vertexData,
+        animationSettings: {
+          ...defaultAnimationSettings,
+          ...currentAnimationsSettings
+        },
+        removed: true
+      };
     }
   }
 
@@ -205,6 +205,7 @@ const updateGraphVerticesData = <V, E>(
     if (vertexData) cancelVertexAnimations(vertexData);
     delete updatedVerticesData[key];
     removedVertices.delete(key);
+    isModified = true;
   }
 
   return isModified ? updatedVerticesData : oldVerticesData;
@@ -304,6 +305,7 @@ const updateGraphEdgesData = <V, E>(
     if (edgeData) cancelEdgeAnimations(edgeData);
     delete updatedEdgesData[key];
     removedEdges.delete(key);
+    isModified = true;
   }
 
   return isModified ? updatedEdgesData : oldEdgesData;
@@ -342,8 +344,8 @@ const updateGraphEdgeLabelsData = <V, E>(
   // (their unmount animation is finished)
   for (const key in oldEdgeLabelsData) {
     if (!edgesData[key]) {
-      isModified = true;
       delete updatedEdgeLabelsData[key];
+      isModified = true;
     }
   }
 
