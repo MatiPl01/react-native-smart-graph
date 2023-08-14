@@ -1,6 +1,5 @@
 import { PropsWithChildren } from 'react';
 import {
-  runOnJS,
   SharedValue,
   useAnimatedReaction,
   useSharedValue
@@ -69,7 +68,7 @@ function GraphPlacementLayoutProvider<V, E>({
 
       if (isFirstRender.value) {
         isFirstRender.value = false;
-        runOnJS(onRender)(boundingRect);
+        onRender(boundingRect);
       }
 
       targetBoundingRect.value = boundingRect;

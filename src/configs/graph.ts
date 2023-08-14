@@ -47,7 +47,7 @@ const sharedRootsPlacementSettings = {
   roots: []
 };
 
-export const DEFAULT_PLACEMENT_SETTINGS: {
+const DEFAULT_PLACEMENT_SETTINGS: {
   circle: AllCirclePlacementSettings;
   circles: AllCirclesPlacementSettings;
   orbits: AllOrbitsPlacementSettings;
@@ -108,6 +108,8 @@ export const DEFAULT_LAYOUT_SETTINGS: Record<
   force: {
     attractionForceFactor: 1,
     attractionScale: 1,
+    minUpdateDistance: 1,
+    refreshInterval: 100,
     repulsionScale: 100000,
     strategy: 'default',
     type: 'force'

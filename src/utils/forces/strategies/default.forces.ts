@@ -33,9 +33,13 @@ export const applyDefaultForces = (
   {
     attractionForceFactor,
     attractionScale,
+    minUpdateDistance,
     repulsionScale
-  }: AllForceLayoutSettings
-): Record<string, Vector> => {
+  }: Omit<AllForceLayoutSettings, 'refreshInterval'>
+): {
+  keys: Array<string>;
+  positions: Record<string, Vector>;
+} => {
   'worklet';
   const forces = calcForces(
     connections,
@@ -44,5 +48,10 @@ export const applyDefaultForces = (
     createAttractionFactorGetter(attractionScale, attractionForceFactor),
     createRepulsionFactorGetter(repulsionScale)
   );
-  return updateVerticesPositions(forces, lockedVertices, verticesPositions);
+  return updateVerticesPositions(
+    forces,
+    lockedVertices,
+    verticesPositions,
+    minUpdateDistance
+  );
 };

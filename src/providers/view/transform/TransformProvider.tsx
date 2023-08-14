@@ -117,6 +117,7 @@ export default function TransformProvider({
   };
 
   const handleGraphRender = (containerBoundingRect: BoundingRect) => {
+    'worklet';
     initialBoundingRect.value = containerBoundingRect;
   };
 

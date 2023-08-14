@@ -7,7 +7,7 @@ import {
   useRef,
   useState
 } from 'react';
-import { runOnUI, SharedValue } from 'react-native-reanimated';
+import { runOnUI, SharedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
@@ -18,11 +18,13 @@ import {
   AllAnimationSettings,
   AllGraphPlacementSettings
 } from '@/types/settings';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
-import { updateNewVerticesPositions } from '@/utils/forces';
-import { placeVertices } from '@/utils/placement';
+import {
+  updateInitialVerticesPositions,
+  updateNewVerticesPositions
+} from '@/utils/forces';
 
 type ForcesPlacementContextType = {
+  initialPlacementCompleted: SharedValue<boolean>;
   lockedVertices: Record<string, boolean>;
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>;
 };
@@ -80,29 +82,22 @@ function ForcesPlacementProvider<V, E>({
   );
   // Ref to track if the component is rendered for the first time
   const isFirstRenderRef = useRef(true);
-  // Ref to track if the component is rendered for the second time
-  const isSecondRenderRef = useRef(false);
+  // Used to indicate if the initial placement animation was completed
+  const initialPlacementCompleted = useSharedValue(false);
 
   useEffect(() => {
-    // Skip the first render (when verticesData is empty)
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      isSecondRenderRef.current = true;
-      return;
-    }
     // Get animated vertices positions
     const animatedVerticesPositions = Object.fromEntries(
       Object.entries(verticesData).map(([key, { position }]) => [key, position])
     );
-    // Animate vertices to their final positions on the second render
-    if (isSecondRenderRef.current) {
+    // Skip the first render (when verticesData is empty)
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
       handleFirstGraphRender(animatedVerticesPositions);
     }
     // Otherwise, calculate the optimal render positions for the vertices
     // and add them to the state
-    else {
-      handleNextGraphRender();
-    }
+    handleNextGraphRender();
     // Update the state
     setPlacedVerticesPositions(animatedVerticesPositions);
   }, [verticesData]);
@@ -110,28 +105,22 @@ function ForcesPlacementProvider<V, E>({
   const handleFirstGraphRender = (
     animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
   ) => {
-    isSecondRenderRef.current = false;
-
-    const { boundingRect, verticesPositions } = placeVertices(
+    runOnUI(updateInitialVerticesPositions)(
+      animatedVerticesPositions,
       connections,
       vertexRadius.value,
       {
         height: canvasDimensions.height.value,
         width: canvasDimensions.width.value
       },
-      placementSettings
-    );
-    onRender(boundingRect);
-
-    animateVerticesToFinalPositions(
-      animatedVerticesPositions,
-      verticesPositions,
+      placementSettings,
       {
         ...layoutAnimationSettings,
         onComplete: createFirstAnimationCompleteHandler(
           layoutAnimationSettings.onComplete
         )
-      }
+      },
+      onRender
     );
 
     // Mark vertices as locked until the animation is complete
@@ -155,12 +144,15 @@ function ForcesPlacementProvider<V, E>({
     (onComplete?: () => void) => () => {
       // Unlock vertices
       setLockedVertices({});
+      // Mark the initial placement as completed
+      initialPlacementCompleted.value = true;
       // Call the original onComplete handler
       onComplete?.();
     };
 
   const contextValue = useMemo<ForcesPlacementContextType>(
     () => ({
+      initialPlacementCompleted,
       lockedVertices,
       placedVerticesPositions
     }),

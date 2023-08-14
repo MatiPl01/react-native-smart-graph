@@ -13,6 +13,7 @@ import { calcApproxPointOnParabola } from '@/utils/math';
 import {
   calcOrthogonalUnitVector,
   calcUnitVector,
+  distanceBetweenVectors,
   translateAlongVector
 } from '@/utils/vectors';
 
@@ -48,8 +49,11 @@ function DirectedCurvedEdgeComponent<V, E>({
     (v1Position.y.value + v2Position.y.value) / 2
   );
   // Edge arrow
-  const arrowHeight = useDerivedValue(
-    () => 1.5 * v2Radius.value * settings.arrow.scale.value
+  const arrowHeight = useDerivedValue(() =>
+    Math.min(
+      distanceBetweenVectors(p1.value, p2.value),
+      1.5 * v2Radius.value * settings.arrow.scale.value
+    )
   );
   const arrowWidth = useDerivedValue(() => (2 / 3) * arrowHeight.value);
   const arrowTipPosition = useSharedValue({ x: 0, y: 0 });

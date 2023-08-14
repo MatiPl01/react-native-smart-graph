@@ -127,22 +127,18 @@ export default function App() {
         console.error(e);
         return;
       }
-    }, 1000);
+    }, 200);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <GraphView objectFit='contain'>
+    <GraphView objectFit='contain' scales={[1e-10, 1, 2]}>
       <DirectedGraphComponent
         settings={{
-          placement: {
-            strategy: 'random',
-            mesh: 'random'
+          layout: {
+            type: 'force'
           }
-          // layout: {
-          //   type: 'force'
-          // }
         }}
         graph={graph}
       />

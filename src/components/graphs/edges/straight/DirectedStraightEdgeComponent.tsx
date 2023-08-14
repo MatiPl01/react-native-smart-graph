@@ -12,6 +12,7 @@ import {
   addVectors,
   calcOrthogonalUnitVector,
   calcUnitVector,
+  distanceBetweenVectors,
   multiplyVector,
   translateAlongVector
 } from '@/utils/vectors';
@@ -58,7 +59,9 @@ function DirectedStraightEdgeComponent<V, E>({
   const dirVec = useDerivedValue(() => calcUnitVector(p2.value, p1.value));
   const arrowTipPosition = useSharedValue(p2.value);
   const arrowWidth = useSharedValue(0);
-  const arrowHeight = useDerivedValue(() => 1.5 * arrowWidth.value);
+  const arrowHeight = useDerivedValue(() =>
+    Math.min(1.5 * arrowWidth.value, distanceBetweenVectors(p1.value, p2.value))
+  );
 
   useAnimatedReaction(
     () => ({
