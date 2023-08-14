@@ -5,9 +5,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react';
 
+import { REMOVE_COMPONENTS_TIMEOUT } from '@/constants/timeouts';
 import { useGraphObserver } from '@/hooks';
 import { withGraphSettings } from '@/providers/graph/data/settings';
 import { GraphComponentsData } from '@/types/components';
@@ -62,6 +64,9 @@ function ComponentsDataProvider<V, E>({
   // has been completed and edges are waiting to be unmounted
   const removedEdges = useMemo(() => new Set<string>(), []);
 
+  // Other values
+  const removeComponentsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const getComponentsData = () => ({
     connections: graph.connections,
     graphAnimationsSettings,
@@ -75,14 +80,19 @@ function ComponentsDataProvider<V, E>({
   // COMPONENTS DATA
   const [componentsData, setComponentsData] =
     useState<ComponentsData<V, E>>(getComponentsData);
+  // This useState is a tricky way to force remove vertices and edges
+  // that wait for removal after the remove timeout has passed
+  const [forceRemove, setForceRemove] = useState({});
 
   // REMOVE HANDLERS
   const handleVertexRemove = useCallback<VertexRemoveHandler>(key => {
     removedVertices.add(key);
+    startComponentsRemoveTimeout();
   }, []);
 
   const handleEdgeRemove = useCallback<EdgeRemoveHandler>(key => {
     removedEdges.add(key);
+    startComponentsRemoveTimeout();
   }, []);
 
   // CONTEXT VALUE
@@ -99,7 +109,15 @@ function ComponentsDataProvider<V, E>({
       updateContextValue(value, newData, componentsData)
     );
     setComponentsData(newData);
-  }, [state, graphAnimationsSettings, renderLabels]);
+  }, [state, graphAnimationsSettings, renderLabels, forceRemove]);
+
+  const startComponentsRemoveTimeout = () => {
+    clearTimeout(removeComponentsTimeoutRef.current!);
+    removeComponentsTimeoutRef.current = setTimeout(() => {
+      setForceRemove({});
+      removeComponentsTimeoutRef.current = null;
+    }, REMOVE_COMPONENTS_TIMEOUT);
+  };
 
   return (
     <GraphComponentsDataContext.Provider value={contextValue}>

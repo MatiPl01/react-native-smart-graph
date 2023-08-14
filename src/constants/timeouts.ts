@@ -1,0 +1,1 @@
+export const REMOVE_COMPONENTS_TIMEOUT = 100;

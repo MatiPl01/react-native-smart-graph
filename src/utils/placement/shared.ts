@@ -178,16 +178,6 @@ export const alignPositionsToCenter = (
   const offsetX = width / 2 + left;
   const offsetY = height / 2 + top;
 
-  const newPositions = Object.fromEntries(
-    Object.entries(positions).map(([key, { x, y }]) => [
-      key,
-      {
-        x: x - offsetX,
-        y: y - offsetY
-      }
-    ])
-  );
-
   return {
     boundingRect: {
       bottom: bottom - offsetY,
@@ -195,6 +185,14 @@ export const alignPositionsToCenter = (
       right: right - offsetX,
       top: top - offsetY
     },
-    verticesPositions: newPositions
+    verticesPositions: Object.fromEntries(
+      Object.entries(positions).map(([key, { x, y }]) => [
+        key,
+        {
+          x: x - offsetX,
+          y: y - offsetY
+        }
+      ])
+    )
   };
 };

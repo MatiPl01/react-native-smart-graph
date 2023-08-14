@@ -1,6 +1,6 @@
-import { Mask } from '@shopify/react-native-skia';
+import { Mask, Rect } from '@shopify/react-native-skia';
 import { memo } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import { useCanvasContexts } from '@/providers/graph/contexts';
@@ -23,8 +23,18 @@ function GraphComponent() {
   // Update the focusProgress
   useComponentFocus(focusProgress, focusContext);
 
+  const x = useDerivedValue(() => boundingRect.left.value);
+  const y = useDerivedValue(() => boundingRect.top.value);
+  const w = useDerivedValue(
+    () => boundingRect.right.value - boundingRect.left.value
+  );
+  const h = useDerivedValue(
+    () => boundingRect.bottom.value - boundingRect.top.value
+  );
+
   return (
     <>
+      <Rect color='#333' height={h} width={w} x={x} y={y} />
       <Mask
         mask={<GraphEdgesMask boundingRect={boundingRect} />}
         mode='luminance'>
