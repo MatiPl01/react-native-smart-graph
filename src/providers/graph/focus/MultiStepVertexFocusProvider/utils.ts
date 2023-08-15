@@ -1,4 +1,5 @@
-import { FocusStepData } from '@/types/data';
+import { FocusStepData, VertexComponentData } from '@/types/data';
+import { UpdatedFocusPoint } from '@/types/settings';
 import {
   getMultiStepVertexTransformation,
   updateFocusTransformation
@@ -7,34 +8,48 @@ import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { StateProps } from './types';
 
-export const getTargetKey = <V, E>({
+export const createFocusSteps = <V, E>(
+  sortedPoints: Array<UpdatedFocusPoint>,
+  verticesData: Record<string, VertexComponentData<V, E>>
+): Array<FocusStepData<V, E>> => {
+  'worklet';
+  return sortedPoints
+    .map(({ point, startsAt }) => ({
+      point,
+      startsAt: +startsAt,
+      vertex: verticesData[point.key]
+    }))
+    .filter(step => step.vertex !== undefined) as Array<FocusStepData<V, E>>;
+};
+
+export const getTargetPoint = <V, E>({
   afterStep,
   beforeStep,
   currentProgress,
   previousProgress,
-  targetKey: { value: prevTargetKey }
-}: StateProps<V, E>): null | string => {
+  targetPoint: { value: prevTargetPoint }
+}: StateProps<V, E>): UpdatedFocusPoint | null => {
   'worklet';
   if (currentProgress < previousProgress) {
-    return beforeStep?.point.key ?? null;
+    return beforeStep ?? null;
   } else if (currentProgress > previousProgress) {
-    return afterStep?.point.key ?? null;
+    return afterStep ?? null;
   }
   if (
     beforeStep &&
-    (beforeStep.point.key === prevTargetKey || prevTargetKey === null) &&
+    (beforeStep.startsAt === prevTargetPoint?.startsAt || !prevTargetPoint) &&
     currentProgress > beforeStep.startsAt
   ) {
-    return afterStep?.point.key ?? null;
+    return afterStep ?? null;
   }
   if (
     afterStep &&
-    (afterStep.point.key === prevTargetKey || prevTargetKey === null) &&
+    (afterStep.startsAt === prevTargetPoint?.startsAt || !prevTargetPoint) &&
     currentProgress < afterStep.startsAt
   ) {
-    return beforeStep?.point.key ?? null;
+    return beforeStep ?? null;
   }
-  return prevTargetKey;
+  return prevTargetPoint;
 };
 
 export const getResultingProgress = <V, E>(
@@ -58,7 +73,7 @@ export const getTransitionBounds = <V, E>({
   afterStep,
   beforeStep,
   syncProgress,
-  targetKey: { value: targetKey }
+  targetPoint: { value: targetPoint }
 }: StateProps<V, E>): {
   source: FocusStepData<V, E> | null;
   target: FocusStepData<V, E> | null;
@@ -67,13 +82,13 @@ export const getTransitionBounds = <V, E>({
   let targetStep: FocusStepData<V, E> | null = null;
   let sourceStep: FocusStepData<V, E> | null = null;
 
-  if (targetKey === beforeStep?.point.key) {
+  if (targetPoint?.startsAt === beforeStep?.startsAt) {
     targetStep = beforeStep;
     sourceStep = afterStep;
-  } else if (targetKey === afterStep?.point.key) {
+  } else if (targetPoint?.startsAt === afterStep?.startsAt) {
     targetStep = afterStep;
     sourceStep = beforeStep;
-  } else if (targetKey === null) {
+  } else if (!targetPoint) {
     // For blur transition
     sourceStep = beforeStep ?? afterStep;
   }
@@ -105,7 +120,7 @@ export const updateTransitionPoints = <V, E>(
     ),
     disableGestures: false, // TODO: Add support for disabling gestures
     initialScale: viewDataContext.initialScale.value,
-    vertexRadius: vertexRadius.value // TODO - make this work with shared values
+    vertexRadius
   };
   const targetTransformation = targetStep
     ? getMultiStepVertexTransformation(targetStep, transformationConfig)

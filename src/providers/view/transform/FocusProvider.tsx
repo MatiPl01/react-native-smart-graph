@@ -68,6 +68,7 @@ export enum FocusStatus {
   BLUR_TRANSITION = 'BLUR_TRANSITION',
   FOCUS = 'FOCUS',
   FOCUS_PREPARATION = 'FOCUS_PREPARATION',
+  FOCUS_PREPARATION_COMPLETE = 'FOCUS_PREPARATION_COMPLETE',
   FOCUS_TRANSITION = 'FOCUS_TRANSITION'
 }
 
@@ -217,6 +218,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       animSettings === undefined
         ? DEFAULT_FOCUS_ANIMATION_SETTINGS
         : animSettings;
+    // Start focus transition (complete the preparation)
+    focusStatus.value = FocusStatus.FOCUS_PREPARATION_COMPLETE;
   };
 
   // Blur setter
@@ -303,13 +306,14 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       canvasRendered: !!(
         canvasDimensions.width.value && canvasDimensions.height.value
       ),
-      key: focusKey.value
+      status: focusStatus.value
     }),
-    ({ canvasRendered, key }) => {
+    ({ canvasRendered, status }) => {
+      const key = focusKey.value;
       if (
         key === null ||
         !canvasRendered ||
-        focusStatus.value !== FocusStatus.FOCUS_PREPARATION
+        status !== FocusStatus.FOCUS_PREPARATION_COMPLETE
       ) {
         return;
       }
@@ -406,6 +410,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         targetPosition,
         targetScale
       } = data;
+      console.log('progress', progress);
       // Scale the content to the focus scale
       scaleContentTo(calcScaleOnProgress(progress, sourceScale, targetScale));
       // Translate the content to the focus position

@@ -2,7 +2,7 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import { Alignment } from '@/types/layout';
-import { Maybe } from '@/types/utils';
+import { DeepRequired, Maybe } from '@/types/utils';
 
 import { AnimationSettings } from './animations';
 
@@ -26,6 +26,11 @@ export type FocusPoint = {
 };
 
 export type FocusPoints = Record<number, FocusPoint>;
+
+export type UpdatedFocusPoint = {
+  point: DeepRequired<FocusPoint>;
+  startsAt: number;
+};
 
 export type MultiStepFocusSettings = {
   disableGestures?: boolean;
