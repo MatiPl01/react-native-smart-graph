@@ -15,6 +15,10 @@ export const useComponentFocus = (
     ({ currentKey, progress }) => {
       const previousKey = focusContext.previousKey.value;
 
+      if (componentKey === 'V1') {
+        console.log('>>>', currentKey, previousKey);
+      }
+
       // If no focus target, no component is blurred
       if (currentKey === null && previousKey === null) {
         result.value = 1;
@@ -37,8 +41,11 @@ export const useComponentFocus = (
       }
       // Transition from focus to focus (changing focus target)
       else {
+        // If the focus target is the same as the previous one
         // eslint-disable-next-line no-lonely-if
-        if (componentKey === currentKey) {
+        if (componentKey === currentKey && componentKey === previousKey) {
+          result.value = 1; // Focus target
+        } else if (componentKey === currentKey) {
           result.value = progress; // Focus target
         } else if (componentKey === previousKey) {
           result.value = 1 - progress; // Previous focus target

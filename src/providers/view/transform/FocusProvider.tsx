@@ -126,8 +126,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const transitionStartPosition = useSharedValue({ x: 0, y: 0 });
   const transitionStartScale = useSharedValue(0);
   const transitionProgress = useSharedValue(1);
-  // The value below is used only to properly update the previous focus key
-  const currentKey = useSharedValue<null | string>(null);
   const previousKey = useSharedValue<null | string>(null);
 
   /**
@@ -208,10 +206,14 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     blurOrigin.value = null;
     // Disable auto sizing when focusing
     autoSizingContext.disableAutoSizing();
+    // Update the previously focused key
+    useCustomSource.value = !!data.customSource;
+    if (focusStatus.value !== FocusStatus.BLUR_TRANSITION) {
+      previousKey.value = focusKey.value;
+    }
     // Turn off animated reaction until data is completely set
     focusStatus.value = FocusStatus.FOCUS_PREPARATION;
     // Set focus data
-    useCustomSource.value = !!data.customSource;
     focusKey.value = data.key;
     gesturesDisabled.value = !!data.gesturesDisabled;
     animationSettings.value =
@@ -266,16 +268,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   /*
    * HELPER REACTIONS
    */
-
-  // This reaction is used to update the previous focus key
-  useAnimatedReaction(
-    () => focusKey.value,
-    key => {
-      if (currentKey.value === key) return;
-      previousKey.value = currentKey.value;
-      currentKey.value = key;
-    }
-  );
 
   // This reaction is used to update the start scale and translation
   // of the container during the focus/blur transition based on
@@ -360,6 +352,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       // Enable gestures and change the container position to fit
       // into the canvas bounds if it's out of them
       if (finishStatus === FocusStatus.BLUR) {
+        previousKey.value = null;
+        focusKey.value = null;
         gesturesDisabled.value = false;
         translateContentTo(
           {
@@ -369,6 +363,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
           getTranslateClamp(currentScale.value),
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
+      } else {
+        previousKey.value = focusKey.value;
       }
     }
   );
@@ -410,7 +406,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         targetPosition,
         targetScale
       } = data;
-      console.log('progress', progress);
       // Scale the content to the focus scale
       scaleContentTo(calcScaleOnProgress(progress, sourceScale, targetScale));
       // Translate the content to the focus position

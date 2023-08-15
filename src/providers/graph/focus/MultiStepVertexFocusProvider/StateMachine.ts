@@ -245,7 +245,7 @@ export const useStateMachine = <V, E>(
   viewDataContext: GraphViewData,
   settings: InternalMultiStepFocusSettings
 ): MachineContext<V, E> => {
-  const isStopped = useSharedValue(false);
+  const isStopped = useSharedValue(true);
   const state = useSharedValue(MachineState.BLUR);
   const targetPoint = useSharedValue<UpdatedFocusPoint | null>(null);
 
@@ -258,10 +258,12 @@ export const useStateMachine = <V, E>(
       start() {
         'worklet';
         isStopped.value = false;
+        console.log('start');
       },
       state,
       stop() {
         'worklet';
+        console.log('stop');
         if (state.value !== MachineState.BLUR) {
           // Update the transition progress with default animation
           focusContext.endFocus(null);
@@ -295,7 +297,7 @@ export const useStateMachine = <V, E>(
             vertexRadius,
             viewDataContext
           });
-          console.log('state', result);
+          console.log(state.value);
         } while (result !== state.value);
         state.value = result;
       }

@@ -133,13 +133,14 @@ function MultiStepVertexFocusProvider<V, E>({
       progress: {
         current: settings.progress.value,
         previous: previousProgress.value,
-        sync: 1 // TODO
+        sync: syncProgress.value
       },
       radius: vertexRadius.value
     }),
     ({ progress, radius }) => {
       const prevStepIdx = previousStepIdx.value;
       if (stateMachine.isStopped() || prevStepIdx === -1) return;
+      console.log(progress.sync);
 
       const currentSteps = getFocusSteps(
         progress.current,
