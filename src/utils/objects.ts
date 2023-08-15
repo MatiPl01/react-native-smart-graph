@@ -186,40 +186,45 @@ export const deepMemoComparator =
     return true;
   };
 
+// TODO - fix
 const deepMergeHelper = <T extends Record<string, any>>(
   obj1: T,
   obj2?: DeepPartial<T>
 ): T => {
   if (obj2 === undefined) return obj1;
 
+  console.log(obj1, obj2);
+  return obj1; // TODO - remove
+
   const result = (Array.isArray(obj1) && Array.isArray(obj2) ? [] : {}) as T;
   let isModified = false;
 
-  for (const key in obj2) {
-    if (
-      Object.hasOwn(obj1, key) &&
-      typeof obj1[key] === 'object' &&
-      obj1[key] !== null &&
-      typeof obj2[key] === 'object' &&
-      obj2[key] !== null
-    ) {
-      // If references are equal, no need to merge
-      if (obj1[key] === obj2[key]) {
-        result[key] = obj1[key];
-        continue;
-      }
-      const mergedChild = deepMerge(obj1[key], obj2[key]);
-      isModified = isModified || mergedChild !== obj1[key];
-      result[key] = mergedChild;
-    } else {
-      result[key] = obj1[key];
-      isModified = isModified || obj2[key] !== obj1[key];
-    }
-  }
+  // for (const key in obj2) {
+  //   if (
+  //     Object.hasOwn(obj1, key) &&
+  //     typeof obj1[key] === 'object' &&
+  //     obj1[key] !== null &&
+  //     typeof obj2[key] === 'object' &&
+  //     obj2[key] !== null
+  //   ) {
+  //     // If references are equal, no need to merge
+  //     if (obj1[key] === obj2[key]) {
+  //       result[key] = obj1[key];
+  //       continue;
+  //     }
+  //     const mergedChild = deepMergeHelper(obj1[key], obj2[key]);
+  //     isModified = isModified || mergedChild !== obj1[key];
+  //     result[key] = mergedChild;
+  //   } else {
+  //     result[key] = obj1[key];
+  //     isModified = isModified || obj2[key] !== obj1[key];
+  //   }
+  // }
 
   for (const key in obj1) {
     if (!Object.hasOwn(obj2, key)) {
-      result[key] = obj1[key];
+      console.log(key, obj1[key]);
+      // result[key] = obj1[key];
       isModified = true;
     }
   }

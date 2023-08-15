@@ -37,15 +37,15 @@ export type DirectedGraphWithCurvedEdgeSettings<V> = SharedGraphSettings<V> & {
   components?: DirectedGraphWithCurvedEdgesComponentsSettings;
 };
 
-export type UndirectedGraphSettings<V> =
+export type UndirectedGraphSettings<V = void> =
   | UndirectedGraphWithCurvedEdgeSettings<V>
   | UndirectedGraphWithStraightEdgeSettings<V>;
 
-export type DirectedGraphSettings<V> =
+export type DirectedGraphSettings<V = void> =
   | DirectedGraphWithCurvedEdgeSettings<V>
   | DirectedGraphWithStraightEdgeSettings<V>;
 
-export type GraphSettings<V> =
+export type GraphSettings<V = void> =
   | DirectedGraphSettings<V>
   | UndirectedGraphSettings<V>;
 

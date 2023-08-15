@@ -15,10 +15,6 @@ export const useComponentFocus = (
     ({ currentKey, progress }) => {
       const previousKey = focusContext.previousKey.value;
 
-      if (componentKey === 'V1') {
-        console.log('>>>', currentKey, previousKey);
-      }
-
       // If no focus target, no component is blurred
       if (currentKey === null && previousKey === null) {
         result.value = 1;

@@ -101,6 +101,9 @@ export default abstract class Graph<
     (this.edges$ as Mutable<typeof this.edges$>) = {};
     (this.edgesBetweenVertices$ as Mutable<typeof this.edgesBetweenVertices$>) =
       {};
+    // Invalidate cached data
+    this.invalidateEdgesCache();
+    this.invalidateVerticesCache();
     // Notify observers after all changes to the graph model are made
     if (notifyChange) {
       this.notifyGraphChange(

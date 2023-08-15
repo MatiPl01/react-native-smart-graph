@@ -31,6 +31,8 @@ function VertexComponent<V, E>({
     Math.max(0, animationProgressHelper.value)
   );
 
+  console.log(vertex.key);
+
   // FOCUS
   // Vertex focus progress
   const focusProgress = useSharedValue(0);
