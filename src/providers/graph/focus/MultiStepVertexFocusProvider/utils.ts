@@ -30,13 +30,6 @@ export const getTargetPoint = <V, E>({
   targetPoint: { value: prevTargetPoint }
 }: StateProps<V, E>): UpdatedFocusPoint | null => {
   'worklet';
-  console.log(
-    '<><>',
-    currentProgress,
-    previousProgress,
-    afterStep?.startsAt,
-    beforeStep?.startsAt
-  );
   if (currentProgress < previousProgress) {
     return beforeStep ?? null;
   } else if (currentProgress > previousProgress) {
@@ -135,11 +128,6 @@ export const updateTransitionPoints = <V, E>(
   const sourceTransformation = sourceStep
     ? getMultiStepVertexTransformation(sourceStep, transformationConfig)
     : undefined;
-
-  console.log({
-    end: targetTransformation,
-    start: sourceTransformation
-  });
 
   updateFocusTransformation(
     {

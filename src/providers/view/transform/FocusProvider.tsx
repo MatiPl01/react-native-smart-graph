@@ -126,6 +126,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const transitionStartPosition = useSharedValue({ x: 0, y: 0 });
   const transitionStartScale = useSharedValue(0);
   const transitionProgress = useSharedValue(1);
+  const transitionStarted = useSharedValue(false);
   const previousKey = useSharedValue<null | string>(null);
 
   /**
@@ -161,8 +162,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       };
       transitionStartScale.value = currentScale.value;
     }
-    // This is a workaround to prevent reaction from cancelling transition
-    transitionProgress.value = 1e-6;
     // Turn on the animated reaction that will handle the animation
     focusStatus.value = transitionType;
     focusKey.value = key;
@@ -344,6 +343,9 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         isInitialFinishRender.value = false;
         return;
       }
+      if (progress > 0) {
+        transitionStarted.value = true;
+      }
 
       // Get the finish status based on the progress
       const currentStatus = focusStatus.value;
@@ -353,20 +355,19 @@ export default function FocusProvider({ children }: FocusProviderProps) {
           currentStatus === FocusStatus.FOCUS_TRANSITION
             ? FocusStatus.FOCUS
             : FocusStatus.BLUR;
-        // } // TODO
-        // else if (
-        //   progress === 0 &&
-        //   currentStatus !== FocusStatus.FOCUS_PREPARATION &&
-        //   currentStatus !== FocusStatus.FOCUS_PREPARATION_COMPLETE
-        // ) {
-        //   finishStatus =
-        //     currentStatus === FocusStatus.FOCUS_TRANSITION
-        //       ? FocusStatus.BLUR
-        //       : FocusStatus.FOCUS;
+      } else if (
+        progress === 0 &&
+        transitionStarted.value &&
+        currentStatus !== FocusStatus.FOCUS_PREPARATION &&
+        currentStatus !== FocusStatus.FOCUS_PREPARATION_COMPLETE
+      ) {
+        finishStatus =
+          previousKey.value === null ? FocusStatus.BLUR : FocusStatus.FOCUS;
       } else {
         return;
       }
 
+      transitionStarted.value = false;
       // Set the finish status
       focusStatus.value = finishStatus;
       // Enable gestures and change the container position to fit
@@ -383,8 +384,9 @@ export default function FocusProvider({ children }: FocusProviderProps) {
           getTranslateClamp(currentScale.value),
           DEFAULT_GESTURE_ANIMATION_SETTINGS
         );
-      } else {
-        previousKey.value = focusKey.value;
+        // focusKey can be null because of the blur transition
+      } else if (focusKey.value === null) {
+        focusKey.value = previousKey.value;
       }
     }
   );
@@ -427,7 +429,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         targetPosition,
         targetScale
       } = data;
-      console.log({ progress, sourcePosition, targetPosition });
       // Scale the content to the focus scale
       scaleContentTo(calcScaleOnProgress(progress, sourceScale, targetScale));
       // Translate the content to the focus position

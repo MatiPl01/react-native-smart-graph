@@ -8,7 +8,12 @@ import {
   VertexPressHandler
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { useSharedValue } from 'react-native-reanimated';
+import {
+  Extrapolate,
+  interpolate,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
 const GRAPH1: DirectedGraphData = {
@@ -98,15 +103,14 @@ export default function BottomSheetFocus() {
   const [settings, setGraphSettings] = useState<DirectedGraphSettings>({});
 
   const animatedIndex = useSharedValue(0);
-  const bottomSheetProgress = useSharedValue(0.3);
-  // const bottomSheetProgress = useDerivedValue(() =>
-  //   interpolate(
-  //     animatedIndex.value,
-  //     [0, snapPoints.length - 1],
-  //     [0, 1],
-  //     Extrapolate.CLAMP
-  //   )
-  // );
+  const bottomSheetProgress = useDerivedValue(() =>
+    interpolate(
+      animatedIndex.value,
+      [0, snapPoints.length - 1],
+      [0, 1],
+      Extrapolate.CLAMP
+    )
+  );
 
   const createGraphSettings = (key: string): DirectedGraphSettings => ({
     focus: {
