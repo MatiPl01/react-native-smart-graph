@@ -1,31 +1,30 @@
+import { PropsWithChildren } from 'react';
 import {
   runOnJS,
+  SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useAutoSizingContext } from '@/providers/view/auto';
-import { useViewDataContext } from '@/providers/view/data';
-import {
-  useFocusContext,
-  useTransformContext
-} from '@/providers/view/transform';
+import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withGraphSettings } from '@/providers/graph/data';
 
-export default function SettingsChangeResponderProvider({
-  children
-}: {
-  children?: React.ReactNode;
-}) {
+type SettingsChangeResponderProviderProps = PropsWithChildren<{
+  focusProgress?: SharedValue<number>;
+}>;
+
+function SettingsChangeResponderProvider({
+  children,
+  focusProgress
+}: SettingsChangeResponderProviderProps) {
   // CONTEXT VALUES
-  // Canvas data context values
-  const { initialScaleProvided, isRendered, objectFit } = useViewDataContext();
-  // Transform context values
-  const { resetContainerPosition } = useTransformContext();
-  // Auto sizing context values
-  const autoSizingContext = useAutoSizingContext();
-  // Focus context values
-  const { focus } = useFocusContext();
+  const {
+    autoSizingContext,
+    dataContext: { initialScaleProvided, isRendered, objectFit },
+    focusContext: { focus },
+    transformContext: { resetContainerPosition }
+  } = useCanvasContexts();
 
   // Other values
   const isFirstAutoSizingReactionCall = useSharedValue(true);
@@ -53,7 +52,7 @@ export default function SettingsChangeResponderProvider({
         return;
       }
       isFirstAutoSizingReactionCall.value = false;
-      if (objFit !== 'none') {
+      if (objFit !== 'none' && !focusProgress?.value) {
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
         } else {
@@ -95,3 +94,10 @@ export default function SettingsChangeResponderProvider({
 
   return <>{children}</>;
 }
+
+export default withGraphSettings(
+  SettingsChangeResponderProvider,
+  ({ settings }) => ({
+    focusProgress: settings.focus?.progress
+  })
+);

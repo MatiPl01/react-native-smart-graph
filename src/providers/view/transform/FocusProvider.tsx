@@ -161,6 +161,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       };
       transitionStartScale.value = currentScale.value;
     }
+    // This is a workaround to prevent reaction from cancelling transition
+    transitionProgress.value = 1e-6;
     // Turn on the animated reaction that will handle the animation
     focusStatus.value = transitionType;
     focusKey.value = key;
@@ -332,7 +334,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     }
   );
 
-  // This is used to finish the focus transition once the progress reaches 1
+  // This is used to finish the focus/blur transition once the progress
+  // reaches 0 or 1
   const isInitialFinishRender = useSharedValue(true);
   useAnimatedReaction(
     () => transitionProgress.value,
@@ -341,12 +344,29 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         isInitialFinishRender.value = false;
         return;
       }
-      if (progress !== 1) return;
+
+      // Get the finish status based on the progress
       const currentStatus = focusStatus.value;
-      const finishStatus =
-        currentStatus === FocusStatus.FOCUS_TRANSITION
-          ? FocusStatus.FOCUS
-          : FocusStatus.BLUR;
+      let finishStatus: FocusStatus;
+      if (progress === 1) {
+        finishStatus =
+          currentStatus === FocusStatus.FOCUS_TRANSITION
+            ? FocusStatus.FOCUS
+            : FocusStatus.BLUR;
+        // } // TODO
+        // else if (
+        //   progress === 0 &&
+        //   currentStatus !== FocusStatus.FOCUS_PREPARATION &&
+        //   currentStatus !== FocusStatus.FOCUS_PREPARATION_COMPLETE
+        // ) {
+        //   finishStatus =
+        //     currentStatus === FocusStatus.FOCUS_TRANSITION
+        //       ? FocusStatus.BLUR
+        //       : FocusStatus.FOCUS;
+      } else {
+        return;
+      }
+
       // Set the finish status
       focusStatus.value = finishStatus;
       // Enable gestures and change the container position to fit
@@ -378,6 +398,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   useAnimatedReaction(
     () => {
       const status = focusStatus.value;
+
       if (
         status !== FocusStatus.FOCUS_TRANSITION &&
         status !== FocusStatus.FOCUS
@@ -406,6 +427,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         targetPosition,
         targetScale
       } = data;
+      console.log({ progress, sourcePosition, targetPosition });
       // Scale the content to the focus scale
       scaleContentTo(calcScaleOnProgress(progress, sourceScale, targetScale));
       // Translate the content to the focus position

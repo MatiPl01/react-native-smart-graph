@@ -8,12 +8,7 @@ import {
   VertexPressHandler
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import {
-  Extrapolate,
-  interpolate,
-  useDerivedValue,
-  useSharedValue
-} from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
 const GRAPH1: DirectedGraphData = {
@@ -94,7 +89,7 @@ const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
 
 export default function BottomSheetFocus() {
   const graph = useMemo(() => new DirectedGraph(GRAPH1), []);
-  const snapPoints = useMemo(() => ['20%', '50%', '85%'], []);
+  const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [currentRoute, setCurrentRoute] =
@@ -103,14 +98,15 @@ export default function BottomSheetFocus() {
   const [settings, setGraphSettings] = useState<DirectedGraphSettings>({});
 
   const animatedIndex = useSharedValue(0);
-  const bottomSheetProgress = useDerivedValue(() =>
-    interpolate(
-      animatedIndex.value,
-      [0, snapPoints.length - 1],
-      [0, 1],
-      Extrapolate.CLAMP
-    )
-  );
+  const bottomSheetProgress = useSharedValue(0.3);
+  // const bottomSheetProgress = useDerivedValue(() =>
+  //   interpolate(
+  //     animatedIndex.value,
+  //     [0, snapPoints.length - 1],
+  //     [0, 1],
+  //     Extrapolate.CLAMP
+  //   )
+  // );
 
   const createGraphSettings = (key: string): DirectedGraphSettings => ({
     focus: {
@@ -130,7 +126,7 @@ export default function BottomSheetFocus() {
           alignment: {
             horizontalAlignment: 'left',
             verticalAlignment: 'top',
-            verticalOffset: 15,
+            verticalOffset: 60,
             horizontalOffset: 20
           }
         }

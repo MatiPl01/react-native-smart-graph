@@ -70,14 +70,14 @@ function MultiStepVertexFocusProvider<V, E>({
 
   const updateFocusSteps = () => {
     'worklet';
-    focusStepsData.value = createFocusSteps(
-      sortedFocusPoints.value,
-      verticesData
-    );
     previousStepIdx.value = binarySearchLE(
       focusStepsData.value,
       settings.progress.value,
       ({ startsAt }) => startsAt
+    );
+    focusStepsData.value = createFocusSteps(
+      sortedFocusPoints.value,
+      verticesData
     );
   };
 
@@ -89,10 +89,11 @@ function MultiStepVertexFocusProvider<V, E>({
         if (!stateMachine.isStopped()) {
           stateMachine.stop();
           syncProgress.value = 0;
+          previousProgress.value = 0;
         }
       } else if (stateMachine.isStopped()) {
         stateMachine.start();
-        syncProgress.value = withTiming(1, DEFAULT_FOCUS_ANIMATION_SETTINGS); // TODO - figure out what to do with sync progress
+        syncProgress.value = withTiming(1, DEFAULT_FOCUS_ANIMATION_SETTINGS);
       }
     }
   );
@@ -135,18 +136,14 @@ function MultiStepVertexFocusProvider<V, E>({
         previous: previousProgress.value,
         sync: syncProgress.value
       },
-      radius: vertexRadius.value
+      radius: vertexRadius.value,
+      steps: focusStepsData.value
     }),
-    ({ progress, radius }) => {
+    ({ progress, radius, steps }) => {
       const prevStepIdx = previousStepIdx.value;
       if (stateMachine.isStopped() || prevStepIdx === -1) return;
-      console.log(progress.sync);
 
-      const currentSteps = getFocusSteps(
-        progress.current,
-        prevStepIdx,
-        focusStepsData.value
-      );
+      const currentSteps = getFocusSteps(progress.current, prevStepIdx, steps);
       if (!currentSteps) return;
       const { afterStep, beforeStep, currentStepIdx } = currentSteps;
 
