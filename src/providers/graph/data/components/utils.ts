@@ -20,7 +20,7 @@ import {
   cancelEdgeAnimations,
   cancelVertexAnimations
 } from '@/utils/animations';
-import { deepMerge, updateValues } from '@/utils/objects';
+import { updateValues } from '@/utils/objects';
 
 export type ComponentsData<V, E> = {
   connections: GraphConnections;
@@ -44,8 +44,14 @@ export const createContextValue = <V, E>(
   }
 ): GraphComponentsData<V, E> => updateContextValue(removeHandlers, data);
 
-const sharedKeys = ['isGraphDirected', 'targetBoundingRect'] as const;
-const SHARED_KEYS = new Set(sharedKeys);
+const SHARED_KEYS = {
+  connections: 'shallow', // 'shallow' - shallow compare
+  edgeLabelsData: 'shallow',
+  edgesData: 'shallow',
+  isGraphDirected: 'shared', // 'shared' - replace with shared value
+  targetBoundingRect: 'shared',
+  verticesData: 'shallow'
+};
 
 export const updateContextValue = <V, E>(
   value: PartialWithRequired<
@@ -56,16 +62,11 @@ export const updateContextValue = <V, E>(
   currentData?: ComponentsData<V, E>
 ): GraphComponentsData<V, E> => {
   const currentLayoutAnimationSettings = value?.layoutAnimationSettings;
-  const newLayoutAnimationSettings = currentLayoutAnimationSettings
-    ? deepMerge(
-        currentLayoutAnimationSettings,
-        newData.graphAnimationsSettings.layout,
-        newData.state.animationsSettings.layout
-      )
-    : deepMerge(
-        newData.graphAnimationsSettings.layout,
-        newData.state.animationsSettings.layout
-      );
+  const newLayoutAnimationSettings = updateValues({
+    current: currentLayoutAnimationSettings,
+    default: newData.graphAnimationsSettings.layout,
+    new: newData.state.animationsSettings.layout
+  });
 
   // Update vertices data only if vertices have changed
   const newVerticesData =

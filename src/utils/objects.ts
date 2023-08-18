@@ -9,10 +9,15 @@ import {
   SharedValue
 } from 'react-native-reanimated';
 
-import { DeepPartial, SharedifyBy } from '@/types/utils';
+import {
+  DeepPartial,
+  DeepReplaceValue,
+  MergeAll,
+  ReplaceWithSharedValues
+} from '@/types/utils';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const deepEqual = (value1: any, value2: any): boolean => {
+const deepEqual = (value1: any, value2: any): boolean => {
   // If either value is null or not an object, they are not deeply equal
   if (
     typeof value1 !== 'object' ||
@@ -186,60 +191,7 @@ export const deepMemoComparator =
     return true;
   };
 
-// TODO - fix
-const deepMergeHelper = <T extends Record<string, any>>(
-  obj1: T,
-  obj2?: DeepPartial<T>
-): T => {
-  if (obj2 === undefined) return obj1;
-
-  console.log(obj1, obj2);
-  return obj1; // TODO - remove
-
-  const result = (Array.isArray(obj1) && Array.isArray(obj2) ? [] : {}) as T;
-  let isModified = false;
-
-  for (const key in obj2) {
-    if (
-      Object.hasOwn(obj1, key) &&
-      typeof obj1[key] === 'object' &&
-      obj1[key] !== null &&
-      typeof obj2[key] === 'object' &&
-      obj2[key] !== null
-    ) {
-      // If references are equal, no need to merge
-      if (obj1[key] === obj2[key]) {
-        result[key] = obj1[key];
-        continue;
-      }
-      const mergedChild = deepMergeHelper(obj1[key], obj2[key]);
-      isModified = isModified || mergedChild !== obj1[key];
-      result[key] = mergedChild;
-    } else {
-      result[key] = obj1[key];
-      isModified = isModified || obj2[key] !== obj1[key];
-    }
-  }
-
-  for (const key in obj1) {
-    if (!Object.hasOwn(obj2, key)) {
-      console.log(key, obj1[key]);
-      // result[key] = obj1[key];
-      isModified = true;
-    }
-  }
-
-  return isModified ? result : obj1;
-};
-
-export const deepMerge = <T extends Record<string, any>>(
-  obj1: T,
-  ...objs: Array<DeepPartial<T> | undefined>
-): T => {
-  return objs.reduce((acc, obj) => deepMergeHelper(acc, obj), obj1);
-};
-
-type SettingsWithDefaults<C, N, D> = {
+type SettingsWithDefaults<C, D, N> = {
   current?: C;
   default: D;
   new?: N;
@@ -250,39 +202,50 @@ type SettingsWithoutDefaults<C, N> = {
   new?: N;
 };
 
-const areSettingsWithDefaults = <C, N, D>(
-  settings: SettingsWithDefaults<C, N, D> | SettingsWithoutDefaults<C, N>
-): settings is SettingsWithDefaults<C, N, D> => {
+const areSettingsWithDefaults = <C, D, N>(
+  settings: SettingsWithDefaults<C, D, N> | SettingsWithoutDefaults<C, N>
+): settings is SettingsWithDefaults<C, D, N> => {
   return 'default' in settings;
 };
 
+const isEmpty = (obj?: object): boolean =>
+  obj ? Object.keys(obj).length === 0 : true;
+
 export const updateValues = <
-  C extends D | Record<keyof D, any>,
-  N extends DeepPartial<D>,
-  D extends Record<string, any>,
-  K extends string = never
+  D extends object,
+  C extends object,
+  N extends object,
+  K extends DeepPartial<
+    DeepReplaceValue<MergeAll<[D, C, N]>, string>
+  > | void = void
 >(
-  settings: SettingsWithDefaults<C, N, D> | SettingsWithoutDefaults<C, N>,
-  sharedKeys?: Set<K>
-): C & SharedifyBy<N, K> => {
-  const result = { ...settings.current } as C;
+  settings: SettingsWithDefaults<C, D, N> | SettingsWithoutDefaults<C, N>,
+  config?: K
+): ReplaceWithSharedValues<D, K> => {
+  const result = (
+    (settings.current && !Array.isArray(settings.current)) ||
+    (settings.new && !Array.isArray(settings.new)) ||
+    (areSettingsWithDefaults(settings) && !Array.isArray(settings.default))
+      ? { ...(settings.current ?? {}) }
+      : [...(settings.current ?? [])]
+  ) as C;
+
   let isModified = false;
-  const keySet = new Set(
-    areSettingsWithDefaults(settings)
-      ? Object.keys(settings.default)
-      : settings.new
-      ? Object.keys(settings.new)
-      : []
-  );
+  const keySet = new Set([
+    ...(areSettingsWithDefaults(settings) ? Object.keys(settings.default) : []),
+    ...(settings.new ? Object.keys(settings.new) : [])
+  ]);
 
   // Add or update values
   for (const key of keySet) {
     const value = areSettingsWithDefaults(settings)
-      ? settings.new?.[key as keyof N] ?? settings.default[key as keyof D]
+      ? isEmpty(settings.new?.[key as keyof N])
+        ? settings.default[key as keyof D]
+        : settings.new?.[key as keyof N]
       : settings.new?.[key as keyof N];
 
     // SHARED VALUES
-    if (sharedKeys?.has(key as K)) {
+    if (config?.[key as keyof K] === 'shared') {
       const res = result as Record<string, SharedValue<any>>;
       // If the value passed by the user is a shared value
       if (isSharedValue(value)) {
@@ -308,7 +271,27 @@ export const updateValues = <
         }
       }
     }
-    // NON-SHARED VALUES
+    // OBJECTS
+    else if (
+      config?.[key as keyof K] !== 'shallow' &&
+      value !== null &&
+      typeof value === 'object'
+    ) {
+      if (result[key as keyof C] !== value) {
+        result[key as keyof C] = updateValues(
+          areSettingsWithDefaults(settings)
+            ? {
+                current: result[key as keyof C],
+                default: settings.default?.[key as keyof D] ?? {},
+                new: value
+              }
+            : { current: result[key as keyof C], new: value },
+          config?.[key as keyof K] as any
+        ) as C[keyof C];
+        isModified = true;
+      }
+    }
+    // PRIMITIVES
     else {
       const res = result as Record<string, any>;
       // If the value doesn't exist in the current settings or exists
@@ -323,8 +306,8 @@ export const updateValues = <
   // Clear values that no longer exist
   for (const key in result) {
     if (!keySet.has(key)) {
-      if (sharedKeys?.has(key as unknown as K)) {
-        cancelAnimation(result[key]);
+      if (config?.[key as unknown as keyof K] === 'shared') {
+        cancelAnimation(result[key] as SharedValue<any>);
       }
       delete result[key];
       isModified = true;
@@ -333,30 +316,7 @@ export const updateValues = <
 
   // Return the result if it was modified, otherwise return the current settings
   // (if modified in place, the current settings will be returned)
-  return (isModified ? result : settings.current!) as C & SharedifyBy<N, K>;
+  return (isModified
+    ? result
+    : settings.current!) as unknown as ReplaceWithSharedValues<D, K>;
 };
-
-export const createKeySet = <O extends Record<string, any>>(
-  obj: O,
-  exclude?: Array<string>
-): Set<keyof O> => {
-  const result = new Set(Object.keys(obj));
-  if (exclude) {
-    for (const key of exclude) {
-      result.delete(key);
-    }
-  }
-  return result;
-};
-
-export const removeValueWithKey = <
-  T extends Record<string, any>,
-  K extends keyof T
->(
-  obj: T,
-  key: K
-): Omit<T, K> =>
-  Object.fromEntries(Object.entries(obj).filter(([k]) => k !== key)) as Omit<
-    T,
-    K
-  >;

@@ -112,6 +112,7 @@ function ComponentsDataProvider<V, E>({
   }, [state, graphAnimationsSettings, renderLabels, forceRemove]);
 
   const startComponentsRemoveTimeout = () => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     clearTimeout(removeComponentsTimeoutRef.current!);
     removeComponentsTimeoutRef.current = setTimeout(() => {
       setForceRemove({});

@@ -19,17 +19,6 @@ export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type PartialWithRequired<T, K extends keyof T> = Partial<T> &
   Required<Pick<T, K>>;
 
-export type Sharedify<T> = {
-  [K in keyof T]: undefined extends T[K]
-    ? Exclude<T[K], undefined> extends infer U
-      ? SharedValue<U> | undefined
-      : never
-    : SharedValue<T[K]>;
-};
-
-export type SharedifyBy<T, K extends keyof T> = Omit<T, K> &
-  Sharedify<Pick<T, K>>;
-
 export type DeepSharedify<T> = {
   [K in keyof T]: T[K] extends object ? DeepSharedify<T[K]> : SharedValue<T[K]>;
 };
@@ -41,3 +30,35 @@ export type SharedifyWithout<T, E extends keyof any = never> = {
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };
+
+export type DeepReplaceValue<T, V> = {
+  [P in keyof T]: T[P] extends object | undefined
+    ? DeepReplaceValue<NonNullable<T[P]>, V> | V | undefined
+    : V;
+};
+
+export type ReplaceWithSharedValues<T, R> = R extends Record<string, any>
+  ? {
+      [P in keyof T]: P extends keyof R
+        ? T[P] extends SharedValue<infer U>
+          ? SharedValue<U>
+          : R[P] extends 'shared'
+          ? SharedValue<T[P]>
+          : R[P] extends 'shallow'
+          ? T[P]
+          : R[P] extends Record<string, any>
+          ? ReplaceWithSharedValues<T[P], R[P]>
+          : T[P]
+        : T[P];
+    }
+  : T;
+
+type DeepMerge<U> = U extends object
+  ? { [K in keyof U]: U[K] extends object ? DeepMerge<U[K]> : U[K] }
+  : U;
+
+export type MergeAll<T> = T extends [infer Head, ...infer Tail]
+  ? Tail extends []
+    ? Head
+    : DeepMerge<Head & MergeAll<Tail>>
+  : unknown;
