@@ -88,6 +88,18 @@ export const arrangeGraphComponents = (
   spacing: number
 ): GraphLayout => {
   'worklet';
+  if (!graphComponents.length) {
+    return {
+      boundingRect: {
+        bottom: 0,
+        left: 0,
+        right: 0,
+        top: 0
+      },
+      verticesPositions: {}
+    };
+  }
+
   // Prepare graph components for packing
   const preparedComponents = graphComponents.map(
     ({ boundingRect, verticesPositions }) => {
