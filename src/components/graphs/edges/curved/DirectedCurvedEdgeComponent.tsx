@@ -51,7 +51,11 @@ function DirectedCurvedEdgeComponent<V, E>({
   // Edge arrow
   const arrowHeight = useDerivedValue(() =>
     Math.min(
-      distanceBetweenVectors(p1.value, p2.value),
+      Math.max(
+        0,
+        distanceBetweenVectors(p1.value, p2.value) -
+          (v1Radius.value + v2Radius.value)
+      ),
       1.5 * v2Radius.value * settings.arrow.scale.value
     )
   );

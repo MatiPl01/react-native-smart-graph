@@ -77,14 +77,9 @@ const arrangeVertices = (
 
 const placeVertices = (
   arrangedVertices: Record<string, { col: number; row: number }>,
-  minVertexSpacing: number,
-  vertexRadius: number
+  minVertexSpacing: number
 ): PlacedVerticesPositions => {
   'worklet';
-  // determine the minimum distance between vertices
-  const padding = 2 * vertexRadius;
-  const minVertexCenterDistance = padding + minVertexSpacing;
-
   // determine the width and height of the grid
   const { numCols, numRows } = Object.values(arrangedVertices).reduce(
     (acc, { col, row }) => ({
@@ -95,14 +90,14 @@ const placeVertices = (
   );
 
   // calculate the width and height of the grid as well as the padding
-  const width = padding + (numCols - 1) * minVertexCenterDistance;
-  const height = padding + (numRows - 1) * minVertexCenterDistance;
+  const width = (numCols - 1) * minVertexSpacing;
+  const height = (numRows - 1) * minVertexSpacing;
 
   // calculate the positions of the vertices based on the grid
   return Object.entries(arrangedVertices).reduce((acc, [key, { col, row }]) => {
     acc[key] = {
-      x: vertexRadius + col * minVertexCenterDistance - width / 2,
-      y: vertexRadius + row * minVertexCenterDistance - height / 2
+      x: col * minVertexSpacing - width / 2,
+      y: row * minVertexSpacing - height / 2
     };
     return acc;
   }, {} as PlacedVerticesPositions);
@@ -110,7 +105,6 @@ const placeVertices = (
 
 export default function placeVerticesOnTrees(
   connections: GraphConnections,
-  vertexRadius: number,
   isGraphDirected: boolean,
   settings: AllTreesPlacementSettings
 ): GraphLayout {
@@ -139,16 +133,10 @@ export default function placeVerticesOnTrees(
     const arrangedVertices = arrangeVertices(updatedConnections, rootVertex);
     // Place vertices in the layout
 
-    const verticesPositions = placeVertices(
-      arrangedVertices,
-      minVertexSpacing,
-      vertexRadius
-    );
+    const verticesPositions = placeVertices(arrangedVertices, minVertexSpacing);
     // Calculate container dimensions
     componentsLayouts.push({
-      boundingRect: calcContainerBoundingRect(verticesPositions, {
-        padding: vertexRadius
-      }),
+      boundingRect: calcContainerBoundingRect(verticesPositions),
       verticesPositions
     });
   }

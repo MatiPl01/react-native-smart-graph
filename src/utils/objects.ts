@@ -324,7 +324,7 @@ export const updateValues = <
     : settings.current!) as unknown as ReplaceWithSharedValues<D, K>;
 };
 
-export const unsharedify = <T extends object>(obj: T): Unsharedify<T> => {
+export const unsharedify = <T extends object>(obj?: T): Unsharedify<T> => {
   'worklet';
   const result = {} as Unsharedify<T>;
   for (const key in obj) {

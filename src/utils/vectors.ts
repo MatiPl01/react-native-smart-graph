@@ -78,11 +78,6 @@ export const vectorLength = (vector: Vector): number => {
   return Math.sqrt(vector.x ** 2 + vector.y ** 2);
 };
 
-export const dotProduct = (vector1: Vector, vector2: Vector): number => {
-  'worklet';
-  return vector1.x * vector2.x + vector1.y * vector2.y;
-};
-
 export const distanceBetweenVectors = (
   vector1: Vector,
   vector2: Vector

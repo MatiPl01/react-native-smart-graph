@@ -1,28 +1,30 @@
+import { Sharedifyable } from '@/types/utils';
+
 /*
  * COMPONENTS SETTINGS
  */
 export type VertexSettings = {
-  radius?: number;
+  radius?: Sharedifyable<number>;
 };
 
 export type StraightEdgeSettings = {
-  maxOffsetFactor?: number;
-  type: 'straight';
+  maxOffsetFactor?: Sharedifyable<number>;
+  type: Sharedifyable<'straight'>;
 };
 
 export type CurvedEdgeSettings = {
-  type: 'curved';
+  type: Sharedifyable<'curved'>;
 };
 
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
 export type LabelSettings = {
-  displayed?: boolean;
-  scale?: number;
+  displayed?: Sharedifyable<boolean>;
+  scale?: Sharedifyable<number>;
 };
 
 export type ArrowSettings = {
-  scale?: number;
+  scale?: Sharedifyable<number>;
 };
 
 export type EdgeType = EdgeSettings['type'];

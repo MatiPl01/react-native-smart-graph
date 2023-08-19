@@ -182,7 +182,6 @@ const findForcesPlacementPositions = (
 export const updateInitialVerticesPositions = (
   animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
   connections: GraphConnections,
-  vertexRadius: number,
   canvasDimensions: Dimensions,
   placementSettings: AllGraphPlacementSettings,
   animationSettings: AllAnimationSettings,
@@ -191,7 +190,6 @@ export const updateInitialVerticesPositions = (
   'worklet';
   const { boundingRect, verticesPositions } = placeVertices(
     connections,
-    vertexRadius,
     canvasDimensions,
     placementSettings
   );

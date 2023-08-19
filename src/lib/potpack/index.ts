@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * This code was taken from the potpack library and modified to work with
  * react-native-reanimated.

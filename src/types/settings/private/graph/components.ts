@@ -6,7 +6,7 @@ import {
   StraightEdgeSettings,
   VertexSettings
 } from '@/types/settings/public';
-import { DeepRequired, DeepSharedify, SharedifyWithout } from '@/types/utils';
+import { DeepRequired, DeepSharedify } from '@/types/utils';
 
 /*
  * DEFAULT SETTINGS
@@ -44,10 +44,7 @@ export type InternalCurvedEdgeSettings = Pick<AllCurvedEdgeSettings, 'type'> &
 
 export type InternalArrowSettings = DeepSharedify<AllArrowSettings>;
 
-export type InternalLabelSettings = SharedifyWithout<
-  AllLabelSettings,
-  'displayed'
->;
+export type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
 
 export type InternalEdgeSettings = Pick<AllEdgeSettings, 'type'> &
   DeepSharedify<Omit<AllEdgeSettings, 'type'>>;

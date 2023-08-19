@@ -13,7 +13,6 @@ import random from '@/utils/random';
 type CalcVerticesPositionsProps = {
   density: number;
   minVertexSpacing: number;
-  vertexRadius: number;
   vertices: Array<string>;
 };
 
@@ -21,7 +20,7 @@ const calcVerticesGridPositions = (
   props: CalcVerticesPositionsProps
 ): GraphLayout => {
   'worklet';
-  const { density, minVertexSpacing, vertexRadius, vertices } = props;
+  const { density, minVertexSpacing, vertices } = props;
   const verticesCount = vertices.length;
 
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
@@ -31,8 +30,8 @@ const calcVerticesGridPositions = (
   for (let i = -shiftedPositionBoundary; i <= shiftedPositionBoundary; i++) {
     for (let j = -shiftedPositionBoundary; j <= shiftedPositionBoundary; j++) {
       availablePositions.push({
-        x: vertexRadius + i * (2 * vertexRadius + minVertexSpacing),
-        y: vertexRadius + j * (2 * vertexRadius + minVertexSpacing)
+        x: i * (2 * minVertexSpacing),
+        y: j * (2 * minVertexSpacing)
       });
     }
   }
@@ -43,17 +42,16 @@ const calcVerticesGridPositions = (
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return alignPositionsToCenter(verticesPositions, vertexRadius);
+  return alignPositionsToCenter(verticesPositions);
 };
 
 const calcVerticesTriangularPositions = (
   props: CalcVerticesPositionsProps
 ): GraphLayout => {
   'worklet';
-  const { density, minVertexSpacing, vertexRadius, vertices } = props;
+  const { density, minVertexSpacing, vertices } = props;
   const verticesCount = vertices.length;
-  const minVertexCenterDistance = 2 * vertexRadius + minVertexSpacing;
-  const triangleHeight = (minVertexCenterDistance * Math.sqrt(3)) / 2;
+  const triangleHeight = (minVertexSpacing * Math.sqrt(3)) / 2;
 
   const availablePositionsCount = Math.ceil(verticesCount / density);
   const availablePositions: Array<Vector> = [];
@@ -71,17 +69,15 @@ const calcVerticesTriangularPositions = (
     if (lineNumber % 2 === 1) {
       // Vertical line
       x =
-        vertexRadius +
-        (currentVertexIndex % 2 === 1 ? minVertexCenterDistance / 2 : 0) +
-        minVertexCenterDistance * Math.floor(lineNumber / 2);
-      y = vertexRadius + currentVertexIndex * triangleHeight;
+        (currentVertexIndex % 2 === 1 ? minVertexSpacing / 2 : 0) +
+        minVertexSpacing * Math.floor(lineNumber / 2);
+      y = currentVertexIndex * triangleHeight;
     } else {
       // Horizontal line
       x =
-        vertexRadius +
-        ((lineNumber - 2) % 4 === 0 ? minVertexCenterDistance / 2 : 0) +
-        currentVertexIndex * minVertexCenterDistance;
-      y = vertexRadius + Math.floor(lineNumber / 2) * triangleHeight;
+        ((lineNumber - 2) % 4 === 0 ? minVertexSpacing / 2 : 0) +
+        currentVertexIndex * minVertexSpacing;
+      y = Math.floor(lineNumber / 2) * triangleHeight;
     }
 
     currentVertexIndex++;
@@ -114,33 +110,31 @@ const calcVerticesTriangularPositions = (
     {} as PlacedVerticesPositions
   );
 
-  return alignPositionsToCenter(verticesPositions, vertexRadius);
+  return alignPositionsToCenter(verticesPositions);
 };
 
 const calcVerticesRandomPositions = (
   vertices: Array<string>,
-  vertexRadius: number,
   width: number,
   height: number
 ): GraphLayout => {
   'worklet';
-  const innerWidth = width - 2 * vertexRadius;
-  const innerHeight = height - 2 * vertexRadius;
+  const innerWidth = width;
+  const innerHeight = height;
 
   const verticesPositions = vertices.reduce((acc, key) => {
     acc[key] = {
-      x: vertexRadius + (Math.random() - 0.5) * innerWidth,
-      y: vertexRadius + (Math.random() - 0.5) * innerHeight
+      x: (Math.random() - 0.5) * innerWidth,
+      y: (Math.random() - 0.5) * innerHeight
     };
     return acc;
   }, {} as PlacedVerticesPositions);
 
-  return alignPositionsToCenter(verticesPositions, vertexRadius);
+  return alignPositionsToCenter(verticesPositions);
 };
 
 export default function placeVerticesRandomly(
   vertices: Array<string>,
-  vertexRadius: number,
   canvasDimensions: Dimensions,
   settings: AllRandomPlacementSettings
 ): GraphLayout {
@@ -148,7 +142,6 @@ export default function placeVerticesRandomly(
   if (settings.mesh === 'random') {
     return calcVerticesRandomPositions(
       vertices,
-      vertexRadius,
       settings.containerWidth ?? canvasDimensions.width,
       settings.containerHeight ?? canvasDimensions.height
     );
@@ -157,7 +150,6 @@ export default function placeVerticesRandomly(
   const props: CalcVerticesPositionsProps = {
     density: settings.density,
     minVertexSpacing: settings.minVertexSpacing,
-    vertexRadius,
     vertices
   };
 
