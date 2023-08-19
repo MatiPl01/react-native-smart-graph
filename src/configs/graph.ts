@@ -22,12 +22,14 @@ import {
   AllGraphLayoutSettings,
   AllLabelSettings,
   AllOrbitsPlacementSettings,
+  AllRandomPlacementSettings,
   AllStraightEdgeSettings,
   AllTreesPlacementSettings,
   AllUnboundRandomPlacementSettings,
   AllVertexSettings,
   LayoutType
 } from '@/types/settings';
+import { unsharedify } from '@/utils/objects';
 
 /*
  * SETTINGS
@@ -98,10 +100,7 @@ const DEFAULT_PLACEMENT_SETTINGS: {
 };
 
 // LAYOUT
-export const DEFAULT_LAYOUT_SETTINGS: Record<
-  LayoutType,
-  AllGraphLayoutSettings
-> = {
+const DEFAULT_LAYOUT_SETTINGS: Record<LayoutType, AllGraphLayoutSettings> = {
   auto: {
     type: 'auto'
   },
@@ -130,7 +129,7 @@ export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
 };
 
 // COMPONENTS
-export const DEFAULT_COMPONENTS_SETTINGS: {
+const DEFAULT_COMPONENTS_SETTINGS: {
   arrow: AllArrowSettings;
   edge: {
     curved: AllCurvedEdgeSettings;
@@ -169,42 +168,46 @@ const DEFAULT_ANIMATIONS_SETTINGS: AllGraphAnimationsSettings = {
 
 export const getDefaultConfig = <V, E>(
   data: GraphData<V, E>
-): Omit<AllGraphSettings<V, E>, 'graph'> => ({
-  renderers: {
-    arrow: data.graph.isDirected() ? DefaultArrowRenderer : undefined,
-    edge:
-      data.settings?.components?.edge?.type === 'curved'
-        ? DefaultCurvedEdgeRenderer
-        : DefaultStraightEdgeRenderer,
-    label: data.settings?.components?.label?.displayed
-      ? DefaultLabelRenderer
-      : undefined,
-    vertex: DefaultVertexRenderer
-  },
-  settings: {
-    animations: DEFAULT_ANIMATIONS_SETTINGS,
-    components: {
-      arrow: data.graph.isDirected()
-        ? DEFAULT_COMPONENTS_SETTINGS.arrow
+): Omit<AllGraphSettings<V, E>, 'graph'> => {
+  const settings = unsharedify(data?.settings);
+
+  return {
+    renderers: {
+      arrow: data.graph.isDirected() ? DefaultArrowRenderer : undefined,
+      edge:
+        settings?.components?.edge?.type === 'curved'
+          ? DefaultCurvedEdgeRenderer
+          : DefaultStraightEdgeRenderer,
+      label: data.settings?.components?.label?.displayed
+        ? DefaultLabelRenderer
         : undefined,
-      edge: DEFAULT_COMPONENTS_SETTINGS.edge[
-        data.settings?.components?.edge?.type ?? 'straight'
-      ],
-      label: DEFAULT_COMPONENTS_SETTINGS.label,
-      vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
+      vertex: DefaultVertexRenderer
     },
-    layout: data.settings?.layout
-      ? DEFAULT_LAYOUT_SETTINGS[data.settings.layout.type]
-      : DEFAULT_LAYOUT_SETTINGS.auto,
-    placement: data.settings?.placement
-      ? data.settings.placement.strategy === 'random'
-        ? DEFAULT_PLACEMENT_SETTINGS[data.settings.placement.strategy][
-            data.settings.placement.mesh ?? 'grid'
-          ]
-        : DEFAULT_PLACEMENT_SETTINGS[data.settings.placement.strategy]
-      : DEFAULT_PLACEMENT_SETTINGS.random.grid
-  }
-});
+    settings: {
+      animations: DEFAULT_ANIMATIONS_SETTINGS,
+      components: {
+        arrow: data.graph.isDirected()
+          ? DEFAULT_COMPONENTS_SETTINGS.arrow
+          : undefined,
+        edge: DEFAULT_COMPONENTS_SETTINGS.edge[
+          settings?.components?.edge?.type ?? 'straight'
+        ],
+        label: DEFAULT_COMPONENTS_SETTINGS.label,
+        vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
+      },
+      layout: settings?.layout
+        ? DEFAULT_LAYOUT_SETTINGS[settings.layout.type]
+        : DEFAULT_LAYOUT_SETTINGS.auto,
+      placement: settings?.placement
+        ? settings.placement.strategy === 'random'
+          ? DEFAULT_PLACEMENT_SETTINGS[settings.placement.strategy][
+              settings.placement.mesh ?? 'grid'
+            ]
+          : DEFAULT_PLACEMENT_SETTINGS[settings.placement.strategy]
+        : DEFAULT_PLACEMENT_SETTINGS.random.grid
+    }
+  };
+};
 
 const getPlacementConfig = <V, E>(
   settings: AllGraphSettings<V, E>['settings']
@@ -212,13 +215,14 @@ const getPlacementConfig = <V, E>(
   const sharedSettings = { strategy: 'shared' };
 
   switch (settings.placement.strategy) {
+    default:
     case 'random':
       const sharedRandomSettings = {
         ...sharedSettings,
         mesh: 'shared'
       };
 
-      switch (settings.placement.mesh) {
+      switch ((settings.placement as AllRandomPlacementSettings).mesh) {
         case 'grid':
         case 'triangular':
           return {

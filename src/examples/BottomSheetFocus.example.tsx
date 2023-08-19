@@ -191,7 +191,7 @@ export default function BottomSheetFocus() {
               onVertexPress: handleVertexPress
             },
             placement: {
-              strategy: 'orbits',
+              strategy: useSharedValue('trees'),
               roots,
               minVertexSpacing
             },

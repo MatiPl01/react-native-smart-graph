@@ -3,9 +3,7 @@ import { useMemo } from 'react';
 import { ContextProviderComposer } from '@/providers/utils';
 
 import { AutoSizingProvider } from './auto';
-import GraphViewDataProvider, {
-  GraphViewDataProviderProps
-} from './data/GraphViewDataProvider';
+import { GraphViewDataProvider, GraphViewDataProviderProps } from './data';
 import { GesturesProvider } from './gestures';
 import { FocusProvider, TransformProvider } from './transform';
 

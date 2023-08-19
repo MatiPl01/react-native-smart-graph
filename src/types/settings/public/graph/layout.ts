@@ -1,3 +1,5 @@
+import { Sharedifyable } from '@/types/utils';
+
 /*
  * AUTO LAYOUT
  */
@@ -9,12 +11,12 @@ export type AutoLayoutSettings = {
  * FORCE LAYOUT
  */
 export type ForceLayoutSettings = {
-  attractionForceFactor?: number;
-  attractionScale?: number;
-  minUpdateDistance?: number;
-  refreshInterval?: number;
-  repulsionScale?: number;
-  strategy?: 'default'; // TODO - add more in the future
+  attractionForceFactor?: Sharedifyable<number>;
+  attractionScale?: Sharedifyable<number>;
+  minUpdateDistance?: Sharedifyable<number>;
+  refreshInterval?: Sharedifyable<number>;
+  repulsionScale?: Sharedifyable<number>;
+  strategy?: Sharedifyable<'default'>; // TODO - add more in the future
   type: 'force';
 };
 

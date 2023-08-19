@@ -15,7 +15,8 @@ import {
   DeepRequired,
   PartialBy,
   Sharedify,
-  SharedifyWithout
+  SharedifyWithout,
+  Unsharedify
 } from '@/types/utils';
 
 export type PlacedVerticesPositions = Record<string, Vector>;
@@ -35,29 +36,37 @@ export type GraphLayout = {
  */
 // Random
 export type AllBoundRandomPlacementSettings = PartialBy<
-  DeepRequired<BoundRandomPlacementSettings>,
+  DeepRequired<Unsharedify<BoundRandomPlacementSettings>>,
   'containerHeight' | 'containerWidth'
 >;
 
-export type AllUnboundRandomPlacementSettings =
-  DeepRequired<UnboundRandomPlacementSettings>;
+export type AllUnboundRandomPlacementSettings = DeepRequired<
+  Unsharedify<UnboundRandomPlacementSettings>
+>;
 
 export type AllRandomPlacementSettings =
   | AllBoundRandomPlacementSettings
   | AllUnboundRandomPlacementSettings;
 
 // Circle
-export type AllCirclePlacementSettings = DeepRequired<CirclePlacementSettings>;
+export type AllCirclePlacementSettings = DeepRequired<
+  Unsharedify<CirclePlacementSettings>
+>;
 
 // Circles
-export type AllCirclesPlacementSettings =
-  DeepRequired<CirclesPlacementSettings>;
+export type AllCirclesPlacementSettings = DeepRequired<
+  Unsharedify<CirclesPlacementSettings>
+>;
 
 // Trees
-export type AllTreesPlacementSettings = DeepRequired<TreesPlacementSettings>;
+export type AllTreesPlacementSettings = DeepRequired<
+  Unsharedify<TreesPlacementSettings>
+>;
 
 // Orbits
-export type AllOrbitsPlacementSettings = DeepRequired<OrbitsPlacementSettings>;
+export type AllOrbitsPlacementSettings = DeepRequired<
+  Unsharedify<OrbitsPlacementSettings>
+>;
 
 /*
  * GRAPH PLACEMENT SETTINGS WITH ALL REQUIRED FIELDS

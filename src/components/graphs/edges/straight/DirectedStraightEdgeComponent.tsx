@@ -60,7 +60,14 @@ function DirectedStraightEdgeComponent<V, E>({
   const arrowTipPosition = useSharedValue(p2.value);
   const arrowWidth = useSharedValue(0);
   const arrowHeight = useDerivedValue(() =>
-    Math.min(1.5 * arrowWidth.value, distanceBetweenVectors(p1.value, p2.value))
+    Math.min(
+      Math.max(
+        0,
+        distanceBetweenVectors(p1.value, p2.value) -
+          (v1Radius.value + v2Radius.value)
+      ),
+      1.5 * arrowWidth.value
+    )
   );
 
   useAnimatedReaction(

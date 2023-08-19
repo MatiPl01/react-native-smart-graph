@@ -22,9 +22,9 @@ import {
   FocusStatus,
   useAutoSizingContext,
   useFocusContext,
-  useTransformContext
+  useTransformContext,
+  useViewDataContext
 } from '@/providers/view';
-import { useViewDataContext } from '@/providers/view/data';
 import { ObjectFit } from '@/types/layout';
 
 const OBJECT_FIT_BUTTONS: Array<{ icon: IconDefinition; type: ObjectFit }> = [

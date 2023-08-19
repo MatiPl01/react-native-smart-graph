@@ -20,11 +20,19 @@ export type PartialWithRequired<T, K extends keyof T> = Partial<T> &
   Required<Pick<T, K>>;
 
 export type DeepSharedify<T> = {
-  [K in keyof T]: T[K] extends object ? DeepSharedify<T[K]> : SharedValue<T[K]>;
+  [K in keyof T]: T[K] extends SharedValue<infer U> | infer U | undefined
+    ? SharedValue<U>
+    : T[K] extends object
+    ? DeepSharedify<T[K]>
+    : SharedValue<T[K]>;
 };
 
 export type SharedifyWithout<T, E extends keyof any = never> = {
-  [K in keyof T]: K extends E ? T[K] : SharedValue<T[K]>;
+  [K in keyof T]: K extends E
+    ? T[K]
+    : T[K] extends SharedValue<infer U> | infer U | undefined
+    ? SharedValue<U>
+    : SharedValue<T[K]>;
 };
 
 export type Sharedify<T> = {
@@ -44,6 +52,8 @@ export type Unsharedify<T> = T extends (...args: Array<any>) => any
   : T extends object
   ? { [P in keyof T]: Unsharedify<T[P]> }
   : T;
+
+export type Sharedifyable<T> = SharedValue<T> | T;
 
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];

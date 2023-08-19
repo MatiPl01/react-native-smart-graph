@@ -1,11 +1,13 @@
+import { Sharedifyable } from '@/types/utils';
+
 /* eslint-disable import/no-unused-modules */
 type SharedPlacementSettings = {
-  minVertexSpacing?: number;
+  minVertexSpacing?: Sharedifyable<number>;
 };
 
 type SortablePlacementSettings = {
   sortComparator?: (key1: string, key2: string) => number;
-  sortVertices?: boolean;
+  sortVertices?: Sharedifyable<boolean>;
 };
 
 /*
@@ -14,16 +16,16 @@ type SortablePlacementSettings = {
 export type RandomMeshType = 'grid' | 'random' | 'triangular';
 
 export type BoundRandomPlacementSettings = {
-  containerHeight?: number;
-  containerWidth?: number;
-  mesh: 'random';
-  strategy: 'random';
+  containerHeight?: Sharedifyable<number>;
+  containerWidth?: Sharedifyable<number>;
+  mesh: Sharedifyable<'random'>;
+  strategy: Sharedifyable<'random'>;
 };
 
 export type UnboundRandomPlacementSettings = SharedPlacementSettings & {
-  density?: number;
-  mesh?: Exclude<RandomMeshType, 'random'>;
-  strategy: 'random';
+  density?: Sharedifyable<number>;
+  mesh?: Sharedifyable<Exclude<RandomMeshType, 'random'>>;
+  strategy: Sharedifyable<'random'>;
 };
 
 export type RandomPlacementSettings =
@@ -38,24 +40,24 @@ type SharedCircularPlacementSettings = SortablePlacementSettings &
 
 // Circle
 export type CirclePlacementSettings = SharedCircularPlacementSettings & {
-  strategy: 'circle';
+  strategy: Sharedifyable<'circle'>;
 };
 
 // Circles
 export type CirclesPlacementSettings = SharedCircularPlacementSettings & {
-  strategy: 'circles';
+  strategy: Sharedifyable<'circles'>;
 };
 
 /*
  * ROOTS PLACEMENT (trees, orbits)
  */
 type SharedRootsPlacementSettings = SharedPlacementSettings & {
-  roots?: Array<string>;
+  roots?: Sharedifyable<Array<string>>;
 };
 
 // Trees
 export type TreesPlacementSettings = SharedRootsPlacementSettings & {
-  strategy: 'trees';
+  strategy: Sharedifyable<'trees'>;
 };
 
 // Orbits
@@ -74,20 +76,19 @@ export type OrbitsLayerSizing =
 
 type OrbitsCustomLayerSizingSettings = {
   getLayerRadius: LayerRadiusGetter;
-  layerSizing: 'custom';
+  layerSizing: Sharedifyable<'custom'>;
 };
 
 export type OrbitsPlacementSettings = SharedRootsPlacementSettings &
   (
     | {
-        layerSizing?: Exclude<OrbitsLayerSizing, 'custom'>;
+        layerSizing?: Sharedifyable<Exclude<OrbitsLayerSizing, 'custom'>>;
       }
     | OrbitsCustomLayerSizingSettings
   ) & {
-    maxSectorAngle?: number;
-    roots?: Array<string>;
-    strategy: 'orbits';
-    symmetrical?: boolean;
+    maxSectorAngle?: Sharedifyable<number>;
+    strategy: Sharedifyable<'orbits'>;
+    symmetrical?: Sharedifyable<boolean>;
   };
 
 /*
