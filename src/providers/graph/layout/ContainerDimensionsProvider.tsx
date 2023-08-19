@@ -2,17 +2,19 @@ import { PropsWithChildren } from 'react';
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withComponentsData } from '@/providers/graph/data';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { BoundingRect } from '@/types/layout';
 import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
   targetBoundingRect: SharedValue<BoundingRect>;
+  vertexRadius: SharedValue<number>;
 }>;
 
 function ContainerDimensionsProvider({
   children,
-  targetBoundingRect
+  targetBoundingRect,
+  vertexRadius
 }: ContainerDimensionsProviderProps) {
   // CONTEXTS
   // Canvas contexts
@@ -28,22 +30,35 @@ function ContainerDimensionsProvider({
         right: boundingRect.right.value,
         top: boundingRect.top.value
       },
+      padding: vertexRadius.value,
       targetRect: targetBoundingRect.value
     }),
-    ({ currentRect, targetRect }) => {
-      for (const key in boundingRect) {
-        const k = key as keyof BoundingRect;
-        boundingRect[k].value = animateToValue(currentRect[k], targetRect[k]);
-      }
+    ({ currentRect, padding, targetRect }) => {
+      boundingRect.left.value = animateToValue(
+        currentRect.left,
+        targetRect.left - padding
+      );
+      boundingRect.top.value = animateToValue(
+        currentRect.top,
+        targetRect.top - padding
+      );
+      boundingRect.right.value = animateToValue(
+        currentRect.right,
+        targetRect.right + padding
+      );
+      boundingRect.bottom.value = animateToValue(
+        currentRect.bottom,
+        targetRect.bottom + padding
+      );
     }
   );
 
   return <>{children}</>;
 }
 
-export default withComponentsData(
-  ContainerDimensionsProvider,
-  ({ targetBoundingRect }) => ({
+export default withGraphSettings(
+  withComponentsData(ContainerDimensionsProvider, ({ targetBoundingRect }) => ({
     targetBoundingRect
-  })
+  })),
+  ({ settings }) => ({ vertexRadius: settings.components.vertex.radius })
 );

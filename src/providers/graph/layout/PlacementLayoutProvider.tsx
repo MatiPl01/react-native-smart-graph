@@ -25,7 +25,6 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   layoutAnimationSettings: AllAnimationSettings;
   placementSettings: InternalGraphPlacementSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
-  vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
@@ -37,7 +36,6 @@ function GraphPlacementLayoutProvider<V, E>({
   layoutAnimationSettings,
   placementSettings,
   targetBoundingRect,
-  vertexRadius,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
   // CONTEXTS
@@ -56,13 +54,11 @@ function GraphPlacementLayoutProvider<V, E>({
         width: canvasDimensions.width.value
       },
       isDirected: isGraphDirected.value,
-      radius: vertexRadius.value,
       settings: unsharedify(placementSettings)
     }),
-    ({ canvasDims, isDirected, radius, settings }) => {
+    ({ canvasDims, isDirected, settings }) => {
       const { boundingRect, verticesPositions } = placeVertices(
         connections,
-        radius,
         canvasDims,
         settings,
         isDirected
@@ -112,7 +108,6 @@ export default withGraphSettings(
     })
   ),
   ({ settings }) => ({
-    placementSettings: settings.placement,
-    vertexRadius: settings.components.vertex.radius
+    placementSettings: settings.placement
   })
 );

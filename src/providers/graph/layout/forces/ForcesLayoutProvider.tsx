@@ -30,7 +30,6 @@ type ForcesLayoutProviderProps<V, E> = PropsWithChildren<{
   edgesData: Record<string, EdgeComponentData<V, E>>;
   settings: InternalForceLayoutSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
-  vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
 
@@ -40,7 +39,6 @@ function ForcesLayoutProvider<V, E>({
   edgesData,
   settings,
   targetBoundingRect,
-  vertexRadius,
   verticesData
 }: ForcesLayoutProviderProps<V, E>) {
   // CONTEXTS
@@ -121,10 +119,9 @@ function ForcesLayoutProvider<V, E>({
   useAnimatedReaction(
     () => ({
       completed: initialPlacementCompleted.value,
-      padding: vertexRadius.value,
       positions: targetPositions.value
     }),
-    ({ completed, padding, positions }) => {
+    ({ completed, positions }) => {
       if (!completed) return;
       targetBoundingRect.value = calcContainerBoundingRect(
         positions ??
@@ -133,10 +130,7 @@ function ForcesLayoutProvider<V, E>({
               key,
               animatedVectorCoordinatesToVector(value)
             ])
-          ),
-        {
-          padding
-        }
+          )
       );
     }
   );
@@ -164,7 +158,6 @@ export default withGraphSettings(
     })
   ),
   ({ settings }) => ({
-    settings: settings.layout as InternalForceLayoutSettings,
-    vertexRadius: settings.components.vertex.radius
+    settings: settings.layout as InternalForceLayoutSettings
   })
 );

@@ -13,7 +13,6 @@ export * from './shared';
 
 export const placeVertices = (
   connections: GraphConnections,
-  vertexRadius: number,
   canvasDimensions: Dimensions,
   settings: AllGraphPlacementSettings,
   isGraphDirected = false
@@ -21,36 +20,17 @@ export const placeVertices = (
   'worklet';
   switch (settings.strategy) {
     case 'circle':
-      return placeVerticesOnCircle(
-        Object.keys(connections),
-        vertexRadius,
-        settings
-      );
+      return placeVerticesOnCircle(Object.keys(connections), settings);
     case 'circles':
-      return placeVerticesOnCircles(
-        findGraphComponents(connections),
-        vertexRadius,
-        settings
-      );
+      return placeVerticesOnCircles(findGraphComponents(connections), settings);
     case 'orbits':
-      return placeVerticesOnOrbits(
-        connections,
-        vertexRadius,
-        isGraphDirected,
-        settings
-      );
+      return placeVerticesOnOrbits(connections, isGraphDirected, settings);
     case 'trees':
-      return placeVerticesOnTrees(
-        connections,
-        vertexRadius,
-        isGraphDirected,
-        settings
-      );
+      return placeVerticesOnTrees(connections, isGraphDirected, settings);
     default:
     case 'random':
       return placeVerticesRandomly(
         Object.keys(connections),
-        vertexRadius,
         canvasDimensions,
         settings
       );

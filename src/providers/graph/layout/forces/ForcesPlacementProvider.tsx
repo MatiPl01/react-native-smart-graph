@@ -109,7 +109,6 @@ function ForcesPlacementProvider<V, E>({
     runOnUI(updateInitialVerticesPositions)(
       animatedVerticesPositions,
       connections,
-      vertexRadius.value,
       {
         height: canvasDimensions.height.value,
         width: canvasDimensions.width.value

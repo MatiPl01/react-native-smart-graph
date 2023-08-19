@@ -11,7 +11,8 @@ import {
   Extrapolate,
   interpolate,
   useDerivedValue,
-  useSharedValue
+  useSharedValue,
+  withTiming
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
@@ -110,7 +111,7 @@ export default function BottomSheetFocus() {
   const roots = useSharedValue(['V1']);
   const focusPoints = useDerivedValue(() => ({
     0.5: {
-      key: currentRoute.value,
+      key: roots.value[0],
       vertexScale: 6,
       alignment: {
         horizontalAlignment: 'center',
@@ -119,7 +120,7 @@ export default function BottomSheetFocus() {
       }
     },
     1: {
-      key: currentRoute.value,
+      key: roots.value[0],
       vertexScale: 2,
       alignment: {
         horizontalAlignment: 'left',
@@ -129,6 +130,9 @@ export default function BottomSheetFocus() {
       }
     }
   }));
+
+  const minVertexSpacing = useSharedValue(100);
+  const vertexRadius = useSharedValue(20);
 
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
@@ -161,6 +165,10 @@ export default function BottomSheetFocus() {
   useEffect(() => {
     setInterval(() => {
       roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
+      minVertexSpacing.value = Math.random() * 100 + 10;
+      vertexRadius.value = withTiming(Math.random() * 80 + 10, {
+        duration: 500
+      });
     }, 500);
   }, []);
 
@@ -184,7 +192,13 @@ export default function BottomSheetFocus() {
             },
             placement: {
               strategy: 'orbits',
-              roots: roots as unknown as Array<string> // TODO - add support for shared values
+              roots,
+              minVertexSpacing
+            },
+            components: {
+              vertex: {
+                radius: vertexRadius
+              }
             }
           }}
           graph={graph}
