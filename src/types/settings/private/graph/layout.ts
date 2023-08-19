@@ -3,13 +3,17 @@ import {
   ForceLayoutSettings,
   GraphLayoutSettings
 } from '@/types/settings/public';
-import { DeepRequired, SharedifyWithout } from '@/types/utils';
+import { DeepRequired, SharedifyWithout, Unsharedify } from '@/types/utils';
 
 type AllAutoLayoutSettings = DeepRequired<AutoLayoutSettings>;
 
-export type AllForceLayoutSettings = DeepRequired<ForceLayoutSettings>;
+export type AllForceLayoutSettings = DeepRequired<
+  Unsharedify<ForceLayoutSettings>
+>;
 
-export type AllGraphLayoutSettings = DeepRequired<GraphLayoutSettings>;
+export type AllGraphLayoutSettings = DeepRequired<
+  Unsharedify<GraphLayoutSettings>
+>;
 
 export type InternalForceLayoutSettings = SharedifyWithout<
   AllForceLayoutSettings,

@@ -198,7 +198,7 @@ export const getDefaultConfig = <V, E>(
       layout: settings?.layout
         ? DEFAULT_LAYOUT_SETTINGS[settings.layout.type]
         : DEFAULT_LAYOUT_SETTINGS.auto,
-      placement: settings?.placement
+      placement: settings?.placement?.strategy
         ? settings.placement.strategy === 'random'
           ? DEFAULT_PLACEMENT_SETTINGS[settings.placement.strategy][
               settings.placement.mesh ?? 'grid'

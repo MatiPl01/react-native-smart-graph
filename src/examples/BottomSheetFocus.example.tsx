@@ -4,6 +4,7 @@ import {
   DirectedGraphComponent,
   DirectedGraphData,
   GraphView,
+  GraphViewControls,
   VertexPressHandler
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -176,9 +177,10 @@ export default function BottomSheetFocus() {
     <>
       <GraphView
         padding={{
-          bottom: 50,
+          bottom: 100,
           left: 25,
-          right: 25
+          right: 25,
+          top: 50
         }}
         objectFit='contain'>
         <DirectedGraphComponent
@@ -203,6 +205,7 @@ export default function BottomSheetFocus() {
           }}
           graph={graph}
         />
+        <GraphViewControls style={styles.controls} />
       </GraphView>
       <BottomSheet
         animatedIndex={animatedIndex}
@@ -225,5 +228,10 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     fontSize: 18
+  },
+  controls: {
+    top: 64,
+    right: 16,
+    position: 'absolute'
   }
 });
