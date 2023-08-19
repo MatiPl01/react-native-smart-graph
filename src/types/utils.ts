@@ -27,6 +27,24 @@ export type SharedifyWithout<T, E extends keyof any = never> = {
   [K in keyof T]: K extends E ? T[K] : SharedValue<T[K]>;
 };
 
+export type Sharedify<T> = {
+  [K in keyof T]: T[K] extends SharedValue<any>
+    ? T[K]
+    : T[K] extends infer U | undefined
+    ? U extends undefined
+      ? SharedValue<U> | undefined
+      : SharedValue<U>
+    : never;
+};
+
+export type Unsharedify<T> = T extends (...args: Array<any>) => any
+  ? T // Leaves function type as is
+  : T extends SharedValue<infer U>
+  ? U
+  : T extends object
+  ? { [P in keyof T]: Unsharedify<T[P]> }
+  : T;
+
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };

@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
   DirectedGraph,
   DirectedGraphComponent,
   DirectedGraphData,
-  DirectedGraphSettings,
   GraphView,
   VertexPressHandler
 } from 'react-native-smart-graph';
@@ -97,11 +96,6 @@ export default function BottomSheetFocus() {
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [currentRoute, setCurrentRoute] =
-    useState<keyof typeof GRAPH_ROUTES>('V1');
-  const currentRouteRef = useRef(currentRoute);
-  const [settings, setGraphSettings] = useState<DirectedGraphSettings>({});
-
   const animatedIndex = useSharedValue(0);
   const bottomSheetProgress = useDerivedValue(() =>
     interpolate(
@@ -112,52 +106,33 @@ export default function BottomSheetFocus() {
     )
   );
 
-  const createGraphSettings = (key: string): DirectedGraphSettings => ({
-    focus: {
-      points: {
-        0.5: {
-          key,
-          vertexScale: 6,
-          alignment: {
-            horizontalAlignment: 'center',
-            verticalAlignment: 'top',
-            verticalOffset: 100
-          }
-        },
-        1: {
-          key,
-          vertexScale: 2,
-          alignment: {
-            horizontalAlignment: 'left',
-            verticalAlignment: 'top',
-            verticalOffset: 60,
-            horizontalOffset: 20
-          }
-        }
-      },
-      progress: bottomSheetProgress
+  const currentRoute = useSharedValue<keyof typeof GRAPH_ROUTES>('V1');
+  const roots = useSharedValue('V1');
+  const focusPoints = useDerivedValue(() => ({
+    0.5: {
+      key: currentRoute.value,
+      vertexScale: 6,
+      alignment: {
+        horizontalAlignment: 'center',
+        verticalAlignment: 'top',
+        verticalOffset: 100
+      }
     },
-    events: {
-      onVertexPress: handleVertexPress
-    },
-    placement: {
-      strategy: 'orbits',
-      roots: [key]
-    },
-    animations: {
-      layout: {
-        duration: 1000
+    1: {
+      key: currentRoute.value,
+      vertexScale: 2,
+      alignment: {
+        horizontalAlignment: 'left',
+        verticalAlignment: 'top',
+        verticalOffset: 60,
+        horizontalOffset: 20
       }
     }
-  });
-
-  useEffect(() => {
-    setGraphSettings(createGraphSettings(currentRoute));
-  }, [currentRoute]);
+  }));
 
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
-      if (currentRouteRef.current === key) {
+      if (currentRoute.value === key) {
         bottomSheetRef.current?.snapToIndex(1, {
           duration: 250
         });
@@ -169,9 +144,8 @@ export default function BottomSheetFocus() {
       if (!target) {
         return;
       }
-      currentRouteRef.current = k;
-      setCurrentRoute(k);
-      graph.clear();
+      currentRoute.value = k;
+      graph.replaceBatch(target);
     },
     []
   );
@@ -184,6 +158,11 @@ export default function BottomSheetFocus() {
     );
   };
 
+  setInterval(() => {
+    roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
+    console.log(roots.value);
+  }, 1000);
+
   return (
     <>
       <GraphView
@@ -193,7 +172,22 @@ export default function BottomSheetFocus() {
           right: 25
         }}
         objectFit='contain'>
-        <DirectedGraphComponent graph={graph} settings={settings} />
+        <DirectedGraphComponent
+          settings={{
+            focus: {
+              points: focusPoints,
+              progress: bottomSheetProgress
+            },
+            events: {
+              onVertexPress: handleVertexPress
+            },
+            placement: {
+              strategy: 'orbits',
+              roots
+            }
+          }}
+          graph={graph}
+        />
       </GraphView>
       <BottomSheet
         animatedIndex={animatedIndex}

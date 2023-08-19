@@ -11,7 +11,12 @@ import {
   TreesPlacementSettings,
   UnboundRandomPlacementSettings
 } from '@/types/settings/public';
-import { DeepRequired, PartialBy } from '@/types/utils';
+import {
+  DeepRequired,
+  PartialBy,
+  Sharedify,
+  SharedifyWithout
+} from '@/types/utils';
 
 export type PlacedVerticesPositions = Record<string, Vector>;
 
@@ -60,3 +65,41 @@ export type AllOrbitsPlacementSettings = DeepRequired<OrbitsPlacementSettings>;
 export type AllGraphPlacementSettings =
   | AllRandomPlacementSettings
   | DeepRequired<Exclude<GraphPlacementSettings, RandomPlacementSettings>>;
+
+/*
+ * INTERNAL GRAPH PLACEMENT SETTINGS
+ */
+export type InternalBoundRandomPlacementSettings =
+  Sharedify<AllBoundRandomPlacementSettings>;
+
+export type InternalUnboundRandomPlacementSettings =
+  Sharedify<AllUnboundRandomPlacementSettings>;
+
+export type InternalRandomPlacementSettings =
+  | InternalBoundRandomPlacementSettings
+  | InternalUnboundRandomPlacementSettings;
+
+export type InternalCirclePlacementSettings = SharedifyWithout<
+  AllCirclePlacementSettings,
+  'sortComparator'
+>;
+
+export type InternalCirclesPlacementSettings = SharedifyWithout<
+  AllCirclesPlacementSettings,
+  'sortComparator'
+>;
+
+export type InternalTreesPlacementSettings =
+  Sharedify<AllTreesPlacementSettings>;
+
+export type InternalOrbitsPlacementSettings = SharedifyWithout<
+  AllOrbitsPlacementSettings,
+  'getLayerRadius'
+>;
+
+export type InternalGraphPlacementSettings =
+  | InternalCirclePlacementSettings
+  | InternalCirclesPlacementSettings
+  | InternalOrbitsPlacementSettings
+  | InternalRandomPlacementSettings
+  | InternalTreesPlacementSettings;

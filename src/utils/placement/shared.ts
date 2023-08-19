@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import potpack from '@/lib/potpack';
 import { AnimatedDimensions, BoundingRect, Dimensions } from '@/types/layout';
 import { GraphLayout, PlacedVerticesPositions } from '@/types/settings';
