@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   DirectedGraph,
   DirectedGraphComponent,
@@ -107,7 +107,7 @@ export default function BottomSheetFocus() {
   );
 
   const currentRoute = useSharedValue<keyof typeof GRAPH_ROUTES>('V1');
-  const roots = useSharedValue('V1');
+  const roots = useSharedValue(['V1']);
   const focusPoints = useDerivedValue(() => ({
     0.5: {
       key: currentRoute.value,
@@ -158,10 +158,11 @@ export default function BottomSheetFocus() {
     );
   };
 
-  setInterval(() => {
-    roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
-    console.log(roots.value);
-  }, 1000);
+  useEffect(() => {
+    setInterval(() => {
+      roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
+    }, 500);
+  }, []);
 
   return (
     <>
@@ -183,7 +184,7 @@ export default function BottomSheetFocus() {
             },
             placement: {
               strategy: 'orbits',
-              roots
+              roots: roots as unknown as Array<string> // TODO - add support for shared values
             }
           }}
           graph={graph}
