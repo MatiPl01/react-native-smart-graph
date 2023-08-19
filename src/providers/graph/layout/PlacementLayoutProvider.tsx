@@ -12,9 +12,10 @@ import { BoundingRect } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
-  AllGraphPlacementSettings
+  InternalGraphPlacementSettings
 } from '@/types/settings';
 import { animateVerticesToFinalPositions } from '@/utils/animations';
+import { unsharedify } from '@/utils/objects';
 import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
@@ -22,7 +23,7 @@ export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   edgesData: Record<string, EdgeComponentData<V, E>>;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
-  placementSettings: AllGraphPlacementSettings;
+  placementSettings: InternalGraphPlacementSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
   vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
@@ -55,14 +56,15 @@ function GraphPlacementLayoutProvider<V, E>({
         width: canvasDimensions.width.value
       },
       isDirected: isGraphDirected.value,
-      radius: vertexRadius.value
+      radius: vertexRadius.value,
+      settings: unsharedify(placementSettings)
     }),
-    ({ canvasDims, isDirected, radius }) => {
+    ({ canvasDims, isDirected, radius, settings }) => {
       const { boundingRect, verticesPositions } = placeVertices(
         connections,
         radius,
         canvasDims,
-        placementSettings,
+        settings,
         isDirected
       );
 

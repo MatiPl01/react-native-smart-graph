@@ -13,7 +13,8 @@ import {
   DeepPartial,
   DeepReplaceValue,
   MergeAll,
-  ReplaceWithSharedValues
+  ReplaceWithSharedValues,
+  Unsharedify
 } from '@/types/utils';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -321,4 +322,22 @@ export const updateValues = <
   return (isModified
     ? result
     : settings.current!) as unknown as ReplaceWithSharedValues<D, K>;
+};
+
+export const unsharedify = <T extends object>(obj: T): Unsharedify<T> => {
+  'worklet';
+  const result = {} as Unsharedify<T>;
+  for (const key in obj) {
+    const k = key as unknown as keyof typeof result;
+    const value = obj[key as keyof T];
+    if (isSharedValue(value)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      result[k] = (value as SharedValue<any>).value;
+    } else if (typeof value === 'object' && value !== null) {
+      result[k] = unsharedify(value);
+    } else {
+      result[k] = value;
+    }
+  }
+  return result;
 };

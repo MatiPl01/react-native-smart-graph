@@ -206,6 +206,59 @@ export const getDefaultConfig = <V, E>(
   }
 });
 
+const getPlacementConfig = <V, E>(
+  settings: AllGraphSettings<V, E>['settings']
+) => {
+  const sharedSettings = { strategy: 'shared' };
+
+  switch (settings.placement.strategy) {
+    case 'random':
+      const sharedRandomSettings = {
+        ...sharedSettings,
+        mesh: 'shared'
+      };
+
+      switch (settings.placement.mesh) {
+        case 'grid':
+        case 'triangular':
+          return {
+            ...sharedRandomSettings,
+            density: 'shared',
+            minVertexSpacing: 'shared'
+          };
+        case 'random':
+        default:
+          return {
+            ...sharedRandomSettings,
+            containerHeight: 'shared',
+            containerWidth: 'shared'
+          };
+      }
+    case 'circle':
+    case 'circles':
+      return {
+        ...sharedSettings,
+        minVertexSpacing: 'shared',
+        sortVertices: 'shared'
+      };
+    case 'trees':
+      return {
+        ...sharedSettings,
+        minVertexSpacing: 'shared',
+        roots: 'shared'
+      };
+    case 'orbits':
+      return {
+        ...sharedSettings,
+        layerSizing: 'shared',
+        maxSectorAngle: 'shared',
+        minVertexSpacing: 'shared',
+        roots: 'shared',
+        symmetrical: 'shared'
+      };
+  }
+};
+
 export const getUpdateConfig = <V, E>({
   settings
 }: Omit<AllGraphSettings<V, E>, 'graph'>) => ({
@@ -245,6 +298,7 @@ export const getUpdateConfig = <V, E>({
             repulsionScale: 'shared',
             strategy: 'shared'
           }
-        : undefined
+        : undefined,
+    placement: getPlacementConfig(settings)
   }
 });

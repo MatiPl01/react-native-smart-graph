@@ -32,6 +32,7 @@ import {
   DirectedGraphWithCurvedEdgeSettings,
   GraphEventsSettings,
   InternalGraphLayoutSettings,
+  InternalGraphPlacementSettings,
   InternalMultiStepFocusSettings,
   MultiStepFocusSettings,
   UndirectedGraphSettings,
@@ -116,6 +117,6 @@ export type GraphSettingsData<V, E> = Omit<
     components: InternalGraphComponentsSettings;
     focus?: InternalMultiStepFocusSettings;
     layout: InternalGraphLayoutSettings;
-    placement: AllGraphPlacementSettings;
+    placement: InternalGraphPlacementSettings;
   };
 };

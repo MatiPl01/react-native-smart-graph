@@ -16,12 +16,13 @@ import { AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
-  AllGraphPlacementSettings
+  InternalGraphPlacementSettings
 } from '@/types/settings';
 import {
   updateInitialVerticesPositions,
   updateNewVerticesPositions
 } from '@/utils/forces';
+import { unsharedify } from '@/utils/objects';
 
 type ForcesPlacementContextType = {
   initialPlacementCompleted: SharedValue<boolean>;
@@ -46,7 +47,7 @@ export const useForcesPlacementContext = () => {
 export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
   layoutAnimationSettings: AllAnimationSettings;
-  placementSettings: AllGraphPlacementSettings;
+  placementSettings: InternalGraphPlacementSettings;
   vertexRadius: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V, E>>;
 }>;
@@ -113,7 +114,7 @@ function ForcesPlacementProvider<V, E>({
         height: canvasDimensions.height.value,
         width: canvasDimensions.width.value
       },
-      placementSettings,
+      unsharedify(placementSettings),
       {
         ...layoutAnimationSettings,
         onComplete: createFirstAnimationCompleteHandler(
