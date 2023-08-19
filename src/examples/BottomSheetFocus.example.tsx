@@ -171,7 +171,7 @@ export default function BottomSheetFocus() {
       }
       currentRouteRef.current = k;
       setCurrentRoute(k);
-      graph.replaceBatch(target);
+      graph.clear();
     },
     []
   );
