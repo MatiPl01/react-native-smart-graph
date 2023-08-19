@@ -133,33 +133,33 @@ export const getMultiStepVertexTransformation = <V, E>(
 
 export const getFocusSteps = <V, E>(
   progress: number,
-  previousStep: number,
+  previousStepIdx: number,
   focusStepsData: Array<FocusStepData<V, E>>
 ): {
   afterStep: FocusStepData<V, E> | null;
   beforeStep: FocusStepData<V, E> | null;
-  currentStep: number;
+  currentStepIdx: number;
 } | null => {
   'worklet';
-  let afterStep = focusStepsData[previousStep];
-  let beforeStep = focusStepsData[previousStep - 1];
+  let afterStep = focusStepsData[previousStepIdx];
+  let beforeStep = focusStepsData[previousStepIdx - 1];
 
   if (!afterStep && !beforeStep) return null;
 
   while (afterStep && progress > afterStep.startsAt) {
     beforeStep = afterStep;
-    afterStep = focusStepsData[previousStep + 1];
-    previousStep++;
+    afterStep = focusStepsData[previousStepIdx + 1];
+    previousStepIdx++;
   }
   while (beforeStep && progress < beforeStep.startsAt) {
     afterStep = beforeStep;
-    beforeStep = focusStepsData[previousStep - 2];
-    previousStep--;
+    beforeStep = focusStepsData[previousStepIdx - 2];
+    previousStepIdx--;
   }
 
   return {
     afterStep: afterStep ?? null,
     beforeStep: beforeStep ?? null,
-    currentStep: previousStep
+    currentStepIdx: previousStepIdx
   };
 };

@@ -7,7 +7,6 @@ import GraphViewDataProvider, {
   GraphViewDataProviderProps
 } from './data/GraphViewDataProvider';
 import { GesturesProvider } from './gestures';
-import { SettingsChangeResponderProvider } from './settings';
 import { FocusProvider, TransformProvider } from './transform';
 
 type CanvasProviderProps = GraphViewDataProviderProps;
@@ -31,10 +30,7 @@ export default function CanvasProvider({
       <FocusProvider />,
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
-      <GesturesProvider />,
-      // SETTINGS
-      // The provider used to handle canvas settings change and respond to such changes
-      <SettingsChangeResponderProvider />
+      <GesturesProvider />
     ],
     []
   );

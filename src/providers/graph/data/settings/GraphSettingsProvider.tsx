@@ -3,6 +3,7 @@ import {
   createContext,
   PropsWithChildren,
   useEffect,
+  useMemo,
   useState
 } from 'react';
 
@@ -37,8 +38,19 @@ type GraphSettingsProviderProps<V, E> = PropsWithChildren<GraphData<V, E>>;
 
 export default function GraphSettingsProvider<V, E>({
   children,
-  ...userSettings
+  graph,
+  renderers,
+  settings
 }: GraphSettingsProviderProps<V, E>) {
+  const userSettings = useMemo(
+    () => ({
+      graph,
+      renderers,
+      settings
+    }),
+    [settings, renderers, graph]
+  );
+
   const [contextValue, setContextValue] = useState(() =>
     createContextValue(userSettings)
   );

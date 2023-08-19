@@ -18,6 +18,7 @@ import {
   ForcesPlacementProvider,
   PlacementLayoutProvider
 } from './layout';
+import { SettingsChangeResponderProvider } from './settings';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
   canvasContexts: CanvasContexts;
@@ -70,7 +71,10 @@ export default function GraphProvider<V, E>({
       <ConditionalProvider.If
         if={({ settings }) => !!settings.events}
         then={<PressEventsProvider transform={transform} />}
-      />
+      />,
+      // SETTINGS
+      // The provider used to handle canvas settings change and respond to such changes
+      <SettingsChangeResponderProvider />
     ],
     []
   );

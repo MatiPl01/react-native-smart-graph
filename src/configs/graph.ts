@@ -205,3 +205,46 @@ export const getDefaultConfig = <V, E>(
       : DEFAULT_PLACEMENT_SETTINGS.random.grid
   }
 });
+
+export const getUpdateConfig = <V, E>({
+  settings
+}: Omit<AllGraphSettings<V, E>, 'graph'>) => ({
+  graph: 'shallow',
+  settings: {
+    components: {
+      arrow: {
+        scale: 'shared'
+      },
+      edge:
+        settings.components.edge.type === 'straight'
+          ? {
+              // STRAIGHT EDGE PROPERTIES
+              maxOffsetFactor: 'shared'
+            }
+          : undefined,
+      label: {
+        scale: 'shared'
+      },
+      vertex: {
+        radius: 'shared'
+      }
+    },
+    focus: {
+      disableGestures: 'shared',
+      points: 'shared',
+      progress: 'shared'
+    },
+    layout:
+      settings.layout.type === 'force'
+        ? {
+            // FORCE LAYOUT PROPERTIES
+            attractionForceFactor: 'shared',
+            attractionScale: 'shared',
+            minUpdateDistance: 'shared',
+            refreshInterval: 'shared',
+            repulsionScale: 'shared',
+            strategy: 'shared'
+          }
+        : undefined
+  }
+});

@@ -1,11 +1,10 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  DirectedEdgeData,
   DirectedGraph,
   DirectedGraphComponent,
-  FocusPoints,
+  DirectedGraphData,
+  DirectedGraphSettings,
   GraphView,
-  VertexData,
   VertexPressHandler
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -17,10 +16,7 @@ import {
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
-const GRAPH: {
-  edges: Array<DirectedEdgeData>;
-  vertices: Array<VertexData>;
-} = {
+const GRAPH1: DirectedGraphData = {
   edges: [
     { key: 'E1', from: 'V1', to: 'V2' },
     { key: 'E2', from: 'V1', to: 'V3' },
@@ -29,45 +25,82 @@ const GRAPH: {
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
+const GRAPH2: DirectedGraphData = {
+  edges: [
+    { key: 'E221', from: 'V2', to: 'V21' },
+    { key: 'E222', from: 'V2', to: 'V22' },
+    // Back to V1
+    { key: 'E12', from: 'V1', to: 'V2' }
+  ],
+  vertices: [{ key: 'V2' }, { key: 'V21' }, { key: 'V22' }, { key: 'V1' }]
+};
+
+const GRAPH3: DirectedGraphData = {
+  edges: [
+    { key: 'E331', from: 'V3', to: 'V31' },
+    { key: 'E332', from: 'V3', to: 'V32' },
+    { key: 'E333', from: 'V3', to: 'V33' },
+    { key: 'E334', from: 'V3', to: 'V34' },
+    { key: 'E335', from: 'V3', to: 'V35' },
+    // Back to V1
+    { key: 'E13', from: 'V1', to: 'V3' }
+  ],
+  vertices: [
+    { key: 'V3' },
+    { key: 'V31' },
+    { key: 'V32' },
+    { key: 'V33' },
+    { key: 'V34' },
+    { key: 'V35' },
+    { key: 'V1' }
+  ]
+};
+
+const GRAPH4: DirectedGraphData = {
+  edges: [
+    { key: 'E441', from: 'V4', to: 'V41' },
+    { key: 'E442', from: 'V4', to: 'V42' },
+    { key: 'E443', from: 'V4', to: 'V43' },
+    { key: 'E444', from: 'V4', to: 'V44' },
+    { key: 'E445', from: 'V4', to: 'V45' },
+    { key: 'E446', from: 'V4', to: 'V46' },
+    { key: 'E447', from: 'V4', to: 'V47' },
+    // Back to V1
+    { key: 'E14', from: 'V1', to: 'V4' }
+  ],
+  vertices: [
+    { key: 'V4' },
+    { key: 'V41' },
+    { key: 'V42' },
+    { key: 'V43' },
+    { key: 'V44' },
+    { key: 'V45' },
+    { key: 'V46' },
+    { key: 'V47' },
+    { key: 'V1' }
+  ]
+};
+
+const GRAPH_ROUTES = {
+  V1: GRAPH1,
+  V2: GRAPH2,
+  V3: GRAPH3,
+  V4: GRAPH4
+};
+
 const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
   key: `Item ${index + 1}`
 }));
 
 export default function BottomSheetFocus() {
-  const graph = useMemo(() => new DirectedGraph(GRAPH), []);
+  const graph = useMemo(() => new DirectedGraph(GRAPH1), []);
+  const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
 
-  const snapPoints = useMemo(() => ['20%', '50%', '75%'], []);
-  const focusPoints = useMemo<FocusPoints>(
-    () => ({
-      0.5: {
-        key: 'V1',
-        vertexScale: 6,
-        alignment: {
-          horizontalAlignment: 'center',
-          verticalAlignment: 'top',
-          verticalOffset: 100
-        }
-      },
-      0.9: {
-        key: 'V3',
-        alignment: {
-          verticalOffset: 50,
-          verticalAlignment: 'top'
-        }
-      },
-      1: {
-        key: 'V2',
-        vertexScale: 2.5,
-        alignment: {
-          verticalOffset: 75,
-          horizontalAlignment: 'left',
-          verticalAlignment: 'top',
-          horizontalOffset: 25
-        }
-      }
-    }),
-    []
-  );
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [currentRoute, setCurrentRoute] =
+    useState<keyof typeof GRAPH_ROUTES>('V1');
+  const currentRouteRef = useRef(currentRoute);
+  const [settings, setGraphSettings] = useState<DirectedGraphSettings>({});
 
   const animatedIndex = useSharedValue(0);
   const bottomSheetProgress = useDerivedValue(() =>
@@ -79,9 +112,66 @@ export default function BottomSheetFocus() {
     )
   );
 
+  const createGraphSettings = (key: string): DirectedGraphSettings => ({
+    focus: {
+      points: {
+        0.5: {
+          key,
+          vertexScale: 6,
+          alignment: {
+            horizontalAlignment: 'center',
+            verticalAlignment: 'top',
+            verticalOffset: 100
+          }
+        },
+        1: {
+          key,
+          vertexScale: 2,
+          alignment: {
+            horizontalAlignment: 'left',
+            verticalAlignment: 'top',
+            verticalOffset: 60,
+            horizontalOffset: 20
+          }
+        }
+      },
+      progress: bottomSheetProgress
+    },
+    events: {
+      onVertexPress: handleVertexPress
+    },
+    placement: {
+      strategy: 'orbits',
+      roots: [key]
+    },
+    animations: {
+      layout: {
+        duration: 1000
+      }
+    }
+  });
+
+  useEffect(() => {
+    setGraphSettings(createGraphSettings(currentRoute));
+  }, [currentRoute]);
+
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
-      graph.focus(key);
+      if (currentRouteRef.current === key) {
+        bottomSheetRef.current?.snapToIndex(1, {
+          duration: 250
+        });
+        return;
+      }
+      bottomSheetRef.current?.snapToIndex(0);
+      const k = key as keyof typeof GRAPH_ROUTES;
+      const target = GRAPH_ROUTES[k];
+      if (!target) {
+        return;
+      }
+      currentRouteRef.current = k;
+      setCurrentRoute(k);
+      graph.replaceBatch(target);
     },
     []
   );
@@ -96,32 +186,19 @@ export default function BottomSheetFocus() {
 
   return (
     <>
-      <GraphView objectFit='contain'>
-        <DirectedGraphComponent
-          settings={{
-            focus: {
-              points: focusPoints,
-              progress: bottomSheetProgress
-            },
-            events: {
-              onVertexPress: handleVertexPress
-            },
-            placement: {
-              strategy: 'orbits'
-              // minVertexSpacing: 100
-            },
-            components: {
-              edge: {
-                type: 'curved'
-              }
-            }
-          }}
-          graph={graph}
-        />
+      <GraphView
+        padding={{
+          bottom: 50,
+          left: 25,
+          right: 25
+        }}
+        objectFit='contain'>
+        <DirectedGraphComponent graph={graph} settings={settings} />
       </GraphView>
       <BottomSheet
         animatedIndex={animatedIndex}
         index={0}
+        ref={bottomSheetRef}
         snapPoints={snapPoints}>
         <BottomSheetFlatList data={LIST_DATA} renderItem={renderItem} />
       </BottomSheet>

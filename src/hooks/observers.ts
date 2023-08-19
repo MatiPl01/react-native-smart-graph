@@ -12,7 +12,7 @@ import {
   AllFocusSettings,
   GraphModificationAnimationsSettings
 } from '@/types/settings';
-import { deepMerge } from '@/utils/objects';
+import { updateValues } from '@/utils/objects';
 
 export type GraphState<V, E> = {
   animationsSettings: GraphModificationAnimationsSettings;
@@ -95,7 +95,11 @@ export const useFocusObserver = <V, E>(
     focusChanged(vertexKey, settings) {
       setState({
         focusedVertexKey: vertexKey,
-        settings: deepMerge(state.settings, DEFAULT_FOCUS_SETTINGS, settings)
+        settings: updateValues({
+          current: state.settings,
+          default: DEFAULT_FOCUS_SETTINGS,
+          new: settings
+        })
       });
     }
   });

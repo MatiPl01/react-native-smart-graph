@@ -66,7 +66,7 @@ export default function AutoSizingProvider({
   const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Transition between non-auto-layout and auto-layout states
   const autoSizingStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
-  const autoSizingStartScale = useSharedValue<number>(0);
+  const autoSizingStartScale = useSharedValue(0);
   const autoSizingTransitionProgress = useSharedValue(1);
 
   const startAutoSizingTimeout = (
