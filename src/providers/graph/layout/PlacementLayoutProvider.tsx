@@ -20,12 +20,12 @@ import { placeVertices } from '@/utils/placement';
 
 export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
-  edgesData: Record<string, EdgeComponentData<V, E>>;
+  edgesData: Record<string, EdgeComponentData<E>>;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
   placementSettings: InternalGraphPlacementSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({

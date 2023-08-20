@@ -1,5 +1,5 @@
 import { Group } from '@shopify/react-native-skia';
-import { memo, useEffect, useMemo } from 'react';
+import { memo, useEffect } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
@@ -10,19 +10,14 @@ import {
 } from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
 
-function VertexComponent<V, E>({
-  animationSettings,
-  displayed,
+function VertexComponent<V>({
+  data: { animationSettings, displayed, key, removed, ...restData },
   focusContext,
   onRemove,
-  removed,
   renderer,
   settings,
-  vertex,
   ...restProps
-}: VertexComponentProps<V, E>) {
-  const key = vertex.key;
-
+}: VertexComponentProps<V>) {
   // ANIMATION
   // Vertex render animation progress
   // Use a helper value to ensure that the animation progress is never negative
@@ -34,20 +29,6 @@ function VertexComponent<V, E>({
   // FOCUS
   // Vertex focus progress
   const focusProgress = useSharedValue(0);
-
-  // RENDERER PROPS
-  const rendererProps = useMemo<VertexRendererProps<V>>(
-    () => ({
-      ...restProps,
-      ...settings,
-      animationProgress,
-      focusKey: focusContext.focus.key,
-      focusProgress,
-      key: vertex.key,
-      value: vertex.value
-    }),
-    [settings, vertex]
-  );
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
@@ -74,23 +55,33 @@ function VertexComponent<V, E>({
   // Render the vertex component
   return (
     <Group transform={transform}>
-      <RenderedVertexComponent<V> props={rendererProps} renderer={renderer} />
+      <RenderedVertexComponent
+        {...restProps}
+        {...restData}
+        {...settings}
+        animationProgress={animationProgress}
+        focusKey={focusContext.focus.key}
+        focusProgress={focusProgress}
+        renderer={renderer}
+        vertexKey={key}
+      />
     </Group>
   );
 }
 
-type RenderedVertexComponentProps<V> = {
-  props: VertexRendererProps<V>;
+type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
   renderer: VertexRenderer<V>;
+  vertexKey: string;
 };
 
 const RenderedVertexComponent = memo(function <V>({
-  props,
-  renderer
+  renderer,
+  vertexKey: key,
+  ...restProps
 }: RenderedVertexComponentProps<V>) {
-  return renderer(props);
+  return renderer({ key, ...restProps });
 }) as <V>(props: RenderedVertexComponentProps<V>) => JSX.Element;
 
-export default memo(VertexComponent) as <V, E>(
-  props: VertexComponentProps<V, E>
+export default memo(VertexComponent) as <V>(
+  props: VertexComponentProps<V>
 ) => JSX.Element;

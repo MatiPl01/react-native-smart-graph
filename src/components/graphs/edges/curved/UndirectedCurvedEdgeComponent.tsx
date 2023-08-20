@@ -12,18 +12,23 @@ import {
   translateAlongVector
 } from '@/utils/vectors';
 
+import RenderedCurvedEdgeComponent from './RenderedCurvedEdgeComponent';
+
 function UndirectedCurvedEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   data: {
     animationProgress,
-    edge,
+    key,
     labelHeight,
     labelPosition,
+    v1Key,
     v1Position,
     v1Radius,
+    v2Key,
     v2Position,
-    v2Radius
+    v2Radius,
+    value
   },
   renderers,
   settings
@@ -36,8 +41,6 @@ function UndirectedCurvedEdgeComponent<V, E>({
     x: v2Position.x.value,
     y: v2Position.y.value
   }));
-  const v1Key = edge.vertices[0].key;
-  const v2Key = edge.vertices[1].key;
 
   // Parabola vertex
   const parabolaX = useSharedValue(
@@ -105,14 +108,17 @@ function UndirectedCurvedEdgeComponent<V, E>({
     return `M${v1Position.x.value},${v1Position.y.value} Q${controlPoint.x},${controlPoint.y} ${v2Position.x.value},${v2Position.y.value}`;
   });
 
-  return renderers.edge({
-    animationProgress,
-    key: edge.key,
-    parabolaX,
-    parabolaY,
-    path,
-    value: edge.value
-  });
+  return (
+    <RenderedCurvedEdgeComponent
+      animationProgress={animationProgress}
+      edgeKey={key}
+      parabolaX={parabolaX}
+      parabolaY={parabolaY}
+      path={path}
+      renderer={renderers.edge}
+      value={value}
+    />
+  );
 }
 
 export default memo(

@@ -4,17 +4,18 @@ import { VertexComponentData, VertexRemoveHandler } from '@/types/data';
 import { InternalVertexSettings } from '@/types/settings';
 
 /* eslint-disable import/no-unused-modules */
-export type VertexComponentProps<V, E> = VertexComponentData<V, E> & {
+export type VertexComponentProps<V> = {
+  data: VertexComponentData<V>;
   focusContext: FocusContextType;
   onRemove: VertexRemoveHandler;
   renderer: VertexRenderer<V>;
   settings: InternalVertexSettings;
 };
 
-export type GraphVerticesProps<V, E> = {
+export type GraphVerticesProps<V> = {
   focusContext: FocusContextType;
   onRemove: VertexRemoveHandler;
   renderer: VertexRenderer<V>;
   settings: InternalVertexSettings;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 };

@@ -8,6 +8,8 @@ import {
   multiplyVector
 } from '@/utils/vectors';
 
+import RenderedStraightEdgeComponent from './RenderedStraightEdgeComponent';
+
 /* eslint-disable import/no-unused-modules */
 const calcTranslationOffset = (
   order: number,
@@ -28,13 +30,16 @@ function UndirectedStraightEdgeComponent<V, E>({
   animatedOrder,
   data: {
     animationProgress,
-    edge,
+    key,
     labelHeight,
     labelPosition,
+    v1Key,
     v1Position,
     v1Radius,
+    v2Key,
     v2Position,
-    v2Radius
+    v2Radius,
+    value
   },
   renderers,
   settings
@@ -48,9 +53,6 @@ function UndirectedStraightEdgeComponent<V, E>({
     x: v2Position.x.value,
     y: v2Position.y.value
   });
-
-  const v1Key = edge.vertices[0].key;
-  const v2Key = edge.vertices[1].key;
 
   useAnimatedReaction(
     () => ({
@@ -99,13 +101,16 @@ function UndirectedStraightEdgeComponent<V, E>({
     }
   );
 
-  return renderers.edge({
-    animationProgress,
-    key: edge.key,
-    p1,
-    p2,
-    value: edge.value
-  });
+  return (
+    <RenderedStraightEdgeComponent
+      animationProgress={animationProgress}
+      edgeKey={key}
+      p1={p1}
+      p2={p2}
+      renderer={renderers.edge}
+      value={value}
+    />
+  );
 }
 
 export default memo(

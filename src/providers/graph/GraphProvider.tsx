@@ -69,7 +69,7 @@ export default function GraphProvider<V, E>({
       // EVENTS
       // Press events provider
       <ConditionalProvider.If
-        if={({ settings }) => !!settings.events}
+        if={({ settings }) => !!settings.events?.press}
         then={<PressEventsProvider transform={transform} />}
       />,
       // SETTINGS

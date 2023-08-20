@@ -41,7 +41,7 @@ function GraphEdges<V, E>({
       {Object.values(edgesData).map(data => (
         <EdgeComponent<V, E>
           data={data}
-          key={data.edge.key}
+          key={data.key}
           onRemove={onRemove}
           renderers={renderers}
           settings={settings}

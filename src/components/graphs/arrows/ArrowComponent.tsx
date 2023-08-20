@@ -1,6 +1,10 @@
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { ArrowComponentProps } from '@/types/components';
+import {
+  ArrowComponentProps,
+  ArrowRenderer,
+  ArrowRendererProps
+} from '@/types/components';
 import { translateAlongVector } from '@/utils/vectors';
 
 export default function ArrowComponent({
@@ -22,11 +26,25 @@ export default function ArrowComponent({
     Math.atan2(directionVector.value.y, directionVector.value.x)
   );
 
-  return renderer({
-    ...restProps,
-    centerPosition,
-    height,
-    rotation,
-    tipPosition
-  });
+  return (
+    <RenderedArrowComponent
+      {...restProps}
+      centerPosition={centerPosition}
+      height={height}
+      renderer={renderer}
+      rotation={rotation}
+      tipPosition={tipPosition}
+    />
+  );
+}
+
+type RenderedArrowComponentProps = ArrowRendererProps & {
+  renderer: ArrowRenderer;
+};
+
+function RenderedArrowComponent({
+  renderer,
+  ...rendererProps
+}: RenderedArrowComponentProps) {
+  return renderer(rendererProps);
 }

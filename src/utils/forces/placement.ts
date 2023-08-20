@@ -203,9 +203,9 @@ export const updateInitialVerticesPositions = (
   onRender(boundingRect);
 };
 
-export const updateNewVerticesPositions = <V, E>(
+export const updateNewVerticesPositions = <V>(
   placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
-  verticesData: Record<string, VertexComponentData<V, E>>,
+  verticesData: Record<string, VertexComponentData<V>>,
   connections: GraphConnections,
   vertexRadius: number
 ): void => {

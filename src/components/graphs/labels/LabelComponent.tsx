@@ -1,7 +1,11 @@
 import { memo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
-import { LabelComponentProps } from '@/types/components';
+import {
+  LabelComponentProps,
+  LabelRenderer,
+  LabelRendererProps
+} from '@/types/components';
 
 function LabelComponent<E>({
   edgeKey,
@@ -65,13 +69,29 @@ function LabelComponent<E>({
     return angle;
   });
 
-  return renderer({
-    edgeLength,
-    edgeRotation,
-    height,
-    key: edgeKey,
-    ...restProps
-  });
+  return (
+    <RenderedLabelComponent
+      {...restProps}
+      edgeKey={edgeKey}
+      edgeLength={edgeLength}
+      edgeRotation={edgeRotation}
+      height={height}
+      renderer={renderer}
+    />
+  );
+}
+
+type RenderedLabelComponentProps<E> = Omit<LabelRendererProps<E>, 'key'> & {
+  edgeKey: string;
+  renderer: LabelRenderer<E>;
+};
+
+function RenderedLabelComponent<E>({
+  edgeKey: key,
+  renderer,
+  ...restProps
+}: RenderedLabelComponentProps<E>) {
+  return renderer({ key, ...restProps });
 }
 
 export default memo(LabelComponent) as typeof LabelComponent;

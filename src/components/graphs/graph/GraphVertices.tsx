@@ -2,12 +2,12 @@ import { VertexComponent } from '@/components/graphs/vertices';
 import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesProps } from '@/types/components';
 
-function GraphVertices<V, E>({
+function GraphVertices<V>({
   verticesData,
   ...restProps
-}: GraphVerticesProps<V, E>) {
+}: GraphVerticesProps<V>) {
   return Object.values(verticesData).map(data => (
-    <VertexComponent {...restProps} {...data} key={data.vertex.key} />
+    <VertexComponent {...restProps} data={data} key={data.key} />
   ));
 }
 

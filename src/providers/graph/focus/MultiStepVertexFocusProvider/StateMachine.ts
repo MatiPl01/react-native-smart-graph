@@ -240,16 +240,16 @@ FOCUS_START -- A --> FOCUS_TRANSITION -- D --> FOCUS --- K ---> BLUR_START -- F 
     |                                           |                                     
     +--------------------- E -------------------+
 */
-export const useStateMachine = <V, E>(
+export const useStateMachine = <V>(
   focusContext: FocusContextType,
   viewDataContext: GraphViewData,
   settings: InternalMultiStepFocusSettings
-): MachineContext<V, E> => {
+): MachineContext<V> => {
   const isStopped = useSharedValue(true);
   const state = useSharedValue(MachineState.BLUR);
   const targetPoint = useSharedValue<UpdatedFocusPoint | null>(null);
 
-  return useMemo<MachineContext<V, E>>(
+  return useMemo<MachineContext<V>>(
     () => ({
       isStopped() {
         'worklet';

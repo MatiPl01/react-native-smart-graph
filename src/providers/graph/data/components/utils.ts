@@ -44,7 +44,7 @@ export const createContextValue = <V, E>(
   }
 ): GraphComponentsData<V, E> => updateContextValue(removeHandlers, data);
 
-const SHARED_KEYS = {
+const UPDATE_CONFIG = {
   connections: 'shallow', // 'shallow' - shallow compare
   edgeLabelsData: 'shallow',
   edgesData: 'shallow',
@@ -63,6 +63,7 @@ export const updateContextValue = <V, E>(
 ): GraphComponentsData<V, E> => {
   const currentLayoutAnimationSettings = value?.layoutAnimationSettings;
   const newLayoutAnimationSettings = updateValues({
+    // TODO - fix
     current: currentLayoutAnimationSettings,
     default: newData.graphAnimationsSettings.layout,
     new: newData.state.animationsSettings.layout
@@ -128,17 +129,17 @@ export const updateContextValue = <V, E>(
         verticesData: newVerticesData
       }
     },
-    SHARED_KEYS
+    UPDATE_CONFIG
   );
 };
 
 const updateGraphVerticesData = <V, E>(
-  oldVerticesData: Record<string, VertexComponentData<V, E>>,
+  oldVerticesData: Record<string, VertexComponentData<V>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AllAnimationSettings
-): Record<string, VertexComponentData<V, E>> => {
+): Record<string, VertexComponentData<V>> => {
   const updatedVerticesData = { ...oldVerticesData };
   let isModified = false;
 
@@ -154,7 +155,12 @@ const updateGraphVerticesData = <V, E>(
     const oldVertex = oldVerticesData[vertex.key];
     // The shallow equality check is enough here because the vertex data
     // shouldn't be modified in place
-    if (oldVertex && !oldVertex.removed && oldVertex.vertex === vertex) {
+    if (
+      oldVertex &&
+      !oldVertex.removed &&
+      oldVertex.key === vertex.key &&
+      oldVertex.value === vertex.value
+    ) {
       continue;
     }
 
@@ -175,8 +181,9 @@ const updateGraphVerticesData = <V, E>(
         ...defaultAnimationSettings,
         ...currentAnimationsSettings
       },
+      key: vertex.key,
       removed: false,
-      vertex
+      value: vertex.value
     };
   }
 
@@ -213,13 +220,13 @@ const updateGraphVerticesData = <V, E>(
 };
 
 const updateGraphEdgesData = <V, E>(
-  oldEdgesData: Record<string, EdgeComponentData<V, E>>,
+  oldEdgesData: Record<string, EdgeComponentData<E>>,
   currentEdges: OrderedEdges<V, E>,
-  verticesData: Record<string, VertexComponentData<V, E>>,
+  verticesData: Record<string, VertexComponentData<V>>,
   removedEdges: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AllAnimationSettings
-): Record<string, EdgeComponentData<V, E>> => {
+): Record<string, EdgeComponentData<E>> => {
   const updatedEdgesData = { ...oldEdgesData };
   let isModified = false; // Flag to indicate if edges data was updated
 
@@ -233,7 +240,15 @@ const updateGraphEdgesData = <V, E>(
     // Continue if edge is already in the graph, is not removed and data
     // is not changed
     const oldEdge = oldEdgesData[edgeData.edge.key];
-    if (oldEdge && !oldEdge.removed && oldEdge.edge === edgeData.edge) {
+    if (
+      oldEdge &&
+      !oldEdge.removed &&
+      oldEdge.key === edgeData.edge.key &&
+      oldEdge.value === edgeData.edge.value &&
+      oldEdge.v1Key === edgeData.edge.vertices[0].key &&
+      oldEdge.v2Key === edgeData.edge.vertices[1].key &&
+      oldEdge.isDirected === edgeData.edge.isDirected()
+    ) {
       // Update shared values if they were changed
       if (oldEdge.order.value !== edgeData.order) {
         oldEdge.order.value = edgeData.order;
@@ -251,7 +266,7 @@ const updateGraphEdgesData = <V, E>(
     if (!v1Data || !v2Data) continue;
 
     isModified = true;
-    // Create the edge data
+    // Create the edge dataq
     updatedEdgesData[edgeData.edge.key] = {
       ...(oldEdge ?? {
         animationProgress: makeMutable(0),
@@ -269,12 +284,16 @@ const updateGraphEdgesData = <V, E>(
         ...defaultAnimationSettings,
         ...currentAnimationsSettings
       },
-      edge: edgeData.edge,
+      isDirected: edgeData.edge.isDirected(),
+      key: edgeData.edge.key,
       removed: false,
+      v1Key: v1.key,
       v1Position: v1Data.position,
       v1Radius: v1Data.currentRadius,
+      v2Key: v2.key,
       v2Position: v2Data.position,
-      v2Radius: v2Data.currentRadius
+      v2Radius: v2Data.currentRadius,
+      value: edgeData.edge.value
     };
   }
 
@@ -312,9 +331,9 @@ const updateGraphEdgesData = <V, E>(
   return isModified ? updatedEdgesData : oldEdgesData;
 };
 
-const updateGraphEdgeLabelsData = <V, E>(
+const updateGraphEdgeLabelsData = <E>(
   oldEdgeLabelsData: Record<string, LabelComponentData<E>>,
-  edgesData: Record<string, EdgeComponentData<V, E>>
+  edgesData: Record<string, EdgeComponentData<E>>
 ): Record<string, LabelComponentData<E>> => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
   let isModified = false; // Flag to indicate if edges data was updated
@@ -324,10 +343,7 @@ const updateGraphEdgeLabelsData = <V, E>(
     const edgeData = edgesData[key];
     const oldLabelData = oldEdgeLabelsData[key];
     // Update label data if it is not rendered yet or its value was changed
-    if (
-      edgeData &&
-      (!oldLabelData || oldLabelData.value !== edgeData.edge.value)
-    ) {
+    if (edgeData && (!oldLabelData || oldLabelData.value !== edgeData.value)) {
       isModified = true;
       updatedEdgeLabelsData[key] = {
         animationProgress: edgeData.animationProgress,
@@ -336,7 +352,7 @@ const updateGraphEdgeLabelsData = <V, E>(
         height: edgeData.labelHeight,
         v1Position: edgeData.v1Position,
         v2Position: edgeData.v2Position,
-        value: edgeData.edge.value
+        value: edgeData.value
       };
     }
   }
