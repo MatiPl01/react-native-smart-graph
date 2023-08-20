@@ -61,44 +61,59 @@ export const getAlignedVertexAbsolutePosition = (
   return { x, y };
 };
 
-// Use object instead of set to support reanimated worklets
+// Use objects instead of sets to support reanimated worklets
 const ALL_SPACING_KEYS = { bottom: true, left: true, right: true, top: true };
+const AXIS_SPACING_KEYS = { horizontal: true, vertical: true };
 
 const isAllSpacing = (spacing: Spacing): spacing is BoundingRect => {
   'worklet';
   return (
     typeof spacing === 'object' &&
+    spacing !== null &&
     Object.keys(spacing).every(
       value => ALL_SPACING_KEYS[value as keyof typeof ALL_SPACING_KEYS]
     )
   );
 };
 
+const isAxisSpacing = (spacing: Spacing): spacing is AxisSpacing => {
+  'worklet';
+  return (
+    typeof spacing === 'object' &&
+    spacing !== null &&
+    Object.keys(spacing).every(
+      value => AXIS_SPACING_KEYS[value as keyof typeof AXIS_SPACING_KEYS]
+    )
+  );
+};
+
 export const updateSpacing = (spacing?: Spacing): BoundingRect => {
   'worklet';
-  if (!spacing) {
-    return { bottom: 0, left: 0, right: 0, top: 0 };
+  if (spacing) {
+    if (!isNaN(spacing as number)) {
+      return {
+        bottom: spacing as number,
+        left: spacing as number,
+        right: spacing as number,
+        top: spacing as number
+      };
+    }
+    if (isAllSpacing(spacing)) {
+      return Object.fromEntries(
+        ([...Object.keys(ALL_SPACING_KEYS)] as Array<keyof BoundingRect>).map(
+          key => [key, spacing[key] ?? 0]
+        )
+      ) as BoundingRect;
+    }
+    if (isAxisSpacing(spacing)) {
+      const { horizontal, vertical } = spacing;
+      return {
+        bottom: vertical ?? 0,
+        left: horizontal ?? 0,
+        right: horizontal ?? 0,
+        top: vertical ?? 0
+      };
+    }
   }
-  if (!isNaN(spacing as number)) {
-    return {
-      bottom: spacing as number,
-      left: spacing as number,
-      right: spacing as number,
-      top: spacing as number
-    };
-  }
-  if (isAllSpacing(spacing)) {
-    return Object.fromEntries(
-      ([...Object.keys(ALL_SPACING_KEYS)] as Array<keyof BoundingRect>).map(
-        key => [key, spacing[key] ?? 0]
-      )
-    ) as BoundingRect;
-  }
-  const { horizontal, vertical } = spacing as AxisSpacing;
-  return {
-    bottom: vertical ?? 0,
-    left: horizontal ?? 0,
-    right: horizontal ?? 0,
-    top: vertical ?? 0
-  };
+  return { bottom: 0, left: 0, right: 0, top: 0 };
 };
