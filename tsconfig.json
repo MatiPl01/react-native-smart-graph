@@ -15,6 +15,7 @@
     "removeComments": true,
     "checkJs": true,
     "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
     "rootDir": "./src",
     "baseUrl": "./src",
     "paths": {

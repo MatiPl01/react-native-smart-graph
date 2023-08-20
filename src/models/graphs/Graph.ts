@@ -9,6 +9,7 @@ import {
   UndirectedEdge,
   Vertex
 } from '@/types/models';
+import { catchError, ChangeResult } from '@/types/models/utils';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -41,11 +42,116 @@ export default abstract class Graph<
   }> | null = null;
   protected cachedVertices: Array<GV> | null = null;
 
+  clear = catchError(
+    (
+      animationSettings?: Maybe<BatchModificationAnimationSettings>,
+      notifyChange = true
+    ): void => {
+      // Clear the whole graph
+      (this.vertices$ as Mutable<typeof this.vertices$>) = {};
+      (this.edges$ as Mutable<typeof this.edges$>) = {};
+      (this.edgesBetweenVertices$ as Mutable<
+        typeof this.edgesBetweenVertices$
+      >) = {};
+      // Invalidate cached data
+      this.invalidateEdgesCache();
+      this.invalidateVerticesCache();
+      // Notify observers after all changes to the graph model are made
+      if (notifyChange) {
+        this.notifyGraphChange(
+          animationSettings &&
+            createAnimationsSettingsForBatchModification(
+              {
+                edges: Object.keys(this.edges$),
+                vertices: Object.keys(this.vertices$)
+              },
+              animationSettings
+            )
+        );
+      }
+    }
+  );
+
   protected readonly edges$: Record<string, GE> = {};
   protected readonly edgesBetweenVertices$: Record<
     string,
     Record<string, Array<GE>>
   > = {};
+
+  focus = catchError((vertexKey: string, settings?: FocusSettings): void => {
+    if (!this.vertices$[vertexKey]) {
+      throw new Error(`Vertex with key ${vertexKey} does not exist.`);
+    }
+    this.focusedVertexKey = vertexKey;
+    this.notifyFocusChange(vertexKey, settings);
+  });
+
+  removeBatch = catchError(
+    (
+      data: {
+        edges?: Array<string>;
+        vertices?: Array<string>;
+      },
+      animationSettings?: Maybe<BatchModificationAnimationSettings>,
+      notifyChange = true
+    ): void => {
+      // Remove edges and vertices from graph
+      for (const edgeKey of data.edges ?? []) {
+        this.removeEdge(edgeKey, null, false);
+      }
+      for (const vertexKey of data.vertices ?? []) {
+        this.removeVertex(vertexKey, null, false);
+      }
+      // Notify observers after all changes to the graph model are made
+      if (notifyChange) {
+        this.notifyGraphChange(
+          animationSettings &&
+            createAnimationsSettingsForBatchModification(
+              {
+                edges: data.edges,
+                vertices: data.vertices
+              },
+              animationSettings
+            )
+        );
+      }
+    }
+  );
+
+  removeVertex = catchError(
+    (
+      key: string,
+      animationSettings?: Maybe<AnimationSettings>,
+      notifyChange = true
+    ): void => {
+      if (!this.vertices$[key]) {
+        throw new Error(`Vertex with key ${key} does not exist.`);
+      }
+
+      // Blur vertex if it is focused
+      if (this.focusedVertexKey === key) {
+        this.blur();
+      }
+
+      const vertex = this.vertices$[key] as GV;
+      const edgeKeys = vertex.edges.map(edge => edge.key);
+      for (const edgeKey of edgeKeys) {
+        this.removeEdge(edgeKey, null, false);
+      }
+      delete this.vertices$[key];
+      this.invalidateVerticesCache();
+      if (notifyChange) {
+        this.notifyGraphChange(
+          animationSettings &&
+            createAnimationsSettingsForBatchModification(
+              { edges: edgeKeys, vertices: [key] },
+              animationSettings
+            )
+        );
+      }
+    }
+  );
+
   protected readonly vertices$: Record<string, GV> = {};
 
   private invalidateEdgesCache(): void {
@@ -92,46 +198,11 @@ export default abstract class Graph<
     }
   }
 
-  clear(
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
-    notifyChange = true
-  ): void {
-    // Clear the whole graph
-    (this.vertices$ as Mutable<typeof this.vertices$>) = {};
-    (this.edges$ as Mutable<typeof this.edges$>) = {};
-    (this.edgesBetweenVertices$ as Mutable<typeof this.edgesBetweenVertices$>) =
-      {};
-    // Invalidate cached data
-    this.invalidateEdgesCache();
-    this.invalidateVerticesCache();
-    // Notify observers after all changes to the graph model are made
-    if (notifyChange) {
-      this.notifyGraphChange(
-        animationSettings &&
-          createAnimationsSettingsForBatchModification(
-            {
-              edges: Object.keys(this.edges$),
-              vertices: Object.keys(this.vertices$)
-            },
-            animationSettings
-          )
-      );
-    }
-  }
-
   get edges(): Array<GE> {
     if (!this.cachedEdges) {
       this.cachedEdges = Object.values(this.edges$);
     }
     return this.cachedEdges;
-  }
-
-  focus(vertexKey: string, settings?: FocusSettings): void {
-    if (!this.vertices$[vertexKey]) {
-      throw new Error(`Vertex with key ${vertexKey} does not exist.`);
-    }
-    this.focusedVertexKey = vertexKey;
-    this.notifyFocusChange(vertexKey, settings);
   }
 
   getEdge(key: string): GE | null {
@@ -159,7 +230,7 @@ export default abstract class Graph<
     edge: GE,
     animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
-  ): GE {
+  ): void {
     if (this.edges$[edge.key]) {
       throw new Error(`Edge with key ${edge.key} already exists.`);
     }
@@ -183,21 +254,19 @@ export default abstract class Graph<
     this.edges$[edge.key] = edge;
     this.invalidateEdgesCache();
     if (notifyChange) this.notifyGraphChange(animationsSettings);
-    return edge;
   }
 
   protected insertVertexObject(
     vertex: GV,
     animationSettings?: Maybe<GraphModificationAnimationsSettings>,
     notifyChange = true
-  ): GV {
+  ): void {
     if (this.vertices$[vertex.key]) {
       throw new Error(`Vertex with key ${vertex.key} already exists.`);
     }
     this.vertices$[vertex.key] = vertex;
     this.invalidateVerticesCache();
     if (notifyChange) this.notifyGraphChange(animationSettings);
-    return vertex;
   }
 
   protected notifyFocusChange(
@@ -255,36 +324,6 @@ export default abstract class Graph<
     return this.cachedOrderedEdges;
   }
 
-  removeBatch(
-    data: {
-      edges?: Array<string>;
-      vertices?: Array<string>;
-    },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
-    notifyChange = true
-  ): void {
-    // Remove edges and vertices from graph
-    for (const edgeKey of data.edges ?? []) {
-      this.removeEdge(edgeKey, null, false);
-    }
-    for (const vertexKey of data.vertices ?? []) {
-      this.removeVertex(vertexKey, null, false);
-    }
-    // Notify observers after all changes to the graph model are made
-    if (notifyChange) {
-      this.notifyGraphChange(
-        animationSettings &&
-          createAnimationsSettingsForBatchModification(
-            {
-              edges: data.edges,
-              vertices: data.vertices
-            },
-            animationSettings
-          )
-      );
-    }
-  }
-
   protected removeEdgeObject(
     edge: GE,
     animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
@@ -316,40 +355,6 @@ export default abstract class Graph<
     this.observers.delete(observer);
   }
 
-  removeVertex(
-    key: string,
-    animationSettings?: Maybe<AnimationSettings>,
-    notifyChange = true
-  ): V | undefined {
-    if (!this.vertices$[key]) {
-      throw new Error(`Vertex with key ${key} does not exist.`);
-    }
-
-    // Blur vertex if it is focused
-    if (this.focusedVertexKey === key) {
-      this.blur();
-    }
-
-    const vertex = this.vertices$[key] as GV;
-    const edgeKeys = vertex.edges.map(edge => edge.key);
-    for (const edgeKey of edgeKeys) {
-      this.removeEdge(edgeKey, null, false);
-    }
-    delete this.vertices$[key];
-    this.invalidateVerticesCache();
-    if (notifyChange) {
-      this.notifyGraphChange(
-        animationSettings &&
-          createAnimationsSettingsForBatchModification(
-            { edges: edgeKeys, vertices: [key] },
-            animationSettings
-          )
-      );
-    }
-
-    return vertex.value;
-  }
-
   get vertices(): Array<GV> {
     if (!this.cachedVertices) {
       this.cachedVertices = Object.values(this.vertices$);
@@ -366,19 +371,19 @@ export default abstract class Graph<
     },
     animationSettings?: Maybe<BatchModificationAnimationSettings>,
     notifyChange?: boolean
-  ): void;
+  ): ChangeResult;
 
   abstract insertEdge(
     data: ED,
     animationSettings?: Maybe<AnimationSettings>,
     notifyChange?: boolean
-  ): GE;
+  ): ChangeResult;
 
   abstract insertVertex(
     data: VertexData<V>,
     animationSettings?: Maybe<AnimationSettings>,
     notifyChange?: boolean
-  ): GV;
+  ): ChangeResult;
 
   abstract isDirected(): boolean;
 
@@ -390,7 +395,7 @@ export default abstract class Graph<
     key: string,
     animationSettings?: Maybe<AnimationSettings>,
     notifyChange?: boolean
-  ): E | undefined;
+  ): ChangeResult;
 
   abstract replaceBatch(
     data: {
@@ -399,5 +404,5 @@ export default abstract class Graph<
     },
     animationSettings?: Maybe<BatchModificationAnimationSettings>,
     notifyChange?: boolean
-  ): void;
+  ): ChangeResult;
 }

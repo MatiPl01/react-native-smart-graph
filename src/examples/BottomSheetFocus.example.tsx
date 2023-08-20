@@ -173,13 +173,6 @@ export default function BottomSheetFocus() {
       if (graph.hasVertex('VV')) {
         graph.removeVertex('VV');
       } else {
-        graph.insertVertex(
-          {
-            key: 'VV'
-          },
-          undefined,
-          false
-        );
         graph.insertEdge({
           key: 'EE',
           from: 'V1',
