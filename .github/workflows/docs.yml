@@ -1,5 +1,6 @@
 name: Documentation
 on:
+  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
     paths:
@@ -19,10 +20,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
+    name: 📖 Deploy docs
     environment:
-      name: 📖 Documentation
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
