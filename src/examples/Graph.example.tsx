@@ -1,81 +1,143 @@
-import { useCallback, useMemo, useState } from 'react';
-import {
-  GraphView,
-  DirectedGraph,
-  DirectedGraphComponent,
-  DirectedGraphData,
-  VertexPressHandler
-} from 'react-native-smart-graph';
+import React, { useEffect } from 'react';
+import { DirectedGraph, DirectedGraphComponent, GraphView } from '..';
 
-const LARGE_TREE = {
-  vertices: [
-    { key: 'LV1' },
-    { key: 'LV2' },
-    { key: 'LV3' },
-    { key: 'LV4' },
-    { key: 'LV5' },
-    { key: 'LV6' },
-    { key: 'LV7' },
-    { key: 'LV8' }
-  ],
-  edges: [
-    { key: 'LE1', from: 'LV1', to: 'LV2' },
-    { key: 'LE2', from: 'LV2', to: 'LV3' },
-    { key: 'LE3', from: 'LV2', to: 'LV4' },
-    { key: 'LE4', from: 'LV2', to: 'LV5' },
-    { key: 'LE5', from: 'LV5', to: 'LV6' },
-    { key: 'LE6', from: 'LV1', to: 'LV7' },
-    { key: 'LE7', from: 'LV5', to: 'LV8' }
-  ]
-};
+const ADDED_COMPONENTS = [
+  { key: 'F', value: 'F' },
+  { key: 'G', value: 'G' },
+  { key: 'H', value: 'H' },
+  { key: 'I', value: 'I' },
+  { key: 'J', value: 'J' },
+  { key: 'K', value: 'K' },
+  { key: 'L', value: 'L' },
+  {
+    from: 'E',
+    key: 'EK',
+    to: 'K',
+    value: 'EK'
+  },
+  {
+    from: 'E',
+    key: 'EL',
+    to: 'L',
+    value: 'EL'
+  },
+  {
+    from: 'C',
+    key: 'CF',
+    to: 'F',
+    value: 'CF'
+  },
+  { key: 'M', value: 'M' },
+  { key: 'N', value: 'N' },
+  { key: 'O', value: 'O' },
+  {
+    from: 'C',
+    key: 'CG',
+    to: 'G',
+    value: 'CG'
+  },
+  {
+    from: 'C',
+    key: 'CH',
+    to: 'H',
+    value: 'CH'
+  },
+  {
+    from: 'C',
+    key: 'CI',
+    to: 'I',
+    value: 'CI'
+  },
+  {
+    from: 'C',
+    key: 'CJ',
+    to: 'J',
+    value: 'CJ'
+  }
+];
 
-const SMALL_TREE = {
-  vertices: [{ key: 'SV1' }, { key: 'SV2' }, { key: 'SV3' }, { key: 'SV4' }],
-  edges: [
-    { key: 'SE1', from: 'SV1', to: 'SV2' },
-    { key: 'SE2', from: 'SV1', to: 'SV3' },
-    { key: 'SE3', from: 'SV1', to: 'SV4' }
-  ]
-};
+let idx = 0;
+let mode = 0;
 
-const COMBINED_GRAPH: DirectedGraphData = {
-  vertices: [...SMALL_TREE.vertices, ...LARGE_TREE.vertices],
-  edges: [...SMALL_TREE.edges, ...LARGE_TREE.edges]
-};
+export default function App() {
+  const graph = new DirectedGraph({
+    edges: [
+      {
+        from: 'A',
+        key: 'AB',
+        to: 'B',
+        value: 'AB'
+      },
 
-export default function Graph() {
-  const [smallTreeRoot, setSmallTreeRoot] = useState('');
-  const [largeTreeRoot, setLargeTreeRoot] = useState('');
-
-  const graph = useMemo(() => new DirectedGraph(COMBINED_GRAPH), []);
-
-  const handleVertexPress = useCallback<VertexPressHandler>(
-    ({ vertex: { key } }) => {
-      if (key.startsWith('SV')) {
-        setSmallTreeRoot(key);
-      } else {
-        setLargeTreeRoot(key);
+      {
+        from: 'A',
+        key: 'AC',
+        to: 'C',
+        value: 'AC'
+      },
+      {
+        from: 'C',
+        key: 'CD',
+        to: 'D',
+        value: 'CD'
+      },
+      {
+        from: 'C',
+        key: 'CE',
+        to: 'E',
+        value: 'CE'
       }
-    },
-    []
-  );
+    ],
+    vertices: [
+      { key: 'A', value: 'A' },
+      { key: 'B', value: 'B' },
+      { key: 'C', value: 'C' },
+      { key: 'D', value: 'D' },
+      { key: 'E', value: 'E' }
+    ]
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (idx < 0 || idx >= ADDED_COMPONENTS.length) {
+        mode = mode === 0 ? 1 : 0;
+        idx = Math.max(0, Math.min(ADDED_COMPONENTS.length - 1, idx));
+      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const component = ADDED_COMPONENTS[idx]!;
+
+      try {
+        if (mode === 0) {
+          if (component.from && component.to) {
+            graph.insertEdge(component);
+          } else {
+            graph.insertVertex(component);
+          }
+          idx++;
+        } else {
+          if (component.from && component.to) {
+            graph.removeEdge(component.key);
+          } else {
+            graph.removeVertex(component.key);
+          }
+          idx--;
+        }
+      } catch (e) {
+        clearInterval(interval);
+        console.error(e);
+        return;
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <GraphView objectFit='contain' padding={50}>
+    <GraphView objectFit='contain' scales={[1e-10, 1, 2]}>
       <DirectedGraphComponent
         settings={{
-          // --- Placement settings ---
-          placement: {
-            strategy: 'trees',
-            roots: [smallTreeRoot, largeTreeRoot],
-            minColumnDistance: 50,
-            minRowDistance: 50
-          },
-          // --- End of placement settings ---
-          events: {
-            press: {
-              onVertexPress: handleVertexPress
-            }
+          layout: {
+            type: 'force'
           }
         }}
         graph={graph}
