@@ -53,7 +53,7 @@ Specifies whether vertices should be randomly placed on a mesh or if the placeme
 
 <!-- accordion:end -->
 
-#### `minVertexSpacing` (when `mesh` is <ins>not</ins> set to `'random'`)
+#### `minVertexDistance` (when `mesh` is <ins>not</ins> set to `'random'`)
 
 Specifies the minimum distance between vertices (the **minimum distance** between mesh **cross points**).
 

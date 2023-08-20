@@ -47,7 +47,7 @@ A required field specifying the strategy to use.
 | -------- | ------- | -------- |
 | 'orbits' | -       | yes      |
 
-#### `minVertexSpacing`
+#### `minVertexDistance`
 
 Specifies the minimum distance between vertices.
 
@@ -172,7 +172,7 @@ export default function Graph() {
           ...
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'auto' // <- doesn't have to be explicitly specified (it's a default option)
           }
           ...
@@ -272,7 +272,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'auto' // <- doesn't have to be explicitly specified (it's a default option)
           }
           // --- End of placement settings ---
@@ -300,7 +300,7 @@ export default function Graph() {
           ...
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'equal'
           }
           ...
@@ -400,7 +400,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'equal'
           }
           // --- End of placement settings ---
@@ -428,7 +428,7 @@ export default function Graph() {
           ...
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'non-decreasing'
           }
           ...
@@ -528,7 +528,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'non-decreasing'
           }
           // --- End of placement settings ---
@@ -556,7 +556,7 @@ export default function Graph() {
           ...
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'quad-increasing'
           }
           ...
@@ -656,7 +656,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'quad-increasing'
           }
           // --- End of placement settings ---
@@ -693,7 +693,7 @@ export default function Graph() {
           ...
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'custom',
             getLayerRadius
           }
@@ -803,7 +803,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'custom',
             getLayerRadius
           }
@@ -907,7 +907,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'auto', // <- doesn't have to be explicitly specified (it's a default option)
             roots: [orbitsRoot]
           },
@@ -986,7 +986,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'orbits',
-            minVertexSpacing: 50,
+            minVertexDistance: 50,
             layerSizing: 'auto', // <- doesn't have to be explicitly specified (it's a default option)
             roots: [orbitsRoot]
           },

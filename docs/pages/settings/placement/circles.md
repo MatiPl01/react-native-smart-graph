@@ -19,7 +19,7 @@ A required field specifying the strategy to use.
 | --------- | ------- | -------- |
 | 'circles' | -       | yes      |
 
-#### `minVertexSpacing`
+#### `minVertexDistance`
 
 Specifies the minimum distance between vertices.
 
@@ -77,7 +77,7 @@ export default function Graph() {
           ...
           placement: {
             strategy: 'circles',
-            minVertexSpacing: 150,
+            minVertexDistance: 150,
             sortVertices: true,
             sortComparator
           }
@@ -143,7 +143,7 @@ export default function Graph() {
           // --- Placement settings ---
           placement: {
             strategy: 'circles',
-            minVertexSpacing: 150,
+            minVertexDistance: 150,
             sortVertices: true,
             sortComparator
           }

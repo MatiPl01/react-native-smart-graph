@@ -103,7 +103,7 @@ export default function Graph() {
             // --- End of graph components settings ---
             placement: {
               strategy: 'circle',
-              minVertexSpacing: 75
+              minVertexDistance: 75
             }
           }}
           graph={graph}
@@ -242,7 +242,7 @@ export default function Graph() {
           // --- End of graph components settings ---
           placement: {
             strategy: 'circle',
-            minVertexSpacing: 75
+            minVertexDistance: 75
           }
         }}
         graph={graph}
@@ -346,7 +346,7 @@ export default function Graph() {
             // --- End of graph components settings ---
             placement: {
               strategy: 'circle',
-              minVertexSpacing: 75
+              minVertexDistance: 75
             }
           }}
           graph={graph}
@@ -485,7 +485,7 @@ export default function Graph() {
           // --- End of graph components settings ---
           placement: {
             strategy: 'circle',
-            minVertexSpacing: 75
+            minVertexDistance: 75
           }
         }}
         graph={graph}

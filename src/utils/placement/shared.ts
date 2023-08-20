@@ -1,6 +1,11 @@
 /* eslint-disable import/no-unused-modules */
 import potpack from '@/lib/potpack';
-import { AnimatedDimensions, BoundingRect, Dimensions } from '@/types/layout';
+import {
+  AnimatedDimensions,
+  AxisSpacing,
+  BoundingRect,
+  Dimensions
+} from '@/types/layout';
 import { GraphLayout, PlacedVerticesPositions } from '@/types/settings';
 
 export enum Symmetry {
@@ -86,7 +91,7 @@ export const defaultSortComparator = (key1: string, key2: string) => {
 
 export const arrangeGraphComponents = (
   graphComponents: Array<GraphLayout>,
-  spacing: number
+  spacing: AxisSpacing | number
 ): GraphLayout => {
   'worklet';
   if (!graphComponents.length) {
@@ -101,15 +106,26 @@ export const arrangeGraphComponents = (
     };
   }
 
+  const updatedSpacing =
+    typeof spacing === 'number'
+      ? {
+          x: spacing,
+          y: spacing
+        }
+      : {
+          x: spacing.horizontal ?? 0,
+          y: spacing.vertical ?? 0
+        };
+
   // Prepare graph components for packing
   const preparedComponents = graphComponents.map(
     ({ boundingRect, verticesPositions }) => {
       const { bottom, left, right, top } = boundingRect;
       return {
         boundingRect,
-        h: bottom - top + spacing,
+        h: bottom - top + updatedSpacing.y,
         verticesPositions,
-        w: right - left + spacing,
+        w: right - left + updatedSpacing.x,
         x: 0,
         y: 0
       };

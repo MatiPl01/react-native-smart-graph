@@ -299,7 +299,7 @@ export default function Graph() {
           settings={{
             placement: {
               strategy: 'circle',
-              minVertexSpacing: 100
+              minVertexDistance: 100
             }
           }}
           graph={graph}
@@ -418,7 +418,7 @@ export default function Graph() {
           settings={{
             placement: {
               strategy: 'circle',
-              minVertexSpacing: 100
+              minVertexDistance: 100
             }
           }}
           graph={graph}

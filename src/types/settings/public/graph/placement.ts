@@ -1,10 +1,5 @@
 import { Sharedifyable } from '@/types/utils';
 
-/* eslint-disable import/no-unused-modules */
-type SharedPlacementSettings = {
-  minVertexSpacing?: Sharedifyable<number>;
-};
-
 type SortablePlacementSettings = {
   sortComparator?: (key1: string, key2: string) => number;
   sortVertices?: Sharedifyable<boolean>;
@@ -22,9 +17,10 @@ export type BoundRandomPlacementSettings = {
   strategy: Sharedifyable<'random'>;
 };
 
-export type UnboundRandomPlacementSettings = SharedPlacementSettings & {
+export type UnboundRandomPlacementSettings = {
   density?: Sharedifyable<number>;
   mesh?: Sharedifyable<Exclude<RandomMeshType, 'random'>>;
+  minVertexDistance?: Sharedifyable<number>;
   strategy: Sharedifyable<'random'>;
 };
 
@@ -35,8 +31,9 @@ export type RandomPlacementSettings =
 /*
  * CIRCULAR PLACEMENT (circle, circles)
  */
-type SharedCircularPlacementSettings = SortablePlacementSettings &
-  SharedPlacementSettings;
+type SharedCircularPlacementSettings = SortablePlacementSettings & {
+  minVertexDistance?: Sharedifyable<number>;
+};
 
 // Circle
 export type CirclePlacementSettings = SharedCircularPlacementSettings & {
@@ -49,14 +46,13 @@ export type CirclesPlacementSettings = SharedCircularPlacementSettings & {
 };
 
 /*
- * ROOTS PLACEMENT (trees, orbits)
+ * TREE-LIKE PLACEMENT (trees, orbits)
  */
-type SharedRootsPlacementSettings = SharedPlacementSettings & {
-  roots?: Sharedifyable<Array<string>>;
-};
-
 // Trees
-export type TreesPlacementSettings = SharedRootsPlacementSettings & {
+export type TreesPlacementSettings = {
+  minColumnDistance?: Sharedifyable<number>;
+  minRowDistance?: Sharedifyable<number>;
+  roots?: Sharedifyable<Array<string>>;
   strategy: Sharedifyable<'trees'>;
 };
 
@@ -79,17 +75,18 @@ type OrbitsCustomLayerSizingSettings = {
   layerSizing: Sharedifyable<'custom'>;
 };
 
-export type OrbitsPlacementSettings = SharedRootsPlacementSettings &
-  (
-    | {
-        layerSizing?: Sharedifyable<Exclude<OrbitsLayerSizing, 'custom'>>;
-      }
-    | OrbitsCustomLayerSizingSettings
-  ) & {
-    maxSectorAngle?: Sharedifyable<number>;
-    strategy: Sharedifyable<'orbits'>;
-    symmetrical?: Sharedifyable<boolean>;
-  };
+export type OrbitsPlacementSettings = (
+  | {
+      layerSizing?: Sharedifyable<Exclude<OrbitsLayerSizing, 'custom'>>;
+    }
+  | OrbitsCustomLayerSizingSettings
+) & {
+  maxSectorAngle?: Sharedifyable<number>;
+  minVertexDistance?: Sharedifyable<number>;
+  roots?: Sharedifyable<Array<string>>;
+  strategy: Sharedifyable<'orbits'>;
+  symmetrical?: Sharedifyable<boolean>;
+};
 
 /*
  * GRAPH PLACEMENT SETTINGS

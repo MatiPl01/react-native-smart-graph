@@ -13,8 +13,7 @@ import {
   Extrapolate,
   interpolate,
   useDerivedValue,
-  useSharedValue,
-  withTiming
+  useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
@@ -134,7 +133,8 @@ export default function BottomSheetFocus() {
     }
   }));
 
-  const minVertexSpacing = useSharedValue(100);
+  const minRowDistance = useSharedValue(100);
+  const minColumnDistance = useSharedValue(50);
   const vertexRadius = useSharedValue(20);
 
   const handleVertexPress = useCallback<VertexPressHandler>(
@@ -167,20 +167,21 @@ export default function BottomSheetFocus() {
 
   useEffect(() => {
     setInterval(() => {
-      roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
-      minVertexSpacing.value = Math.random() * 100 + 10;
-      vertexRadius.value = withTiming(Math.random() * 80 + 10, {
-        duration: 500
-      });
-      if (graph.hasVertex('VV')) {
-        graph.removeVertex('VV');
-      } else {
-        graph.insertEdge({
-          key: 'EE',
-          from: 'V1',
-          to: 'VV'
-        });
-      }
+      // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
+      minRowDistance.value = Math.random() * 100 + 40;
+      minColumnDistance.value = Math.random() * 50 + 20;
+      // vertexRadius.value = withTiming(Math.random() * 30 + 10, {
+      //   duration: 500
+      // });
+      // if (graph.hasVertex('VV')) {
+      //   graph.removeVertex('VV');
+      // } else {
+      //   graph.insertEdge({
+      //     key: 'EE',
+      //     from: 'V1',
+      //     to: 'VV'
+      //   });
+      // }
     }, 500);
   }, []);
 
@@ -208,9 +209,10 @@ export default function BottomSheetFocus() {
               }
             },
             placement: {
-              strategy: useSharedValue('trees'),
+              strategy: 'trees',
               roots,
-              minVertexSpacing
+              minRowDistance,
+              minColumnDistance
             },
             components: {
               vertex: {

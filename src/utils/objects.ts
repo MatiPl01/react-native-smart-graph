@@ -278,7 +278,8 @@ export const updateValues = <
     else if (
       config?.[key as keyof K] !== 'shallow' &&
       value !== null &&
-      typeof value === 'object'
+      typeof value === 'object' &&
+      !isSharedValue(value)
     ) {
       if (result[key as keyof C] !== value) {
         result[key as keyof C] = updateValues(

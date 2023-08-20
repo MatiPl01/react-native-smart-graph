@@ -5,7 +5,7 @@ import {
 } from '@/types/settings';
 import { defaultSortComparator } from '@/utils/placement/shared';
 
-const getLayout = (verticesCount: number, minVertexSpacing: number) => {
+const getLayout = (verticesCount: number, minVertexDistance: number) => {
   'worklet';
   let angleStep, radius;
 
@@ -14,7 +14,7 @@ const getLayout = (verticesCount: number, minVertexSpacing: number) => {
     radius = 0;
   } else {
     angleStep = (2 * Math.PI) / verticesCount;
-    radius = minVertexSpacing / (2 * Math.sin(angleStep / 2));
+    radius = minVertexDistance / (2 * Math.sin(angleStep / 2));
   }
 
   return {
@@ -34,7 +34,7 @@ export default function placeVerticesOnCircle<
   const initialAngle = -Math.PI / 2;
   const { angleStep, radius } = getLayout(
     updatedVertices.length,
-    settings.minVertexSpacing
+    settings.minVertexDistance
   );
 
   return {

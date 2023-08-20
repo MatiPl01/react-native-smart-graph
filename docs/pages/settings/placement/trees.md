@@ -19,7 +19,7 @@ A required field specifying the strategy to use.
 | ------- | ------- | -------- |
 | 'trees' | -       | yes      |
 
-#### `minVertexSpacing`
+#### `minVertexDistance`
 
 Specifies the minimum distance between vertices.
 
@@ -84,7 +84,7 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minVertexDistance: 50
           },
           ...
         }}
@@ -170,7 +170,7 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minVertexDistance: 50
           },
           // --- End of placement settings ---
           events: {
@@ -201,7 +201,7 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minVertexDistance: 50
           },
           ...
         }}
@@ -287,7 +287,7 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minVertexDistance: 50
           },
           // --- End of placement settings ---
           events: {
