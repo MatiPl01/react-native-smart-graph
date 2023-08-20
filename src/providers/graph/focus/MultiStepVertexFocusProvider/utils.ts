@@ -8,10 +8,10 @@ import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { StateProps } from './types';
 
-export const createFocusSteps = <V, E>(
+export const createFocusSteps = <V>(
   sortedPoints: Array<UpdatedFocusPoint>,
-  verticesData: Record<string, VertexComponentData<V, E>>
-): Array<FocusStepData<V, E>> => {
+  verticesData: Record<string, VertexComponentData<V>>
+): Array<FocusStepData<V>> => {
   'worklet';
   return sortedPoints
     .map(({ point, startsAt }) => ({
@@ -19,16 +19,16 @@ export const createFocusSteps = <V, E>(
       startsAt: +startsAt,
       vertex: verticesData[point.key]
     }))
-    .filter(step => step.vertex !== undefined) as Array<FocusStepData<V, E>>;
+    .filter(step => step.vertex !== undefined) as Array<FocusStepData<V>>;
 };
 
-export const getTargetPoint = <V, E>({
+export const getTargetPoint = <V>({
   afterStep,
   beforeStep,
   currentProgress,
   previousProgress,
   targetPoint: { value: prevTargetPoint }
-}: StateProps<V, E>): UpdatedFocusPoint | null => {
+}: StateProps<V>): UpdatedFocusPoint | null => {
   'worklet';
   if (currentProgress < previousProgress) {
     return beforeStep ?? null;
@@ -52,9 +52,9 @@ export const getTargetPoint = <V, E>({
   return prevTargetPoint;
 };
 
-export const getResultingProgress = <V, E>(
-  targetStep: FocusStepData<V, E> | null,
-  { afterStep, beforeStep, currentProgress, syncProgress }: StateProps<V, E>
+export const getResultingProgress = <V>(
+  targetStep: FocusStepData<V> | null,
+  { afterStep, beforeStep, currentProgress, syncProgress }: StateProps<V>
 ): number => {
   'worklet';
   const afterProgress = afterStep?.startsAt ?? 1;
@@ -69,18 +69,18 @@ export const getResultingProgress = <V, E>(
   return stepProgress * syncProgress;
 };
 
-export const getTransitionBounds = <V, E>({
+export const getTransitionBounds = <V>({
   afterStep,
   beforeStep,
   syncProgress,
   targetPoint: { value: targetPoint }
-}: StateProps<V, E>): {
-  source: FocusStepData<V, E> | null;
-  target: FocusStepData<V, E> | null;
+}: StateProps<V>): {
+  source: FocusStepData<V> | null;
+  target: FocusStepData<V> | null;
 } => {
   'worklet';
-  let targetStep: FocusStepData<V, E> | null = null;
-  let sourceStep: FocusStepData<V, E> | null = null;
+  let targetStep: FocusStepData<V> | null = null;
+  let sourceStep: FocusStepData<V> | null = null;
 
   if (targetPoint?.startsAt === beforeStep?.startsAt) {
     targetStep = beforeStep;
@@ -103,8 +103,8 @@ export const getTransitionBounds = <V, E>({
   };
 };
 
-export const updateTransitionPoints = <V, E>(
-  props: StateProps<V, E>
+export const updateTransitionPoints = <V>(
+  props: StateProps<V>
 ): {
   endUpdated?: boolean;
   startUpdated?: boolean;

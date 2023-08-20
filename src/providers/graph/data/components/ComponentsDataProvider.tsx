@@ -113,11 +113,18 @@ function ComponentsDataProvider<V, E>({
 
   const startComponentsRemoveTimeout = () => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    clearTimeout(removeComponentsTimeoutRef.current!);
+    clearComponentsRemoveTimeout();
     removeComponentsTimeoutRef.current = setTimeout(() => {
       setForceRemove({});
       removeComponentsTimeoutRef.current = null;
     }, REMOVE_COMPONENTS_TIMEOUT);
+  };
+
+  const clearComponentsRemoveTimeout = () => {
+    if (removeComponentsTimeoutRef.current) {
+      clearTimeout(removeComponentsTimeoutRef.current);
+      removeComponentsTimeoutRef.current = null;
+    }
   };
 
   return (

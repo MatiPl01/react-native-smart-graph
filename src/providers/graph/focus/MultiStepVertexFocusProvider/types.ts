@@ -17,9 +17,9 @@ export enum MachineState {
   FOCUS_TRANSITION = 'FOCUS_TRANSITION'
 }
 
-export type StateProps<V, E> = {
-  afterStep: FocusStepData<V, E> | null;
-  beforeStep: FocusStepData<V, E> | null;
+export type StateProps<V> = {
+  afterStep: FocusStepData<V> | null;
+  beforeStep: FocusStepData<V> | null;
   currentProgress: number;
   focusContext: FocusContextType;
   previousProgress: number;
@@ -30,9 +30,9 @@ export type StateProps<V, E> = {
   viewDataContext: GraphViewData;
 };
 
-export type StateHandler = <V, E>(props: StateProps<V, E>) => MachineState;
+export type StateHandler = <V>(props: StateProps<V>) => MachineState;
 
-export type MachineContext<V, E> = {
+export type MachineContext<V> = {
   isStopped(): boolean;
   start(): void;
   stop(): void;
@@ -40,8 +40,8 @@ export type MachineContext<V, E> = {
     currentProgress: number,
     previousProgress: number,
     syncProgress: number,
-    afterStep: FocusStepData<V, E> | null,
-    beforeStep: FocusStepData<V, E> | null,
+    afterStep: FocusStepData<V> | null,
+    beforeStep: FocusStepData<V> | null,
     vertexRadius: number
   ): void;
 };

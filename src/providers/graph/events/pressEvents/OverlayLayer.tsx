@@ -3,25 +3,25 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { VertexComponentData } from '@/types/data';
 import { AnimatedBoundingRect, AnimatedTransformation } from '@/types/layout';
-import { GraphEventsSettings } from '@/types/settings';
+import { PressEventsSettings } from '@/types/settings';
 
 import OverlayVertex from './OverlayVertex';
 
-type OverlayLayerProps<V, E> = {
+type OverlayLayerProps<V> = {
   boundingRect: AnimatedBoundingRect;
   debug?: boolean;
-  settings: GraphEventsSettings<V>;
+  settings: PressEventsSettings<V>;
   transform: AnimatedTransformation;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 };
 
-export default function OverlayLayer<V, E>({
+export default function OverlayLayer<V>({
   boundingRect,
   debug,
   settings,
   transform,
   verticesData
-}: OverlayLayerProps<V, E>) {
+}: OverlayLayerProps<V>) {
   const style = useAnimatedStyle(() => {
     const boundingLeft = boundingRect.left.value;
     const boundingTop = boundingRect.top.value;
@@ -66,9 +66,9 @@ export default function OverlayLayer<V, E>({
               }
 
               return (
-                <OverlayVertex<V, E>
+                <OverlayVertex<V>
+                  animationDisabled={settings?.disableAnimation}
                   boundingRect={boundingRect}
-                  data={data}
                   debug={debug}
                   displayed={displayed}
                   key={key}
@@ -77,6 +77,8 @@ export default function OverlayLayer<V, E>({
                   position={position}
                   radius={currentRadius}
                   scale={scale}
+                  vertexKey={key}
+                  vertexValue={data.value}
                 />
               );
             }

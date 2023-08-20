@@ -8,7 +8,7 @@ import { AnimatedBoundingRect } from '@/types/layout';
 
 type GraphEdgesMaskProps<V, E> = {
   boundingRect: AnimatedBoundingRect;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 };
 
 function GraphEdgesMask<V, E>({
@@ -38,10 +38,10 @@ function GraphEdgesMask<V, E>({
   );
 }
 
-const VertexMask = memo(function <V, E>({
+const VertexMask = memo(function <V>({
   data
 }: {
-  data: VertexComponentData<V, E>;
+  data: VertexComponentData<V>;
 }) {
   const radius = useDerivedValue(() =>
     data.displayed.value === false ? 0 : data.currentRadius.value

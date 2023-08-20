@@ -214,8 +214,8 @@ export const animateToValue = (
   return fromValue + delta * factor;
 };
 
-export const cancelVertexAnimations = <V, E>(
-  vertexData: VertexComponentData<V, E>
+export const cancelVertexAnimations = <V>(
+  vertexData: VertexComponentData<V>
 ) => {
   cancelAnimation(vertexData.scale);
   cancelAnimation(vertexData.currentRadius);
@@ -224,9 +224,7 @@ export const cancelVertexAnimations = <V, E>(
   cancelAnimation(vertexData.displayed);
 };
 
-export const cancelEdgeAnimations = <V, E>(
-  edgeData: EdgeComponentData<V, E>
-) => {
+export const cancelEdgeAnimations = <V>(edgeData: EdgeComponentData<V>) => {
   cancelAnimation(edgeData.animationProgress);
   cancelAnimation(edgeData.displayed);
   cancelAnimation(edgeData.edgesCount);

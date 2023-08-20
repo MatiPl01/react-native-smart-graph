@@ -8,9 +8,12 @@ export type VertexPressEvent<V = void> = {
 
 export type VertexPressHandler<V = void> = (data: VertexPressEvent<V>) => void;
 
-type PressEventsCallbacks<V> = {
+export type PressEventsSettings<V> = {
+  disableAnimation?: boolean;
   onVertexLongPress?: VertexPressHandler<V>;
   onVertexPress?: VertexPressHandler<V>;
 };
 
-export type GraphEventsSettings<V> = PressEventsCallbacks<V>;
+export type GraphEventsSettings<V> = {
+  press: PressEventsSettings<V>;
+};

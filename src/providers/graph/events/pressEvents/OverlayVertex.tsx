@@ -1,6 +1,7 @@
-import { memo, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Pressable } from 'react-native';
 import Animated, {
+  runOnJS,
   SharedValue,
   useAnimatedStyle,
   useSharedValue,
@@ -8,7 +9,6 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 
-import { VertexComponentData } from '@/types/data';
 import {
   AnimatedBoundingRect,
   AnimatedVectorCoordinates
@@ -31,9 +31,9 @@ const pulseAnimation = (activeScale: number): number => {
   );
 };
 
-type VertexOverlayProps<V, E> = {
+type VertexOverlayProps<V> = {
+  animationDisabled?: boolean;
   boundingRect: AnimatedBoundingRect;
-  data: VertexComponentData<V, E>;
   debug?: boolean;
   displayed: SharedValue<boolean>;
   onLongPress?: VertexPressHandler<V>;
@@ -41,21 +41,25 @@ type VertexOverlayProps<V, E> = {
   position: AnimatedVectorCoordinates;
   radius: SharedValue<number>;
   scale: SharedValue<number>;
+  vertexKey: string;
+  vertexValue?: V;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function OverlayVertex<V, E>({
+function OverlayVertex<V>({
+  animationDisabled,
   boundingRect,
-  data: { vertex },
   debug,
   displayed,
   onLongPress,
   onPress,
   position,
   radius,
-  scale
-}: VertexOverlayProps<V, E>) {
+  scale,
+  vertexKey: key,
+  vertexValue: value
+}: VertexOverlayProps<V>) {
   // HELPER VALUES
   const isPressing = useSharedValue(false);
   const longPressStarted = useSharedValue(false);
@@ -63,20 +67,36 @@ function OverlayVertex<V, E>({
 
   const getPressEventData = () => ({
     position,
-    vertex: {
-      key: vertex.key,
-      value: vertex.value
-    }
+    vertex: { key, value }
   });
 
   // PRESS EVENT
   const handlePress = () => {
+    isPressing.value = false;
+    if (!onPress) return;
     // Don't trigger the press event if the long press has started
     if (longPressStarted.value) return;
+    onPress(getPressEventData());
+    // Don't animate if the animation is disabled
+    if (animationDisabled) return;
+
     // Animate the vertex and trigger the press event
     scale.value = pulseAnimation(PRESS_MAX_SCALE);
+  };
 
-    onPress?.(getPressEventData());
+  const resetScale = () => {
+    // Animate if the animation is not disabled
+    if (!animationDisabled) {
+      scale.value = withTiming(1, { duration: PULSE_DURATION / 2 }, () => {
+        longPressStarted.value = false;
+      });
+    }
+  };
+
+  const handleLongPress = () => {
+    if (!isPressing.value) return;
+    // If so, trigger the long press event and reset the scale
+    onLongPress?.(getPressEventData());
   };
 
   // LONG PRESS EVENT
@@ -100,27 +120,30 @@ function OverlayVertex<V, E>({
       if (!isPressing.value) return;
       // Start long press animation
       longPressStarted.value = true;
-      scale.value = withTiming(LONG_PRESS_MAX_SCALE, {
-        duration: LONG_PRESS_ANIMATION_DURATION
-      });
+
+      // Animate if the animation is not disabled
+      if (!animationDisabled) {
+        scale.value = withTiming(
+          LONG_PRESS_MAX_SCALE,
+          {
+            duration: LONG_PRESS_ANIMATION_DURATION
+          },
+          completed => {
+            if (completed) runOnJS(handleLongPress)();
+          }
+        );
+      }
     }, LONG_PRESS_DELAY);
   };
 
   const handlePressOut = () => {
     if (!onLongPress) return;
+    // Reset scale if the long press has not started
+    if (longPressStarted.value) resetScale();
     // Reset state
     clearLongPressTimeout();
     isPressing.value = false;
     longPressAnimationTimeoutRef.current = null;
-
-    // Check if the long press animation has started
-    if (longPressStarted.value) {
-      // If so, trigger the long press event and reset the scale
-      onLongPress?.(getPressEventData());
-      scale.value = withTiming(1, { duration: PULSE_DURATION / 2 }, () => {
-        longPressStarted.value = false;
-      });
-    }
   };
 
   const style = useAnimatedStyle(() => {
@@ -139,6 +162,12 @@ function OverlayVertex<V, E>({
       width: size
     };
   }, [position.x, position.y, radius]);
+
+  useEffect(() => {
+    return () => {
+      handlePressOut();
+    };
+  }, []);
 
   return (
     <AnimatedPressable

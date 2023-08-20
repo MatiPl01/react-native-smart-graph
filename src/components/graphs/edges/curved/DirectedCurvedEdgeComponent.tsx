@@ -17,18 +17,21 @@ import {
   translateAlongVector
 } from '@/utils/vectors';
 
+import RenderedCurvedEdgeComponent from './RenderedCurvedEdgeComponent';
+
 function DirectedCurvedEdgeComponent<V, E>({
   animatedEdgesCount,
   animatedOrder,
   data: {
     animationProgress,
-    edge,
+    key,
     labelHeight,
     labelPosition,
     v1Position,
     v1Radius,
     v2Position,
-    v2Radius
+    v2Radius,
+    value
   },
   renderers,
   settings
@@ -176,14 +179,15 @@ function DirectedCurvedEdgeComponent<V, E>({
 
   return (
     <>
-      {renderers.edge({
-        animationProgress,
-        key: edge.key,
-        parabolaX,
-        parabolaY,
-        path,
-        value: edge.value
-      })}
+      <RenderedCurvedEdgeComponent
+        animationProgress={animationProgress}
+        edgeKey={key}
+        parabolaX={parabolaX}
+        parabolaY={parabolaY}
+        path={path}
+        renderer={renderers.edge}
+        value={value}
+      />
       <ArrowComponent
         animationProgress={animationProgress}
         directionVector={dirVec}

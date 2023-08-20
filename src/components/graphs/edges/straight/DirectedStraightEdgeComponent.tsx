@@ -17,6 +17,8 @@ import {
   translateAlongVector
 } from '@/utils/vectors';
 
+import RenderedStraightEdgeComponent from './RenderedStraightEdgeComponent';
+
 const calcTranslationOffset = (
   order: number,
   edgesCount: number,
@@ -35,13 +37,14 @@ function DirectedStraightEdgeComponent<V, E>({
   animatedOrder,
   data: {
     animationProgress,
-    edge,
+    key,
     labelHeight,
     labelPosition,
     v1Position,
     v1Radius,
     v2Position,
-    v2Radius
+    v2Radius,
+    value
   },
   renderers,
   settings
@@ -132,13 +135,14 @@ function DirectedStraightEdgeComponent<V, E>({
 
   return (
     <>
-      {renderers.edge({
-        animationProgress,
-        key: edge.key,
-        p1,
-        p2,
-        value: edge.value
-      })}
+      <RenderedStraightEdgeComponent
+        animationProgress={animationProgress}
+        edgeKey={key}
+        p1={p1}
+        p2={p2}
+        renderer={renderers.edge}
+        value={value}
+      />
       <ArrowComponent
         animationProgress={animationProgress}
         directionVector={dirVec}

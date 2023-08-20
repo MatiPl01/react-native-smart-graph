@@ -3,19 +3,19 @@ import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
 import { Alignment, AnimatedVectorCoordinates } from '@/types/layout';
-import { Vertex } from '@/types/models/public/vertex';
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 import { FocusPoint } from '@/types/settings/public/graph/focus';
 import { DeepRequired, Maybe } from '@/types/utils';
 
-export type VertexComponentData<V, E> = {
+export type VertexComponentData<V> = {
   animationSettings: AllAnimationSettings;
   currentRadius: SharedValue<number>;
   displayed: SharedValue<boolean>;
+  key: string;
   position: AnimatedVectorCoordinates;
   removed: boolean;
   scale: SharedValue<number>;
-  vertex: Vertex<V, E>;
+  value?: V;
 };
 
 export type VertexRemoveHandler = (key: string) => void;
@@ -52,8 +52,8 @@ export type FocusEndHandler = (
   animationSettings?: Maybe<AllAnimationSettings>
 ) => void;
 
-export type FocusStepData<V, E> = {
+export type FocusStepData<V> = {
   point: DeepRequired<FocusPoint>;
   startsAt: number;
-  vertex: VertexComponentData<V, E>;
+  vertex: VertexComponentData<V>;
 };

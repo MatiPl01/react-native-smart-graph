@@ -46,7 +46,7 @@ export const useVertexFocusContext = () => {
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   vertexRadius: SharedValue<number>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
 function VertexFocusProvider<V, E>({

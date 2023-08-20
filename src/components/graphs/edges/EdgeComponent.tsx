@@ -30,13 +30,13 @@ type InnerEdgeProps<V, E> = Omit<
 const areDirectedEdgeProps = <V, E>(
   props: InnerEdgeProps<V, E>
 ): props is DirectedEdgeComponentProps<V, E> => {
-  return props.data.edge.isDirected();
+  return props.data.isDirected;
 };
 
 const areUndirectedEdgeProps = <V, E>(
   props: InnerEdgeProps<V, E>
 ): props is UndirectedEdgeComponentProps<V, E> => {
-  return !props.data.edge.isDirected();
+  return !props.data.isDirected;
 };
 
 function areCurvedEdgeProps<V, E>(
@@ -61,7 +61,7 @@ function EdgeComponent<V, E>({
   renderers,
   settings
 }: EdgeComponentProps<V, E>) {
-  const { animationProgress, animationSettings, edge } = data;
+  const { animationProgress, animationSettings } = data;
 
   // EDGE ORDERING
   // Target edge order
@@ -71,7 +71,7 @@ function EdgeComponent<V, E>({
   // Edge mount/unmount animation
   useEffect(() => {
     updateComponentAnimationState(
-      edge.key,
+      data.key,
       animationProgress,
       animationSettings,
       data.removed,

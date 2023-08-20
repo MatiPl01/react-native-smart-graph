@@ -170,6 +170,22 @@ export default function BottomSheetFocus() {
       vertexRadius.value = withTiming(Math.random() * 80 + 10, {
         duration: 500
       });
+      if (graph.hasVertex('VV')) {
+        graph.removeVertex('VV');
+      } else {
+        graph.insertVertex(
+          {
+            key: 'VV'
+          },
+          undefined,
+          false
+        );
+        graph.insertEdge({
+          key: 'EE',
+          from: 'V1',
+          to: 'VV'
+        });
+      }
     }, 500);
   }, []);
 
@@ -190,7 +206,10 @@ export default function BottomSheetFocus() {
               progress: bottomSheetProgress
             },
             events: {
-              onVertexPress: handleVertexPress
+              press: {
+                onVertexLongPress: handleVertexPress,
+                onVertexPress: handleVertexPress
+              }
             },
             placement: {
               strategy: useSharedValue('trees'),

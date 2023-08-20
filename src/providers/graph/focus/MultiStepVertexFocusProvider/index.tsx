@@ -23,18 +23,18 @@ import { getFocusSteps } from '@/utils/focus';
 import { useStateMachine } from './StateMachine';
 import { createFocusSteps } from './utils';
 
-type MultiStepFocusProviderProps<V, E> = PropsWithChildren<{
+type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
   vertexRadius: SharedValue<number>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
-function MultiStepVertexFocusProvider<V, E>({
+function MultiStepVertexFocusProvider<V>({
   children,
   settings,
   vertexRadius,
   verticesData
-}: MultiStepFocusProviderProps<V, E>) {
+}: MultiStepFocusProviderProps<V>) {
   // CONTEXTS
   // Canvas contexts
   const { dataContext: viewDataContext, focusContext } = useCanvasContexts();
@@ -57,7 +57,7 @@ function MultiStepVertexFocusProvider<V, E>({
       }))
       .sort((a, b) => a.startsAt - b.startsAt)
   );
-  const focusStepsData = useSharedValue<Array<FocusStepData<V, E>>>([]);
+  const focusStepsData = useSharedValue<Array<FocusStepData<V>>>([]);
 
   // OTHER VALUES
   // // Used to determine the direction of the progress
