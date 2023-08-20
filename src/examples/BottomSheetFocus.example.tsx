@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DirectedGraph,
   DirectedGraphComponent,
   DirectedGraphData,
   GraphView,
   GraphViewControls,
+  ObjectFit,
   VertexPressHandler
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -96,6 +97,7 @@ const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
 export default function BottomSheetFocus() {
   const graph = useMemo(() => new DirectedGraph(GRAPH1), []);
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
+  const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const animatedIndex = useSharedValue(0);
@@ -191,7 +193,8 @@ export default function BottomSheetFocus() {
           right: 25,
           top: 50
         }}
-        objectFit='contain'>
+        objectFit={objectFit}
+        scales={[0.05, 1, 2, 4]}>
         <DirectedGraphComponent
           settings={{
             focus: {
@@ -217,7 +220,10 @@ export default function BottomSheetFocus() {
           }}
           graph={graph}
         />
-        <GraphViewControls style={styles.controls} />
+        <GraphViewControls
+          onObjectFitChange={setObjectFit}
+          style={styles.controls}
+        />
       </GraphView>
       <BottomSheet
         animatedIndex={animatedIndex}

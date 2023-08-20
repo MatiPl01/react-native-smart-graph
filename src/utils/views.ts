@@ -12,27 +12,29 @@ export const calcContainerScale = (
   'worklet';
   let scale = initialScale;
 
-  const containerWidth =
-    containerDimensions.width + padding.left + padding.right;
-  const containerHeight =
-    containerDimensions.height + padding.top + padding.bottom;
+  const containerWidth = containerDimensions.width;
+  const containerHeight = containerDimensions.height;
+  const targetWidth = canvasWidth - padding.left - padding.right;
+  const targetHeight = canvasHeight - padding.top - padding.bottom;
+
+  if (containerWidth <= 0 || containerHeight <= 0) return scale;
 
   switch (objectFit) {
     case 'contain':
       scale = Math.min(
-        canvasWidth / containerWidth,
-        canvasHeight / containerHeight
+        targetWidth / containerWidth,
+        targetHeight / containerHeight
       );
       break;
     case 'cover':
       scale = Math.max(
-        canvasWidth / containerWidth,
-        canvasHeight / containerHeight
+        targetWidth / containerWidth,
+        targetHeight / containerHeight
       );
       break;
   }
 
-  return scale || initialScale;
+  return Math.max(scale || initialScale, 0);
 };
 
 export const calcContainerTranslation = (

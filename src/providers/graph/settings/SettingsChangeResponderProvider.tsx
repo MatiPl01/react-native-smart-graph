@@ -28,7 +28,6 @@ function SettingsChangeResponderProvider({
 
   // Other values
   const isFirstAutoSizingReactionCall = useSharedValue(true);
-  const isFirstResetReactionCall = useSharedValue(true);
   const prevObjectFit = useSharedValue<null | string>(null);
 
   // A workaround to make sure that the auto sizing is enabled after the
@@ -52,6 +51,8 @@ function SettingsChangeResponderProvider({
         return;
       }
       isFirstAutoSizingReactionCall.value = false;
+      prevObjectFit.value = objFit;
+      // For the first reaction call only
       if (objFit !== 'none' && !focusProgress?.value) {
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
@@ -69,12 +70,8 @@ function SettingsChangeResponderProvider({
       objectFit.value !== prevObjectFit.value &&
       !autoSizingContext.autoSizingEnabled.value,
     shouldReset => {
-      prevObjectFit.value = objectFit.value;
       if (!shouldReset) return;
-      if (isFirstResetReactionCall.value) {
-        isFirstResetReactionCall.value = false;
-        return;
-      }
+      prevObjectFit.value = objectFit.value;
       // Don't reset the container position if there is a focused object
       if (focus.key.value !== null) return;
       // Reset the container position
