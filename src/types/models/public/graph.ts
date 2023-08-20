@@ -1,4 +1,5 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
+import { ChangeResult } from '@/types/models/utils';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -15,7 +16,9 @@ import { Vertex, VertexConnections } from './vertex';
 export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
   blur(settings?: Maybe<AnimationSettings>): void;
-  clear(animationSettings?: Maybe<BatchModificationAnimationSettings>): void;
+  clear(
+    animationSettings?: Maybe<BatchModificationAnimationSettings>
+  ): ChangeResult;
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<V, E>>;
@@ -33,17 +36,17 @@ export interface Graph<V, E> {
     },
     animationSettings?: Maybe<BatchModificationAnimationSettings>,
     notifyChange?: boolean
-  ): void;
+  ): ChangeResult;
   insertEdge(
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange?: boolean
-  ): Edge<V, E>;
+  ): ChangeResult;
   insertVertex(
     data: VertexData<V>,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange?: boolean
-  ): Vertex<V, E>;
+  ): ChangeResult;
   isDirected(): boolean;
   removeBatch(
     data: {
@@ -52,18 +55,18 @@ export interface Graph<V, E> {
     },
     animationSettings?: Maybe<BatchModificationAnimationSettings>,
     notifyChange?: boolean
-  ): void;
+  ): ChangeResult;
   removeEdge(
     key: string,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange?: boolean
-  ): E | undefined;
+  ): ChangeResult;
   removeObserver(observer: GraphObserver): void;
   removeVertex(
     key: string,
     animationSettings?: Maybe<SingleModificationAnimationSettings>,
     notifyChange?: boolean
-  ): V | undefined;
+  ): ChangeResult;
   replaceBatch(
     data: {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
@@ -71,7 +74,7 @@ export interface Graph<V, E> {
     },
     animationSettings?: Maybe<BatchModificationAnimationSettings>,
     notifyChange?: boolean
-  ): void;
+  ): ChangeResult;
 }
 
 export type GraphConnections = Record<string, VertexConnections>;
