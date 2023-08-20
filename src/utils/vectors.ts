@@ -11,10 +11,15 @@ export const calcUnitVector = (from: Vector, to: Vector): Vector => {
   return mag > 0 ? { x: dx / mag, y: dy / mag } : { x: 0, y: 0 };
 };
 
+export const calcOrthogonalVector = (vector: Vector): Vector => {
+  'worklet';
+  return { x: -vector.y, y: vector.x };
+};
+
 export const calcOrthogonalUnitVector = (from: Vector, to: Vector): Vector => {
   'worklet';
   const unitVector = calcUnitVector(from, to);
-  return { x: -unitVector.y, y: unitVector.x };
+  return calcOrthogonalVector(unitVector);
 };
 
 export const translateAlongVector = (

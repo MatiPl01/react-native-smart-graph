@@ -21,7 +21,16 @@ const GRAPH1: DirectedGraphData = {
   edges: [
     { key: 'E1', from: 'V1', to: 'V2' },
     { key: 'E2', from: 'V1', to: 'V3' },
-    { key: 'E3', from: 'V1', to: 'V4' }
+    { key: 'E3', from: 'V1', to: 'V4' },
+    { key: 'E12', from: 'V1', to: 'V2' },
+    { key: 'E22', from: 'V1', to: 'V3' },
+    { key: 'E32', from: 'V1', to: 'V4' },
+    { key: 'E13', from: 'V1', to: 'V2' },
+    { key: 'E23', from: 'V1', to: 'V3' },
+    { key: 'E33', from: 'V1', to: 'V4' },
+    { key: 'E14', from: 'V1', to: 'V2' },
+    { key: 'E24', from: 'V1', to: 'V3' },
+    { key: 'E34', from: 'V1', to: 'V4' }
   ],
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
@@ -217,8 +226,12 @@ export default function BottomSheetFocus() {
             components: {
               vertex: {
                 radius: vertexRadius
+              },
+              edge: {
+                type: 'curved'
               }
-            }
+            },
+            animations: null
           }}
           graph={graph}
         />

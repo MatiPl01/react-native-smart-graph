@@ -8,7 +8,7 @@ import { FocusPoint } from '@/types/settings/public/graph/focus';
 import { DeepRequired, Maybe } from '@/types/utils';
 
 export type VertexComponentData<V> = {
-  animationSettings: AllAnimationSettings;
+  animationSettings: AllAnimationSettings | null;
   currentRadius: SharedValue<number>;
   displayed: SharedValue<boolean>;
   key: string;

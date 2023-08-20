@@ -27,9 +27,9 @@ export type BatchModificationAnimationSettings =
   | AnimationSettings;
 
 export type GraphAnimationsSettings = {
-  edges?: AnimationSettings;
-  layout?: AnimationSettings;
-  vertices?: AnimationSettings;
-};
+  edges?: AnimationSettings | null;
+  layout?: AnimationSettings | null;
+  vertices?: AnimationSettings | null;
+} | null;
 
 export type AnimationEasing = EasingFactoryFn | EasingFn;

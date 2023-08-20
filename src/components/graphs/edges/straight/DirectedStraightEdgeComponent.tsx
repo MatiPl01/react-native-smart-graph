@@ -10,7 +10,7 @@ import { ArrowComponent } from '@/components/graphs/arrows';
 import { DirectedStraightEdgeComponentProps } from '@/types/components';
 import {
   addVectors,
-  calcOrthogonalUnitVector,
+  calcOrthogonalVector,
   calcUnitVector,
   distanceBetweenVectors,
   multiplyVector,
@@ -59,7 +59,7 @@ function DirectedStraightEdgeComponent<V, E>({
     y: v2Position.y.value
   });
   // Edge arrow
-  const dirVec = useDerivedValue(() => calcUnitVector(p2.value, p1.value));
+  const dirVector = useDerivedValue(() => calcUnitVector(p2.value, p1.value));
   const arrowTipPosition = useSharedValue(p2.value);
   const arrowWidth = useSharedValue(0);
   const arrowHeight = useDerivedValue(() =>
@@ -76,26 +76,26 @@ function DirectedStraightEdgeComponent<V, E>({
   useAnimatedReaction(
     () => ({
       arrowScale: settings.arrow.scale.value,
+      dirVec: dirVector.value,
       edgesCount: animatedEdgesCount.value,
       labelScale: settings.label?.scale.value,
       maxOffsetFactor: settings.edge.maxOffsetFactor.value,
       order: animatedOrder.value,
       r1: v1Radius.value,
-      r2: v2Radius.value,
-      v1: { x: v1Position.x.value, y: v1Position.y.value },
-      v2: { x: v2Position.x.value, y: v2Position.y.value }
+      r2: v2Radius.value
     }),
     ({
       arrowScale,
+      dirVec,
       edgesCount,
       labelScale,
       maxOffsetFactor,
       order,
       r1,
-      r2,
-      v1,
-      v2
+      r2
     }) => {
+      const v1 = { x: v1Position.x.value, y: v1Position.y.value };
+      const v2 = { x: v2Position.x.value, y: v2Position.y.value };
       const calcOffset = calcTranslationOffset.bind(
         null,
         order,
@@ -106,16 +106,16 @@ function DirectedStraightEdgeComponent<V, E>({
       const p1Offset = calcOffset(r1);
       const p2Offset = calcOffset(r2);
 
-      const dirVector = calcOrthogonalUnitVector(v1, v2);
-      const p1Translation = multiplyVector(dirVector, p1Offset);
-      const p2Translation = multiplyVector(dirVector, p2Offset);
+      const translationVector = calcOrthogonalVector(dirVec);
+      const p1Translation = multiplyVector(translationVector, p1Offset);
+      const p2Translation = multiplyVector(translationVector, p2Offset);
       // Update edge line points positions
       p1.value = addVectors(v1, p1Translation);
       p2.value = addVectors(v2, p2Translation);
       // Update edge arrow tip position
       arrowTipPosition.value = translateAlongVector(
         p2.value,
-        dirVec.value,
+        dirVec,
         Math.sqrt(r2 ** 2 - p2Offset ** 2)
       );
       // Update edge label max size
@@ -145,7 +145,7 @@ function DirectedStraightEdgeComponent<V, E>({
       />
       <ArrowComponent
         animationProgress={animationProgress}
-        directionVector={dirVec}
+        directionVector={dirVector}
         height={arrowHeight}
         renderer={renderers.arrow}
         tipPosition={arrowTipPosition}

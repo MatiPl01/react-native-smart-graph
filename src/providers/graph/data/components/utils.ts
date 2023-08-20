@@ -1,5 +1,6 @@
 import { makeMutable } from 'react-native-reanimated';
 
+import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
 import { GraphState } from '@/hooks';
 import { GraphComponentsData } from '@/types/components';
 import {
@@ -62,12 +63,14 @@ export const updateContextValue = <V, E>(
   currentData?: ComponentsData<V, E>
 ): GraphComponentsData<V, E> => {
   const currentLayoutAnimationSettings = value?.layoutAnimationSettings;
-  const newLayoutAnimationSettings = updateValues({
-    // TODO - fix
-    current: currentLayoutAnimationSettings,
-    default: newData.graphAnimationsSettings.layout,
-    new: newData.state.animationsSettings.layout
-  });
+  const newLayoutAnimationSettings =
+    newData.graphAnimationsSettings.layout === null
+      ? null
+      : updateValues({
+          current: currentLayoutAnimationSettings,
+          default: newData.graphAnimationsSettings.layout,
+          new: newData.state.animationsSettings.layout
+        });
 
   // Update vertices data only if vertices have changed
   const newVerticesData =
@@ -133,12 +136,28 @@ export const updateContextValue = <V, E>(
   );
 };
 
+const updateAnimationSettings = (
+  defaultSettings: AllAnimationSettings | null,
+  currentSettings?: AnimationSettings | null
+): AllAnimationSettings | null => {
+  if (
+    currentSettings === null ||
+    (defaultSettings === null && !currentSettings)
+  ) {
+    return null;
+  }
+  return {
+    ...(defaultSettings ?? DEFAULT_ANIMATION_SETTINGS),
+    ...currentSettings
+  };
+};
+
 const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
-  defaultAnimationSettings: AllAnimationSettings
+  defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, VertexComponentData<V>> => {
   const updatedVerticesData = { ...oldVerticesData };
   let isModified = false;
@@ -177,10 +196,10 @@ const updateGraphVerticesData = <V, E>(
         },
         scale: makeMutable(1)
       }),
-      animationSettings: {
-        ...defaultAnimationSettings,
-        ...currentAnimationsSettings
-      },
+      animationSettings: updateAnimationSettings(
+        defaultAnimationSettings,
+        currentAnimationsSettings[vertex.key]
+      ),
       key: vertex.key,
       removed: false,
       value: vertex.value
@@ -197,10 +216,10 @@ const updateGraphVerticesData = <V, E>(
       isModified = true;
       updatedVerticesData[key] = {
         ...vertexData,
-        animationSettings: {
-          ...defaultAnimationSettings,
-          ...currentAnimationsSettings
-        },
+        animationSettings: updateAnimationSettings(
+          defaultAnimationSettings,
+          currentAnimationsSettings[key]
+        ),
         removed: true
       };
     }
@@ -225,7 +244,7 @@ const updateGraphEdgesData = <V, E>(
   verticesData: Record<string, VertexComponentData<V>>,
   removedEdges: Set<string>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
-  defaultAnimationSettings: AllAnimationSettings
+  defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, EdgeComponentData<E>> => {
   const updatedEdgesData = { ...oldEdgesData };
   let isModified = false; // Flag to indicate if edges data was updated
@@ -280,10 +299,10 @@ const updateGraphEdgesData = <V, E>(
         },
         order: makeMutable(edgeData.order)
       }),
-      animationSettings: {
-        ...defaultAnimationSettings,
-        ...currentAnimationsSettings
-      },
+      animationSettings: updateAnimationSettings(
+        defaultAnimationSettings,
+        currentAnimationsSettings[edgeData.edge.key]
+      ),
       isDirected: edgeData.edge.isDirected(),
       key: edgeData.edge.key,
       removed: false,
@@ -308,10 +327,10 @@ const updateGraphEdgesData = <V, E>(
         isModified = true;
         updatedEdgesData[key] = {
           ...edgeData,
-          animationSettings: {
-            ...defaultAnimationSettings,
-            ...currentAnimationsSettings
-          },
+          animationSettings: updateAnimationSettings(
+            defaultAnimationSettings,
+            currentAnimationsSettings[key]
+          ),
           removed: true
         };
       }
