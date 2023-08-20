@@ -69,11 +69,11 @@ const getQuadIncreasingLayerRadiuses = (
 
 const getNonDecreasingLayerRadiuses = (
   minLayerRadiuses: Record<string, number>,
-  minVertexSpacing: number
+  minVertexDistance: number
 ): Array<number> => {
   'worklet';
   const layersRadius = [0];
-  let maxDistanceBetweenLayers = minVertexSpacing;
+  let maxDistanceBetweenLayers = minVertexDistance;
 
   for (let i = 1; i < Object.keys(minLayerRadiuses).length; i++) {
     layersRadius.push(
@@ -114,7 +114,7 @@ const getCustomLayerRadiuses = (
 
 const getAutoLayerRadiuses = (
   minLayerRadiuses: Record<string, number>,
-  minVertexSpacing: number
+  minVertexDistance: number
 ): Array<number> => {
   'worklet';
   const layersRadius = [0];
@@ -123,7 +123,7 @@ const getAutoLayerRadiuses = (
     layersRadius.push(
       Math.max(
         minLayerRadiuses[i] as number,
-        (layersRadius[i - 1] as number) + minVertexSpacing
+        (layersRadius[i - 1] as number) + minVertexDistance
       )
     );
   }
@@ -133,7 +133,7 @@ const getAutoLayerRadiuses = (
 
 const getLayerRadiuses = (
   minLayerRadiuses: Record<string, number>,
-  minVertexSpacing: number,
+  minVertexDistance: number,
   settings: AllOrbitsPlacementSettings
 ): Array<number> => {
   'worklet';
@@ -143,7 +143,7 @@ const getLayerRadiuses = (
     case 'quad-increasing':
       return getQuadIncreasingLayerRadiuses(minLayerRadiuses);
     case 'non-decreasing':
-      return getNonDecreasingLayerRadiuses(minLayerRadiuses, minVertexSpacing);
+      return getNonDecreasingLayerRadiuses(minLayerRadiuses, minVertexDistance);
     case 'custom':
       return getCustomLayerRadiuses(
         Object.keys(minLayerRadiuses).length,
@@ -151,7 +151,7 @@ const getLayerRadiuses = (
       );
     case 'auto':
     default:
-      return getAutoLayerRadiuses(minLayerRadiuses, minVertexSpacing);
+      return getAutoLayerRadiuses(minLayerRadiuses, minVertexDistance);
   }
 };
 
@@ -165,7 +165,7 @@ const calcVertexCenterDistance = (
 
 const calcLayerRadiuses = (
   arrangedVertices: ArrangedVertices,
-  minVertexSpacing: number,
+  minVertexDistance: number,
   settings: AllOrbitsPlacementSettings
 ): Record<number, number> => {
   'worklet';
@@ -176,13 +176,13 @@ const calcLayerRadiuses = (
     minLayerRadiuses[layer] =
       layer &&
       Math.max(
-        minLayerRadiuses[layer] ?? minVertexSpacing,
-        calcVertexCenterDistance(minVertexSpacing, sectorAngle)
+        minLayerRadiuses[layer] ?? minVertexDistance,
+        calcVertexCenterDistance(minVertexDistance, sectorAngle)
       );
   }
 
   // Calc layers radiuses
-  return getLayerRadiuses(minLayerRadiuses, minVertexSpacing, settings);
+  return getLayerRadiuses(minLayerRadiuses, minVertexDistance, settings);
 };
 
 const placeVertices = (
@@ -290,10 +290,10 @@ export default function placeVerticesOnOrbits(
       settings.maxSectorAngle
     );
     // Calculate the layout of the component
-    const minVertexSpacing = settings.minVertexSpacing;
+    const minVertexDistance = settings.minVertexDistance;
     const layerRadiuses = calcLayerRadiuses(
       arrangedVertices,
-      minVertexSpacing,
+      minVertexDistance,
       settings
     );
     // Place vertices on the layout
@@ -311,5 +311,5 @@ export default function placeVerticesOnOrbits(
     });
   }
 
-  return arrangeGraphComponents(componentsLayouts, settings.minVertexSpacing);
+  return arrangeGraphComponents(componentsLayouts, settings.minVertexDistance);
 }

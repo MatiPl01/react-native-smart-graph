@@ -12,7 +12,7 @@ import random from '@/utils/random';
 
 type CalcVerticesPositionsProps = {
   density: number;
-  minVertexSpacing: number;
+  minVertexDistance: number;
   vertices: Array<string>;
 };
 
@@ -20,7 +20,7 @@ const calcVerticesGridPositions = (
   props: CalcVerticesPositionsProps
 ): GraphLayout => {
   'worklet';
-  const { density, minVertexSpacing, vertices } = props;
+  const { density, minVertexDistance, vertices } = props;
   const verticesCount = vertices.length;
 
   const maxPointsInLine = Math.ceil(Math.sqrt(verticesCount / density));
@@ -30,8 +30,8 @@ const calcVerticesGridPositions = (
   for (let i = -shiftedPositionBoundary; i <= shiftedPositionBoundary; i++) {
     for (let j = -shiftedPositionBoundary; j <= shiftedPositionBoundary; j++) {
       availablePositions.push({
-        x: i * (2 * minVertexSpacing),
-        y: j * (2 * minVertexSpacing)
+        x: i * (2 * minVertexDistance),
+        y: j * (2 * minVertexDistance)
       });
     }
   }
@@ -49,9 +49,9 @@ const calcVerticesTriangularPositions = (
   props: CalcVerticesPositionsProps
 ): GraphLayout => {
   'worklet';
-  const { density, minVertexSpacing, vertices } = props;
+  const { density, minVertexDistance, vertices } = props;
   const verticesCount = vertices.length;
-  const triangleHeight = (minVertexSpacing * Math.sqrt(3)) / 2;
+  const triangleHeight = (minVertexDistance * Math.sqrt(3)) / 2;
 
   const availablePositionsCount = Math.ceil(verticesCount / density);
   const availablePositions: Array<Vector> = [];
@@ -69,14 +69,14 @@ const calcVerticesTriangularPositions = (
     if (lineNumber % 2 === 1) {
       // Vertical line
       x =
-        (currentVertexIndex % 2 === 1 ? minVertexSpacing / 2 : 0) +
-        minVertexSpacing * Math.floor(lineNumber / 2);
+        (currentVertexIndex % 2 === 1 ? minVertexDistance / 2 : 0) +
+        minVertexDistance * Math.floor(lineNumber / 2);
       y = currentVertexIndex * triangleHeight;
     } else {
       // Horizontal line
       x =
-        ((lineNumber - 2) % 4 === 0 ? minVertexSpacing / 2 : 0) +
-        currentVertexIndex * minVertexSpacing;
+        ((lineNumber - 2) % 4 === 0 ? minVertexDistance / 2 : 0) +
+        currentVertexIndex * minVertexDistance;
       y = Math.floor(lineNumber / 2) * triangleHeight;
     }
 
@@ -149,7 +149,7 @@ export default function placeVerticesRandomly(
 
   const props: CalcVerticesPositionsProps = {
     density: settings.density,
-    minVertexSpacing: settings.minVertexSpacing,
+    minVertexDistance: settings.minVertexDistance,
     vertices
   };
 

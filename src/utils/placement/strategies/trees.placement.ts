@@ -77,7 +77,8 @@ const arrangeVertices = (
 
 const placeVertices = (
   arrangedVertices: Record<string, { col: number; row: number }>,
-  minVertexSpacing: number
+  minColumnDistance: number,
+  minRowDistance: number
 ): PlacedVerticesPositions => {
   'worklet';
   // determine the width and height of the grid
@@ -90,14 +91,14 @@ const placeVertices = (
   );
 
   // calculate the width and height of the grid as well as the padding
-  const width = (numCols - 1) * minVertexSpacing;
-  const height = (numRows - 1) * minVertexSpacing;
+  const width = (numCols - 1) * minColumnDistance;
+  const height = (numRows - 1) * minRowDistance;
 
   // calculate the positions of the vertices based on the grid
   return Object.entries(arrangedVertices).reduce((acc, [key, { col, row }]) => {
     acc[key] = {
-      x: col * minVertexSpacing - width / 2,
-      y: row * minVertexSpacing - height / 2
+      x: col * minColumnDistance - width / 2,
+      y: row * minRowDistance - height / 2
     };
     return acc;
   }, {} as PlacedVerticesPositions);
@@ -114,7 +115,7 @@ export default function placeVerticesOnTrees(
 
   const graphComponents = findGraphComponents(connections);
 
-  const minVertexSpacing = settings.minVertexSpacing;
+  const { minColumnDistance, minRowDistance } = settings;
   for (const component of graphComponents) {
     // Find the root vertex of the component
     const rootVertex = findRootVertex(
@@ -133,7 +134,11 @@ export default function placeVerticesOnTrees(
     const arrangedVertices = arrangeVertices(updatedConnections, rootVertex);
     // Place vertices in the layout
 
-    const verticesPositions = placeVertices(arrangedVertices, minVertexSpacing);
+    const verticesPositions = placeVertices(
+      arrangedVertices,
+      minColumnDistance,
+      minRowDistance
+    );
     // Calculate container dimensions
     componentsLayouts.push({
       boundingRect: calcContainerBoundingRect(verticesPositions),
@@ -141,5 +146,8 @@ export default function placeVerticesOnTrees(
     });
   }
 
-  return arrangeGraphComponents(componentsLayouts, minVertexSpacing);
+  return arrangeGraphComponents(componentsLayouts, {
+    horizontal: minColumnDistance,
+    vertical: minRowDistance
+  });
 }

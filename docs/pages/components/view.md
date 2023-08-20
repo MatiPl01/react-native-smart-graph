@@ -194,7 +194,7 @@ export default function Graph() {
         settings={{
           placement: {
             strategy: 'circle',
-            minVertexSpacing: 150
+            minVertexDistance: 150
           }
         }}
         graph={graph}

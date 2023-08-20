@@ -35,18 +35,15 @@ import { unsharedify } from '@/utils/objects';
  * SETTINGS
  */
 // PLACEMENT
+const minVertexDistance = 20;
+
 const sharedCircularPlacementSettings = {
-  minVertexSpacing: 20,
+  minVertexDistance,
   sortComparator: (key1: string, key2: string) => {
     'worklet';
     return key1.localeCompare(key2);
   },
   sortVertices: false
-};
-
-const sharedRootsPlacementSettings = {
-  minVertexSpacing: 20,
-  roots: []
 };
 
 const DEFAULT_PLACEMENT_SETTINGS: {
@@ -69,9 +66,10 @@ const DEFAULT_PLACEMENT_SETTINGS: {
     strategy: 'circles'
   },
   orbits: {
-    ...sharedRootsPlacementSettings,
     layerSizing: 'auto',
     maxSectorAngle: (2 / 3) * Math.PI,
+    minVertexDistance,
+    roots: [],
     strategy: 'orbits',
     symmetrical: true
   },
@@ -79,7 +77,7 @@ const DEFAULT_PLACEMENT_SETTINGS: {
     grid: {
       density: 0.5,
       mesh: 'grid',
-      minVertexSpacing: 20,
+      minVertexDistance,
       strategy: 'random'
     },
     random: {
@@ -89,12 +87,14 @@ const DEFAULT_PLACEMENT_SETTINGS: {
     triangular: {
       density: 0.5,
       mesh: 'triangular',
-      minVertexSpacing: 20,
+      minVertexDistance,
       strategy: 'random'
     }
   },
   trees: {
-    ...sharedRootsPlacementSettings,
+    minColumnDistance: minVertexDistance,
+    minRowDistance: 2 * minVertexDistance,
+    roots: [],
     strategy: 'trees'
   }
 };
@@ -228,7 +228,7 @@ const getPlacementConfig = <V, E>(
           return {
             ...sharedRandomSettings,
             density: 'shared',
-            minVertexSpacing: 'shared'
+            minVertexDistance: 'shared'
           };
         case 'random':
         default:
@@ -242,13 +242,14 @@ const getPlacementConfig = <V, E>(
     case 'circles':
       return {
         ...sharedSettings,
-        minVertexSpacing: 'shared',
+        minVertexDistance: 'shared',
         sortVertices: 'shared'
       };
     case 'trees':
       return {
         ...sharedSettings,
-        minVertexSpacing: 'shared',
+        minColumnDistance: 'shared',
+        minRowDistance: 'shared',
         roots: 'shared'
       };
     case 'orbits':
@@ -256,7 +257,7 @@ const getPlacementConfig = <V, E>(
         ...sharedSettings,
         layerSizing: 'shared',
         maxSectorAngle: 'shared',
-        minVertexSpacing: 'shared',
+        minVertexDistance: 'shared',
         roots: 'shared',
         symmetrical: 'shared'
       };

@@ -11,6 +11,6 @@ export default function placeVerticesOnCircles(
   'worklet';
   return arrangeGraphComponents(
     components.map(component => placeVerticesOnCircle(component, settings)),
-    settings.minVertexSpacing
+    settings.minVertexDistance
   );
 }

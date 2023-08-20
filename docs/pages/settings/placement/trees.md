@@ -19,13 +19,21 @@ A required field specifying the strategy to use.
 | ------- | ------- | -------- |
 | 'trees' | -       | yes      |
 
-#### `minVertexSpacing`
+#### `minRowDistance`
 
-Specifies the minimum distance between vertices.
+Specifies the minimum distance between tree rows.
 
 | Type   | Default | Required |
 | ------ | ------- | -------- |
 | number | 20      | no       |
+
+#### `minColumnDistance`
+
+Specifies the minimum distance between tree columns.
+
+| Type   | Default | Required |
+| ------ | ------- | -------- |
+| number | 40      | no       |
 
 #### `roots`
 
@@ -84,7 +92,8 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minColumnDistance: 50,
+            minRowDistance: 50
           },
           ...
         }}
@@ -170,7 +179,8 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minColumnDistance: 50,
+            minRowDistance: 50
           },
           // --- End of placement settings ---
           events: {
@@ -201,7 +211,8 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minColumnDistance: 50,
+            minRowDistance: 50
           },
           ...
         }}
@@ -287,7 +298,8 @@ export default function Graph() {
           placement: {
             strategy: 'trees',
             roots: [smallTreeRoot, largeTreeRoot],
-            minVertexSpacing: 50
+            minColumnDistance: 50,
+            minRowDistance: 50
           },
           // --- End of placement settings ---
           events: {
