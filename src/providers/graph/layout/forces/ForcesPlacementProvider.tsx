@@ -44,22 +44,22 @@ export const useForcesPlacementContext = () => {
   return contextValue as ForcesPlacementContextType;
 };
 
-export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
+export type ForcesPlacementProviderProps<V> = PropsWithChildren<{
   connections: GraphConnections;
   layoutAnimationSettings: AllAnimationSettings;
   placementSettings: InternalGraphPlacementSettings;
   vertexRadius: SharedValue<number>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
-function ForcesPlacementProvider<V, E>({
+function ForcesPlacementProvider<V>({
   children,
   connections,
   layoutAnimationSettings,
   placementSettings,
   vertexRadius,
   verticesData
-}: ForcesPlacementProviderProps<V, E>) {
+}: ForcesPlacementProviderProps<V>) {
   // CONTEXTS
   // Canvas contexts
   const {

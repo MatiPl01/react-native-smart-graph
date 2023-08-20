@@ -27,10 +27,10 @@ import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
 type ForcesLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
-  edgesData: Record<string, EdgeComponentData<V, E>>;
+  edgesData: Record<string, EdgeComponentData<E>>;
   settings: InternalForceLayoutSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
-  verticesData: Record<string, VertexComponentData<V, E>>;
+  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
 function ForcesLayoutProvider<V, E>({
