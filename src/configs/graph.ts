@@ -160,11 +160,29 @@ const DEFAULT_COMPONENTS_SETTINGS: {
 };
 
 // ANIMATIONS
-const DEFAULT_ANIMATIONS_SETTINGS: AllGraphAnimationsSettings = {
-  edges: DEFAULT_ANIMATION_SETTINGS,
-  layout: DEFAULT_ANIMATION_SETTINGS,
-  vertices: DEFAULT_ANIMATION_SETTINGS
-};
+const getDefaultAnimations = <V, E>(
+  settings: GraphData<V, E>['settings']
+): AllGraphAnimationsSettings =>
+  settings?.animations === null
+    ? {
+        edges: null,
+        layout: null,
+        vertices: null
+      }
+    : {
+        edges:
+          settings?.animations?.edges === null
+            ? null
+            : DEFAULT_ANIMATION_SETTINGS,
+        layout:
+          settings?.animations?.layout === null
+            ? null
+            : DEFAULT_ANIMATION_SETTINGS,
+        vertices:
+          settings?.animations?.vertices === null
+            ? null
+            : DEFAULT_ANIMATION_SETTINGS
+      };
 
 export const getDefaultConfig = <V, E>(
   data: GraphData<V, E>
@@ -184,7 +202,7 @@ export const getDefaultConfig = <V, E>(
       vertex: DefaultVertexRenderer
     },
     settings: {
-      animations: DEFAULT_ANIMATIONS_SETTINGS,
+      animations: getDefaultAnimations(data.settings),
       components: {
         arrow: data.graph.isDirected()
           ? DEFAULT_COMPONENTS_SETTINGS.arrow

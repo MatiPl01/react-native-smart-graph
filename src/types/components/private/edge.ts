@@ -25,34 +25,34 @@ import {
   AllUndirectedGraphWithStraightEdgeRenderers
 } from './renderers';
 
-type SharedEdgeComponentProps<E> = {
+type SharedEdgeComponentProps = {
   animatedEdgesCount: SharedValue<number>;
   animatedOrder: SharedValue<number>;
 };
 
 export type DirectedStraightEdgeComponentProps<V, E> =
-  SharedEdgeComponentProps<E> & {
+  SharedEdgeComponentProps & {
     data: EdgeComponentData<E>;
     renderers: AllDirectedGraphWithStraightEdgeRenderers<V, E>;
     settings: InternalDirectedStraightEdgeSettings;
   };
 
 export type DirectedCurvedEdgeComponentProps<V, E> =
-  SharedEdgeComponentProps<E> & {
+  SharedEdgeComponentProps & {
     data: EdgeComponentData<E>;
     renderers: AllDirectedGraphWithCurvedEdgeRenderers<V, E>;
     settings: InternalDirectedCurvedEdgeSettings;
   };
 
 export type UndirectedStraightEdgeComponentProps<V, E> =
-  SharedEdgeComponentProps<E> & {
+  SharedEdgeComponentProps & {
     data: EdgeComponentData<E>;
     renderers: AllUndirectedGraphWithStraightEdgeRenderers<V, E>;
     settings: InternalUndirectedStraightEdgeSettings;
   };
 
 export type UndirectedCurvedEdgeComponentProps<V, E> =
-  SharedEdgeComponentProps<E> & {
+  SharedEdgeComponentProps & {
     data: EdgeComponentData<E>;
     renderers: AllUndirectedGraphWithCurvedEdgeRenderers<V, E>;
     settings: InternalUndirectedCurvedEdgeSettings;

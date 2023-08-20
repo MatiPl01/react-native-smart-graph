@@ -19,7 +19,7 @@ import {
 export const animateVerticesToFinalPositions = (
   animatedPositions: Record<string, AnimatedVectorCoordinates>,
   finalPositions: Record<string, Vector>,
-  { duration, easing, onComplete }: AllAnimationSettings
+  animationSettings: AllAnimationSettings | null
 ) => {
   'worklet';
   const finalPositionsEntries = Object.entries(finalPositions);
@@ -28,7 +28,10 @@ export const animateVerticesToFinalPositions = (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [key, finalPosition] = finalPositionsEntries[i]!;
     const animatedPosition = animatedPositions[key];
-    if (animatedPosition) {
+    if (!animatedPosition) continue;
+    // If animationSettings is not null, animate to final position
+    if (animationSettings) {
+      const { duration, easing, onComplete } = animationSettings;
       animatedPosition.x.value = withTiming(finalPosition.x, {
         duration,
         easing
@@ -47,6 +50,11 @@ export const animateVerticesToFinalPositions = (
             }
           : undefined
       );
+    }
+    // Otherwise, if animationSettings is null, just set final position
+    else {
+      animatedPosition.x.value = finalPosition.x;
+      animatedPosition.y.value = finalPosition.y;
     }
   }
 };

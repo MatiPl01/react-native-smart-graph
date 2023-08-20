@@ -86,10 +86,15 @@ function EdgeComponent<V, E>({
       ord: data.order.value
     }),
     ({ count, ord }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
-      animatedOrder.value = withTiming(ord, settingsWithoutCallback);
-      animatedEdgesCount.value = withTiming(count, settingsWithoutCallback);
+      if (animationSettings) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
+        animatedOrder.value = withTiming(ord, settingsWithoutCallback);
+        animatedEdgesCount.value = withTiming(count, settingsWithoutCallback);
+      } else {
+        animatedOrder.value = ord;
+        animatedEdgesCount.value = count;
+      }
     }
   );
 

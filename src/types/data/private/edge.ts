@@ -9,7 +9,7 @@ export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 
 export type EdgeComponentData<E> = {
   animationProgress: SharedValue<number>;
-  animationSettings: AllAnimationSettings;
+  animationSettings: AllAnimationSettings | null;
   displayed: SharedValue<boolean>;
   edgesCount: SharedValue<number>;
   isDirected: boolean;
