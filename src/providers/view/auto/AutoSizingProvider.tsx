@@ -11,6 +11,7 @@ import {
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useViewDataContext } from '@/providers/view/data';
 import { useTransformContext } from '@/providers/view/transform';
+import { ObjectFit } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
 
@@ -68,6 +69,7 @@ export default function AutoSizingProvider({
   const autoSizingStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
   const autoSizingStartScale = useSharedValue(0);
   const autoSizingTransitionProgress = useSharedValue(1);
+  const autoSizingStartObjectFit = useSharedValue<ObjectFit | null>(null);
 
   const startAutoSizingTimeout = (
     animationSettings?: Maybe<AllAnimationSettings>
@@ -85,11 +87,15 @@ export default function AutoSizingProvider({
   };
 
   const startAutoSizing = (animationSettings?: Maybe<AllAnimationSettings>) => {
+    const objFit = objectFit.value;
+    if (objFit === 'none') return;
+
     const animSettings =
       animationSettings === undefined
         ? DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS
         : animationSettings;
     autoSizingStartScale.value = currentScale.value;
+    autoSizingStartObjectFit.value = objFit;
     autoSizingStartTranslation.value = {
       x: translateX.value,
       y: translateY.value
@@ -132,13 +138,15 @@ export default function AutoSizingProvider({
   const disableAutoSizing = () => {
     'worklet';
     autoSizingEnabled.value = false;
+    autoSizingStartScale.value = 0;
     autoSizingTransitionProgress.value = 0;
     runOnJS(clearAutoSizingTimeout)();
   };
 
   useAnimatedReaction(
     () =>
-      objectFit.value !== 'none' && autoSizingEnabled.value
+      objectFit.value === autoSizingStartObjectFit.value &&
+      autoSizingEnabled.value
         ? {
             // boundingRect and canvasDimensions must be used to trigger
             // the reaction when the canvas is resized or the container
