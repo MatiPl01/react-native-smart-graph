@@ -35,7 +35,7 @@ import { unsharedify } from '@/utils/objects';
  * SETTINGS
  */
 // PLACEMENT
-const minVertexDistance = 25;
+const minVertexDistance = 20;
 
 const sharedCircularPlacementSettings = {
   minVertexDistance,
