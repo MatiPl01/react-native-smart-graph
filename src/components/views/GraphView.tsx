@@ -1,20 +1,25 @@
-import { memo, PropsWithChildren, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useAnimatedReaction } from 'react-native-reanimated';
 
-import { DEFAULT_VIEW_SETTINGS } from '@/configs/view';
 import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
 import CanvasProvider, { useGesturesContext } from '@/providers/view';
-import { GraphViewSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/objects';
-
-type GraphViewProps = PropsWithChildren<GraphViewSettings>;
+import { deepMemoComparator, unsharedify } from '@/utils/objects';
+import { GraphViewProps, validateProps } from '@/validations/GraphView';
 
 function GraphView({ children, ...providerProps }: GraphViewProps) {
-  validateProps(providerProps);
   const providerComposer = useMemo(() => <GraphViewComposer />, []);
+
+  useAnimatedReaction(
+    () => unsharedify(providerProps), // TODO - fix (doesn't work with shared values)
+    props => {
+      console.log('>>>>>');
+      validateProps(props);
+    }
+  );
 
   return (
     <View style={styles.container}>
@@ -24,27 +29,6 @@ function GraphView({ children, ...providerProps }: GraphViewProps) {
     </View>
   );
 }
-
-const validateProps = ({ initialScale, scales }: GraphViewProps) => {
-  // Validate parameters
-  if (scales) {
-    if (scales.length === 0) {
-      throw new Error('At least one scale must be provided');
-    }
-    if (
-      scales.indexOf(initialScale ?? DEFAULT_VIEW_SETTINGS.initialScale) < 0
-    ) {
-      throw new Error('Initial scale must be included in scales');
-    }
-    if (scales.some(scale => scale <= 0)) {
-      throw new Error('All scales must be positive');
-    }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (scales.some((scale, index) => scale <= scales[index - 1]!)) {
-      throw new Error('Scales must be in ascending order');
-    }
-  }
-};
 
 const GraphViewComposer = memo(function () {
   // CONTEXTS
