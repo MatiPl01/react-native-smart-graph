@@ -6,7 +6,10 @@ import GraphViewChildrenProvider, {
   useGraphViewChildrenContext
 } from '@/contexts/GraphViewChildrenProvider';
 import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import CanvasProvider, { useGesturesContext } from '@/providers/view';
+import CanvasProvider, {
+  useGesturesContext,
+  useTransformContext
+} from '@/providers/view';
 import { GraphViewSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 
@@ -50,6 +53,8 @@ const GraphViewComposer = memo(function () {
   // CONTEXTS
   // Graph view children context
   const { canvas, overlay } = useGraphViewChildrenContext();
+  // Transform context
+  const { handleCanvasRender } = useTransformContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
 
@@ -59,7 +64,9 @@ const GraphViewComposer = memo(function () {
   );
 
   return (
-    <>
+    <View
+      onLayout={handleCanvasRender}
+      style={[StyleSheet.absoluteFill, { backgroundColor: 'red' }]}>
       <OverlayProvider>
         {canvas}
         {/* Renders overlay layers set using the OverlayContext */}
@@ -67,7 +74,7 @@ const GraphViewComposer = memo(function () {
       </OverlayProvider>
       {/* Render other components than canvas (e.g. graph controls) */}
       <View style={styles.overlay}>{overlay}</View>
-    </>
+    </View>
   );
 });
 

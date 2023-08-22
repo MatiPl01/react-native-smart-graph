@@ -17,7 +17,7 @@ type OverlayLayerProps<V> = {
 
 export default function OverlayLayer<V>({
   boundingRect,
-  debug,
+  debug = true,
   settings,
   transform,
   verticesData

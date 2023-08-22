@@ -1,6 +1,10 @@
-import { Group } from '@shopify/react-native-skia';
 import { memo, useEffect } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { StyleSheet } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import {
@@ -11,7 +15,15 @@ import {
 import { updateComponentAnimationState } from '@/utils/components';
 
 function VertexComponent<V>({
-  data: { animationSettings, displayed, key, removed, ...restData },
+  data: {
+    animationSettings,
+    displayed,
+    key,
+    position: { x, y },
+    removed,
+    scale,
+    ...restData
+  },
   focusContext,
   onRemove,
   renderer,
@@ -49,25 +61,38 @@ function VertexComponent<V>({
     );
   }, [removed, animationSettings]);
 
-  // Hide vertices that wait for removal
-  const transform = useDerivedValue(() => [{ scale: displayed.value ? 1 : 0 }]);
+  const vertexStyle = useAnimatedStyle(() => {
+    const r = settings.radius.value;
+
+    return {
+      transform: [{ translateX: x.value - r }, { translateY: y.value - r }]
+    };
+  });
 
   // Render the vertex component
   return (
-    <Group transform={transform}>
+    <Animated.View style={[styles.vertex, vertexStyle]}>
       <RenderedVertexComponent
         {...restProps}
         {...restData}
         {...settings}
+        // TODO - remove excessive props
         animationProgress={animationProgress}
         focusKey={focusContext.focus.key}
         focusProgress={focusProgress}
         renderer={renderer}
+        scale={scale}
         vertexKey={key}
       />
-    </Group>
+    </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  vertex: {
+    position: 'absolute'
+  }
+});
 
 type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
   renderer: VertexRenderer<V>;

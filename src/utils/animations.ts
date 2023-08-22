@@ -1,4 +1,3 @@
-import { Vector } from '@shopify/react-native-skia';
 import {
   cancelAnimation,
   isSharedValue,
@@ -7,7 +6,7 @@ import {
 } from 'react-native-reanimated';
 
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates, Vector } from '@/types/layout';
 import {
   AllAnimationSettings,
   AnimationSettings,

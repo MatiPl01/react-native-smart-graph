@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Vector } from '@shopify/react-native-skia';
-
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates, Vector } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import {
   addVectors,

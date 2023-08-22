@@ -1,11 +1,10 @@
-import { Vector } from '@shopify/react-native-skia';
-
 import {
   Alignment,
   AxisSpacing,
   BoundingRect,
   Dimensions,
-  Spacing
+  Spacing,
+  Vector
 } from '@/types/layout';
 
 export const findCenterOfPoints = (positions: Array<Vector>): Vector | null => {

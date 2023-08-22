@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import {
   CurvedEdgeRenderer,
   CurvedEdgeRendererProps
@@ -11,10 +13,14 @@ type RenderedCurvedEdgeComponentProps<E> = Omit<
   renderer: CurvedEdgeRenderer<E>;
 };
 
-export default function RenderedCurvedEdgeComponent<E>({
+function RenderedCurvedEdgeComponent<E>({
   edgeKey: key,
   renderer,
   ...restProps
 }: RenderedCurvedEdgeComponentProps<E>) {
   return renderer({ key, ...restProps });
 }
+
+export default memo(RenderedCurvedEdgeComponent) as <E>(
+  props: RenderedCurvedEdgeComponentProps<E>
+) => JSX.Element;

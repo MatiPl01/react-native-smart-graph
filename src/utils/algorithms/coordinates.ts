@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Vector } from '@shopify/react-native-skia';
+import { Vector } from '@/types/layout';
 
 const cross = (v1: Vector, v2: Vector, v3: Vector): number => {
   'worklet';

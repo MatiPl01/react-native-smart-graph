@@ -1,4 +1,3 @@
-import { Vector } from '@shopify/react-native-skia';
 import { createContext, useContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
@@ -15,6 +14,7 @@ import {
   useTransformContext
 } from '@/providers/view';
 import { useViewDataContext } from '@/providers/view/data';
+import { Vector } from '@/types/layout';
 import { Maybe } from '@/types/utils';
 import { averageVector } from '@/utils/vectors';
 

@@ -1,4 +1,4 @@
-import { Vector } from '@shopify/react-native-skia';
+import { Vector } from '@/types/layout';
 
 const parabola = (x: number, a: number, p: number, q: number): number => {
   'worklet';

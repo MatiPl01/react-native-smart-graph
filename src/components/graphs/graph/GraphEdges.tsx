@@ -1,8 +1,8 @@
-import { Group } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 import { interpolate, useDerivedValue } from 'react-native-reanimated';
 
 import { EdgeComponent } from '@/components/graphs/edges';
+import { Box } from '@/components/utils';
 import { withComponentsData } from '@/providers/graph';
 import { withGraphSettings } from '@/providers/graph/data';
 import { GraphEdgesProps } from '@/types/components';
@@ -37,7 +37,7 @@ function GraphEdges<V, E>({
   );
 
   return (
-    <Group opacity={opacity}>
+    <Box opacity={opacity}>
       {Object.values(edgesData).map(data => (
         <EdgeComponent<V, E>
           data={data}
@@ -47,7 +47,7 @@ function GraphEdges<V, E>({
           settings={settings}
         />
       ))}
-    </Group>
+    </Box>
   );
 }
 

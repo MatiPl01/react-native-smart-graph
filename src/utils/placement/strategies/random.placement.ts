@@ -1,6 +1,4 @@
-import { Vector } from '@shopify/react-native-skia';
-
-import { Dimensions } from '@/types/layout';
+import { Dimensions, Vector } from '@/types/layout';
 import {
   AllRandomPlacementSettings,
   GraphLayout,

@@ -1,34 +1,27 @@
-/* eslint-disable import/no-unused-modules */
-import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
-import {
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, {
   interpolate,
   useAnimatedReaction,
-  useDerivedValue
+  useAnimatedStyle
 } from 'react-native-reanimated';
 
-import FONTS from '@/assets/fonts';
 import { VertexRendererProps } from '@/types/components';
+
+const D = 40;
+const R = D / 2;
 
 export default function DefaultVertexRenderer<V>({
   animationProgress,
   currentRadius,
   focusProgress,
   key,
-  position: { x, y },
   radius,
   scale
 }: VertexRendererProps<V>) {
-  const font = useFont(FONTS.rubikFont, 1);
-
-  const transform = useDerivedValue(() => [
-    { translateX: x.value },
-    { translateY: y.value },
-    { scale: Math.max(0, currentRadius.value) }
-  ]);
-
-  const opacity = useDerivedValue(() =>
-    interpolate(focusProgress.value, [0, 1], [0.5, 1])
-  );
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(focusProgress.value, [0, 1], [0.5, 1]),
+    transform: [{ scale: currentRadius.value / R }]
+  }));
 
   useAnimatedReaction(
     () => ({
@@ -41,15 +34,33 @@ export default function DefaultVertexRenderer<V>({
     }
   );
 
-  if (font === null) {
-    return null;
-  }
-
   return (
-    <Group opacity={opacity} transform={transform}>
-      <Circle color='gold' r={1} />
-      <Circle color='black' r={0.75} />
-      <Text color='white' font={font} text={key} x={0} y={0} />
-    </Group>
+    <Animated.View style={[styles.container, containerStyle]}>
+      <View style={styles.innerCircle} />
+      <Text style={styles.textStyle}>{key}</Text>
+    </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    backgroundColor: 'gold',
+    borderRadius: R,
+    height: D,
+    justifyContent: 'center',
+    width: D
+  },
+  innerCircle: {
+    backgroundColor: 'black',
+    borderRadius: R,
+    height: 0.75 * D,
+    width: 0.75 * D
+  },
+  textStyle: {
+    bottom: -(1.25 * R),
+    color: 'white',
+    fontWeight: 'bold',
+    position: 'absolute'
+  }
+});

@@ -1,4 +1,3 @@
-import { Vector } from '@shopify/react-native-skia';
 import { createContext, useContext, useMemo, useRef } from 'react';
 import {
   runOnJS,
@@ -11,7 +10,7 @@ import {
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useViewDataContext } from '@/providers/view/data';
 import { useTransformContext } from '@/providers/view/transform';
-import { ObjectFit } from '@/types/layout';
+import { ObjectFit, Vector } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
 

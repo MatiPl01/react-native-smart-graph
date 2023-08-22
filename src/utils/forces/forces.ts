@@ -1,6 +1,4 @@
-import { Vector } from '@shopify/react-native-skia';
-
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates, Vector } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import { AllForceLayoutSettings } from '@/types/settings';
 

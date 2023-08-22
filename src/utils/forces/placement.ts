@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Vector } from '@shopify/react-native-skia';
-
 import { VertexComponentData } from '@/types/data';
 import {
   AnimatedVectorCoordinates,
   BoundingRect,
-  Dimensions
+  Dimensions,
+  Vector
 } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import {

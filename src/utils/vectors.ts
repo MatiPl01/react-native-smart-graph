@@ -1,6 +1,4 @@
-import { Vector } from '@shopify/react-native-skia';
-
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { AnimatedVectorCoordinates, Vector } from '@/types/layout';
 
 export const calcUnitVector = (from: Vector, to: Vector): Vector => {
   'worklet';
@@ -96,5 +94,22 @@ export const getLineCenter = (vector1: Vector, vector2: Vector): Vector => {
   return {
     x: (vector1.x + vector2.x) / 2,
     y: (vector1.y + vector2.y) / 2
+  };
+};
+
+export const rotateVector = (
+  target: Vector,
+  origin: Vector,
+  angle: number
+): Vector => {
+  'worklet';
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const dx = target.x - origin.x;
+  const dy = target.y - origin.y;
+
+  return {
+    x: origin.x + dx * cos - dy * sin,
+    y: origin.y + dx * sin + dy * cos
   };
 };

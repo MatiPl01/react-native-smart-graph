@@ -158,7 +158,7 @@ function OverlayVertex<V>({
           translateX: position.x.value - boundingRect.left.value - radius.value
         },
         { translateY: position.y.value - boundingRect.top.value - radius.value }
-      ] as Array<never>, // this is a fix wor incorrectly inferred types,
+      ] as Array<never>, // this is a fix for incorrectly inferred types,
       width: size
     };
   }, [position.x, position.y, radius]);

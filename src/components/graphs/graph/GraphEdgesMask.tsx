@@ -1,4 +1,4 @@
-import { Circle, Rect } from '@shopify/react-native-skia';
+// TODO - re-implement this component
 import { memo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
@@ -22,20 +22,22 @@ function GraphEdgesMask<V>({
     () => boundingRect.bottom.value - boundingRect.top.value
   );
 
-  return (
-    <>
-      <Rect
-        color='white'
-        height={height}
-        width={width}
-        x={boundingRect.left}
-        y={boundingRect.top}
-      />
-      {Object.entries(verticesData).map(([key, data]) => (
-        <VertexMask data={data} key={key} />
-      ))}
-    </>
-  );
+  return null;
+
+  // return (
+  //   <>
+  //     <Rect
+  //       color='white'
+  //       height={height}
+  //       width={width}
+  //       x={boundingRect.left}
+  //       y={boundingRect.top}
+  //     />
+  //     {Object.entries(verticesData).map(([key, data]) => (
+  //       <VertexMask data={data} key={key} />
+  //     ))}
+  //   </>
+  // );
 }
 
 const VertexMask = memo(function <V>({
@@ -47,14 +49,16 @@ const VertexMask = memo(function <V>({
     data.displayed.value === false ? 0 : data.currentRadius.value
   );
 
-  return (
-    <Circle
-      color='black'
-      cx={data.position.x}
-      cy={data.position.y}
-      r={radius}
-    />
-  );
+  return null;
+
+  // return (
+  //   <Circle
+  //     color='black'
+  //     cx={data.position.x}
+  //     cy={data.position.y}
+  //     r={radius}
+  //   />
+  // );
 });
 
 export default withComponentsData(GraphEdgesMask, ({ verticesData }) => ({

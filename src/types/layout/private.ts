@@ -1,6 +1,9 @@
-/* eslint-disable import/no-unused-modules */
-import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
+
+export type Vector = {
+  x: number;
+  y: number;
+};
 
 export type AnimatedVector = SharedValue<Vector>;
 

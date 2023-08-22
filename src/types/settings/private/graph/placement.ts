@@ -1,6 +1,8 @@
-import { Vector } from '@shopify/react-native-skia';
-
-import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
+import {
+  AnimatedVectorCoordinates,
+  BoundingRect,
+  Vector
+} from '@/types/layout';
 import {
   BoundRandomPlacementSettings,
   CirclePlacementSettings,

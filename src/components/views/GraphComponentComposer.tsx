@@ -1,7 +1,5 @@
-import { Canvas, Group } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
-import { useDerivedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
 import {
@@ -51,17 +49,21 @@ function GraphComponentComposer<V, E>({
   const graphProps = restProps;
   validateProps<V, E>(graphProps);
   // CONTEXTS
+  // Data context
   const dataContext = useViewDataContext();
+  const {
+    boundingRect,
+    currentScale,
+    currentTranslation: { x: translateX, y: translateY }
+  } = dataContext;
+  // Transform context
   const transformContext = useTransformContext();
+  // Auto sizing context
   const autoSizingContext = useAutoSizingContext();
+  // Focus context
   const focusContext = useFocusContext();
+  // Gestures context
   const gesturesContext = useGesturesContext();
-
-  const canvasTransform = useDerivedValue(() => [
-    { translateX: dataContext.currentTranslation.x.value },
-    { translateY: dataContext.currentTranslation.y.value },
-    { scale: dataContext.currentScale.value }
-  ]);
 
   const animatedTransform = useMemo(
     () => ({
@@ -91,27 +93,40 @@ function GraphComponentComposer<V, E>({
   // IMPORTANT: graphComponent must be memoized to prevent re-rendering
   const graphComponent = useMemo(() => <GraphComponent />, []);
 
+  // TODO - remove overlay layer where the same code is repeated
+  // and move press logic to vertices
+  const canvasStyle = useAnimatedStyle(() => {
+    const width = boundingRect.right.value - boundingRect.left.value;
+    const height = boundingRect.bottom.value - boundingRect.top.value;
+    const scale = currentScale.value;
+
+    // Translation between the center of the container and the
+    // center of the graph
+    const dx = (width / 2) * (scale - 1);
+    const dy = (height / 2) * (scale - 1);
+
+    return {
+      height,
+      transform: [
+        { translateX: translateX.value + dx },
+        { translateY: translateY.value + dy },
+        { scale }
+      ] as Array<never>, // this is a fix for incorrectly inferred types
+      width
+    };
+  });
+
   return (
-    <Canvas
-      onLayout={transformContext.handleCanvasRender}
-      style={styles.canvas}>
-      <Group transform={canvasTransform}>
-        <GraphProvider
-          canvasContexts={canvasContexts}
-          graphProps={graphProps}
-          transform={animatedTransform}>
-          {graphComponent}
-        </GraphProvider>
-      </Group>
-    </Canvas>
+    <Animated.View style={canvasStyle}>
+      <GraphProvider
+        canvasContexts={canvasContexts}
+        graphProps={graphProps}
+        transform={animatedTransform}>
+        {graphComponent}
+      </GraphProvider>
+    </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  canvas: {
-    flex: 1
-  }
-});
 
 export default withOverlay(GraphComponentComposer) as <V, E>(
   props: GraphData<V, E>

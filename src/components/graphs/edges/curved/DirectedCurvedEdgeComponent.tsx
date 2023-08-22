@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unused-modules */
-import { rotate } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import {
   useAnimatedReaction,
@@ -14,6 +12,7 @@ import {
   calcOrthogonalUnitVector,
   calcUnitVector,
   distanceBetweenVectors,
+  rotateVector,
   translateAlongVector
 } from '@/utils/vectors';
 
@@ -135,8 +134,12 @@ function DirectedCurvedEdgeComponent<V, E>({
         // 1. Get the rotation angle of the coordinate system
         const rotationAngle = Math.atan2(v2.y - v1.y, v2.x - v1.x);
         // 2. Rotate points to the new coordinate system
-        const plainP2 = rotate(v2, center, rotationAngle);
-        const plainParabolaVertex = rotate({ x, y }, center, rotationAngle);
+        const plainP2 = rotateVector(v2, center, rotationAngle);
+        const plainParabolaVertex = rotateVector(
+          { x, y },
+          center,
+          rotationAngle
+        );
         // 3. Calculate the canonical parabola equation coefficients
         const { x: p, y: q } = plainParabolaVertex;
         const a = (plainP2.y - q) / (plainP2.x - p) ** 2;
@@ -148,7 +151,7 @@ function DirectedCurvedEdgeComponent<V, E>({
           q,
           -r2
         );
-        const rotatedArrowTipPosition = rotate(
+        const rotatedArrowTipPosition = rotateVector(
           plainArrowTipPosition,
           center,
           -rotationAngle
@@ -161,7 +164,7 @@ function DirectedCurvedEdgeComponent<V, E>({
           q,
           -arrowHeight.value
         );
-        const rotatedArrowEndPosition = rotate(
+        const rotatedArrowEndPosition = rotateVector(
           plainArrowEndPosition,
           center,
           -rotationAngle

@@ -1,4 +1,3 @@
-import { Vector } from '@shopify/react-native-skia';
 import { createContext, useContext } from 'react';
 import {
   runOnJS,
@@ -20,6 +19,7 @@ import {
   FocusEndHandler,
   FocusStartHandler
 } from '@/types/data';
+import { Vector } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
 import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';

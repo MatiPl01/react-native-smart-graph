@@ -1,13 +1,14 @@
-import { Mask, Rect } from '@shopify/react-native-skia';
 import { memo } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
-import GraphEdgesMask from './GraphEdgesMask';
 import GraphVertices from './GraphVertices';
 
 function GraphComponent() {
@@ -23,23 +24,26 @@ function GraphComponent() {
   // Update the focusProgress
   useComponentFocus(focusProgress, focusContext);
 
-  const x = useDerivedValue(() => boundingRect.left.value);
-  const y = useDerivedValue(() => boundingRect.top.value);
-  const w = useDerivedValue(
-    () => boundingRect.right.value - boundingRect.left.value
-  );
-  const h = useDerivedValue(
-    () => boundingRect.bottom.value - boundingRect.top.value
-  );
+  const testStyle = useAnimatedStyle(() => ({
+    height: boundingRect.bottom.value - boundingRect.top.value,
+    transform: [
+      { translateX: boundingRect.left.value },
+      { translateY: boundingRect.top.value }
+    ],
+    width: boundingRect.right.value - boundingRect.left.value
+  }));
 
   return (
     <>
-      <Rect color='#333' height={h} width={w} x={x} y={y} />
-      <Mask
+      {/* TODO - remove after testing */}
+      <Animated.View style={testStyle} />
+      {/* TODO - implement this */}
+      {/* <Mask
         mask={<GraphEdgesMask boundingRect={boundingRect} />}
         mode='luminance'>
         <GraphEdges focusProgress={focusProgress} />
-      </Mask>
+      </Mask> */}
+      <GraphEdges focusProgress={focusProgress} />
       <GraphVertices focusContext={focusContext} />
       <GraphEdgesLabels focusProgress={focusProgress} />
     </>

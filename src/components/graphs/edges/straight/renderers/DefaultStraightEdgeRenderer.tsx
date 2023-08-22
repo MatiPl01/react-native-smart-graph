@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unused-modules */
-import { Line } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { StraightEdgeRendererProps } from '@/types/components';
@@ -32,5 +30,6 @@ export default function DefaultStraightEdgeRenderer<E>({
       (p2Target.value.y - center.value.y) * animationProgress.value
   }));
 
-  return <Line color='#999' p1={p1} p2={p2} strokeWidth={1} style='stroke' />;
+  return null; // TODO - implement this
+  // return <Line color='#999' p1={p1} p2={p2} strokeWidth={1} style='stroke' />;
 }
