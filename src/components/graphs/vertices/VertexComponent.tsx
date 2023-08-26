@@ -65,13 +65,16 @@ function VertexComponent<V>({
     () => ({
       currentScale: scale.value,
       points: transformPoints.value,
-      progress: transformProgress.value
+      progress: {
+        animation: animationProgress.value,
+        transform: transformProgress.value
+      }
     }),
     ({ currentScale, points: { source, target }, progress }) => {
       transform.value = [
-        { scale: Math.max(0, 1) },
-        { translateX: source.x + (target.x - source.x) * progress },
-        { translateY: source.y + (target.y - source.y) * progress }
+        { scale: Math.max(0, currentScale * progress.animation) },
+        { translateX: source.x + (target.x - source.x) * progress.transform },
+        { translateY: source.y + (target.y - source.y) * progress.transform }
       ];
     }
   );

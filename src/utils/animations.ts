@@ -26,23 +26,37 @@ export const updateVerticesTransform = <V>(
   layoutAnimationSettings?: AllAnimationSettings | null
 ): void => {
   'worklet';
+  // Stop animation and set source and target vertices positions to the current ones
+  // (this is needed to prevent animation from jumping to the previous target position))
   cancelAnimation(layoutAnimationProgress);
+  for (const vertexData of Object.values(verticesData)) {
+    const currentPosition = calcTranslationOnProgress(
+      vertexData.transform.progress.value,
+      vertexData.transform.points.value.source,
+      vertexData.transform.points.value.target
+    );
+    vertexData.transform.points.value = {
+      source: currentPosition,
+      target: currentPosition
+    };
+  }
 
+  // Reset the animation progress
+  layoutAnimationProgress.value = 0;
+
+  // Set new target positions
   for (const [key, vertexData] of Object.entries(verticesData)) {
     const targetPosition = verticesPositions[key];
     if (!targetPosition) {
       continue;
     }
     vertexData.transform.points.value = {
-      source: calcTranslationOnProgress(
-        vertexData.transform.progress.value,
-        vertexData.transform.points.value.source,
-        vertexData.transform.points.value.target
-      ),
+      source: vertexData.transform.points.value.source,
       target: targetPosition
     };
   }
 
+  // Update the animation progress
   if (!layoutAnimationSettings) {
     layoutAnimationProgress.value = 1;
   } else {
