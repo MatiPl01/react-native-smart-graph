@@ -7,14 +7,20 @@ import { AllAnimationSettings } from '@/types/settings/private/graph/animations'
 import { FocusPoint } from '@/types/settings/public/graph/focus';
 import { DeepRequired, Maybe } from '@/types/utils';
 
+export type VertexTransform = {
+  points: SharedValue<{
+    source: Vector;
+    target: Vector;
+  }>;
+  progress: SharedValue<number>;
+};
+
 export type VertexComponentData<V> = {
   animationSettings: AllAnimationSettings | null;
-  currentRadius: SharedValue<number>;
-  displayed: SharedValue<boolean>;
   key: string;
-  position: AnimatedVectorCoordinates;
   removed: boolean;
   scale: SharedValue<number>;
+  transform: VertexTransform;
   value?: V;
 };
 

@@ -14,14 +14,15 @@ import {
   AllAnimationSettings,
   InternalGraphPlacementSettings
 } from '@/types/settings';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
+import { updateVerticesTransform } from '@/utils/animations';
 import { unsharedify } from '@/utils/objects';
 import { placeVertices } from '@/utils/placement';
 
-export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
+type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
   edgesData: Record<string, EdgeComponentData<E>>;
   isGraphDirected: SharedValue<boolean>;
+  layoutAnimationProgress: SharedValue<number>;
   layoutAnimationSettings: AllAnimationSettings;
   placementSettings: InternalGraphPlacementSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
@@ -33,6 +34,7 @@ function GraphPlacementLayoutProvider<V, E>({
   connections,
   edgesData,
   isGraphDirected,
+  layoutAnimationProgress,
   layoutAnimationSettings,
   placementSettings,
   targetBoundingRect,
@@ -71,14 +73,10 @@ function GraphPlacementLayoutProvider<V, E>({
 
       targetBoundingRect.value = boundingRect;
 
-      animateVerticesToFinalPositions(
-        Object.fromEntries(
-          Object.entries(verticesData).map(([key, { position }]) => [
-            key,
-            position
-          ])
-        ),
+      updateVerticesTransform(
+        verticesData,
         verticesPositions,
+        layoutAnimationProgress,
         layoutAnimationSettings
       );
     },
@@ -95,6 +93,7 @@ export default withGraphSettings(
       connections,
       edgesData,
       isGraphDirected,
+      layoutAnimationProgress,
       layoutAnimationSettings,
       targetBoundingRect,
       verticesData
@@ -102,6 +101,7 @@ export default withGraphSettings(
       connections,
       edgesData,
       isGraphDirected,
+      layoutAnimationProgress,
       layoutAnimationSettings,
       targetBoundingRect,
       verticesData

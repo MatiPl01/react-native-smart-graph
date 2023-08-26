@@ -77,6 +77,7 @@ export type GraphComponentsData<V, E> = {
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
   isGraphDirected: SharedValue<boolean>;
+  layoutAnimationProgress: SharedValue<number>;
   layoutAnimationSettings: AllAnimationSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V>>;

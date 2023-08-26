@@ -7,6 +7,7 @@ import {
 } from 'react-native-reanimated';
 
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components';
+import { animateToValue } from '@/utils/animations';
 import {
   calcOrthogonalUnitVector,
   translateAlongVector
@@ -15,65 +16,70 @@ import {
 import RenderedCurvedEdgeComponent from './RenderedCurvedEdgeComponent';
 
 function UndirectedCurvedEdgeComponent<V, E>({
-  animatedEdgesCount,
-  animatedOrder,
   data: {
     animationProgress,
+    animationSettings,
+    edgesCount,
     key,
     labelHeight,
     labelPosition,
+    order,
     v1Key,
-    v1Position,
+    v1Position: { x: v1x, y: v1y },
     v1Radius,
     v2Key,
-    v2Position,
+    v2Position: { x: v2x, y: v2y },
     v2Radius,
     value
   },
   renderers,
   settings
 }: UndirectedCurvedEdgeComponentProps<V, E>) {
-  const p1 = useDerivedValue(() => ({
-    x: v1Position.x.value,
-    y: v1Position.y.value
-  }));
-  const p2 = useDerivedValue(() => ({
-    x: v2Position.x.value,
-    y: v2Position.y.value
-  }));
+  const animated = !!animationSettings;
+  const {
+    label: { scale: labelScale }
+  } = settings;
 
-  // Parabola vertex
-  const parabolaX = useSharedValue(
-    (v1Position.x.value + v2Position.x.value) / 2
+  // Edge
+  const targetOffset = useDerivedValue(
+    () => labelHeight.value * (order.value - (edgesCount.value - 1) / 2)
   );
-  const parabolaY = useSharedValue(
-    (v1Position.y.value + v2Position.y.value) / 2
+  const currentOffset = useSharedValue(
+    labelHeight.value * (order.value - (edgesCount.value - 1) / 2)
   );
+  const path = useSharedValue('');
 
   // Edge label
   useAnimatedReaction(
-    () =>
-      settings.label
-        ? {
-            r1: v1Radius.value,
-            r2: v2Radius.value,
-            scale: settings.label.scale.value
-          }
-        : null,
-    data => {
-      if (!data) return;
-      const { r1, r2, scale } = data;
+    () => ({
+      r1: v1Radius.value,
+      r2: v2Radius.value,
+      scale: labelScale.value
+    }),
+    ({ r1, r2, scale }) => {
       labelHeight.value = ((r1 + r2) / 2) * scale;
     }
   );
 
+  // Edge offset
   useAnimatedReaction(
     () => ({
-      offset:
-        labelHeight.value *
-        (animatedOrder.value - (animatedEdgesCount.value - 1) / 2),
-      v1: p1.value,
-      v2: p2.value
+      current: currentOffset.value,
+      target: targetOffset.value
+    }),
+    ({ current, target }) => {
+      currentOffset.value = animated
+        ? animateToValue(current, target, 0.1, 100)
+        : target;
+    }
+  );
+
+  // Edge
+  useAnimatedReaction(
+    () => ({
+      offset: currentOffset.value,
+      v1: { x: v1x.value, y: v1y.value },
+      v2: { x: v2x.value, y: v2y.value }
     }),
     ({ offset, v1, v2 }) => {
       // Ensure that the order of edges is always the same
@@ -84,7 +90,7 @@ function UndirectedCurvedEdgeComponent<V, E>({
       }
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(v1, v2);
-      const { x, y } = translateAlongVector(
+      const { x: parabolaX, y: parabolaY } = translateAlongVector(
         {
           x: (v1.x + v2.x) / 2,
           y: (v1.y + v2.y) / 2
@@ -92,28 +98,22 @@ function UndirectedCurvedEdgeComponent<V, E>({
         orthogonalUnitVector,
         offset
       );
-      labelPosition.x.value = parabolaX.value = x;
-      labelPosition.y.value = parabolaY.value = y;
+      labelPosition.x.value = parabolaX;
+      labelPosition.y.value = parabolaY;
+
+      // Update the edge path
+      const controlPoint = {
+        x: parabolaX * 2 - (v1.x + v2.x) / 2,
+        y: parabolaY * 2 - (v1.y + v2.y) / 2
+      };
+      path.value = `M${v1.x},${v1.y} Q${controlPoint.x},${controlPoint.y} ${v2.x},${v2.y}`;
     }
   );
-
-  // Edge curve path
-  const path = useDerivedValue(() => {
-    const controlPoint = {
-      x: parabolaX.value * 2 - (v1Position.x.value + v2Position.x.value) / 2,
-      y: parabolaY.value * 2 - (v1Position.y.value + v2Position.y.value) / 2
-    };
-
-    // Create the SVG path string with the 'Q' command for a quadratic curve
-    return `M${v1Position.x.value},${v1Position.y.value} Q${controlPoint.x},${controlPoint.y} ${v2Position.x.value},${v2Position.y.value}`;
-  });
 
   return (
     <RenderedCurvedEdgeComponent
       animationProgress={animationProgress}
       edgeKey={key}
-      parabolaX={parabolaX}
-      parabolaY={parabolaY}
       path={path}
       renderer={renderers.edge}
       value={value}

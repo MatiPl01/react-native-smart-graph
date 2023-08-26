@@ -49,15 +49,21 @@ export type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
 export type InternalEdgeSettings = Pick<AllEdgeSettings, 'type'> &
   DeepSharedify<Omit<AllEdgeSettings, 'type'>>;
 
-export type InternalUndirectedStraightEdgeSettings = {
-  edge: InternalStraightEdgeSettings;
-  label?: InternalLabelSettings;
+type SharedInternalEdgeSettings = {
+  vertex: InternalVertexSettings;
 };
 
-export type InternalUndirectedCurvedEdgeSettings = {
-  edge: InternalCurvedEdgeSettings;
-  label?: InternalLabelSettings;
-};
+export type InternalUndirectedStraightEdgeSettings =
+  SharedInternalEdgeSettings & {
+    edge: InternalStraightEdgeSettings;
+    label: InternalLabelSettings;
+  };
+
+export type InternalUndirectedCurvedEdgeSettings =
+  SharedInternalEdgeSettings & {
+    edge: InternalCurvedEdgeSettings;
+    label: InternalLabelSettings;
+  };
 
 export type InternalDirectedStraightEdgeSettings =
   InternalUndirectedStraightEdgeSettings & {

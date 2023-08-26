@@ -227,11 +227,14 @@ export default function BottomSheetFocus() {
               vertex: {
                 radius: vertexRadius
               },
+              label: {
+                displayed: true
+              },
               edge: {
-                type: 'curved'
+                // type: 'curved'
               }
-            },
-            animations: null
+            }
+            // animations: null
           }}
           graph={graph}
         />

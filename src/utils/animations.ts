@@ -1,61 +1,61 @@
-import { Vector } from '@shopify/react-native-skia';
+/* eslint-disable import/no-unused-modules */
 import {
   cancelAnimation,
   isSharedValue,
   runOnJS,
+  SharedValue,
   withTiming
 } from 'react-native-reanimated';
 
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
-import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   AllAnimationSettings,
   AnimationSettings,
   BatchModificationAnimationSettings,
   GraphModificationAnimationsSettings,
+  PlacedVerticesPositions,
   SingleModificationAnimationSettings
 } from '@/types/settings';
 
-export const animateVerticesToFinalPositions = (
-  animatedPositions: Record<string, AnimatedVectorCoordinates>,
-  finalPositions: Record<string, Vector>,
-  animationSettings: AllAnimationSettings | null
-) => {
-  'worklet';
-  const finalPositionsEntries = Object.entries(finalPositions);
+import { calcTranslationOnProgress } from './views';
 
-  for (let i = 0; i < finalPositionsEntries.length; i++) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const [key, finalPosition] = finalPositionsEntries[i]!;
-    const animatedPosition = animatedPositions[key];
-    if (!animatedPosition) continue;
-    // If animationSettings is not null, animate to final position
-    if (animationSettings) {
-      const { duration, easing, onComplete } = animationSettings;
-      animatedPosition.x.value = withTiming(finalPosition.x, {
-        duration,
-        easing
-      });
-      animatedPosition.y.value = withTiming(
-        finalPosition.y,
-        {
-          duration,
-          easing
-        },
-        // Call onComplete only once, when the last vertex animation is complete
-        onComplete && i === finalPositionsEntries.length - 1
-          ? (finished?: boolean) => {
-              'worklet';
-              runOnJS(onComplete)(finished);
-            }
-          : undefined
-      );
+export const updateVerticesTransform = <V>(
+  verticesData: Record<string, VertexComponentData<V>>,
+  verticesPositions: PlacedVerticesPositions,
+  layoutAnimationProgress: SharedValue<number>,
+  layoutAnimationSettings?: AllAnimationSettings | null
+): void => {
+  'worklet';
+  cancelAnimation(layoutAnimationProgress);
+
+  for (const [key, vertexData] of Object.entries(verticesData)) {
+    const targetPosition = verticesPositions[key];
+    if (!targetPosition) {
+      continue;
     }
-    // Otherwise, if animationSettings is null, just set final position
-    else {
-      animatedPosition.x.value = finalPosition.x;
-      animatedPosition.y.value = finalPosition.y;
-    }
+    vertexData.transform.points.value = {
+      source: calcTranslationOnProgress(
+        vertexData.transform.progress.value,
+        vertexData.transform.points.value.source,
+        vertexData.transform.points.value.target
+      ),
+      target: targetPosition
+    };
+  }
+
+  if (!layoutAnimationSettings) {
+    layoutAnimationProgress.value = 1;
+  } else {
+    layoutAnimationProgress.value = 0;
+    layoutAnimationProgress.value = withTiming(
+      1,
+      layoutAnimationSettings,
+      finished => {
+        if (finished && layoutAnimationSettings.onComplete) {
+          runOnJS(layoutAnimationSettings.onComplete)();
+        }
+      }
+    );
   }
 };
 
@@ -207,7 +207,8 @@ export const createAnimationsSettingsForBatchModification = (
 export const animateToValue = (
   fromValue: number,
   toValue: number,
-  eps?: number
+  eps?: number,
+  div = 1000
 ): number => {
   'worklet';
   const delta = toValue - fromValue;
@@ -218,7 +219,7 @@ export const animateToValue = (
   if (isNaN(delta) || Math.abs(delta) < minDelta) {
     return toValue;
   }
-  const factor = Math.max(0.1, Math.abs(delta) / 1000);
+  const factor = Math.max(0.1, Math.abs(delta) / div);
   return fromValue + delta * factor;
 };
 
@@ -226,10 +227,7 @@ export const cancelVertexAnimations = <V>(
   vertexData: VertexComponentData<V>
 ) => {
   cancelAnimation(vertexData.scale);
-  cancelAnimation(vertexData.currentRadius);
-  cancelAnimation(vertexData.position.x);
-  cancelAnimation(vertexData.position.y);
-  cancelAnimation(vertexData.displayed);
+  cancelAnimation(vertexData.transform.points);
 };
 
 export const cancelEdgeAnimations = <V>(edgeData: EdgeComponentData<V>) => {

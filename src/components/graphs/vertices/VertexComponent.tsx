@@ -1,6 +1,10 @@
-import { Group } from '@shopify/react-native-skia';
+import { Group, Transforms2d } from '@shopify/react-native-skia';
 import { memo, useEffect } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import {
+  useAnimatedReaction,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import {
@@ -11,13 +15,18 @@ import {
 import { updateComponentAnimationState } from '@/utils/components';
 
 function VertexComponent<V>({
-  data: { animationSettings, displayed, key, removed, ...restData },
+  data: { animationSettings, removed, ...restData },
   focusContext,
   onRemove,
   renderer,
-  settings,
-  ...restProps
+  settings
 }: VertexComponentProps<V>) {
+  const {
+    key,
+    scale,
+    transform: { points: transformPoints, progress: transformProgress }
+  } = restData;
+
   // ANIMATION
   // Vertex render animation progress
   // Use a helper value to ensure that the animation progress is never negative
@@ -30,33 +39,47 @@ function VertexComponent<V>({
   // Vertex focus progress
   const focusProgress = useSharedValue(0);
 
+  // TRANSFORM
+  // Vertex transform
+  const transform = useSharedValue<Transforms2d>([{ scale: 0 }]);
+
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
   useComponentFocus(focusProgress, focusContext, key);
 
+  // Vertex animation handler
   useEffect(() => {
-    if (!removed) displayed.value = true;
-
     updateComponentAnimationState(
       key,
       animationProgressHelper,
       animationSettings,
       removed,
       () => {
-        displayed.value = false;
         onRemove(key);
       }
     );
-  }, [removed, animationSettings]);
+  }, [removed]);
 
-  // Hide vertices that wait for removal
-  const transform = useDerivedValue(() => [{ scale: displayed.value ? 1 : 0 }]);
+  // Vertex transform handler
+  useAnimatedReaction(
+    () => ({
+      currentScale: scale.value,
+      points: transformPoints.value,
+      progress: transformProgress.value
+    }),
+    ({ currentScale, points: { source, target }, progress }) => {
+      transform.value = [
+        { scale: Math.max(0, 1) },
+        { translateX: source.x + (target.x - source.x) * progress },
+        { translateY: source.y + (target.y - source.y) * progress }
+      ];
+    }
+  );
 
   // Render the vertex component
   return (
     <Group transform={transform}>
       <RenderedVertexComponent
-        {...restProps}
         {...restData}
         {...settings}
         animationProgress={animationProgress}

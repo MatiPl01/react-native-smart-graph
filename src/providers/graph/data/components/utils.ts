@@ -1,4 +1,4 @@
-import { makeMutable } from 'react-native-reanimated';
+import { makeMutable, SharedValue } from 'react-native-reanimated';
 
 import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
 import { GraphState } from '@/hooks';
@@ -37,13 +37,16 @@ export type ComponentsData<V, E> = {
   state: GraphState<V, E>;
 };
 
+type AdditionalValues = {
+  handleEdgeRemove: EdgeRemoveHandler;
+  handleVertexRemove: VertexRemoveHandler;
+  layoutAnimationProgress: SharedValue<number>;
+};
+
 export const createContextValue = <V, E>(
   data: ComponentsData<V, E>,
-  removeHandlers: {
-    handleEdgeRemove: EdgeRemoveHandler;
-    handleVertexRemove: VertexRemoveHandler;
-  }
-): GraphComponentsData<V, E> => updateContextValue(removeHandlers, data);
+  additionalValues: AdditionalValues
+): GraphComponentsData<V, E> => updateContextValue(additionalValues, data);
 
 const UPDATE_CONFIG = {
   connections: 'shallow', // 'shallow' - shallow compare
@@ -55,10 +58,7 @@ const UPDATE_CONFIG = {
 };
 
 export const updateContextValue = <V, E>(
-  value: PartialWithRequired<
-    GraphComponentsData<V, E>,
-    'handleEdgeRemove' | 'handleVertexRemove'
-  >,
+  value: PartialWithRequired<GraphComponentsData<V, E>, keyof AdditionalValues>,
   newData: ComponentsData<V, E>,
   currentData?: ComponentsData<V, E>
 ): GraphComponentsData<V, E> => {
@@ -80,6 +80,7 @@ export const updateContextValue = <V, E>(
           value?.verticesData ?? {},
           newData.state.vertices,
           newData.removedVertices,
+          value.layoutAnimationProgress,
           newData.state.animationsSettings.vertices,
           newData.graphAnimationsSettings.vertices
         )
@@ -121,6 +122,7 @@ export const updateContextValue = <V, E>(
         handleEdgeRemove: value.handleEdgeRemove, // Prevent removing
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
+        layoutAnimationProgress: value.layoutAnimationProgress, // Prevent removing
         layoutAnimationSettings: newLayoutAnimationSettings,
         // Prevent removing or create the initial value if it doesn't exist
         targetBoundingRect: value?.targetBoundingRect ?? {
@@ -156,6 +158,7 @@ const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
+  layoutAnimationProgress: SharedValue<number>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, VertexComponentData<V>> => {
@@ -183,18 +186,18 @@ const updateGraphVerticesData = <V, E>(
       continue;
     }
 
-    isModified = true;
     // Create the vertex data
     updatedVerticesData[vertex.key] = {
       ...(oldVertex ?? {
         // Create shared values only for new vertices
-        currentRadius: makeMutable(0),
-        displayed: makeMutable(true),
-        position: {
-          x: makeMutable(0),
-          y: makeMutable(0)
-        },
-        scale: makeMutable(1)
+        scale: makeMutable(1),
+        transform: {
+          points: makeMutable({
+            source: { x: 0, y: 0 },
+            target: { x: 0, y: 0 }
+          }),
+          progress: layoutAnimationProgress
+        }
       }),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
@@ -204,6 +207,7 @@ const updateGraphVerticesData = <V, E>(
       removed: false,
       value: vertex.value
     };
+    isModified = true; // Mark as modified to set the new vertices data object
   }
 
   // Keys of vertices that are currently in the graph
@@ -219,8 +223,7 @@ const updateGraphVerticesData = <V, E>(
         animationSettings: updateAnimationSettings(
           defaultAnimationSettings,
           currentAnimationsSettings[key]
-        ),
-        removed: true
+        )
       };
     }
   }
@@ -248,6 +251,11 @@ const updateGraphEdgesData = <V, E>(
 ): Record<string, EdgeComponentData<E>> => {
   const updatedEdgesData = { ...oldEdgesData };
   let isModified = false; // Flag to indicate if edges data was updated
+
+  console.log(
+    'update edges',
+    Object.values(currentEdges).map(e => e.edge.key)
+  );
 
   // Add new edges to edges data
   for (const edgeData of currentEdges) {

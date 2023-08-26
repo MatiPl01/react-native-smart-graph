@@ -9,10 +9,8 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 
-import {
-  AnimatedBoundingRect,
-  AnimatedVectorCoordinates
-} from '@/types/layout';
+import { VertexTransform } from '@/types/data';
+import { AnimatedBoundingRect } from '@/types/layout';
 import { VertexPressHandler } from '@/types/settings';
 
 const LONG_PRESS_ANIMATION_DURATION = 500;
@@ -38,9 +36,9 @@ type VertexOverlayProps<V> = {
   displayed: SharedValue<boolean>;
   onLongPress?: VertexPressHandler<V>;
   onPress?: VertexPressHandler<V>;
-  position: AnimatedVectorCoordinates;
   radius: SharedValue<number>;
   scale: SharedValue<number>;
+  transform: VertexTransform;
   vertexKey: string;
   vertexValue?: V;
 };
@@ -48,15 +46,16 @@ type VertexOverlayProps<V> = {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function OverlayVertex<V>({
+  // TODO - fix
   animationDisabled,
   boundingRect,
   debug,
   displayed,
   onLongPress,
   onPress,
-  position,
   radius,
   scale,
+  transform: { position, progress },
   vertexKey: key,
   vertexValue: value
 }: VertexOverlayProps<V>) {

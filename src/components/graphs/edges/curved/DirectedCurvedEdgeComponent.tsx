@@ -9,6 +9,7 @@ import {
 
 import { ArrowComponent } from '@/components/graphs/arrows';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components';
+import { animateToValue } from '@/utils/animations';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import {
   calcOrthogonalUnitVector,
@@ -20,109 +21,95 @@ import {
 import RenderedCurvedEdgeComponent from './RenderedCurvedEdgeComponent';
 
 function DirectedCurvedEdgeComponent<V, E>({
-  animatedEdgesCount,
-  animatedOrder,
   data: {
     animationProgress,
+    animationSettings,
+    edgesCount,
     key,
     labelHeight,
     labelPosition,
-    v1Position,
+    order,
+    v1Position: { x: v1x, y: v1y },
     v1Radius,
-    v2Position,
+    v2Position: { x: v2x, y: v2y },
     v2Radius,
     value
   },
   renderers,
   settings
 }: DirectedCurvedEdgeComponentProps<V, E>) {
-  const p1 = useDerivedValue(() => ({
-    x: v1Position.x.value,
-    y: v1Position.y.value
-  }));
-  const p2 = useDerivedValue(() => ({
-    x: v2Position.x.value,
-    y: v2Position.y.value
-  }));
-  // Parabola vertex
-  const parabolaX = useSharedValue(
-    (v1Position.x.value + v2Position.x.value) / 2
-  );
-  const parabolaY = useSharedValue(
-    (v1Position.y.value + v2Position.y.value) / 2
-  );
+  const animated = !!animationSettings;
+  const {
+    arrow: { scale: arrowScale },
+    label: { scale: labelScale }
+  } = settings;
+
   // Edge arrow
-  const arrowHeight = useDerivedValue(() =>
-    Math.min(
-      Math.max(
-        0,
-        distanceBetweenVectors(p1.value, p2.value) -
-          (v1Radius.value + v2Radius.value)
-      ),
-      1.5 * v2Radius.value * settings.arrow.scale.value
-    )
-  );
-  const arrowWidth = useDerivedValue(() => (2 / 3) * arrowHeight.value);
+  const arrowHeight = useSharedValue(0);
+  const arrowWidth = useSharedValue(0);
   const arrowTipPosition = useSharedValue({ x: 0, y: 0 });
   const dirVec = useSharedValue({ x: 0, y: 0 });
-  // Edge curve path
-  const path = useDerivedValue(() => {
-    const controlPoint = {
-      x: parabolaX.value * 2 - (v1Position.x.value + v2Position.x.value) / 2,
-      y: parabolaY.value * 2 - (v1Position.y.value + v2Position.y.value) / 2
-    };
-
-    // Create the SVG path string with the 'Q' command for a quadratic curve
-    const pathString = `M${v1Position.x.value},${v1Position.y.value} Q${controlPoint.x},${controlPoint.y} ${v2Position.x.value},${v2Position.y.value}`;
-
-    return pathString;
-  });
+  // Edge
+  const targetOffset = useDerivedValue(
+    () => labelHeight.value * (order.value - (edgesCount.value - 1) / 2)
+  );
+  const currentOffset = useSharedValue(
+    labelHeight.value * (order.value - (edgesCount.value - 1) / 2)
+  );
+  const path = useSharedValue('');
 
   // Edge label
   useAnimatedReaction(
-    () =>
-      settings.label
-        ? {
-            r1: v1Radius.value,
-            r2: v2Radius.value,
-            scale: settings.label?.scale.value
-          }
-        : null,
-    data => {
-      if (!data) return;
-      const { r1, r2, scale } = data;
+    () => ({
+      r1: v1Radius.value,
+      r2: v2Radius.value,
+      scale: labelScale.value
+    }),
+    ({ r1, r2, scale }) => {
       labelHeight.value = ((r1 + r2) / 2) * scale;
     }
   );
 
+  // Edge offset
   useAnimatedReaction(
     () => ({
-      edgesCount: animatedEdgesCount.value,
-      labelSize: labelHeight.value,
-      order: animatedOrder.value,
-      r2: v2Radius.value,
-      v1: p1.value,
-      v2: p2.value
+      current: currentOffset.value,
+      target: targetOffset.value
     }),
-    ({ edgesCount, labelSize, order, r2, v1, v2 }) => {
+    ({ current, target }) => {
+      currentOffset.value = animated
+        ? animateToValue(current, target, 0.1, 100)
+        : target;
+    }
+  );
+
+  // Edge
+  useAnimatedReaction(
+    () => ({
+      offset: currentOffset.value,
+      r2: v2Radius.value,
+      v1: { x: v1x.value, y: v1y.value },
+      v2: { x: v2x.value, y: v2y.value }
+    }),
+    ({ offset, r2, v1, v2 }) => {
       const center = {
         x: (v1.x + v2.x) / 2,
         y: (v1.y + v2.y) / 2
       };
+
       // Calculate the parabola vertex position
       const orthogonalUnitVector = calcOrthogonalUnitVector(v1, v2);
-      const offset = labelSize * (order - (edgesCount - 1) / 2);
-      const { x, y } = translateAlongVector(
+      const { x: parabolaX, y: parabolaY } = translateAlongVector(
         center,
         orthogonalUnitVector,
         offset
       );
-      labelPosition.x.value = parabolaX.value = x;
-      labelPosition.y.value = parabolaY.value = y;
+      labelPosition.x.value = parabolaX;
+      labelPosition.y.value = parabolaY;
 
       // Calculate the edge arrow tip position and direction vector
       // If points are collinear
-      if (v1.x === x || v1.y === y) {
+      if (v1.x === parabolaX || v1.y === parabolaY) {
         // 1. Calculate the direction vector
         const directionVector = calcUnitVector(v2, v1);
         dirVec.value = directionVector;
@@ -136,7 +123,11 @@ function DirectedCurvedEdgeComponent<V, E>({
         const rotationAngle = Math.atan2(v2.y - v1.y, v2.x - v1.x);
         // 2. Rotate points to the new coordinate system
         const plainP2 = rotate(v2, center, rotationAngle);
-        const plainParabolaVertex = rotate({ x, y }, center, rotationAngle);
+        const plainParabolaVertex = rotate(
+          { x: parabolaX, y: parabolaY },
+          center,
+          rotationAngle
+        );
         // 3. Calculate the canonical parabola equation coefficients
         const { x: p, y: q } = plainParabolaVertex;
         const a = (plainP2.y - q) / (plainP2.x - p) ** 2;
@@ -174,6 +165,31 @@ function DirectedCurvedEdgeComponent<V, E>({
         arrowTipPosition.value = rotatedArrowTipPosition;
         dirVec.value = directionVector;
       }
+
+      // Update the edge path
+      const controlPoint = {
+        x: parabolaX * 2 - (v1.x + v2.x) / 2,
+        y: parabolaY * 2 - (v1.y + v2.y) / 2
+      };
+      path.value = `M${v1.x},${v1.y} Q${controlPoint.x},${controlPoint.y} ${v2.x},${v2.y}`;
+    }
+  );
+
+  useAnimatedReaction(
+    () => ({
+      r1: v1Radius.value,
+      r2: v2Radius.value,
+      scale: arrowScale.value,
+      v1: { x: v1x.value, y: v1y.value },
+      v2: { x: v2x.value, y: v2y.value }
+    }),
+    ({ r1, r2, scale, v1, v2 }) => {
+      const height = Math.min(
+        Math.max(0, distanceBetweenVectors(v1, v2) - (r1 + r2)),
+        1.5 * r2 * scale
+      );
+      arrowHeight.value = height;
+      arrowWidth.value = (2 / 3) * height;
     }
   );
 
@@ -182,8 +198,6 @@ function DirectedCurvedEdgeComponent<V, E>({
       <RenderedCurvedEdgeComponent
         animationProgress={animationProgress}
         edgeKey={key}
-        parabolaX={parabolaX}
-        parabolaY={parabolaY}
         path={path}
         renderer={renderers.edge}
         value={value}

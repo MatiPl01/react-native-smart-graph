@@ -294,27 +294,35 @@ export default abstract class Graph<
 
   get orderedEdges(): OrderedEdges<V, E, GE> {
     if (!this.cachedOrderedEdges) {
-      const addedEdgesKeys = new Set<string>();
+      const addedVerticesPairs: Record<string, Record<string, boolean>> = {};
       const result: OrderedEdges<V, E, GE> = [];
 
-      for (const edge of this.edges) {
-        if (addedEdgesKeys.has(edge.key)) {
-          continue;
-        }
-
-        const [v1, v2] = edge.vertices;
-        const edgesBetweenVertices =
-          this.edgesBetweenVertices$[v1.key]?.[v2.key] ?? [];
-
-        for (const { edge: e, order } of this.orderEdgesBetweenVertices(
-          edgesBetweenVertices
-        )) {
-          result.push({
-            edge: e,
-            edgesCount: edgesBetweenVertices.length,
-            order
-          });
-          addedEdgesKeys.add(edge.key);
+      // Loop over each vertices connected with edges
+      for (const key1 in this.edgesBetweenVertices$) {
+        for (const key2 in this.edgesBetweenVertices$[key1]) {
+          // Skip if the pair of vertices was already added
+          if (addedVerticesPairs[key1]?.[key2]) continue;
+          // Mark the pair of vertices as added
+          if (!addedVerticesPairs[key1]) {
+            addedVerticesPairs[key1] = {};
+          }
+          if (!addedVerticesPairs[key2]) {
+            addedVerticesPairs[key2] = {};
+          }
+          addedVerticesPairs[key1]![key2] = true;
+          addedVerticesPairs[key2]![key1] = true;
+          // Get edges between vertices
+          const edges = this.edgesBetweenVertices$[key1]![key2]!;
+          // Order edges between vertices
+          const orderedEdges = this.orderEdgesBetweenVertices(edges);
+          // Add ordered edges to result
+          for (const { edge, order } of orderedEdges) {
+            result.push({
+              edge,
+              edgesCount: edges.length,
+              order
+            });
+          }
         }
       }
 

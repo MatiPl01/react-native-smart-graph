@@ -1,4 +1,5 @@
 /* eslint-disable import/no-unused-modules */
+import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedVectorCoordinates } from '@/types/layout';
@@ -10,20 +11,32 @@ export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 export type EdgeComponentData<E> = {
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
-  displayed: SharedValue<boolean>;
-  edgesCount: SharedValue<number>;
   isDirected: boolean;
   key: string;
   labelHeight: SharedValue<number>;
   labelPosition: AnimatedVectorCoordinates;
-  order: SharedValue<number>;
-  removed: boolean;
-  v1Key: string;
-  v1Position: AnimatedVectorCoordinates;
-  v1Radius: SharedValue<number>;
-  v2Key: string;
-  v2Position: AnimatedVectorCoordinates;
-  v2Radius: SharedValue<number>;
+  ordering: SharedValue<{
+    edgesCount: number;
+    order: number;
+  }>;
+  removed: SharedValue<boolean>;
+  transform: {
+    progress: SharedValue<number>;
+    v1: {
+      key: string;
+      points: SharedValue<{
+        source: Vector;
+        target: Vector;
+      }>;
+    };
+    v2: {
+      key: string;
+      points: SharedValue<{
+        source: Vector;
+        target: Vector;
+      }>;
+    };
+  };
   value?: E;
 };
 

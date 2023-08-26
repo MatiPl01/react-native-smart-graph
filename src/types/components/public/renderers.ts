@@ -1,11 +1,7 @@
 /* eslint-disable import/no-unused-modules */
 import { SharedValue } from 'react-native-reanimated';
 
-import {
-  AnimatedPath,
-  AnimatedVector,
-  AnimatedVectorCoordinates
-} from '@/types/layout';
+import { AnimatedPath, AnimatedVector } from '@/types/layout';
 
 type SharedRenderersProps = {
   animationProgress: SharedValue<number>;
@@ -15,11 +11,9 @@ type SharedRenderersProps = {
  * VERTEX
  */
 export type VertexRendererProps<V> = SharedRenderersProps & {
-  currentRadius: SharedValue<number>;
   focusKey: SharedValue<null | string>;
   focusProgress: SharedValue<number>;
   key: string;
-  position: AnimatedVectorCoordinates;
   radius: SharedValue<number>;
   scale: SharedValue<number>;
   value?: V;
@@ -43,8 +37,6 @@ export type StraightEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
 };
 
 export type CurvedEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
-  parabolaX: SharedValue<number>;
-  parabolaY: SharedValue<number>;
   path: AnimatedPath;
 };
 
