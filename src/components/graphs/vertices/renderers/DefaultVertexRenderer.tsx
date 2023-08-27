@@ -6,6 +6,7 @@ import FONTS from '@/assets/fonts';
 import { VertexRendererProps } from '@/types/components';
 
 export default function DefaultVertexRenderer<V>({
+  animationProgress,
   focusProgress,
   key
 }: VertexRendererProps<V>) {
@@ -15,12 +16,14 @@ export default function DefaultVertexRenderer<V>({
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
   );
 
+  const transform = useDerivedValue(() => [{ scale: animationProgress.value }]);
+
   if (font === null) {
     return null;
   }
 
   return (
-    <Group opacity={opacity}>
+    <Group opacity={opacity} transform={transform}>
       <Circle color='gold' r={20} />
       <Circle color='black' r={15} />
       <Text color='white' font={font} text={key} x={-10} y={40} />

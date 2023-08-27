@@ -5,6 +5,8 @@ import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { useComponentFocus } from '@/hooks/focus';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 
+import GraphEdges from './GraphEdges';
+import GraphEdgesLabels from './GraphEdgesLabels';
 import GraphVertices from './GraphVertices';
 
 function GraphComponent() {
@@ -38,9 +40,9 @@ function GraphComponent() {
         mode='luminance'>
         <GraphEdges focusProgress={focusProgress} />
       </Mask> */}
-      {/* <GraphEdges focusProgress={focusProgress} /> */}
+      <GraphEdges focusProgress={focusProgress} />
       <GraphVertices focusContext={focusContext} />
-      {/* <GraphEdgesLabels focusProgress={focusProgress} /> */}
+      <GraphEdgesLabels focusProgress={focusProgress} />
     </>
   );
 }

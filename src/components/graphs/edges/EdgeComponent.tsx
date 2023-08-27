@@ -63,7 +63,7 @@ function EdgeComponent<V, E>({
       data.animationProgress,
       data.animationSettings,
       data.removed,
-      onRemove
+      () => onRemove(data.key)
     );
   }, [data.removed, data.animationSettings]);
 

@@ -52,11 +52,8 @@ export type StraightEdgeRenderer<E> = (
  * LABEL
  */
 export type LabelRendererProps<E> = SharedRenderersProps & {
-  centerX: SharedValue<number>;
-  centerY: SharedValue<number>;
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
-  height: SharedValue<number>;
   key: string;
   value?: E;
 };

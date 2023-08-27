@@ -1,10 +1,10 @@
-/* eslint-disable import/no-unused-modules */
 import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
 import { DirectedEdge, UndirectedEdge } from '@/types/models';
 import { AllAnimationSettings } from '@/types/settings';
+
+import { LabelComponentData } from './label';
 
 export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 
@@ -13,30 +13,23 @@ export type EdgeComponentData<E> = {
   animationSettings: AllAnimationSettings | null;
   isDirected: boolean;
   key: string;
-  labelHeight: SharedValue<number>;
-  labelPosition: AnimatedVectorCoordinates;
+  label: Omit<LabelComponentData<E>, 'animationProgress' | 'value'>;
   ordering: SharedValue<{
     edgesCount: number;
     order: number;
   }>;
-  removed: SharedValue<boolean>;
+  removed: boolean;
   transform: {
+    points: SharedValue<{
+      v1Source: Vector;
+      v1Target: Vector;
+      v2Source: Vector;
+      v2Target: Vector;
+    }>;
     progress: SharedValue<number>;
-    v1: {
-      key: string;
-      points: SharedValue<{
-        source: Vector;
-        target: Vector;
-      }>;
-    };
-    v2: {
-      key: string;
-      points: SharedValue<{
-        source: Vector;
-        target: Vector;
-      }>;
-    };
   };
+  v1Key: string;
+  v2Key: string;
   value?: E;
 };
 

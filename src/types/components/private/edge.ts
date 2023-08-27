@@ -80,15 +80,12 @@ export type EdgeComponentProps<V, E> = Omit<
 
 export type GraphEdgesProps<V, E> = Omit<
   EdgeComponentProps<V, E>,
-  'data' | 'renderers' | 'settings'
+  'data' | 'renderers'
 > & {
   arrowRenderer?: ArrowRenderer;
-  arrowSettings: InternalArrowSettings;
   edgeRenderer: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
-  edgeSettings: InternalEdgeSettings;
   edgesData: Record<string, EdgeComponentData<E>>;
   focusProgress: SharedValue<number>;
   labelRenderer: LabelRenderer<E>;
-  labelSettings: InternalLabelSettings;
   onRemove: EdgeRemoveHandler;
 };

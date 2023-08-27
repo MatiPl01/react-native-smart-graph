@@ -95,6 +95,7 @@ export const updateContextValue = <V, E>(
           newData.state.orderedEdges,
           newVerticesData,
           newData.removedEdges,
+          value.layoutAnimationProgress,
           newData.state.animationsSettings.edges,
           newData.graphAnimationsSettings.edges
         )
@@ -223,7 +224,8 @@ const updateGraphVerticesData = <V, E>(
         animationSettings: updateAnimationSettings(
           defaultAnimationSettings,
           currentAnimationsSettings[key]
-        )
+        ),
+        removed: true
       };
     }
   }
@@ -246,16 +248,12 @@ const updateGraphEdgesData = <V, E>(
   currentEdges: OrderedEdges<V, E>,
   verticesData: Record<string, VertexComponentData<V>>,
   removedEdges: Set<string>,
+  layoutAnimationProgress: SharedValue<number>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, EdgeComponentData<E>> => {
   const updatedEdgesData = { ...oldEdgesData };
   let isModified = false; // Flag to indicate if edges data was updated
-
-  console.log(
-    'update edges',
-    Object.values(currentEdges).map(e => e.edge.key)
-  );
 
   // Add new edges to edges data
   for (const edgeData of currentEdges) {
@@ -277,11 +275,15 @@ const updateGraphEdgesData = <V, E>(
       oldEdge.isDirected === edgeData.edge.isDirected()
     ) {
       // Update shared values if they were changed
-      if (oldEdge.order.value !== edgeData.order) {
-        oldEdge.order.value = edgeData.order;
-      }
-      if (oldEdge.edgesCount.value !== edgeData.edgesCount) {
-        oldEdge.edgesCount.value = edgeData.edgesCount;
+      const oldOrdering = oldEdge.ordering.value;
+      if (
+        oldOrdering.order !== edgeData.order ||
+        oldOrdering.edgesCount !== edgeData.edgesCount
+      ) {
+        oldEdge.ordering.value = {
+          edgesCount: edgeData.edgesCount,
+          order: edgeData.order
+        };
       }
       continue;
     }
@@ -292,20 +294,32 @@ const updateGraphEdgesData = <V, E>(
     const v2Data = verticesData[v2.key];
     if (!v1Data || !v2Data) continue;
 
-    isModified = true;
-    // Create the edge dataq
+    // Create the edge data
     updatedEdgesData[edgeData.edge.key] = {
       ...(oldEdge ?? {
-        animationProgress: makeMutable(0),
         // Create shared values only for new edges
-        displayed: makeMutable(true),
-        edgesCount: makeMutable(edgeData.edgesCount),
-        labelHeight: makeMutable(0),
-        labelPosition: {
-          x: makeMutable(0),
-          y: makeMutable(0)
+        animationProgress: makeMutable(0),
+        label: {
+          transform: makeMutable({
+            center: { x: 0, y: 0 },
+            p1: { x: 0, y: 0 },
+            p2: { x: 0, y: 0 },
+            scale: 0
+          })
         },
-        order: makeMutable(edgeData.order)
+        ordering: makeMutable({
+          edgesCount: edgeData.edgesCount,
+          order: edgeData.order
+        }),
+        transform: {
+          points: makeMutable({
+            v1Source: { x: 0, y: 0 },
+            v1Target: { x: 0, y: 0 },
+            v2Source: { x: 0, y: 0 },
+            v2Target: { x: 0, y: 0 }
+          }),
+          progress: layoutAnimationProgress
+        }
       }),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
@@ -315,13 +329,10 @@ const updateGraphEdgesData = <V, E>(
       key: edgeData.edge.key,
       removed: false,
       v1Key: v1.key,
-      v1Position: v1Data.position,
-      v1Radius: v1Data.currentRadius,
       v2Key: v2.key,
-      v2Position: v2Data.position,
-      v2Radius: v2Data.currentRadius,
       value: edgeData.edge.value
     };
+    isModified = true;
   }
 
   // Keys of edges that are currently in the graph
@@ -373,12 +384,8 @@ const updateGraphEdgeLabelsData = <E>(
     if (edgeData && (!oldLabelData || oldLabelData.value !== edgeData.value)) {
       isModified = true;
       updatedEdgeLabelsData[key] = {
+        ...edgeData.label,
         animationProgress: edgeData.animationProgress,
-        centerX: edgeData.labelPosition.x,
-        centerY: edgeData.labelPosition.y,
-        height: edgeData.labelHeight,
-        v1Position: edgeData.v1Position,
-        v2Position: edgeData.v2Position,
         value: edgeData.value
       };
     }

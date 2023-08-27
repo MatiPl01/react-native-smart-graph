@@ -299,6 +299,7 @@ export const getUpdateConfig = <V, E>({
             }
           : undefined,
       label: {
+        displayed: 'shared',
         scale: 'shared'
       },
       vertex: {

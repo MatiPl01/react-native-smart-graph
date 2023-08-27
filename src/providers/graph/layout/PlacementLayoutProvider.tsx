@@ -14,7 +14,7 @@ import {
   AllAnimationSettings,
   InternalGraphPlacementSettings
 } from '@/types/settings';
-import { updateVerticesTransform } from '@/utils/animations';
+import { updateComponentsTransform } from '@/utils/animations';
 import { unsharedify } from '@/utils/objects';
 import { placeVertices } from '@/utils/placement';
 
@@ -73,8 +73,9 @@ function GraphPlacementLayoutProvider<V, E>({
 
       targetBoundingRect.value = boundingRect;
 
-      updateVerticesTransform(
+      updateComponentsTransform(
         verticesData,
+        edgesData,
         verticesPositions,
         layoutAnimationProgress,
         layoutAnimationSettings

@@ -16,19 +16,19 @@ import {
   PlacedVerticesPositions,
   SingleModificationAnimationSettings
 } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 
 import { calcTranslationOnProgress } from './views';
 
-export const updateVerticesTransform = <V>(
+const cancelComponentsAnimation = <V, E>(
   verticesData: Record<string, VertexComponentData<V>>,
-  verticesPositions: PlacedVerticesPositions,
-  layoutAnimationProgress: SharedValue<number>,
-  layoutAnimationSettings?: AllAnimationSettings | null
+  edgesData: Record<string, EdgeComponentData<E>>,
+  layoutAnimationProgress: SharedValue<number>
 ): void => {
   'worklet';
-  // Stop animation and set source and target vertices positions to the current ones
-  // (this is needed to prevent animation from jumping to the previous target position))
+  // Cancel layout animation
   cancelAnimation(layoutAnimationProgress);
+  // Set current vertices positions as source and target positions
   for (const vertexData of Object.values(verticesData)) {
     const currentPosition = calcTranslationOnProgress(
       vertexData.transform.progress.value,
@@ -40,11 +40,34 @@ export const updateVerticesTransform = <V>(
       target: currentPosition
     };
   }
+  // Set current edges positions as source and target positions
+  for (const edgeData of Object.values(edgesData)) {
+    const currentV1Position = calcTranslationOnProgress(
+      edgeData.transform.progress.value,
+      edgeData.transform.points.value.v1Source,
+      edgeData.transform.points.value.v1Target
+    );
+    const currentV2Position = calcTranslationOnProgress(
+      edgeData.transform.progress.value,
+      edgeData.transform.points.value.v2Source,
+      edgeData.transform.points.value.v2Target
+    );
+    edgeData.transform.points.value = {
+      v1Source: currentV1Position,
+      v1Target: currentV1Position,
+      v2Source: currentV2Position,
+      v2Target: currentV2Position
+    };
+  }
+};
 
-  // Reset the animation progress
-  layoutAnimationProgress.value = 0;
-
-  // Set new target positions
+const updateComponentsTransformPoints = <V, E>(
+  verticesData: Record<string, VertexComponentData<V>>,
+  edgesData: Record<string, EdgeComponentData<E>>,
+  verticesPositions: PlacedVerticesPositions
+): void => {
+  'worklet';
+  // Set new target vertices positions
   for (const [key, vertexData] of Object.entries(verticesData)) {
     const targetPosition = verticesPositions[key];
     if (!targetPosition) {
@@ -55,8 +78,27 @@ export const updateVerticesTransform = <V>(
       target: targetPosition
     };
   }
+  // Set new target edges positions
+  for (const edgeData of Object.values(edgesData)) {
+    const targetV1Position = verticesPositions[edgeData.v1Key];
+    const targetV2Position = verticesPositions[edgeData.v2Key];
+    if (!targetV1Position || !targetV2Position) {
+      continue;
+    }
+    edgeData.transform.points.value = {
+      v1Source: edgeData.transform.points.value.v1Source,
+      v1Target: targetV1Position,
+      v2Source: edgeData.transform.points.value.v2Source,
+      v2Target: targetV2Position
+    };
+  }
+};
 
-  // Update the animation progress
+const restartLayoutAnimation = (
+  layoutAnimationProgress: SharedValue<number>,
+  layoutAnimationSettings?: Maybe<AllAnimationSettings>
+): void => {
+  'worklet';
   if (!layoutAnimationSettings) {
     layoutAnimationProgress.value = 1;
   } else {
@@ -71,6 +113,25 @@ export const updateVerticesTransform = <V>(
       }
     );
   }
+};
+
+export const updateComponentsTransform = <V, E>(
+  verticesData: Record<string, VertexComponentData<V>>,
+  edgesData: Record<string, EdgeComponentData<E>>,
+  verticesPositions: PlacedVerticesPositions,
+  layoutAnimationProgress: SharedValue<number>,
+  layoutAnimationSettings?: Maybe<AllAnimationSettings>
+): void => {
+  'worklet';
+  // Stop animation and set source and target vertices/edges positions to the current ones
+  // (this is needed to prevent animation from jumping to the previous target position))
+  cancelComponentsAnimation(verticesData, edgesData, layoutAnimationProgress);
+  // Reset the animation progress
+  layoutAnimationProgress.value = 0;
+  // Set new target positions
+  updateComponentsTransformPoints(verticesData, edgesData, verticesPositions);
+  // Update the animation progress
+  restartLayoutAnimation(layoutAnimationProgress, layoutAnimationSettings);
 };
 
 const ANIMATION_SETTINGS_KEYS = new Set(['duration', 'easing', 'onComplete']);
@@ -246,12 +307,9 @@ export const cancelVertexAnimations = <V>(
 
 export const cancelEdgeAnimations = <V>(edgeData: EdgeComponentData<V>) => {
   cancelAnimation(edgeData.animationProgress);
-  cancelAnimation(edgeData.displayed);
-  cancelAnimation(edgeData.edgesCount);
-  cancelAnimation(edgeData.order);
-  cancelAnimation(edgeData.labelHeight);
-  cancelAnimation(edgeData.labelPosition.x);
-  cancelAnimation(edgeData.labelPosition.y);
+  cancelAnimation(edgeData.label.transform);
+  cancelAnimation(edgeData.ordering);
+  cancelAnimation(edgeData.transform.points);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
