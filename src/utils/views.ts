@@ -52,7 +52,7 @@ export const calcContainerTranslation = (
   };
 };
 
-export const calcScaleOnProgress = (
+export const calcValueOnProgress = (
   progress: number,
   startScale: number,
   endScale: number

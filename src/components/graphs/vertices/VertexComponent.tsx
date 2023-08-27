@@ -13,19 +13,16 @@ import {
   VertexRendererProps
 } from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
+import { calcValueOnProgress } from '@/utils/views';
 
 function VertexComponent<V>({
-  data: { animationSettings, removed, ...restData },
+  data: { animationSettings, points, removed, transformProgress, ...restData },
   focusContext,
   onRemove,
   renderer,
   settings
 }: VertexComponentProps<V>) {
-  const {
-    key,
-    scale,
-    transform: { points: transformPoints, progress: transformProgress }
-  } = restData;
+  const { key, scale } = restData;
 
   // ANIMATION
   // Vertex render animation progress
@@ -64,14 +61,15 @@ function VertexComponent<V>({
   useAnimatedReaction(
     () => ({
       currentScale: scale.value,
-      points: transformPoints.value,
+      points: points.value,
       progress: transformProgress.value
     }),
     ({ currentScale, points: { source, target }, progress }) => {
+      console.log('vertex', key);
       transform.value = [
         { scale: Math.max(0, currentScale) },
-        { translateX: source.x + (target.x - source.x) * progress },
-        { translateY: source.y + (target.y - source.y) * progress }
+        { translateX: calcValueOnProgress(progress, source.x, target.x) },
+        { translateY: calcValueOnProgress(progress, source.y, target.y) }
       ];
     }
   );

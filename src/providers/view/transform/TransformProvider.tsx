@@ -15,7 +15,7 @@ import { Maybe } from '@/types/utils';
 import {
   calcContainerScale,
   calcContainerTranslation,
-  calcScaleOnProgress,
+  calcValueOnProgress,
   calcTranslationOnProgress,
   clamp
 } from '@/utils/views';
@@ -307,7 +307,7 @@ export default function TransformProvider({
       getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
 
     // Scale content to fit container based on objectFit
-    scaleContentTo(calcScaleOnProgress(progress, startScale, targetScale));
+    scaleContentTo(calcValueOnProgress(progress, startScale, targetScale));
     // Translate content to fit container based on objectFit
     translateContentTo(
       calcTranslationOnProgress(

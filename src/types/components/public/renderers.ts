@@ -66,11 +66,9 @@ export type LabelRenderer<E> = (
  * ARROW
  */
 export type ArrowRendererProps = SharedRenderersProps & {
-  centerPosition: AnimatedVector;
-  height: SharedValue<number>;
-  rotation: SharedValue<number>;
-  tipPosition: AnimatedVector;
-  width: SharedValue<number>;
+  edgeRotation: SharedValue<number>;
+  scale: SharedValue<number>;
+  vertexRadius: SharedValue<number>;
 };
 
 export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;

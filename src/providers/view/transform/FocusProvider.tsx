@@ -22,7 +22,7 @@ import {
 } from '@/types/data';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
-import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
+import { calcTranslationOnProgress, calcValueOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
 
@@ -430,7 +430,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         targetScale
       } = data;
       // Scale the content to the focus scale
-      scaleContentTo(calcScaleOnProgress(progress, sourceScale, targetScale));
+      scaleContentTo(calcValueOnProgress(progress, sourceScale, targetScale));
       // Translate the content to the focus position
       translateContentTo(
         calcTranslationOnProgress(progress, sourcePosition, targetPosition)
@@ -472,7 +472,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         translation
       } = data;
       // Scale the content to the initial scale
-      const newScale = calcScaleOnProgress(progress, sourceScale, targetScale);
+      const newScale = calcValueOnProgress(progress, sourceScale, targetScale);
       scaleContentTo(newScale);
       // Translate the content to the user's finger position
       const translateScale = newScale / sourceScale - 1;

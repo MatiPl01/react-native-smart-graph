@@ -1,87 +1,42 @@
 /* eslint-disable import/no-unused-modules */
 import { memo } from 'react';
-import {
-  useAnimatedReaction,
-  useDerivedValue,
-  useSharedValue
-} from 'react-native-reanimated';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components';
-import { animateToValue } from '@/utils/animations';
 import {
   calcOrthogonalUnitVector,
   translateAlongVector
 } from '@/utils/vectors';
+import { calcTranslationOnProgress } from '@/utils/views';
 
 import RenderedCurvedEdgeComponent from './RenderedCurvedEdgeComponent';
 
 function UndirectedCurvedEdgeComponent<V, E>({
   data: {
     animationProgress,
-    animationSettings,
-    edgesCount,
     key,
-    labelHeight,
-    labelPosition,
-    order,
+    label: labelData,
+    ordering,
+    transform: { points: transformPoints, progress: transformProgress },
     v1Key,
-    v1Position: { x: v1x, y: v1y },
-    v1Radius,
     v2Key,
-    v2Position: { x: v2x, y: v2y },
-    v2Radius,
     value
   },
   renderers,
   settings
 }: UndirectedCurvedEdgeComponentProps<V, E>) {
-  const animated = !!animationSettings;
-  const {
-    label: { scale: labelScale }
-  } = settings;
-
-  // Edge
-  const targetOffset = useDerivedValue(
-    () => labelHeight.value * (order.value - (edgesCount.value - 1) / 2)
-  );
-  const currentOffset = useSharedValue(
-    labelHeight.value * (order.value - (edgesCount.value - 1) / 2)
-  );
+  // EDGE RENDERER PROPS
   const path = useSharedValue('');
 
-  // Edge label
   useAnimatedReaction(
     () => ({
-      r1: v1Radius.value,
-      r2: v2Radius.value,
-      scale: labelScale.value
+      points: transformPoints.value,
+      progress: transformProgress.value,
+      ordering: ordering.value
     }),
-    ({ r1, r2, scale }) => {
-      labelHeight.value = ((r1 + r2) / 2) * scale;
-    }
-  );
-
-  // Edge offset
-  useAnimatedReaction(
-    () => ({
-      current: currentOffset.value,
-      target: targetOffset.value
-    }),
-    ({ current, target }) => {
-      currentOffset.value = animated
-        ? animateToValue(current, target, 0.1, 100)
-        : target;
-    }
-  );
-
-  // Edge
-  useAnimatedReaction(
-    () => ({
-      offset: currentOffset.value,
-      v1: { x: v1x.value, y: v1y.value },
-      v2: { x: v2x.value, y: v2y.value }
-    }),
-    ({ offset, v1, v2 }) => {
+    ({ points: { v1Source, v1Target, v2Source, v2Target }, progress }) => {
+      let v1 = calcTranslationOnProgress(progress, v1Source, v1Target);
+      let v2 = calcTranslationOnProgress(progress, v2Source, v2Target);
       // Ensure that the order of edges is always the same
       // no matter which vertex was specified first in the edge
       // vertices array
@@ -107,7 +62,8 @@ function UndirectedCurvedEdgeComponent<V, E>({
         y: parabolaY * 2 - (v1.y + v2.y) / 2
       };
       path.value = `M${v1.x},${v1.y} Q${controlPoint.x},${controlPoint.y} ${v2.x},${v2.y}`;
-    }
+    },
+    [v1Key, v2Key]
   );
 
   return (

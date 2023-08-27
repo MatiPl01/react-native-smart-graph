@@ -15,19 +15,23 @@ export type EdgeComponentData<E> = {
   key: string;
   label: Omit<LabelComponentData<E>, 'animationProgress' | 'value'>;
   ordering: SharedValue<{
-    edgesCount: number;
-    order: number;
+    source: {
+      edgesCount: number;
+      order: number;
+    };
+    target: {
+      edgesCount: number;
+      order: number;
+    };
+  }>;
+  points: SharedValue<{
+    v1Source: Vector;
+    v1Target: Vector;
+    v2Source: Vector;
+    v2Target: Vector;
   }>;
   removed: boolean;
-  transform: {
-    points: SharedValue<{
-      v1Source: Vector;
-      v1Target: Vector;
-      v2Source: Vector;
-      v2Target: Vector;
-    }>;
-    progress: SharedValue<number>;
-  };
+  transformProgress: SharedValue<number>;
   v1Key: string;
   v2Key: string;
   value?: E;

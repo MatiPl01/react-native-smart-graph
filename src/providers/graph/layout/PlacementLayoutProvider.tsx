@@ -22,7 +22,6 @@ type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
   edgesData: Record<string, EdgeComponentData<E>>;
   isGraphDirected: SharedValue<boolean>;
-  layoutAnimationProgress: SharedValue<number>;
   layoutAnimationSettings: AllAnimationSettings;
   placementSettings: InternalGraphPlacementSettings;
   targetBoundingRect: SharedValue<BoundingRect>;
@@ -34,7 +33,6 @@ function GraphPlacementLayoutProvider<V, E>({
   connections,
   edgesData,
   isGraphDirected,
-  layoutAnimationProgress,
   layoutAnimationSettings,
   placementSettings,
   targetBoundingRect,
@@ -69,15 +67,14 @@ function GraphPlacementLayoutProvider<V, E>({
       if (isFirstRender.value) {
         isFirstRender.value = false;
         onRender(boundingRect);
+        return;
       }
 
       targetBoundingRect.value = boundingRect;
-
       updateComponentsTransform(
         verticesData,
         edgesData,
         verticesPositions,
-        layoutAnimationProgress,
         layoutAnimationSettings
       );
     },
@@ -94,7 +91,6 @@ export default withGraphSettings(
       connections,
       edgesData,
       isGraphDirected,
-      layoutAnimationProgress,
       layoutAnimationSettings,
       targetBoundingRect,
       verticesData
@@ -102,7 +98,6 @@ export default withGraphSettings(
       connections,
       edgesData,
       isGraphDirected,
-      layoutAnimationProgress,
       layoutAnimationSettings,
       targetBoundingRect,
       verticesData

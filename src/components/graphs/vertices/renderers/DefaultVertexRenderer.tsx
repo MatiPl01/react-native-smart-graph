@@ -23,7 +23,7 @@ export default function DefaultVertexRenderer<V>({
   }
 
   return (
-    <Group opacity={opacity} transform={transform}>
+    <Group opacity={opacity} origin={{ x: 20, y: 20 }} transform={transform}>
       <Circle color='gold' r={20} />
       <Circle color='black' r={15} />
       <Text color='white' font={font} text={key} x={-10} y={40} />

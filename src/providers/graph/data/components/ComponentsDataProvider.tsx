@@ -8,7 +8,6 @@ import {
   useRef,
   useState
 } from 'react';
-import { useSharedValue } from 'react-native-reanimated';
 
 import { REMOVE_COMPONENTS_TIMEOUT } from '@/constants/timeouts';
 import { useGraphObserver } from '@/hooks';
@@ -65,10 +64,6 @@ function ComponentsDataProvider<V, E>({
   // has been completed and edges are waiting to be unmounted
   const removedEdges = useMemo(() => new Set<string>(), []);
 
-  // LAYOUT ANIMATION
-  // Animation progress
-  const layoutAnimationProgress = useSharedValue(0);
-
   // Other values
   const removeComponentsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -104,8 +99,7 @@ function ComponentsDataProvider<V, E>({
   const [contextValue, setContextValue] = useState(() =>
     createContextValue(componentsData, {
       handleEdgeRemove,
-      handleVertexRemove,
-      layoutAnimationProgress
+      handleVertexRemove
     })
   );
 

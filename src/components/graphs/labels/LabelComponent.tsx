@@ -22,7 +22,7 @@ function LabelComponent<E>({
   // 0 - not blocked
   // 1 - blocked for top swap
   // -1 - blocked for bottom swap
-  const blockedAngle = Math.PI / 36; // 5 degrees in one direction (10 degrees total)
+  const blockedAngle = Math.PI / 36; // 5 degrees in one direction (10 degrees in total)
   const swapBlocked = useSharedValue(0);
   const isSwapped = useSharedValue(false);
 

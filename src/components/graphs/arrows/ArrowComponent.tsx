@@ -1,50 +1,49 @@
-import { useDerivedValue } from 'react-native-reanimated';
+import { Group, Transforms2d } from '@shopify/react-native-skia';
+import { memo } from 'react';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import {
-  ArrowComponentProps,
-  ArrowRenderer,
-  ArrowRendererProps
-} from '@/types/components';
+import { ArrowComponentProps } from '@/types/components';
 import { translateAlongVector } from '@/utils/vectors';
 
-export default function ArrowComponent({
-  directionVector,
-  height,
+function ArrowComponent({
+  animationProgress,
   renderer,
-  tipPosition,
-  ...restProps
+  transform: arrowTransform
 }: ArrowComponentProps) {
-  const centerPosition = useDerivedValue(() =>
-    translateAlongVector(
-      tipPosition.value,
-      directionVector.value,
-      height.value / 2
-    )
+  // RENDERER PROPS
+  const rendererProps = {
+    animationProgress,
+    edgeRotation: useSharedValue(0),
+    scale: useSharedValue(0),
+    vertexRadius: useSharedValue(0)
+  };
+
+  // HELPER VALUES
+  const transform = useSharedValue<Transforms2d>([{ scale: 0 }]);
+
+  useAnimatedReaction(
+    () => arrowTransform.value,
+    ({ dirVector, scale, tipPosition, vertexRadius }) => {
+      const center = translateAlongVector(
+        tipPosition,
+        dirVector,
+        -(scale * vertexRadius)
+      );
+      const rotation = Math.atan2(dirVector.y, dirVector.x);
+
+      transform.value = [
+        { translateX: center.x },
+        { translateY: center.y },
+        { rotate: rotation },
+        { scale }
+      ];
+      rendererProps.edgeRotation.value = rotation;
+      rendererProps.scale.value = scale;
+      rendererProps.vertexRadius.value = vertexRadius;
+    }
   );
 
-  const rotation = useDerivedValue(() =>
-    Math.atan2(directionVector.value.y, directionVector.value.x)
-  );
-
-  return (
-    <RenderedArrowComponent
-      {...restProps}
-      centerPosition={centerPosition}
-      height={height}
-      renderer={renderer}
-      rotation={rotation}
-      tipPosition={tipPosition}
-    />
-  );
+  return <Group transform={transform}>{renderer(rendererProps)}</Group>;
 }
 
-type RenderedArrowComponentProps = ArrowRendererProps & {
-  renderer: ArrowRenderer;
-};
-
-function RenderedArrowComponent({
-  renderer,
-  ...rendererProps
-}: RenderedArrowComponentProps) {
-  return renderer(rendererProps);
-}
+export default memo(ArrowComponent);

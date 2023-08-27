@@ -1,4 +1,4 @@
-import { makeMutable, SharedValue } from 'react-native-reanimated';
+import { makeMutable } from 'react-native-reanimated';
 
 import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
 import { GraphState } from '@/hooks';
@@ -22,6 +22,7 @@ import {
   cancelVertexAnimations
 } from '@/utils/animations';
 import { updateValues } from '@/utils/objects';
+import { calcTranslationOnProgress } from '@/utils/views';
 
 export type ComponentsData<V, E> = {
   connections: GraphConnections;
@@ -40,7 +41,6 @@ export type ComponentsData<V, E> = {
 type AdditionalValues = {
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
-  layoutAnimationProgress: SharedValue<number>;
 };
 
 export const createContextValue = <V, E>(
@@ -80,7 +80,6 @@ export const updateContextValue = <V, E>(
           value?.verticesData ?? {},
           newData.state.vertices,
           newData.removedVertices,
-          value.layoutAnimationProgress,
           newData.state.animationsSettings.vertices,
           newData.graphAnimationsSettings.vertices
         )
@@ -95,7 +94,6 @@ export const updateContextValue = <V, E>(
           newData.state.orderedEdges,
           newVerticesData,
           newData.removedEdges,
-          value.layoutAnimationProgress,
           newData.state.animationsSettings.edges,
           newData.graphAnimationsSettings.edges
         )
@@ -123,7 +121,6 @@ export const updateContextValue = <V, E>(
         handleEdgeRemove: value.handleEdgeRemove, // Prevent removing
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
-        layoutAnimationProgress: value.layoutAnimationProgress, // Prevent removing
         layoutAnimationSettings: newLayoutAnimationSettings,
         // Prevent removing or create the initial value if it doesn't exist
         targetBoundingRect: value?.targetBoundingRect ?? {
@@ -159,7 +156,6 @@ const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
-  layoutAnimationProgress: SharedValue<number>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, VertexComponentData<V>> => {
@@ -191,14 +187,13 @@ const updateGraphVerticesData = <V, E>(
     updatedVerticesData[vertex.key] = {
       ...(oldVertex ?? {
         // Create shared values only for new vertices
+        isModified: makeMutable(true),
+        points: makeMutable({
+          source: { x: 0, y: 0 },
+          target: { x: 0, y: 0 }
+        }),
         scale: makeMutable(1),
-        transform: {
-          points: makeMutable({
-            source: { x: 0, y: 0 },
-            target: { x: 0, y: 0 }
-          }),
-          progress: layoutAnimationProgress
-        }
+        transformProgress: makeMutable(0)
       }),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
@@ -218,7 +213,6 @@ const updateGraphVerticesData = <V, E>(
   for (const key in oldVerticesData) {
     const vertexData = oldVerticesData[key];
     if (vertexData && !currentVerticesKeys.has(key) && !vertexData.removed) {
-      isModified = true;
       updatedVerticesData[key] = {
         ...vertexData,
         animationSettings: updateAnimationSettings(
@@ -227,6 +221,7 @@ const updateGraphVerticesData = <V, E>(
         ),
         removed: true
       };
+      isModified = true; // Mark as modified to set the new vertices data object
     }
   }
 
@@ -237,7 +232,7 @@ const updateGraphVerticesData = <V, E>(
     if (vertexData) cancelVertexAnimations(vertexData);
     delete updatedVerticesData[key];
     removedVertices.delete(key);
-    isModified = true;
+    isModified = true; // Mark as modified to set the new vertices data object
   }
 
   return isModified ? updatedVerticesData : oldVerticesData;
@@ -248,7 +243,6 @@ const updateGraphEdgesData = <V, E>(
   currentEdges: OrderedEdges<V, E>,
   verticesData: Record<string, VertexComponentData<V>>,
   removedEdges: Set<string>,
-  layoutAnimationProgress: SharedValue<number>,
   currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, EdgeComponentData<E>> => {
@@ -277,12 +271,15 @@ const updateGraphEdgesData = <V, E>(
       // Update shared values if they were changed
       const oldOrdering = oldEdge.ordering.value;
       if (
-        oldOrdering.order !== edgeData.order ||
-        oldOrdering.edgesCount !== edgeData.edgesCount
+        oldOrdering.target.order !== edgeData.order ||
+        oldOrdering.target.edgesCount !== edgeData.edgesCount
       ) {
         oldEdge.ordering.value = {
-          edgesCount: edgeData.edgesCount,
-          order: edgeData.order
+          source: oldOrdering.target,
+          target: {
+            edgesCount: edgeData.edgesCount,
+            order: edgeData.order
+          }
         };
       }
       continue;
@@ -308,18 +305,30 @@ const updateGraphEdgesData = <V, E>(
           })
         },
         ordering: makeMutable({
-          edgesCount: edgeData.edgesCount,
-          order: edgeData.order
+          source: {
+            edgesCount: 0,
+            order: 0
+          },
+          target: {
+            edgesCount: edgeData.edgesCount,
+            order: edgeData.order
+          }
         }),
-        transform: {
-          points: makeMutable({
-            v1Source: { x: 0, y: 0 },
-            v1Target: { x: 0, y: 0 },
-            v2Source: { x: 0, y: 0 },
-            v2Target: { x: 0, y: 0 }
-          }),
-          progress: layoutAnimationProgress
-        }
+        points: makeMutable({
+          v1Source: calcTranslationOnProgress(
+            v1Data.transformProgress.value,
+            v1Data.points.value.source,
+            v1Data.points.value.target
+          ),
+          v1Target: v1Data.points.value.target,
+          v2Source: calcTranslationOnProgress(
+            v2Data.transformProgress.value,
+            v2Data.points.value.source,
+            v2Data.points.value.target
+          ),
+          v2Target: v2Data.points.value.target
+        }),
+        transformProgress: makeMutable(1)
       }),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
@@ -332,7 +341,7 @@ const updateGraphEdgesData = <V, E>(
       v2Key: v2.key,
       value: edgeData.edge.value
     };
-    isModified = true;
+    isModified = true; // Mark as modified to set the new edges data object
   }
 
   // Keys of edges that are currently in the graph
@@ -343,7 +352,6 @@ const updateGraphEdgesData = <V, E>(
     const edgeData = oldEdgesData[key];
     if (edgeData && !currentEdgesKeys.has(key)) {
       if (!edgeData.removed) {
-        isModified = true;
         updatedEdgesData[key] = {
           ...edgeData,
           animationSettings: updateAnimationSettings(
@@ -352,6 +360,7 @@ const updateGraphEdgesData = <V, E>(
           ),
           removed: true
         };
+        isModified = true; // Mark as modified to set the new edges data object
       }
     }
   }
@@ -363,7 +372,7 @@ const updateGraphEdgesData = <V, E>(
     if (edgeData) cancelEdgeAnimations(edgeData);
     delete updatedEdgesData[key];
     removedEdges.delete(key);
-    isModified = true;
+    isModified = true; // Mark as modified to set the new edges data object
   }
 
   return isModified ? updatedEdgesData : oldEdgesData;
@@ -382,12 +391,12 @@ const updateGraphEdgeLabelsData = <E>(
     const oldLabelData = oldEdgeLabelsData[key];
     // Update label data if it is not rendered yet or its value was changed
     if (edgeData && (!oldLabelData || oldLabelData.value !== edgeData.value)) {
-      isModified = true;
       updatedEdgeLabelsData[key] = {
         ...edgeData.label,
         animationProgress: edgeData.animationProgress,
         value: edgeData.value
       };
+      isModified = true; // Mark as modified to set the new labels data object
     }
   }
 
@@ -396,7 +405,7 @@ const updateGraphEdgeLabelsData = <E>(
   for (const key in oldEdgeLabelsData) {
     if (!edgesData[key]) {
       delete updatedEdgeLabelsData[key];
-      isModified = true;
+      isModified = true; // Mark as modified to set the new labels data object
     }
   }
 

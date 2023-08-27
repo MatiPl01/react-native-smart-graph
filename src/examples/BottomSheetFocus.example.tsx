@@ -177,19 +177,27 @@ export default function BottomSheetFocus() {
 
   useEffect(() => {
     setInterval(() => {
-      roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
-      minRowDistance.value = Math.random() * 100 + 40;
-      minColumnDistance.value = Math.random() * 50 + 20;
+      // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
+      // minRowDistance.value = Math.random() * 100 + 40;
+      // minColumnDistance.value = Math.random() * 50 + 20;
       // vertexRadius.value = withTiming(Math.random() * 30 + 10, {
       //   duration: 500
       // }); // TODO - fix vertex radius issues (it cannot be removed)
-      if (graph.hasVertex('VV')) {
-        graph.removeVertex('VV');
+      // if (graph.hasVertex('VV')) {
+      //   graph.removeVertex('VV');
+      // } else {
+      //   graph.insertEdge({
+      //     key: 'EE',
+      //     from: 'V1',
+      //     to: 'VV'
+      //   });
+      // }
+      if (graph.hasEdge('E3')) {
+        graph.removeEdge('E3');
       } else {
         graph.insertEdge({
-          key: 'EE',
-          from: 'V1',
-          to: 'VV'
+          key: 'E3',
+          vertices: ['V1', 'V3']
         });
       }
     }, 500);
@@ -219,12 +227,15 @@ export default function BottomSheetFocus() {
               }
             },
             placement: {
-              strategy: 'trees',
+              strategy: 'orbits',
               roots,
-              minRowDistance,
-              minColumnDistance
+              minVertexDistance: minRowDistance
+              // minColumnDistance
             },
             components: {
+              arrow: {
+                scale: 0.4
+              },
               vertex: {
                 radius: vertexRadius
               },
