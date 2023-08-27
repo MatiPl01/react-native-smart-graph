@@ -12,6 +12,7 @@ import {
 } from '@/types/components';
 import { EdgeComponentData, LabelComponentData } from '@/types/data';
 import { Unsharedify } from '@/types/utils';
+import { unsharedify } from '@/utils/objects';
 import {
   calcOrthogonalUnitVector,
   translateAlongVector
@@ -100,19 +101,19 @@ const getLabelTransform = <E>(
   };
 };
 
-type CustomReactionProps<S> = ReactionProps &
-  S & {
-    transform: {
-      edge: EdgeTranslation;
-      label: Unsharedify<LabelComponentData<any>['transform']>;
-    };
+type CustomReactionProps<S> = ReactionProps & {
+  customProps: Unsharedify<S>;
+  transform: {
+    edge: EdgeTranslation;
+    label: Unsharedify<LabelComponentData<any>['transform']>;
   };
+};
 
 export const useCurvedEdge = <
   P extends
     | DirectedCurvedEdgeComponentProps<any, any>
     | UndirectedCurvedEdgeComponentProps<any, any>,
-  S extends Record<string, any>
+  S extends Record<string, SharedValue<any>>
 >(
   inputProps: P,
   getPointsOrder: EdgePointsOrderGetter,
@@ -146,16 +147,16 @@ export const useCurvedEdge = <
 
   useAnimatedReaction(
     () => ({
+      customProps: unsharedify(additionalProps),
       label: {
         displayed: labelDisplayed.value,
         scale: labelScale.value
       },
       points: points.value,
       progress: transformProgress.value,
-      r: vertexRadius.value,
-      ...additionalProps
+      r: vertexRadius
     }),
-    props => {
+    ({ customProps, ...props }) => {
       // Update the source offset if the new transition started
       let beginOffset = startOffset.value;
       if (props.progress === 0) {
@@ -179,6 +180,7 @@ export const useCurvedEdge = <
       // Additional reaction
       reaction?.({
         ...props,
+        customProps,
         transform: {
           edge: edgeTransform,
           label: labelData.transform.value
@@ -187,7 +189,8 @@ export const useCurvedEdge = <
       // At the end, update shared values
       path.value = edgeTransform.path;
       currentOffset.value = edgeTransform.offset;
-    }
+    },
+    [vertexRadius]
   );
 
   return { path };

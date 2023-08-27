@@ -8,7 +8,7 @@ import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
   targetBoundingRect: SharedValue<BoundingRect>;
-  vertexRadius: SharedValue<number>;
+  vertexRadius: number;
 }>;
 
 function ContainerDimensionsProvider({
@@ -30,7 +30,7 @@ function ContainerDimensionsProvider({
         right: boundingRect.right.value,
         top: boundingRect.top.value
       },
-      padding: vertexRadius.value,
+      padding: vertexRadius,
       targetRect: targetBoundingRect.value
     }),
     ({ currentRect, padding, targetRect }) => {

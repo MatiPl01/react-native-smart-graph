@@ -37,8 +37,7 @@ function DirectedStraightEdgeComponent<V, E>(
   const arrowTransform = useSharedValue({
     dirVector: { x: 0, y: 0 },
     scale: 0,
-    tipPosition: { x: 0, y: 0 },
-    vertexRadius: vertexRadius.value
+    tipPosition: { x: 0, y: 0 }
   });
 
   const { p1, p2 } = useStraightEdge(
@@ -46,11 +45,10 @@ function DirectedStraightEdgeComponent<V, E>(
     calcTranslationOffset,
     // Additional settings for the arrow component
     () => ({
-      arrowScale: arrowScale.value
+      arrowScale
     }),
     ({
-      arrowScale: scale,
-      r,
+      customProps: { arrowScale: scale },
       transform: {
         edge: { offset, p1: v1, p2: v2 },
         label: { scale: labelScale }
@@ -58,13 +56,12 @@ function DirectedStraightEdgeComponent<V, E>(
     }) => {
       'worklet';
       // Update the arrow component props
-      const distance = Math.sqrt(r ** 2 - offset ** 2);
+      const distance = Math.sqrt(vertexRadius ** 2 - offset ** 2);
       const dirVector = calcUnitVector(v1, v2);
       arrowTransform.value = {
         dirVector,
         scale: Math.min(scale, labelScale),
-        tipPosition: translateAlongVector(v2, dirVector, -distance),
-        vertexRadius: r
+        tipPosition: translateAlongVector(v2, dirVector, -distance)
       };
     }
   );
@@ -83,6 +80,7 @@ function DirectedStraightEdgeComponent<V, E>(
         animationProgress={animationProgress}
         renderer={renderers.arrow}
         transform={arrowTransform}
+        vertexRadius={vertexRadius}
       />
     </>
   );

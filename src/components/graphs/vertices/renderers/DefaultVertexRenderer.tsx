@@ -8,9 +8,10 @@ import { VertexRendererProps } from '@/types/components';
 export default function DefaultVertexRenderer<V>({
   animationProgress,
   focusProgress,
-  key
+  key,
+  r
 }: VertexRendererProps<V>) {
-  const font = useFont(FONTS.rubikFont, 20);
+  const font = useFont(FONTS.rubikFont, r);
 
   const opacity = useDerivedValue(() =>
     interpolate(focusProgress.value, [0, 1], [0.5, 1])
@@ -23,10 +24,10 @@ export default function DefaultVertexRenderer<V>({
   }
 
   return (
-    <Group opacity={opacity} origin={{ x: 20, y: 20 }} transform={transform}>
-      <Circle color='gold' r={20} />
-      <Circle color='black' r={15} />
-      <Text color='white' font={font} text={key} x={-10} y={40} />
+    <Group opacity={opacity} origin={{ x: r, y: r }} transform={transform}>
+      <Circle color='gold' r={r} />
+      <Circle color='black' r={0.75 * r} />
+      <Text color='white' font={font} text={key} x={-r / 2} y={2 * r} />
     </Group>
   );
 }

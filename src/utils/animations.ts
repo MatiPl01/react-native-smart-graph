@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable import/no-unused-modules */
 import {
   cancelAnimation,
   isSharedValue,
@@ -45,12 +44,13 @@ const updateVerticesTransform = <V>(
 ): void => {
   'worklet';
   for (const [key, vertexData] of Object.entries(verticesData)) {
-    const targetPosition = verticesPositions[key];
+    // If there is no target position, the vertex must have been removed
+    // (it will be transitioned to the center of the canvas - it's initial position)
+    const targetPosition = verticesPositions[key] ?? { x: 0, y: 0 };
     if (
-      !targetPosition ||
       // If vertex is already being transitioned to the target position, don't update it
-      (areVectorsEqual(targetPosition, vertexData.points.value.target) &&
-        vertexData.transformProgress.value > 0)
+      areVectorsEqual(targetPosition, vertexData.points.value.target) &&
+      vertexData.transformProgress.value > 0
     ) {
       continue;
     }
@@ -90,8 +90,16 @@ const updateEdgesTransform = <E>(
 ): void => {
   'worklet';
   for (const edgeData of Object.values(edgesData)) {
-    const v1TargetPosition = verticesPositions[edgeData.v1Key];
-    const v2TargetPosition = verticesPositions[edgeData.v2Key];
+    // If there are mp target vertices positions, the edge must have been removed
+    // (it will be transitioned with removed vertices to the center of the canvas)
+    const v1TargetPosition = verticesPositions[edgeData.v1Key] ?? {
+      x: 0,
+      y: 0
+    };
+    const v2TargetPosition = verticesPositions[edgeData.v2Key] ?? {
+      x: 0,
+      y: 0
+    };
     const ordering = edgeData.ordering.value;
 
     // Check if ordering has changed
@@ -100,7 +108,6 @@ const updateEdgesTransform = <E>(
       ordering.source.edgesCount !== ordering.target.edgesCount ||
       ordering.source.order !== ordering.target.order
     ) {
-      console.log('edge ordering modified', edgeData.key);
       // Reset source and target positions to the current position
       // (it ensures that the animation will be executed only once when the ordering changes)
       edgeData.ordering.value = {
@@ -122,12 +129,9 @@ const updateEdgesTransform = <E>(
             edgeData.points.value.v2Source,
             edgeData.points.value.v2Target
           ))) ||
-      (v1TargetPosition &&
-        v2TargetPosition &&
-        (!areVectorsEqual(v1TargetPosition, edgeData.points.value.v1Target) ||
-          !areVectorsEqual(v2TargetPosition, edgeData.points.value.v2Target)))
+      !areVectorsEqual(v1TargetPosition, edgeData.points.value.v1Target) ||
+      !areVectorsEqual(v2TargetPosition, edgeData.points.value.v2Target)
     ) {
-      console.log('edge position modified', edgeData.key);
       // Reset source and target positions to the current position
       // (it prevents animation from jumping when progress is not updated yet)
       const currentV1Position = calcTranslationOnProgress(
@@ -161,9 +165,9 @@ const updateEdgesTransform = <E>(
     if (isPositionModified) {
       edgeData.points.value = {
         v1Source: edgeData.points.value.v1Target,
-        v1Target: v1TargetPosition!,
+        v1Target: v1TargetPosition,
         v2Source: edgeData.points.value.v2Target,
-        v2Target: v2TargetPosition!
+        v2Target: v2TargetPosition
       };
     }
     // Start the animation

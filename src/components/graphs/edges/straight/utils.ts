@@ -12,6 +12,7 @@ import {
 } from '@/types/components/private/edge';
 import { EdgeComponentData, LabelComponentData } from '@/types/data';
 import { Unsharedify } from '@/types/utils';
+import { unsharedify } from '@/utils/objects';
 import {
   addVectors,
   calcOrthogonalVector,
@@ -30,6 +31,7 @@ type ReactionProps = {
   points: Unsharedify<EdgeComponentData<unknown>['points']>;
   progress: number;
   r: number;
+  vertexScale: number;
 };
 
 type EdgeTranslation = {
@@ -57,19 +59,16 @@ const getEdgeTransform = (
     offsetFactor,
     points: { v1Source, v1Target, v2Source, v2Target },
     progress,
-    r
+    r,
+    vertexScale
   }: ReactionProps
 ): EdgeTranslation => {
   'worklet';
   const v1 = calcTranslationOnProgress(progress, v1Source, v1Target);
   const v2 = calcTranslationOnProgress(progress, v2Source, v2Target);
   const directionVector = calcUnitVector(v2, v1);
-  const targetOffset = calcTranslationOffset(
-    order,
-    edgesCount,
-    offsetFactor,
-    r
-  );
+  const targetOffset =
+    vertexScale * calcTranslationOffset(order, edgesCount, offsetFactor, r);
   const offset = calcValueOnProgress(progress, startOffset, targetOffset);
   const translationDirection = calcOrthogonalVector(directionVector);
   const translationVector = multiplyVector(translationDirection, offset);
@@ -89,13 +88,15 @@ const getLabelTransform = <E>(
   {
     target: { edgesCount }
   }: Unsharedify<EdgeComponentData<unknown>['ordering']>,
-  { label, offsetFactor, progress }: ReactionProps
+  { label, offsetFactor, progress, vertexScale }: ReactionProps
 ): Unsharedify<LabelComponentData<E>['transform']> => {
   'worklet';
-  const targetScale = Math.min(
-    (2 * offsetFactor) / (edgesCount > 0 ? edgesCount - 1 : 1),
-    label.scale
-  );
+  const targetScale =
+    vertexScale *
+    Math.min(
+      (2 * offsetFactor) / (edgesCount > 0 ? edgesCount - 1 : 1),
+      label.scale
+    );
 
   return {
     center: getLineCenter(p1, p2),
@@ -105,19 +106,19 @@ const getLabelTransform = <E>(
   };
 };
 
-type CustomReactionProps<S> = ReactionProps &
-  S & {
-    transform: {
-      edge: EdgeTranslation;
-      label: Unsharedify<LabelComponentData<any>['transform']>;
-    };
+type CustomReactionProps<S> = ReactionProps & {
+  customProps: Unsharedify<S>;
+  transform: {
+    edge: EdgeTranslation;
+    label: Unsharedify<LabelComponentData<any>['transform']>;
   };
+};
 
 export const useStraightEdge = <
   P extends
     | DirectedStraightEdgeComponentProps<any, any>
     | UndirectedStraightEdgeComponentProps<any, any>,
-  S extends Record<string, any>
+  S extends Record<string, SharedValue<any>>
 >(
   inputProps: P,
   calcTranslationOffset: TranslationOffsetGetter,
@@ -132,7 +133,7 @@ export const useStraightEdge = <
     settings: {
       edge: { maxOffsetFactor },
       label: { displayed: labelDisplayed, scale: labelScale },
-      vertex: { radius: vertexRadius }
+      vertex: { radius: vertexRadius, scale: vertexScale }
     }
   } = inputProps;
 
@@ -158,6 +159,7 @@ export const useStraightEdge = <
 
   useAnimatedReaction(
     () => ({
+      customProps: unsharedify(additionalProps),
       label: {
         displayed: labelDisplayed.value,
         scale: labelScale.value
@@ -165,10 +167,11 @@ export const useStraightEdge = <
       offsetFactor: maxOffsetFactor.value,
       points: points.value,
       progress: transformProgress.value,
-      r: vertexRadius.value,
+      r: vertexRadius,
+      vertexScale: vertexScale.value,
       ...additionalProps
     }),
-    props => {
+    ({ customProps, ...props }) => {
       // Update the source offset if the new transition started
       let beginOffset = startOffset.value;
       if (props.progress === 0) {
@@ -198,6 +201,7 @@ export const useStraightEdge = <
       // Additional reaction
       reaction?.({
         ...props,
+        customProps,
         transform: {
           edge: edgeTransform,
           label: labelData.transform.value
@@ -207,7 +211,8 @@ export const useStraightEdge = <
       p1.value = edgeTransform.p1;
       p2.value = edgeTransform.p2;
       currentOffset.value = edgeTransform.offset;
-    }
+    },
+    [vertexRadius]
   );
 
   return { p1, p2 };

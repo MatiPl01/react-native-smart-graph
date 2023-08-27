@@ -14,7 +14,7 @@ export type VertexRendererProps<V> = SharedRenderersProps & {
   focusKey: SharedValue<null | string>;
   focusProgress: SharedValue<number>;
   key: string;
-  radius: SharedValue<number>;
+  r: number;
   scale: SharedValue<number>;
   value?: V;
 };
@@ -67,8 +67,8 @@ export type LabelRenderer<E> = (
  */
 export type ArrowRendererProps = SharedRenderersProps & {
   edgeRotation: SharedValue<number>;
+  s: number;
   scale: SharedValue<number>;
-  vertexRadius: SharedValue<number>;
 };
 
 export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;

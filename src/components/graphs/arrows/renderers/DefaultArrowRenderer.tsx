@@ -6,7 +6,8 @@ import { useDerivedValue } from 'react-native-reanimated';
 import { ArrowRendererProps } from '@/types/components';
 
 export default function DefaultArrowRenderer({
-  animationProgress
+  animationProgress,
+  s
 }: ArrowRendererProps) {
   const color = '#999';
   const colors = [color, color, color];
@@ -20,9 +21,9 @@ export default function DefaultArrowRenderer({
   return (
     <Vertices
       vertices={[
-        { x: -10, y: -5 },
-        { x: -10, y: 5 },
-        { x: 10, y: 0 }
+        { x: -s / 2, y: -s / 4 },
+        { x: -s / 2, y: s / 4 },
+        { x: s / 2, y: 0 }
       ]}
       colors={colors}
       transform={transform}

@@ -155,7 +155,8 @@ const DEFAULT_COMPONENTS_SETTINGS: {
     scale: 0.5
   },
   vertex: {
-    radius: 20
+    radius: 20,
+    scale: 1
   }
 };
 
@@ -303,7 +304,7 @@ export const getUpdateConfig = <V, E>({
         scale: 'shared'
       },
       vertex: {
-        radius: 'shared'
+        scale: 'shared'
       }
     },
     focus: {

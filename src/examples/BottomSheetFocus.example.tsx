@@ -13,7 +13,8 @@ import {
   Extrapolate,
   interpolate,
   useDerivedValue,
-  useSharedValue
+  useSharedValue,
+  withTiming
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
@@ -144,7 +145,7 @@ export default function BottomSheetFocus() {
 
   const minRowDistance = useSharedValue(100);
   const minColumnDistance = useSharedValue(50);
-  const vertexRadius = useSharedValue(20);
+  const vertexScale = useSharedValue(1);
 
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
@@ -176,12 +177,12 @@ export default function BottomSheetFocus() {
 
   useEffect(() => {
     setInterval(() => {
-      // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
-      // minRowDistance.value = Math.random() * 100 + 40;
-      // minColumnDistance.value = Math.random() * 50 + 20;
-      // vertexRadius.value = withTiming(Math.random() * 30 + 10, {
-      //   duration: 500
-      // }); // TODO - fix vertex radius issues (it cannot be removed)
+      roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
+      minRowDistance.value = Math.random() * 100 + 40;
+      minColumnDistance.value = Math.random() * 50 + 20;
+      vertexScale.value = withTiming(Math.random(), {
+        duration: 500
+      });
       if (graph.hasVertex('VV')) {
         graph.removeVertex('VV');
       } else {
@@ -223,23 +224,24 @@ export default function BottomSheetFocus() {
               }
             },
             placement: {
-              strategy: 'orbits',
+              strategy: 'trees',
               roots,
-              minVertexDistance: minRowDistance
-              // minColumnDistance
+              minRowDistance,
+              minColumnDistance
             },
             components: {
               arrow: {
                 scale: 0.5
               },
               vertex: {
-                radius: vertexRadius
+                radius: 20,
+                scale: vertexScale
               },
               label: {
                 displayed: true
               },
               edge: {
-                type: 'curved'
+                type: 'straight'
               }
             }
             // animations: null

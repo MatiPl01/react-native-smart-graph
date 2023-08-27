@@ -10,6 +10,6 @@ export type ArrowComponentProps = {
     dirVector: Vector;
     scale: number;
     tipPosition: Vector;
-    vertexRadius: number;
   }>;
+  vertexRadius: number;
 };

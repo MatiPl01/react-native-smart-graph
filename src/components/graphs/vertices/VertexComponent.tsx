@@ -20,7 +20,7 @@ function VertexComponent<V>({
   focusContext,
   onRemove,
   renderer,
-  settings
+  settings: { radius: r, scale: userScale }
 }: VertexComponentProps<V>) {
   const { key, scale } = restData;
 
@@ -60,15 +60,30 @@ function VertexComponent<V>({
   // Vertex transform handler
   useAnimatedReaction(
     () => ({
-      currentScale: scale.value,
       points: points.value,
-      progress: transformProgress.value
+      progress: transformProgress.value,
+      scales: {
+        internal: scale.value,
+        user: userScale.value
+      }
     }),
-    ({ currentScale, points: { source, target }, progress }) => {
+    ({ points: { source, target }, progress, scales }) => {
       transform.value = [
-        { scale: Math.max(0, currentScale) },
-        { translateX: calcValueOnProgress(progress, source.x, target.x) },
-        { translateY: calcValueOnProgress(progress, source.y, target.y) }
+        { scale: Math.max(0, scales.internal * scales.user) },
+        ...(scales.user > 0
+          ? [
+              {
+                translateX:
+                  calcValueOnProgress(progress, source.x, target.x) /
+                  scales.user
+              },
+              {
+                translateY:
+                  calcValueOnProgress(progress, source.y, target.y) /
+                  scales.user
+              }
+            ]
+          : [])
       ];
     }
   );
@@ -78,11 +93,12 @@ function VertexComponent<V>({
     <Group transform={transform}>
       <RenderedVertexComponent
         {...restData}
-        {...settings}
         animationProgress={animationProgress}
         focusKey={focusContext.focus.key}
         focusProgress={focusProgress}
+        r={r}
         renderer={renderer}
+        scale={userScale}
         vertexKey={key}
       />
     </Group>

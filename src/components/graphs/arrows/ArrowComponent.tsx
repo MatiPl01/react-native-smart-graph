@@ -7,14 +7,15 @@ import { translateAlongVector } from '@/utils/vectors';
 export default function ArrowComponent({
   animationProgress,
   renderer,
-  transform: arrowTransform
+  transform: arrowTransform,
+  vertexRadius
 }: ArrowComponentProps) {
   // RENDERER PROPS
   const rendererProps = {
     animationProgress,
     edgeRotation: useSharedValue(0),
-    scale: useSharedValue(0),
-    vertexRadius: useSharedValue(0)
+    s: vertexRadius,
+    scale: useSharedValue(0)
   };
 
   // HELPER VALUES
@@ -22,7 +23,7 @@ export default function ArrowComponent({
 
   useAnimatedReaction(
     () => arrowTransform.value,
-    ({ dirVector, scale, tipPosition, vertexRadius }) => {
+    ({ dirVector, scale, tipPosition }) => {
       const center = translateAlongVector(
         tipPosition,
         dirVector,
@@ -38,8 +39,8 @@ export default function ArrowComponent({
       ];
       rendererProps.edgeRotation.value = rotation;
       rendererProps.scale.value = scale;
-      rendererProps.vertexRadius.value = vertexRadius;
-    }
+    },
+    [vertexRadius]
   );
 
   return <Group transform={transform}>{renderer(rendererProps)}</Group>;

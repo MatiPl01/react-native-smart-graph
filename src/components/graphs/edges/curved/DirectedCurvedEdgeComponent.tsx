@@ -24,7 +24,7 @@ function DirectedCurvedEdgeComponent<V, E>(
     renderers,
     settings: {
       arrow: { scale: arrowScale },
-      vertex: { radius: vertexRadius }
+      vertex: { radius: vertexRadius, scale: vertexScale }
     }
   } = props;
 
@@ -32,30 +32,28 @@ function DirectedCurvedEdgeComponent<V, E>(
   const arrowTransform = useSharedValue({
     dirVector: { x: 0, y: 0 },
     scale: 0,
-    tipPosition: { x: 0, y: 0 },
-    vertexRadius: vertexRadius.value
+    tipPosition: { x: 0, y: 0 }
   });
 
   const { path } = useCurvedEdge(
     props,
     getEdgePointsOrder,
     () => ({
-      arrowScale: arrowScale.value
+      arrowScale,
+      vertexScale
     }),
     ({
-      arrowScale: scale,
-      r,
+      customProps,
       transform: {
-        edge: { parabolaPoint, v1, v2 },
-        label: { scale: labelScale }
+        edge: { parabolaPoint, v1, v2 }
       }
     }) => {
       'worklet';
+      // Update the arrow component props
       const center = {
         x: (v1.x + v2.x) / 2,
         y: (v1.y + v2.y) / 2
       };
-      // Update the arrow component props
       // 1. Get the rotation angle of the coordinate system
       const rotationAngle = Math.atan2(v2.y - v1.y, v2.x - v1.x);
       // 2. Rotate points to the new coordinate system
@@ -65,12 +63,13 @@ function DirectedCurvedEdgeComponent<V, E>(
       const { x: p, y: q } = plainParabolaVertex;
       const a = (plainP2.y - q) / (plainP2.x - p) ** 2;
       // 4. Calculate the edge arrow tip position
+      console.log(props.data.key);
       const plainArrowTipPosition = calcApproxPointOnParabola(
         plainP2.x,
         a,
         p,
         q,
-        -r
+        -vertexRadius * customProps.vertexScale
       );
       const rotatedArrowTipPosition = rotate(
         plainArrowTipPosition,
@@ -83,7 +82,7 @@ function DirectedCurvedEdgeComponent<V, E>(
         a,
         p,
         q,
-        scale * r
+        vertexRadius * customProps.arrowScale
       );
       const rotatedArrowEndPosition = rotate(
         plainArrowEndPosition,
@@ -97,9 +96,8 @@ function DirectedCurvedEdgeComponent<V, E>(
       // 6. Update the values
       arrowTransform.value = {
         dirVector,
-        scale,
-        tipPosition: rotatedArrowTipPosition,
-        vertexRadius: r
+        scale: customProps.arrowScale * customProps.vertexScale,
+        tipPosition: rotatedArrowTipPosition
       };
     }
   );
@@ -117,6 +115,7 @@ function DirectedCurvedEdgeComponent<V, E>(
         animationProgress={animationProgress}
         renderer={renderers.arrow}
         transform={arrowTransform}
+        vertexRadius={vertexRadius}
       />
     </>
   );
