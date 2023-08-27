@@ -1,6 +1,15 @@
-/* eslint-disable import/no-unused-modules */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vector } from '@shopify/react-native-skia';
+import {
+  SharedValue,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated';
 
+import {
+  DirectedStraightEdgeComponentProps,
+  UndirectedStraightEdgeComponentProps
+} from '@/types/components/private/edge';
 import { EdgeComponentData, LabelComponentData } from '@/types/data';
 import { Unsharedify } from '@/types/utils';
 import {
@@ -12,7 +21,7 @@ import {
 } from '@/utils/vectors';
 import { calcTranslationOnProgress, calcValueOnProgress } from '@/utils/views';
 
-type Props = {
+type ReactionProps = {
   label: {
     displayed: boolean;
     scale: number;
@@ -38,7 +47,7 @@ export type TranslationOffsetGetter = (
   vertexRadius: number
 ) => number;
 
-export const getEdgeTranslation = (
+const getEdgeTransform = (
   calcTranslationOffset: TranslationOffsetGetter,
   startOffset: number,
   {
@@ -49,7 +58,7 @@ export const getEdgeTranslation = (
     points: { v1Source, v1Target, v2Source, v2Target },
     progress,
     r
-  }: Props
+  }: ReactionProps
 ): EdgeTranslation => {
   'worklet';
   const v1 = calcTranslationOnProgress(progress, v1Source, v1Target);
@@ -74,13 +83,13 @@ export const getEdgeTranslation = (
   };
 };
 
-export const getLabelTransform = <E>(
+const getLabelTransform = <E>(
   { p1, p2, v1, v2 }: EdgeTranslation,
   startScale: number,
   {
     target: { edgesCount }
   }: Unsharedify<EdgeComponentData<unknown>['ordering']>,
-  { label, offsetFactor, progress }: Props
+  { label, offsetFactor, progress }: ReactionProps
 ): Unsharedify<LabelComponentData<E>['transform']> => {
   'worklet';
   const targetScale = Math.min(
@@ -94,4 +103,111 @@ export const getLabelTransform = <E>(
     p2: v2,
     scale: calcValueOnProgress(progress, startScale, targetScale)
   };
+};
+
+type CustomReactionProps<S> = ReactionProps &
+  S & {
+    transform: {
+      edge: EdgeTranslation;
+      label: Unsharedify<LabelComponentData<any>['transform']>;
+    };
+  };
+
+export const useStraightEdge = <
+  P extends
+    | DirectedStraightEdgeComponentProps<any, any>
+    | UndirectedStraightEdgeComponentProps<any, any>,
+  S extends Record<string, any>
+>(
+  inputProps: P,
+  calcTranslationOffset: TranslationOffsetGetter,
+  selector?: (props: P) => S,
+  reaction?: (props: CustomReactionProps<S>) => void
+): {
+  p1: SharedValue<Vector>;
+  p2: SharedValue<Vector>;
+} => {
+  const {
+    data: { label: labelData, ordering, points, transformProgress },
+    settings: {
+      edge: { maxOffsetFactor },
+      label: { displayed: labelDisplayed, scale: labelScale },
+      vertex: { radius: vertexRadius }
+    }
+  } = inputProps;
+
+  // EDGE RENDERER PROPS
+  const p1 = useSharedValue({
+    x: points.value.v1Source.x,
+    y: points.value.v1Source.y
+  });
+  const p2 = useSharedValue({
+    x: points.value.v2Source.x,
+    y: points.value.v2Source.y
+  });
+
+  // HELPER VALUES
+  // Offset
+  const currentOffset = useSharedValue(0);
+  const startOffset = useSharedValue(0);
+  // Label scale
+  const labelStartScale = useSharedValue(0);
+
+  // ADDITIONAL PROPS
+  const additionalProps = selector?.(inputProps);
+
+  useAnimatedReaction(
+    () => ({
+      label: {
+        displayed: labelDisplayed.value,
+        scale: labelScale.value
+      },
+      offsetFactor: maxOffsetFactor.value,
+      points: points.value,
+      progress: transformProgress.value,
+      r: vertexRadius.value,
+      ...additionalProps
+    }),
+    props => {
+      // Update the source offset if the new transition started
+      let beginOffset = startOffset.value;
+      if (props.progress === 0) {
+        beginOffset = startOffset.value = currentOffset.value;
+      }
+      // Get translated edge data
+      const edgeTransform = getEdgeTransform(
+        calcTranslationOffset,
+        beginOffset,
+        ordering.value,
+        props
+      );
+      p1.value = edgeTransform.p1;
+      p2.value = edgeTransform.p2;
+      currentOffset.value = edgeTransform.offset;
+      // Update label data (if it is displayed)
+      if (props.label.displayed) {
+        let beginScale = labelStartScale.value;
+        if (props.progress === 0) {
+          beginScale = labelStartScale.value = labelData.transform.value.scale;
+        }
+        const labelTransform = getLabelTransform(
+          edgeTransform,
+          beginScale,
+          ordering.value,
+          props
+        );
+        labelData.transform.value = labelTransform;
+      }
+      // Additional reaction
+      reaction?.({
+        ...props,
+        transform: {
+          edge: edgeTransform,
+          label: labelData.transform.value
+        }
+      } as CustomReactionProps<S>);
+    }
+  );
+
+  return { p1, p2 };
 };

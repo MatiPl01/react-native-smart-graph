@@ -1,11 +1,12 @@
 import { memo } from 'react';
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 
 import { ArrowComponent } from '@/components/graphs/arrows';
 import { DirectedStraightEdgeComponentProps } from '@/types/components';
 import { calcUnitVector, translateAlongVector } from '@/utils/vectors';
 
-import { getEdgeTranslationPoints, getLabelTransform } from './utils';
+import StraightEdgeComponent from './StraightEdgeComponent';
+import { useStraightEdge } from './utils';
 
 const calcTranslationOffset = (
   order: number,
@@ -20,82 +21,64 @@ const calcTranslationOffset = (
     : maxTranslationOffset * (edgesCount - 1);
 };
 
-function DirectedStraightEdgeComponent<V, E>({
-  data: {
-    animationProgress,
-    key,
-    label: labelData,
-    ordering,
-    transform: { points: transformPoints, progress: transformProgress },
-    value
-  },
-  renderers,
-  settings: {
-    arrow: { scale: arrowScale },
-    edge: { maxOffsetFactor },
-    label: { displayed: labelDisplayed, scale: labelScale },
-    vertex: { radius: vertexRadius }
-  }
-}: DirectedStraightEdgeComponentProps<V, E>) {
-  // EDGE RENDERER PROPS
-  const p1 = useSharedValue({
-    x: transformPoints.value.v1Source.x,
-    y: transformPoints.value.v1Source.y
-  });
-  const p2 = useSharedValue({
-    x: transformPoints.value.v2Source.x,
-    y: transformPoints.value.v2Source.y
-  });
+function DirectedStraightEdgeComponent<V, E>(
+  props: DirectedStraightEdgeComponentProps<V, E>
+) {
+  const {
+    data: { animationProgress, key, value },
+    renderers,
+    settings: {
+      arrow: { scale: arrowScale },
+      vertex: { radius: vertexRadius }
+    }
+  } = props;
 
   // ARROW COMPONENT PROPS
   const arrowTransform = useSharedValue({
-    dirVector: calcUnitVector(p2.value, p1.value),
-    scale: arrowScale.value,
-    tipPosition: p2.value,
+    dirVector: { x: 0, y: 0 },
+    scale: 0,
+    tipPosition: { x: 0, y: 0 },
     vertexRadius: vertexRadius.value
   });
 
-  useAnimatedReaction(
+  const { p1, p2 } = useStraightEdge(
+    props,
+    calcTranslationOffset,
+    // Additional settings for the arrow component
     () => ({
-      label: {
-        displayed: labelDisplayed.value,
-        scale: labelScale.value
-      },
-      offsetFactor: maxOffsetFactor.value,
-      ordering: ordering.value,
-      points: transformPoints.value,
-      progress: transformProgress.value,
-      r: vertexRadius.value
+      arrowScale: arrowScale.value
     }),
-    props => {
-      const res = getEdgeTranslationPoints(calcTranslationOffset, props);
-      p1.value = res.p1;
-      p2.value = res.p2;
-      // Update label data (if it is displayed)
-      const labelTransform = getLabelTransform(res, props);
-      if (props.label.displayed) {
-        labelData.transform.value = labelTransform;
+    ({
+      arrowScale: scale,
+      r,
+      transform: {
+        edge: { offset, p1: v1, p2: v2 },
+        label: { scale: labelScale }
       }
+    }) => {
+      'worklet';
       // Update the arrow component props
-      const dirVector = calcUnitVector(res.p1, res.p2);
+      const distance = Math.sqrt(r ** 2 - offset ** 2);
+      const dirVector = calcUnitVector(v1, v2);
       arrowTransform.value = {
         dirVector,
-        scale: Math.min(arrowScale.value, labelTransform.scale),
-        tipPosition: translateAlongVector(res.p2, dirVector, -props.r),
-        vertexRadius: props.r
+        scale: Math.min(scale, labelScale),
+        tipPosition: translateAlongVector(v2, dirVector, -distance),
+        vertexRadius: r
       };
     }
   );
 
   return (
     <>
-      {renderers.edge({
-        animationProgress,
-        key,
-        p1,
-        p2,
-        value
-      })}
+      <StraightEdgeComponent
+        animationProgress={animationProgress}
+        edgeKey={key}
+        p1={p1}
+        p2={p2}
+        renderer={renderers.edge}
+        value={value}
+      />
       <ArrowComponent
         animationProgress={animationProgress}
         renderer={renderers.arrow}

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  DirectedGraph,
   DirectedGraphComponent,
   DirectedGraphData,
   GraphView,
   GraphViewControls,
   ObjectFit,
-  UndirectedGraph,
   UndirectedGraphData,
   VertexPressHandler
 } from 'react-native-smart-graph';
@@ -104,7 +104,7 @@ const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
 }));
 
 export default function BottomSheetFocus() {
-  const graph = useMemo(() => new UndirectedGraph(GRAPH1), []);
+  const graph = useMemo(() => new DirectedGraph(GRAPH2), []);
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
@@ -197,7 +197,8 @@ export default function BottomSheetFocus() {
       } else {
         graph.insertEdge({
           key: 'E3',
-          vertices: ['V1', 'V3']
+          from: 'V1',
+          to: 'V2'
         });
       }
     }, 500);

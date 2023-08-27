@@ -1,10 +1,21 @@
 /* eslint-disable import/no-unused-modules */
 import { Vertices } from '@shopify/react-native-skia';
 import React from 'react';
+import { useDerivedValue } from 'react-native-reanimated';
 
-export default function DefaultArrowRenderer() {
+import { ArrowRendererProps } from '@/types/components';
+
+export default function DefaultArrowRenderer({
+  animationProgress
+}: ArrowRendererProps) {
   const color = '#999';
   const colors = [color, color, color];
+
+  const transform = useDerivedValue(() => [
+    {
+      scale: animationProgress.value
+    }
+  ]);
 
   return (
     <Vertices
@@ -14,6 +25,7 @@ export default function DefaultArrowRenderer() {
         { x: 20, y: 0 }
       ]}
       colors={colors}
+      transform={transform}
     />
   );
 }
