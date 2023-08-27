@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  DirectedGraph,
   DirectedGraphComponent,
   DirectedGraphData,
   GraphView,
   GraphViewControls,
   ObjectFit,
-  UndirectedGraph,
-  UndirectedGraphData,
   VertexPressHandler
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -18,20 +17,20 @@ import {
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
-const GRAPH1: UndirectedGraphData = {
+const GRAPH1: DirectedGraphData = {
   edges: [
-    { key: 'E1', vertices: ['V1', 'V2'] },
-    { key: 'E2', vertices: ['V1', 'V3'] },
-    { key: 'E3', vertices: ['V1', 'V4'] },
-    { key: 'E12', vertices: ['V1', 'V2'] },
-    { key: 'E22', vertices: ['V1', 'V3'] },
-    { key: 'E32', vertices: ['V1', 'V4'] },
-    { key: 'E13', vertices: ['V1', 'V2'] },
-    { key: 'E23', vertices: ['V1', 'V3'] },
-    { key: 'E33', vertices: ['V1', 'V4'] },
-    { key: 'E14', vertices: ['V1', 'V2'] },
-    { key: 'E24', vertices: ['V1', 'V3'] },
-    { key: 'E34', vertices: ['V1', 'V4'] }
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V1', to: 'V3' },
+    { key: 'E3', from: 'V1', to: 'V4' },
+    { key: 'E12', from: 'V1', to: 'V2' },
+    { key: 'E22', from: 'V1', to: 'V3' },
+    { key: 'E32', from: 'V1', to: 'V4' },
+    { key: 'E13', from: 'V1', to: 'V2' },
+    { key: 'E23', from: 'V1', to: 'V3' },
+    { key: 'E33', from: 'V1', to: 'V4' },
+    { key: 'E14', from: 'V1', to: 'V2' },
+    { key: 'E24', from: 'V1', to: 'V3' },
+    { key: 'E34', from: 'V1', to: 'V4' }
   ],
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
@@ -104,7 +103,7 @@ const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
 }));
 
 export default function BottomSheetFocus() {
-  const graph = useMemo(() => new UndirectedGraph(GRAPH1), []);
+  const graph = useMemo(() => new DirectedGraph(GRAPH1), []);
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
@@ -183,24 +182,21 @@ export default function BottomSheetFocus() {
       // vertexRadius.value = withTiming(Math.random() * 30 + 10, {
       //   duration: 500
       // }); // TODO - fix vertex radius issues (it cannot be removed)
-      // if (graph.hasVertex('VV')) {
-      //   graph.removeVertex('VV');
-      // } else {
-      //   graph.insertEdge({
-      //     key: 'EE',
-      //     from: 'V1',
-      //     to: 'VV'
-      //   });
-      // }
+      if (graph.hasVertex('VV')) {
+        graph.removeVertex('VV');
+      } else {
+        graph.insertVertex({ key: 'VV' });
+      }
       if (graph.hasEdge('E3')) {
         graph.removeEdge('E3');
       } else {
         graph.insertEdge({
           key: 'E3',
-          vertices: ['V1', 'V2']
+          from: 'V1',
+          to: 'V2'
         });
       }
-    }, 500);
+    }, 2000);
   }, []);
 
   return (
@@ -234,7 +230,7 @@ export default function BottomSheetFocus() {
             },
             components: {
               arrow: {
-                scale: 0.4
+                scale: 0.5
               },
               vertex: {
                 radius: vertexRadius

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vector } from '@shopify/react-native-skia';
 import {
@@ -101,13 +100,24 @@ const getLabelTransform = <E>(
   };
 };
 
+type CustomReactionProps<S> = ReactionProps &
+  S & {
+    transform: {
+      edge: EdgeTranslation;
+      label: Unsharedify<LabelComponentData<any>['transform']>;
+    };
+  };
+
 export const useCurvedEdge = <
   P extends
     | DirectedCurvedEdgeComponentProps<any, any>
-    | UndirectedCurvedEdgeComponentProps<any, any>
+    | UndirectedCurvedEdgeComponentProps<any, any>,
+  S extends Record<string, any>
 >(
   inputProps: P,
-  getPointsOrder: EdgePointsOrderGetter
+  getPointsOrder: EdgePointsOrderGetter,
+  selector?: (props: P) => S,
+  reaction?: (props: CustomReactionProps<S>) => void
 ): {
   path: SharedValue<string>;
 } => {
@@ -131,6 +141,9 @@ export const useCurvedEdge = <
   const currentOffset = useSharedValue(0);
   const startOffset = useSharedValue(0);
 
+  // ADDITIONAL PROPS
+  const additionalProps = selector?.(inputProps);
+
   useAnimatedReaction(
     () => ({
       label: {
@@ -139,7 +152,8 @@ export const useCurvedEdge = <
       },
       points: points.value,
       progress: transformProgress.value,
-      r: vertexRadius.value
+      r: vertexRadius.value,
+      ...additionalProps
     }),
     props => {
       // Update the source offset if the new transition started
@@ -154,8 +168,6 @@ export const useCurvedEdge = <
         ordering.value,
         props
       );
-      path.value = edgeTransform.path;
-      currentOffset.value = edgeTransform.offset;
       // Update label data (if it is displayed)
       if (props.label.displayed) {
         const labelTransform = getLabelTransform(
@@ -164,6 +176,17 @@ export const useCurvedEdge = <
         );
         labelData.transform.value = labelTransform;
       }
+      // Additional reaction
+      reaction?.({
+        ...props,
+        transform: {
+          edge: edgeTransform,
+          label: labelData.transform.value
+        }
+      } as CustomReactionProps<S>);
+      // At the end, update shared values
+      path.value = edgeTransform.path;
+      currentOffset.value = edgeTransform.offset;
     }
   );
 

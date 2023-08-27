@@ -181,9 +181,6 @@ export const useStraightEdge = <
         ordering.value,
         props
       );
-      p1.value = edgeTransform.p1;
-      p2.value = edgeTransform.p2;
-      currentOffset.value = edgeTransform.offset;
       // Update label data (if it is displayed)
       if (props.label.displayed) {
         let beginScale = labelStartScale.value;
@@ -206,6 +203,10 @@ export const useStraightEdge = <
           label: labelData.transform.value
         }
       } as CustomReactionProps<S>);
+      // At the end, update shared values
+      p1.value = edgeTransform.p1;
+      p2.value = edgeTransform.p2;
+      currentOffset.value = edgeTransform.offset;
     }
   );
 

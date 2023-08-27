@@ -65,7 +65,6 @@ function VertexComponent<V>({
       progress: transformProgress.value
     }),
     ({ currentScale, points: { source, target }, progress }) => {
-      console.log('vertex', key);
       transform.value = [
         { scale: Math.max(0, currentScale) },
         { translateX: calcValueOnProgress(progress, source.x, target.x) },

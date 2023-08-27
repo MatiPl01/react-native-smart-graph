@@ -26,7 +26,7 @@ export default function ArrowComponent({
       const center = translateAlongVector(
         tipPosition,
         dirVector,
-        -(scale * vertexRadius)
+        -(scale * vertexRadius) / 2
       );
       const rotation = Math.atan2(dirVector.y, dirVector.x);
 

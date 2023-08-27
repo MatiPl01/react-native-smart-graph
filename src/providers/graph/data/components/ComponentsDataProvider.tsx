@@ -111,6 +111,10 @@ function ComponentsDataProvider<V, E>({
     setComponentsData(newData);
   }, [state, graphAnimationsSettings, renderLabels, forceRemove]);
 
+  useEffect(() => {
+    console.log('>>> NEW CONTEXT VALUE');
+  }, [contextValue.verticesData, contextValue.edgesData]);
+
   const startComponentsRemoveTimeout = () => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     clearComponentsRemoveTimeout();

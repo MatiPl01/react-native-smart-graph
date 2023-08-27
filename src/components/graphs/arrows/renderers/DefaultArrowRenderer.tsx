@@ -20,9 +20,9 @@ export default function DefaultArrowRenderer({
   return (
     <Vertices
       vertices={[
-        { x: -20, y: -10 },
-        { x: -20, y: 10 },
-        { x: 20, y: 0 }
+        { x: -10, y: -5 },
+        { x: -10, y: 5 },
+        { x: 10, y: 0 }
       ]}
       colors={colors}
       transform={transform}

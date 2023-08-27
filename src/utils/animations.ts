@@ -83,8 +83,7 @@ const updateVerticesTransform = <V>(
   }
 };
 
-// // TODO - animate edges on ordering change
-const updateEdgesTransform = <V, E>(
+const updateEdgesTransform = <E>(
   edgesData: Record<string, EdgeComponentData<E>>,
   verticesPositions: PlacedVerticesPositions,
   layoutAnimationSettings?: Maybe<AllAnimationSettings>
@@ -95,13 +94,38 @@ const updateEdgesTransform = <V, E>(
     const v2TargetPosition = verticesPositions[edgeData.v2Key];
     const ordering = edgeData.ordering.value;
 
+    // Check if ordering has changed
+    let isOrderingModified = false; // This will be used to update the animation progress
+    if (
+      ordering.source.edgesCount !== ordering.target.edgesCount ||
+      ordering.source.order !== ordering.target.order
+    ) {
+      console.log('edge ordering modified', edgeData.key);
+      // Reset source and target positions to the current position
+      // (it ensures that the animation will be executed only once when the ordering changes)
+      edgeData.ordering.value = {
+        source: ordering.target,
+        target: ordering.target
+      };
+      isOrderingModified = true; // Mark as modified to update the animation progress
+    }
+
     // Check if vertices positions have changed
     let isPositionModified = false; // This will be used to update the animation progress
     if (
-      v1TargetPosition &&
-      v2TargetPosition &&
-      (!areVectorsEqual(v1TargetPosition, edgeData.points.value.v1Target) ||
-        !areVectorsEqual(v2TargetPosition, edgeData.points.value.v2Target))
+      (isOrderingModified &&
+        (!areVectorsEqual(
+          edgeData.points.value.v1Source,
+          edgeData.points.value.v1Target
+        ) ||
+          !areVectorsEqual(
+            edgeData.points.value.v2Source,
+            edgeData.points.value.v2Target
+          ))) ||
+      (v1TargetPosition &&
+        v2TargetPosition &&
+        (!areVectorsEqual(v1TargetPosition, edgeData.points.value.v1Target) ||
+          !areVectorsEqual(v2TargetPosition, edgeData.points.value.v2Target)))
     ) {
       console.log('edge position modified', edgeData.key);
       // Reset source and target positions to the current position
@@ -123,40 +147,6 @@ const updateEdgesTransform = <V, E>(
         v2Target: currentV2Position
       };
       isPositionModified = true; // Mark as modified to update the animation progress
-    } else if (
-      !areVectorsEqual(
-        edgeData.points.value.v1Source,
-        edgeData.points.value.v1Target
-      ) ||
-      !areVectorsEqual(
-        edgeData.points.value.v2Source,
-        edgeData.points.value.v2Target
-      )
-    ) {
-      // Otherwise, make the source position equal to the target position
-      // to prevent animating the edge to the previous target position
-      edgeData.points.value = {
-        v1Source: edgeData.points.value.v1Target,
-        v1Target: edgeData.points.value.v1Target,
-        v2Source: edgeData.points.value.v2Target,
-        v2Target: edgeData.points.value.v2Target
-      };
-    }
-
-    // Check if ordering has changed
-    let isOrderingModified = false; // This will be used to update the animation progress
-    if (
-      ordering.source.edgesCount !== ordering.target.edgesCount ||
-      ordering.source.order !== ordering.target.order
-    ) {
-      console.log('edge ordering modified', edgeData.key);
-      // Reset source and target positions to the current position
-      // (it ensures that the animation will be executed only once when the ordering changes)
-      edgeData.ordering.value = {
-        source: ordering.target,
-        target: ordering.target
-      };
-      isOrderingModified = true; // Mark as modified to update the animation progress
     }
 
     // Don't update the progress if neither position nor ordering has changed
@@ -166,7 +156,7 @@ const updateEdgesTransform = <V, E>(
     // Now, we can safely reset the progress
     edgeData.transformProgress.value = 0;
 
-    // Animate edge to the new target position
+    // Animate the edge to the new target position
     // Now, we can safely set the new target position
     if (isPositionModified) {
       edgeData.points.value = {
