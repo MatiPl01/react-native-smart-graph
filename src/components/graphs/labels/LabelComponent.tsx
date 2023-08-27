@@ -2,14 +2,17 @@ import { Group, Transforms2d } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { LabelComponentProps } from '@/types/components';
+import {
+  LabelComponentProps,
+  LabelRenderer,
+  LabelRendererProps
+} from '@/types/components';
 import { distanceBetweenVectors } from '@/utils/vectors';
 
 function LabelComponent<E>({
   data: { animationProgress, transform: labelTransform, value },
   edgeKey,
-  renderer,
-  ...restProps
+  renderer
 }: LabelComponentProps<E>) {
   // RENDERER PROPS
   const edgeLength = useSharedValue(0);
@@ -81,16 +84,29 @@ function LabelComponent<E>({
 
   return (
     <Group transform={transform}>
-      {renderer({
-        ...restProps,
-        animationProgress,
-        edgeLength,
-        edgeRotation,
-        key: edgeKey,
-        value
-      })}
+      <RenderedLabelComponent
+        animationProgress={animationProgress}
+        edgeKey={edgeKey}
+        edgeLength={edgeLength}
+        edgeRotation={edgeRotation}
+        renderer={renderer}
+        value={value}
+      />
     </Group>
   );
+}
+
+type RenderedLabelComponentProps<E> = Omit<LabelRendererProps<E>, 'key'> & {
+  edgeKey: string;
+  renderer: LabelRenderer<E>;
+};
+
+function RenderedLabelComponent<E>({
+  edgeKey: key,
+  renderer,
+  ...restProps
+}: RenderedLabelComponentProps<E>) {
+  return renderer({ key, ...restProps });
 }
 
 export default memo(LabelComponent) as typeof LabelComponent;

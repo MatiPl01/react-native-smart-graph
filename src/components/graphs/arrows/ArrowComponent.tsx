@@ -1,11 +1,10 @@
 import { Group, Transforms2d } from '@shopify/react-native-skia';
-import { memo } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import { ArrowComponentProps } from '@/types/components';
 import { translateAlongVector } from '@/utils/vectors';
 
-function ArrowComponent({
+export default function ArrowComponent({
   animationProgress,
   renderer,
   transform: arrowTransform
@@ -45,5 +44,3 @@ function ArrowComponent({
 
   return <Group transform={transform}>{renderer(rendererProps)}</Group>;
 }
-
-export default memo(ArrowComponent);

@@ -18,7 +18,7 @@ import {
   translateAlongVector
 } from '@/utils/vectors';
 
-import RenderedCurvedEdgeComponent from './RenderedCurvedEdgeComponent';
+import RenderedCurvedEdgeComponent from './CurvedEdgeComponent';
 
 function DirectedCurvedEdgeComponent<V, E>({
   data: {

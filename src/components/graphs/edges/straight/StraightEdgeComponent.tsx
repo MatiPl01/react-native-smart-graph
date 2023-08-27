@@ -16,8 +16,5 @@ export default function StraightEdgeComponent<E>({
   renderer,
   ...restProps
 }: StraightEdgeComponentProps<E>) {
-  return renderer({
-    ...restProps,
-    key
-  });
+  return renderer({ key, ...restProps });
 }
