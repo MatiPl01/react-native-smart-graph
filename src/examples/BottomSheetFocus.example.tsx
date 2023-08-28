@@ -184,20 +184,26 @@ export default function BottomSheetFocus() {
         duration: 500
       });
       if (graph.hasVertex('VV')) {
-        graph.removeVertex('VV');
+        if (Math.random() < 0.1) {
+          graph.removeVertex('VV');
+        }
       } else {
         graph.insertVertex({ key: 'VV' });
       }
-      if (graph.hasEdge('E3')) {
-        graph.removeEdge('E3');
-      } else {
-        graph.insertEdge({
-          key: 'E3',
-          from: 'V1',
-          to: 'V2'
-        });
+      if (Math.random() < 0.4) {
+        if (graph.hasEdge('E3')) {
+          if (Math.random() < 0.1) {
+            graph.removeEdge('E3');
+          }
+        } else {
+          graph.insertEdge({
+            key: 'E3',
+            from: 'VV',
+            to: 'V2'
+          });
+        }
       }
-    }, 2000);
+    }, 500);
   }, []);
 
   return (
@@ -229,6 +235,9 @@ export default function BottomSheetFocus() {
               minRowDistance,
               minColumnDistance
             },
+            layout: {
+              type: 'force'
+            },
             components: {
               arrow: {
                 scale: 0.5
@@ -241,7 +250,7 @@ export default function BottomSheetFocus() {
                 displayed: true
               },
               edge: {
-                type: 'straight'
+                // type: 'curved'
               }
             }
             // animations: null

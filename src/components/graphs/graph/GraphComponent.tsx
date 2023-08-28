@@ -41,8 +41,8 @@ function GraphComponent() {
         <GraphEdges focusProgress={focusProgress} />
       </Mask> */}
       <GraphEdges focusProgress={focusProgress} />
-      <GraphVertices focusContext={focusContext} />
       <GraphEdgesLabels focusProgress={focusProgress} />
+      <GraphVertices focusContext={focusContext} />
     </>
   );
 }

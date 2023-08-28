@@ -52,11 +52,14 @@ function DirectedStraightEdgeComponent<V, E>(
       transform: {
         edge: { offset, p1: v1, p2: v2 },
         label: { scale: labelScale }
-      }
+      },
+      vertexScale
     }) => {
       'worklet';
       // Update the arrow component props
-      const distance = Math.sqrt(vertexRadius ** 2 - offset ** 2);
+      const distance = Math.sqrt(
+        (vertexScale * vertexRadius) ** 2 - offset ** 2
+      );
       const dirVector = calcUnitVector(v1, v2);
       arrowTransform.value = {
         dirVector,

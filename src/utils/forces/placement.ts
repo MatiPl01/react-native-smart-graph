@@ -1,29 +1,28 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vector } from '@shopify/react-native-skia';
 
-import { VertexComponentData } from '@/types/data';
-import {
-  AnimatedVectorCoordinates,
-  BoundingRect,
-  Dimensions
-} from '@/types/layout';
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
+import { BoundingRect, Dimensions } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   AllGraphPlacementSettings
 } from '@/types/settings';
 import { grahamScan } from '@/utils/algorithms';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { findCenterOfPoints } from '@/utils/layout';
 import { placeVertices } from '@/utils/placement';
 import {
-  animatedVectorCoordinatesToVector,
+  setVerticesPositions,
+  updateComponentsTransform
+} from '@/utils/transform';
+import {
   calcOrthogonalUnitVector,
   calcUnitVector,
   distanceBetweenVectors,
   getLineCenter,
   translateAlongVector
 } from '@/utils/vectors';
+import { calcTranslationOnProgress } from '@/utils/views';
 
 const getRandomDistance = (vertexRadius: number): number => {
   'worklet';
@@ -144,23 +143,15 @@ const findForcesPlacementPosition = (
 };
 
 const findForcesPlacementPositions = (
-  placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
+  placedVerticesPositions: Record<string, Vector>,
   connections: GraphConnections,
   vertexRadius: number
 ): Record<string, Vector> => {
   'worklet';
-  const allVerticesPositions = Object.fromEntries(
-    Object.entries(placedVerticesPositions).map(([key, value]) => [
-      key,
-      animatedVectorCoordinatesToVector(value)
-    ])
-  );
-
   // Determine which vertices are not placed yet
   const unplacedVertices = Object.keys(connections).filter(
     key => !placedVerticesPositions[key]
   );
-
   // Place unplaced vertices
   return unplacedVertices.reduce((acc, key) => {
     const neighbors = [];
@@ -170,8 +161,8 @@ const findForcesPlacementPositions = (
     if (connections[key]?.outgoing) {
       neighbors.push(...connections[key]!.outgoing);
     }
-    acc[key] = allVerticesPositions[key] = findForcesPlacementPosition(
-      allVerticesPositions,
+    acc[key] = placedVerticesPositions[key] = findForcesPlacementPosition(
+      placedVerticesPositions,
       neighbors,
       vertexRadius
     );
@@ -179,8 +170,9 @@ const findForcesPlacementPositions = (
   }, {} as Record<string, Vector>);
 };
 
-export const updateInitialVerticesPositions = (
-  animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
+export const updateInitialPlacement = <V, E>(
+  verticesData: Record<string, VertexComponentData<V>>,
+  edgesData: Record<string, EdgeComponentData<E>>,
   connections: GraphConnections,
   canvasDimensions: Dimensions,
   placementSettings: AllGraphPlacementSettings,
@@ -194,8 +186,9 @@ export const updateInitialVerticesPositions = (
     placementSettings
   );
 
-  animateVerticesToFinalPositions(
-    animatedVerticesPositions,
+  updateComponentsTransform(
+    verticesData,
+    edgesData,
     verticesPositions,
     animationSettings
   );
@@ -203,33 +196,41 @@ export const updateInitialVerticesPositions = (
   onRender(boundingRect);
 };
 
-export const updateNewVerticesPositions = <V>(
-  placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
+export const updateNextPlacement = <V, E>(
+  placedVerticesData: Record<string, VertexComponentData<V>>,
   verticesData: Record<string, VertexComponentData<V>>,
+  edgesData: Record<string, EdgeComponentData<E>>,
   connections: GraphConnections,
   vertexRadius: number
 ): void => {
   'worklet';
   // Filter out vertices that were removed from the graph
-  const filteredVertices = Object.fromEntries(
-    Object.entries(placedVerticesPositions).filter(
-      ([key]) => verticesData[key]?.displayed.value
-    )
+  // and calculate vertices positions
+  const verticesPositions = Object.fromEntries(
+    Object.entries(placedVerticesData)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, { removed }]) => !removed)
+      .map(
+        ([
+          key,
+          {
+            points: {
+              value: { source, target }
+            },
+            transformProgress: { value: progress }
+          }
+        ]) => [key, calcTranslationOnProgress(progress, source, target)]
+      )
   );
+  console.log('next', verticesPositions);
+
   // Calculate new vertices placement positions
   const newVerticesPositions = findForcesPlacementPositions(
-    filteredVertices,
+    verticesPositions,
     connections,
     vertexRadius
   );
+  console.log(newVerticesPositions);
   // Update positions of new vertices
-  for (const key in newVerticesPositions) {
-    const position = newVerticesPositions[key]!;
-    const vertexPosition = verticesData[key]?.position;
-    if (!vertexPosition) {
-      return;
-    }
-    vertexPosition.x.value = position.x;
-    vertexPosition.y.value = position.y;
-  }
+  setVerticesPositions(newVerticesPositions, verticesData, edgesData);
 };

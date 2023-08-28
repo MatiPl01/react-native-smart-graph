@@ -8,15 +8,14 @@ import {
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
-import { BoundingRect } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   InternalGraphPlacementSettings
 } from '@/types/settings';
-import { updateComponentsTransform } from '@/utils/animations';
 import { unsharedify } from '@/utils/objects';
 import { placeVertices } from '@/utils/placement';
+import { updateComponentsTransform } from '@/utils/transform';
 
 type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
@@ -24,7 +23,6 @@ type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
   placementSettings: InternalGraphPlacementSettings;
-  targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
@@ -35,13 +33,12 @@ function GraphPlacementLayoutProvider<V, E>({
   isGraphDirected,
   layoutAnimationSettings,
   placementSettings,
-  targetBoundingRect,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
   // CONTEXTS
   // Canvas contexts
   const {
-    dataContext: { canvasDimensions },
+    dataContext: { canvasDimensions, targetBoundingRect },
     transformContext: { handleGraphRender: onRender }
   } = useCanvasContexts();
 
@@ -92,14 +89,12 @@ export default withGraphSettings(
       edgesData,
       isGraphDirected,
       layoutAnimationSettings,
-      targetBoundingRect,
       verticesData
     }) => ({
       connections,
       edgesData,
       isGraphDirected,
       layoutAnimationSettings,
-      targetBoundingRect,
       verticesData
     })
   ),

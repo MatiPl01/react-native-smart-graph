@@ -21,7 +21,6 @@ import {
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/data';
-import { BoundingRect } from '@/types/layout';
 import { Graph, GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
@@ -78,7 +77,6 @@ export type GraphComponentsData<V, E> = {
   handleVertexRemove: VertexRemoveHandler;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
-  targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V>>;
 };
 

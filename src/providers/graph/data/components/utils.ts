@@ -22,7 +22,7 @@ import {
   cancelVertexAnimations
 } from '@/utils/animations';
 import { updateValues } from '@/utils/objects';
-import { calcTranslationOnProgress } from '@/utils/views';
+import { getVertexPosition } from '@/utils/transform';
 
 export type ComponentsData<V, E> = {
   connections: GraphConnections;
@@ -53,7 +53,6 @@ const UPDATE_CONFIG = {
   edgeLabelsData: 'shallow',
   edgesData: 'shallow',
   isGraphDirected: 'shared', // 'shared' - replace with shared value
-  targetBoundingRect: 'shared',
   verticesData: 'shallow'
 };
 
@@ -122,13 +121,6 @@ export const updateContextValue = <V, E>(
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
         layoutAnimationSettings: newLayoutAnimationSettings,
-        // Prevent removing or create the initial value if it doesn't exist
-        targetBoundingRect: value?.targetBoundingRect ?? {
-          bottom: 0,
-          left: 0,
-          right: 0,
-          top: 0
-        },
         verticesData: newVerticesData
       }
     },
@@ -315,17 +307,9 @@ const updateGraphEdgesData = <V, E>(
           }
         }),
         points: makeMutable({
-          v1Source: calcTranslationOnProgress(
-            v1Data.transformProgress.value,
-            v1Data.points.value.source,
-            v1Data.points.value.target
-          ),
+          v1Source: getVertexPosition(v1Data),
           v1Target: v1Data.points.value.target,
-          v2Source: calcTranslationOnProgress(
-            v2Data.transformProgress.value,
-            v2Data.points.value.source,
-            v2Data.points.value.target
-          ),
+          v2Source: getVertexPosition(v2Data),
           v2Target: v2Data.points.value.target
         }),
         transformProgress: makeMutable(1)

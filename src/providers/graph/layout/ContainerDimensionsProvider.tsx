@@ -2,24 +2,23 @@ import { PropsWithChildren } from 'react';
 import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
-import { BoundingRect } from '@/types/layout';
+import { withGraphSettings } from '@/providers/graph/data';
 import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
-  targetBoundingRect: SharedValue<BoundingRect>;
   vertexRadius: number;
+  vertexScale: SharedValue<number>;
 }>;
 
 function ContainerDimensionsProvider({
   children,
-  targetBoundingRect,
-  vertexRadius
+  vertexRadius,
+  vertexScale
 }: ContainerDimensionsProviderProps) {
   // CONTEXTS
   // Canvas contexts
   const {
-    dataContext: { boundingRect }
+    dataContext: { boundingRect, targetBoundingRect }
   } = useCanvasContexts();
 
   useAnimatedReaction(
@@ -30,7 +29,7 @@ function ContainerDimensionsProvider({
         right: boundingRect.right.value,
         top: boundingRect.top.value
       },
-      padding: vertexRadius,
+      padding: vertexRadius * vertexScale.value,
       targetRect: targetBoundingRect.value
     }),
     ({ currentRect, padding, targetRect }) => {
@@ -57,8 +56,9 @@ function ContainerDimensionsProvider({
 }
 
 export default withGraphSettings(
-  withComponentsData(ContainerDimensionsProvider, ({ targetBoundingRect }) => ({
-    targetBoundingRect
-  })),
-  ({ settings }) => ({ vertexRadius: settings.components.vertex.radius })
+  ContainerDimensionsProvider,
+  ({ settings }) => ({
+    vertexRadius: settings.components.vertex.radius,
+    vertexScale: settings.components.vertex.scale
+  })
 );
