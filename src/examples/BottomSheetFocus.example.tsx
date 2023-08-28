@@ -250,7 +250,7 @@ export default function BottomSheetFocus() {
                 displayed: true
               },
               edge: {
-                // type: 'curved'
+                type: 'curved'
               }
             }
             // animations: null

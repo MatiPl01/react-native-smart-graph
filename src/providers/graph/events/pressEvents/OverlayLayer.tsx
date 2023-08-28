@@ -3,23 +3,28 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import { VertexComponentData } from '@/types/data';
 import { AnimatedBoundingRect, AnimatedTransformation } from '@/types/layout';
-import { PressEventsSettings } from '@/types/settings';
+import {
+  InternalPressEventsSettings,
+  InternalVertexSettings
+} from '@/types/settings';
 
 import OverlayVertex from './OverlayVertex';
 
 type OverlayLayerProps<V> = {
   boundingRect: AnimatedBoundingRect;
   debug?: boolean;
-  settings: PressEventsSettings<V>;
+  pressSettings: InternalPressEventsSettings<V>;
   transform: AnimatedTransformation;
+  vertexSettings: InternalVertexSettings;
   verticesData: Record<string, VertexComponentData<V>>;
 };
 
 export default function OverlayLayer<V>({
   boundingRect,
   debug,
-  settings,
+  pressSettings,
   transform,
+  vertexSettings,
   verticesData
 }: OverlayLayerProps<V>) {
   const style = useAnimatedStyle(() => {
@@ -56,33 +61,19 @@ export default function OverlayLayer<V>({
             ...(debug ? { backgroundColor: 'rgba(255, 183, 0, 0.2)' } : {})
           }
         ]}>
-        {(settings?.onVertexPress || settings?.onVertexLongPress) &&
-          Object.entries(verticesData).map(
-            ([key, { currentRadius, displayed, position, scale }]) => {
-              const data = verticesData[key];
-
-              if (!data) {
-                return null;
-              }
-
-              return (
-                <OverlayVertex<V>
-                  animationDisabled={settings?.disableAnimation}
-                  boundingRect={boundingRect}
-                  debug={debug}
-                  displayed={displayed}
-                  key={key}
-                  onLongPress={settings?.onVertexLongPress}
-                  onPress={settings?.onVertexPress}
-                  position={position}
-                  radius={currentRadius}
-                  scale={scale}
-                  vertexKey={key}
-                  vertexValue={data.value}
-                />
-              );
-            }
-          )}
+        {Object.entries(verticesData).map(
+          ([key, data]) =>
+            !data.removed && (
+              <OverlayVertex<V>
+                boundingRect={boundingRect}
+                debug={debug}
+                key={key}
+                pressSettings={pressSettings}
+                vertexData={data}
+                vertexSettings={vertexSettings}
+              />
+            )
+        )}
       </Animated.View>
     </>
   );

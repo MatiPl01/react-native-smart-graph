@@ -68,19 +68,18 @@ function VertexComponent<V>({
       }
     }),
     ({ points: { source, target }, progress, scales }) => {
+      const s = Math.max(0, scales.internal * scales.user);
       transform.value = [
-        { scale: Math.max(0, scales.internal * scales.user) },
-        ...(scales.user > 0
+        { scale: s },
+        ...(s > 0
           ? [
               {
                 translateX:
-                  calcValueOnProgress(progress, source.x, target.x) /
-                  scales.user
+                  calcValueOnProgress(progress, source.x, target.x) / s
               },
               {
                 translateY:
-                  calcValueOnProgress(progress, source.y, target.y) /
-                  scales.user
+                  calcValueOnProgress(progress, source.y, target.y) / s
               }
             ]
           : [])

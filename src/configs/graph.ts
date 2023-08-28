@@ -214,6 +214,11 @@ export const getDefaultConfig = <V, E>(
         label: DEFAULT_COMPONENTS_SETTINGS.label,
         vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
       },
+      events: settings.events && {
+        press: settings.events?.press && {
+          disableAnimation: false
+        }
+      },
       layout: settings?.layout
         ? DEFAULT_LAYOUT_SETTINGS[settings.layout.type]
         : DEFAULT_LAYOUT_SETTINGS.auto,
@@ -305,6 +310,11 @@ export const getUpdateConfig = <V, E>({
       },
       vertex: {
         scale: 'shared'
+      }
+    },
+    events: settings.events && {
+      press: settings.events.press && {
+        disableAnimation: 'shared'
       }
     },
     focus: {
