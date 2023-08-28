@@ -1,10 +1,9 @@
+import { Vector } from '@shopify/react-native-skia';
+import { SharedValue } from 'react-native-reanimated';
+
 import { FocusContextType } from '@/providers/view';
 import { FocusedVertexData, FocusStepData } from '@/types/data';
-import {
-  Alignment,
-  AnimatedVectorCoordinates,
-  Dimensions
-} from '@/types/layout';
+import { Alignment, Dimensions } from '@/types/layout';
 import { AllFocusSettings } from '@/types/settings';
 
 import {
@@ -15,7 +14,7 @@ import {
 export const getFocusedVertexData = (
   focusedVertexWithPosition: {
     key: string;
-    position: AnimatedVectorCoordinates;
+    position: SharedValue<Vector>;
   } | null,
   vertexRadius: number,
   settings: AllFocusSettings

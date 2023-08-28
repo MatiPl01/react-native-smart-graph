@@ -10,6 +10,7 @@ import {
   runOnJS,
   SharedValue,
   useAnimatedReaction,
+  useDerivedValue,
   useSharedValue
 } from 'react-native-reanimated';
 
@@ -24,6 +25,7 @@ import {
   getFocusedVertexTransformation,
   updateFocusTransformation
 } from '@/utils/focus';
+import { getVertexPosition } from '@/utils/transform';
 
 type VertexFocusContextType = {
   isVertexFocused: SharedValue<boolean>;
@@ -45,7 +47,8 @@ export const useVertexFocusContext = () => {
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
-  vertexRadius: SharedValue<number>;
+  vertexRadius: number;
+  vertexScale: SharedValue<number>;
   verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
@@ -53,6 +56,7 @@ function VertexFocusProvider<V, E>({
   children,
   graph,
   vertexRadius,
+  vertexScale: userScale,
   verticesData
 }: VertexFocusProviderProps<V, E>) {
   // CONTEXTS
@@ -66,15 +70,27 @@ function VertexFocusProvider<V, E>({
   // Vertex focus observer
   const [data] = useFocusObserver(graph);
 
+  // Helper values
+  const focusPosition = useDerivedValue(() => {
+    // TODO - fix
+    console.log('focusPosition');
+    const key = data.focusedVertexKey;
+    if (!key || !verticesData[key]) {
+      return { x: 0, y: 0 };
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return getVertexPosition(verticesData[key]!);
+  }, [data.focusedVertexKey]);
+
   // FOCUSED VERTEX DATA
   const focusedVertexWithPosition = useMemo(() => {
     const vertexData = data.focusedVertexKey
       ? verticesData[data.focusedVertexKey]
       : null;
-    return vertexData && vertexData.displayed.value && data.focusedVertexKey
+    return vertexData && !vertexData.removed && data.focusedVertexKey
       ? {
           key: data.focusedVertexKey,
-          position: vertexData.position
+          position: focusPosition
         }
       : null;
   }, [verticesData, data.focusedVertexKey]);
@@ -83,7 +99,7 @@ function VertexFocusProvider<V, E>({
     () =>
       getFocusedVertexData(
         focusedVertexWithPosition,
-        vertexRadius.value,
+        vertexRadius,
         data.settings
       ),
     [focusedVertexWithPosition, data.settings]
@@ -122,16 +138,13 @@ function VertexFocusProvider<V, E>({
     transitionDisabled.value = true;
     // Start focus if there is a focused vertex and focus is not active
     if (focusContext.focus.key.value === focusedVertexData.vertex.key) return;
-    const {
-      position: { x, y },
-      scale
-    } = focusedVertexData.vertex;
+    const { scale } = focusedVertexData.vertex;
     updateFocusTransformation(
       {
         end: {
-          scale,
-          x: x.value,
-          y: y.value
+          scale: scale * userScale.value,
+          x: focusPosition.value.x,
+          y: focusPosition.value.y
         }
       },
       focusContext
@@ -175,9 +188,9 @@ function VertexFocusProvider<V, E>({
         },
         vertex: {
           radius: vertex.radius,
-          scale: vertex.scale,
-          x: vertex.position.x.value,
-          y: vertex.position.y.value
+          scale: vertex.scale / userScale.value,
+          x: focusPosition.value.x,
+          y: focusPosition.value.y
         }
       };
     },
@@ -231,6 +244,7 @@ export default withGraphSettings(
   })),
   ({ graph, settings }) => ({
     graph,
-    vertexRadius: settings.components.vertex.radius
+    vertexRadius: settings.components.vertex.radius,
+    vertexScale: settings.components.vertex.scale
   })
 );

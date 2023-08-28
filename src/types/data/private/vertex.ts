@@ -2,7 +2,7 @@
 import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { Alignment, AnimatedVectorCoordinates } from '@/types/layout';
+import { Alignment } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 import { FocusPoint } from '@/types/settings/public/graph/focus';
 import { DeepRequired, Maybe } from '@/types/utils';
@@ -27,7 +27,7 @@ export type FocusedVertexData = {
   vertex?: {
     alignment: Required<Alignment>;
     key: string;
-    position: AnimatedVectorCoordinates;
+    position: SharedValue<Vector>;
     radius: number;
     scale: number;
   };

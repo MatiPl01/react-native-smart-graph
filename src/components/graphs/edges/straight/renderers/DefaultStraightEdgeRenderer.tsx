@@ -7,7 +7,8 @@ import { StraightEdgeRendererProps } from '@/types/components';
 export default function DefaultStraightEdgeRenderer<E>({
   animationProgress,
   p1: p1Target,
-  p2: p2Target
+  p2: p2Target,
+  vertexScale
 }: StraightEdgeRendererProps<E>) {
   const center = useDerivedValue(() => ({
     x: (p1Target.value.x + p2Target.value.x) / 2,
@@ -32,5 +33,15 @@ export default function DefaultStraightEdgeRenderer<E>({
       (p2Target.value.y - center.value.y) * animationProgress.value
   }));
 
-  return <Line color='#999' p1={p1} p2={p2} strokeWidth={1} style='stroke' />;
+  const strokeWidth = useDerivedValue(() => vertexScale.value * 2);
+
+  return (
+    <Line
+      color='#999'
+      p1={p1}
+      p2={p2}
+      strokeWidth={strokeWidth}
+      style='stroke'
+    />
+  );
 }

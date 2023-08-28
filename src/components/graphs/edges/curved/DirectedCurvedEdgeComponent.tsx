@@ -110,6 +110,7 @@ function DirectedCurvedEdgeComponent<V, E>(
         path={path}
         renderer={renderers.edge}
         value={value}
+        vertexScale={vertexScale}
       />
       <ArrowComponent
         animationProgress={animationProgress}

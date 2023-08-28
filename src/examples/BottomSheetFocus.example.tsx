@@ -204,6 +204,16 @@ export default function BottomSheetFocus() {
         }
       }
     }, 500);
+
+    setTimeout(() => {
+      graph.focus('V1');
+    }, 2000);
+    setTimeout(() => {
+      graph.focus('V2');
+    }, 5000);
+    setTimeout(() => {
+      graph.blur();
+    }, 10000);
   }, []);
 
   return (

@@ -1,15 +1,22 @@
 /* eslint-disable import/no-unused-modules */
 import { Path } from '@shopify/react-native-skia';
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import {
+  useAnimatedReaction,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { CurvedEdgeRendererProps } from '@/types/components';
 
 export default function DefaultCurvedEdgeRenderer<E>({
   animationProgress,
-  path
+  path,
+  vertexScale
 }: CurvedEdgeRendererProps<E>) {
   const start = useSharedValue(0.5);
   const end = useSharedValue(0.5);
+
+  const strokeWidth = useDerivedValue(() => vertexScale.value * 2);
 
   useAnimatedReaction(
     () => animationProgress.value,
@@ -25,7 +32,7 @@ export default function DefaultCurvedEdgeRenderer<E>({
       end={end}
       path={path}
       start={start}
-      strokeWidth={1}
+      strokeWidth={strokeWidth}
       style='stroke'
     />
   );
