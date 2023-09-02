@@ -4,20 +4,25 @@ import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { VertexComponentData } from '@/types/data';
 import { AnimatedTransformation } from '@/types/layout';
-import { PressEventsSettings } from '@/types/settings';
+import {
+  InternalPressEventsSettings,
+  InternalVertexSettings
+} from '@/types/settings';
 
 import OverlayLayer from './OverlayLayer';
 
 export type PressEventsProviderProps<V> = PropsWithChildren<{
-  settings: PressEventsSettings<V>;
+  pressSettings: InternalPressEventsSettings<V>;
   transform: AnimatedTransformation;
+  vertexSettings: InternalVertexSettings;
   verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
 function PressEventsProvider<V>({
   children,
-  settings,
+  pressSettings,
   transform,
+  vertexSettings,
   verticesData
 }: PressEventsProviderProps<V>) {
   // CONTEXTS
@@ -32,8 +37,9 @@ function PressEventsProvider<V>({
       1,
       <OverlayLayer // TODO - think of better solution (this layer re-renders every overlay vertex every time this useEffect is called)
         boundingRect={boundingRect}
-        settings={settings}
+        pressSettings={pressSettings}
         transform={transform}
+        vertexSettings={vertexSettings}
         verticesData={verticesData}
       />
     );
@@ -41,7 +47,7 @@ function PressEventsProvider<V>({
     return () => {
       removeLayer(1);
     };
-  }, [verticesData, settings?.onVertexPress, settings?.onVertexLongPress]);
+  }, [verticesData, PressEventsProvider, vertexSettings]);
 
   return <>{children}</>;
 }
@@ -50,5 +56,8 @@ export default withGraphSettings(
   withComponentsData(PressEventsProvider, ({ verticesData }) => ({
     verticesData
   })),
-  ({ settings }) => ({ settings: settings.events?.press })
+  ({ settings }) => ({
+    pressSettings: settings.events?.press,
+    vertexSettings: settings.components.vertex
+  })
 );

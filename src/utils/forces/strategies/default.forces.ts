@@ -1,6 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import { AllForceLayoutSettings } from '@/types/settings';
 import { calcForces, updateVerticesPositions } from '@/utils/forces/shared';
@@ -29,7 +28,7 @@ const createRepulsionFactorGetter = (repulsionScale: number) => {
 export const applyDefaultForces = (
   connections: GraphConnections,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  verticesPositions: Record<string, Vector>,
   {
     attractionForceFactor,
     attractionScale,

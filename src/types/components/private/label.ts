@@ -6,4 +6,5 @@ export type LabelComponentProps<E> = {
   edgeKey: string;
   renderer: LabelRenderer<E>;
   value?: E;
+  vertexRadius: number;
 };

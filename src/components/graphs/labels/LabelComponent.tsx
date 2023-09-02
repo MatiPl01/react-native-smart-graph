@@ -12,7 +12,8 @@ import { distanceBetweenVectors } from '@/utils/vectors';
 function LabelComponent<E>({
   data: { animationProgress, transform: labelTransform, value },
   edgeKey,
-  renderer
+  renderer,
+  vertexRadius
 }: LabelComponentProps<E>) {
   // RENDERER PROPS
   const edgeLength = useSharedValue(0);
@@ -89,6 +90,7 @@ function LabelComponent<E>({
         edgeKey={edgeKey}
         edgeLength={edgeLength}
         edgeRotation={edgeRotation}
+        r={vertexRadius}
         renderer={renderer}
         value={value}
       />

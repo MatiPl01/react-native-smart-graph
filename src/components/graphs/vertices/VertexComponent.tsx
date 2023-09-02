@@ -20,7 +20,7 @@ function VertexComponent<V>({
   focusContext,
   onRemove,
   renderer,
-  settings: { radius: r, scale: userScale }
+  settings: { radius: r }
 }: VertexComponentProps<V>) {
   const { key, scale } = restData;
 
@@ -63,24 +63,22 @@ function VertexComponent<V>({
       points: points.value,
       progress: transformProgress.value,
       scales: {
-        internal: scale.value,
-        user: userScale.value
+        internal: scale.value
       }
     }),
     ({ points: { source, target }, progress, scales }) => {
+      const s = Math.max(0, scales.internal);
       transform.value = [
-        { scale: Math.max(0, scales.internal * scales.user) },
-        ...(scales.user > 0
+        { scale: s },
+        ...(s > 0
           ? [
               {
                 translateX:
-                  calcValueOnProgress(progress, source.x, target.x) /
-                  scales.user
+                  calcValueOnProgress(progress, source.x, target.x) / s
               },
               {
                 translateY:
-                  calcValueOnProgress(progress, source.y, target.y) /
-                  scales.user
+                  calcValueOnProgress(progress, source.y, target.y) / s
               }
             ]
           : [])
@@ -98,7 +96,6 @@ function VertexComponent<V>({
         focusProgress={focusProgress}
         r={r}
         renderer={renderer}
-        scale={userScale}
         vertexKey={key}
       />
     </Group>

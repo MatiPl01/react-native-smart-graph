@@ -7,7 +7,7 @@ import { ArrowRendererProps } from '@/types/components';
 
 export default function DefaultArrowRenderer({
   animationProgress,
-  s
+  s // size
 }: ArrowRendererProps) {
   const color = '#999';
   const colors = [color, color, color];

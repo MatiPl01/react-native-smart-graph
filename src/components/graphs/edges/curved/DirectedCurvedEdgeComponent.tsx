@@ -1,9 +1,9 @@
-/* eslint-disable import/no-unused-modules */
-import { rotate } from '@shopify/react-native-skia';
+import { rotate, Transforms2d } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
 import { ArrowComponent } from '@/components/graphs/arrows';
+import { calcArrowTransform } from '@/components/graphs/arrows/utils';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import { calcUnitVector } from '@/utils/vectors';
@@ -13,7 +13,7 @@ import { EdgePointsOrderGetter, useCurvedEdge } from './utils';
 
 const getEdgePointsOrder: EdgePointsOrderGetter = () => {
   'worklet';
-  return -1; // ALways determined by the edge direction
+  return -1; // Always determined by the edge direction
 };
 
 function DirectedCurvedEdgeComponent<V, E>(
@@ -24,23 +24,18 @@ function DirectedCurvedEdgeComponent<V, E>(
     renderers,
     settings: {
       arrow: { scale: arrowScale },
-      vertex: { radius: vertexRadius, scale: vertexScale }
+      vertex: { radius: vertexRadius }
     }
   } = props;
 
   // ARROW COMPONENT PROPS
-  const arrowTransform = useSharedValue({
-    dirVector: { x: 0, y: 0 },
-    scale: 0,
-    tipPosition: { x: 0, y: 0 }
-  });
+  const arrowTransform = useSharedValue<Transforms2d>([{ scale: 0 }]);
 
   const { path } = useCurvedEdge(
     props,
     getEdgePointsOrder,
     () => ({
-      arrowScale,
-      vertexScale
+      arrowScale
     }),
     ({
       customProps,
@@ -63,13 +58,12 @@ function DirectedCurvedEdgeComponent<V, E>(
       const { x: p, y: q } = plainParabolaVertex;
       const a = (plainP2.y - q) / (plainP2.x - p) ** 2;
       // 4. Calculate the edge arrow tip position
-      console.log(props.data.key);
       const plainArrowTipPosition = calcApproxPointOnParabola(
         plainP2.x,
         a,
         p,
         q,
-        -vertexRadius * customProps.vertexScale
+        -vertexRadius
       );
       const rotatedArrowTipPosition = rotate(
         plainArrowTipPosition,
@@ -94,11 +88,12 @@ function DirectedCurvedEdgeComponent<V, E>(
         rotatedArrowEndPosition
       );
       // 6. Update the values
-      arrowTransform.value = {
+      arrowTransform.value = calcArrowTransform(
+        rotatedArrowTipPosition,
         dirVector,
-        scale: customProps.arrowScale * customProps.vertexScale,
-        tipPosition: rotatedArrowTipPosition
-      };
+        customProps.arrowScale,
+        vertexRadius
+      );
     }
   );
 

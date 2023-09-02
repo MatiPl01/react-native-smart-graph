@@ -169,14 +169,12 @@ export const useCurvedEdge = <
         ordering.value,
         props
       );
-      // Update label data (if it is displayed)
-      if (props.label.displayed) {
-        const labelTransform = getLabelTransform(
-          edgeTransform,
-          props.label.scale
-        );
-        labelData.transform.value = labelTransform;
-      }
+      // Update label transform
+      const labelTransform = getLabelTransform(
+        edgeTransform,
+        props.label.scale
+      );
+      labelData.transform.value = labelTransform;
       // Additional reaction
       reaction?.({
         ...props,

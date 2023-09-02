@@ -155,8 +155,7 @@ const DEFAULT_COMPONENTS_SETTINGS: {
     scale: 0.5
   },
   vertex: {
-    radius: 20,
-    scale: 1
+    radius: 20
   }
 };
 
@@ -214,7 +213,12 @@ export const getDefaultConfig = <V, E>(
         label: DEFAULT_COMPONENTS_SETTINGS.label,
         vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
       },
-      layout: settings?.layout
+      events: settings.events && {
+        press: settings.events?.press && {
+          disableAnimation: false
+        }
+      },
+      layout: settings?.layout?.type
         ? DEFAULT_LAYOUT_SETTINGS[settings.layout.type]
         : DEFAULT_LAYOUT_SETTINGS.auto,
       placement: settings?.placement?.strategy
@@ -302,9 +306,11 @@ export const getUpdateConfig = <V, E>({
       label: {
         displayed: 'shared',
         scale: 'shared'
-      },
-      vertex: {
-        scale: 'shared'
+      }
+    },
+    events: settings.events && {
+      press: settings.events.press && {
+        disableAnimation: 'shared'
       }
     },
     focus: {

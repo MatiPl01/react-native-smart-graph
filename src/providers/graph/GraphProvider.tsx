@@ -10,6 +10,7 @@ import CanvasContextsProvider, {
   CanvasContexts
 } from './contexts/CanvasContextsProvider';
 import { ComponentsDataProvider, GraphSettingsProvider } from './data';
+import { PressEventsProvider } from './events';
 import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
 import {
   ContainerDimensionsProvider,
@@ -68,10 +69,10 @@ export default function GraphProvider<V, E>({
       // EVENTS
       // Press events provider
       // TDOo - improve press events provider (the overlay layer degrades performance)
-      // <ConditionalProvider.If // TODO - fix
-      //   if={({ settings }) => !!settings.events?.press}
-      //   then={<PressEventsProvider transform={transform} />}
-      // />,
+      <ConditionalProvider.If
+        if={({ settings }) => !!settings.events?.press}
+        then={<PressEventsProvider transform={transform} />}
+      />,
       // SETTINGS
       // The provider used to handle canvas settings change and respond to such changes
       <SettingsChangeResponderProvider />

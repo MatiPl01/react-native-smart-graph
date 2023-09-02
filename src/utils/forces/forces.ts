@@ -1,6 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import { AllForceLayoutSettings } from '@/types/settings';
 
@@ -9,7 +8,7 @@ import { applyDefaultForces } from './strategies/default.forces';
 export const applyForces = (
   connections: GraphConnections,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  verticesPositions: Record<string, Vector>,
   settings: Omit<AllForceLayoutSettings, 'refreshInterval'>
 ): {
   keys: Array<string>;

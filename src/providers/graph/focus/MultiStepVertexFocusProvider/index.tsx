@@ -1,6 +1,5 @@
 import { PropsWithChildren } from 'react';
 import {
-  SharedValue,
   useAnimatedReaction,
   useDerivedValue,
   useSharedValue,
@@ -25,7 +24,7 @@ import { createFocusSteps } from './utils';
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
-  vertexRadius: SharedValue<number>;
+  vertexRadius: number;
   verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
@@ -130,16 +129,16 @@ function MultiStepVertexFocusProvider<V>({
 
   // Update focus on progress change or steps change
   useAnimatedReaction(
+    // TODO - react on vertex position changes when progress is not being modified
     () => ({
       progress: {
         current: settings.progress.value,
         previous: previousProgress.value,
         sync: syncProgress.value
       },
-      radius: vertexRadius.value,
       steps: focusStepsData.value
     }),
-    ({ progress, radius, steps }) => {
+    ({ progress, steps }) => {
       const prevStepIdx = previousStepIdx.value;
       if (
         stateMachine.isStopped() ||
@@ -160,7 +159,7 @@ function MultiStepVertexFocusProvider<V>({
         progress.sync,
         beforeStep,
         afterStep,
-        radius
+        vertexRadius
       );
 
       // Update values for the next reaction
