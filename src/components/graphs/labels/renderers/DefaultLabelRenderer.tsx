@@ -14,9 +14,7 @@ export default function DefaultLabelRenderer<E>({
 
   // TODO - improve label centering
   const labelTransform = useDerivedValue(() => [
-    {
-      translateX: ((-key.length * r) / 3.25) * animationProgress.value
-    },
+    { translateX: ((-key.length * r) / 3.25) * animationProgress.value },
     { translateY: (r / 3) * animationProgress.value },
     { scale: Math.max(animationProgress.value, 0) }
   ]);

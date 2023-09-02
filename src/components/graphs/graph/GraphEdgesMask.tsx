@@ -17,12 +17,14 @@ function GraphEdgesMask<V>({
   vertexRadius,
   verticesData
 }: GraphEdgesMaskProps<V>) {
-  const width = useDerivedValue(
-    () => boundingRect.right.value - boundingRect.left.value
-  );
-  const height = useDerivedValue(
-    () => boundingRect.bottom.value - boundingRect.top.value
-  );
+  const {
+    bottom: bottomBound,
+    left: leftBound,
+    right: rightBound,
+    top: topBound
+  } = boundingRect;
+  const width = useDerivedValue(() => rightBound.value - leftBound.value);
+  const height = useDerivedValue(() => bottomBound.value - topBound.value);
 
   return (
     <>

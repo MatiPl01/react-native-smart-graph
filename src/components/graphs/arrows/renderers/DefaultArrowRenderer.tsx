@@ -12,11 +12,7 @@ export default function DefaultArrowRenderer({
   const color = '#999';
   const colors = [color, color, color];
 
-  const transform = useDerivedValue(() => [
-    {
-      scale: animationProgress.value
-    }
-  ]);
+  const transform = useDerivedValue(() => [{ scale: animationProgress.value }]);
 
   return (
     <Vertices
