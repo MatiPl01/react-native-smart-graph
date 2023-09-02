@@ -24,7 +24,7 @@ function DirectedCurvedEdgeComponent<V, E>(
     renderers,
     settings: {
       arrow: { scale: arrowScale },
-      vertex: { radius: vertexRadius, scale: vertexScale }
+      vertex: { radius: vertexRadius }
     }
   } = props;
 
@@ -35,8 +35,7 @@ function DirectedCurvedEdgeComponent<V, E>(
     props,
     getEdgePointsOrder,
     () => ({
-      arrowScale,
-      vertexScale
+      arrowScale
     }),
     ({
       customProps,
@@ -64,7 +63,7 @@ function DirectedCurvedEdgeComponent<V, E>(
         a,
         p,
         q,
-        -vertexRadius * customProps.vertexScale
+        -vertexRadius
       );
       const rotatedArrowTipPosition = rotate(
         plainArrowTipPosition,
@@ -92,7 +91,7 @@ function DirectedCurvedEdgeComponent<V, E>(
       arrowTransform.value = calcArrowTransform(
         rotatedArrowTipPosition,
         dirVector,
-        customProps.arrowScale * customProps.vertexScale,
+        customProps.arrowScale,
         vertexRadius
       );
     }
@@ -106,7 +105,6 @@ function DirectedCurvedEdgeComponent<V, E>(
         path={path}
         renderer={renderers.edge}
         value={value}
-        vertexScale={vertexScale}
       />
       <ArrowComponent
         animationProgress={animationProgress}

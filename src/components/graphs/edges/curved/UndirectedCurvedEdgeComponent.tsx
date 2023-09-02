@@ -16,10 +16,7 @@ function UndirectedCurvedEdgeComponent<V, E>(
 ) {
   const {
     data: { animationProgress, key, value },
-    renderers,
-    settings: {
-      vertex: { scale: vertexScale }
-    }
+    renderers
   } = props;
 
   const { path } = useCurvedEdge(props, getEdgePointsOrder);
@@ -31,7 +28,6 @@ function UndirectedCurvedEdgeComponent<V, E>(
       path={path}
       renderer={renderers.edge}
       value={value}
-      vertexScale={vertexScale}
     />
   );
 }

@@ -13,8 +13,7 @@ import {
   Extrapolate,
   interpolate,
   useDerivedValue,
-  useSharedValue,
-  withTiming
+  useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 
@@ -145,7 +144,6 @@ export default function BottomSheetFocus() {
 
   const minRowDistance = useSharedValue(100);
   const minColumnDistance = useSharedValue(50);
-  const vertexScale = useSharedValue(1);
 
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
@@ -180,9 +178,6 @@ export default function BottomSheetFocus() {
       // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
       // minRowDistance.value = Math.random() * 100 + 40;
       // minColumnDistance.value = Math.random() * 50 + 20;
-      vertexScale.value = withTiming(Math.random(), {
-        duration: 500
-      });
       if (graph.hasEdge('E3')) {
         // if (Math.random() < 0.1) {
         graph.removeEdge('E3');
@@ -214,17 +209,17 @@ export default function BottomSheetFocus() {
       //     });
       //   }
       // }
-    }, 2000);
+    }, 500);
 
-    // setTimeout(() => {
-    //   graph.focus('V1');
-    // }, 2000);
-    // setTimeout(() => {
-    //   graph.focus('V2');
-    // }, 5000);
-    // setTimeout(() => {
-    //   graph.blur();
-    // }, 10000);
+    setTimeout(() => {
+      graph.focus('V1');
+    }, 2000);
+    setTimeout(() => {
+      graph.focus('V2');
+    }, 5000);
+    setTimeout(() => {
+      graph.blur();
+    }, 10000);
   }, []);
 
   return (
@@ -257,21 +252,20 @@ export default function BottomSheetFocus() {
               minColumnDistance
             },
             layout: {
-              // type: 'force'
+              type: 'force'
             },
             components: {
               arrow: {
-                scale: 1
+                scale: 0.5
               },
               vertex: {
-                radius: 20,
-                scale: vertexScale
+                radius: 20
               },
               label: {
-                // displayed: true
+                displayed: true
               },
               edge: {
-                // type: 'curved'
+                type: 'curved'
               }
             }
             // animations: null

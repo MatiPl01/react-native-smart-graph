@@ -1,52 +1,16 @@
-import { Vector } from '@shopify/react-native-skia';
-import { SharedValue } from 'react-native-reanimated';
-
 import { FocusContextType } from '@/providers/view';
-import { FocusedVertexData, FocusStepData } from '@/types/data';
+import { FocusStepData } from '@/types/data';
 import { Alignment, Dimensions } from '@/types/layout';
-import { AllFocusSettings } from '@/types/settings';
 
 import {
   getAlignedVertexAbsolutePosition,
   getCoordinatesRelativeToCenter
 } from './layout';
 
-export const getFocusedVertexData = (
-  focusedVertexWithPosition: {
-    key: string;
-    position: SharedValue<Vector>;
-  } | null,
-  vertexRadius: number,
-  settings: AllFocusSettings
-): FocusedVertexData => {
-  'worklet';
-  if (!focusedVertexWithPosition) {
-    return { animation: settings.animation };
-  }
-
-  return {
-    animation: settings.animation,
-    vertex: {
-      ...focusedVertexWithPosition,
-      alignment: settings.alignment,
-      radius: vertexRadius,
-      scale: settings.vertexScale
-    }
-  };
-};
-
 type VertexTransformation = {
   scale: number;
   x: number;
   y: number;
-};
-
-type TransformationInput = {
-  alignment: Required<Alignment>;
-  canvasDimensions: Dimensions;
-  vertex: VertexTransformation & {
-    radius: number;
-  };
 };
 
 export const updateFocusTransformation = (
@@ -69,11 +33,13 @@ export const updateFocusTransformation = (
   }
 };
 
-export const getFocusedVertexTransformation = ({
-  alignment,
-  canvasDimensions,
-  vertex
-}: TransformationInput): VertexTransformation => {
+// eslint-disable-next-line import/no-unused-modules
+export const getFocusedVertexTransformation = (
+  alignment: Required<Alignment>,
+  canvasDimensions: Dimensions,
+  vertex: VertexTransformation,
+  vertexRadius: number
+): VertexTransformation => {
   'worklet';
   // Calculate vertex position based on the alignment settings
   const { x: dx, y: dy } = getCoordinatesRelativeToCenter(
@@ -81,7 +47,7 @@ export const getFocusedVertexTransformation = ({
     getAlignedVertexAbsolutePosition(
       canvasDimensions,
       alignment,
-      vertex.radius * vertex.scale
+      vertexRadius * vertex.scale
     )
   );
   return {
@@ -103,31 +69,31 @@ export const getMultiStepVertexTransformation = <V>(
 ): VertexTransformation => {
   'worklet';
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const { alignment, position, radius, scale } = getFocusedVertexData(
-    {
-      key: stepData.point.key,
-      position: stepData.vertex.position
-    },
-    config.vertexRadius,
-    {
-      alignment: stepData.point.alignment,
-      animation: null,
-      disableGestures: config.disableGestures,
-      vertexScale: stepData.point.vertexScale
-    }
-  ).vertex!;
+  // // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  // const { alignment, position, radius, scale } = getFocusedVertexData(
+  //   {
+  //     key: stepData.point.key,
+  //     position: stepData.vertex.position
+  //   },
+  //   config.vertexRadius,
+  //   {
+  //     alignment: stepData.point.alignment,
+  //     animation: null,
+  //     disableGestures: config.disableGestures,
+  //     vertexScale: stepData.point.vertexScale
+  //   }
+  // ).vertex!;
 
-  return getFocusedVertexTransformation({
-    alignment,
-    canvasDimensions: config.canvasDimensions,
-    vertex: {
-      radius,
-      scale,
-      x: position.x.value,
-      y: position.y.value
-    }
-  });
+  // return getFocusedVertexTransformation({
+  //   alignment,
+  //   canvasDimensions: config.canvasDimensions,
+  //   vertex: {
+  //     radius,
+  //     scale,
+  //     x: position.x.value,
+  //     y: position.y.value
+  //   }
+  // });
 };
 
 export const getFocusSteps = <V>(

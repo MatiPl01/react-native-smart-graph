@@ -31,7 +31,6 @@ type ReactionProps = {
   points: Unsharedify<EdgeComponentData<unknown>['points']>;
   progress: number;
   r: number;
-  vertexScale: number;
 };
 
 type EdgeTranslation = {
@@ -59,16 +58,19 @@ const getEdgeTransform = (
     offsetFactor,
     points: { v1Source, v1Target, v2Source, v2Target },
     progress,
-    r,
-    vertexScale
+    r
   }: ReactionProps
 ): EdgeTranslation => {
   'worklet';
   const v1 = calcTranslationOnProgress(progress, v1Source, v1Target);
   const v2 = calcTranslationOnProgress(progress, v2Source, v2Target);
   const directionVector = calcUnitVector(v2, v1);
-  const targetOffset =
-    vertexScale * calcTranslationOffset(order, edgesCount, offsetFactor, r);
+  const targetOffset = calcTranslationOffset(
+    order,
+    edgesCount,
+    offsetFactor,
+    r
+  );
   const offset = calcValueOnProgress(progress, startOffset, targetOffset);
   const translationDirection = calcOrthogonalVector(directionVector);
   const translationVector = multiplyVector(translationDirection, offset);
@@ -88,15 +90,13 @@ const getLabelTransform = <E>(
   {
     target: { edgesCount }
   }: Unsharedify<EdgeComponentData<unknown>['ordering']>,
-  { label, offsetFactor, progress, vertexScale }: ReactionProps
+  { label, offsetFactor, progress }: ReactionProps
 ): Unsharedify<LabelComponentData<E>['transform']> => {
   'worklet';
-  const targetScale =
-    vertexScale *
-    Math.min(
-      (2 * offsetFactor) / (edgesCount > 0 ? edgesCount - 1 : 1),
-      label.scale
-    );
+  const targetScale = Math.min(
+    (2 * offsetFactor) / (edgesCount > 0 ? edgesCount - 1 : 1),
+    label.scale
+  );
 
   return {
     center: getLineCenter(p1, p2),
@@ -133,7 +133,7 @@ export const useStraightEdge = <
     settings: {
       edge: { maxOffsetFactor },
       label: { displayed: labelDisplayed, scale: labelScale },
-      vertex: { radius: vertexRadius, scale: vertexScale }
+      vertex: { radius: vertexRadius }
     }
   } = inputProps;
 
@@ -153,8 +153,6 @@ export const useStraightEdge = <
   const startOffset = useSharedValue(0);
   // Label scale
   const labelStartScale = useSharedValue(0);
-  // Ordering
-  const prevOrdering = useSharedValue(ordering.value);
 
   // ADDITIONAL PROPS
   const additionalProps = selector?.(inputProps);
@@ -170,21 +168,14 @@ export const useStraightEdge = <
       points: points.value,
       progress: transformProgress.value,
       r: vertexRadius,
-      vertexScale: vertexScale.value,
       ...additionalProps
     }),
     ({ customProps, ...props }) => {
       // Update the source offset if the ordering has changed
       let beginOffset = startOffset.value;
       const currentOrdering = ordering.value;
-      if (
-        (currentOrdering.target.order !== prevOrdering.value.target.order ||
-          currentOrdering.target.edgesCount !==
-            prevOrdering.value.target.edgesCount) &&
-        props.progress === 0 // TODO - FIX
-      ) {
+      if (props.progress === 0) {
         beginOffset = startOffset.value = currentOffset.value;
-        prevOrdering.value = currentOrdering;
       }
       // Get translated edge data
       const edgeTransform = getEdgeTransform(

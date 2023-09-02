@@ -222,7 +222,6 @@ export const updateNextPlacement = <V, E>(
         ]) => [key, calcTranslationOnProgress(progress, source, target)]
       )
   );
-  console.log('next', verticesPositions);
 
   // Calculate new vertices placement positions
   const newVerticesPositions = findForcesPlacementPositions(
@@ -230,7 +229,6 @@ export const updateNextPlacement = <V, E>(
     connections,
     vertexRadius
   );
-  console.log(newVerticesPositions);
   // Update positions of new vertices
   setVerticesPositions(newVerticesPositions, verticesData, edgesData);
 };

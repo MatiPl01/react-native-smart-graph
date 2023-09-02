@@ -93,8 +93,6 @@ const updateEdgesTransform = <E>(
         target: ordering.target
       };
       isOrderingModified = true; // Mark as modified to update the animation progress
-
-      console.log('[transform] update ordering', edgeData.key);
     }
 
     // Check if vertices positions have changed
@@ -246,6 +244,16 @@ export const getVertexPosition = <V>(
     vertexData.points.value.source,
     vertexData.points.value.target
   );
+};
+
+export const getVertexTransformation = <V>(
+  vertexData: VertexComponentData<V>
+): Vector & { scale: number } => {
+  'worklet';
+  return {
+    ...getVertexPosition(vertexData),
+    scale: vertexData.scale.value
+  };
 };
 
 export const getVerticesPositions = <V>(

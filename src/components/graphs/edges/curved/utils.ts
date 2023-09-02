@@ -160,11 +160,6 @@ export const useCurvedEdge = <
       // Update the source offset if the new transition started
       let beginOffset = startOffset.value;
       if (props.progress === 0) {
-        console.log(
-          '[useCurvedEdge] reset offset',
-          inputProps.data.key,
-          inputProps.data.ordering.value
-        );
         beginOffset = startOffset.value = currentOffset.value;
       }
       // Get translated edge data
@@ -174,14 +169,12 @@ export const useCurvedEdge = <
         ordering.value,
         props
       );
-      // Update label data (if it is displayed)
-      if (props.label.displayed) {
-        const labelTransform = getLabelTransform(
-          edgeTransform,
-          props.label.scale
-        );
-        labelData.transform.value = labelTransform;
-      }
+      // Update label transform
+      const labelTransform = getLabelTransform(
+        edgeTransform,
+        props.label.scale
+      );
+      labelData.transform.value = labelTransform;
       // Additional reaction
       reaction?.({
         ...props,

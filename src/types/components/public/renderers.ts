@@ -29,7 +29,6 @@ export type VertexRenderer<V> = (
 type SharedEdgeRendererProps<E> = SharedRenderersProps & {
   key: string;
   value?: E;
-  vertexScale: SharedValue<number>;
 };
 
 export type StraightEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {

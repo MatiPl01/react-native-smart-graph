@@ -31,7 +31,7 @@ function DirectedStraightEdgeComponent<V, E>(
     renderers,
     settings: {
       arrow: { scale: arrowScale },
-      vertex: { radius: vertexRadius, scale: vertexScale }
+      vertex: { radius: vertexRadius }
     }
   } = props;
 
@@ -50,12 +50,11 @@ function DirectedStraightEdgeComponent<V, E>(
       transform: {
         edge: { offset, p1: v1, p2: v2 },
         label: { scale: labelScale }
-      },
-      vertexScale: vScale
+      }
     }) => {
       'worklet';
       // Update the arrow component props
-      const distance = Math.sqrt((vScale * vertexRadius) ** 2 - offset ** 2);
+      const distance = Math.sqrt(vertexRadius ** 2 - offset ** 2);
       const dirVector = calcUnitVector(v1, v2);
       arrowTransform.value = calcArrowTransform(
         translateAlongVector(v2, dirVector, -distance),
@@ -75,7 +74,6 @@ function DirectedStraightEdgeComponent<V, E>(
         p2={p2}
         renderer={renderers.edge}
         value={value}
-        vertexScale={vertexScale}
       />
       <ArrowComponent
         animationProgress={animationProgress}

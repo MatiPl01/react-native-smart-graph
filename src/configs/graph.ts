@@ -155,8 +155,7 @@ const DEFAULT_COMPONENTS_SETTINGS: {
     scale: 0.5
   },
   vertex: {
-    radius: 20,
-    scale: 1
+    radius: 20
   }
 };
 

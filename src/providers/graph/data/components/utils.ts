@@ -257,7 +257,6 @@ const updateGraphEdgesData = <V, E>(
         oldOrdering.target.order !== edgeData.order ||
         oldOrdering.target.edgesCount !== edgeData.edgesCount
       ) {
-        console.log('update', edgeData.edge.key);
         oldEdge.ordering.value = {
           source: oldOrdering.target,
           target: {

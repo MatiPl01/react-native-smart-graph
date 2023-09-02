@@ -24,10 +24,7 @@ function UndirectedStraightEdgeComponent<V, E>(
 ) {
   const {
     data: { animationProgress, key, value },
-    renderers,
-    settings: {
-      vertex: { scale: vertexScale }
-    }
+    renderers
   } = props;
 
   const { p1, p2 } = useStraightEdge(props, calcTranslationOffset);
@@ -40,7 +37,6 @@ function UndirectedStraightEdgeComponent<V, E>(
       p2={p2}
       renderer={renderers.edge}
       value={value}
-      vertexScale={vertexScale}
     />
   );
 }

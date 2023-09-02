@@ -51,7 +51,7 @@ function OverlayVertex<V>({
     onVertexPress: onPress
   },
   vertexData,
-  vertexSettings: { radius, scale: userScale }
+  vertexSettings: { radius }
 }: VertexOverlayProps<V>) {
   const { key, scale, value } = vertexData;
   // HELPER VALUES
@@ -140,7 +140,7 @@ function OverlayVertex<V>({
   };
 
   const style = useAnimatedStyle(() => {
-    const r = radius * scale.value * userScale.value;
+    const r = radius * scale.value;
     const size = 2 * r;
     const position = getVertexPosition(vertexData);
 
