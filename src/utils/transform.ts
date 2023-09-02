@@ -247,12 +247,13 @@ export const getVertexPosition = <V>(
 };
 
 export const getVertexTransformation = <V>(
-  vertexData: VertexComponentData<V>
+  vertexData: VertexComponentData<V>,
+  scaleMultiplier = 1
 ): Vector & { scale: number } => {
   'worklet';
   return {
     ...getVertexPosition(vertexData),
-    scale: vertexData.scale.value
+    scale: vertexData.scale.value * scaleMultiplier
   };
 };
 

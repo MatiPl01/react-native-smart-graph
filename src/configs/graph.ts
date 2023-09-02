@@ -306,9 +306,6 @@ export const getUpdateConfig = <V, E>({
       label: {
         displayed: 'shared',
         scale: 'shared'
-      },
-      vertex: {
-        scale: 'shared'
       }
     },
     events: settings.events && {

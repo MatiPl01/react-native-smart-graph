@@ -6,6 +6,7 @@ import {
   getAlignedVertexAbsolutePosition,
   getCoordinatesRelativeToCenter
 } from './layout';
+import { getVertexTransformation } from './transform';
 
 type VertexTransformation = {
   scale: number;
@@ -69,31 +70,12 @@ export const getMultiStepVertexTransformation = <V>(
 ): VertexTransformation => {
   'worklet';
 
-  // // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  // const { alignment, position, radius, scale } = getFocusedVertexData(
-  //   {
-  //     key: stepData.point.key,
-  //     position: stepData.vertex.position
-  //   },
-  //   config.vertexRadius,
-  //   {
-  //     alignment: stepData.point.alignment,
-  //     animation: null,
-  //     disableGestures: config.disableGestures,
-  //     vertexScale: stepData.point.vertexScale
-  //   }
-  // ).vertex!;
-
-  // return getFocusedVertexTransformation({
-  //   alignment,
-  //   canvasDimensions: config.canvasDimensions,
-  //   vertex: {
-  //     radius,
-  //     scale,
-  //     x: position.x.value,
-  //     y: position.y.value
-  //   }
-  // });
+  return getFocusedVertexTransformation(
+    stepData.point.alignment,
+    config.canvasDimensions,
+    getVertexTransformation(stepData.vertex, stepData.point.vertexScale),
+    config.vertexRadius
+  );
 };
 
 export const getFocusSteps = <V>(

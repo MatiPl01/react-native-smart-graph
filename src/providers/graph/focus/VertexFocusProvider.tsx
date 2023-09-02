@@ -108,7 +108,7 @@ function VertexFocusProvider<V, E>({
         height: canvasDimensions.height.value,
         width: canvasDimensions.width.value
       },
-      getVertexTransformation(focusedVertex),
+      getVertexTransformation(focusedVertex, data.settings.vertexScale),
       vertexRadius
     );
     updateFocusTransformation({ end: vertexTransform }, focusContext);
@@ -129,7 +129,10 @@ function VertexFocusProvider<V, E>({
           height: canvasDimensions.height.value,
           width: canvasDimensions.width.value
         },
-        transform: getVertexTransformation(focusedVertex)
+        transform: getVertexTransformation(
+          focusedVertex,
+          data.settings.vertexScale
+        )
       },
     props => {
       if (!props) return;
