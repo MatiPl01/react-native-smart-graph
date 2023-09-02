@@ -73,7 +73,7 @@ function VertexFocusProvider<V, E>({
   // Helper values
   const focusPosition = useDerivedValue(() => {
     // TODO - fix
-    console.log('focusPosition');
+    // console.log('focusPosition');
     const key = data.focusedVertexKey;
     if (!key || !verticesData[key]) {
       return { x: 0, y: 0 };

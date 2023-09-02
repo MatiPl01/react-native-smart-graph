@@ -1,7 +1,9 @@
+import { Transforms2d } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
 import { ArrowComponent } from '@/components/graphs/arrows';
+import { calcArrowTransform } from '@/components/graphs/arrows/utils';
 import { DirectedStraightEdgeComponentProps } from '@/types/components';
 import { calcUnitVector, translateAlongVector } from '@/utils/vectors';
 
@@ -34,11 +36,7 @@ function DirectedStraightEdgeComponent<V, E>(
   } = props;
 
   // ARROW COMPONENT PROPS
-  const arrowTransform = useSharedValue({
-    dirVector: { x: 0, y: 0 },
-    scale: 0,
-    tipPosition: { x: 0, y: 0 }
-  });
+  const arrowTransform = useSharedValue<Transforms2d>([{ scale: 0 }]);
 
   const { p1, p2 } = useStraightEdge(
     props,
@@ -59,11 +57,12 @@ function DirectedStraightEdgeComponent<V, E>(
       // Update the arrow component props
       const distance = Math.sqrt((vScale * vertexRadius) ** 2 - offset ** 2);
       const dirVector = calcUnitVector(v1, v2);
-      arrowTransform.value = {
+      arrowTransform.value = calcArrowTransform(
+        translateAlongVector(v2, dirVector, -distance),
         dirVector,
-        scale: Math.min(aScale, labelScale),
-        tipPosition: translateAlongVector(v2, dirVector, -distance)
-      };
+        Math.min(aScale, labelScale),
+        vertexRadius
+      );
     }
   );
 

@@ -248,24 +248,16 @@ const updateGraphEdgesData = <V, E>(
       removedEdges.delete(edgeData.edge.key);
     }
 
-    // Continue if edge is already in the graph, is not removed and data
-    // is not changed
     const oldEdge = oldEdgesData[edgeData.edge.key];
-    if (
-      oldEdge &&
-      !oldEdge.removed &&
-      oldEdge.key === edgeData.edge.key &&
-      oldEdge.value === edgeData.edge.value &&
-      oldEdge.v1Key === edgeData.edge.vertices[0].key &&
-      oldEdge.v2Key === edgeData.edge.vertices[1].key &&
-      oldEdge.isDirected === edgeData.edge.isDirected()
-    ) {
-      // Update shared values if they were changed
+
+    // Update shared values if they were changed
+    if (oldEdge) {
       const oldOrdering = oldEdge.ordering.value;
       if (
         oldOrdering.target.order !== edgeData.order ||
         oldOrdering.target.edgesCount !== edgeData.edgesCount
       ) {
+        console.log('update', edgeData.edge.key);
         oldEdge.ordering.value = {
           source: oldOrdering.target,
           target: {
@@ -274,7 +266,19 @@ const updateGraphEdgesData = <V, E>(
           }
         };
       }
-      continue;
+
+      // Continue if edge is already in the graph, is not removed and data
+      // is not changed
+      if (
+        !oldEdge.removed &&
+        oldEdge.key === edgeData.edge.key &&
+        oldEdge.value === edgeData.edge.value &&
+        oldEdge.v1Key === edgeData.edge.vertices[0].key &&
+        oldEdge.v2Key === edgeData.edge.vertices[1].key &&
+        oldEdge.isDirected === edgeData.edge.isDirected()
+      ) {
+        continue;
+      }
     }
 
     // Continue if vertices of the edge are not rendered yet

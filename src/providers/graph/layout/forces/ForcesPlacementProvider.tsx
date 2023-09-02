@@ -19,6 +19,7 @@ import {
 } from '@/types/settings';
 import { updateInitialPlacement, updateNextPlacement } from '@/utils/forces';
 import { unsharedify } from '@/utils/objects';
+import { udateEdgesOrdering } from '@/utils/transform';
 
 type ForcesPlacementContextType<V> = {
   initialPlacementCompleted: SharedValue<boolean>;
@@ -99,6 +100,10 @@ function ForcesPlacementProvider<V, E>({
     // Update the state
     setPlacedVerticesData(verticesData);
   }, [verticesData]);
+
+  useEffect(() => {
+    udateEdgesOrdering(edgesData, layoutAnimationSettings);
+  }, [edgesData]);
 
   const handleFirstGraphRender = () => {
     runOnUI(updateInitialPlacement)(

@@ -7,17 +7,17 @@ import { LabelRendererProps } from '@/types/components';
 
 export default function DefaultLabelRenderer<E>({
   animationProgress,
-  key
+  key,
+  r
 }: LabelRendererProps<E>) {
-  const FONT_SIZE = 20;
-  const font = useFont(FONTS.rubikFont, FONT_SIZE);
+  const font = useFont(FONTS.rubikFont, r);
 
   // TODO - improve label centering
   const labelTransform = useDerivedValue(() => [
     {
-      translateX: ((-key.length * FONT_SIZE) / 3.25) * animationProgress.value
+      translateX: ((-key.length * r) / 3.25) * animationProgress.value
     },
-    { translateY: (FONT_SIZE / 3) * animationProgress.value },
+    { translateY: (r / 3) * animationProgress.value },
     { scale: Math.max(animationProgress.value, 0) }
   ]);
 

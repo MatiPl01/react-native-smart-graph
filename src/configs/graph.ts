@@ -219,7 +219,7 @@ export const getDefaultConfig = <V, E>(
           disableAnimation: false
         }
       },
-      layout: settings?.layout
+      layout: settings?.layout?.type
         ? DEFAULT_LAYOUT_SETTINGS[settings.layout.type]
         : DEFAULT_LAYOUT_SETTINGS.auto,
       placement: settings?.placement?.strategy

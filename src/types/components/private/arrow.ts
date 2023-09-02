@@ -1,4 +1,4 @@
-import { Vector } from '@shopify/react-native-skia';
+import { Transforms2d } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
 import { ArrowRenderer } from '@/types/components/public';
@@ -6,10 +6,6 @@ import { ArrowRenderer } from '@/types/components/public';
 export type ArrowComponentProps = {
   animationProgress: SharedValue<number>;
   renderer: ArrowRenderer;
-  transform: SharedValue<{
-    dirVector: Vector;
-    scale: number;
-    tipPosition: Vector;
-  }>;
+  transform: SharedValue<Transforms2d>;
   vertexRadius: number;
 };

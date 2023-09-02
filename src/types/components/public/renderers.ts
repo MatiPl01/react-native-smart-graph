@@ -56,6 +56,7 @@ export type LabelRendererProps<E> = SharedRenderersProps & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   key: string;
+  r: number;
   value?: E;
 };
 
@@ -67,9 +68,7 @@ export type LabelRenderer<E> = (
  * ARROW
  */
 export type ArrowRendererProps = SharedRenderersProps & {
-  edgeRotation: SharedValue<number>;
   s: number;
-  scale: SharedValue<number>;
 };
 
 export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;

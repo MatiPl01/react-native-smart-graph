@@ -68,7 +68,7 @@ const updateEdgesTransform = <E>(
 ): boolean => {
   'worklet';
   for (const edgeData of Object.values(edgesData)) {
-    // If there are mp target vertices positions, the edge must have been removed
+    // If there are no target vertices positions, the edge must have been removed
     // (it will be transitioned with removed vertices to the center of the canvas)
     const v1TargetPosition = verticesPositions[edgeData.v1Key] ?? {
       x: 0,
@@ -93,6 +93,8 @@ const updateEdgesTransform = <E>(
         target: ordering.target
       };
       isOrderingModified = true; // Mark as modified to update the animation progress
+
+      console.log('[transform] update ordering', edgeData.key);
     }
 
     // Check if vertices positions have changed
@@ -181,6 +183,34 @@ export const updateComponentsTransform = <V, E>(
   );
 };
 
+export const udateEdgesOrdering = <E>(
+  edgesData: Record<string, EdgeComponentData<E>>,
+  layoutAnimationSettings?: Maybe<AllAnimationSettings>
+): void => {
+  'worklet';
+  for (const edgeData of Object.values(edgesData)) {
+    const ordering = edgeData.ordering.value;
+    if (
+      ordering.source.edgesCount !== ordering.target.edgesCount ||
+      ordering.source.order !== ordering.target.order
+    ) {
+      // Reset source and target positions to the current position
+      // (it ensures that the animation will be executed only once when the ordering changes)
+      edgeData.ordering.value = {
+        source: ordering.target,
+        target: ordering.target
+      };
+      edgeData.transformProgress.value = 0;
+      // Start the animation
+      animateWithoutCallback(
+        edgeData.transformProgress,
+        1,
+        layoutAnimationSettings
+      );
+    }
+  }
+};
+
 const setVertexPosition = <V>(
   vertexData: VertexComponentData<V>,
   position: Vector
@@ -205,7 +235,6 @@ const setEdgePosition = <E>(
     v2Source: v2Position,
     v2Target: v2Position
   };
-  edgeData.transformProgress.value = 1;
 };
 
 export const getVertexPosition = <V>(

@@ -177,43 +177,54 @@ export default function BottomSheetFocus() {
 
   useEffect(() => {
     setInterval(() => {
-      roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
-      minRowDistance.value = Math.random() * 100 + 40;
-      minColumnDistance.value = Math.random() * 50 + 20;
+      // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
+      // minRowDistance.value = Math.random() * 100 + 40;
+      // minColumnDistance.value = Math.random() * 50 + 20;
       vertexScale.value = withTiming(Math.random(), {
         duration: 500
       });
-      if (graph.hasVertex('VV')) {
-        if (Math.random() < 0.1) {
-          graph.removeVertex('VV');
-        }
+      if (graph.hasEdge('E3')) {
+        // if (Math.random() < 0.1) {
+        graph.removeEdge('E3');
+        // }
       } else {
-        graph.insertVertex({ key: 'VV' });
+        graph.insertEdge({
+          key: 'E3',
+          from: 'V1',
+          to: 'V2'
+        });
       }
-      if (Math.random() < 0.4) {
-        if (graph.hasEdge('E3')) {
-          if (Math.random() < 0.1) {
-            graph.removeEdge('E3');
-          }
-        } else {
-          graph.insertEdge({
-            key: 'E3',
-            from: 'VV',
-            to: 'V2'
-          });
-        }
-      }
-    }, 500);
-
-    setTimeout(() => {
-      graph.focus('V1');
+      // if (graph.hasVertex('VV')) {
+      //   if (Math.random() < 0.1) {
+      //     graph.removeVertex('VV');
+      //   }
+      // } else {
+      //   graph.insertVertex({ key: 'VV' });
+      // }
+      // if (Math.random() < 0.4) {
+      //   if (graph.hasEdge('E3')) {
+      //     if (Math.random() < 0.1) {
+      //       graph.removeEdge('E3');
+      //     }
+      //   } else {
+      //     graph.insertEdge({
+      //       key: 'E3',
+      //       from: 'VV',
+      //       to: 'V2'
+      //     });
+      //   }
+      // }
     }, 2000);
-    setTimeout(() => {
-      graph.focus('V2');
-    }, 5000);
-    setTimeout(() => {
-      graph.blur();
-    }, 10000);
+
+    // setTimeout(() => {
+    //   graph.focus('V1');
+    // }, 2000);
+    // setTimeout(() => {
+    //   graph.focus('V2');
+    // }, 5000);
+    // setTimeout(() => {
+    //   graph.blur();
+    // }, 10000);
   }, []);
 
   return (
@@ -246,21 +257,21 @@ export default function BottomSheetFocus() {
               minColumnDistance
             },
             layout: {
-              type: 'force'
+              // type: 'force'
             },
             components: {
               arrow: {
-                scale: 0.5
+                scale: 1
               },
               vertex: {
                 radius: 20,
                 scale: vertexScale
               },
               label: {
-                displayed: true
+                // displayed: true
               },
               edge: {
-                type: 'curved'
+                // type: 'curved'
               }
             }
             // animations: null

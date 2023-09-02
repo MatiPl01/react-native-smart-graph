@@ -153,6 +153,8 @@ export const useStraightEdge = <
   const startOffset = useSharedValue(0);
   // Label scale
   const labelStartScale = useSharedValue(0);
+  // Ordering
+  const prevOrdering = useSharedValue(ordering.value);
 
   // ADDITIONAL PROPS
   const additionalProps = selector?.(inputProps);
@@ -172,39 +174,44 @@ export const useStraightEdge = <
       ...additionalProps
     }),
     ({ customProps, ...props }) => {
-      // Update the source offset if the new transition started
+      // Update the source offset if the ordering has changed
       let beginOffset = startOffset.value;
-      if (props.progress === 0) {
+      const currentOrdering = ordering.value;
+      if (
+        (currentOrdering.target.order !== prevOrdering.value.target.order ||
+          currentOrdering.target.edgesCount !==
+            prevOrdering.value.target.edgesCount) &&
+        props.progress === 0 // TODO - FIX
+      ) {
         beginOffset = startOffset.value = currentOffset.value;
+        prevOrdering.value = currentOrdering;
       }
       // Get translated edge data
       const edgeTransform = getEdgeTransform(
         calcTranslationOffset,
         beginOffset,
-        ordering.value,
+        currentOrdering,
         props
       );
-      // Update label data (if it is displayed)
-      if (props.label.displayed) {
-        let beginScale = labelStartScale.value;
-        if (props.progress === 0) {
-          beginScale = labelStartScale.value = labelData.transform.value.scale;
-        }
-        const labelTransform = getLabelTransform(
-          edgeTransform,
-          beginScale,
-          ordering.value,
-          props
-        );
-        labelData.transform.value = labelTransform;
+      // Update label transform
+      let beginScale = labelStartScale.value;
+      if (props.progress === 0) {
+        beginScale = labelStartScale.value = labelData.transform.value.scale;
       }
+      const labelTransform = getLabelTransform(
+        edgeTransform,
+        beginScale,
+        currentOrdering,
+        props
+      );
+      labelData.transform.value = labelTransform;
       // Additional reaction
       reaction?.({
         ...props,
         customProps,
         transform: {
           edge: edgeTransform,
-          label: labelData.transform.value
+          label: labelTransform
         }
       } as CustomReactionProps<S>);
       // At the end, update shared values

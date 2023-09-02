@@ -160,6 +160,11 @@ export const useCurvedEdge = <
       // Update the source offset if the new transition started
       let beginOffset = startOffset.value;
       if (props.progress === 0) {
+        console.log(
+          '[useCurvedEdge] reset offset',
+          inputProps.data.key,
+          inputProps.data.ordering.value
+        );
         beginOffset = startOffset.value = currentOffset.value;
       }
       // Get translated edge data
