@@ -9,11 +9,11 @@ export type VertexSettings = {
 
 export type StraightEdgeSettings = {
   maxOffsetFactor?: Sharedifyable<number>;
-  type: Sharedifyable<'straight'>;
+  type: 'straight';
 };
 
 export type CurvedEdgeSettings = {
-  type: Sharedifyable<'curved'>;
+  type: 'curved';
 };
 
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;

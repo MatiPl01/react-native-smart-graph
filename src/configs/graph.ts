@@ -235,28 +235,19 @@ export const getDefaultConfig = <V, E>(
 const getPlacementConfig = <V, E>(
   settings: AllGraphSettings<V, E>['settings']
 ) => {
-  const sharedSettings = { strategy: 'shared' };
-
   switch (settings.placement.strategy) {
     default:
     case 'random':
-      const sharedRandomSettings = {
-        ...sharedSettings,
-        mesh: 'shared'
-      };
-
       switch ((settings.placement as AllRandomPlacementSettings).mesh) {
         case 'grid':
         case 'triangular':
           return {
-            ...sharedRandomSettings,
             density: 'shared',
             minVertexDistance: 'shared'
           };
         case 'random':
         default:
           return {
-            ...sharedRandomSettings,
             containerHeight: 'shared',
             containerWidth: 'shared'
           };
@@ -264,20 +255,17 @@ const getPlacementConfig = <V, E>(
     case 'circle':
     case 'circles':
       return {
-        ...sharedSettings,
         minVertexDistance: 'shared',
         sortVertices: 'shared'
       };
     case 'trees':
       return {
-        ...sharedSettings,
         minColumnDistance: 'shared',
         minRowDistance: 'shared',
         roots: 'shared'
       };
     case 'orbits':
       return {
-        ...sharedSettings,
         layerSizing: 'shared',
         maxSectorAngle: 'shared',
         minVertexDistance: 'shared',
@@ -326,8 +314,7 @@ export const getUpdateConfig = <V, E>({
             attractionScale: 'shared',
             minUpdateDistance: 'shared',
             refreshInterval: 'shared',
-            repulsionScale: 'shared',
-            strategy: 'shared'
+            repulsionScale: 'shared'
           }
         : undefined,
     placement: getPlacementConfig(settings)

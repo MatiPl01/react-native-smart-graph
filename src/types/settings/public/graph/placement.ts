@@ -13,15 +13,15 @@ export type RandomMeshType = 'grid' | 'random' | 'triangular';
 export type BoundRandomPlacementSettings = {
   containerHeight?: Sharedifyable<number>;
   containerWidth?: Sharedifyable<number>;
-  mesh: Sharedifyable<'random'>;
-  strategy: Sharedifyable<'random'>;
+  mesh: 'random';
+  strategy: 'random';
 };
 
 export type UnboundRandomPlacementSettings = {
   density?: Sharedifyable<number>;
-  mesh?: Sharedifyable<Exclude<RandomMeshType, 'random'>>;
+  mesh?: Exclude<RandomMeshType, 'random'>;
   minVertexDistance?: Sharedifyable<number>;
-  strategy: Sharedifyable<'random'>;
+  strategy: 'random';
 };
 
 export type RandomPlacementSettings =
@@ -37,12 +37,12 @@ type SharedCircularPlacementSettings = SortablePlacementSettings & {
 
 // Circle
 export type CirclePlacementSettings = SharedCircularPlacementSettings & {
-  strategy: Sharedifyable<'circle'>;
+  strategy: 'circle';
 };
 
 // Circles
 export type CirclesPlacementSettings = SharedCircularPlacementSettings & {
-  strategy: Sharedifyable<'circles'>;
+  strategy: 'circles';
 };
 
 /*
@@ -53,7 +53,7 @@ export type TreesPlacementSettings = {
   minColumnDistance?: Sharedifyable<number>;
   minRowDistance?: Sharedifyable<number>;
   roots?: Sharedifyable<Array<string>>;
-  strategy: Sharedifyable<'trees'>;
+  strategy: 'trees';
 };
 
 // Orbits
@@ -84,7 +84,7 @@ export type OrbitsPlacementSettings = (
   maxSectorAngle?: Sharedifyable<number>;
   minVertexDistance?: Sharedifyable<number>;
   roots?: Sharedifyable<Array<string>>;
-  strategy: Sharedifyable<'orbits'>;
+  strategy: 'orbits';
   symmetrical?: Sharedifyable<boolean>;
 };
 

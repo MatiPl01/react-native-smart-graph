@@ -16,7 +16,7 @@ export type ForceLayoutSettings = {
   minUpdateDistance?: Sharedifyable<number>;
   refreshInterval?: Sharedifyable<number>;
   repulsionScale?: Sharedifyable<number>;
-  strategy?: Sharedifyable<'default'>; // TODO - add more in the future
+  strategy?: 'default'; // TODO - add more in the future
   type: 'force';
 };
 

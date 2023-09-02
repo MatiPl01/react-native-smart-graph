@@ -49,7 +49,7 @@ import {
 export type DirectedGraphComponentProps<
   V,
   E,
-  S extends DirectedGraphSettings<V>
+  S extends DirectedGraphSettings<V> = DirectedGraphSettings<V>
 > = {
   graph: DirectedGraph<V, E>;
   renderers?: S extends DirectedGraphWithCurvedEdgeSettings<V>
@@ -61,7 +61,7 @@ export type DirectedGraphComponentProps<
 export type UndirectedGraphComponentProps<
   V,
   E,
-  S extends UndirectedGraphSettings<V>
+  S extends UndirectedGraphSettings<V> = UndirectedGraphSettings<V>
 > = {
   graph: UndirectedGraph<V, E>;
   renderers?: S extends UndirectedGraphWithCurvedEdgeSettings<V>

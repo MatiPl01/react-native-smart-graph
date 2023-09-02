@@ -178,17 +178,17 @@ export default function BottomSheetFocus() {
       // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
       // minRowDistance.value = Math.random() * 100 + 40;
       // minColumnDistance.value = Math.random() * 50 + 20;
-      if (graph.hasEdge('E3')) {
-        // if (Math.random() < 0.1) {
-        graph.removeEdge('E3');
-        // }
-      } else {
-        graph.insertEdge({
-          key: 'E3',
-          from: 'V1',
-          to: 'V2'
-        });
-      }
+      // if (graph.hasEdge('E3')) {
+      //   // if (Math.random() < 0.1) {
+      //   graph.removeEdge('E3');
+      //   // }
+      // } else {
+      //   graph.insertEdge({
+      //     key: 'E3',
+      //     from: 'V1',
+      //     to: 'V2'
+      //   });
+      // }
       // if (graph.hasVertex('VV')) {
       //   if (Math.random() < 0.1) {
       //     graph.removeVertex('VV');
@@ -265,7 +265,7 @@ export default function BottomSheetFocus() {
                 displayed: true
               },
               edge: {
-                type: 'curved'
+                type: 'straight'
               }
             }
             // animations: null
