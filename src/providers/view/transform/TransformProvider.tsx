@@ -15,8 +15,8 @@ import { Maybe } from '@/types/utils';
 import {
   calcContainerScale,
   calcContainerTranslation,
-  calcScaleOnProgress,
   calcTranslationOnProgress,
+  calcValueOnProgress,
   clamp
 } from '@/utils/views';
 
@@ -101,7 +101,8 @@ export default function TransformProvider({
     maxScale,
     minScale,
     objectFit,
-    padding
+    padding,
+    targetBoundingRect
   } = useViewDataContext();
 
   // Other values
@@ -119,6 +120,7 @@ export default function TransformProvider({
   const handleGraphRender = (containerBoundingRect: BoundingRect) => {
     'worklet';
     initialBoundingRect.value = containerBoundingRect;
+    targetBoundingRect.value = containerBoundingRect;
   };
 
   const getCurrentBoundingRect = (): BoundingRect => {
@@ -307,7 +309,7 @@ export default function TransformProvider({
       getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
 
     // Scale content to fit container based on objectFit
-    scaleContentTo(calcScaleOnProgress(progress, startScale, targetScale));
+    scaleContentTo(calcValueOnProgress(progress, startScale, targetScale));
     // Translate content to fit container based on objectFit
     translateContentTo(
       calcTranslationOnProgress(

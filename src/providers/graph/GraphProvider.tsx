@@ -68,6 +68,7 @@ export default function GraphProvider<V, E>({
       />,
       // EVENTS
       // Press events provider
+      // TDOo - improve press events provider (the overlay layer degrades performance)
       <ConditionalProvider.If
         if={({ settings }) => !!settings.events?.press}
         then={<PressEventsProvider transform={transform} />}

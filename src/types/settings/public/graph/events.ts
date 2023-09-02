@@ -1,8 +1,6 @@
 import { VertexData } from '@/types/data';
-import { AnimatedVectorCoordinates } from '@/types/layout';
 
 export type VertexPressEvent<V = void> = {
-  position: AnimatedVectorCoordinates;
   vertex: VertexData<V>;
 };
 

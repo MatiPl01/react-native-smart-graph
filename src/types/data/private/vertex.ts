@@ -2,19 +2,21 @@
 import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { Alignment, AnimatedVectorCoordinates } from '@/types/layout';
+import { Alignment } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 import { FocusPoint } from '@/types/settings/public/graph/focus';
 import { DeepRequired, Maybe } from '@/types/utils';
 
 export type VertexComponentData<V> = {
   animationSettings: AllAnimationSettings | null;
-  currentRadius: SharedValue<number>;
-  displayed: SharedValue<boolean>;
   key: string;
-  position: AnimatedVectorCoordinates;
+  points: SharedValue<{
+    source: Vector;
+    target: Vector;
+  }>;
   removed: boolean;
   scale: SharedValue<number>;
+  transformProgress: SharedValue<number>;
   value?: V;
 };
 
@@ -25,7 +27,7 @@ export type FocusedVertexData = {
   vertex?: {
     alignment: Required<Alignment>;
     key: string;
-    position: AnimatedVectorCoordinates;
+    position: SharedValue<Vector>;
     radius: number;
     scale: number;
   };

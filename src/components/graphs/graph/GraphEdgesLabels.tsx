@@ -10,21 +10,24 @@ type GraphEdgeLabelsProps<E> = {
   edgeLabelsData: Record<string, LabelComponentData<E>>;
   focusProgress: SharedValue<number>;
   renderer: LabelRenderer<E>;
+  vertexRadius: number;
 };
 
 function GraphEdgeLabels<E>({
   edgeLabelsData,
   focusProgress,
-  renderer
+  renderer,
+  vertexRadius
 }: GraphEdgeLabelsProps<E>) {
   return renderer ? (
     <Group opacity={focusProgress}>
       {Object.entries(edgeLabelsData).map(([key, data]) => (
         <LabelComponent<E>
-          {...data}
+          data={data}
           edgeKey={key}
           key={key}
           renderer={renderer}
+          vertexRadius={vertexRadius}
         />
       ))}
     </Group>
@@ -35,7 +38,8 @@ export default withGraphSettings(
   withComponentsData(GraphEdgeLabels, ({ edgeLabelsData }) => ({
     edgeLabelsData
   })),
-  ({ renderers }) => ({
-    renderer: renderers.label
+  ({ renderers, settings }) => ({
+    renderer: renderers.label,
+    vertexRadius: settings.components.vertex.radius
   })
 );

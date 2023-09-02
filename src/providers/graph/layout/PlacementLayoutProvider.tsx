@@ -8,23 +8,21 @@ import {
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
-import { BoundingRect } from '@/types/layout';
 import { GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   InternalGraphPlacementSettings
 } from '@/types/settings';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
 import { unsharedify } from '@/utils/objects';
 import { placeVertices } from '@/utils/placement';
+import { updateComponentsTransform } from '@/utils/transform';
 
-export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
+type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
   edgesData: Record<string, EdgeComponentData<E>>;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
   placementSettings: InternalGraphPlacementSettings;
-  targetBoundingRect: SharedValue<BoundingRect>;
   verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
@@ -35,13 +33,12 @@ function GraphPlacementLayoutProvider<V, E>({
   isGraphDirected,
   layoutAnimationSettings,
   placementSettings,
-  targetBoundingRect,
   verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
   // CONTEXTS
   // Canvas contexts
   const {
-    dataContext: { canvasDimensions },
+    dataContext: { canvasDimensions, targetBoundingRect },
     transformContext: { handleGraphRender: onRender }
   } = useCanvasContexts();
 
@@ -67,17 +64,13 @@ function GraphPlacementLayoutProvider<V, E>({
       if (isFirstRender.value) {
         isFirstRender.value = false;
         onRender(boundingRect);
+        return;
       }
 
       targetBoundingRect.value = boundingRect;
-
-      animateVerticesToFinalPositions(
-        Object.fromEntries(
-          Object.entries(verticesData).map(([key, { position }]) => [
-            key,
-            position
-          ])
-        ),
+      updateComponentsTransform(
+        verticesData,
+        edgesData,
         verticesPositions,
         layoutAnimationSettings
       );
@@ -96,14 +89,12 @@ export default withGraphSettings(
       edgesData,
       isGraphDirected,
       layoutAnimationSettings,
-      targetBoundingRect,
       verticesData
     }) => ({
       connections,
       edgesData,
       isGraphDirected,
       layoutAnimationSettings,
-      targetBoundingRect,
       verticesData
     })
   ),

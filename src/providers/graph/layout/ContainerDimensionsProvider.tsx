@@ -1,25 +1,22 @@
 import { PropsWithChildren } from 'react';
-import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
+import { useAnimatedReaction } from 'react-native-reanimated';
 
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
-import { BoundingRect } from '@/types/layout';
+import { withGraphSettings } from '@/providers/graph/data';
 import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
-  targetBoundingRect: SharedValue<BoundingRect>;
-  vertexRadius: SharedValue<number>;
+  vertexRadius: number;
 }>;
 
 function ContainerDimensionsProvider({
   children,
-  targetBoundingRect,
   vertexRadius
 }: ContainerDimensionsProviderProps) {
   // CONTEXTS
   // Canvas contexts
   const {
-    dataContext: { boundingRect }
+    dataContext: { boundingRect, targetBoundingRect }
   } = useCanvasContexts();
 
   useAnimatedReaction(
@@ -30,25 +27,24 @@ function ContainerDimensionsProvider({
         right: boundingRect.right.value,
         top: boundingRect.top.value
       },
-      padding: vertexRadius.value,
       targetRect: targetBoundingRect.value
     }),
-    ({ currentRect, padding, targetRect }) => {
+    ({ currentRect, targetRect }) => {
       boundingRect.left.value = animateToValue(
         currentRect.left,
-        targetRect.left - padding
+        targetRect.left - vertexRadius
       );
       boundingRect.top.value = animateToValue(
         currentRect.top,
-        targetRect.top - padding
+        targetRect.top - vertexRadius
       );
       boundingRect.right.value = animateToValue(
         currentRect.right,
-        targetRect.right + padding
+        targetRect.right + vertexRadius
       );
       boundingRect.bottom.value = animateToValue(
         currentRect.bottom,
-        targetRect.bottom + padding
+        targetRect.bottom + vertexRadius
       );
     }
   );
@@ -57,8 +53,8 @@ function ContainerDimensionsProvider({
 }
 
 export default withGraphSettings(
-  withComponentsData(ContainerDimensionsProvider, ({ targetBoundingRect }) => ({
-    targetBoundingRect
-  })),
-  ({ settings }) => ({ vertexRadius: settings.components.vertex.radius })
+  ContainerDimensionsProvider,
+  ({ settings }) => ({
+    vertexRadius: settings.components.vertex.radius
+  })
 );

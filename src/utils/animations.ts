@@ -1,13 +1,13 @@
-import { Vector } from '@shopify/react-native-skia';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   cancelAnimation,
   isSharedValue,
   runOnJS,
+  SharedValue,
   withTiming
 } from 'react-native-reanimated';
 
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
-import { AnimatedVectorCoordinates } from '@/types/layout';
 import {
   AllAnimationSettings,
   AnimationSettings,
@@ -15,48 +15,48 @@ import {
   GraphModificationAnimationsSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
+import { Maybe } from '@/types/utils';
 
-export const animateVerticesToFinalPositions = (
-  animatedPositions: Record<string, AnimatedVectorCoordinates>,
-  finalPositions: Record<string, Vector>,
-  animationSettings: AllAnimationSettings | null
-) => {
+export const animateWithoutCallback = (
+  value: SharedValue<number>,
+  target: number,
+  animationSettings?: Maybe<AllAnimationSettings>
+): void => {
   'worklet';
-  const finalPositionsEntries = Object.entries(finalPositions);
-
-  for (let i = 0; i < finalPositionsEntries.length; i++) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const [key, finalPosition] = finalPositionsEntries[i]!;
-    const animatedPosition = animatedPositions[key];
-    if (!animatedPosition) continue;
-    // If animationSettings is not null, animate to final position
-    if (animationSettings) {
-      const { duration, easing, onComplete } = animationSettings;
-      animatedPosition.x.value = withTiming(finalPosition.x, {
-        duration,
-        easing
-      });
-      animatedPosition.y.value = withTiming(
-        finalPosition.y,
-        {
-          duration,
-          easing
-        },
-        // Call onComplete only once, when the last vertex animation is complete
-        onComplete && i === finalPositionsEntries.length - 1
-          ? (finished?: boolean) => {
-              'worklet';
-              runOnJS(onComplete)(finished);
-            }
-          : undefined
-      );
-    }
-    // Otherwise, if animationSettings is null, just set final position
-    else {
-      animatedPosition.x.value = finalPosition.x;
-      animatedPosition.y.value = finalPosition.y;
-    }
+  if (!animationSettings) {
+    value.value = target;
+    return;
   }
+  const { duration, easing } = animationSettings;
+  value.value = withTiming(target, {
+    duration,
+    easing
+  });
+};
+
+export const animateWithCallback = (
+  value: SharedValue<number>,
+  target: number,
+  animationSettings?: Maybe<AllAnimationSettings>
+): void => {
+  'worklet';
+  if (!animationSettings) {
+    value.value = target;
+    return;
+  }
+  const { duration, easing, onComplete } = animationSettings;
+  value.value = withTiming(
+    target,
+    {
+      duration,
+      easing
+    },
+    finished => {
+      if (onComplete) {
+        runOnJS(onComplete)(finished);
+      }
+    }
+  );
 };
 
 const ANIMATION_SETTINGS_KEYS = new Set(['duration', 'easing', 'onComplete']);
@@ -207,7 +207,8 @@ export const createAnimationsSettingsForBatchModification = (
 export const animateToValue = (
   fromValue: number,
   toValue: number,
-  eps?: number
+  eps?: number,
+  div = 1000
 ): number => {
   'worklet';
   const delta = toValue - fromValue;
@@ -218,28 +219,24 @@ export const animateToValue = (
   if (isNaN(delta) || Math.abs(delta) < minDelta) {
     return toValue;
   }
-  const factor = Math.max(0.1, Math.abs(delta) / 1000);
+  const factor = Math.max(0.1, Math.abs(delta) / div);
   return fromValue + delta * factor;
 };
 
 export const cancelVertexAnimations = <V>(
   vertexData: VertexComponentData<V>
 ) => {
+  cancelAnimation(vertexData.points);
   cancelAnimation(vertexData.scale);
-  cancelAnimation(vertexData.currentRadius);
-  cancelAnimation(vertexData.position.x);
-  cancelAnimation(vertexData.position.y);
-  cancelAnimation(vertexData.displayed);
+  cancelAnimation(vertexData.transformProgress);
 };
 
 export const cancelEdgeAnimations = <V>(edgeData: EdgeComponentData<V>) => {
   cancelAnimation(edgeData.animationProgress);
-  cancelAnimation(edgeData.displayed);
-  cancelAnimation(edgeData.edgesCount);
-  cancelAnimation(edgeData.order);
-  cancelAnimation(edgeData.labelHeight);
-  cancelAnimation(edgeData.labelPosition.x);
-  cancelAnimation(edgeData.labelPosition.y);
+  cancelAnimation(edgeData.label.transform);
+  cancelAnimation(edgeData.ordering);
+  cancelAnimation(edgeData.points);
+  cancelAnimation(edgeData.transformProgress);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

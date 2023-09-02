@@ -1,4 +1,4 @@
-import { Mask, Rect } from '@shopify/react-native-skia';
+import { Rect } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
@@ -7,7 +7,6 @@ import { useCanvasContexts } from '@/providers/graph/contexts';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
-import GraphEdgesMask from './GraphEdgesMask';
 import GraphVertices from './GraphVertices';
 
 function GraphComponent() {
@@ -35,13 +34,15 @@ function GraphComponent() {
   return (
     <>
       <Rect color='#333' height={h} width={w} x={x} y={y} />
-      <Mask
+      {/* TODO - maybe remove the mask component - it degrades performance */}
+      {/* <Mask
         mask={<GraphEdgesMask boundingRect={boundingRect} />}
         mode='luminance'>
         <GraphEdges focusProgress={focusProgress} />
-      </Mask>
-      <GraphVertices focusContext={focusContext} />
+      </Mask> */}
+      <GraphEdges focusProgress={focusProgress} />
       <GraphEdgesLabels focusProgress={focusProgress} />
+      <GraphVertices focusContext={focusContext} />
     </>
   );
 }

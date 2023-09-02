@@ -7,36 +7,22 @@ import { LabelRendererProps } from '@/types/components';
 
 export default function DefaultLabelRenderer<E>({
   animationProgress,
-  centerX,
-  centerY,
-  edgeRotation,
-  height,
-  key
+  key,
+  r
 }: LabelRendererProps<E>) {
-  const FONT_SIZE = 16;
-  const font = useFont(FONTS.rubikFont, FONT_SIZE);
+  const font = useFont(FONTS.rubikFont, r);
 
-  const wrapperTransform = useDerivedValue(() => [
-    { translateX: centerX.value },
-    { translateY: centerY.value },
-    { rotate: edgeRotation.value },
-    { scale: height.value / FONT_SIZE }
-  ]);
   // TODO - improve label centering
   const labelTransform = useDerivedValue(() => [
-    {
-      translateX: ((-key.length * FONT_SIZE) / 3.25) * animationProgress.value
-    },
-    { translateY: (FONT_SIZE / 3) * animationProgress.value },
+    { translateX: ((-key.length * r) / 3.25) * animationProgress.value },
+    { translateY: (r / 3) * animationProgress.value },
     { scale: Math.max(animationProgress.value, 0) }
   ]);
 
   return (
     font && (
-      <Group transform={wrapperTransform}>
-        <Group transform={labelTransform}>
-          <Text color='white' font={font} text={key} x={0} y={0} />
-        </Group>
+      <Group transform={labelTransform}>
+        <Text color='white' font={font} text={key} x={0} y={0} />
       </Group>
     )
   );

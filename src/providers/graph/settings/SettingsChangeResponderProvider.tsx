@@ -65,10 +65,9 @@ function SettingsChangeResponderProvider({
 
   // On every objectFit change, after auto-sizing has been disabled,
   // reset the container position
+  const autoSizingEnabled = autoSizingContext.autoSizingEnabled;
   useAnimatedReaction(
-    () =>
-      objectFit.value !== prevObjectFit.value &&
-      !autoSizingContext.autoSizingEnabled.value,
+    () => objectFit.value !== prevObjectFit.value && !autoSizingEnabled.value,
     shouldReset => {
       if (!shouldReset) return;
       prevObjectFit.value = objectFit.value;

@@ -49,15 +49,21 @@ export type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
 export type InternalEdgeSettings = Pick<AllEdgeSettings, 'type'> &
   DeepSharedify<Omit<AllEdgeSettings, 'type'>>;
 
-export type InternalUndirectedStraightEdgeSettings = {
-  edge: InternalStraightEdgeSettings;
-  label?: InternalLabelSettings;
+type SharedInternalEdgeSettings = {
+  vertex: InternalVertexSettings;
 };
 
-export type InternalUndirectedCurvedEdgeSettings = {
-  edge: InternalCurvedEdgeSettings;
-  label?: InternalLabelSettings;
-};
+export type InternalUndirectedStraightEdgeSettings =
+  SharedInternalEdgeSettings & {
+    edge: InternalStraightEdgeSettings;
+    label: InternalLabelSettings;
+  };
+
+export type InternalUndirectedCurvedEdgeSettings =
+  SharedInternalEdgeSettings & {
+    edge: InternalCurvedEdgeSettings;
+    label: InternalLabelSettings;
+  };
 
 export type InternalDirectedStraightEdgeSettings =
   InternalUndirectedStraightEdgeSettings & {
@@ -69,7 +75,11 @@ export type InternalDirectedCurvedEdgeSettings =
     arrow: InternalArrowSettings;
   };
 
-export type InternalVertexSettings = DeepSharedify<AllVertexSettings>;
+export type InternalVertexSettings = DeepSharedify<
+  Omit<AllVertexSettings, 'radius'>
+> & {
+  radius: number;
+};
 
 /*
  * INTERNAL GRAPH COMPONENTS SETTINGS

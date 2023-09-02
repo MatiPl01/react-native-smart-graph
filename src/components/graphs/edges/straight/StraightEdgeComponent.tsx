@@ -3,7 +3,7 @@ import {
   StraightEdgeRendererProps
 } from '@/types/components';
 
-type RenderedStraightEdgeComponentProps<E> = Omit<
+type StraightEdgeComponentProps<E> = Omit<
   StraightEdgeRendererProps<E>,
   'key'
 > & {
@@ -11,10 +11,10 @@ type RenderedStraightEdgeComponentProps<E> = Omit<
   renderer: StraightEdgeRenderer<E>;
 };
 
-export default function RenderedCurvedEdgeComponent<E>({
+export default function StraightEdgeComponent<E>({
   edgeKey: key,
   renderer,
   ...restProps
-}: RenderedStraightEdgeComponentProps<E>) {
+}: StraightEdgeComponentProps<E>) {
   return renderer({ key, ...restProps });
 }

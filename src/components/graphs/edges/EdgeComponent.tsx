@@ -1,10 +1,5 @@
 /* eslint-disable no-redeclare */
 import { memo, useEffect } from 'react';
-import {
-  useAnimatedReaction,
-  useSharedValue,
-  withTiming
-} from 'react-native-reanimated';
 
 import {
   DirectedCurvedEdgeComponentProps,
@@ -61,46 +56,18 @@ function EdgeComponent<V, E>({
   renderers,
   settings
 }: EdgeComponentProps<V, E>) {
-  const { animationProgress, animationSettings } = data;
-
-  // EDGE ORDERING
-  // Target edge order
-  const animatedOrder = useSharedValue(data.order.value);
-  const animatedEdgesCount = useSharedValue(data.edgesCount.value);
-
   // Edge mount/unmount animation
   useEffect(() => {
     updateComponentAnimationState(
       data.key,
-      animationProgress,
-      animationSettings,
+      data.animationProgress,
+      data.animationSettings,
       data.removed,
-      onRemove
+      () => onRemove(data.key)
     );
-  }, [data.removed, animationSettings]);
-
-  // Use separate order and count values to make their changes animated
-  useAnimatedReaction(
-    () => ({
-      count: data.edgesCount.value,
-      ord: data.order.value
-    }),
-    ({ count, ord }) => {
-      if (animationSettings) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
-        animatedOrder.value = withTiming(ord, settingsWithoutCallback);
-        animatedEdgesCount.value = withTiming(count, settingsWithoutCallback);
-      } else {
-        animatedOrder.value = ord;
-        animatedEdgesCount.value = count;
-      }
-    }
-  );
+  }, [data.removed, data.animationSettings]);
 
   const innerProps = {
-    animatedEdgesCount,
-    animatedOrder,
     data,
     renderers,
     settings

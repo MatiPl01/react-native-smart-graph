@@ -1,6 +1,10 @@
-import { Group } from '@shopify/react-native-skia';
+import { Group, Transforms2d } from '@shopify/react-native-skia';
 import { memo, useEffect } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import {
+  useAnimatedReaction,
+  useDerivedValue,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import {
@@ -9,15 +13,17 @@ import {
   VertexRendererProps
 } from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
+import { calcValueOnProgress } from '@/utils/views';
 
 function VertexComponent<V>({
-  data: { animationSettings, displayed, key, removed, ...restData },
+  data: { animationSettings, points, removed, transformProgress, ...restData },
   focusContext,
   onRemove,
   renderer,
-  settings,
-  ...restProps
+  settings: { radius: r }
 }: VertexComponentProps<V>) {
+  const { key, scale } = restData;
+
   // ANIMATION
   // Vertex render animation progress
   // Use a helper value to ensure that the animation progress is never negative
@@ -30,38 +36,65 @@ function VertexComponent<V>({
   // Vertex focus progress
   const focusProgress = useSharedValue(0);
 
+  // TRANSFORM
+  // Vertex transform
+  const transform = useSharedValue<Transforms2d>([{ scale: 0 }]);
+
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
   useComponentFocus(focusProgress, focusContext, key);
 
+  // Vertex animation handler
   useEffect(() => {
-    if (!removed) displayed.value = true;
-
     updateComponentAnimationState(
       key,
       animationProgressHelper,
       animationSettings,
       removed,
       () => {
-        displayed.value = false;
         onRemove(key);
       }
     );
-  }, [removed, animationSettings]);
+  }, [removed]);
 
-  // Hide vertices that wait for removal
-  const transform = useDerivedValue(() => [{ scale: displayed.value ? 1 : 0 }]);
+  // Vertex transform handler
+  useAnimatedReaction(
+    () => ({
+      points: points.value,
+      progress: transformProgress.value,
+      scales: {
+        internal: scale.value
+      }
+    }),
+    ({ points: { source, target }, progress, scales }) => {
+      const s = Math.max(0, scales.internal);
+      transform.value = [
+        { scale: s },
+        ...(s > 0
+          ? [
+              {
+                translateX:
+                  calcValueOnProgress(progress, source.x, target.x) / s
+              },
+              {
+                translateY:
+                  calcValueOnProgress(progress, source.y, target.y) / s
+              }
+            ]
+          : [])
+      ];
+    }
+  );
 
   // Render the vertex component
   return (
     <Group transform={transform}>
       <RenderedVertexComponent
-        {...restProps}
         {...restData}
-        {...settings}
         animationProgress={animationProgress}
         focusKey={focusContext.focus.key}
         focusProgress={focusProgress}
+        r={r}
         renderer={renderer}
         vertexKey={key}
       />

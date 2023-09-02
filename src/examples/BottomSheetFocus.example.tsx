@@ -144,7 +144,6 @@ export default function BottomSheetFocus() {
 
   const minRowDistance = useSharedValue(100);
   const minColumnDistance = useSharedValue(50);
-  const vertexRadius = useSharedValue(20);
 
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
@@ -177,21 +176,50 @@ export default function BottomSheetFocus() {
   useEffect(() => {
     setInterval(() => {
       // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
-      minRowDistance.value = Math.random() * 100 + 40;
-      minColumnDistance.value = Math.random() * 50 + 20;
-      // vertexRadius.value = withTiming(Math.random() * 30 + 10, {
-      //   duration: 500
-      // });
+      // minRowDistance.value = Math.random() * 100 + 40;
+      // minColumnDistance.value = Math.random() * 50 + 20;
+      if (graph.hasEdge('E3')) {
+        // if (Math.random() < 0.1) {
+        graph.removeEdge('E3');
+        // }
+      } else {
+        graph.insertEdge({
+          key: 'E3',
+          from: 'V1',
+          to: 'V2'
+        });
+      }
       // if (graph.hasVertex('VV')) {
-      //   graph.removeVertex('VV');
+      //   if (Math.random() < 0.1) {
+      //     graph.removeVertex('VV');
+      //   }
       // } else {
-      //   graph.insertEdge({
-      //     key: 'EE',
-      //     from: 'V1',
-      //     to: 'VV'
-      //   });
+      //   graph.insertVertex({ key: 'VV' });
+      // }
+      // if (Math.random() < 0.4) {
+      //   if (graph.hasEdge('E3')) {
+      //     if (Math.random() < 0.1) {
+      //       graph.removeEdge('E3');
+      //     }
+      //   } else {
+      //     graph.insertEdge({
+      //       key: 'E3',
+      //       from: 'VV',
+      //       to: 'V2'
+      //     });
+      //   }
       // }
     }, 500);
+
+    setTimeout(() => {
+      graph.focus('V1');
+    }, 2000);
+    setTimeout(() => {
+      graph.focus('V2');
+    }, 5000);
+    setTimeout(() => {
+      graph.blur();
+    }, 10000);
   }, []);
 
   return (
@@ -223,15 +251,24 @@ export default function BottomSheetFocus() {
               minRowDistance,
               minColumnDistance
             },
+            layout: {
+              type: 'force'
+            },
             components: {
+              arrow: {
+                scale: 0.5
+              },
               vertex: {
-                radius: vertexRadius
+                radius: 20
+              },
+              label: {
+                displayed: true
               },
               edge: {
                 type: 'curved'
               }
-            },
-            animations: null
+            }
+            // animations: null
           }}
           graph={graph}
         />

@@ -213,7 +213,12 @@ export const getDefaultConfig = <V, E>(
         label: DEFAULT_COMPONENTS_SETTINGS.label,
         vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
       },
-      layout: settings?.layout
+      events: settings.events && {
+        press: settings.events?.press && {
+          disableAnimation: false
+        }
+      },
+      layout: settings?.layout?.type
         ? DEFAULT_LAYOUT_SETTINGS[settings.layout.type]
         : DEFAULT_LAYOUT_SETTINGS.auto,
       placement: settings?.placement?.strategy
@@ -299,10 +304,13 @@ export const getUpdateConfig = <V, E>({
             }
           : undefined,
       label: {
+        displayed: 'shared',
         scale: 'shared'
-      },
-      vertex: {
-        radius: 'shared'
+      }
+    },
+    events: settings.events && {
+      press: settings.events.press && {
+        disableAnimation: 'shared'
       }
     },
     focus: {

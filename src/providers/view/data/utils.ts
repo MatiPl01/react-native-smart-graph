@@ -48,7 +48,13 @@ export const createContextValue = (
   padding: makeMutable(
     updateSpacing(userSettings.padding ?? DEFAULT_SETTINGS.padding)
   ),
-  scales: makeMutable(userSettings.scales ?? DEFAULT_SETTINGS.scales)
+  scales: makeMutable(userSettings.scales ?? DEFAULT_SETTINGS.scales),
+  targetBoundingRect: makeMutable({
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0
+  })
 });
 
 export const updateContextValue = (

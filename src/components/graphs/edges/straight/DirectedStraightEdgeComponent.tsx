@@ -1,23 +1,14 @@
-/* eslint-disable import/no-unused-modules */
+import { Transforms2d } from '@shopify/react-native-skia';
 import { memo } from 'react';
-import {
-  useAnimatedReaction,
-  useDerivedValue,
-  useSharedValue
-} from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 
 import { ArrowComponent } from '@/components/graphs/arrows';
+import { calcArrowTransform } from '@/components/graphs/arrows/utils';
 import { DirectedStraightEdgeComponentProps } from '@/types/components';
-import {
-  addVectors,
-  calcOrthogonalVector,
-  calcUnitVector,
-  distanceBetweenVectors,
-  multiplyVector,
-  translateAlongVector
-} from '@/utils/vectors';
+import { calcUnitVector, translateAlongVector } from '@/utils/vectors';
 
-import RenderedStraightEdgeComponent from './RenderedStraightEdgeComponent';
+import StraightEdgeComponent from './StraightEdgeComponent';
+import { useStraightEdge } from './utils';
 
 const calcTranslationOffset = (
   order: number,
@@ -32,110 +23,51 @@ const calcTranslationOffset = (
     : maxTranslationOffset * (edgesCount - 1);
 };
 
-function DirectedStraightEdgeComponent<V, E>({
-  animatedEdgesCount,
-  animatedOrder,
-  data: {
-    animationProgress,
-    key,
-    labelHeight,
-    labelPosition,
-    v1Position,
-    v1Radius,
-    v2Position,
-    v2Radius,
-    value
-  },
-  renderers,
-  settings
-}: DirectedStraightEdgeComponentProps<V, E>) {
-  // Edge line
-  const p1 = useSharedValue({
-    x: v1Position.x.value,
-    y: v1Position.y.value
-  });
-  const p2 = useSharedValue({
-    x: v2Position.x.value,
-    y: v2Position.y.value
-  });
-  // Edge arrow
-  const dirVector = useDerivedValue(() => calcUnitVector(p2.value, p1.value));
-  const arrowTipPosition = useSharedValue(p2.value);
-  const arrowWidth = useSharedValue(0);
-  const arrowHeight = useDerivedValue(() =>
-    Math.min(
-      Math.max(
-        0,
-        distanceBetweenVectors(p1.value, p2.value) -
-          (v1Radius.value + v2Radius.value)
-      ),
-      1.5 * arrowWidth.value
-    )
-  );
+function DirectedStraightEdgeComponent<V, E>(
+  props: DirectedStraightEdgeComponentProps<V, E>
+) {
+  const {
+    data: { animationProgress, key, value },
+    renderers,
+    settings: {
+      arrow: { scale: arrowScale },
+      vertex: { radius: vertexRadius }
+    }
+  } = props;
 
-  useAnimatedReaction(
+  // ARROW COMPONENT PROPS
+  const arrowTransform = useSharedValue<Transforms2d>([{ scale: 0 }]);
+
+  const { p1, p2 } = useStraightEdge(
+    props,
+    calcTranslationOffset,
+    // Additional settings for the arrow component
     () => ({
-      arrowScale: settings.arrow.scale.value,
-      dirVec: dirVector.value,
-      edgesCount: animatedEdgesCount.value,
-      labelScale: settings.label?.scale.value,
-      maxOffsetFactor: settings.edge.maxOffsetFactor.value,
-      order: animatedOrder.value,
-      r1: v1Radius.value,
-      r2: v2Radius.value
+      arrowScale
     }),
     ({
-      arrowScale,
-      dirVec,
-      edgesCount,
-      labelScale,
-      maxOffsetFactor,
-      order,
-      r1,
-      r2
-    }) => {
-      const v1 = { x: v1Position.x.value, y: v1Position.y.value };
-      const v2 = { x: v2Position.x.value, y: v2Position.y.value };
-      const calcOffset = calcTranslationOffset.bind(
-        null,
-        order,
-        edgesCount,
-        maxOffsetFactor
-      );
-
-      const p1Offset = calcOffset(r1);
-      const p2Offset = calcOffset(r2);
-
-      const translationVector = calcOrthogonalVector(dirVec);
-      const p1Translation = multiplyVector(translationVector, p1Offset);
-      const p2Translation = multiplyVector(translationVector, p2Offset);
-      // Update edge line points positions
-      p1.value = addVectors(v1, p1Translation);
-      p2.value = addVectors(v2, p2Translation);
-      // Update edge arrow tip position
-      arrowTipPosition.value = translateAlongVector(
-        p2.value,
-        dirVec,
-        Math.sqrt(r2 ** 2 - p2Offset ** 2)
-      );
-      // Update edge label max size
-      const maxSize =
-        (maxOffsetFactor * (r1 + r2)) / (edgesCount > 0 ? edgesCount - 1 : 1);
-      const avgRadius = (r1 + r2) / 2;
-      if (labelScale) {
-        labelHeight.value = Math.min(maxSize, labelScale * avgRadius);
+      customProps: { arrowScale: aScale },
+      transform: {
+        edge: { offset, p1: v1, p2: v2 },
+        label: { scale: labelScale }
       }
-      // Update edge arrow max size
-      arrowWidth.value = Math.min(maxSize, arrowScale * avgRadius);
-      // Update label position
-      labelPosition.x.value = (p1.value.x + p2.value.x) / 2;
-      labelPosition.y.value = (p1.value.y + p2.value.y) / 2;
+    }) => {
+      'worklet';
+      // Update the arrow component props
+      const distance = Math.sqrt(vertexRadius ** 2 - offset ** 2);
+      const dirVector = calcUnitVector(v1, v2);
+      arrowTransform.value = calcArrowTransform(
+        translateAlongVector(v2, dirVector, -distance),
+        dirVector,
+        Math.min(aScale, labelScale),
+        vertexRadius
+      );
     }
   );
 
   return (
     <>
-      <RenderedStraightEdgeComponent
+      <StraightEdgeComponent
         animationProgress={animationProgress}
         edgeKey={key}
         p1={p1}
@@ -145,11 +77,9 @@ function DirectedStraightEdgeComponent<V, E>({
       />
       <ArrowComponent
         animationProgress={animationProgress}
-        directionVector={dirVector}
-        height={arrowHeight}
         renderer={renderers.arrow}
-        tipPosition={arrowTipPosition}
-        width={arrowWidth}
+        transform={arrowTransform}
+        vertexRadius={vertexRadius}
       />
     </>
   );

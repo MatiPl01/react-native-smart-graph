@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unused-modules */
-import { Group, Vertices } from '@shopify/react-native-skia';
+import { Vertices } from '@shopify/react-native-skia';
 import React from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
@@ -7,33 +7,22 @@ import { ArrowRendererProps } from '@/types/components';
 
 export default function DefaultArrowRenderer({
   animationProgress,
-  centerPosition,
-  height,
-  rotation,
-  width
+  s // size
 }: ArrowRendererProps) {
   const color = '#999';
   const colors = [color, color, color];
 
-  const vertices = useDerivedValue(() => {
-    const x = height.value / 2 - (1 - animationProgress.value) * height.value;
-    const y = 0.35 * width.value * animationProgress.value;
-    return [
-      { x: -height.value / 2, y: 0 },
-      { x, y: -y },
-      { x, y }
-    ];
-  }, []);
-
-  const transform = useDerivedValue(() => [
-    { translateX: centerPosition.value.x },
-    { translateY: centerPosition.value.y },
-    { rotate: rotation.value }
-  ]);
+  const transform = useDerivedValue(() => [{ scale: animationProgress.value }]);
 
   return (
-    <Group transform={transform}>
-      <Vertices colors={colors} vertices={vertices} />
-    </Group>
+    <Vertices
+      vertices={[
+        { x: -s / 2, y: -s / 4 },
+        { x: -s / 2, y: s / 4 },
+        { x: s / 2, y: 0 }
+      ]}
+      colors={colors}
+      transform={transform}
+    />
   );
 }

@@ -7,10 +7,13 @@ export const useComponentFocus = (
   focusContext: FocusContextType,
   componentKey?: string
 ): void => {
+  const focusKey = focusContext.focus.key;
+  const focusProgress = focusContext.transitionProgress;
+
   useAnimatedReaction(
     () => ({
-      currentKey: focusContext.focus.key.value,
-      progress: focusContext.transitionProgress.value
+      currentKey: focusKey.value,
+      progress: focusProgress.value
     }),
     ({ currentKey, progress }) => {
       const previousKey = focusContext.previousKey.value;

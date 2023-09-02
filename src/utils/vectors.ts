@@ -98,3 +98,12 @@ export const getLineCenter = (vector1: Vector, vector2: Vector): Vector => {
     y: (vector1.y + vector2.y) / 2
   };
 };
+
+export const areVectorsEqual = (
+  vector1: Vector,
+  vector2: Vector,
+  eps = 10e-4
+): boolean => {
+  'worklet';
+  return distanceBetweenVectors(vector1, vector2) < eps;
+};

@@ -4,7 +4,7 @@ import { Sharedifyable } from '@/types/utils';
  * COMPONENTS SETTINGS
  */
 export type VertexSettings = {
-  radius?: Sharedifyable<number>;
+  radius: number; // required
 };
 
 export type StraightEdgeSettings = {
