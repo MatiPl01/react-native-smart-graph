@@ -41,8 +41,9 @@ function MultiStepVertexFocusProvider<V>({
   const { isVertexFocused } = useVertexFocusContext();
 
   // MULTI STEP FOCUS DATA
+  const { points: settingsFocusPoints } = settings;
   const sortedFocusPoints = useDerivedValue<Array<UpdatedFocusPoint>>(() =>
-    Object.entries(settings.points.value)
+    Object.entries(settingsFocusPoints.value)
       .map(([startsAt, point]) => ({
         point: {
           vertexScale: DEFAULT_FOCUS_SETTINGS.vertexScale,
@@ -81,8 +82,9 @@ function MultiStepVertexFocusProvider<V>({
   };
 
   // Enable/disable the state machine
+  const isGestureActive = viewDataContext.isGestureActive;
   useAnimatedReaction(
-    () => isVertexFocused.value || viewDataContext.isGestureActive.value,
+    () => isVertexFocused.value || isGestureActive.value,
     disabled => {
       if (disabled) {
         if (!stateMachine.isStopped()) {
@@ -128,11 +130,12 @@ function MultiStepVertexFocusProvider<V>({
   );
 
   // Update focus on progress change or steps change
+  const focusProgress = settings.progress;
   useAnimatedReaction(
     // TODO - react on vertex position changes when progress is not being modified
     () => ({
       progress: {
-        current: settings.progress.value,
+        current: focusProgress.value,
         previous: previousProgress.value,
         sync: syncProgress.value
       },

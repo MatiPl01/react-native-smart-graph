@@ -57,17 +57,18 @@ function GraphComponentComposer<V, E>({
   const focusContext = useFocusContext();
   const gesturesContext = useGesturesContext();
 
+  const { currentScale, currentTranslation } = dataContext;
   const canvasTransform = useDerivedValue(() => [
-    { translateX: dataContext.currentTranslation.x.value },
-    { translateY: dataContext.currentTranslation.y.value },
-    { scale: dataContext.currentScale.value }
+    { translateX: currentTranslation.x.value },
+    { translateY: currentTranslation.y.value },
+    { scale: currentScale.value }
   ]);
 
   const animatedTransform = useMemo(
     () => ({
-      scale: dataContext.currentScale,
-      translateX: dataContext.currentTranslation.x,
-      translateY: dataContext.currentTranslation.y
+      scale: currentScale,
+      translateX: currentTranslation.x,
+      translateY: currentTranslation.y
     }),
     []
   );

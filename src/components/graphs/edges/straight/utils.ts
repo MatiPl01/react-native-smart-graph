@@ -167,8 +167,7 @@ export const useStraightEdge = <
       offsetFactor: maxOffsetFactor.value,
       points: points.value,
       progress: transformProgress.value,
-      r: vertexRadius,
-      ...additionalProps
+      r: vertexRadius
     }),
     ({ customProps, ...props }) => {
       // Update the source offset if the ordering has changed
