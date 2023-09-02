@@ -2,10 +2,11 @@ import { memo } from 'react';
 
 import { GraphComponentComposer } from '@/components/views';
 import { DirectedGraphComponentProps } from '@/types/components';
+import { EdgeType } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 
-function DirectedGraphComponent<V, E>(
-  props: DirectedGraphComponentProps<V, E>
+function DirectedGraphComponent<V, E, ET extends EdgeType>(
+  props: DirectedGraphComponentProps<V, E, ET>
 ) {
   return <GraphComponentComposer {...props} />;
 }

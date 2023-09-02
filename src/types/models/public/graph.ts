@@ -1,5 +1,5 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
-import { ChangeResult } from '@/types/models/utils';
+import { ChangeResult } from '@/utils/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,

@@ -9,7 +9,7 @@ import {
   UndirectedEdge,
   Vertex
 } from '@/types/models';
-import { catchError, ChangeResult } from '@/types/models/utils';
+import { catchError, ChangeResult } from '@/utils/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,

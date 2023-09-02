@@ -2,6 +2,7 @@ import { GraphAnimationsSettings } from './animations';
 import {
   DirectedGraphWithCurvedEdgesComponentsSettings,
   DirectedGraphWithStraightEdgesComponentsSettings,
+  EdgeType,
   UndirectedGraphWithCurvedEdgesComponentsSettings,
   UndirectedGraphWithStraightEdgesComponentsSettings
 } from './components';
@@ -11,30 +12,31 @@ import { GraphLayoutSettings } from './layout';
 import { GraphPlacementSettings } from './placement';
 
 type SharedGraphSettings<V> = {
-  animations?: GraphAnimationsSettings;
-  events?: GraphEventsSettings<V>;
-  focus?: MultiStepFocusSettings;
-  layout?: GraphLayoutSettings;
-  placement?: GraphPlacementSettings;
+  animationSettings?: GraphAnimationsSettings;
+  edgeType?: EdgeType;
+  eventSettings?: GraphEventsSettings<V>;
+  focusSettings?: MultiStepFocusSettings;
+  layoutSettings?: GraphLayoutSettings;
+  placementSettings?: GraphPlacementSettings;
 };
 
 export type UndirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components?: UndirectedGraphWithStraightEdgesComponentsSettings;
+    componentSettings?: UndirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type UndirectedGraphWithCurvedEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components?: UndirectedGraphWithCurvedEdgesComponentsSettings;
+    componentSettings?: UndirectedGraphWithCurvedEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components?: DirectedGraphWithStraightEdgesComponentsSettings;
+    componentSettings?: DirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithCurvedEdgeSettings<V> = SharedGraphSettings<V> & {
-  components?: DirectedGraphWithCurvedEdgesComponentsSettings;
+  componentSettings?: DirectedGraphWithCurvedEdgesComponentsSettings;
 };
 
 export type UndirectedGraphSettings<V = void> =

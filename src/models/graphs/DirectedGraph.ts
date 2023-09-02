@@ -7,7 +7,7 @@ import {
   DirectedGraphVertex as IDirectedGraphVertex,
   GraphConnections
 } from '@/types/models';
-import { catchError } from '@/types/models/utils';
+import { catchError } from '@/utils/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,

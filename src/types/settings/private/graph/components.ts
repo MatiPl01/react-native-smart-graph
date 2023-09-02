@@ -33,11 +33,8 @@ export type AllGraphComponentsSettings = {
 /*
  * INTERNAL SETTINGS
  */
-export type InternalStraightEdgeSettings = Pick<
-  AllStraightEdgeSettings,
-  'type'
-> &
-  DeepSharedify<Omit<AllStraightEdgeSettings, 'type'>>;
+export type InternalStraightEdgeSettings =
+  DeepSharedify<AllStraightEdgeSettings>;
 
 export type InternalCurvedEdgeSettings = Pick<AllCurvedEdgeSettings, 'type'> &
   DeepSharedify<Omit<AllCurvedEdgeSettings, 'type'>>;
@@ -46,8 +43,7 @@ export type InternalArrowSettings = DeepSharedify<AllArrowSettings>;
 
 export type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
 
-export type InternalEdgeSettings = Pick<AllEdgeSettings, 'type'> &
-  DeepSharedify<Omit<AllEdgeSettings, 'type'>>;
+export type InternalEdgeSettings = DeepSharedify<AllEdgeSettings>;
 
 type SharedInternalEdgeSettings = {
   vertex: InternalVertexSettings;

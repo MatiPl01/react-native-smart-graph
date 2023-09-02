@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DirectedGraph,
-  DirectedGraphComponent,
   DirectedGraphData,
   GraphView,
   GraphViewControls,
@@ -16,6 +15,11 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
+import {
+  DefaultArrowRenderer,
+  DefaultStraightEdgeRenderer,
+  DirectedGraphComponent
+} from '@/components';
 
 const GRAPH1: DirectedGraphData = {
   edges: [
@@ -234,42 +238,41 @@ export default function BottomSheetFocus() {
         objectFit={objectFit}
         scales={[0.05, 1, 2, 4]}>
         <DirectedGraphComponent
-          settings={{
-            focus: {
-              points: focusPoints,
-              progress: bottomSheetProgress
+          componentSettings={{
+            arrow: {
+              scale: 0.5
             },
-            events: {
-              press: {
-                onVertexLongPress: handleVertexPress,
-                onVertexPress: handleVertexPress
-              }
+            vertex: {
+              radius: 20
             },
-            placement: {
-              strategy: 'trees',
-              roots,
-              minRowDistance,
-              minColumnDistance
-            },
-            layout: {
-              type: 'force'
-            },
-            components: {
-              arrow: {
-                scale: 0.5
-              },
-              vertex: {
-                radius: 20
-              },
-              label: {
-                displayed: true
-              },
-              edge: {
-                type: 'straight'
-              }
+            label: {
+              displayed: true
             }
-            // animations: null
           }}
+          eventSettings={{
+            press: {
+              onVertexLongPress: handleVertexPress,
+              onVertexPress: handleVertexPress
+            }
+          }}
+          focusSettings={{
+            points: focusPoints,
+            progress: bottomSheetProgress
+          }}
+          layoutSettings={{
+            type: 'force'
+          }}
+          placementSettings={{
+            strategy: 'trees',
+            roots,
+            minRowDistance,
+            minColumnDistance
+          }}
+          renderers={{
+            edge: DefaultStraightEdgeRenderer,
+            arrow: DefaultArrowRenderer
+          }}
+          // animations: null
           graph={graph}
         />
         <GraphViewControls

@@ -28,15 +28,14 @@ import {
   AllGraphLayoutSettings,
   AllGraphPlacementSettings,
   DirectedGraphSettings,
-  DirectedGraphWithCurvedEdgeSettings,
+  EdgeType,
   GraphEventsSettings,
   InternalGraphEventsSettings,
   InternalGraphLayoutSettings,
   InternalGraphPlacementSettings,
   InternalMultiStepFocusSettings,
   MultiStepFocusSettings,
-  UndirectedGraphSettings,
-  UndirectedGraphWithCurvedEdgeSettings
+  UndirectedGraphSettings
 } from '@/types/settings';
 import {
   AllGraphComponentsSettings,
@@ -49,25 +48,25 @@ import {
 export type DirectedGraphComponentProps<
   V,
   E,
-  S extends DirectedGraphSettings<V> = DirectedGraphSettings<V>
-> = {
+  ET extends EdgeType = 'straight'
+> = Omit<DirectedGraphSettings<V>, 'edgeType'> & {
+  edgeType?: ET;
   graph: DirectedGraph<V, E>;
-  renderers?: S extends DirectedGraphWithCurvedEdgeSettings<V>
+  renderers: ET extends 'curved'
     ? DirectedGraphWithCurvedEdgeRenderers<V, E>
     : DirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings?: S;
 };
 
 export type UndirectedGraphComponentProps<
   V,
   E,
-  S extends UndirectedGraphSettings<V> = UndirectedGraphSettings<V>
-> = {
+  ET extends EdgeType = 'straight'
+> = Omit<UndirectedGraphSettings<V>, 'componentSettings'> & {
+  edgeType?: ET;
   graph: UndirectedGraph<V, E>;
-  renderers?: S extends UndirectedGraphWithCurvedEdgeSettings<V>
+  renderers?: ET extends 'curved'
     ? UndirectedGraphWithCurvedEdgeRenderers<V, E>
     : UndirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings?: S;
 };
 
 export type GraphComponentsData<V, E> = {
@@ -85,35 +84,33 @@ export type GraphComponentsData<V, E> = {
  * DEFAULT GRAPH SETTINGS
  */
 export type AllGraphSettings<V, E> = {
+  animationSettings: AllGraphAnimationsSettings;
+  componentSettings: AllGraphComponentsSettings;
+  edgeType: EdgeType;
+  eventSettings?: GraphEventsSettings<V>;
+  focusSettings?: MultiStepFocusSettings;
   graph: Graph<V, E>;
+  layoutSettings: AllGraphLayoutSettings;
+  placementSettings: AllGraphPlacementSettings;
   renderers: {
     arrow?: ArrowRenderer;
     edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
     label?: LabelRenderer<E>;
     vertex: VertexRenderer<V>;
   };
-  settings: {
-    animations: AllGraphAnimationsSettings;
-    components: AllGraphComponentsSettings;
-    events?: GraphEventsSettings<V>;
-    focus?: MultiStepFocusSettings;
-    layout: AllGraphLayoutSettings;
-    placement: AllGraphPlacementSettings;
-  };
 };
 
 /*
  * INTERNAL GRAPH SETTINGS
  */
-export type GraphSettingsData<V, E> = Omit<
+export type GraphSettingsData<V, E> = Pick<
   AllGraphSettings<V, E>,
-  'settings'
+  'graph' | 'renderers'
 > & {
-  settings: Pick<AllGraphSettings<V, E>['settings'], 'animations'> & {
-    components: InternalGraphComponentsSettings;
-    events?: InternalGraphEventsSettings<V>;
-    focus?: InternalMultiStepFocusSettings;
-    layout: InternalGraphLayoutSettings;
-    placement: InternalGraphPlacementSettings;
-  };
+  animationSettings: AllGraphSettings<V, E>['animationSettings'];
+  componentSettings: InternalGraphComponentsSettings;
+  eventSettings?: InternalGraphEventsSettings<V>;
+  focusSettings?: InternalMultiStepFocusSettings;
+  layoutSettings: InternalGraphLayoutSettings;
+  placementSettings: InternalGraphPlacementSettings;
 };

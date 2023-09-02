@@ -7,7 +7,7 @@ import {
   UndirectedEdge as IUndirectedEdge,
   UndirectedGraphVertex as IUndirectedGraphVertex
 } from '@/types/models';
-import { catchError } from '@/types/models/utils';
+import { catchError } from '@/utils/models';
 import {
   AnimationSettings,
   SingleModificationAnimationSettings
