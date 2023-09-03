@@ -147,7 +147,7 @@ export default function BottomSheetFocus() {
   }));
 
   const minRowDistance = useSharedValue(100);
-  const minColumnDistance = useSharedValue(50);
+  // const minColumnDistance = useSharedValue(50);
 
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
