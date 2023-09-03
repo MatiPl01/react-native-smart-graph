@@ -266,7 +266,7 @@ export default function GesturesProvider({
         return;
       }
       // Stop the decay animation if the user starts a new gesture
-      if (isPanActive.value || isPanActive.value) return;
+      if (isPanActive.value || isPinchActive.value) return;
       scaleContentTo(
         Math.max(decayScale, 0),
         pinchEndOrigin.value ?? undefined,
