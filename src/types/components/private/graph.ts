@@ -52,7 +52,7 @@ export type DirectedGraphComponentProps<
 > = Omit<DirectedGraphSettings<V>, 'edgeType'> & {
   edgeType?: ET;
   graph: DirectedGraph<V, E>;
-  renderers: ET extends 'curved'
+  renderers?: ET extends 'curved'
     ? DirectedGraphWithCurvedEdgeRenderers<V, E>
     : DirectedGraphWithStraightEdgeRenderers<V, E>;
 };
@@ -105,7 +105,7 @@ export type AllGraphSettings<V, E> = {
  */
 export type GraphSettingsData<V, E> = Pick<
   AllGraphSettings<V, E>,
-  'graph' | 'renderers'
+  'edgeType' | 'graph' | 'renderers'
 > & {
   animationSettings: AllGraphSettings<V, E>['animationSettings'];
   componentSettings: InternalGraphComponentsSettings;

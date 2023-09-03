@@ -10,6 +10,7 @@ import { GraphEdgesProps } from '@/types/components';
 function GraphEdges<V, E>({
   arrowRenderer,
   edgeRenderer,
+  edgeType,
   edgesData,
   focusProgress,
   labelRenderer,
@@ -30,6 +31,7 @@ function GraphEdges<V, E>({
       {Object.values(edgesData).map(data => (
         <EdgeComponent<V, E>
           data={data}
+          edgeType={edgeType}
           key={data.key}
           onRemove={onRemove}
           renderers={renderers}
@@ -45,10 +47,11 @@ export default withGraphSettings(
     edgesData,
     onRemove: handleEdgeRemove
   })),
-  ({ renderers, settings }) => ({
+  ({ componentSettings, edgeType, renderers }) => ({
     arrowRenderer: renderers.arrow,
     edgeRenderer: renderers.edge,
+    edgeType,
     labelRenderer: renderers.label,
-    settings: settings.components
+    settings: componentSettings
   })
 );

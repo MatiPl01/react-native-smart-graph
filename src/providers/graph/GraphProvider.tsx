@@ -52,7 +52,7 @@ export default function GraphProvider<V, E>({
             <ForcesLayoutProvider />
           ]
         }}
-        match={({ settings }) => settings.layout.type}
+        match={({ layoutSettings }) => layoutSettings.type}
       />,
       // CONTAINER
       // Provider used to compute the dimensions of the container
@@ -63,14 +63,14 @@ export default function GraphProvider<V, E>({
       // Provider used to focus one of the vertices specified in an
       // array based on the user-defined progress
       <ConditionalProvider.If
-        if={({ settings }) => !!settings.focus}
+        if={({ focusSettings }) => !!focusSettings}
         then={<MultiStepVertexFocusProvider />}
       />,
       // EVENTS
       // Press events provider
       // TDOo - improve press events provider (the overlay layer degrades performance)
       <ConditionalProvider.If
-        if={({ settings }) => !!settings.events?.press}
+        if={({ eventSettings }) => !!eventSettings?.press}
         then={<PressEventsProvider transform={transform} />}
       />,
       // SETTINGS

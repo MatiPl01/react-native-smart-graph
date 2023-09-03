@@ -136,9 +136,9 @@ function ComponentsDataProvider<V, E>({
 
 export default withGraphSettings(
   ComponentsDataProvider,
-  ({ graph, renderers, settings }) => ({
+  ({ animationSettings, graph, renderers }) => ({
     graph,
-    graphAnimationsSettings: settings.animations,
+    graphAnimationsSettings: animationSettings,
     renderLabels: !!renderers.label
   })
 );

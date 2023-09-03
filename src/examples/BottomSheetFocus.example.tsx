@@ -259,9 +259,11 @@ export default function BottomSheetFocus() {
             points: focusPoints,
             progress: bottomSheetProgress
           }}
-          layoutSettings={{
-            type: 'force'
-          }}
+          // layoutSettings={
+          //   {
+          //     // type: 'force'
+          //   }
+          // }
           placementSettings={{
             strategy: 'trees',
             roots,

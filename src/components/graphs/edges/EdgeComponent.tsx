@@ -47,11 +47,12 @@ function areCurvedEdgeProps<V, E>(
 ): props is
   | DirectedCurvedEdgeComponentProps<V, E>
   | UndirectedCurvedEdgeComponentProps<V, E> {
-  return props.settings.edge.type === 'curved';
+  return props.edgeType === 'curved';
 }
 
 function EdgeComponent<V, E>({
   data,
+  edgeType,
   onRemove,
   renderers,
   settings
@@ -69,6 +70,7 @@ function EdgeComponent<V, E>({
 
   const innerProps = {
     data,
+    edgeType,
     renderers,
     settings
   };

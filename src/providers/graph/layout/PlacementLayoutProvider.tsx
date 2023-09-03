@@ -98,7 +98,5 @@ export default withGraphSettings(
       verticesData
     })
   ),
-  ({ settings }) => ({
-    placementSettings: settings.placement
-  })
+  ({ placementSettings }) => ({ placementSettings })
 );

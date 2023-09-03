@@ -38,8 +38,8 @@ export default withGraphSettings(
   withComponentsData(GraphEdgeLabels, ({ edgeLabelsData }) => ({
     edgeLabelsData
   })),
-  ({ renderers, settings }) => ({
+  ({ componentSettings, renderers }) => ({
     renderer: renderers.label,
-    vertexRadius: settings.components.vertex.radius
+    vertexRadius: componentSettings.vertex.radius
   })
 );

@@ -60,7 +60,7 @@ export default withGraphSettings(
   withComponentsData(GraphEdgesMask, ({ verticesData }) => ({
     verticesData
   })),
-  ({ settings }) => ({
-    vertexRadius: settings.components.vertex.radius
+  ({ componentSettings }) => ({
+    vertexRadius: componentSettings.vertex.radius
   })
 );

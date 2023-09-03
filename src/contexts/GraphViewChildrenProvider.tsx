@@ -104,7 +104,6 @@ const getUpdatedContextValue = (
     filteredChildren.canvas,
     contextValue.canvas,
     deepMemoComparator({
-      include: ['graph', 'settings', 'renderers'],
       shallow: ['graph']
     })
   );
@@ -113,7 +112,6 @@ const getUpdatedContextValue = (
     filteredChildren.overlay,
     contextValue.overlay,
     deepMemoComparator({
-      include: ['graph', 'settings', 'renderers'],
       shallow: ['graph']
     })
   );
