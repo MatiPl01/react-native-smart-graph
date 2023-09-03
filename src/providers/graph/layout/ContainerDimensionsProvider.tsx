@@ -54,7 +54,7 @@ function ContainerDimensionsProvider({
 
 export default withGraphSettings(
   ContainerDimensionsProvider,
-  ({ settings }) => ({
-    vertexRadius: settings.components.vertex.radius
+  ({ componentSettings }) => ({
+    vertexRadius: componentSettings.vertex.radius
   })
 );

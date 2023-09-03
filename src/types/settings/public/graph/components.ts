@@ -9,12 +9,9 @@ export type VertexSettings = {
 
 export type StraightEdgeSettings = {
   maxOffsetFactor?: Sharedifyable<number>;
-  type: Sharedifyable<'straight'>;
 };
 
-export type CurvedEdgeSettings = {
-  type: Sharedifyable<'curved'>;
-};
+export type CurvedEdgeSettings = Record<string, never>; // No settings for now
 
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
@@ -27,7 +24,7 @@ export type ArrowSettings = {
   scale?: Sharedifyable<number>;
 };
 
-export type EdgeType = EdgeSettings['type'];
+export type EdgeType = 'curved' | 'straight';
 
 /*
  * GRAPH COMPONENTS SETTINGS

@@ -38,18 +38,9 @@ type GraphSettingsProviderProps<V, E> = PropsWithChildren<GraphData<V, E>>;
 
 export default function GraphSettingsProvider<V, E>({
   children,
-  graph,
-  renderers,
-  settings
+  ...restProps
 }: GraphSettingsProviderProps<V, E>) {
-  const userSettings = useMemo(
-    () => ({
-      graph,
-      renderers,
-      settings
-    }),
-    [settings, renderers, graph]
-  );
+  const userSettings = useMemo(() => restProps, [...Object.values(restProps)]);
 
   const [contextValue, setContextValue] = useState(() =>
     createContextValue(userSettings)

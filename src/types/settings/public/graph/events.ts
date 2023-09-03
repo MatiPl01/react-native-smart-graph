@@ -13,5 +13,5 @@ export type PressEventsSettings<V> = {
 };
 
 export type GraphEventsSettings<V> = {
-  press: PressEventsSettings<V>;
+  press?: PressEventsSettings<V>;
 };

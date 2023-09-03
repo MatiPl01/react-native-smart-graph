@@ -135,10 +135,8 @@ export default function App() {
   return (
     <GraphView objectFit='contain' scales={[1e-10, 1, 2]}>
       <DirectedGraphComponent
-        settings={{
-          layout: {
-            type: 'force'
-          }
+        layoutSettings={{
+          type: 'force'
         }}
         graph={graph}
       />

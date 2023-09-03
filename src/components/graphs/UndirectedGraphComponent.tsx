@@ -2,11 +2,11 @@ import { memo } from 'react';
 
 import { GraphComponentComposer } from '@/components/views';
 import { UndirectedGraphComponentProps } from '@/types/components';
-import { UndirectedGraphSettings } from '@/types/settings';
+import { EdgeType } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 
-function UndirectedGraphComponent<V, E, S extends UndirectedGraphSettings<V>>(
-  props: UndirectedGraphComponentProps<V, E, S>
+function UndirectedGraphComponent<V, E, ET extends EdgeType>(
+  props: UndirectedGraphComponentProps<V, E, ET>
 ) {
   return <GraphComponentComposer {...props} />;
 }

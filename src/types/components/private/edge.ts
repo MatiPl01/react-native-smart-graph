@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { SharedValue } from 'react-native-reanimated';
 
 import {
@@ -25,29 +24,37 @@ import {
   AllUndirectedGraphWithStraightEdgeRenderers
 } from './renderers';
 
-export type DirectedStraightEdgeComponentProps<V, E> = {
-  data: EdgeComponentData<E>;
-  renderers: AllDirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings: InternalDirectedStraightEdgeSettings;
-};
+type SharedStraightEdgeComponentProps = { edgeType: 'straight' };
 
-export type DirectedCurvedEdgeComponentProps<V, E> = {
-  data: EdgeComponentData<E>;
-  renderers: AllDirectedGraphWithCurvedEdgeRenderers<V, E>;
-  settings: InternalDirectedCurvedEdgeSettings;
-};
+type SharedCurvedEdgeComponentProps = { edgeType: 'curved' };
 
-export type UndirectedStraightEdgeComponentProps<V, E> = {
-  data: EdgeComponentData<E>;
-  renderers: AllUndirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings: InternalUndirectedStraightEdgeSettings;
-};
+export type DirectedStraightEdgeComponentProps<V, E> =
+  SharedStraightEdgeComponentProps & {
+    data: EdgeComponentData<E>;
+    renderers: AllDirectedGraphWithStraightEdgeRenderers<V, E>;
+    settings: InternalDirectedStraightEdgeSettings;
+  };
 
-export type UndirectedCurvedEdgeComponentProps<V, E> = {
-  data: EdgeComponentData<E>;
-  renderers: AllUndirectedGraphWithCurvedEdgeRenderers<V, E>;
-  settings: InternalUndirectedCurvedEdgeSettings;
-};
+export type DirectedCurvedEdgeComponentProps<V, E> =
+  SharedCurvedEdgeComponentProps & {
+    data: EdgeComponentData<E>;
+    renderers: AllDirectedGraphWithCurvedEdgeRenderers<V, E>;
+    settings: InternalDirectedCurvedEdgeSettings;
+  };
+
+export type UndirectedStraightEdgeComponentProps<V, E> =
+  SharedStraightEdgeComponentProps & {
+    data: EdgeComponentData<E>;
+    renderers: AllUndirectedGraphWithStraightEdgeRenderers<V, E>;
+    settings: InternalUndirectedStraightEdgeSettings;
+  };
+
+export type UndirectedCurvedEdgeComponentProps<V, E> =
+  SharedCurvedEdgeComponentProps & {
+    data: EdgeComponentData<E>;
+    renderers: AllUndirectedGraphWithCurvedEdgeRenderers<V, E>;
+    settings: InternalUndirectedCurvedEdgeSettings;
+  };
 
 export type DirectedEdgeComponentProps<V, E> =
   | DirectedCurvedEdgeComponentProps<V, E>

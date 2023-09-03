@@ -16,8 +16,8 @@ export default withGraphSettings(
     onRemove: handleVertexRemove,
     verticesData
   })),
-  ({ renderers, settings }) => ({
+  ({ componentSettings, renderers }) => ({
     renderer: renderers.vertex,
-    settings: settings.components.vertex
+    settings: componentSettings.vertex
   })
 );

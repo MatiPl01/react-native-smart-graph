@@ -93,7 +93,7 @@ function SettingsChangeResponderProvider({
 
 export default withGraphSettings(
   SettingsChangeResponderProvider,
-  ({ settings }) => ({
-    focusProgress: settings.focus?.progress
+  ({ focusSettings }) => ({
+    focusProgress: focusSettings?.progress
   })
 );

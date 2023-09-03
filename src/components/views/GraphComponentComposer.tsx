@@ -22,8 +22,8 @@ const validateProps = <V, E>(props: GraphData<V, E>) => {
   // TODO - add more validations
   // FOCUS
   // Focus points validation
-  if (props.settings?.focus) {
-    const focusPoints = props.settings.focus.points;
+  if (props.focusSettings) {
+    const focusPoints = props.focusSettings.points;
     const keySet = new Set();
     for (const key in focusPoints) {
       if (+key < 0 || +key > 1) {

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DirectedGraph,
-  DirectedGraphComponent,
   DirectedGraphData,
   GraphView,
   GraphViewControls,
@@ -16,6 +15,11 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
+import {
+  DefaultArrowRenderer,
+  DefaultStraightEdgeRenderer,
+  DirectedGraphComponent
+} from '@/components';
 
 const GRAPH1: DirectedGraphData = {
   edges: [
@@ -178,17 +182,17 @@ export default function BottomSheetFocus() {
       // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
       // minRowDistance.value = Math.random() * 100 + 40;
       // minColumnDistance.value = Math.random() * 50 + 20;
-      if (graph.hasEdge('E3')) {
-        // if (Math.random() < 0.1) {
-        graph.removeEdge('E3');
-        // }
-      } else {
-        graph.insertEdge({
-          key: 'E3',
-          from: 'V1',
-          to: 'V2'
-        });
-      }
+      // if (graph.hasEdge('E3')) {
+      //   // if (Math.random() < 0.1) {
+      //   graph.removeEdge('E3');
+      //   // }
+      // } else {
+      //   graph.insertEdge({
+      //     key: 'E3',
+      //     from: 'V1',
+      //     to: 'V2'
+      //   });
+      // }
       // if (graph.hasVertex('VV')) {
       //   if (Math.random() < 0.1) {
       //     graph.removeVertex('VV');
@@ -234,42 +238,43 @@ export default function BottomSheetFocus() {
         objectFit={objectFit}
         scales={[0.05, 1, 2, 4]}>
         <DirectedGraphComponent
-          settings={{
-            focus: {
-              points: focusPoints,
-              progress: bottomSheetProgress
+          componentSettings={{
+            arrow: {
+              scale: 0.5
             },
-            events: {
-              press: {
-                onVertexLongPress: handleVertexPress,
-                onVertexPress: handleVertexPress
-              }
+            vertex: {
+              radius: 20
             },
-            placement: {
-              strategy: 'trees',
-              roots,
-              minRowDistance,
-              minColumnDistance
-            },
-            layout: {
-              type: 'force'
-            },
-            components: {
-              arrow: {
-                scale: 0.5
-              },
-              vertex: {
-                radius: 20
-              },
-              label: {
-                displayed: true
-              },
-              edge: {
-                type: 'curved'
-              }
+            label: {
+              displayed: true
             }
-            // animations: null
           }}
+          eventSettings={{
+            press: {
+              onVertexLongPress: handleVertexPress,
+              onVertexPress: handleVertexPress
+            }
+          }}
+          focusSettings={{
+            points: focusPoints,
+            progress: bottomSheetProgress
+          }}
+          // layoutSettings={
+          //   {
+          //     // type: 'force'
+          //   }
+          // }
+          placementSettings={{
+            strategy: 'trees',
+            roots,
+            minRowDistance,
+            minColumnDistance
+          }}
+          renderers={{
+            edge: DefaultStraightEdgeRenderer,
+            arrow: DefaultArrowRenderer
+          }}
+          // animations: null
           graph={graph}
         />
         <GraphViewControls

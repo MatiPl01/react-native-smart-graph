@@ -147,7 +147,7 @@ export default withGraphSettings(
     connections,
     edgesData
   })),
-  ({ settings }) => ({
-    settings: settings.layout as InternalForceLayoutSettings
+  ({ layoutSettings }) => ({
+    settings: layoutSettings as InternalForceLayoutSettings
   })
 );
