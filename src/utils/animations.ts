@@ -207,19 +207,25 @@ export const createAnimationsSettingsForBatchModification = (
 export const animateToValue = (
   fromValue: number,
   toValue: number,
-  eps?: number,
-  div = 1000
+  config?: {
+    div?: number;
+    eps?: number;
+    minFactor?: number;
+  }
 ): number => {
   'worklet';
   const delta = toValue - fromValue;
 
-  const minDelta = eps ?? 1;
+  const minDelta = config?.eps ?? 1;
   // Delta can be NaN when the difference between values is too small
   // (subtracting very close numbers can result in a number that is too small to be represented)
   if (isNaN(delta) || Math.abs(delta) < minDelta) {
     return toValue;
   }
-  const factor = Math.max(0.1, Math.abs(delta) / div);
+  const factor = Math.max(
+    config?.minFactor ?? 0.1,
+    Math.abs(delta) / (config?.div ?? 1000)
+  );
   return fromValue + delta * factor;
 };
 

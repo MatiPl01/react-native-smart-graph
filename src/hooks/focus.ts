@@ -1,6 +1,11 @@
-import { SharedValue, useAnimatedReaction } from 'react-native-reanimated';
+import {
+  SharedValue,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated';
 
 import { FocusContextType } from '@/providers/view';
+import { animateToValue } from '@/utils/animations';
 
 export const useComponentFocus = (
   result: SharedValue<number>,
@@ -10,32 +15,38 @@ export const useComponentFocus = (
   const focusKey = focusContext.focus.key;
   const focusProgress = focusContext.transitionProgress;
 
+  // Helper value to check if the focus target changed
+  const previousReactionFocusKey = useSharedValue<null | string>(null);
+  const shouldConverge = useSharedValue(false);
+
   useAnimatedReaction(
     () => ({
       currentKey: focusKey.value,
+      currentResult: result.value,
       progress: focusProgress.value
     }),
-    ({ currentKey, progress }) => {
+    ({ currentKey, currentResult, progress }) => {
       const previousKey = focusContext.previousKey.value;
+      let newValue = currentResult;
 
       // If no focus target, no component is blurred
       if (currentKey === null && previousKey === null) {
-        result.value = 1;
+        newValue = 1;
       }
       // Transition from blur to focus
       else if (previousKey === null && currentKey !== null) {
         if (componentKey === currentKey) {
-          result.value = 1; // Focus target
+          newValue = 1; // Focus target
         } else {
-          result.value = 1 - progress; // Others
+          newValue = 1 - progress; // Others
         }
       }
       // Transition from focus to blur
       else if (previousKey !== null && currentKey === null) {
         if (componentKey === previousKey) {
-          result.value = 1; // Previous focus target
+          newValue = 1; // Previous focus target
         } else {
-          result.value = progress; // Others
+          newValue = progress; // Others
         }
       }
       // Transition from focus to focus (changing focus target)
@@ -43,14 +54,34 @@ export const useComponentFocus = (
         // If the focus target is the same as the previous one
         // eslint-disable-next-line no-lonely-if
         if (componentKey === currentKey && componentKey === previousKey) {
-          result.value = 1; // Focus target
+          newValue = 1; // Focus target
         } else if (componentKey === currentKey) {
-          result.value = progress; // Focus target
+          newValue = progress; // Focus target
         } else if (componentKey === previousKey) {
-          result.value = 1 - progress; // Previous focus target
+          newValue = 1 - progress; // Previous focus target
         } else {
-          result.value = 0; // Others
+          newValue = 0; // Others
         }
+      }
+
+      // Check if the result value should converge to the new value
+      // (e.g. when the focus target changes and progress is not 0 or 1)
+      if (previousReactionFocusKey.value !== currentKey) {
+        previousReactionFocusKey.value = currentKey;
+        shouldConverge.value = true;
+      }
+
+      if (shouldConverge.value) {
+        // Converge to the new value
+        result.value = animateToValue(currentResult, newValue, {
+          eps: 0.05
+        });
+        if (result.value === newValue) {
+          shouldConverge.value = false;
+        }
+      } else {
+        // Set the new value
+        result.value = newValue;
       }
     },
     [componentKey]

@@ -113,16 +113,12 @@ function ForcesLayoutProvider<E>({
       // Animate vertex position to the target position
       const eps = 0.1 * minUpdateDistance;
       updatedPositions[key] = {
-        x: animateToValue(
-          vertexData.points.value.target.x,
-          targetPosition.x,
+        x: animateToValue(vertexData.points.value.target.x, targetPosition.x, {
           eps
-        ),
-        y: animateToValue(
-          vertexData.points.value.target.y,
-          targetPosition.y,
+        }),
+        y: animateToValue(vertexData.points.value.target.y, targetPosition.y, {
           eps
-        )
+        })
       };
     }
 
