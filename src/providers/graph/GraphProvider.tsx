@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { PropsWithChildren, useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
