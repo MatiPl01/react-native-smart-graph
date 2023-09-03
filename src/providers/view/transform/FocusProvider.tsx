@@ -65,6 +65,7 @@ export const useFocusContext = () => {
 
 export enum FocusStatus {
   BLUR = 'BLUR',
+  BLUR_PREPARATION = 'BLUR_PREPARATION',
   BLUR_TRANSITION = 'BLUR_TRANSITION',
   FOCUS = 'FOCUS',
   FOCUS_PREPARATION = 'FOCUS_PREPARATION',
@@ -205,6 +206,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     'worklet';
     // Reset blur settings
     blurOrigin.value = null;
+    // Reset the transition finish handler
+    transitionStarted.value = false;
     // Disable auto sizing when focusing
     autoSizingContext.disableAutoSizing();
     // Update the previously focused key
@@ -239,6 +242,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     if (focusStatus.value === FocusStatus.BLUR) {
       return;
     }
+    previousKey.value = focusKey.value;
+    // Reset the transition finish handler
+    transitionStarted.value = false;
+    // Cancel focus transition if it is in progress
+    focusStatus.value = FocusStatus.BLUR_PREPARATION;
     // Turn off focus without animation if data is null
     if (data === null) {
       focusStatus.value = FocusStatus.BLUR;
@@ -358,6 +366,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       } else if (
         progress === 0 &&
         transitionStarted.value &&
+        currentStatus !== FocusStatus.BLUR_PREPARATION &&
         currentStatus !== FocusStatus.FOCUS_PREPARATION &&
         currentStatus !== FocusStatus.FOCUS_PREPARATION_COMPLETE
       ) {
@@ -367,7 +376,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         return;
       }
 
-      transitionStarted.value = false;
       // Set the finish status
       focusStatus.value = finishStatus;
       // Enable gestures and change the container position to fit

@@ -123,10 +123,10 @@ export default function BottomSheetFocus() {
   );
 
   const currentRoute = useSharedValue<keyof typeof GRAPH_ROUTES>('V1');
-  const roots = useSharedValue(['V1']);
+  const roots = useDerivedValue<Array<string>>(() => [currentRoute.value]);
   const focusPoints = useDerivedValue(() => ({
     0.5: {
-      key: roots.value[0],
+      key: currentRoute.value,
       vertexScale: 6,
       alignment: {
         horizontalAlignment: 'center',
@@ -135,7 +135,7 @@ export default function BottomSheetFocus() {
       }
     },
     1: {
-      key: roots.value[0],
+      key: currentRoute.value,
       vertexScale: 2,
       alignment: {
         horizontalAlignment: 'left',
@@ -179,7 +179,6 @@ export default function BottomSheetFocus() {
 
   useEffect(() => {
     setInterval(() => {
-      // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
       // minRowDistance.value = Math.random() * 100 + 40;
       // minColumnDistance.value = Math.random() * 50 + 20;
       // if (graph.hasEdge('E3')) {
@@ -219,11 +218,17 @@ export default function BottomSheetFocus() {
       graph.focus('V1');
     }, 2000);
     setTimeout(() => {
-      graph.focus('V2');
-    }, 5000);
+      graph.focus('V2', {
+        animation: {
+          duration: 1000
+        }
+      });
+    }, 4000);
     setTimeout(() => {
-      graph.blur();
-    }, 10000);
+      graph.blur({
+        duration: 1000
+      });
+    }, 6000);
   }, []);
 
   return (
@@ -265,16 +270,16 @@ export default function BottomSheetFocus() {
           //   }
           // }
           placementSettings={{
-            strategy: 'trees',
+            strategy: 'orbits',
             roots,
-            minRowDistance,
-            minColumnDistance
+            minVertexDistance: minRowDistance
+            // minColumnDistance
           }}
           renderers={{
             edge: DefaultStraightEdgeRenderer,
             arrow: DefaultArrowRenderer
           }}
-          // animations: null
+          // animationSettings={null}
           graph={graph}
         />
         <GraphViewControls
