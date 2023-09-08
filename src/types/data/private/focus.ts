@@ -1,7 +1,15 @@
 import { Vector } from '@shopify/react-native-skia';
+import { SharedValue } from 'react-native-reanimated';
 
+import { FocusContextType } from '@/providers/view';
+import { GraphViewData } from '@/types/components';
 import { Dimensions } from '@/types/layout';
-import { AllAnimationSettings, FocusPoint } from '@/types/settings';
+import {
+  AllAnimationSettings,
+  FocusPoint,
+  InternalMultiStepFocusSettings,
+  UpdatedFocusPoint
+} from '@/types/settings';
 import { DeepRequired, Maybe } from '@/types/utils';
 
 import { VertexComponentData, VertexTransformation } from './vertex';
@@ -59,4 +67,17 @@ export type FocusStepData<V> = {
   point: DeepRequired<FocusPoint>;
   startsAt: number;
   vertex: VertexComponentData<V>;
+};
+
+export type MultiStepFocusStateProps<V> = {
+  afterStep: FocusStepData<V> | null;
+  beforeStep: FocusStepData<V> | null;
+  currentProgress: number;
+  focusContext: FocusContextType;
+  previousProgress: number;
+  settings: InternalMultiStepFocusSettings;
+  syncProgress: number;
+  targetPoint: SharedValue<UpdatedFocusPoint | null>;
+  vertexRadius: number;
+  viewDataContext: GraphViewData;
 };

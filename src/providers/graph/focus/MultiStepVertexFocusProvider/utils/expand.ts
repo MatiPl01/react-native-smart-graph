@@ -9,7 +9,7 @@ import { getMultiStepVertexTransformation } from '@/utils/focus';
 import { calcTransformationOnProgress } from '@/utils/views';
 
 import {
-  createPointMapping,
+  createMappings,
   getIndicesOfFocusProgressClosestPoints
 } from './shared';
 
@@ -59,7 +59,8 @@ const createExpandedMapping = <V>(
   for (let sourceIdx = 0; sourceIdx < sourcePoints.length; sourceIdx++) {
     const sourcePoint = sourcePoints[sourceIdx]!;
     const remainingSourcePointsCount = sourcePoints.length - sourceIdx;
-    const maxNextTargetIdx = nextTargetIdx + remainingSourcePointsCount;
+    const maxNextTargetIdx =
+      targetStepsData.length - remainingSourcePointsCount;
     let minDifference = Math.abs(
       sourcePoint.startsAt - targetStepsData[nextTargetIdx - 1]!.startsAt
     );
@@ -73,7 +74,7 @@ const createExpandedMapping = <V>(
             );
       // If the difference is greater than the previous one, we found the closest target step
       // (the previous one)
-      if (difference > minDifference) {
+      if (difference === Infinity || difference > minDifference) {
         // Add mappings for all skipped target steps and the closest target step
         for (let i = result.length; i < nextTargetIdx; i++) {
           // Check if the previous source points is closer to the current target step
@@ -89,6 +90,8 @@ const createExpandedMapping = <V>(
             result.push({ from: sourcePoint, to: targetStep });
           }
         }
+        minDifference = Infinity;
+        nextTargetIdx++;
         continue;
       }
       minDifference = difference;
@@ -104,6 +107,7 @@ const expandMappingFromNonEmptySource = <V>(
   targetStepsData: Array<FocusStepData<V>>, // must be sorted
   focusProgress: number
 ): Array<FocusPointMapping<V>> => {
+  'worklet';
   let { nextIdx: nextTargetStepIdx, prevIdx: prevTargetStepIdx } =
     getIndicesOfFocusProgressClosestPoints(targetStepsData, focusProgress);
   const { nextIdx: nextSourcePointIdx, prevIdx: prevSourcePointIdx } =
@@ -124,37 +128,15 @@ const expandMappingFromNonEmptySource = <V>(
     }
   }
 
-  // Create mappings
-  const mappings: Array<FocusPointMapping<V>> = [];
-  // Add mapping for points balow source points
-  mappings.push(
-    ...createExpandedMapping(
-      sourcePoints.slice(0, prevSourcePointIdx),
-      targetStepsData.slice(0, prevTargetStepIdx)
-    )
+  return createMappings(
+    createExpandedMapping,
+    sourcePoints,
+    targetStepsData,
+    prevSourcePointIdx,
+    nextSourcePointIdx,
+    prevTargetStepIdx,
+    nextTargetStepIdx
   );
-  // Add mapping for source points
-  mappings.push(
-    createPointMapping(
-      sourcePoints[prevSourcePointIdx]!,
-      targetStepsData[prevTargetStepIdx]!
-    )
-  );
-  if (prevTargetStepIdx !== nextTargetStepIdx) {
-    createPointMapping(
-      sourcePoints[nextSourcePointIdx]!,
-      targetStepsData[nextTargetStepIdx]!
-    );
-  }
-  // Add mapping for points above source points
-  mappings.push(
-    ...createExpandedMapping(
-      sourcePoints.slice(nextSourcePointIdx + 1),
-      targetStepsData.slice(nextTargetStepIdx + 1)
-    )
-  );
-
-  return mappings;
 };
 
 export const expandPointsMapping = <V>(

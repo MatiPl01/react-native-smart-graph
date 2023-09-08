@@ -1,4 +1,4 @@
-/* eslint-disable import/no-unused-modules */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   FocusPointMapping,
   FocusStepData,
@@ -39,4 +39,49 @@ export const getIndicesOfFocusProgressClosestPoints = <V>(
     nextIdx,
     prevIdx
   };
+};
+
+export const createMappings = <V>(
+  createMappingsFn: (
+    sourcePoints: Array<MappingSourcePoint>,
+    targetStepsData: Array<FocusStepData<V>> // must be sorted
+  ) => Array<FocusPointMapping<V>>,
+  sourcePoints: Array<MappingSourcePoint>,
+  targetStepsData: Array<FocusStepData<V>>,
+  prevSourcePointIdx: number,
+  nextSourcePointIdx: number,
+  prevTargetStepIdx: number,
+  nextTargetStepIdx: number
+): Array<FocusPointMapping<V>> => {
+  'worklet';
+  // Create mappings
+  const mappings: Array<FocusPointMapping<V>> = [];
+  // Add mapping for points balow source points
+  mappings.push(
+    ...createMappingsFn(
+      sourcePoints.slice(0, prevSourcePointIdx),
+      targetStepsData.slice(0, prevTargetStepIdx)
+    )
+  );
+  // Add mapping for source points
+  mappings.push(
+    createPointMapping(
+      sourcePoints[prevSourcePointIdx]!,
+      targetStepsData[prevTargetStepIdx]!
+    )
+  );
+  if (prevTargetStepIdx !== nextTargetStepIdx) {
+    createPointMapping(
+      sourcePoints[nextSourcePointIdx]!,
+      targetStepsData[nextTargetStepIdx]!
+    );
+  }
+  // Add mapping for points above source points
+  mappings.push(
+    ...createMappingsFn(
+      sourcePoints.slice(nextSourcePointIdx + 1),
+      targetStepsData.slice(nextTargetStepIdx + 1)
+    )
+  );
+  return mappings;
 };

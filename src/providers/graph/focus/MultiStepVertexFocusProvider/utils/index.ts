@@ -1,8 +1,6 @@
-/* eslint-disable import/no-unused-modules */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SharedValue, withTiming } from 'react-native-reanimated';
 
-import { StateProps } from '@/providers/graph/focus/MultiStepVertexFocusProvider/types';
 import {
   FocusBoundsMapping,
   FocusConfig,
@@ -10,6 +8,7 @@ import {
   FocusPointMapping,
   FocusStepData,
   MappingSourcePoint,
+  MultiStepFocusStateProps as StateProps,
   VertexComponentData
 } from '@/types/data';
 import {
@@ -165,41 +164,55 @@ export const createFocusSteps = <V>(
 };
 
 const updateProgressBounds = <V>(
-  { from, to }: FocusBoundsMapping,
-  targetStepsData: Array<FocusStepData<V>>,
-  transitionProgress: number
+  updatedPointsMapping: Array<FocusPointMapping<V>>,
+  {
+    hasSourcePoints,
+    hasTargetSteps
+  }: { hasSourcePoints: boolean; hasTargetSteps: boolean }
 ): FocusBoundsMapping => {
-  'worklet';
-  const currentBounds = {
-    max: calcValueOnProgress(transitionProgress, from.max, to.max),
-    min: calcValueOnProgress(transitionProgress, from.min, to.min)
+  ('worklet');
+  const sourceBounds = {
+    max: updatedPointsMapping[updatedPointsMapping.length - 1]!.from.startsAt,
+    min: updatedPointsMapping[0]!.from.startsAt
+  };
+  const targetBounds = {
+    max: updatedPointsMapping[updatedPointsMapping.length - 1]!.to.startsAt,
+    min: updatedPointsMapping[0]!.to.startsAt
   };
 
-  if (!targetStepsData.length) {
+  // Slide from top
+  if (!hasSourcePoints) {
     return {
-      from: currentBounds,
-      to: { max: 1, min: 1 }
+      from: { max: 2, min: 1 },
+      to: { max: 1, min: 0 }
+    };
+  }
+  // Slide to top
+  if (!hasTargetSteps) {
+    return {
+      from: {
+        max: Math.max(sourceBounds.max, 1),
+        min: Math.min(sourceBounds.min, 0)
+      },
+      to: { max: 2, min: 1 }
     };
   }
 
-  const newPointMax = targetStepsData[targetStepsData.length - 1]!.startsAt;
-  const newPointMin = targetStepsData[0]!.startsAt;
+  let newMax = 1;
+  let newMin = 0;
+  let oldMax = Math.max(sourceBounds.max, 1);
+  let oldMin = Math.min(sourceBounds.min, 0);
 
-  let newMax = Math.max(newPointMax, 1);
-  let newMin = Math.min(newPointMin, 0);
-  let oldMax = currentBounds.max;
-  let oldMin = currentBounds.min;
-
-  if (newPointMax === 1 && currentBounds.max !== 1) {
-    newMax += 1 - currentBounds.max;
-  } else if (newPointMax !== 1 && currentBounds.max === 1) {
-    oldMax += 1 - newPointMax;
+  if (targetBounds.max === 1) {
+    newMax = 2 - sourceBounds.max;
+  } else if (sourceBounds.max === 1) {
+    oldMax = 2 - targetBounds.max;
   }
 
-  if (newPointMin === 0 && currentBounds.min !== 0) {
-    newMin -= currentBounds.min;
-  } else if (newPointMin !== 0 && currentBounds.min === 0) {
-    oldMin -= newPointMin;
+  if (targetBounds.min === 0) {
+    newMin = -sourceBounds.min;
+  } else if (sourceBounds.min === 0) {
+    oldMin = -targetBounds.min;
   }
 
   return {
@@ -246,11 +259,11 @@ const updatePath = <V>(
   focusProgress: number,
   focusConfig: FocusConfig
 ): FocusPath<V> => {
-  ('worklet');
+  'worklet';
   // Get source points
   const sourcePoints = getMappingSourcePoints(
     oldPath.points,
-    focusProgress,
+    transitionProgress,
     focusConfig
   );
   // Update points mapping
@@ -264,17 +277,18 @@ const updatePath = <V>(
         )
       : shrinkPointsMapping(sourcePoints, targetStepsData, focusProgress);
   // Update progress bounds
-  const updatedProgressBounds = updateProgressBounds(
-    oldPath.progressBounds,
-    targetStepsData,
-    transitionProgress
-  );
+  const updatedProgressBounds = updateProgressBounds(updatedPointsMapping, {
+    hasSourcePoints: !!sourcePoints.length,
+    hasTargetSteps: !!targetStepsData.length
+  });
 
   return {
     points: updatedPointsMapping,
     progressBounds: updatedProgressBounds
   };
 };
+
+const withinBounds = (value: number) => value >= 0 && value <= 1;
 
 const cleanupPath = <V>(oldPath: FocusPath<V>): FocusPath<V> => {
   'worklet';
@@ -283,14 +297,22 @@ const cleanupPath = <V>(oldPath: FocusPath<V>): FocusPath<V> => {
   const cleanedPointsMapping = oldPointsMapping.filter(
     ({ from, to }, i) =>
       i === 0 ||
-      from.startsAt !== oldPointsMapping[i - 1]!.from.startsAt ||
-      to.startsAt !== oldPointsMapping[i - 1]!.to.startsAt
+      (from.startsAt !== oldPointsMapping[i - 1]!.from.startsAt &&
+        withinBounds(from.startsAt)) ||
+      (to.startsAt !== oldPointsMapping[i - 1]!.to.startsAt &&
+        withinBounds(to.startsAt))
   );
   // Change transition bounds to the real range (0 - 1)
-  const cleanedProgressBounds = {
-    from: { max: 1, min: 0 },
-    to: { max: 1, min: 0 }
-  };
+  // (or to (1 - 1) if there are no points)
+  const cleanedProgressBounds = cleanedPointsMapping.length
+    ? {
+        from: { max: 1, min: 0 },
+        to: { max: 1, min: 0 }
+      }
+    : {
+        from: { max: 1, min: 1 },
+        to: { max: 1, min: 1 }
+      };
 
   return {
     points: cleanedPointsMapping,

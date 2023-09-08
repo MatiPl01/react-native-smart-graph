@@ -82,6 +82,8 @@ function MultiStepVertexFocusProvider<V>({
   // target focus path)
   const pathTransitionProgress = useSharedValue(0);
 
+  // TODO - clamp progress to [0, 1]
+
   // OTHER VALUES
 
   // // Used to determine the direction of the progress
