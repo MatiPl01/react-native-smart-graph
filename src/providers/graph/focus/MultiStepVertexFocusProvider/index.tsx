@@ -8,7 +8,6 @@ import {
 import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
-import { useVertexFocusContext } from '@/providers/graph/focus/VertexFocusProvider';
 import { FocusConfig, FocusPath, VertexComponentData } from '@/types/data';
 import {
   InternalMultiStepFocusSettings,
@@ -35,7 +34,7 @@ function MultiStepVertexFocusProvider<V>({
   // Canvas contexts
   const { dataContext: viewDataContext, focusContext } = useCanvasContexts();
   // Graph contexts
-  const { isVertexFocused } = useVertexFocusContext();
+  // const { isVertexFocused } = useVertexFocusContext();
 
   // MULTI STEP FOCUS DATA
   const { points: settingsFocusPoints } = settings;
