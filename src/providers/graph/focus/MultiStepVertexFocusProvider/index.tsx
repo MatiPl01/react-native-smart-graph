@@ -2,25 +2,22 @@ import { PropsWithChildren } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
-  useSharedValue,
-  withTiming
+  useSharedValue
 } from 'react-native-reanimated';
 
 import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { useVertexFocusContext } from '@/providers/graph/focus/VertexFocusProvider';
-import { FocusStepData, VertexComponentData } from '@/types/data';
+import { FocusConfig, FocusPath, VertexComponentData } from '@/types/data';
 import {
   InternalMultiStepFocusSettings,
   UpdatedFocusPoint
 } from '@/types/settings';
-import { binarySearchLE } from '@/utils/algorithms';
-import { getFocusSteps } from '@/utils/focus';
+import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { useStateMachine } from './StateMachine';
-import { createFocusSteps } from './utils';
+import { createFocusSteps, updateFocusPath } from './utils';
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
@@ -57,54 +54,88 @@ function MultiStepVertexFocusProvider<V>({
       }))
       .sort((a, b) => a.startsAt - b.startsAt)
   );
-  const focusStepsData = useSharedValue<Array<FocusStepData<V>>>([]);
+
+  // FOCUS PATH TRANSITION DATA
+  const { canvasDimensions } = viewDataContext;
+  const focusConfig = useDerivedValue<FocusConfig>(
+    () => ({
+      canvasDimensions: animatedCanvasDimensionsToDimensions(canvasDimensions),
+      vertexRadius
+    }),
+    [viewDataContext.canvasDimensions, vertexRadius]
+  );
+  // Mapping between points from the source and target focus steps data
+  const focusPath = useSharedValue<FocusPath<V>>({
+    points: [],
+    progressBounds: {
+      from: {
+        max: 1,
+        min: 0
+      },
+      to: {
+        max: 1,
+        min: 0
+      }
+    }
+  });
+  // Path transition progress (used to transition from the current to the
+  // target focus path)
+  const pathTransitionProgress = useSharedValue(0);
 
   // OTHER VALUES
+
   // // Used to determine the direction of the progress
-  const previousProgress = useSharedValue(0);
-  const previousStepIdx = useSharedValue(-1);
-  const syncProgress = useSharedValue(0);
+  // const previousProgress = useSharedValue(0);
+  // const previousStepIdx = useSharedValue(-1);
+  // const syncProgress = useSharedValue(0);
 
   // State machine
   const stateMachine = useStateMachine(focusContext, viewDataContext, settings);
 
-  const updateFocusSteps = () => {
+  const updatePath = () => {
     'worklet';
-    previousStepIdx.value = binarySearchLE(
-      focusStepsData.value,
-      settings.progress.value,
-      ({ startsAt }) => startsAt
-    );
-    focusStepsData.value = createFocusSteps(
+    // previousStepIdx.value = binarySearchLE(
+    //   targetStepsData.value,
+    //   settings.progress.value,
+    //   ({ startsAt }) => startsAt
+    // );
+    const targetStepsData = createFocusSteps(
       sortedFocusPoints.value,
       verticesData
     );
+    updateFocusPath(
+      focusPath,
+      pathTransitionProgress,
+      targetStepsData,
+      settings.pointsChangeAnimationSettings,
+      focusConfig.value
+    );
   };
 
-  // Enable/disable the state machine
-  const isGestureActive = viewDataContext.isGestureActive;
-  useAnimatedReaction(
-    () => isVertexFocused.value || isGestureActive.value,
-    disabled => {
-      if (disabled) {
-        if (!stateMachine.isStopped()) {
-          stateMachine.stop();
-          syncProgress.value = 0;
-          previousProgress.value = 0;
-        }
-      } else if (stateMachine.isStopped()) {
-        stateMachine.start();
-        syncProgress.value = withTiming(1, DEFAULT_FOCUS_ANIMATION_SETTINGS);
-      }
-    }
-  );
+  // // Enable/disable the state machine
+  // const isGestureActive = viewDataContext.isGestureActive;
+  // useAnimatedReaction(
+  //   () => isVertexFocused.value || isGestureActive.value,
+  //   disabled => { // TODO - fix double tap issue
+  //     if (disabled) {
+  //       if (!stateMachine.isStopped()) {
+  //         stateMachine.stop();
+  //         syncProgress.value = 0;
+  //         previousProgress.value = 0;
+  //       }
+  //     } else if (stateMachine.isStopped()) {
+  //       stateMachine.start();
+  //       syncProgress.value = withTiming(1, DEFAULT_FOCUS_ANIMATION_SETTINGS);
+  //     }
+  //   }
+  // );
 
   // Update focus steps data when focus points change
   useAnimatedReaction(
     () => sortedFocusPoints.value,
     () => {
       if (stateMachine.isStopped()) return;
-      updateFocusSteps();
+      updatePath();
     }
   );
 
@@ -114,14 +145,14 @@ function MultiStepVertexFocusProvider<V>({
     () => {
       if (stateMachine.isStopped()) return;
       // Check if focused vertices have changed
-      const stepsData = focusStepsData.value;
+      const pathPoints = focusPath.value.points;
       const focusPoints = sortedFocusPoints.value;
       let i = 0;
       for (const {
         point: { key }
       } of focusPoints) {
-        if (stepsData[i++]?.vertex !== verticesData[key]) {
-          updateFocusSteps();
+        if (pathPoints[i++]?.to?.vertex !== verticesData[key]) {
+          updatePath();
           return;
         }
       }
@@ -129,47 +160,47 @@ function MultiStepVertexFocusProvider<V>({
     [verticesData]
   );
 
-  // Update focus on progress change or steps change
-  const focusProgress = settings.progress;
-  useAnimatedReaction(
-    // TODO - react on vertex position changes when progress is not being modified
-    () => ({
-      progress: {
-        current: focusProgress.value,
-        previous: previousProgress.value,
-        sync: syncProgress.value
-      },
-      steps: focusStepsData.value
-    }),
-    ({ progress, steps }) => {
-      const prevStepIdx = previousStepIdx.value;
-      if (
-        stateMachine.isStopped() ||
-        prevStepIdx === -1 ||
-        progress.current === progress.previous
-      ) {
-        return;
-      }
+  // // Update focus on progress change or steps change
+  // const focusProgress = settings.progress;
+  // useAnimatedReaction(
+  //   // TODO - react on vertex position changes when progress is not being modified
+  //   () => ({
+  //     progress: {
+  //       current: focusProgress.value,
+  //       previous: previousProgress.value,
+  //       sync: syncProgress.value
+  //     },
+  //     steps: focusStepsData.value
+  //   }),
+  //   ({ progress, steps }) => {
+  //     const prevStepIdx = previousStepIdx.value;
+  //     if (
+  //       stateMachine.isStopped() ||
+  //       prevStepIdx === -1 ||
+  //       progress.current === progress.previous
+  //     ) {
+  //       return;
+  //     }
 
-      const currentSteps = getFocusSteps(progress.current, prevStepIdx, steps);
-      if (!currentSteps) return;
-      const { afterStep, beforeStep, currentStepIdx } = currentSteps;
+  //     const currentSteps = getFocusSteps(progress.current, prevStepIdx, steps);
+  //     if (!currentSteps) return;
+  //     const { afterStep, beforeStep, currentStepIdx } = currentSteps;
 
-      // Update the state machine
-      stateMachine.update(
-        progress.current,
-        progress.previous,
-        progress.sync,
-        beforeStep,
-        afterStep,
-        vertexRadius
-      );
+  //     // Update the state machine
+  //     stateMachine.update(
+  //       progress.current,
+  //       progress.previous,
+  //       progress.sync,
+  //       beforeStep,
+  //       afterStep,
+  //       vertexRadius
+  //     );
 
-      // Update values for the next reaction
-      previousProgress.value = progress.current;
-      previousStepIdx.value = currentStepIdx;
-    }
-  );
+  //     // Update values for the next reaction
+  //     previousProgress.value = progress.current;
+  //     previousStepIdx.value = currentStepIdx;
+  //   }
+  // );
 
   return <>{children}</>;
 }
