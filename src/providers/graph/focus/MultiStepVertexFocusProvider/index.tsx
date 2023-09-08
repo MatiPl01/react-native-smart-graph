@@ -70,11 +70,11 @@ function MultiStepVertexFocusProvider<V>({
     progressBounds: {
       from: {
         max: 1,
-        min: 0
+        min: 1
       },
       to: {
         max: 1,
-        min: 0
+        min: 1
       }
     }
   });
@@ -107,8 +107,8 @@ function MultiStepVertexFocusProvider<V>({
       focusPath,
       pathTransitionProgress,
       targetStepsData,
-      settings.pointsChangeAnimationSettings,
-      focusConfig.value
+      focusConfig.value,
+      settings
     );
   };
 
