@@ -105,9 +105,11 @@ const createExpandedMapping = <V>(
       i++
     ) {
       // Check if the previous source points is closer to the current target step
+      // (only if this is not the last target step)
       const prevSourcePoint = sourcePoints[sourceIdx - 1];
       const targetStep = targetStepsData[i]!;
       if (
+        i < targetStepsData.length - 1 &&
         prevSourcePoint &&
         Math.abs(prevSourcePoint.startsAt - targetStep.startsAt) <
           Math.abs(sourcePoint.startsAt - targetStep.startsAt)

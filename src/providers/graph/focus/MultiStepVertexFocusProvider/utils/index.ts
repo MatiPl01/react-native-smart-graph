@@ -20,6 +20,7 @@ import {
   updateFocusTransformation
 } from '@/utils/focus';
 import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
+import { calcValueOnProgress } from '@/utils/views';
 
 import { expandPointsMapping } from './expand';
 import { shrinkPointsMapping } from './shrink';
@@ -161,6 +162,9 @@ export const createFocusSteps = <V>(
 
 const updateProgressBounds = <V>(
   updatedPointsMapping: Array<FocusPointMapping<V>>,
+  oldProgressBounds: FocusBoundsMapping,
+  focusProgress: number,
+  transitionProgress: number,
   {
     hasSourcePoints,
     hasTargetSteps
@@ -177,8 +181,30 @@ const updateProgressBounds = <V>(
   // Slide from top
   if (!hasSourcePoints) {
     return {
-      from: { max: 2, min: 1 },
+      from: { max: focusProgress + 2, min: focusProgress + 1 },
       to: { max: 1, min: 0 }
+    };
+  }
+
+  // Get current progress bounds
+  const currentProgressBounds = {
+    max: calcValueOnProgress(
+      transitionProgress,
+      oldProgressBounds.from.max,
+      oldProgressBounds.to.max
+    ),
+    min: calcValueOnProgress(
+      transitionProgress,
+      oldProgressBounds.from.min,
+      oldProgressBounds.to.min
+    )
+  };
+
+  // Slide to top
+  if (!hasTargetSteps) {
+    return {
+      from: currentProgressBounds,
+      to: { max: focusProgress + 2, min: focusProgress + 1 }
     };
   }
 
@@ -186,17 +212,6 @@ const updateProgressBounds = <V>(
     max: updatedPointsMapping[updatedPointsMapping.length - 1]!.from.startsAt,
     min: updatedPointsMapping[0]!.from.startsAt
   };
-  // Slide to top
-  if (!hasTargetSteps) {
-    return {
-      from: {
-        max: Math.max(sourceBounds.max, 1),
-        min: Math.min(sourceBounds.min, 0)
-      },
-      to: { max: 2, min: 1 }
-    };
-  }
-
   const targetBounds = {
     max: updatedPointsMapping[updatedPointsMapping.length - 1]!.to.startsAt,
     min: updatedPointsMapping[0]!.to.startsAt
@@ -204,18 +219,18 @@ const updateProgressBounds = <V>(
 
   let newMax = 1;
   let newMin = 0;
-  let oldMax = Math.max(sourceBounds.max, 1);
-  let oldMin = Math.min(sourceBounds.min, 0);
+  let oldMax = currentProgressBounds.max;
+  let oldMin = currentProgressBounds.min;
 
-  if (targetBounds.max === 1) {
+  if (targetBounds.max === 1 && sourceBounds.max < 1) {
     newMax = 2 - sourceBounds.max;
-  } else if (sourceBounds.max === 1) {
+  } else if (sourceBounds.max === 1 && oldMax === 1) {
     oldMax = 2 - targetBounds.max;
   }
 
-  if (targetBounds.min === 0) {
+  if (targetBounds.min === 0 && sourceBounds.min > 0) {
     newMin = -sourceBounds.min;
-  } else if (sourceBounds.min === 0) {
+  } else if (sourceBounds.min === 0 && oldMin === 0) {
     oldMin = -targetBounds.min;
   }
 
@@ -241,7 +256,7 @@ const updatePath = <V>(
   'worklet';
   // Update points mapping
   const updatedPointsMapping =
-    targetStepsData.length > oldPath.points.length
+    targetStepsData.length >= oldPath.points.length
       ? expandPointsMapping(
           oldPath,
           targetStepsData,
@@ -257,10 +272,16 @@ const updatePath = <V>(
           focusConfig
         );
   // Update progress bounds
-  const updatedProgressBounds = updateProgressBounds(updatedPointsMapping, {
-    hasSourcePoints: !!oldPath.points.length,
-    hasTargetSteps: !!targetStepsData.length
-  });
+  const updatedProgressBounds = updateProgressBounds(
+    updatedPointsMapping,
+    oldPath.progressBounds,
+    focusProgress,
+    transitionProgress,
+    {
+      hasSourcePoints: !!oldPath.points.length,
+      hasTargetSteps: !!targetStepsData.length
+    }
+  );
 
   return {
     points: updatedPointsMapping,
@@ -275,6 +296,7 @@ const withinBounds = (value: number) => {
 
 const cleanupPath = <V>(oldPath: FocusPath<V>): FocusPath<V> => {
   'worklet';
+  console.log('\n!!! cleanupPath !!!\n');
   const { points: oldPointsMapping } = oldPath;
   // Filter out points with the same startsAt value
   const cleanedPointsMapping = oldPointsMapping.filter(
@@ -332,8 +354,9 @@ export const updateFocusPath = <V>(
   path.value = updatedPath;
   const { onComplete, ...timingConfig } = animationSettings;
   transitionProgress.value = 0;
-  const handleComplete = () => {
+  const handleComplete = (completed?: boolean) => {
     'worklet';
+    if (!completed) return;
     path.value = cleanupPath(updatedPath);
     onComplete?.();
   };

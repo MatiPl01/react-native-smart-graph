@@ -257,20 +257,22 @@ export default function BottomSheetFocus() {
     let idx = 0;
     const P = [
       ['Empty', []],
-      ['Path 1', [0.32, 0.64]],
-      ['Path 2', [0.2, 0.32, 0.33, 0.64, 0.7]],
-      ['Edge case 1', [1]],
-      ['Edge case 2', [0]],
-      ['Path 3', [0.1, 0.5]],
-      ['Edge case 3', [0, 0.5, 0.6, 1]]
+      ['Path 1', [0.32, 0.45, 0.65, 0.85]],
+      ['Path 2', [0.15, 0.3, 0.35, 0.42, 0.5, 0.6, 0.7, 0.75, 0.8, 1]],
+      ['Path 1 again', [0.32, 0.45, 0.65, 0.85]]
     ].map(updatePath);
 
+    let i = 0;
+
     setInterval(() => {
+      if (i++ > 26) {
+        return;
+      }
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { name, points } = P[idx++ % P.length]!;
       console.log(`\n\n\n\n===== ${name} =====`);
       focusPoints.value = points;
-    }, 2000);
+    }, 100);
   }, []);
 
   return (
@@ -304,7 +306,10 @@ export default function BottomSheetFocus() {
           }}
           focusSettings={{
             points: focusPoints,
-            progress: useSharedValue(0.64)
+            progress: useSharedValue(0.64),
+            pointsChangeAnimationSettings: {
+              duration: 300
+            }
           }}
           // layoutSettings={
           //   {

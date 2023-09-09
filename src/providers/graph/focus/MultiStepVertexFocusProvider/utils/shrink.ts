@@ -86,9 +86,11 @@ const createShrunkMapping = <V>(
       i++
     ) {
       // Check if the previous target step is closer to the current source point
+      // (only if this is not the last source point)
       const prevTargetStep = targetStepsData[targetIdx - 1];
       const sourcePoint = sourcePoints[i]!;
       if (
+        i < sourcePoints.length - 1 &&
         prevTargetStep &&
         Math.abs(prevTargetStep.startsAt - sourcePoint.startsAt) <
           Math.abs(targetStep.startsAt - sourcePoint.startsAt)
@@ -110,8 +112,24 @@ const shrinkMappingToNonEmptyTarget = <V>(
 ): Array<FocusPointMapping<V>> => {
   'worklet';
   console.log('shrinkMappingToNonEmptyTarget');
+  console.log(
+    'sources',
+    sourcePoints.map(p => p.startsAt)
+  );
+  console.log(
+    'targets',
+    targetStepsData.map(p => p.startsAt)
+  );
   let prevSourceIdx = findPrevStepIdx(sourcePoints, focusProgress);
   const prevTargetIdx = findPrevStepIdx(targetStepsData, focusProgress);
+
+  console.log('selected idx', {
+    focusProgress,
+    prevSourceIdx,
+    prevSourceStartsAt: sourcePoints[prevSourceIdx]?.startsAt,
+    prevTargetIdx,
+    prevTargetStartsAt: targetStepsData[prevTargetIdx]?.startsAt
+  });
 
   // Ensure that there are no points left above and below target points
   if (prevTargetIdx > prevSourceIdx) {

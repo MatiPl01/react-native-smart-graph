@@ -28,7 +28,10 @@ export const findPrevStepIdx = <V>(
   progress: number
 ): number => {
   'worklet';
-  return binarySearchLE(steps, progress, step => step.startsAt);
+  return Math.max(
+    binarySearchLE(steps, progress, step => step.startsAt),
+    0
+  );
 };
 
 export const getIndicesOfFocusProgressClosestPoints = <V>(
