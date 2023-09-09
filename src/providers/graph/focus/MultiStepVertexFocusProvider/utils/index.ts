@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SharedValue, withTiming } from 'react-native-reanimated';
 
@@ -9,81 +8,60 @@ import {
   FocusPointMapping,
   FocusStepData,
   MultiStepFocusStateProps as StateProps,
+  TransformedFocusData,
+  TransformedFocusPoint,
   VertexComponentData
 } from '@/types/data';
 import {
   InternalMultiStepFocusSettings,
   UpdatedFocusPoint
 } from '@/types/settings';
-import {
-  getMultiStepVertexTransformation,
-  updateFocusTransformation
-} from '@/utils/focus';
-import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
+import { updateFocusTransformation } from '@/utils/focus';
 import { calcValueOnProgress } from '@/utils/views';
 
 import { expandPointsMapping } from './expand';
+import { getTransformedFocusPoint } from './shared';
 import { shrinkPointsMapping } from './shrink';
 
-export const getTargetPoint = <V>({
-  afterStep,
-  beforeStep,
-  currentProgress,
-  previousProgress,
+export const getTargetPoint = ({
+  data: { afterStep, beforeStep },
+  progress,
   targetPoint: { value: prevTargetPoint }
-}: StateProps<V>): UpdatedFocusPoint | null => {
+}: StateProps): TransformedFocusPoint | null => {
   'worklet';
-  if (currentProgress < previousProgress) {
+  if (progress.current < progress.previous) {
     return beforeStep ?? null;
-  } else if (currentProgress > previousProgress) {
+  } else if (progress.current > progress.previous) {
     return afterStep ?? null;
   }
   if (
     beforeStep &&
     (beforeStep.startsAt === prevTargetPoint?.startsAt || !prevTargetPoint) &&
-    currentProgress > beforeStep.startsAt
+    progress.current > beforeStep.startsAt
   ) {
     return afterStep ?? null;
   }
   if (
     afterStep &&
     (afterStep.startsAt === prevTargetPoint?.startsAt || !prevTargetPoint) &&
-    currentProgress < afterStep.startsAt
+    progress.current < afterStep.startsAt
   ) {
     return beforeStep ?? null;
   }
   return prevTargetPoint;
 };
 
-export const getResultingProgress = <V>(
-  targetStep: FocusStepData<V> | null,
-  { afterStep, beforeStep, currentProgress, syncProgress }: StateProps<V>
-): number => {
-  'worklet';
-  const afterProgress = afterStep?.startsAt ?? 1;
-  const beforeProgress = beforeStep?.startsAt ?? 0;
-
-  const stepProgress =
-    (targetStep === afterStep
-      ? currentProgress - beforeProgress
-      : afterProgress - currentProgress) /
-    (afterProgress - beforeProgress);
-
-  return stepProgress * syncProgress;
-};
-
-export const getTransitionBounds = <V>({
-  afterStep,
-  beforeStep,
+export const getTransitionBounds = ({
+  data: { afterStep, beforeStep },
   syncProgress,
   targetPoint: { value: targetPoint }
-}: StateProps<V>): {
-  source: FocusStepData<V> | null;
-  target: FocusStepData<V> | null;
+}: StateProps): {
+  source: TransformedFocusPoint | null;
+  target: TransformedFocusPoint | null;
 } => {
   'worklet';
-  let targetStep: FocusStepData<V> | null = null;
-  let sourceStep: FocusStepData<V> | null = null;
+  let targetStep: TransformedFocusPoint | null = null;
+  let sourceStep: TransformedFocusPoint | null = null;
 
   if (targetPoint?.startsAt === beforeStep?.startsAt) {
     targetStep = beforeStep;
@@ -106,43 +84,138 @@ export const getTransitionBounds = <V>({
   };
 };
 
-export const updateTransitionPoints = <V>(
-  props: StateProps<V>
-): {
-  endUpdated?: boolean;
-  startUpdated?: boolean;
-} => {
+export const updateTransitionPoints = (props: StateProps): void => {
   'worklet';
-  const { focusContext, vertexRadius, viewDataContext } = props;
   const { source: sourceStep, target: targetStep } = getTransitionBounds(props);
-
-  const transformationConfig = {
-    availableScales: viewDataContext.scales.value,
-    canvasDimensions: animatedCanvasDimensionsToDimensions(
-      viewDataContext.canvasDimensions
-    ),
-    disableGestures: false, // TODO: Add support for disabling gestures
-    initialScale: viewDataContext.initialScale.value,
-    vertexRadius
-  };
-  const targetTransformation = targetStep
-    ? getMultiStepVertexTransformation(targetStep, transformationConfig)
-    : undefined;
-  const sourceTransformation = sourceStep
-    ? getMultiStepVertexTransformation(sourceStep, transformationConfig)
-    : undefined;
 
   updateFocusTransformation(
     {
-      end: targetTransformation,
-      start: sourceTransformation
+      end: targetStep?.transform,
+      start: sourceStep?.transform
     },
-    focusContext
+    props.focusContext
+  );
+};
+
+const getAfterStep = <V>(
+  path: FocusPath<V>,
+  progress: { current: number; transition: number },
+  currentStepIdx: number
+): { currentIdx: number; step?: FocusPointMapping<V> } => {
+  'worklet';
+  let step = path.points[currentStepIdx];
+
+  while (
+    step &&
+    progress.current >
+      calcValueOnProgress(
+        progress.transition,
+        step.from.startsAt,
+        step.to.startsAt
+      )
+  ) {
+    step = path.points[currentStepIdx + 1];
+    currentStepIdx++;
+  }
+  return { currentIdx: currentStepIdx, step };
+};
+
+const getBeforeStep = <V>(
+  path: FocusPath<V>,
+  progress: { current: number; transition: number },
+  currentStepIdx: number
+): { currentIdx: number; step?: FocusPointMapping<V> } => {
+  'worklet';
+  let step = path.points[currentStepIdx - 1];
+
+  while (
+    step &&
+    progress.current <
+      calcValueOnProgress(
+        progress.transition,
+        step.from.startsAt,
+        step.to.startsAt
+      )
+  ) {
+    step = path.points[currentStepIdx - 1];
+    currentStepIdx--;
+  }
+  return { currentIdx: currentStepIdx, step };
+};
+
+const calcStepStartsAt = <V>(
+  path: FocusPath<V>,
+  transitionProgress: number,
+  mapping: FocusPointMapping<V> | undefined,
+  bound: 'max' | 'min'
+): number => {
+  'worklet';
+  return mapping
+    ? calcValueOnProgress(
+        transitionProgress,
+        mapping.from.startsAt,
+        mapping.to.startsAt
+      )
+    : calcValueOnProgress(
+        transitionProgress,
+        path.progressBounds.from[bound],
+        path.progressBounds.to[bound]
+      );
+};
+
+export const transformFocusData = <V>(
+  path: FocusPath<V>,
+  progress: {
+    current: number;
+    transition: number;
+  },
+  currentStepIdx: number,
+  focusConfig: FocusConfig
+): TransformedFocusData | null => {
+  'worklet';
+  // Either getAfterStep or getBeforeStep will return the same step
+  // so we can use the same currentStepIdx for both and update it
+  // after each call
+  const afterStep = getAfterStep(path, progress, currentStepIdx);
+  currentStepIdx = afterStep.currentIdx;
+  const beforeStep = getBeforeStep(path, progress, currentStepIdx);
+  currentStepIdx = beforeStep.currentIdx;
+
+  const beforeStepStartsAt = calcStepStartsAt(
+    path,
+    progress.transition,
+    beforeStep.step,
+    'min'
+  );
+  const afterStepStartsAt = calcStepStartsAt(
+    path,
+    progress.transition,
+    afterStep.step,
+    'max'
   );
 
+  const pointsTransitionProgress =
+    (progress.current - beforeStepStartsAt) /
+    (afterStepStartsAt - beforeStepStartsAt);
+
   return {
-    endUpdated: !!targetTransformation,
-    startUpdated: !!sourceTransformation
+    afterStep: beforeStep.step
+      ? getTransformedFocusPoint(
+          beforeStep.step,
+          focusConfig,
+          progress.transition
+        )
+      : null,
+    beforeStep: afterStep.step
+      ? getTransformedFocusPoint(
+          afterStep.step,
+          focusConfig,
+          progress.transition
+        )
+      : null,
+    currentStepIdx,
+    pointsTransitionProgress,
+    targetAnimationProgress: progress.transition * pointsTransitionProgress
   };
 };
 
@@ -338,15 +411,12 @@ export const updateFocusPath = <V>(
     settings.progress.value,
     focusConfig
   );
-  // Set transition progress to -1 to prevent updating focus position
-  // while we are updating focus path
-  transitionProgress.value = -1;
   // Update transition progress
   // Without animation
   const animationSettings = settings.pointsChangeAnimationSettings;
   if (!animationSettings) {
-    transitionProgress.value = 1;
     path.value = cleanupPath(updatedPath);
+    transitionProgress.value = 1;
     return;
   }
   // With animation

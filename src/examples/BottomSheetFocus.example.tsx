@@ -214,21 +214,21 @@ export default function BottomSheetFocus() {
       // }
     }, 500);
 
-    setTimeout(() => {
-      graph.focus('V1');
-    }, 2000);
-    setTimeout(() => {
-      graph.focus('V2', {
-        animation: {
-          duration: 1000
-        }
-      });
-    }, 4000);
-    setTimeout(() => {
-      graph.blur({
-        duration: 1000
-      });
-    }, 6000);
+    // setTimeout(() => {
+    //   graph.focus('V1');
+    // }, 2000);
+    // setTimeout(() => {
+    //   graph.focus('V2', {
+    //     animation: {
+    //       duration: 1000
+    //     }
+    //   });
+    // }, 4000);
+    // setTimeout(() => {
+    //   graph.blur({
+    //     duration: 1000
+    //   });
+    // }, 6000);
   }, []);
 
   return (
@@ -262,7 +262,8 @@ export default function BottomSheetFocus() {
           }}
           focusSettings={{
             points: focusPoints,
-            progress: bottomSheetProgress
+            progress: bottomSheetProgress,
+            disableGestures: true
           }}
           // layoutSettings={
           //   {
