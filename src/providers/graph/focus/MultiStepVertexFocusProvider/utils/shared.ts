@@ -63,12 +63,6 @@ export const createMappings = <V>(
   nextTargetIdx: number
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  console.log('createMappings', {
-    nextSourceIdx,
-    nextTargetIdx,
-    prevSourceIdx,
-    prevTargetIdx
-  });
   // Create mappings
   const mappings: Array<FocusPointMapping<V>> = [];
   // Add mapping for points balow source points

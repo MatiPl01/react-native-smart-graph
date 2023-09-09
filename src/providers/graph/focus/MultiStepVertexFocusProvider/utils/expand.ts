@@ -72,12 +72,6 @@ const createExpandedMapping = <V>(
       sourcePoint.startsAt - targetStepsData[nextTargetIdx - 1]!.startsAt
     );
 
-    console.log({
-      maxNextTargetIdx,
-      nextTargetIdx,
-      sourceIdx
-    });
-
     while (nextTargetIdx <= maxNextTargetIdx) {
       const difference =
         nextTargetIdx === maxNextTargetIdx // Assign Infinity if there are no more target steps
@@ -132,7 +126,6 @@ const expandMappingFromNonEmptySource = <V>(
   focusProgress: number
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  console.log('expandMappingFromNonEmptySource');
   const prevSourceIdx = findPrevStepIdx(sourcePoints, focusProgress);
   let prevTargetIdx = findPrevStepIdx(targetStepsData, focusProgress);
 
@@ -169,7 +162,6 @@ export const expandPointsMapping = <V>(
   focusConfig: FocusConfig
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  console.log('expand');
   if (!targetStepsData.length) return [];
 
   // Case 1: Transition from empty path

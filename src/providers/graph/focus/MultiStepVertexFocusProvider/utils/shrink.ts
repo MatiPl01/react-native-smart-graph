@@ -53,12 +53,6 @@ const createShrunkMapping = <V>(
       targetStep.startsAt - sourcePoints[nextSourceIdx - 1]!.startsAt
     );
 
-    console.log({
-      maxNextSourceIdx,
-      nextSourceIdx,
-      targetIdx
-    });
-
     while (nextSourceIdx <= maxNextSourceIdx) {
       const difference =
         nextSourceIdx === maxNextSourceIdx // Assign Infinity if there are no more source points
@@ -111,25 +105,8 @@ const shrinkMappingToNonEmptyTarget = <V>(
   focusProgress: number
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  console.log('shrinkMappingToNonEmptyTarget');
-  console.log(
-    'sources',
-    sourcePoints.map(p => p.startsAt)
-  );
-  console.log(
-    'targets',
-    targetStepsData.map(p => p.startsAt)
-  );
   let prevSourceIdx = findPrevStepIdx(sourcePoints, focusProgress);
   const prevTargetIdx = findPrevStepIdx(targetStepsData, focusProgress);
-
-  console.log('selected idx', {
-    focusProgress,
-    prevSourceIdx,
-    prevSourceStartsAt: sourcePoints[prevSourceIdx]?.startsAt,
-    prevTargetIdx,
-    prevTargetStartsAt: targetStepsData[prevTargetIdx]?.startsAt
-  });
 
   // Ensure that there are no points left above and below target points
   if (prevTargetIdx > prevSourceIdx) {
@@ -164,7 +141,6 @@ export const shrinkPointsMapping = <V>(
   focusConfig: FocusConfig
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  console.log('shrink');
   if (!oldPath.points.length) return [];
 
   const sourcePoints = getMappingSourcePoints(

@@ -296,7 +296,6 @@ const withinBounds = (value: number) => {
 
 const cleanupPath = <V>(oldPath: FocusPath<V>): FocusPath<V> => {
   'worklet';
-  console.log('\n!!! cleanupPath !!!\n');
   const { points: oldPointsMapping } = oldPath;
   // Filter out points with the same startsAt value
   const cleanedPointsMapping = oldPointsMapping.filter(

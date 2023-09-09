@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DirectedGraph,
   DirectedGraphData,
-  FocusPoints,
   GraphView,
   GraphViewControls,
   ObjectFit,
@@ -125,27 +124,27 @@ export default function BottomSheetFocus() {
 
   const currentRoute = useSharedValue<keyof typeof GRAPH_ROUTES>('V1');
   const roots = useDerivedValue<Array<string>>(() => [currentRoute.value]);
-  // const focusPoints = useDerivedValue(() => ({
-  //   0.5: {
-  //     key: currentRoute.value,
-  //     vertexScale: 6,
-  //     alignment: {
-  //       horizontalAlignment: 'center',
-  //       verticalAlignment: 'top',
-  //       verticalOffset: 100
-  //     }
-  //   },
-  //   1: {
-  //     key: currentRoute.value,
-  //     vertexScale: 2,
-  //     alignment: {
-  //       horizontalAlignment: 'left',
-  //       verticalAlignment: 'top',
-  //       verticalOffset: 60,
-  //       horizontalOffset: 20
-  //     }
-  //   }
-  // }));
+  const focusPoints = useDerivedValue(() => ({
+    0.5: {
+      key: currentRoute.value,
+      vertexScale: 6,
+      alignment: {
+        horizontalAlignment: 'center',
+        verticalAlignment: 'top',
+        verticalOffset: 100
+      }
+    },
+    1: {
+      key: currentRoute.value,
+      vertexScale: 2,
+      alignment: {
+        horizontalAlignment: 'left',
+        verticalAlignment: 'top',
+        verticalOffset: 60,
+        horizontalOffset: 20
+      }
+    }
+  }));
 
   const minRowDistance = useSharedValue(100);
   // const minColumnDistance = useSharedValue(50);
@@ -232,49 +231,6 @@ export default function BottomSheetFocus() {
     }, 6000);
   }, []);
 
-  const focusPoints = useSharedValue<FocusPoints>({});
-
-  const updatePath = (
-    p: [string, Array<number>]
-  ): {
-    name: string;
-    points: FocusPoints;
-  } => {
-    const [name, points] = p;
-    const pts: FocusPoints = {};
-
-    for (const prog of points) {
-      pts[prog] = { key: 'V1' };
-    }
-
-    return {
-      name,
-      points: pts
-    };
-  };
-
-  useEffect(() => {
-    let idx = 0;
-    const P = [
-      ['Empty', []],
-      ['Path 1', [0.32, 0.45, 0.65, 0.85]],
-      ['Path 2', [0.15, 0.3, 0.35, 0.42, 0.5, 0.6, 0.7, 0.75, 0.8, 1]],
-      ['Path 1 again', [0.32, 0.45, 0.65, 0.85]]
-    ].map(updatePath);
-
-    let i = 0;
-
-    setInterval(() => {
-      if (i++ > 26) {
-        return;
-      }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { name, points } = P[idx++ % P.length]!;
-      console.log(`\n\n\n\n===== ${name} =====`);
-      focusPoints.value = points;
-    }, 100);
-  }, []);
-
   return (
     <>
       <GraphView
@@ -306,10 +262,7 @@ export default function BottomSheetFocus() {
           }}
           focusSettings={{
             points: focusPoints,
-            progress: useSharedValue(0.64),
-            pointsChangeAnimationSettings: {
-              duration: 300
-            }
+            progress: bottomSheetProgress
           }}
           // layoutSettings={
           //   {
