@@ -55,11 +55,13 @@ export const calcContainerTranslation = (
 
 export const calcValueOnProgress = (
   progress: number,
-  startScale: number,
-  endScale: number
+  startValue: number,
+  endValue: number
 ): number => {
   'worklet';
-  return startScale + progress * (endScale - startScale);
+  if (progress === 0) return startValue;
+  if (progress === 1) return endValue;
+  return startValue + progress * (endValue - startValue);
 };
 
 export const calcTranslationOnProgress = (

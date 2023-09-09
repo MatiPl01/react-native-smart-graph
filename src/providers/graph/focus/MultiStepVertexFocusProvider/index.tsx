@@ -14,6 +14,7 @@ import {
   UpdatedFocusPoint
 } from '@/types/settings';
 import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
+import { calcValueOnProgress } from '@/utils/views';
 
 import { useStateMachine } from './StateMachine';
 import { createFocusSteps, updateFocusPath } from './utils';
@@ -100,6 +101,7 @@ function MultiStepVertexFocusProvider<V>({
     //   settings.progress.value,
     //   ({ startsAt }) => startsAt
     // );
+    console.log('update path');
     const targetStepsData = createFocusSteps(
       sortedFocusPoints.value,
       verticesData
@@ -135,7 +137,7 @@ function MultiStepVertexFocusProvider<V>({
   useAnimatedReaction(
     () => sortedFocusPoints.value,
     () => {
-      if (stateMachine.isStopped()) return;
+      // if (stateMachine.isStopped()) return;
       updatePath();
     }
   );
@@ -159,6 +161,46 @@ function MultiStepVertexFocusProvider<V>({
       }
     },
     [verticesData]
+  );
+
+  useAnimatedReaction(
+    () => focusPath.value,
+    path => {
+      console.log(
+        `
+Bounds: ${path.progressBounds.from.min} - ${path.progressBounds.from.max} -> ${
+          path.progressBounds.to.min
+        } - ${path.progressBounds.to.max}
+Progress: ${pathTransitionProgress.value}
+Points: ${path.points
+          .map(({ from, to }) =>
+            calcValueOnProgress(
+              pathTransitionProgress.value,
+              from.startsAt,
+              to.startsAt
+            )
+          )
+          .join(', ')}`
+      );
+    }
+  );
+
+  useAnimatedReaction(
+    () => pathTransitionProgress.value,
+    progress => {
+      console.log(`Progress: ${progress}`);
+      console.log(
+        focusPath.value.points
+          .map(({ from, to }) =>
+            calcValueOnProgress(
+              pathTransitionProgress.value,
+              from.startsAt,
+              to.startsAt
+            ).toPrecision(2)
+          )
+          .join(', ')
+      );
+    }
   );
 
   // // Update focus on progress change or steps change

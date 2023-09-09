@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   FocusConfig,
+  FocusPath,
   FocusPointMapping,
   FocusStepData,
   MappingSourcePoint
@@ -10,7 +11,9 @@ import { calcTransformationOnProgress } from '@/utils/views';
 
 import {
   createMappings,
-  getIndicesOfFocusProgressClosestPoints
+  findPrevStepIdx,
+  getIndicesOfFocusProgressClosestPoints,
+  getMappingSourcePoints
 } from './shared';
 
 const expandMappingFromEmptySource = <V>(
@@ -40,7 +43,9 @@ const expandMappingFromEmptySource = <V>(
 
   return targetStepsData.map(step => ({
     from: {
-      startsAt: step.startsAt + 1, // Slide from top
+      // Slide from top (1 above the current progress to ensure that
+      // the transition will be smooth)
+      startsAt: step.startsAt + focusProgress + 1,
       transform: initialPointTransformation
     },
     to: step
@@ -52,6 +57,8 @@ const createExpandedMapping = <V>(
   targetStepsData: Array<FocusStepData<V>> // must be sorted
 ): Array<FocusPointMapping<V>> => {
   'worklet';
+  if (!sourcePoints.length || !targetStepsData.length) return [];
+
   const result: Array<FocusPointMapping<V>> = [];
 
   let nextTargetIdx = 1;
@@ -65,6 +72,12 @@ const createExpandedMapping = <V>(
       sourcePoint.startsAt - targetStepsData[nextTargetIdx - 1]!.startsAt
     );
 
+    console.log({
+      maxNextTargetIdx,
+      nextTargetIdx,
+      sourceIdx
+    });
+
     while (nextTargetIdx <= maxNextTargetIdx) {
       const difference =
         nextTargetIdx === maxNextTargetIdx // Assign Infinity if there are no more target steps
@@ -75,28 +88,37 @@ const createExpandedMapping = <V>(
       // If the difference is greater than the previous one, we found the closest target step
       // (the previous one)
       if (difference === Infinity || difference > minDifference) {
-        // Add mappings for all skipped target steps and the closest target step
-        for (let i = result.length; i < nextTargetIdx; i++) {
-          // Check if the previous source points is closer to the current target step
-          const prevSourcePoint = sourcePoints[sourceIdx - 1];
-          const targetStep = targetStepsData[i]!;
-          if (
-            prevSourcePoint &&
-            Math.abs(prevSourcePoint.startsAt - targetStep.startsAt) <
-              Math.abs(sourcePoint.startsAt - targetStep.startsAt)
-          ) {
-            result.push({ from: prevSourcePoint, to: targetStep });
-          } else {
-            result.push({ from: sourcePoint, to: targetStep });
-          }
-        }
-        minDifference = Infinity;
-        nextTargetIdx++;
-        continue;
+        break;
       }
       minDifference = difference;
       nextTargetIdx++;
     }
+
+    // Add mappings for all skipped target steps and the closest target step
+    // or for all remaining target steps if there are no more source points
+    for (
+      let i = result.length;
+      i <
+      (sourceIdx === sourcePoints.length - 1
+        ? targetStepsData.length
+        : nextTargetIdx);
+      i++
+    ) {
+      // Check if the previous source points is closer to the current target step
+      const prevSourcePoint = sourcePoints[sourceIdx - 1];
+      const targetStep = targetStepsData[i]!;
+      if (
+        prevSourcePoint &&
+        Math.abs(prevSourcePoint.startsAt - targetStep.startsAt) <
+          Math.abs(sourcePoint.startsAt - targetStep.startsAt)
+      ) {
+        result.push({ from: prevSourcePoint, to: targetStep });
+      } else {
+        result.push({ from: sourcePoint, to: targetStep });
+      }
+    }
+
+    nextTargetIdx++;
   }
 
   return result;
@@ -108,48 +130,48 @@ const expandMappingFromNonEmptySource = <V>(
   focusProgress: number
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  let { nextIdx: nextTargetStepIdx, prevIdx: prevTargetStepIdx } =
-    getIndicesOfFocusProgressClosestPoints(targetStepsData, focusProgress);
-  const { nextIdx: nextSourcePointIdx, prevIdx: prevSourcePointIdx } =
-    getIndicesOfFocusProgressClosestPoints(targetStepsData, focusProgress);
+  console.log('expandMappingFromNonEmptySource');
+  const prevSourceIdx = findPrevStepIdx(sourcePoints, focusProgress);
+  let prevTargetIdx = findPrevStepIdx(targetStepsData, focusProgress);
 
   // Ensure that there are no points left above and below source points
-  if (prevSourcePointIdx > prevTargetStepIdx) {
-    prevTargetStepIdx = prevSourcePointIdx;
-    nextTargetStepIdx = nextSourcePointIdx;
+  if (prevSourceIdx > prevTargetIdx) {
+    prevTargetIdx = prevSourceIdx;
   } else {
-    const remainingSourcePointsCount = sourcePoints.length - nextSourcePointIdx;
-    const remainingTargetStepsCount =
-      targetStepsData.length - nextTargetStepIdx;
+    const remainingSourcePointsCount = sourcePoints.length - prevSourceIdx;
+    const remainingTargetStepsCount = targetStepsData.length - prevTargetIdx;
     if (remainingSourcePointsCount > remainingTargetStepsCount) {
-      nextTargetStepIdx = targetStepsData.length - remainingSourcePointsCount;
-      prevTargetStepIdx =
-        targetStepsData.length - (sourcePoints.length - prevSourcePointIdx);
+      prevTargetIdx = targetStepsData.length - remainingSourcePointsCount;
     }
   }
+
+  const nextSourceIdx = Math.min(prevSourceIdx + 1, sourcePoints.length - 1);
+  const nextTargetIdx = prevTargetIdx + 1; // Can exceed the array length
 
   return createMappings(
     createExpandedMapping,
     sourcePoints,
     targetStepsData,
-    prevSourcePointIdx,
-    nextSourcePointIdx,
-    prevTargetStepIdx,
-    nextTargetStepIdx
+    prevSourceIdx,
+    nextSourceIdx,
+    prevTargetIdx,
+    nextTargetIdx
   );
 };
 
 export const expandPointsMapping = <V>(
-  sourcePoints: Array<MappingSourcePoint>,
+  oldPath: FocusPath<V>,
   targetStepsData: Array<FocusStepData<V>>, // must be sorted
+  transitionProgress: number,
   focusProgress: number,
   focusConfig: FocusConfig
 ): Array<FocusPointMapping<V>> => {
   'worklet';
+  console.log('expand');
   if (!targetStepsData.length) return [];
 
   // Case 1: Transition from empty path
-  if (!sourcePoints.length) {
+  if (!oldPath.points.length) {
     return expandMappingFromEmptySource(
       targetStepsData,
       focusProgress,
@@ -157,6 +179,11 @@ export const expandPointsMapping = <V>(
     );
   }
   // Case 2: Transition from non-empty path
+  const sourcePoints = getMappingSourcePoints(
+    oldPath.points,
+    transitionProgress,
+    focusConfig
+  );
   return expandMappingFromNonEmptySource(
     sourcePoints,
     targetStepsData,

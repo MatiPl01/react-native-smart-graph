@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
+  FocusConfig,
   FocusPointMapping,
   FocusStepData,
   MappingSourcePoint
 } from '@/types/data';
 import { binarySearchLE } from '@/utils/algorithms';
+import { getMultiStepVertexTransformation } from '@/utils/focus';
+import {
+  calcTransformationOnProgress,
+  calcValueOnProgress
+} from '@/utils/views';
 
 export const createPointMapping = <V>(
   sourcePoint: MappingSourcePoint,
@@ -48,40 +54,59 @@ export const createMappings = <V>(
   ) => Array<FocusPointMapping<V>>,
   sourcePoints: Array<MappingSourcePoint>,
   targetStepsData: Array<FocusStepData<V>>,
-  prevSourcePointIdx: number,
-  nextSourcePointIdx: number,
-  prevTargetStepIdx: number,
-  nextTargetStepIdx: number
+  prevSourceIdx: number,
+  nextSourceIdx: number,
+  prevTargetIdx: number,
+  nextTargetIdx: number
 ): Array<FocusPointMapping<V>> => {
   'worklet';
+  console.log('createMappings', {
+    nextSourceIdx,
+    nextTargetIdx,
+    prevSourceIdx,
+    prevTargetIdx
+  });
   // Create mappings
   const mappings: Array<FocusPointMapping<V>> = [];
   // Add mapping for points balow source points
+  // including the lower source point
   mappings.push(
     ...createMappingsFn(
-      sourcePoints.slice(0, prevSourcePointIdx),
-      targetStepsData.slice(0, prevTargetStepIdx)
+      sourcePoints.slice(0, prevSourceIdx + 1),
+      targetStepsData.slice(0, prevTargetIdx + 1)
     )
   );
-  // Add mapping for source points
-  mappings.push(
-    createPointMapping(
-      sourcePoints[prevSourcePointIdx]!,
-      targetStepsData[prevTargetStepIdx]!
-    )
-  );
-  if (prevTargetStepIdx !== nextTargetStepIdx) {
-    createPointMapping(
-      sourcePoints[nextSourcePointIdx]!,
-      targetStepsData[nextTargetStepIdx]!
-    );
-  }
   // Add mapping for points above source points
   mappings.push(
     ...createMappingsFn(
-      sourcePoints.slice(nextSourcePointIdx + 1),
-      targetStepsData.slice(nextTargetStepIdx + 1)
+      sourcePoints.slice(nextSourceIdx),
+      targetStepsData.slice(nextTargetIdx)
     )
   );
   return mappings;
+};
+
+export const getMappingSourcePoints = <V>(
+  oldPointsMapping: Array<FocusPointMapping<V>>,
+  transitionProgress: number,
+  focusConfig: FocusConfig
+): Array<MappingSourcePoint> => {
+  'worklet';
+  return oldPointsMapping.map(({ from, to }) => {
+    const sourceTransform = from.transform;
+    const targetTransform = getMultiStepVertexTransformation(to, focusConfig);
+
+    return {
+      startsAt: calcValueOnProgress(
+        transitionProgress,
+        from.startsAt,
+        to.startsAt
+      ),
+      transform: calcTransformationOnProgress(
+        transitionProgress,
+        sourceTransform,
+        targetTransform
+      )
+    };
+  });
 };

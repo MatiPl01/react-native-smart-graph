@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
+  FocusConfig,
+  FocusPath,
   FocusPointMapping,
   FocusStepData,
   MappingSourcePoint
@@ -7,21 +9,29 @@ import {
 
 import {
   createMappings,
-  getIndicesOfFocusProgressClosestPoints
+  findPrevStepIdx,
+  getMappingSourcePoints
 } from './shared';
 
 const shrinkMappingToEmptyTarget = <V>(
-  sourcePoints: Array<MappingSourcePoint>,
-  targetStepsData: Array<FocusStepData<V>> // must be sorted
+  oldPath: FocusPath<V>,
+  focusProgress: number,
+  sourcePoints: Array<MappingSourcePoint>
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  return targetStepsData.map((step, idx) => ({
-    from: sourcePoints[idx]!,
-    to: {
-      ...step,
-      startsAt: step.startsAt + 1 // Slide to top
-    }
-  }));
+
+  return sourcePoints.map((point, idx) => {
+    const step = oldPath.points[idx]!.to;
+    return {
+      from: point,
+      to: {
+        ...step,
+        // Slide to top (slightly above the top to ensure that this point
+        // will be removed from the path on the path cleanup)
+        startsAt: step.startsAt + focusProgress + 1.01
+      }
+    };
+  });
 };
 
 const createShrunkMapping = <V>(
@@ -29,6 +39,8 @@ const createShrunkMapping = <V>(
   targetStepsData: Array<FocusStepData<V>> // must be sorted
 ): Array<FocusPointMapping<V>> => {
   'worklet';
+  if (!sourcePoints.length || !targetStepsData.length) return [];
+
   const result: Array<FocusPointMapping<V>> = [];
 
   let nextSourceIdx = 1;
@@ -41,6 +53,12 @@ const createShrunkMapping = <V>(
       targetStep.startsAt - sourcePoints[nextSourceIdx - 1]!.startsAt
     );
 
+    console.log({
+      maxNextSourceIdx,
+      nextSourceIdx,
+      targetIdx
+    });
+
     while (nextSourceIdx <= maxNextSourceIdx) {
       const difference =
         nextSourceIdx === maxNextSourceIdx // Assign Infinity if there are no more source points
@@ -51,27 +69,34 @@ const createShrunkMapping = <V>(
       // If the difference is smaller than the previous one, we found the closest source point
       // (the previous one)
       if (difference === Infinity || difference > minDifference) {
-        // Add mappings for all skipped source points and the closest source point
-        for (let i = result.length; i < nextSourceIdx; i++) {
-          // Check if the previous target step is closer to the current source point
-          const prevTargetStep = targetStepsData[targetIdx - 1];
-          const sourcePoint = sourcePoints[i]!;
-          if (
-            prevTargetStep &&
-            Math.abs(prevTargetStep.startsAt - sourcePoint.startsAt) <
-              Math.abs(targetStep.startsAt - sourcePoint.startsAt)
-          ) {
-            result.push({ from: sourcePoint, to: prevTargetStep });
-          } else {
-            result.push({ from: sourcePoint, to: targetStep });
-          }
-        }
-        minDifference = Infinity;
-        nextSourceIdx++;
-        continue;
+        break;
       }
       minDifference = difference;
       nextSourceIdx++;
+    }
+
+    // Add mappings for all skipped source points and the closest source point
+    // or for all remaining source points if there are no more target steps
+    for (
+      let i = result.length;
+      i <
+      (targetIdx === targetStepsData.length - 1
+        ? sourcePoints.length
+        : nextSourceIdx);
+      i++
+    ) {
+      // Check if the previous target step is closer to the current source point
+      const prevTargetStep = targetStepsData[targetIdx - 1];
+      const sourcePoint = sourcePoints[i]!;
+      if (
+        prevTargetStep &&
+        Math.abs(prevTargetStep.startsAt - sourcePoint.startsAt) <
+          Math.abs(targetStep.startsAt - sourcePoint.startsAt)
+      ) {
+        result.push({ from: sourcePoint, to: prevTargetStep });
+      } else {
+        result.push({ from: sourcePoint, to: targetStep });
+      }
     }
   }
 
@@ -84,48 +109,55 @@ const shrinkMappingToNonEmptyTarget = <V>(
   focusProgress: number
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  const { nextIdx: nextTargetStepIdx, prevIdx: prevTargetStepIdx } =
-    getIndicesOfFocusProgressClosestPoints(targetStepsData, focusProgress);
-  let { nextIdx: nextSourcePointIdx, prevIdx: prevSourcePointIdx } =
-    getIndicesOfFocusProgressClosestPoints(targetStepsData, focusProgress);
+  console.log('shrinkMappingToNonEmptyTarget');
+  let prevSourceIdx = findPrevStepIdx(sourcePoints, focusProgress);
+  const prevTargetIdx = findPrevStepIdx(targetStepsData, focusProgress);
 
   // Ensure that there are no points left above and below target points
-  if (prevTargetStepIdx > prevSourcePointIdx) {
-    prevSourcePointIdx = prevTargetStepIdx;
-    nextSourcePointIdx = nextTargetStepIdx;
+  if (prevTargetIdx > prevSourceIdx) {
+    prevSourceIdx = prevTargetIdx;
   } else {
-    const remainingSourcePointsCount = sourcePoints.length - nextSourcePointIdx;
-    const remainingTargetStepsCount =
-      targetStepsData.length - nextTargetStepIdx;
+    const remainingSourcePointsCount = sourcePoints.length - prevSourceIdx;
+    const remainingTargetStepsCount = targetStepsData.length - prevTargetIdx;
     if (remainingTargetStepsCount > remainingSourcePointsCount) {
-      nextSourcePointIdx = sourcePoints.length - remainingTargetStepsCount;
-      prevSourcePointIdx =
-        sourcePoints.length - (targetStepsData.length - prevTargetStepIdx);
+      prevSourceIdx = sourcePoints.length - remainingTargetStepsCount;
     }
   }
+
+  const nextSourceIdx = prevSourceIdx + 1; // Can exceed the array length
+  const nextTargetIdx = Math.min(prevTargetIdx + 1, targetStepsData.length - 1);
 
   return createMappings(
     createShrunkMapping,
     sourcePoints,
     targetStepsData,
-    prevSourcePointIdx,
-    nextSourcePointIdx,
-    prevTargetStepIdx,
-    nextTargetStepIdx
+    prevSourceIdx,
+    nextSourceIdx,
+    prevTargetIdx,
+    nextTargetIdx
   );
 };
 
 export const shrinkPointsMapping = <V>(
-  sourcePoints: Array<MappingSourcePoint>,
+  oldPath: FocusPath<V>,
   targetStepsData: Array<FocusStepData<V>>, // must be sorted
-  focusProgress: number
+  focusProgress: number,
+  transitionProgress: number,
+  focusConfig: FocusConfig
 ): Array<FocusPointMapping<V>> => {
   'worklet';
-  if (!sourcePoints.length) return [];
+  console.log('shrink');
+  if (!oldPath.points.length) return [];
+
+  const sourcePoints = getMappingSourcePoints(
+    oldPath.points,
+    transitionProgress,
+    focusConfig
+  );
 
   // Case 1: Transition to empty path
   if (!targetStepsData.length) {
-    return shrinkMappingToEmptyTarget(sourcePoints, targetStepsData);
+    return shrinkMappingToEmptyTarget(oldPath, focusProgress, sourcePoints);
   }
   // Case 2: Transition to non-empty path
   return shrinkMappingToNonEmptyTarget(
