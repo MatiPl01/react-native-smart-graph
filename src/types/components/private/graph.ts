@@ -27,6 +27,7 @@ import {
   AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
   AllGraphPlacementSettings,
+  AllMultiStepFocusSettings,
   DirectedGraphSettings,
   EdgeType,
   GraphEventsSettings,
@@ -34,7 +35,6 @@ import {
   InternalGraphLayoutSettings,
   InternalGraphPlacementSettings,
   InternalMultiStepFocusSettings,
-  MultiStepFocusSettings,
   UndirectedGraphSettings
 } from '@/types/settings';
 import {
@@ -88,7 +88,7 @@ export type AllGraphSettings<V, E> = {
   componentSettings: AllGraphComponentsSettings;
   edgeType: EdgeType;
   eventSettings?: GraphEventsSettings<V>;
-  focusSettings?: MultiStepFocusSettings;
+  focusSettings?: AllMultiStepFocusSettings;
   graph: Graph<V, E>;
   layoutSettings: AllGraphLayoutSettings;
   placementSettings: AllGraphPlacementSettings;
