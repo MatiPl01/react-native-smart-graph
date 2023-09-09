@@ -29,6 +29,7 @@ export const getTargetPoint = ({
   targetPoint: { value: prevTargetPoint }
 }: StateProps): TransformedFocusPoint | null => {
   'worklet';
+  console.log(progress.previous, progress.current, !!afterStep, !!beforeStep);
   if (progress.current < progress.previous) {
     return beforeStep ?? null;
   } else if (progress.current > progress.previous) {
@@ -143,8 +144,8 @@ const getBeforeStep = <V>(
   return { currentIdx: currentStepIdx, step };
 };
 
-const calcStepStartsAt = <V>(
-  path: FocusPath<V>,
+export const calcStepStartsAt = <V>(
+  progressBounds: FocusBoundsMapping,
   transitionProgress: number,
   mapping: FocusPointMapping<V> | undefined,
   bound: 'max' | 'min'
@@ -158,8 +159,8 @@ const calcStepStartsAt = <V>(
       )
     : calcValueOnProgress(
         transitionProgress,
-        path.progressBounds.from[bound],
-        path.progressBounds.to[bound]
+        progressBounds.from[bound],
+        progressBounds.to[bound]
       );
 };
 
@@ -169,26 +170,26 @@ export const transformFocusData = <V>(
     current: number;
     transition: number;
   },
-  currentStepIdx: number,
+  afterStepIdx: number,
   focusConfig: FocusConfig
 ): TransformedFocusData | null => {
   'worklet';
   // Either getAfterStep or getBeforeStep will return the same step
-  // so we can use the same currentStepIdx for both and update it
+  // so we can use the same afterStepIdx for both and update it
   // after each call
-  const afterStep = getAfterStep(path, progress, currentStepIdx);
-  currentStepIdx = afterStep.currentIdx;
-  const beforeStep = getBeforeStep(path, progress, currentStepIdx);
-  currentStepIdx = beforeStep.currentIdx;
+  const afterStep = getAfterStep(path, progress, afterStepIdx);
+  afterStepIdx = afterStep.currentIdx;
+  const beforeStep = getBeforeStep(path, progress, afterStepIdx);
+  afterStepIdx = beforeStep.currentIdx;
 
   const beforeStepStartsAt = calcStepStartsAt(
-    path,
+    path.progressBounds,
     progress.transition,
     beforeStep.step,
     'min'
   );
   const afterStepStartsAt = calcStepStartsAt(
-    path,
+    path.progressBounds,
     progress.transition,
     afterStep.step,
     'max'
@@ -199,24 +200,34 @@ export const transformFocusData = <V>(
     (afterStepStartsAt - beforeStepStartsAt);
 
   return {
-    afterStep: beforeStep.step
-      ? getTransformedFocusPoint(
-          beforeStep.step,
-          focusConfig,
-          progress.transition
-        )
-      : null,
-    beforeStep: afterStep.step
+    afterStep: afterStep.step
       ? getTransformedFocusPoint(
           afterStep.step,
           focusConfig,
           progress.transition
         )
       : null,
-    currentStepIdx,
+    afterStepIdx,
+    beforeStep: beforeStep.step
+      ? getTransformedFocusPoint(
+          beforeStep.step,
+          focusConfig,
+          progress.transition
+        )
+      : null,
     pointsTransitionProgress,
     targetAnimationProgress: progress.transition * pointsTransitionProgress
   };
+};
+
+export const getResultingProgress = ({
+  data: { beforeStep, pointsTransitionProgress },
+  targetPoint: { value: targetPoint }
+}: StateProps): number => {
+  'worklet';
+  return targetPoint?.startsAt === beforeStep?.startsAt
+    ? 1 - pointsTransitionProgress
+    : pointsTransitionProgress;
 };
 
 export const createFocusSteps = <V>(

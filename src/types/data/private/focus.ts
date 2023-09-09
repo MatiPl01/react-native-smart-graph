@@ -49,9 +49,9 @@ export type TransformedFocusPoint = {
 
 export type TransformedFocusData = {
   afterStep: TransformedFocusPoint | null;
+  // Updated index of the step after the current focus progress
+  afterStepIdx: number;
   beforeStep: TransformedFocusPoint | null;
-  // Updated current step index
-  currentStepIdx: number;
   // Progress of the focus target transition
   pointsTransitionProgress: number;
   // Progress of the focused vertex animation

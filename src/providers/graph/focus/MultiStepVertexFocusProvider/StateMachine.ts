@@ -9,6 +9,7 @@ import { isBetween } from '@/utils/math';
 
 import { MachineContext, MachineState, StateHandler } from './types';
 import {
+  getResultingProgress,
   getTargetPoint,
   getTransitionBounds,
   updateTransitionPoints
@@ -33,6 +34,11 @@ const focusStartState: StateHandler = props => {
   // (skip if the target point is the same as the previous one)
   if (oldTargetPoint.value !== targetPoint) {
     oldTargetPoint.value = targetPoint;
+    console.log(
+      '>>>',
+      targetPoint === props.data.afterStep,
+      targetPoint === props.data.beforeStep
+    );
     const { source: sourceStep } = getTransitionBounds(props);
     // Reset the transition progress if there is no source step or
     // the transition was finished (the new transition will start from
@@ -70,7 +76,7 @@ const focusTransitionState: StateHandler = props => {
   // Update the focus context
   updateTransitionPoints(props);
   // Update the transition progress
-  focusContext.transitionProgress.value = data.pointsTransitionProgress;
+  focusContext.transitionProgress.value = getResultingProgress(props);
   // TODO - figure out how to update the focused point animation separately
 
   // C - If  there is no transition target, restart the focus animation
@@ -159,11 +165,13 @@ const blurStartState: StateHandler = ({ focusContext, targetPoint }) => {
 
 const blurTransitionState: StateHandler = props => {
   'worklet';
-  const { data, focusContext, progress } = props;
+  const { focusContext, progress } = props;
   const { source: sourceStep } = getTransitionBounds(props);
+  const resultingProgress = (focusContext.transitionProgress.value =
+    getResultingProgress(props));
 
   // H - If the resulting progress is 1, the blur animation is finished
-  if (data.pointsTransitionProgress === 1 || !sourceStep) {
+  if (resultingProgress === 1 || !sourceStep) {
     focusContext.transitionProgress.value = 1;
     return MachineState.BLUR;
   }

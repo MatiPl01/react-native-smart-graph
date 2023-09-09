@@ -18,7 +18,12 @@ import { binarySearchLE } from '@/utils/algorithms';
 import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { useStateMachine } from './StateMachine';
-import { createFocusSteps, transformFocusData, updateFocusPath } from './utils';
+import {
+  calcStepStartsAt,
+  createFocusSteps,
+  transformFocusData,
+  updateFocusPath
+} from './utils';
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
@@ -89,7 +94,7 @@ function MultiStepVertexFocusProvider<V>({
 
   // // Used to determine the direction of the progress
   const previousProgress = useSharedValue(0);
-  const currentStepIdx = useSharedValue(0);
+  const afterStepIdx = useSharedValue(0);
   // const syncProgress = useSharedValue(0);
 
   // State machine
@@ -108,17 +113,15 @@ function MultiStepVertexFocusProvider<V>({
       focusConfig.value,
       settings
     );
-    currentStepIdx.value = Math.max(
-      binarySearchLE(
-        focusPath.value.points,
-        settings.progress.value,
-        ({ from }) => {
-          console.log(from.startsAt);
-          return from.startsAt;
-        }
-      ),
-      0
-    );
+    afterStepIdx.value =
+      binarySearchLE(focusPath.value.points, settings.progress.value, mapping =>
+        calcStepStartsAt(
+          focusPath.value.progressBounds,
+          pathTransitionProgress.value,
+          mapping,
+          'min'
+        )
+      ) + 1;
   };
 
   // Enable/disable the state machine
@@ -182,16 +185,15 @@ function MultiStepVertexFocusProvider<V>({
       }
     }),
     ({ progress }) => {
-      const currentIdx = currentStepIdx.value;
-      console.log(progress.current, currentIdx);
-      if (stateMachine.isStopped() || currentIdx === -1) {
+      const afterIdx = afterStepIdx.value;
+      if (stateMachine.isStopped()) {
         return;
       }
 
       const currentData = transformFocusData(
         focusPath.value,
         progress,
-        currentIdx,
+        afterIdx,
         focusConfig.value // TODO - add reaction to focus config change (smooth transition)
       );
 
@@ -210,7 +212,7 @@ function MultiStepVertexFocusProvider<V>({
 
       // Update values for the next reaction
       previousProgress.value = progress.current;
-      currentStepIdx.value = Math.max(0, currentData.currentStepIdx);
+      afterStepIdx.value = Math.max(0, currentData.afterStepIdx);
     }
   );
 
