@@ -107,11 +107,13 @@ const getFocusPointTransformation = <V>(
 
 export const getTransformedFocusPoint = <V>(
   mapping: FocusPointMapping<V>,
+  id: number,
   focusConfig: FocusConfig,
   progress = 1
 ): TransformedFocusPoint => {
   'worklet';
   return {
+    id,
     key: mapping.to.point.key,
     startsAt: calcValueOnProgress(
       progress,
@@ -128,7 +130,7 @@ export const getMappingSourcePoints = <V>(
   focusConfig: FocusConfig
 ): Array<MappingSourcePoint> => {
   'worklet';
-  return oldPointsMapping.map(mapping =>
-    getTransformedFocusPoint(mapping, focusConfig, transitionProgress)
+  return oldPointsMapping.map((mapping, idx) =>
+    getTransformedFocusPoint(mapping, idx, focusConfig, transitionProgress)
   );
 };

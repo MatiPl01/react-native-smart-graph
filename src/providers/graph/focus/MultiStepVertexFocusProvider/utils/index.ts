@@ -29,7 +29,6 @@ export const getTargetPoint = ({
   targetPoint: { value: prevTargetPoint }
 }: StateProps): TransformedFocusPoint | null => {
   'worklet';
-  console.log(progress.previous, progress.current, !!afterStep, !!beforeStep);
   if (progress.current < progress.previous) {
     return beforeStep ?? null;
   } else if (progress.current > progress.previous) {
@@ -64,10 +63,10 @@ export const getTransitionBounds = ({
   let targetStep: TransformedFocusPoint | null = null;
   let sourceStep: TransformedFocusPoint | null = null;
 
-  if (targetPoint?.startsAt === beforeStep?.startsAt) {
+  if (targetPoint?.id === beforeStep?.id) {
     targetStep = beforeStep;
     sourceStep = afterStep;
-  } else if (targetPoint?.startsAt === afterStep?.startsAt) {
+  } else if (targetPoint?.id === afterStep?.id) {
     targetStep = afterStep;
     sourceStep = beforeStep;
   } else if (!targetPoint) {
@@ -98,50 +97,55 @@ export const updateTransitionPoints = (props: StateProps): void => {
   );
 };
 
-const getAfterStep = <V>(
+const getCurrentSteps = <V>(
   path: FocusPath<V>,
   progress: { current: number; transition: number },
-  currentStepIdx: number
-): { currentIdx: number; step?: FocusPointMapping<V> } => {
+  afterStepIdx: number
+): {
+  afterStep?: FocusPointMapping<V>;
+  afterStepIdx: number;
+  beforeStep?: FocusPointMapping<V>;
+} => {
   'worklet';
-  let step = path.points[currentStepIdx];
+  let afterStep = path.points[afterStepIdx];
+  let beforeStep = path.points[afterStepIdx - 1];
 
+  // Either the first or the second loop will be executed
+  // (never both at the same time)
+  // so we can use the same afterStepIdx for both and update it
   while (
-    step &&
+    afterStep &&
     progress.current >
       calcValueOnProgress(
         progress.transition,
-        step.from.startsAt,
-        step.to.startsAt
+        afterStep.from.startsAt,
+        afterStep.to.startsAt
       )
   ) {
-    step = path.points[currentStepIdx + 1];
-    currentStepIdx++;
+    beforeStep = afterStep;
+    afterStep = path.points[afterStepIdx + 1];
+    afterStepIdx++;
   }
-  return { currentIdx: currentStepIdx, step };
-};
-
-const getBeforeStep = <V>(
-  path: FocusPath<V>,
-  progress: { current: number; transition: number },
-  currentStepIdx: number
-): { currentIdx: number; step?: FocusPointMapping<V> } => {
-  'worklet';
-  let step = path.points[currentStepIdx - 1];
 
   while (
-    step &&
+    beforeStep &&
     progress.current <
       calcValueOnProgress(
         progress.transition,
-        step.from.startsAt,
-        step.to.startsAt
+        beforeStep.from.startsAt,
+        beforeStep.to.startsAt
       )
   ) {
-    step = path.points[currentStepIdx - 1];
-    currentStepIdx--;
+    afterStep = beforeStep;
+    beforeStep = path.points[afterStepIdx - 1];
+    afterStepIdx--;
   }
-  return { currentIdx: currentStepIdx, step };
+
+  return {
+    afterStep,
+    afterStepIdx,
+    beforeStep
+  };
 };
 
 export const calcStepStartsAt = <V>(
@@ -174,43 +178,41 @@ export const transformFocusData = <V>(
   focusConfig: FocusConfig
 ): TransformedFocusData | null => {
   'worklet';
-  // Either getAfterStep or getBeforeStep will return the same step
-  // so we can use the same afterStepIdx for both and update it
-  // after each call
-  const afterStep = getAfterStep(path, progress, afterStepIdx);
-  afterStepIdx = afterStep.currentIdx;
-  const beforeStep = getBeforeStep(path, progress, afterStepIdx);
-  afterStepIdx = beforeStep.currentIdx;
+  const steps = getCurrentSteps(path, progress, afterStepIdx);
 
   const beforeStepStartsAt = calcStepStartsAt(
     path.progressBounds,
     progress.transition,
-    beforeStep.step,
+    steps.beforeStep,
     'min'
   );
   const afterStepStartsAt = calcStepStartsAt(
     path.progressBounds,
     progress.transition,
-    afterStep.step,
+    steps.afterStep,
     'max'
   );
 
-  const pointsTransitionProgress =
+  const pointsTransitionProgress = Math.max(
     (progress.current - beforeStepStartsAt) /
-    (afterStepStartsAt - beforeStepStartsAt);
+      (afterStepStartsAt - beforeStepStartsAt),
+    0
+  );
 
   return {
-    afterStep: afterStep.step
+    afterStep: steps.afterStep
       ? getTransformedFocusPoint(
-          afterStep.step,
+          steps.afterStep,
+          steps.afterStepIdx,
           focusConfig,
           progress.transition
         )
       : null,
-    afterStepIdx,
-    beforeStep: beforeStep.step
+    afterStepIdx: steps.afterStepIdx,
+    beforeStep: steps.beforeStep
       ? getTransformedFocusPoint(
-          beforeStep.step,
+          steps.beforeStep,
+          steps.afterStepIdx - 1,
           focusConfig,
           progress.transition
         )
@@ -265,7 +267,7 @@ const updateProgressBounds = <V>(
   // Slide from top
   if (!hasSourcePoints) {
     return {
-      from: { max: focusProgress + 2, min: focusProgress + 1 },
+      from: { max: focusProgress + 1, min: focusProgress },
       to: { max: 1, min: 0 }
     };
   }

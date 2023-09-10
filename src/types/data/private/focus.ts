@@ -42,6 +42,7 @@ export type FocusPath<V> = {
 };
 
 export type TransformedFocusPoint = {
+  id: number;
   key: string;
   startsAt: number;
   transform: VertexTransformation;

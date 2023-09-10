@@ -199,6 +199,8 @@ function MultiStepVertexFocusProvider<V>({
 
       if (!currentData) return;
 
+      console.log(currentData.targetAnimationProgress);
+
       // Update the state machine
       stateMachine.update(
         currentData,

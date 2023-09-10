@@ -61,7 +61,9 @@ export const animateWithCallback = (
 
 const ANIMATION_SETTINGS_KEYS = new Set(['duration', 'easing', 'onComplete']);
 
-const isAnimationSettingsObject = (obj: object): obj is AnimationSettings =>
+export const isAnimationSettingsObject = (
+  obj: object
+): obj is AnimationSettings =>
   Object.keys(obj).every(key => ANIMATION_SETTINGS_KEYS.has(key));
 
 const BATCH_MODIFICATION_WITH_EDGES_AND_VERTICES_SETTINGS_KEYS = new Set([

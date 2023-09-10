@@ -1,7 +1,10 @@
 import { getDefaultConfig, getUpdateConfig } from '@/configs/graph';
 import { GraphSettingsData } from '@/types/components';
 import { GraphData } from '@/types/data';
-import { cancelAnimations } from '@/utils/animations';
+import {
+  cancelAnimations,
+  isAnimationSettingsObject
+} from '@/utils/animations';
 import { updateValues } from '@/utils/objects';
 
 export const updateContextValue = <V, E>(
@@ -10,6 +13,15 @@ export const updateContextValue = <V, E>(
 ): GraphSettingsData<V, E> => {
   // DEFAULTS
   const defaultConfig = getDefaultConfig(data);
+
+  data.animationSettings =
+    data.animationSettings && isAnimationSettingsObject(data.animationSettings)
+      ? {
+          edges: data.animationSettings,
+          layout: data.animationSettings,
+          vertices: data.animationSettings
+        }
+      : data.animationSettings;
 
   return updateValues(
     {

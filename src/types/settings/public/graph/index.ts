@@ -1,4 +1,4 @@
-import { GraphAnimationsSettings } from './animations';
+import { AnimationSettings, GraphAnimationsSettings } from './animations';
 import {
   DirectedGraphWithCurvedEdgesComponentsSettings,
   DirectedGraphWithStraightEdgesComponentsSettings,
@@ -12,7 +12,7 @@ import { GraphLayoutSettings } from './layout';
 import { GraphPlacementSettings } from './placement';
 
 type SharedGraphSettings<V> = {
-  animationSettings?: GraphAnimationsSettings;
+  animationSettings?: AnimationSettings | GraphAnimationsSettings;
   edgeType?: EdgeType;
   eventSettings?: GraphEventsSettings<V>;
   focusSettings?: MultiStepFocusSettings;

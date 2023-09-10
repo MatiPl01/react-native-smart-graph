@@ -34,11 +34,6 @@ const focusStartState: StateHandler = props => {
   // (skip if the target point is the same as the previous one)
   if (oldTargetPoint.value !== targetPoint) {
     oldTargetPoint.value = targetPoint;
-    console.log(
-      '>>>',
-      targetPoint === props.data.afterStep,
-      targetPoint === props.data.beforeStep
-    );
     const { source: sourceStep } = getTransitionBounds(props);
     // Reset the transition progress if there is no source step or
     // the transition was finished (the new transition will start from
