@@ -257,11 +257,11 @@ const arrangeVertices = (
   return arrangedVertices;
 };
 
-export default function placeVerticesOnOrbits(
+const placeVerticesOnOrbits = (
   connections: GraphConnections,
   isGraphDirected: boolean,
   settings: AllOrbitsPlacementSettings
-): GraphLayout {
+): GraphLayout => {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];
   const rootVertexKeys = new Set(settings.roots);
@@ -312,4 +312,9 @@ export default function placeVerticesOnOrbits(
   }
 
   return arrangeGraphComponents(componentsLayouts, settings.minVertexDistance);
-}
+};
+
+// The export declaration must be at the end of the file
+// to ensure that babel can properly transform the file
+// to the commonjs format (worklets cannot be reordered)
+export default placeVerticesOnOrbits;
