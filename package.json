@@ -1,7 +1,7 @@
 {
   "name": "react-native-smart-graph",
   "description": "React Native library for creating animated dynamic graphs",
-  "version": "0.0.30-development",
+  "version": "0.0.39-development",
   "author": {
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"
@@ -10,8 +10,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/react-native-fontawesome": "^0.3.0",
-    "@gorhom/bottom-sheet": "^4",
-    "react-native-reanimated": "git+https://github.com/MatiPl01/react-native-reanimated.git#fix/decay-infinite-updates"
+    "@gorhom/bottom-sheet": "^4"
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",
@@ -47,6 +46,7 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "glob": "^10.3.4",
     "husky": "^8.0.3",
     "jest": "^29.5.0",
     "lint-staged": "^13.2.2",
@@ -56,6 +56,7 @@
     "react-native": "^0.72.0",
     "react-native-builder-bob": "^0.20.4",
     "react-native-gesture-handler": "^2.10.2",
+    "react-native-reanimated": "git+https://github.com/MatiPl01/react-native-reanimated.git#fix/decay-infinite-updates",
     "react-native-svg": "^13.9.0",
     "react-test-renderer": "^18.2.0",
     "semantic-release": "^21.0.3",
@@ -66,8 +67,8 @@
   },
   "files": [
     "dist",
-    "patches",
-    "src"
+    "LICENSE",
+    "README.md"
   ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -76,18 +77,20 @@
       "yarn format:deps"
     ]
   },
-  "main": "dist/commonjs/index.js",
-  "module": "dist/module/index.js",
+  "main": "dist/commonjs/index",
+  "module": "dist/module/index",
   "peerDependencies": {
     "@shopify/react-native-skia": ">=0.1.193",
     "react": ">=18.0.0",
     "react-native": ">=0.71.8",
     "react-native-gesture-handler": ">=2.0.0",
+    "react-native-reanimated": "git+https://github.com/MatiPl01/react-native-reanimated.git#fix/decay-infinite-updates",
     "react-native-svg": ">=13.0.0"
   },
   "publishConfig": {
     "access": "public"
   },
+  "react-native": "dist/src/index",
   "repository": "MatiPl01/react-native-smart-graph",
   "scripts": {
     "android": "react-native run-android",
@@ -100,6 +103,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "postbuild": "node scripts/copySources.js",
     "prepack": "yarn build",
     "prepare": "husky install",
     "semantic-release": "semantic-release",
@@ -107,5 +111,6 @@
     "test": "jest",
     "typecheck": "tsc --noEmit"
   },
-  "types": "dist/types/index.d.ts"
+  "source": "dist/src/index",
+  "types": "dist/types/index"
 }
