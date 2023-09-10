@@ -21,6 +21,7 @@ import {
   AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
   AllLabelSettings,
+  AllMultiStepFocusSettings,
   AllOrbitsPlacementSettings,
   AllRandomPlacementSettings,
   AllStraightEdgeSettings,
@@ -115,6 +116,7 @@ const DEFAULT_LAYOUT_SETTINGS: Record<LayoutType, AllGraphLayoutSettings> = {
 };
 
 // FOCUS
+// Single vertex focus
 export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
   alignment: {
     horizontalAlignment: 'center',
@@ -125,6 +127,15 @@ export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
   animation: DEFAULT_FOCUS_ANIMATION_SETTINGS,
   disableGestures: false,
   vertexScale: 4
+};
+
+// Multi-step vertex focus
+const DEFAULT_MULTI_STEP_FOCUS_SETTINGS: Omit<
+  AllMultiStepFocusSettings,
+  'points' | 'progress'
+> = {
+  disableGestures: false,
+  pointsChangeAnimationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS
 };
 
 // COMPONENTS
@@ -198,6 +209,12 @@ export const getDefaultConfig = <V, E>(
       disableAnimation: false
     }
   },
+  focusSettings: data.focusSettings
+    ? {
+        ...data.focusSettings,
+        ...DEFAULT_MULTI_STEP_FOCUS_SETTINGS
+      }
+    : undefined,
   layoutSettings: data.layoutSettings?.type
     ? DEFAULT_LAYOUT_SETTINGS[data.layoutSettings.type]
     : DEFAULT_LAYOUT_SETTINGS.auto,

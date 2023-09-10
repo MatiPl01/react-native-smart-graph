@@ -1,5 +1,5 @@
 import { FocusContextType } from '@/providers/view';
-import { FocusStepData } from '@/types/data';
+import { FocusConfig, FocusStepData, VertexTransformation } from '@/types/data';
 import { Alignment, Dimensions } from '@/types/layout';
 
 import {
@@ -7,12 +7,6 @@ import {
   getCoordinatesRelativeToCenter
 } from './layout';
 import { getVertexTransformation } from './transform';
-
-type VertexTransformation = {
-  scale: number;
-  x: number;
-  y: number;
-};
 
 export const updateFocusTransformation = (
   transformation: {
@@ -56,12 +50,6 @@ export const getFocusedVertexTransformation = (
     x: vertex.x - dx / vertex.scale,
     y: vertex.y - dy / vertex.scale
   };
-};
-
-type FocusConfig = {
-  canvasDimensions: Dimensions;
-  disableGestures: boolean;
-  vertexRadius: number;
 };
 
 export const getMultiStepVertexTransformation = <V>(

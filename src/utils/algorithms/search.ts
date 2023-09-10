@@ -25,5 +25,5 @@ export const binarySearchLE = <T>(
     }
   }
 
-  return left;
+  return left - 1;
 };

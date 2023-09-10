@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unused-modules */
-
 import { FocusSettings, MultiStepFocusSettings } from '@/types/settings/public';
 import { DeepRequired, SharedifyWithout } from '@/types/utils';
 
@@ -17,7 +15,14 @@ export type AllFocusSettings = DeepRequired<
 /*
  * MULTI-STEP VERTEX FOCUS
  */
+export type AllMultiStepFocusSettings = Omit<
+  Required<MultiStepFocusSettings>,
+  'pointsChangeAnimationSettings'
+> & {
+  pointsChangeAnimationSettings: AllAnimationSettings | null;
+};
+
 export type InternalMultiStepFocusSettings = SharedifyWithout<
-  MultiStepFocusSettings,
-  'progress'
+  AllMultiStepFocusSettings,
+  'pointsChangeAnimationSettings' | 'progress'
 >;
