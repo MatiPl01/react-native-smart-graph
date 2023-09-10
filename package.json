@@ -1,7 +1,7 @@
 {
   "name": "react-native-smart-graph",
   "description": "React Native library for creating animated dynamic graphs",
-  "version": "0.0.39-development",
+  "version": "0.0.40-development",
   "author": {
     "name": "Mateusz Łopaciński",
     "email": "lop.mateusz.2001@gmail.com"
@@ -103,7 +103,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "postbuild": "node scripts/copySources.js",
+    "postbuild": "node scripts/copySources.js && node scripts/copyTsConfig.js",
     "prepack": "yarn build",
     "prepare": "husky install",
     "semantic-release": "semantic-release",
