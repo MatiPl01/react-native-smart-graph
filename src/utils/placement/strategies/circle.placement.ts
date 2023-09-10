@@ -23,9 +23,12 @@ const getLayout = (verticesCount: number, minVertexDistance: number) => {
   };
 };
 
-export default function placeVerticesOnCircle<
+const placeVerticesOnCircle = <
   S extends Omit<AllCirclePlacementSettings, 'strategy'>
->(vertices: Array<string>, settings: S): GraphLayout {
+>(
+  vertices: Array<string>,
+  settings: S
+): GraphLayout => {
   'worklet';
   const updatedVertices = settings?.sortVertices
     ? vertices.sort(settings?.sortComparator ?? defaultSortComparator)
@@ -52,4 +55,9 @@ export default function placeVerticesOnCircle<
       return acc;
     }, {} as PlacedVerticesPositions)
   };
-}
+};
+
+// The export declaration must be at the end of the file
+// to ensure that babel can properly transform the file
+// to the commonjs format (worklets cannot be reordered)
+export default placeVerticesOnCircle;

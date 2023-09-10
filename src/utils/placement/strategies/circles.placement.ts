@@ -4,13 +4,18 @@ import { arrangeGraphComponents } from '@/utils/placement/shared';
 
 import placeVerticesOnCircle from './circle.placement';
 
-export default function placeVerticesOnCircles(
+const placeVerticesOnCircles = (
   components: GraphComponents,
   settings: AllCirclesPlacementSettings
-): GraphLayout {
+): GraphLayout => {
   'worklet';
   return arrangeGraphComponents(
     components.map(component => placeVerticesOnCircle(component, settings)),
     settings.minVertexDistance
   );
-}
+};
+
+// The export declaration must be at the end of the file
+// to ensure that babel can properly transform the file
+// to the commonjs format (worklets cannot be reordered)
+export default placeVerticesOnCircles;
