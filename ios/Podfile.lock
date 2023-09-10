@@ -490,7 +490,7 @@ PODS:
     - React-perflogger (= 0.72.0)
   - RNGestureHandler (2.10.2):
     - React-Core
-  - RNReanimated (3.4.1):
+  - RNReanimated (3.4.0):
     - DoubleConversion
     - FBLazyVector
     - glog
@@ -754,7 +754,7 @@ SPEC CHECKSUMS:
   React-utils: c12d2e75c8bbc727939ddc4319ed95493395ed5a
   ReactCommon: 517b45ed311ba9146aa8b55a8ef6617425f7448e
   RNGestureHandler: f75d81410b40aaa99e71ae8f8bb7a88620c95042
-  RNReanimated: 53ca20eee770c41173703f5948cd8898aa08262c
+  RNReanimated: 020859659f64be2d30849a1fe88c821a7c3e0cbf
   RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   Yoga: 1d6727ed193122f6adaf435c3de1a768326ff83b
