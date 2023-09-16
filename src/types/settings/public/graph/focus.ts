@@ -35,5 +35,6 @@ export type UpdatedFocusPoint = {
 export type MultiStepFocusSettings = {
   disableGestures?: Sharedifyable<boolean>;
   points: Sharedifyable<FocusPoints>;
+  pointsChangeAnimationSettings?: AnimationSettings;
   progress: SharedValue<number>;
 };

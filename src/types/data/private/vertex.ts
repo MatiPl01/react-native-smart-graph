@@ -2,10 +2,7 @@
 import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { Alignment } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
-import { FocusPoint } from '@/types/settings/public/graph/focus';
-import { DeepRequired, Maybe } from '@/types/utils';
 
 export type VertexComponentData<V> = {
   animationSettings: AllAnimationSettings | null;
@@ -22,40 +19,8 @@ export type VertexComponentData<V> = {
 
 export type VertexRemoveHandler = (key: string) => void;
 
-export type FocusedVertexData = {
-  animation: AllAnimationSettings | null;
-  vertex?: {
-    alignment: Required<Alignment>;
-    key: string;
-    position: SharedValue<Vector>;
-    radius: number;
-    scale: number;
-  };
-};
-
-export type FocusData = {
-  customSource?: boolean;
-  gesturesDisabled?: boolean;
-  key: string;
-};
-
-export type BlurData = {
-  customSource?: boolean;
-  origin?: Vector;
-};
-
-export type FocusStartHandler = (
-  data: FocusData,
-  animationSettings?: Maybe<AllAnimationSettings>
-) => void;
-
-export type FocusEndHandler = (
-  data?: Maybe<BlurData>,
-  animationSettings?: Maybe<AllAnimationSettings>
-) => void;
-
-export type FocusStepData<V> = {
-  point: DeepRequired<FocusPoint>;
-  startsAt: number;
-  vertex: VertexComponentData<V>;
+export type VertexTransformation = {
+  scale: number;
+  x: number;
+  y: number;
 };

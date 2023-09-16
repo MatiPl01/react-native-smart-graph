@@ -1,12 +1,7 @@
-import { SharedValue } from 'react-native-reanimated';
-
-import { FocusContextType } from '@/providers/view';
-import { GraphViewData } from '@/types/components';
-import { FocusStepData } from '@/types/data';
 import {
-  InternalMultiStepFocusSettings,
-  UpdatedFocusPoint
-} from '@/types/settings';
+  FocusStepData,
+  MultiStepFocusStateProps as StateProps
+} from '@/types/data';
 
 export enum MachineState {
   BLUR = 'BLUR',
@@ -16,19 +11,6 @@ export enum MachineState {
   FOCUS_START = 'FOCUS_START',
   FOCUS_TRANSITION = 'FOCUS_TRANSITION'
 }
-
-export type StateProps<V> = {
-  afterStep: FocusStepData<V> | null;
-  beforeStep: FocusStepData<V> | null;
-  currentProgress: number;
-  focusContext: FocusContextType;
-  previousProgress: number;
-  settings: InternalMultiStepFocusSettings;
-  syncProgress: number;
-  targetPoint: SharedValue<UpdatedFocusPoint | null>;
-  vertexRadius: number;
-  viewDataContext: GraphViewData;
-};
 
 export type StateHandler = <V>(props: StateProps<V>) => MachineState;
 
