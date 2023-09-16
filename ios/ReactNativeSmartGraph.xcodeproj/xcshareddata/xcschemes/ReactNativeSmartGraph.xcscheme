@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "ReactNativeForceGraph.app"
-               BlueprintName = "ReactNativeForceGraph"
-               ReferencedContainer = "container:ReactNativeForceGraph.xcodeproj">
+               BuildableName = "ReactNativeSmartGraph.app"
+               BlueprintName = "ReactNativeSmartGraph"
+               ReferencedContainer = "container:ReactNativeSmartGraph.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "ReactNativeForceGraphTests.xctest"
-               BlueprintName = "ReactNativeForceGraphTests"
-               ReferencedContainer = "container:ReactNativeForceGraph.xcodeproj">
+               BuildableName = "ReactNativeSmartGraphTests.xctest"
+               BlueprintName = "ReactNativeSmartGraphTests"
+               ReferencedContainer = "container:ReactNativeSmartGraph.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "ReactNativeForceGraph.app"
-            BlueprintName = "ReactNativeForceGraph"
-            ReferencedContainer = "container:ReactNativeForceGraph.xcodeproj">
+            BuildableName = "ReactNativeSmartGraph.app"
+            BlueprintName = "ReactNativeSmartGraph"
+            ReferencedContainer = "container:ReactNativeSmartGraph.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "ReactNativeForceGraph.app"
-            BlueprintName = "ReactNativeForceGraph"
-            ReferencedContainer = "container:ReactNativeForceGraph.xcodeproj">
+            BuildableName = "ReactNativeSmartGraph.app"
+            BlueprintName = "ReactNativeSmartGraph"
+            ReferencedContainer = "container:ReactNativeSmartGraph.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

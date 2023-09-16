@@ -1,4 +1,4 @@
-package com.reactnativeforcegraph;
+package com.reactnativesmartgraph;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

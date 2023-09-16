@@ -93,9 +93,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.reactnativeforcegraph"
+    namespace "com.reactnativesmartgraph"
     defaultConfig {
-        applicationId "com.reactnativeforcegraph"
+        applicationId "com.reactnativesmartgraph"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
