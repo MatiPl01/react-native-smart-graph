@@ -1,14 +1,19 @@
 /* eslint-disable import/no-unused-modules */
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
-import { interpolate, useDerivedValue } from 'react-native-reanimated';
+import {
+  interpolate,
+  useAnimatedReaction,
+  useDerivedValue
+} from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
 import { VertexRendererProps } from '@/types/components';
 
 export default function DefaultVertexRenderer<V>({
   animationProgress,
-  focusProgress,
+  focus: { progress: focusProgress },
   key,
+  multiStepFocus: { progress: multiStepFocusProgress },
   r
 }: VertexRendererProps<V>) {
   const font = useFont(FONTS.rubikFont, r);
@@ -18,6 +23,13 @@ export default function DefaultVertexRenderer<V>({
   );
 
   const transform = useDerivedValue(() => [{ scale: animationProgress.value }]);
+
+  useAnimatedReaction(
+    () => multiStepFocusProgress.value,
+    p => {
+      console.log(p);
+    }
+  );
 
   if (font === null) {
     return null;

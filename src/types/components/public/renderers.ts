@@ -11,9 +11,19 @@ type SharedRenderersProps = {
  * VERTEX
  */
 export type VertexRendererProps<V> = SharedRenderersProps & {
-  focusKey: SharedValue<null | string>;
-  focusProgress: SharedValue<number>;
+  focus: {
+    key: SharedValue<null | string>;
+    progress: SharedValue<number>;
+  };
   key: string;
+  multiStepFocus: {
+    bounds: SharedValue<{
+      afterIdx: number;
+      beforeIdx: number;
+    }>;
+    points: SharedValue<Array<{ key: string; startsAt: number }>>;
+    progress: SharedValue<number>;
+  };
   r: number;
   scale: SharedValue<number>;
   value?: V;

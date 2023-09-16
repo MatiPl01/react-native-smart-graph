@@ -3,6 +3,7 @@ import { useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
 import { useCanvasContexts } from '@/providers/graph/contexts';
+import { useMultiStepFocusContext } from '@/providers/graph/focus';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
@@ -12,6 +13,8 @@ function GraphComponent() {
   // CONTEXTS
   // Canvas contexts
   const { focusContext } = useCanvasContexts();
+  // Graph contexts
+  const multiStepFocusContext = useMultiStepFocusContext();
 
   // A helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
@@ -28,7 +31,10 @@ function GraphComponent() {
       </Mask> */}
       <GraphEdges focusProgress={focusProgress} />
       <GraphEdgesLabels focusProgress={focusProgress} />
-      <GraphVertices focusContext={focusContext} />
+      <GraphVertices
+        focusContext={focusContext}
+        multiStepFocusContext={multiStepFocusContext}
+      />
     </>
   );
 }

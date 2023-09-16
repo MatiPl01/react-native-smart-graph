@@ -1,5 +1,5 @@
 import { Group, Transforms2d } from '@shopify/react-native-skia';
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -18,6 +18,7 @@ import { calcValueOnProgress } from '@/utils/views';
 function VertexComponent<V>({
   data: { animationSettings, points, removed, transformProgress, ...restData },
   focusContext,
+  multiStepFocusContext,
   onRemove,
   renderer,
   settings: { radius: r }
@@ -39,6 +40,15 @@ function VertexComponent<V>({
   // TRANSFORM
   // Vertex transform
   const transform = useSharedValue<Transforms2d>([{ scale: 0 }]);
+
+  // VERTEX PROPS
+  const focusProp = useMemo(
+    () => ({
+      key: focusContext.focus.key,
+      progress: focusProgress
+    }),
+    []
+  );
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
@@ -92,8 +102,8 @@ function VertexComponent<V>({
       <RenderedVertexComponent
         {...restData}
         animationProgress={animationProgress}
-        focusKey={focusContext.focus.key}
-        focusProgress={focusProgress}
+        focus={focusProp}
+        multiStepFocus={multiStepFocusContext}
         r={r}
         renderer={renderer}
         vertexKey={key}

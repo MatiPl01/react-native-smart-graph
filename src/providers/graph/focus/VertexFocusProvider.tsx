@@ -65,8 +65,6 @@ function VertexFocusProvider<V, E>({
   // Vertex focus observer
   const [data] = useFocusObserver(graph);
 
-  console.log(data.focusedVertexKey);
-
   // HELPER VALUES
   const focusStatus = focusContext.status;
   const focusedVertex = useMemo(() => {
