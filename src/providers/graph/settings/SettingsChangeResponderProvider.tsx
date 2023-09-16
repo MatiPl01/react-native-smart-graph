@@ -1,28 +1,24 @@
-import { PropsWithChildren } from 'react';
+import { memo } from 'react';
 import {
   runOnJS,
-  SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
 import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withGraphSettings } from '@/providers/graph/data';
-
-type SettingsChangeResponderProviderProps = PropsWithChildren<{
-  focusProgress?: SharedValue<number>;
-}>;
+import { FocusStatus } from '@/providers/view';
 
 function SettingsChangeResponderProvider({
-  children,
-  focusProgress
-}: SettingsChangeResponderProviderProps) {
+  children
+}: {
+  children?: React.ReactNode;
+}) {
   // CONTEXT VALUES
   const {
     autoSizingContext,
     dataContext: { initialScaleProvided, isRendered, objectFit },
-    focusContext: { focus },
+    focusContext: { focus, focusStatus },
     transformContext: { resetContainerPosition }
   } = useCanvasContexts();
 
@@ -53,7 +49,7 @@ function SettingsChangeResponderProvider({
       isFirstAutoSizingReactionCall.value = false;
       prevObjectFit.value = objFit;
       // For the first reaction call only
-      if (objFit !== 'none' && !focusProgress?.value) {
+      if (objFit !== 'none' && focusStatus.value === FocusStatus.BLUR) {
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
         } else {
@@ -91,9 +87,4 @@ function SettingsChangeResponderProvider({
   return <>{children}</>;
 }
 
-export default withGraphSettings(
-  SettingsChangeResponderProvider,
-  ({ focusSettings }) => ({
-    focusProgress: focusSettings?.progress
-  })
-);
+export default memo(SettingsChangeResponderProvider);

@@ -72,7 +72,6 @@ const focusTransitionState: StateHandler = props => {
   updateTransitionPoints(props);
   // Update the transition progress
   focusContext.transitionProgress.value = getResultingProgress(props);
-  // TODO - figure out how to update the focused point animation separately
 
   // C - If  there is no transition target, restart the focus animation
   if (!targetStep) {

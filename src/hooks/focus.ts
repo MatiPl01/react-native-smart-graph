@@ -13,7 +13,7 @@ export const useComponentFocus = (
   componentKey?: string
 ): void => {
   const focusKey = focusContext.focus.key;
-  const focusProgress = focusContext.transitionProgress;
+  const focusProgress = focusContext.targetAnimationProgress;
 
   // Helper value to check if the focus target changed
   const previousReactionFocusKey = useSharedValue<null | string>(null);

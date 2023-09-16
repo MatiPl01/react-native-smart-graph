@@ -7,7 +7,7 @@ import { VertexRendererProps } from '@/types/components';
 
 export default function DefaultVertexRenderer<V>({
   animationProgress,
-  focusProgress,
+  focus: { progress: focusProgress },
   key,
   r
 }: VertexRendererProps<V>) {

@@ -1,5 +1,6 @@
-import { PropsWithChildren } from 'react';
+import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
 import {
+  SharedValue,
   useAnimatedReaction,
   useDerivedValue,
   useSharedValue
@@ -25,6 +26,29 @@ import {
   updateFocusPath
 } from './utils';
 
+export type MultiStepFocusContextType = {
+  bounds: SharedValue<{
+    afterIdx: number;
+    beforeIdx: number;
+  }>;
+  points: SharedValue<Array<{ key: string; startsAt: number }>>;
+  progress: SharedValue<number>;
+};
+
+const MultiStepFocusContext = createContext(null as unknown as object);
+
+export const useMultiStepFocusContext = () => {
+  const contextValue = useContext(MultiStepFocusContext);
+
+  if (!contextValue) {
+    throw new Error(
+      'useMultiStepFocusContext must be used within a MultiStepFocusProvider'
+    );
+  }
+
+  return contextValue as MultiStepFocusContextType;
+};
+
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
   vertexRadius: number;
@@ -37,6 +61,8 @@ function MultiStepVertexFocusProvider<V>({
   vertexRadius,
   verticesData
 }: MultiStepFocusProviderProps<V>) {
+  const focusProgress = settings.progress;
+
   // CONTEXTS
   // Canvas contexts
   const { dataContext: viewDataContext, focusContext } = useCanvasContexts();
@@ -99,6 +125,20 @@ function MultiStepVertexFocusProvider<V>({
 
   // State machine
   const stateMachine = useStateMachine(focusContext, viewDataContext, settings);
+
+  // CONTEXT VALUES
+  const bounds = useDerivedValue<{ afterIdx: number; beforeIdx: number }>(
+    () => ({
+      afterIdx: afterStepIdx.value,
+      beforeIdx: afterStepIdx.value - 1
+    })
+  );
+  const points = useDerivedValue<Array<{ key: string; startsAt: number }>>(() =>
+    sortedFocusPoints.value.map(({ point, startsAt }) => ({
+      key: point.key,
+      startsAt
+    }))
+  );
 
   const updatePath = () => {
     'worklet';
@@ -175,7 +215,6 @@ function MultiStepVertexFocusProvider<V>({
   );
 
   // Update focus on progress change or steps change
-  const focusProgress = settings.progress;
   useAnimatedReaction(
     // TODO - react on vertex position changes when progress is not being modified
     () => ({
@@ -198,7 +237,6 @@ function MultiStepVertexFocusProvider<V>({
       );
       if (!currentData) return;
 
-      console.log(currentData?.pointsTransitionProgress);
       // Update the state machine
       stateMachine.update(
         currentData,
@@ -209,13 +247,29 @@ function MultiStepVertexFocusProvider<V>({
         1 // TODO - add sync progress
         // progress.sync,
       );
+      // Update focus target animation progress (separately from the container transition progress)
+      focusContext.targetAnimationProgress.value =
+        currentData.targetAnimationProgress;
       // Update values for the next reaction
       previousProgress.value = progress.current;
       afterStepIdx.value = Math.max(0, currentData.afterStepIdx);
     }
   );
 
-  return <>{children}</>;
+  const contextValue = useMemo<MultiStepFocusContextType>(
+    () => ({
+      bounds,
+      points,
+      progress: focusProgress
+    }),
+    []
+  );
+
+  return (
+    <MultiStepFocusContext.Provider value={contextValue}>
+      {children}
+    </MultiStepFocusContext.Provider>
+  );
 }
 
 export default withGraphSettings(

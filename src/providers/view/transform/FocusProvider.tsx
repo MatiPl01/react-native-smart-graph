@@ -48,6 +48,7 @@ export type FocusContextType = {
   previousKey: SharedValue<null | string>;
   startFocus: FocusStartHandler;
   status: SharedValue<FocusStatus>;
+  targetAnimationProgress: SharedValue<number>;
   transitionProgress: SharedValue<number>;
 };
 
@@ -126,7 +127,10 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const animationSettings = useSharedValue<AllAnimationSettings | null>(null);
   const transitionStartPosition = useSharedValue({ x: 0, y: 0 });
   const transitionStartScale = useSharedValue(0);
+  // Progress of the focus/blur transition (transformation of the container)
   const transitionProgress = useSharedValue(1);
+  // Progress of the focus target animation (e.g. vertex opacity change, etc.)
+  const targetAnimationProgress = useSharedValue(0);
   const transitionStarted = useSharedValue(false);
   const previousKey = useSharedValue<null | string>(null);
 
@@ -136,6 +140,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const updateTransitionProgress = (animSettings: AllAnimationSettings) => {
     'worklet';
     transitionProgress.value = 0;
+    targetAnimationProgress.value = 0;
     const { onComplete, ...timingConfig } = animSettings;
     transitionProgress.value = withTiming(
       1,
@@ -147,6 +152,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         }
       }
     );
+    targetAnimationProgress.value = withTiming(1, timingConfig);
   };
 
   const startTransition = (
@@ -561,6 +567,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     previousKey,
     startFocus,
     status: focusStatus,
+    targetAnimationProgress,
     transitionProgress
   };
 

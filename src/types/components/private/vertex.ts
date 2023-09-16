@@ -1,3 +1,4 @@
+import { MultiStepFocusContextType } from '@/providers/graph/focus';
 import { FocusContextType } from '@/providers/view';
 import { VertexRenderer } from '@/types/components/public';
 import { VertexComponentData, VertexRemoveHandler } from '@/types/data';
@@ -7,6 +8,7 @@ import { InternalVertexSettings } from '@/types/settings';
 export type VertexComponentProps<V> = {
   data: VertexComponentData<V>;
   focusContext: FocusContextType;
+  multiStepFocusContext: MultiStepFocusContextType;
   onRemove: VertexRemoveHandler;
   renderer: VertexRenderer<V>;
   settings: InternalVertexSettings;
@@ -14,6 +16,7 @@ export type VertexComponentProps<V> = {
 
 export type GraphVerticesProps<V> = {
   focusContext: FocusContextType;
+  multiStepFocusContext: MultiStepFocusContextType;
   onRemove: VertexRemoveHandler;
   renderer: VertexRenderer<V>;
   settings: InternalVertexSettings;
