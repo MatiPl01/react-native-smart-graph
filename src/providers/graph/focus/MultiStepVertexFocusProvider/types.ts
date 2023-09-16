@@ -1,6 +1,6 @@
 import {
-  FocusStepData,
-  MultiStepFocusStateProps as StateProps
+  MultiStepFocusStateProps as StateProps,
+  TransformedFocusData
 } from '@/types/data';
 
 export enum MachineState {
@@ -12,18 +12,18 @@ export enum MachineState {
   FOCUS_TRANSITION = 'FOCUS_TRANSITION'
 }
 
-export type StateHandler = <V>(props: StateProps<V>) => MachineState;
+export type StateHandler = (props: StateProps) => MachineState;
 
-export type MachineContext<V> = {
+export type MachineContext = {
   isStopped(): boolean;
   start(): void;
   stop(): void;
   update(
-    currentProgress: number,
-    previousProgress: number,
-    syncProgress: number,
-    afterStep: FocusStepData<V> | null,
-    beforeStep: FocusStepData<V> | null,
-    vertexRadius: number
+    data: TransformedFocusData,
+    progress: {
+      current: number;
+      previous: number;
+    },
+    syncProgress: number // TODO - fix
   ): void;
 };

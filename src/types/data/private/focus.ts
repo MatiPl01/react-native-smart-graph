@@ -7,8 +7,7 @@ import { Dimensions } from '@/types/layout';
 import {
   AllAnimationSettings,
   FocusPoint,
-  InternalMultiStepFocusSettings,
-  UpdatedFocusPoint
+  InternalMultiStepFocusSettings
 } from '@/types/settings';
 import { DeepRequired, Maybe } from '@/types/utils';
 
@@ -42,6 +41,24 @@ export type FocusPath<V> = {
   progressBounds: FocusBoundsMapping;
 };
 
+export type TransformedFocusPoint = {
+  id: number;
+  key: string;
+  startsAt: number;
+  transform: VertexTransformation;
+};
+
+export type TransformedFocusData = {
+  afterStep: TransformedFocusPoint | null;
+  // Updated index of the step after the current focus progress
+  afterStepIdx: number;
+  beforeStep: TransformedFocusPoint | null;
+  // Progress of the focus target transition
+  pointsTransitionProgress: number;
+  // Progress of the focused vertex animation
+  targetAnimationProgress: number;
+};
+
 export type FocusData = {
   customSource?: boolean;
   gesturesDisabled?: boolean;
@@ -69,15 +86,15 @@ export type FocusStepData<V> = {
   vertex: VertexComponentData<V>;
 };
 
-export type MultiStepFocusStateProps<V> = {
-  afterStep: FocusStepData<V> | null;
-  beforeStep: FocusStepData<V> | null;
-  currentProgress: number;
+export type MultiStepFocusStateProps = {
+  data: TransformedFocusData;
   focusContext: FocusContextType;
-  previousProgress: number;
+  progress: {
+    current: number;
+    previous: number;
+  };
   settings: InternalMultiStepFocusSettings;
   syncProgress: number;
-  targetPoint: SharedValue<UpdatedFocusPoint | null>;
-  vertexRadius: number;
+  targetPoint: SharedValue<TransformedFocusPoint | null>;
   viewDataContext: GraphViewData;
 };

@@ -30,6 +30,7 @@ import {
   AllVertexSettings,
   LayoutType
 } from '@/types/settings';
+import { isAnimationSettingsObject } from '@/utils/animations';
 
 /*
  * SETTINGS
@@ -167,29 +168,33 @@ const DEFAULT_COMPONENTS_SETTINGS: {
 };
 
 // ANIMATIONS
-const getDefaultAnimations = <V, E>(
-  data: GraphData<V, E>
-): AllGraphAnimationsSettings =>
-  data.animationSettings === null
-    ? {
-        edges: null,
-        layout: null,
-        vertices: null
-      }
-    : {
-        edges:
-          data.animationSettings?.edges === null
-            ? null
-            : DEFAULT_ANIMATION_SETTINGS,
-        layout:
-          data.animationSettings?.layout === null
-            ? null
-            : DEFAULT_ANIMATION_SETTINGS,
-        vertices:
-          data.animationSettings?.vertices === null
-            ? null
-            : DEFAULT_ANIMATION_SETTINGS
-      };
+const getDefaultAnimations = <V, E>({
+  animationSettings
+}: GraphData<V, E>): AllGraphAnimationsSettings => {
+  if (animationSettings === null) {
+    return {
+      edges: null,
+      layout: null,
+      vertices: null
+    };
+  }
+
+  if (!animationSettings || isAnimationSettingsObject(animationSettings)) {
+    return {
+      edges: DEFAULT_ANIMATION_SETTINGS,
+      layout: DEFAULT_ANIMATION_SETTINGS,
+      vertices: DEFAULT_ANIMATION_SETTINGS
+    };
+  }
+
+  return {
+    edges: animationSettings.edges === null ? null : DEFAULT_ANIMATION_SETTINGS,
+    layout:
+      animationSettings.layout === null ? null : DEFAULT_ANIMATION_SETTINGS,
+    vertices:
+      animationSettings.vertices === null ? null : DEFAULT_ANIMATION_SETTINGS
+  };
+};
 
 export const getDefaultConfig = <V, E>(
   data: GraphData<V, E>

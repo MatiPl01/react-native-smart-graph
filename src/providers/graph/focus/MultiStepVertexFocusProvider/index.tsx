@@ -8,15 +8,22 @@ import {
 import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useVertexFocusContext } from '@/providers/graph/focus/VertexFocusProvider';
 import { FocusConfig, FocusPath, VertexComponentData } from '@/types/data';
 import {
   InternalMultiStepFocusSettings,
   UpdatedFocusPoint
 } from '@/types/settings';
+import { binarySearchLE } from '@/utils/algorithms';
 import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { useStateMachine } from './StateMachine';
-import { createFocusSteps, updateFocusPath } from './utils';
+import {
+  calcStepStartsAt,
+  createFocusSteps,
+  transformFocusData,
+  updateFocusPath
+} from './utils';
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
@@ -34,7 +41,7 @@ function MultiStepVertexFocusProvider<V>({
   // Canvas contexts
   const { dataContext: viewDataContext, focusContext } = useCanvasContexts();
   // Graph contexts
-  // const { isVertexFocused } = useVertexFocusContext();
+  const { isVertexFocused } = useVertexFocusContext();
 
   // MULTI STEP FOCUS DATA
   const { points: settingsFocusPoints } = settings;
@@ -86,8 +93,8 @@ function MultiStepVertexFocusProvider<V>({
   // OTHER VALUES
 
   // // Used to determine the direction of the progress
-  // const previousProgress = useSharedValue(0);
-  // const previousStepIdx = useSharedValue(-1);
+  const previousProgress = useSharedValue(0);
+  const afterStepIdx = useSharedValue(0);
   // const syncProgress = useSharedValue(0);
 
   // State machine
@@ -95,11 +102,6 @@ function MultiStepVertexFocusProvider<V>({
 
   const updatePath = () => {
     'worklet';
-    // previousStepIdx.value = binarySearchLE(
-    //   targetStepsData.value,
-    //   settings.progress.value,
-    //   ({ startsAt }) => startsAt
-    // );
     const targetStepsData = createFocusSteps(
       sortedFocusPoints.value,
       verticesData
@@ -111,31 +113,42 @@ function MultiStepVertexFocusProvider<V>({
       focusConfig.value,
       settings
     );
+    // Set the after step index (based on the current progress)
+    afterStepIdx.value =
+      binarySearchLE(focusPath.value.points, settings.progress.value, mapping =>
+        calcStepStartsAt(
+          focusPath.value.progressBounds,
+          pathTransitionProgress.value,
+          mapping,
+          'min'
+        )
+      ) + 1;
   };
 
-  // // Enable/disable the state machine
-  // const isGestureActive = viewDataContext.isGestureActive;
-  // useAnimatedReaction(
-  //   () => isVertexFocused.value || isGestureActive.value,
-  //   disabled => { // TODO - fix double tap issue
-  //     if (disabled) {
-  //       if (!stateMachine.isStopped()) {
-  //         stateMachine.stop();
-  //         syncProgress.value = 0;
-  //         previousProgress.value = 0;
-  //       }
-  //     } else if (stateMachine.isStopped()) {
-  //       stateMachine.start();
-  //       syncProgress.value = withTiming(1, DEFAULT_FOCUS_ANIMATION_SETTINGS);
-  //     }
-  //   }
-  // );
+  // Enable/disable the state machine
+  const isGestureActive = viewDataContext.isGestureActive;
+  useAnimatedReaction(
+    () => isVertexFocused.value || isGestureActive.value,
+    disabled => {
+      // TODO - fix double tap issue
+      if (disabled) {
+        if (!stateMachine.isStopped()) {
+          stateMachine.stop();
+          // syncProgress.value = 0; // TODO - fix sync progress
+          previousProgress.value = 0;
+        }
+      } else if (stateMachine.isStopped()) {
+        stateMachine.start();
+        // syncProgress.value = withTiming(1, DEFAULT_FOCUS_ANIMATION_SETTINGS);
+      }
+    }
+  );
 
   // Update focus steps data when focus points change
   useAnimatedReaction(
     () => sortedFocusPoints.value,
     () => {
-      // if (stateMachine.isStopped()) return;
+      if (stateMachine.isStopped()) return;
       updatePath();
     }
   );
@@ -161,47 +174,46 @@ function MultiStepVertexFocusProvider<V>({
     [verticesData]
   );
 
-  // // Update focus on progress change or steps change
-  // const focusProgress = settings.progress;
-  // useAnimatedReaction(
-  //   // TODO - react on vertex position changes when progress is not being modified
-  //   () => ({
-  //     progress: {
-  //       current: focusProgress.value,
-  //       previous: previousProgress.value,
-  //       sync: syncProgress.value
-  //     },
-  //     steps: focusStepsData.value
-  //   }),
-  //   ({ progress, steps }) => {
-  //     const prevStepIdx = previousStepIdx.value;
-  //     if (
-  //       stateMachine.isStopped() ||
-  //       prevStepIdx === -1 ||
-  //       progress.current === progress.previous
-  //     ) {
-  //       return;
-  //     }
+  // Update focus on progress change or steps change
+  const focusProgress = settings.progress;
+  useAnimatedReaction(
+    // TODO - react on vertex position changes when progress is not being modified
+    () => ({
+      progress: {
+        current: focusProgress.value,
+        transition: pathTransitionProgress.value
+        // sync: syncProgress.value
+      }
+    }),
+    ({ progress }) => {
+      if (stateMachine.isStopped()) {
+        return;
+      }
+      const afterIdx = afterStepIdx.value;
+      const currentData = transformFocusData(
+        focusPath.value,
+        progress,
+        afterIdx,
+        focusConfig.value
+      );
+      if (!currentData) return;
 
-  //     const currentSteps = getFocusSteps(progress.current, prevStepIdx, steps);
-  //     if (!currentSteps) return;
-  //     const { afterStep, beforeStep, currentStepIdx } = currentSteps;
-
-  //     // Update the state machine
-  //     stateMachine.update(
-  //       progress.current,
-  //       progress.previous,
-  //       progress.sync,
-  //       beforeStep,
-  //       afterStep,
-  //       vertexRadius
-  //     );
-
-  //     // Update values for the next reaction
-  //     previousProgress.value = progress.current;
-  //     previousStepIdx.value = currentStepIdx;
-  //   }
-  // );
+      console.log(currentData?.pointsTransitionProgress);
+      // Update the state machine
+      stateMachine.update(
+        currentData,
+        {
+          current: progress.current,
+          previous: previousProgress.value
+        },
+        1 // TODO - add sync progress
+        // progress.sync,
+      );
+      // Update values for the next reaction
+      previousProgress.value = progress.current;
+      afterStepIdx.value = Math.max(0, currentData.afterStepIdx);
+    }
+  );
 
   return <>{children}</>;
 }

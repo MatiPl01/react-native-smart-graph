@@ -3,10 +3,8 @@ import { useSharedValue } from 'react-native-reanimated';
 
 import { FocusContextType } from '@/providers/view';
 import { GraphViewData } from '@/types/components';
-import {
-  InternalMultiStepFocusSettings,
-  UpdatedFocusPoint
-} from '@/types/settings';
+import { TransformedFocusPoint } from '@/types/data';
+import { InternalMultiStepFocusSettings } from '@/types/settings';
 import { isBetween } from '@/utils/math';
 
 import { MachineContext, MachineState, StateHandler } from './types';
@@ -48,7 +46,7 @@ const focusStartState: StateHandler = props => {
       {
         customSource: !!sourceStep,
         gesturesDisabled: disableGestures?.value,
-        key: targetPoint.point.key
+        key: targetPoint.key
       },
       null
     );
@@ -61,11 +59,9 @@ const focusStartState: StateHandler = props => {
 const focusTransitionState: StateHandler = props => {
   'worklet';
   const {
-    afterStep,
-    beforeStep,
-    currentProgress,
+    data,
     focusContext,
-    previousProgress,
+    progress,
     syncProgress,
     targetPoint: { value: targetPoint }
   } = props;
@@ -75,17 +71,15 @@ const focusTransitionState: StateHandler = props => {
   // Update the focus context
   updateTransitionPoints(props);
   // Update the transition progress
-  focusContext.transitionProgress.value = getResultingProgress(
-    targetStep,
-    props
-  );
+  focusContext.transitionProgress.value = getResultingProgress(props);
+  // TODO - figure out how to update the focused point animation separately
 
   // C - If  there is no transition target, restart the focus animation
   if (!targetStep) {
     return MachineState.FOCUS_START;
   }
 
-  if (!sourceStep && currentProgress === 0) {
+  if (!sourceStep && progress.current === 0) {
     // J - Change state to blur if there was no previous focus target
     // and the current progress is 0 (this will change the container
     // position to the position that it had before the focus transition)
@@ -101,21 +95,21 @@ const focusTransitionState: StateHandler = props => {
   // D - If the focus target point was reached, change the state to focus
   if (
     syncProgress === 1 &&
-    isBetween(targetStep.startsAt, previousProgress, currentProgress)
+    isBetween(targetStep.startsAt, progress.previous, progress.current)
   ) {
     focusContext.transitionProgress.value = 1;
     return MachineState.FOCUS;
   }
 
-  // C - If the target vertex changed, re-start the focus animation
+  // C - If the target vertex changed, restart the focus animation
   // with the new target vertex
   if (
-    (currentProgress < previousProgress &&
-      beforeStep &&
-      targetPoint?.startsAt !== beforeStep.startsAt) ||
-    (currentProgress > previousProgress &&
-      afterStep &&
-      targetPoint?.startsAt !== afterStep.startsAt)
+    (progress.current < progress.previous &&
+      data.beforeStep &&
+      targetPoint?.startsAt !== data.beforeStep.startsAt) ||
+    (progress.current > progress.previous &&
+      data.afterStep &&
+      targetPoint?.startsAt !== data.afterStep.startsAt)
   ) {
     return MachineState.FOCUS_START;
   }
@@ -127,8 +121,7 @@ const focusTransitionState: StateHandler = props => {
 const focusState: StateHandler = props => {
   'worklet';
   const {
-    currentProgress,
-    previousProgress,
+    progress,
     targetPoint: { value: targetPoint }
   } = props;
   const { source: sourceStep, target: targetStep } = getTransitionBounds(props);
@@ -140,7 +133,7 @@ const focusState: StateHandler = props => {
 
   if (startStep) {
     // E - Start the focus animation if the progress is modified
-    if (!isBetween(startStep.startsAt, previousProgress, currentProgress)) {
+    if (!isBetween(startStep.startsAt, progress.previous, progress.current)) {
       return MachineState.FOCUS_START;
     }
   } else {
@@ -167,12 +160,10 @@ const blurStartState: StateHandler = ({ focusContext, targetPoint }) => {
 
 const blurTransitionState: StateHandler = props => {
   'worklet';
-  const { currentProgress, focusContext, previousProgress } = props;
+  const { focusContext, progress } = props;
   const { source: sourceStep } = getTransitionBounds(props);
-
-  // Update the transition progress
   const resultingProgress = (focusContext.transitionProgress.value =
-    getResultingProgress(null, props));
+    getResultingProgress(props));
 
   // H - If the resulting progress is 1, the blur animation is finished
   if (resultingProgress === 1 || !sourceStep) {
@@ -182,7 +173,7 @@ const blurTransitionState: StateHandler = props => {
 
   // G - If the transition source point was reached again, stop the
   // blur animation and change the state back to focus
-  if (isBetween(sourceStep.startsAt, previousProgress, currentProgress)) {
+  if (isBetween(sourceStep.startsAt, progress.previous, progress.current)) {
     focusContext.transitionProgress.value = 0;
     return MachineState.FOCUS;
   }
@@ -240,16 +231,16 @@ FOCUS_START -- A --> FOCUS_TRANSITION -- D --> FOCUS --- K ---> BLUR_START -- F 
     |                                           |                                     
     +--------------------- E -------------------+
 */
-export const useStateMachine = <V>(
+export const useStateMachine = (
   focusContext: FocusContextType,
   viewDataContext: GraphViewData,
   settings: InternalMultiStepFocusSettings
-): MachineContext<V> => {
+): MachineContext => {
   const isStopped = useSharedValue(true);
   const state = useSharedValue(MachineState.BLUR);
-  const targetPoint = useSharedValue<UpdatedFocusPoint | null>(null);
+  const targetPoint = useSharedValue<TransformedFocusPoint | null>(null);
 
-  return useMemo<MachineContext<V>>(
+  return useMemo<MachineContext>(
     () => ({
       isStopped() {
         'worklet';
@@ -272,29 +263,19 @@ export const useStateMachine = <V>(
         targetPoint.value = null;
         isStopped.value = true;
       },
-      update(
-        currentProgress,
-        previousProgress,
-        syncProgress,
-        beforeStep,
-        afterStep,
-        vertexRadius
-      ) {
+      update(data, progress, syncProgress) {
         'worklet';
         if (isStopped.value) return;
         let result = state.value;
         do {
           state.value = result;
           result = STATE_HANDLERS[state.value]({
-            afterStep,
-            beforeStep,
-            currentProgress,
+            data,
             focusContext,
-            previousProgress,
+            progress,
             settings,
             syncProgress,
             targetPoint,
-            vertexRadius,
             viewDataContext
           });
           console.log(state.value);

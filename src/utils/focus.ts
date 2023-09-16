@@ -1,12 +1,11 @@
 import { FocusContextType } from '@/providers/view';
-import { FocusConfig, FocusStepData, VertexTransformation } from '@/types/data';
+import { VertexTransformation } from '@/types/data';
 import { Alignment, Dimensions } from '@/types/layout';
 
 import {
   getAlignedVertexAbsolutePosition,
   getCoordinatesRelativeToCenter
 } from './layout';
-import { getVertexTransformation } from './transform';
 
 export const updateFocusTransformation = (
   transformation: {
@@ -49,52 +48,5 @@ export const getFocusedVertexTransformation = (
     scale: vertex.scale,
     x: vertex.x - dx / vertex.scale,
     y: vertex.y - dy / vertex.scale
-  };
-};
-
-export const getMultiStepVertexTransformation = <V>(
-  stepData: FocusStepData<V>,
-  config: FocusConfig
-): VertexTransformation => {
-  'worklet';
-
-  return getFocusedVertexTransformation(
-    stepData.point.alignment,
-    config.canvasDimensions,
-    getVertexTransformation(stepData.vertex, stepData.point.vertexScale),
-    config.vertexRadius
-  );
-};
-
-export const getFocusSteps = <V>(
-  progress: number,
-  previousStepIdx: number,
-  focusStepsData: Array<FocusStepData<V>>
-): {
-  afterStep: FocusStepData<V> | null;
-  beforeStep: FocusStepData<V> | null;
-  currentStepIdx: number;
-} | null => {
-  'worklet';
-  let afterStep = focusStepsData[previousStepIdx];
-  let beforeStep = focusStepsData[previousStepIdx - 1];
-
-  if (!afterStep && !beforeStep) return null;
-
-  while (afterStep && progress > afterStep.startsAt) {
-    beforeStep = afterStep;
-    afterStep = focusStepsData[previousStepIdx + 1];
-    previousStepIdx++;
-  }
-  while (beforeStep && progress < beforeStep.startsAt) {
-    afterStep = beforeStep;
-    beforeStep = focusStepsData[previousStepIdx - 2];
-    previousStepIdx--;
-  }
-
-  return {
-    afterStep: afterStep ?? null,
-    beforeStep: beforeStep ?? null,
-    currentStepIdx: previousStepIdx
   };
 };

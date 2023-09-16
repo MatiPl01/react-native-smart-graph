@@ -4,9 +4,11 @@ import {
   FocusPath,
   FocusPointMapping,
   FocusStepData,
-  MappingSourcePoint
+  MappingSourcePoint,
+  VertexTransformation
 } from '@/types/data';
-import { getMultiStepVertexTransformation } from '@/utils/focus';
+import { getFocusedVertexTransformation } from '@/utils/focus';
+import { getVertexTransformation } from '@/utils/transform';
 import { calcTransformationOnProgress } from '@/utils/views';
 
 import {
@@ -15,6 +17,19 @@ import {
   getIndicesOfFocusProgressClosestPoints,
   getMappingSourcePoints
 } from './shared';
+
+const getFocusStepTransformation = <V>(
+  focusStep: FocusStepData<V>,
+  focusConfig: FocusConfig
+): VertexTransformation => {
+  'worklet';
+  return getFocusedVertexTransformation(
+    focusStep.point.alignment,
+    focusConfig.canvasDimensions,
+    getVertexTransformation(focusStep.vertex, focusStep.point.vertexScale),
+    focusConfig.vertexRadius
+  );
+};
 
 const expandMappingFromEmptySource = <V>(
   targetStepsData: Array<FocusStepData<V>>, // must be sorted
@@ -27,11 +42,11 @@ const expandMappingFromEmptySource = <V>(
     focusProgress
   );
   // Get the current focus point position as the initial point
-  const prevStepTransformation = getMultiStepVertexTransformation(
+  const prevStepTransformation = getFocusStepTransformation(
     targetStepsData[closest.prevIdx]!,
     focusConfig
   );
-  const nextStepTransformation = getMultiStepVertexTransformation(
+  const nextStepTransformation = getFocusStepTransformation(
     targetStepsData[closest.nextIdx]!,
     focusConfig
   );

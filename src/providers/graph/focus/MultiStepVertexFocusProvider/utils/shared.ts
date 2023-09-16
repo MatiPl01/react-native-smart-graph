@@ -3,10 +3,13 @@ import {
   FocusConfig,
   FocusPointMapping,
   FocusStepData,
-  MappingSourcePoint
+  MappingSourcePoint,
+  TransformedFocusPoint,
+  VertexTransformation
 } from '@/types/data';
 import { binarySearchLE } from '@/utils/algorithms';
-import { getMultiStepVertexTransformation } from '@/utils/focus';
+import { getFocusedVertexTransformation } from '@/utils/focus';
+import { getVertexTransformation } from '@/utils/transform';
 import {
   calcTransformationOnProgress,
   calcValueOnProgress
@@ -83,27 +86,51 @@ export const createMappings = <V>(
   return mappings;
 };
 
+const getFocusPointTransformation = <V>(
+  mapping: FocusPointMapping<V>,
+  focusConfig: FocusConfig,
+  progress = 1
+): VertexTransformation => {
+  'worklet';
+  const { from, to } = mapping;
+  return calcTransformationOnProgress(
+    progress,
+    from.transform,
+    getFocusedVertexTransformation(
+      to.point.alignment,
+      focusConfig.canvasDimensions,
+      getVertexTransformation(to.vertex, to.point.vertexScale),
+      focusConfig.vertexRadius
+    )
+  );
+};
+
+export const getTransformedFocusPoint = <V>(
+  mapping: FocusPointMapping<V>,
+  id: number,
+  focusConfig: FocusConfig,
+  progress = 1
+): TransformedFocusPoint => {
+  'worklet';
+  return {
+    id,
+    key: mapping.to.point.key,
+    startsAt: calcValueOnProgress(
+      progress,
+      mapping.from.startsAt,
+      mapping.to.startsAt
+    ),
+    transform: getFocusPointTransformation(mapping, focusConfig, progress)
+  };
+};
+
 export const getMappingSourcePoints = <V>(
   oldPointsMapping: Array<FocusPointMapping<V>>,
   transitionProgress: number,
   focusConfig: FocusConfig
 ): Array<MappingSourcePoint> => {
   'worklet';
-  return oldPointsMapping.map(({ from, to }) => {
-    const sourceTransform = from.transform;
-    const targetTransform = getMultiStepVertexTransformation(to, focusConfig);
-
-    return {
-      startsAt: calcValueOnProgress(
-        transitionProgress,
-        from.startsAt,
-        to.startsAt
-      ),
-      transform: calcTransformationOnProgress(
-        transitionProgress,
-        sourceTransform,
-        targetTransform
-      )
-    };
-  });
+  return oldPointsMapping.map((mapping, idx) =>
+    getTransformedFocusPoint(mapping, idx, focusConfig, transitionProgress)
+  );
 };
