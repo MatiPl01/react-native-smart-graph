@@ -48,8 +48,10 @@ export const calcContainerTranslation = (
   const containerHeight = bottom - top + padding.top + padding.bottom;
 
   return {
-    x: ((-left + padding.left) / containerWidth) * canvasWidth,
-    y: ((-top + padding.top) / containerHeight) * canvasHeight
+    x:
+      (containerWidth && (-left + padding.left) / containerWidth) * canvasWidth,
+    y:
+      (containerHeight && (-top + padding.top) / containerHeight) * canvasHeight
   };
 };
 
