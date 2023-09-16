@@ -12,7 +12,6 @@ import {
   Easing,
   Extrapolate,
   interpolate,
-  makeMutable,
   useDerivedValue,
   useSharedValue
 } from 'react-native-reanimated';
@@ -198,7 +197,7 @@ export default function BottomSheetFocus() {
           //   }
           focusSettings={{
             points: focusPoints,
-            progress: makeMutable(1),
+            progress: bottomSheetProgress,
             pointsChangeAnimationSettings: {
               duration: 1000
             }

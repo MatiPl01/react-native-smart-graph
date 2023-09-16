@@ -113,6 +113,7 @@ function MultiStepVertexFocusProvider<V>({
       focusConfig.value,
       settings
     );
+    // Set the after step index (based on the current progress)
     afterStepIdx.value =
       binarySearchLE(focusPath.value.points, settings.progress.value, mapping =>
         calcStepStartsAt(
@@ -185,22 +186,19 @@ function MultiStepVertexFocusProvider<V>({
       }
     }),
     ({ progress }) => {
-      const afterIdx = afterStepIdx.value;
       if (stateMachine.isStopped()) {
         return;
       }
-
+      const afterIdx = afterStepIdx.value;
       const currentData = transformFocusData(
         focusPath.value,
         progress,
         afterIdx,
-        focusConfig.value // TODO - add reaction to focus config change (smooth transition)
+        focusConfig.value
       );
-
       if (!currentData) return;
 
-      console.log(currentData.targetAnimationProgress);
-
+      console.log(currentData?.pointsTransitionProgress);
       // Update the state machine
       stateMachine.update(
         currentData,
@@ -211,7 +209,6 @@ function MultiStepVertexFocusProvider<V>({
         1 // TODO - add sync progress
         // progress.sync,
       );
-
       // Update values for the next reaction
       previousProgress.value = progress.current;
       afterStepIdx.value = Math.max(0, currentData.afterStepIdx);

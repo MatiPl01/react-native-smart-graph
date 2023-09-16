@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SharedValue, withTiming } from 'react-native-reanimated';
 
@@ -290,7 +291,7 @@ const updateProgressBounds = <V>(
   if (!hasTargetSteps) {
     return {
       from: currentProgressBounds,
-      to: { max: focusProgress + 2, min: focusProgress + 1 }
+      to: { max: focusProgress + 1, min: focusProgress }
     };
   }
 
