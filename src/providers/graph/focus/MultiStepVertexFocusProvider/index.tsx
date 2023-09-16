@@ -198,7 +198,6 @@ function MultiStepVertexFocusProvider<V>({
       );
       if (!currentData) return;
 
-      console.log(currentData?.pointsTransitionProgress);
       // Update the state machine
       stateMachine.update(
         currentData,
@@ -209,6 +208,9 @@ function MultiStepVertexFocusProvider<V>({
         1 // TODO - add sync progress
         // progress.sync,
       );
+      // Update focus target animation progress (separately from the container transition progress)
+      focusContext.targetAnimationProgress.value =
+        currentData.targetAnimationProgress;
       // Update values for the next reaction
       previousProgress.value = progress.current;
       afterStepIdx.value = Math.max(0, currentData.afterStepIdx);

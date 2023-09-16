@@ -142,7 +142,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     transitionProgress.value = 0;
     targetAnimationProgress.value = 0;
     const { onComplete, ...timingConfig } = animSettings;
-    targetAnimationProgress.value = transitionProgress.value = withTiming(
+    transitionProgress.value = withTiming(
       1,
       timingConfig,
       (finished?: boolean) => {
@@ -152,6 +152,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         }
       }
     );
+    targetAnimationProgress.value = withTiming(1, timingConfig);
   };
 
   const startTransition = (

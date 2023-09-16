@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   GraphView,
   GraphViewControls,
@@ -170,22 +170,6 @@ export default function BottomSheetFocus() {
     );
   };
 
-  useEffect(() => {
-    graph.focus('V1');
-    setTimeout(() => {
-      graph.focus('V2');
-    }, 1000);
-    setTimeout(() => {
-      graph.focus('V3');
-    }, 2000);
-    setTimeout(() => {
-      graph.focus('V4');
-    }, 3000);
-    setTimeout(() => {
-      graph.blur();
-    }, 4000);
-  }, []);
-
   return (
     <>
       <GraphView
@@ -211,13 +195,13 @@ export default function BottomSheetFocus() {
           //   {
           //     // type: 'force'
           //   }
-          // focusSettings={{
-          //   points: focusPoints,
-          //   progress: bottomSheetProgress,
-          //   pointsChangeAnimationSettings: {
-          //     duration: 1000
-          //   }
-          // }}
+          focusSettings={{
+            points: focusPoints,
+            progress: bottomSheetProgress,
+            pointsChangeAnimationSettings: {
+              duration: 1000
+            }
+          }}
           // }
           placementSettings={{
             strategy: 'orbits'
