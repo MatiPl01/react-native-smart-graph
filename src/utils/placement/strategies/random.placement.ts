@@ -133,11 +133,11 @@ const calcVerticesRandomPositions = (
   return alignPositionsToCenter(verticesPositions);
 };
 
-export default function placeVerticesRandomly(
+const placeVerticesRandomly = (
   vertices: Array<string>,
   canvasDimensions: Dimensions,
   settings: AllRandomPlacementSettings
-): GraphLayout {
+): GraphLayout => {
   'worklet';
   if (settings.mesh === 'random') {
     return calcVerticesRandomPositions(
@@ -160,4 +160,9 @@ export default function placeVerticesRandomly(
     case 'grid':
       return calcVerticesGridPositions(props);
   }
-}
+};
+
+// The export declaration must be at the end of the file
+// to ensure that babel can properly transform the file
+// to the commonjs format (worklets cannot be reordered)
+export default placeVerticesRandomly;

@@ -1,5 +1,4 @@
 import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
-import { ChangeResult } from '@/utils/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -7,6 +6,7 @@ import {
   SingleModificationAnimationSettings
 } from '@/types/settings';
 import { Maybe } from '@/types/utils';
+import { ChangeResult } from '@/utils/models';
 
 import { Edge, OrderedEdges } from './edge';
 import { GraphObserver } from './observer';
