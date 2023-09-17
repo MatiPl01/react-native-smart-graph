@@ -99,12 +99,12 @@ function DirectedCurvedEdgeComponent<V, E>(
 
   return (
     <>
-      <CurvedEdgeComponent
+      <CurvedEdgeComponent<E>
         animationProgress={animationProgress}
         edgeKey={key}
         path={path}
         renderer={renderers.edge}
-        value={value}
+        value={value as E}
       />
       <ArrowComponent
         animationProgress={animationProgress}

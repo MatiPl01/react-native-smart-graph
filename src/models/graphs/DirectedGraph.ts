@@ -21,7 +21,7 @@ import { catchError } from '@/utils/models';
 
 import Graph from './Graph';
 
-export default class DirectedGraph<V = void, E = void> extends Graph<
+export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
   V,
   E,
   IDirectedGraphVertex<V, E>,
@@ -80,7 +80,7 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
         throw new Error(`Vertex ${targetKey} does not exist`);
       }
 
-      const edge = new DirectedEdge<V, E>(key, value, source, target);
+      const edge = new DirectedEdge<V, E>(key, value as E, source, target);
       source.addOutEdge(edge);
       target.addInEdge(edge);
       this.insertEdgeObject(
@@ -102,7 +102,7 @@ export default class DirectedGraph<V = void, E = void> extends Graph<
       notifyChange: boolean = true // this somehow fixes type error in insertVertexObject
     ): void => {
       return this.insertVertexObject(
-        new DirectedGraphVertex<V, E>(key, value),
+        new DirectedGraphVertex<V, E>(key, value as V),
         animationSettings &&
           createAnimationsSettingsForSingleModification(
             { vertex: key },

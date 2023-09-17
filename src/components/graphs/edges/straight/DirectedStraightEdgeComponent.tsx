@@ -73,7 +73,7 @@ function DirectedStraightEdgeComponent<V, E>(
         p1={p1}
         p2={p2}
         renderer={renderers.edge}
-        value={value}
+        value={value as E}
       />
       <ArrowComponent
         animationProgress={animationProgress}

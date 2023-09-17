@@ -20,7 +20,10 @@ import { catchError } from '@/utils/models';
 
 import Graph from './Graph';
 
-export default class UndirectedGraph<V = void, E = void> extends Graph<
+export default class UndirectedGraph<
+  V = undefined,
+  E = undefined
+> extends Graph<
   V,
   E,
   IUndirectedGraphVertex<V, E>,
@@ -83,7 +86,10 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
         throw new Error(`Vertex ${vertex2key} does not exist`);
       }
 
-      const edge = new UndirectedEdge<V, E>(key, value, [vertex1, vertex2]);
+      const edge = new UndirectedEdge<V, E>(key, value as E, [
+        vertex1,
+        vertex2
+      ]);
 
       vertex1.addEdge(edge);
       if (vertex1key !== vertex2key) {
@@ -108,7 +114,7 @@ export default class UndirectedGraph<V = void, E = void> extends Graph<
       notifyChange: boolean = true // this somehow fixes the type error in insertVertexObject
     ): void => {
       return this.insertVertexObject(
-        new UndirectedGraphVertex<V, E>(key, value),
+        new UndirectedGraphVertex<V, E>(key, value as V),
         animationSettings &&
           createAnimationsSettingsForSingleModification(
             { vertex: key },

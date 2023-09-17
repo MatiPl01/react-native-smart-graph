@@ -90,3 +90,6 @@ export type MergeAll<T> = T extends [infer Head, ...infer Tail]
     ? Head
     : DeepMerge<Head & MergeAll<Tail>>
   : unknown;
+
+export type WithValue<V, T> = T &
+  (V extends undefined ? { value?: V } : { value: V });

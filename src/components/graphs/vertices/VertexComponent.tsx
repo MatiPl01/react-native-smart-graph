@@ -16,7 +16,14 @@ import { updateComponentAnimationState } from '@/utils/components';
 import { calcValueOnProgress } from '@/utils/views';
 
 function VertexComponent<V>({
-  data: { animationSettings, points, removed, transformProgress, ...restData },
+  data: {
+    animationSettings,
+    points,
+    removed,
+    transformProgress,
+    value,
+    ...restData
+  },
   focusContext,
   multiStepFocusContext,
   onRemove,
@@ -106,6 +113,7 @@ function VertexComponent<V>({
         multiStepFocus={multiStepFocusContext}
         r={r}
         renderer={renderer}
+        value={value as V}
         vertexKey={key}
       />
     </Group>

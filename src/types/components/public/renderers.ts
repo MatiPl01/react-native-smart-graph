@@ -10,7 +10,7 @@ type SharedRenderersProps = {
 /*
  * VERTEX
  */
-export type VertexRendererProps<V = void> = SharedRenderersProps & {
+export type VertexRendererProps<V = undefined> = SharedRenderersProps & {
   focus: {
     key: SharedValue<null | string>;
     progress: SharedValue<number>;
@@ -29,7 +29,7 @@ export type VertexRendererProps<V = void> = SharedRenderersProps & {
   value: V;
 };
 
-export type VertexRenderer<V = void> = (
+export type VertexRenderer<V = undefined> = (
   props: VertexRendererProps<V>
 ) => JSX.Element | null;
 
@@ -41,27 +41,29 @@ type SharedEdgeRendererProps<E> = SharedRenderersProps & {
   value: E;
 };
 
-export type StraightEdgeRendererProps<E = void> = SharedEdgeRendererProps<E> & {
-  p1: AnimatedVector;
-  p2: AnimatedVector;
-};
+export type StraightEdgeRendererProps<E = undefined> =
+  SharedEdgeRendererProps<E> & {
+    p1: AnimatedVector;
+    p2: AnimatedVector;
+  };
 
-export type CurvedEdgeRendererProps<E = void> = SharedEdgeRendererProps<E> & {
-  path: AnimatedPath;
-};
+export type CurvedEdgeRendererProps<E = undefined> =
+  SharedEdgeRendererProps<E> & {
+    path: AnimatedPath;
+  };
 
-export type CurvedEdgeRenderer<E = void> = (
+export type CurvedEdgeRenderer<E = undefined> = (
   props: CurvedEdgeRendererProps<E>
 ) => JSX.Element | null;
 
-export type StraightEdgeRenderer<E = void> = (
+export type StraightEdgeRenderer<E = undefined> = (
   props: StraightEdgeRendererProps<E>
 ) => JSX.Element | null;
 
 /*
  * LABEL
  */
-export type LabelRendererProps<E = void> = SharedRenderersProps & {
+export type LabelRendererProps<E = undefined> = SharedRenderersProps & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   key: string;

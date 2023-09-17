@@ -8,7 +8,7 @@ import { LabelComponentData } from './label';
 
 export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 
-export type EdgeComponentData<E = void> = {
+export type EdgeComponentData<E = undefined> = {
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
   isDirected: boolean;
@@ -34,7 +34,7 @@ export type EdgeComponentData<E = void> = {
   transformProgress: SharedValue<number>;
   v1Key: string;
   v2Key: string;
-  value: E;
+  value?: E;
 };
 
 export type EdgeRemoveHandler = (key: string) => void;

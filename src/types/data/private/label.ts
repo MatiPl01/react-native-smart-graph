@@ -1,7 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-export type LabelComponentData<E = void> = {
+export type LabelComponentData<E = undefined> = {
   animationProgress: SharedValue<number>;
   transform: SharedValue<{
     center: Vector;
@@ -9,5 +9,5 @@ export type LabelComponentData<E = void> = {
     p2: Vector;
     scale: number;
   }>;
-  value: E;
+  value?: E;
 };

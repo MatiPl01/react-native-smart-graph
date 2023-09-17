@@ -1,12 +1,18 @@
-export type DirectedEdgeData<E = void> = {
-  from: string;
-  key: string;
-  to: string;
-  value: E;
-};
+import { WithValue } from '@/types/utils';
 
-export type UndirectedEdgeData<E = void> = {
-  key: string;
-  value: E;
-  vertices: Array<string>;
-};
+export type DirectedEdgeData<E = undefined> = WithValue<
+  E,
+  {
+    from: string;
+    key: string;
+    to: string;
+  }
+>;
+
+export type UndirectedEdgeData<E = undefined> = WithValue<
+  E,
+  {
+    key: string;
+    vertices: Array<string>;
+  }
+>;
