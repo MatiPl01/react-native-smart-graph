@@ -41,7 +41,7 @@ function GraphComponent() {
       />
       {/* Edges labels */}
       <GraphEdgesLabels focusProgress={focusProgress} />
-      {/* Vertices labels - TODO */}
+      {/* TODO - Vertices labels */}
     </>
   );
 }
