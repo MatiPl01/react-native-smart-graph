@@ -4,7 +4,7 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 
-export type VertexComponentData<V> = {
+export type VertexComponentData<V = void> = {
   animationSettings: AllAnimationSettings | null;
   key: string;
   points: SharedValue<{
@@ -14,7 +14,7 @@ export type VertexComponentData<V> = {
   removed: boolean;
   scale: SharedValue<number>;
   transformProgress: SharedValue<number>;
-  value?: V;
+  value: V;
 };
 
 export type VertexRemoveHandler = (key: string) => void;

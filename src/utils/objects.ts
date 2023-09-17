@@ -209,10 +209,10 @@ const areSettingsWithDefaults = <C, D, N>(
   return 'default' in settings;
 };
 
-const isEmpty = (obj?: object): boolean =>
+const isEmpty = (obj?: any): boolean =>
   obj === null ||
   obj === undefined ||
-  (typeof obj === 'object' && Object.keys(obj).length === 0);
+  (typeof obj === 'object' && Object.keys(obj as object).length === 0);
 
 export const updateValues = <
   D extends object,
@@ -285,11 +285,11 @@ export const updateValues = <
         result[key as keyof C] = updateValues(
           areSettingsWithDefaults(settings)
             ? {
-                current: result[key as keyof C],
-                default: settings.default?.[key as keyof D] ?? {},
+                current: result[key as keyof C] as object,
+                default: (settings.default?.[key as keyof D] ?? {}) as object,
                 new: value
               }
-            : { current: result[key as keyof C], new: value },
+            : { current: result[key as keyof C] as object, new: value },
           config?.[key as keyof K] as any
         ) as C[keyof C];
         isModified = true;
@@ -327,7 +327,7 @@ export const updateValues = <
 
 export const unsharedify = <T extends object>(obj?: T): Unsharedify<T> => {
   'worklet';
-  const result = {} as Unsharedify<T>;
+  const result = {} as Record<string, any>;
   for (const key in obj) {
     const k = key as unknown as keyof typeof result;
     const value = obj[key as keyof T];
@@ -340,5 +340,5 @@ export const unsharedify = <T extends object>(obj?: T): Unsharedify<T> => {
       result[k] = value;
     }
   }
-  return result;
+  return result as Unsharedify<T>;
 };

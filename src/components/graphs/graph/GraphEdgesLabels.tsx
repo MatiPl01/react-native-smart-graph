@@ -27,6 +27,7 @@ function GraphEdgeLabels<E>({
           edgeKey={key}
           key={key}
           renderer={renderer}
+          value={data.value}
           vertexRadius={vertexRadius}
         />
       ))}

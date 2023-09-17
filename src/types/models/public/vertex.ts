@@ -2,15 +2,15 @@
 
 import { DirectedEdge, Edge, UndirectedEdge } from './edge';
 
-export interface Vertex<V, E> {
+export interface Vertex<V = void, E = void> {
   get degree(): number;
   get edges(): Array<Edge<V, E>>;
   get key(): string;
   get neighbors(): Array<Vertex<V, E>>;
-  get value(): V | undefined;
+  get value(): V;
 }
 
-export interface DirectedGraphVertex<V, E> extends Vertex<V, E> {
+export interface DirectedGraphVertex<V = void, E = void> extends Vertex<V, E> {
   addInEdge(edge: DirectedEdge<V, E>): void;
   addOutEdge(edge: DirectedEdge<V, E>): void;
   get inDegree(): number;
@@ -22,7 +22,8 @@ export interface DirectedGraphVertex<V, E> extends Vertex<V, E> {
   removeOutEdge(key: string): DirectedEdge<V, E>;
 }
 
-export interface UndirectedGraphVertex<V, E> extends Vertex<V, E> {
+export interface UndirectedGraphVertex<V = void, E = void>
+  extends Vertex<V, E> {
   addEdge(edge: UndirectedEdge<V, E>): void;
   removeEdge(key: string): UndirectedEdge<V, E>;
 }
