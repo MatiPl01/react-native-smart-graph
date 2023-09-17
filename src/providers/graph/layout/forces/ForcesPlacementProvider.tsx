@@ -176,8 +176,8 @@ export default withGraphSettings(
       verticesData
     })
   ),
-  ({ componentSettings, placementSettings }) => ({
+  ({ componentsSettings, placementSettings }) => ({
     placementSettings,
-    vertexRadius: componentSettings.vertex.radius
+    vertexRadius: componentsSettings.vertex.radius
   })
 );

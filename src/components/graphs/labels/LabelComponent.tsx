@@ -92,7 +92,7 @@ function LabelComponent<E>({
         edgeRotation={edgeRotation}
         r={vertexRadius}
         renderer={renderer}
-        value={value}
+        value={value as E}
       />
     </Group>
   );

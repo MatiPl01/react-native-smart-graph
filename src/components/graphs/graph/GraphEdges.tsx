@@ -47,11 +47,11 @@ export default withGraphSettings(
     edgesData,
     onRemove: handleEdgeRemove
   })),
-  ({ componentSettings, edgeType, renderers }) => ({
+  ({ componentsSettings, edgeType, renderers }) => ({
     arrowRenderer: renderers.arrow,
     edgeRenderer: renderers.edge,
     edgeType,
     labelRenderer: renderers.label,
-    settings: componentSettings
+    settings: componentsSettings
   })
 );

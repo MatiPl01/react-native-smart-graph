@@ -56,8 +56,8 @@ export default withGraphSettings(
   withComponentsData(PressEventsProvider, ({ verticesData }) => ({
     verticesData
   })),
-  ({ componentSettings, eventSettings }) => ({
+  ({ componentsSettings, eventSettings }) => ({
     pressSettings: eventSettings?.press,
-    vertexSettings: componentSettings.vertex
+    vertexSettings: componentsSettings.vertex
   })
 );

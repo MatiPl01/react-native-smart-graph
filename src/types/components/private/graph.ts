@@ -12,6 +12,7 @@ import {
   LabelRenderer,
   UndirectedGraphWithCurvedEdgeRenderers,
   UndirectedGraphWithStraightEdgeRenderers,
+  VertexMaskRenderer,
   VertexRenderer
 } from '@/types/components/public';
 import {
@@ -61,7 +62,7 @@ export type UndirectedGraphComponentProps<
   V,
   E,
   ET extends EdgeType = 'straight'
-> = Omit<UndirectedGraphSettings<V>, 'componentSettings'> & {
+> = Omit<UndirectedGraphSettings<V>, 'edgeType'> & {
   edgeType?: ET;
   graph: UndirectedGraph<V, E>;
   renderers?: ET extends 'curved'
@@ -85,7 +86,7 @@ export type GraphComponentsData<V, E> = {
  */
 export type AllGraphSettings<V, E> = {
   animationSettings: AllGraphAnimationsSettings;
-  componentSettings: AllGraphComponentsSettings;
+  componentsSettings: AllGraphComponentsSettings;
   edgeType: EdgeType;
   eventSettings?: GraphEventsSettings<V>;
   focusSettings?: AllMultiStepFocusSettings;
@@ -97,6 +98,7 @@ export type AllGraphSettings<V, E> = {
     edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
     label?: LabelRenderer<E>;
     vertex: VertexRenderer<V>;
+    vertexMask?: VertexMaskRenderer;
   };
 };
 
@@ -108,7 +110,7 @@ export type GraphSettingsData<V, E> = Pick<
   'edgeType' | 'graph' | 'renderers'
 > & {
   animationSettings: AllGraphSettings<V, E>['animationSettings'];
-  componentSettings: InternalGraphComponentsSettings;
+  componentsSettings: InternalGraphComponentsSettings;
   eventSettings?: InternalGraphEventsSettings<V>;
   focusSettings?: InternalMultiStepFocusSettings;
   layoutSettings: InternalGraphLayoutSettings;

@@ -3,6 +3,8 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedPath, AnimatedVector } from '@/types/layout';
 
+import { VertexMaskRenderer } from './mask';
+
 type SharedRenderersProps = {
   animationProgress: SharedValue<number>;
 };
@@ -90,6 +92,7 @@ export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;
 type SharedUndirectedGraphRenderers<V, E> = {
   label?: LabelRenderer<E>;
   vertex?: VertexRenderer<V>;
+  vertexMask?: VertexMaskRenderer;
 };
 
 type SharedDirectedGraphRenderers<V, E> = SharedUndirectedGraphRenderers<

@@ -190,8 +190,8 @@ export default withGraphSettings(
   withComponentsData(VertexFocusProvider, ({ verticesData }) => ({
     verticesData
   })),
-  ({ componentSettings, graph }) => ({
+  ({ componentsSettings, graph }) => ({
     graph,
-    vertexRadius: componentSettings.vertex.radius
+    vertexRadius: componentsSettings.vertex.radius
   })
 );

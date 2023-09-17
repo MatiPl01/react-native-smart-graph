@@ -1,36 +1,26 @@
-import { Group, Transforms2d } from '@shopify/react-native-skia';
+import { Group } from '@shopify/react-native-skia';
 import { memo, useEffect, useMemo } from 'react';
-import {
-  useAnimatedReaction,
-  useDerivedValue,
-  useSharedValue
-} from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
+import { useVertexTransform } from '@/hooks/transform';
 import {
   VertexComponentProps,
   VertexRenderer,
   VertexRendererProps
 } from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
-import { calcValueOnProgress } from '@/utils/views';
 
 function VertexComponent<V>({
-  data: {
-    animationSettings,
-    points,
-    removed,
-    transformProgress,
-    value,
-    ...restData
-  },
+  data,
   focusContext,
   multiStepFocusContext,
   onRemove,
   renderer,
   settings: { radius: r }
 }: VertexComponentProps<V>) {
-  const { key, scale } = restData;
+  const { animationSettings, removed, value, ...restData } = data;
+  const { key } = restData;
 
   // ANIMATION
   // Vertex render animation progress
@@ -46,7 +36,7 @@ function VertexComponent<V>({
 
   // TRANSFORM
   // Vertex transform
-  const transform = useSharedValue<Transforms2d>([{ scale: 0 }]);
+  const transform = useVertexTransform(data);
 
   // VERTEX PROPS
   const focusProp = useMemo(
@@ -73,35 +63,6 @@ function VertexComponent<V>({
       }
     );
   }, [removed]);
-
-  // Vertex transform handler
-  useAnimatedReaction(
-    () => ({
-      points: points.value,
-      progress: transformProgress.value,
-      scales: {
-        internal: scale.value
-      }
-    }),
-    ({ points: { source, target }, progress, scales }) => {
-      const s = Math.max(0, scales.internal);
-      transform.value = [
-        { scale: s },
-        ...(s > 0
-          ? [
-              {
-                translateX:
-                  calcValueOnProgress(progress, source.x, target.x) / s
-              },
-              {
-                translateY:
-                  calcValueOnProgress(progress, source.y, target.y) / s
-              }
-            ]
-          : [])
-      ];
-    }
-  );
 
   // Render the vertex component
   return (

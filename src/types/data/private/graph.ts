@@ -8,8 +8,8 @@ import {
   VertexSettings
 } from '@/types/settings';
 
-export type GraphData<V, E> = Omit<GraphSettings<V>, 'componentSettings'> & {
-  componentSettings?: {
+export type GraphData<V, E> = Omit<GraphSettings<V>, 'componentsSettings'> & {
+  componentsSettings?: {
     arrow?: ArrowSettings;
     edge?: EdgeSettings;
     label?: LabelSettings;

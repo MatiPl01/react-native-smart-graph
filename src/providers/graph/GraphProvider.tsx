@@ -4,6 +4,7 @@ import { ContextProviderComposer } from '@/providers/utils';
 import { GraphData } from '@/types/data';
 import { AnimatedTransformation } from '@/types/layout';
 
+import { EdgesMaskProvider } from './appearance';
 import ConditionalProvider from './ConditionalProvider';
 import CanvasContextsProvider, {
   CanvasContexts
@@ -67,14 +68,19 @@ export default function GraphProvider<V, E>({
       />,
       // EVENTS
       // Press events provider
-      // TDOo - improve press events provider (the overlay layer degrades performance)
+      // TODO - improve press events provider (the overlay layer degrades performance)
       <ConditionalProvider.If
         if={({ eventSettings }) => !!eventSettings?.press}
         then={<PressEventsProvider transform={transform} />}
       />,
       // SETTINGS
       // The provider used to handle canvas settings change and respond to such changes
-      <SettingsChangeResponderProvider />
+      <SettingsChangeResponderProvider />,
+      // EDGES MASK
+      <ConditionalProvider.If
+        if={({ componentsSettings }) => componentsSettings.vertex.displayMask}
+        then={<EdgesMaskProvider />}
+      />
     ],
     []
   );
