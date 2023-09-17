@@ -24,6 +24,7 @@ function UndirectedStraightEdgeComponent<V, E>(
 ) {
   const {
     data: { animationProgress, key, value },
+    focusProgress,
     renderers
   } = props;
 
@@ -33,6 +34,7 @@ function UndirectedStraightEdgeComponent<V, E>(
     <StraightEdgeComponent
       animationProgress={animationProgress}
       edgeKey={key}
+      focusProgress={focusProgress}
       p1={p1}
       p2={p2}
       renderer={renderers.edge}

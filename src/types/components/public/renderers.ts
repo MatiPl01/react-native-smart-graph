@@ -39,6 +39,7 @@ export type VertexRenderer<V = undefined> = (
  * EDGE
  */
 type SharedEdgeRendererProps<E> = SharedRenderersProps & {
+  focusProgress: SharedValue<number>;
   key: string;
   value: E;
 };

@@ -51,12 +51,10 @@ function areCurvedEdgeProps<V, E>(
 }
 
 function EdgeComponent<V, E>({
-  data,
-  edgeType,
   onRemove,
-  renderers,
-  settings
+  ...innerProps
 }: EdgeComponentProps<V, E>) {
+  const { data } = innerProps;
   // Edge mount/unmount animation
   useEffect(() => {
     updateComponentAnimationState(
@@ -67,13 +65,6 @@ function EdgeComponent<V, E>({
       () => onRemove(data.key)
     );
   }, [data.removed, data.animationSettings]);
-
-  const innerProps = {
-    data,
-    edgeType,
-    renderers,
-    settings
-  };
 
   if (areDirectedEdgeProps(innerProps)) {
     return areCurvedEdgeProps(innerProps) ? (

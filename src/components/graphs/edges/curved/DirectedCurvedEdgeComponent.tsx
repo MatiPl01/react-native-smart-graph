@@ -21,6 +21,7 @@ function DirectedCurvedEdgeComponent<V, E>(
 ) {
   const {
     data: { animationProgress, key, value },
+    focusProgress,
     renderers,
     settings: {
       arrow: { scale: arrowScale },
@@ -102,6 +103,7 @@ function DirectedCurvedEdgeComponent<V, E>(
       <CurvedEdgeComponent<E>
         animationProgress={animationProgress}
         edgeKey={key}
+        focusProgress={focusProgress}
         path={path}
         renderer={renderers.edge}
         value={value as E}

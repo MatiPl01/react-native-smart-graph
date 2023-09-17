@@ -5,5 +5,5 @@ import { VertexMaskRendererProps } from '@/types/components';
 export default function DefaultVertexMaskRenderer({
   r
 }: VertexMaskRendererProps) {
-  return <Circle color='black' r={r} />;
+  return <Circle r={r} />;
 }
