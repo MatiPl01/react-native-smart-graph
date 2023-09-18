@@ -276,8 +276,8 @@ export default withGraphSettings(
   withComponentsData(MultiStepVertexFocusProvider, ({ verticesData }) => ({
     verticesData
   })),
-  ({ componentSettings, focusSettings }) => ({
+  ({ componentsSettings, focusSettings }) => ({
     settings: focusSettings,
-    vertexRadius: componentSettings.vertex.radius
+    vertexRadius: componentsSettings.vertex.radius
   })
 );

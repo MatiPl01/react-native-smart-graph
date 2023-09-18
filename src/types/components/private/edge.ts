@@ -24,9 +24,17 @@ import {
   AllUndirectedGraphWithStraightEdgeRenderers
 } from './renderers';
 
-type SharedStraightEdgeComponentProps = { edgeType: 'straight' };
+type SharedEdgeComponentProps = {
+  focusProgress: SharedValue<number>;
+};
 
-type SharedCurvedEdgeComponentProps = { edgeType: 'curved' };
+type SharedStraightEdgeComponentProps = SharedEdgeComponentProps & {
+  edgeType: 'straight';
+};
+
+type SharedCurvedEdgeComponentProps = SharedEdgeComponentProps & {
+  edgeType: 'curved';
+};
 
 export type DirectedStraightEdgeComponentProps<V, E> =
   SharedStraightEdgeComponentProps & {

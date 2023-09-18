@@ -8,7 +8,7 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 
-import { VertexComponentData } from '@/types/data';
+import { VertexComponentData, VertexData } from '@/types/data';
 import { AnimatedBoundingRect } from '@/types/layout';
 import {
   InternalPressEventsSettings,
@@ -60,7 +60,7 @@ function OverlayVertex<V>({
   const longPressAnimationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const getPressEventData = () => ({
-    vertex: { key, value }
+    vertex: { key, value } as unknown as VertexData<V>
   });
 
   // PRESS EVENT

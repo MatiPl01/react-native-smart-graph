@@ -3,6 +3,8 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedPath, AnimatedVector } from '@/types/layout';
 
+import { VertexMaskRenderer } from './mask';
+
 type SharedRenderersProps = {
   animationProgress: SharedValue<number>;
 };
@@ -10,7 +12,7 @@ type SharedRenderersProps = {
 /*
  * VERTEX
  */
-export type VertexRendererProps<V> = SharedRenderersProps & {
+export type VertexRendererProps<V = undefined> = SharedRenderersProps & {
   focus: {
     key: SharedValue<null | string>;
     progress: SharedValue<number>;
@@ -26,10 +28,10 @@ export type VertexRendererProps<V> = SharedRenderersProps & {
   };
   r: number;
   scale: SharedValue<number>;
-  value?: V;
+  value: V;
 };
 
-export type VertexRenderer<V> = (
+export type VertexRenderer<V = undefined> = (
   props: VertexRendererProps<V>
 ) => JSX.Element | null;
 
@@ -37,36 +39,39 @@ export type VertexRenderer<V> = (
  * EDGE
  */
 type SharedEdgeRendererProps<E> = SharedRenderersProps & {
+  focusProgress: SharedValue<number>;
   key: string;
-  value?: E;
+  value: E;
 };
 
-export type StraightEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
-  p1: AnimatedVector;
-  p2: AnimatedVector;
-};
+export type StraightEdgeRendererProps<E = undefined> =
+  SharedEdgeRendererProps<E> & {
+    p1: AnimatedVector;
+    p2: AnimatedVector;
+  };
 
-export type CurvedEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
-  path: AnimatedPath;
-};
+export type CurvedEdgeRendererProps<E = undefined> =
+  SharedEdgeRendererProps<E> & {
+    path: AnimatedPath;
+  };
 
-export type CurvedEdgeRenderer<E> = (
+export type CurvedEdgeRenderer<E = undefined> = (
   props: CurvedEdgeRendererProps<E>
 ) => JSX.Element | null;
 
-export type StraightEdgeRenderer<E> = (
+export type StraightEdgeRenderer<E = undefined> = (
   props: StraightEdgeRendererProps<E>
 ) => JSX.Element | null;
 
 /*
  * LABEL
  */
-export type LabelRendererProps<E> = SharedRenderersProps & {
+export type LabelRendererProps<E = undefined> = SharedRenderersProps & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   key: string;
   r: number;
-  value?: E;
+  value: E;
 };
 
 export type LabelRenderer<E> = (
@@ -88,6 +93,7 @@ export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;
 type SharedUndirectedGraphRenderers<V, E> = {
   label?: LabelRenderer<E>;
   vertex?: VertexRenderer<V>;
+  vertexMask?: VertexMaskRenderer;
 };
 
 type SharedDirectedGraphRenderers<V, E> = SharedUndirectedGraphRenderers<

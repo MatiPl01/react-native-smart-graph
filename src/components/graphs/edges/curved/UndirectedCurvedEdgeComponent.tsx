@@ -16,6 +16,7 @@ function UndirectedCurvedEdgeComponent<V, E>(
 ) {
   const {
     data: { animationProgress, key, value },
+    focusProgress,
     renderers
   } = props;
 
@@ -25,9 +26,10 @@ function UndirectedCurvedEdgeComponent<V, E>(
     <CurvedEdgeComponent
       animationProgress={animationProgress}
       edgeKey={key}
+      focusProgress={focusProgress}
       path={path}
       renderer={renderers.edge}
-      value={value}
+      value={value as E}
     />
   );
 }

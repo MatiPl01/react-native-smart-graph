@@ -1,7 +1,9 @@
+import { Mask } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks/focus';
+import { useEdgesMaskContext } from '@/providers/graph/appearance';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { useMultiStepFocusContext } from '@/providers/graph/focus';
 
@@ -15,6 +17,7 @@ function GraphComponent() {
   const { focusContext } = useCanvasContexts();
   // Graph contexts
   const multiStepFocusContext = useMultiStepFocusContext();
+  const edgesMaskContext = useEdgesMaskContext();
 
   // A helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
@@ -23,18 +26,22 @@ function GraphComponent() {
 
   return (
     <>
-      {/* TODO - maybe remove the mask component - it degrades performance */}
-      {/* <Mask
-        mask={<GraphEdgesMask boundingRect={boundingRect} />}
-        mode='luminance'>
+      {/* Graph edges */}
+      {edgesMaskContext ? (
+        <Mask mask={edgesMaskContext.maskComponent} mode='luminance'>
+          <GraphEdges focusProgress={focusProgress} />
+        </Mask>
+      ) : (
         <GraphEdges focusProgress={focusProgress} />
-      </Mask> */}
-      <GraphEdges focusProgress={focusProgress} />
-      <GraphEdgesLabels focusProgress={focusProgress} />
+      )}
+      {/* Graph vertices */}
       <GraphVertices
         focusContext={focusContext}
         multiStepFocusContext={multiStepFocusContext}
       />
+      {/* Edges labels */}
+      <GraphEdgesLabels focusProgress={focusProgress} />
+      {/* TODO - Vertices labels */}
     </>
   );
 }

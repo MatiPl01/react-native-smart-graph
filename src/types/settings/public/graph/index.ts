@@ -22,32 +22,32 @@ type SharedGraphSettings<V> = {
 
 export type UndirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    componentSettings?: UndirectedGraphWithStraightEdgesComponentsSettings;
+    componentsSettings?: UndirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type UndirectedGraphWithCurvedEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    componentSettings?: UndirectedGraphWithCurvedEdgesComponentsSettings;
+    componentsSettings?: UndirectedGraphWithCurvedEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    componentSettings?: DirectedGraphWithStraightEdgesComponentsSettings;
+    componentsSettings?: DirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithCurvedEdgeSettings<V> = SharedGraphSettings<V> & {
-  componentSettings?: DirectedGraphWithCurvedEdgesComponentsSettings;
+  componentsSettings?: DirectedGraphWithCurvedEdgesComponentsSettings;
 };
 
-export type UndirectedGraphSettings<V = void> =
+export type UndirectedGraphSettings<V = undefined> =
   | UndirectedGraphWithCurvedEdgeSettings<V>
   | UndirectedGraphWithStraightEdgeSettings<V>;
 
-export type DirectedGraphSettings<V = void> =
+export type DirectedGraphSettings<V = undefined> =
   | DirectedGraphWithCurvedEdgeSettings<V>
   | DirectedGraphWithStraightEdgeSettings<V>;
 
-export type GraphSettings<V = void> =
+export type GraphSettings<V = undefined> =
   | DirectedGraphSettings<V>
   | UndirectedGraphSettings<V>;
 

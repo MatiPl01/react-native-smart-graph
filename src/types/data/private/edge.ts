@@ -8,7 +8,7 @@ import { LabelComponentData } from './label';
 
 export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 
-export type EdgeComponentData<E> = {
+export type EdgeComponentData<E = undefined> = {
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
   isDirected: boolean;

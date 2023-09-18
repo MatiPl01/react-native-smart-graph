@@ -3,6 +3,7 @@ import {
   DefaultCurvedEdgeRenderer,
   DefaultLabelRenderer,
   DefaultStraightEdgeRenderer,
+  DefaultVertexMaskRenderer,
   DefaultVertexRenderer
 } from '@/components';
 import {
@@ -163,6 +164,7 @@ const DEFAULT_COMPONENTS_SETTINGS: {
     scale: 0.5
   },
   vertex: {
+    displayMask: false,
     radius: 20
   }
 };
@@ -200,7 +202,7 @@ export const getDefaultConfig = <V, E>(
   data: GraphData<V, E>
 ): Omit<AllGraphSettings<V, E>, 'graph'> => ({
   animationSettings: getDefaultAnimations(data),
-  componentSettings: {
+  componentsSettings: {
     arrow: data.graph.isDirected()
       ? DEFAULT_COMPONENTS_SETTINGS.arrow
       : undefined,
@@ -234,10 +236,13 @@ export const getDefaultConfig = <V, E>(
       data.edgeType === 'curved'
         ? DefaultCurvedEdgeRenderer
         : DefaultStraightEdgeRenderer,
-    label: data.componentSettings?.label?.displayed
+    label: data.componentsSettings?.label?.displayed
       ? DefaultLabelRenderer
       : undefined,
-    vertex: DefaultVertexRenderer
+    vertex: DefaultVertexRenderer,
+    vertexMask: data.componentsSettings?.vertex?.displayMask
+      ? DefaultVertexMaskRenderer
+      : undefined
   }
 });
 
@@ -287,7 +292,7 @@ const getPlacementConfig = <V, E>(
 export const getUpdateConfig = <V, E>(
   data: Omit<AllGraphSettings<V, E>, 'graph'>
 ) => ({
-  componentSettings: {
+  componentsSettings: {
     arrow: {
       scale: 'shared'
     },

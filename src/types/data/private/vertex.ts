@@ -4,7 +4,7 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 
-export type VertexComponentData<V> = {
+export type VertexComponentData<V = undefined> = {
   animationSettings: AllAnimationSettings | null;
   key: string;
   points: SharedValue<{

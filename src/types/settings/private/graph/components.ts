@@ -71,11 +71,7 @@ export type InternalDirectedCurvedEdgeSettings =
     arrow: InternalArrowSettings;
   };
 
-export type InternalVertexSettings = DeepSharedify<
-  Omit<AllVertexSettings, 'radius'>
-> & {
-  radius: number;
-};
+export type InternalVertexSettings = AllVertexSettings;
 
 /*
  * INTERNAL GRAPH COMPONENTS SETTINGS

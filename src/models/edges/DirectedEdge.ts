@@ -6,7 +6,7 @@ import {
 export default class DirectedEdge<V, E> implements IDirectedEdge<V, E> {
   constructor(
     private readonly key$: string,
-    private readonly value$: E | undefined,
+    private readonly value$: E,
     private readonly source$: DirectedGraphVertex<V, E>,
     private readonly target$: DirectedGraphVertex<V, E>
   ) {}
@@ -31,7 +31,7 @@ export default class DirectedEdge<V, E> implements IDirectedEdge<V, E> {
     return this.target$;
   }
 
-  get value(): E | undefined {
+  get value(): E {
     return this.value$;
   }
 

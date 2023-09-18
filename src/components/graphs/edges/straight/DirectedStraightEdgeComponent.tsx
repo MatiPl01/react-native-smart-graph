@@ -28,6 +28,7 @@ function DirectedStraightEdgeComponent<V, E>(
 ) {
   const {
     data: { animationProgress, key, value },
+    focusProgress,
     renderers,
     settings: {
       arrow: { scale: arrowScale },
@@ -70,10 +71,11 @@ function DirectedStraightEdgeComponent<V, E>(
       <StraightEdgeComponent
         animationProgress={animationProgress}
         edgeKey={key}
+        focusProgress={focusProgress}
         p1={p1}
         p2={p2}
         renderer={renderers.edge}
-        value={value}
+        value={value as E}
       />
       <ArrowComponent
         animationProgress={animationProgress}

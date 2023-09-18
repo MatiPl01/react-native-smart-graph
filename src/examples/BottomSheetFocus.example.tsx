@@ -186,6 +186,11 @@ export default function BottomSheetFocus() {
             duration: 500,
             easing: Easing.bezier(0.25, 0.1, 0.25, 1)
           }}
+          componentsSettings={{
+            vertex: {
+              displayMask: true
+            }
+          }}
           eventSettings={{
             press: {
               onVertexPress: handleVertexPress
