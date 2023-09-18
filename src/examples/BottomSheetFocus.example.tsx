@@ -186,20 +186,11 @@ export default function BottomSheetFocus() {
             duration: 500,
             easing: Easing.bezier(0.25, 0.1, 0.25, 1)
           }}
-          componentsSettings={{
-            vertex: {
-              displayMask: true
-            }
-          }}
           eventSettings={{
             press: {
               onVertexPress: handleVertexPress
             }
           }}
-          // layoutSettings={
-          //   {
-          //     // type: 'force'
-          //   }
           focusSettings={{
             points: focusPoints,
             progress: bottomSheetProgress,
@@ -207,9 +198,11 @@ export default function BottomSheetFocus() {
               duration: 1000
             }
           }}
-          // }
           placementSettings={{
             strategy: 'orbits'
+          }}
+          renderers={{
+            label: null
           }}
           graph={graph}
         />

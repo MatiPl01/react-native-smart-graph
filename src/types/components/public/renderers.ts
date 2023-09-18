@@ -91,36 +91,36 @@ export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;
  * GRAPH
  */
 type SharedUndirectedGraphRenderers<V, E> = {
-  label?: LabelRenderer<E>;
-  vertex?: VertexRenderer<V>;
-  vertexMask?: VertexMaskRenderer;
+  label: LabelRenderer<E> | null;
+  vertex: VertexRenderer<V> | null;
+  vertexMask: VertexMaskRenderer | null;
 };
 
 type SharedDirectedGraphRenderers<V, E> = SharedUndirectedGraphRenderers<
   V,
   E
 > & {
-  arrow?: ArrowRenderer;
+  arrow: ArrowRenderer | null;
 };
 
 export type UndirectedGraphWithStraightEdgeRenderers<V, E> =
   SharedUndirectedGraphRenderers<V, E> & {
-    edge?: StraightEdgeRenderer<E>;
+    edge: StraightEdgeRenderer<E>;
   };
 
 export type UndirectedGraphWithCurvedEdgeRenderers<V, E> =
   SharedUndirectedGraphRenderers<V, E> & {
-    edge?: CurvedEdgeRenderer<E>;
+    edge: CurvedEdgeRenderer<E>;
   };
 
 export type DirectedGraphWithStraightEdgeRenderers<V, E> =
   SharedDirectedGraphRenderers<V, E> & {
-    edge?: StraightEdgeRenderer<E>;
+    edge: StraightEdgeRenderer<E>;
   };
 
 export type DirectedGraphWithCurvedEdgeRenderers<V, E> =
   SharedDirectedGraphRenderers<V, E> & {
-    edge?: CurvedEdgeRenderer<E>;
+    edge: CurvedEdgeRenderer<E>;
   };
 
 export type UndirectedGraphRenderers<V, E> =

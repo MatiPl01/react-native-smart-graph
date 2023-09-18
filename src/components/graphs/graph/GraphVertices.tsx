@@ -3,12 +3,21 @@ import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesProps } from '@/types/components';
 
 function GraphVertices<V>({
+  renderer,
   verticesData,
   ...restProps
 }: GraphVerticesProps<V>) {
-  return Object.values(verticesData).map(data => (
-    <VertexComponent {...restProps} data={data} key={data.key} />
-  ));
+  return (
+    renderer &&
+    Object.values(verticesData).map(data => (
+      <VertexComponent
+        {...restProps}
+        data={data}
+        key={data.key}
+        renderer={renderer}
+      />
+    ))
+  );
 }
 
 export default withGraphSettings(

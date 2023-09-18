@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
 import { interpolate, useDerivedValue } from 'react-native-reanimated';
 

@@ -7,6 +7,7 @@ import {
   LabelSettings,
   VertexSettings
 } from '@/types/settings';
+import { MaybeObject } from '@/types/utils';
 
 export type GraphData<V, E> = Omit<GraphSettings<V>, 'componentsSettings'> & {
   componentsSettings?: {
@@ -16,5 +17,5 @@ export type GraphData<V, E> = Omit<GraphSettings<V>, 'componentsSettings'> & {
     vertex?: VertexSettings;
   };
   graph: Graph<V, E>;
-  renderers?: GraphRenderers<V, E>;
+  renderers?: MaybeObject<GraphRenderers<V, E>>;
 };

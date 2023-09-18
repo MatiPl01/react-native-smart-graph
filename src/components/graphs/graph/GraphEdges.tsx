@@ -21,19 +21,18 @@ function GraphEdges<V, E>({
   );
 
   return (
-    <>
-      {Object.values(edgesData).map(data => (
-        <EdgeComponent<V, E>
-          data={data}
-          edgeType={edgeType}
-          focusProgress={focusProgress}
-          key={data.key}
-          onRemove={onRemove}
-          renderers={renderers}
-          settings={settings}
-        />
-      ))}
-    </>
+    edgeRenderer &&
+    Object.entries(edgesData).map(([key, data]) => (
+      <EdgeComponent<V, E>
+        data={data}
+        edgeType={edgeType}
+        focusProgress={focusProgress}
+        key={key}
+        onRemove={onRemove}
+        renderers={renderers}
+        settings={settings}
+      />
+    ))
   );
 }
 

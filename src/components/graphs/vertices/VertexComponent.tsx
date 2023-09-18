@@ -64,7 +64,6 @@ function VertexComponent<V>({
     );
   }, [removed]);
 
-  // Render the vertex component
   return (
     <Group transform={transform}>
       <RenderedVertexComponent

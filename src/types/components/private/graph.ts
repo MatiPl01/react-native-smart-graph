@@ -42,6 +42,7 @@ import {
   AllGraphComponentsSettings,
   InternalGraphComponentsSettings
 } from '@/types/settings/private/graph/components';
+import { MaybeObject } from '@/types/utils';
 
 /*
  * COMPONENTS PROPS
@@ -54,8 +55,8 @@ export type DirectedGraphComponentProps<
   edgeType?: ET;
   graph: DirectedGraph<V, E>;
   renderers?: ET extends 'curved'
-    ? DirectedGraphWithCurvedEdgeRenderers<V, E>
-    : DirectedGraphWithStraightEdgeRenderers<V, E>;
+    ? MaybeObject<DirectedGraphWithCurvedEdgeRenderers<V, E>>
+    : MaybeObject<DirectedGraphWithStraightEdgeRenderers<V, E>>;
 };
 
 export type UndirectedGraphComponentProps<
@@ -66,8 +67,8 @@ export type UndirectedGraphComponentProps<
   edgeType?: ET;
   graph: UndirectedGraph<V, E>;
   renderers?: ET extends 'curved'
-    ? UndirectedGraphWithCurvedEdgeRenderers<V, E>
-    : UndirectedGraphWithStraightEdgeRenderers<V, E>;
+    ? MaybeObject<UndirectedGraphWithCurvedEdgeRenderers<V, E>>
+    : MaybeObject<UndirectedGraphWithStraightEdgeRenderers<V, E>>;
 };
 
 export type GraphComponentsData<V, E> = {
@@ -94,11 +95,11 @@ export type AllGraphSettings<V, E> = {
   layoutSettings: AllGraphLayoutSettings;
   placementSettings: AllGraphPlacementSettings;
   renderers: {
-    arrow?: ArrowRenderer;
-    edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
-    label?: LabelRenderer<E>;
-    vertex: VertexRenderer<V>;
-    vertexMask?: VertexMaskRenderer;
+    arrow: ArrowRenderer | null;
+    edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
+    label: LabelRenderer<E> | null;
+    vertex: VertexRenderer<V> | null;
+    vertexMask: VertexMaskRenderer | null;
   };
 };
 

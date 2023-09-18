@@ -82,9 +82,9 @@ export type EdgeComponentProps<V, E> = Omit<
 > & {
   onRemove: EdgeRemoveHandler;
   renderers: {
-    arrow?: ArrowRenderer;
-    edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
-    label?: LabelRenderer<E>;
+    arrow?: ArrowRenderer | null;
+    edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
+    label?: LabelRenderer<E> | null;
   };
   settings: {
     arrow?: InternalArrowSettings;
@@ -97,10 +97,10 @@ export type GraphEdgesProps<V, E> = Omit<
   EdgeComponentProps<V, E>,
   'data' | 'renderers'
 > & {
-  arrowRenderer?: ArrowRenderer;
-  edgeRenderer: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
+  arrowRenderer?: ArrowRenderer | null;
+  edgeRenderer: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
   edgesData: Record<string, EdgeComponentData<E>>;
   focusProgress: SharedValue<number>;
-  labelRenderer: LabelRenderer<E>;
+  labelRenderer: LabelRenderer<E> | null;
   onRemove: EdgeRemoveHandler;
 };

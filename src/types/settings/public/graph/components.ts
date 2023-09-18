@@ -4,7 +4,6 @@ import { Sharedifyable } from '@/types/utils';
  * COMPONENTS SETTINGS
  */
 export type VertexSettings = {
-  displayMask?: boolean;
   radius?: number;
 };
 
@@ -17,7 +16,6 @@ export type CurvedEdgeSettings = Record<string, never>; // No settings for now
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
 export type LabelSettings = {
-  displayed?: Sharedifyable<boolean>;
   scale?: Sharedifyable<number>;
 };
 
