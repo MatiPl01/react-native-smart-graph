@@ -54,11 +54,9 @@ export type DirectedGraphComponentProps<
 > = Omit<DirectedGraphSettings<V>, 'edgeType'> & {
   edgeType?: ET;
   graph: DirectedGraph<V, E>;
-  renderers?: MaybeObject<
-    ET extends 'curved'
-      ? DirectedGraphWithCurvedEdgeRenderers<V, E>
-      : DirectedGraphWithStraightEdgeRenderers<V, E>
-  >;
+  renderers?: ET extends 'curved'
+    ? MaybeObject<DirectedGraphWithCurvedEdgeRenderers<V, E>>
+    : MaybeObject<DirectedGraphWithStraightEdgeRenderers<V, E>>;
 };
 
 export type UndirectedGraphComponentProps<
@@ -68,11 +66,9 @@ export type UndirectedGraphComponentProps<
 > = Omit<UndirectedGraphSettings<V>, 'edgeType'> & {
   edgeType?: ET;
   graph: UndirectedGraph<V, E>;
-  renderers?: MaybeObject<
-    ET extends 'curved'
-      ? UndirectedGraphWithCurvedEdgeRenderers<V, E>
-      : UndirectedGraphWithStraightEdgeRenderers<V, E>
-  >;
+  renderers?: ET extends 'curved'
+    ? MaybeObject<UndirectedGraphWithCurvedEdgeRenderers<V, E>>
+    : MaybeObject<UndirectedGraphWithStraightEdgeRenderers<V, E>>;
 };
 
 export type GraphComponentsData<V, E> = {
