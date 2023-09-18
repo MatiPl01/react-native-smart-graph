@@ -21,7 +21,6 @@ import { calcTranslationOnProgress, calcValueOnProgress } from '@/utils/views';
 
 type ReactionProps = {
   label: {
-    displayed: boolean;
     scale: number;
   };
   points: Unsharedify<EdgeComponentData<unknown>['points']>;
@@ -117,15 +116,15 @@ export const useCurvedEdge = <
 >(
   inputProps: P,
   getPointsOrder: EdgePointsOrderGetter,
-  selector?: (props: P) => S,
-  reaction?: (props: CustomReactionProps<S>) => void
+  additional?: [(props: P) => S, (props: CustomReactionProps<S>) => void]
 ): {
   path: SharedValue<string>;
 } => {
   const {
     data: { label: labelData, ordering, points, transformProgress },
+    renderers: { label: labelRenderer },
     settings: {
-      label: { displayed: labelDisplayed, scale: labelScale },
+      label: { scale: labelScale },
       vertex: { radius: vertexRadius }
     }
   } = inputProps;
@@ -143,13 +142,13 @@ export const useCurvedEdge = <
   const startOffset = useSharedValue(0);
 
   // ADDITIONAL PROPS
+  const [selector, reaction] = additional ?? [];
   const additionalProps = selector?.(inputProps);
 
   useAnimatedReaction(
     () => ({
       customProps: unsharedify(additionalProps),
       label: {
-        displayed: labelDisplayed.value,
         scale: labelScale.value
       },
       points: points.value,
@@ -157,6 +156,7 @@ export const useCurvedEdge = <
       r: vertexRadius
     }),
     ({ customProps, ...props }) => {
+      // EDGE
       // Update the source offset if the new transition started
       let beginOffset = startOffset.value;
       if (props.progress === 0) {
@@ -169,13 +169,18 @@ export const useCurvedEdge = <
         ordering.value,
         props
       );
+
+      // LABEL
       // Update label transform
-      const labelTransform = getLabelTransform(
-        edgeTransform,
-        props.label.scale
-      );
-      labelData.transform.value = labelTransform;
-      // Additional reaction
+      if (labelRenderer) {
+        const labelTransform = getLabelTransform(
+          edgeTransform,
+          props.label.scale
+        );
+        labelData.transform.value = labelTransform;
+      }
+
+      // CUSTOM REACTION
       reaction?.({
         ...props,
         customProps,
@@ -184,11 +189,12 @@ export const useCurvedEdge = <
           label: labelData.transform.value
         }
       } as CustomReactionProps<S>);
-      // At the end, update shared values
+
+      // At the end, update edge-related shared values
       path.value = edgeTransform.path;
       currentOffset.value = edgeTransform.offset;
     },
-    [vertexRadius]
+    [vertexRadius, labelRenderer, additional]
   );
 
   return { path };

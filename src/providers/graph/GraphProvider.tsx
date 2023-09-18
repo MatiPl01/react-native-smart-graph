@@ -77,10 +77,7 @@ export default function GraphProvider<V, E>({
       // The provider used to handle canvas settings change and respond to such changes
       <SettingsChangeResponderProvider />,
       // EDGES MASK
-      <ConditionalProvider.If
-        if={({ componentsSettings }) => componentsSettings.vertex.displayMask}
-        then={<EdgesMaskProvider />}
-      />
+      <EdgesMaskProvider />
     ],
     []
   );

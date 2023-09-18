@@ -210,9 +210,10 @@ const areSettingsWithDefaults = <C, D, N>(
 };
 
 const isEmpty = (obj?: any): boolean =>
-  obj === null ||
-  obj === undefined ||
-  (typeof obj === 'object' && Object.keys(obj as object).length === 0);
+  obj === null
+    ? false
+    : obj === undefined ||
+      (typeof obj === 'object' && Object.keys(obj as object).length === 0);
 
 export const updateValues = <
   D extends object,

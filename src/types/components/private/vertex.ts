@@ -18,7 +18,7 @@ export type GraphVerticesProps<V> = {
   focusContext: FocusContextType;
   multiStepFocusContext: MultiStepFocusContextType;
   onRemove: VertexRemoveHandler;
-  renderer: VertexRenderer<V>;
+  renderer: VertexRenderer<V> | null;
   settings: InternalVertexSettings;
   verticesData: Record<string, VertexComponentData<V>>;
 };

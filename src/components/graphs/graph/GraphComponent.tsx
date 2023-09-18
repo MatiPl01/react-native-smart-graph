@@ -17,7 +17,7 @@ function GraphComponent() {
   const { focusContext } = useCanvasContexts();
   // Graph contexts
   const multiStepFocusContext = useMultiStepFocusContext();
-  const edgesMaskContext = useEdgesMaskContext();
+  const { maskComponent } = useEdgesMaskContext();
 
   // A helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
@@ -27,20 +27,20 @@ function GraphComponent() {
   return (
     <>
       {/* Graph edges */}
-      {edgesMaskContext ? (
-        <Mask mask={edgesMaskContext.maskComponent} mode='luminance'>
+      {maskComponent ? (
+        <Mask mask={maskComponent} mode='luminance'>
           <GraphEdges focusProgress={focusProgress} />
         </Mask>
       ) : (
         <GraphEdges focusProgress={focusProgress} />
       )}
+      {/* Edges labels */}
+      <GraphEdgesLabels focusProgress={focusProgress} />
       {/* Graph vertices */}
       <GraphVertices
         focusContext={focusContext}
         multiStepFocusContext={multiStepFocusContext}
       />
-      {/* Edges labels */}
-      <GraphEdgesLabels focusProgress={focusProgress} />
       {/* TODO - Vertices labels */}
     </>
   );

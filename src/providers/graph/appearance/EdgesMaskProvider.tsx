@@ -23,10 +23,20 @@ type EdgesMaskContextType = {
 
 const EdgesMaskContext = createContext<EdgesMaskContextType | null>(null);
 
-export const useEdgesMaskContext = () => useContext(EdgesMaskContext);
+export const useEdgesMaskContext = () => {
+  const context = useContext(EdgesMaskContext);
+
+  if (!context) {
+    throw new Error(
+      'useEdgesMaskContext must be used within a GraphEdgesMaskProvider'
+    );
+  }
+
+  return context;
+};
 
 type GraphEdgesMaskProviderProps = PropsWithChildren<{
-  renderer?: VertexMaskRenderer;
+  renderer: VertexMaskRenderer | null;
 }>;
 
 function GraphEdgesMaskProvider({

@@ -29,7 +29,7 @@ function DirectedStraightEdgeComponent<V, E>(
   const {
     data: { animationProgress, key, value },
     focusProgress,
-    renderers,
+    renderers: { arrow: arrowRenderer, edge: edgeRenderer },
     settings: {
       arrow: { scale: arrowScale },
       vertex: { radius: vertexRadius }
@@ -43,27 +43,31 @@ function DirectedStraightEdgeComponent<V, E>(
     props,
     calcTranslationOffset,
     // Additional settings for the arrow component
-    () => ({
-      arrowScale
-    }),
-    ({
-      customProps: { arrowScale: aScale },
-      transform: {
-        edge: { offset, p1: v1, p2: v2 },
-        label: { scale: labelScale }
-      }
-    }) => {
-      'worklet';
-      // Update the arrow component props
-      const distance = Math.sqrt(vertexRadius ** 2 - offset ** 2);
-      const dirVector = calcUnitVector(v1, v2);
-      arrowTransform.value = calcArrowTransform(
-        translateAlongVector(v2, dirVector, -distance),
-        dirVector,
-        Math.min(aScale, labelScale),
-        vertexRadius
-      );
-    }
+    arrowRenderer
+      ? [
+          () => ({
+            arrowScale
+          }),
+          ({
+            customProps: { arrowScale: aScale },
+            transform: {
+              edge: { offset, p1: v1, p2: v2 },
+              label: { scale: labelScale }
+            }
+          }) => {
+            'worklet';
+            // Update the arrow component props
+            const distance = Math.sqrt(vertexRadius ** 2 - offset ** 2);
+            const dirVector = calcUnitVector(v1, v2);
+            arrowTransform.value = calcArrowTransform(
+              translateAlongVector(v2, dirVector, -distance),
+              dirVector,
+              Math.min(aScale, labelScale),
+              vertexRadius
+            );
+          }
+        ]
+      : undefined
   );
 
   return (
@@ -74,15 +78,17 @@ function DirectedStraightEdgeComponent<V, E>(
         focusProgress={focusProgress}
         p1={p1}
         p2={p2}
-        renderer={renderers.edge}
+        renderer={edgeRenderer}
         value={value as E}
       />
-      <ArrowComponent
-        animationProgress={animationProgress}
-        renderer={renderers.arrow}
-        transform={arrowTransform}
-        vertexRadius={vertexRadius}
-      />
+      {arrowRenderer && (
+        <ArrowComponent
+          animationProgress={animationProgress}
+          renderer={arrowRenderer}
+          transform={arrowTransform}
+          vertexRadius={vertexRadius}
+        />
+      )}
     </>
   );
 }

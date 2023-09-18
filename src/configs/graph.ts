@@ -69,7 +69,7 @@ const DEFAULT_PLACEMENT_SETTINGS: {
   },
   orbits: {
     layerSizing: 'auto',
-    maxSectorAngle: (2 / 3) * Math.PI,
+    maxSectorAngle: Math.PI,
     minVertexDistance,
     roots: [],
     strategy: 'orbits',
@@ -160,11 +160,9 @@ const DEFAULT_COMPONENTS_SETTINGS: {
     }
   },
   label: {
-    displayed: false,
     scale: 0.5
   },
   vertex: {
-    displayMask: false,
     radius: 20
   }
 };
@@ -231,18 +229,14 @@ export const getDefaultConfig = <V, E>(
       : DEFAULT_PLACEMENT_SETTINGS[data.placementSettings.strategy]
     : DEFAULT_PLACEMENT_SETTINGS.random.grid,
   renderers: {
-    arrow: data.graph.isDirected() ? DefaultArrowRenderer : undefined,
+    arrow: data.graph.isDirected() ? DefaultArrowRenderer : null,
     edge:
       data.edgeType === 'curved'
         ? DefaultCurvedEdgeRenderer
         : DefaultStraightEdgeRenderer,
-    label: data.componentsSettings?.label?.displayed
-      ? DefaultLabelRenderer
-      : undefined,
+    label: DefaultLabelRenderer,
     vertex: DefaultVertexRenderer,
-    vertexMask: data.componentsSettings?.vertex?.displayMask
-      ? DefaultVertexMaskRenderer
-      : undefined
+    vertexMask: DefaultVertexMaskRenderer
   }
 });
 
@@ -304,7 +298,6 @@ export const getUpdateConfig = <V, E>(
           }
         : undefined,
     label: {
-      displayed: 'shared',
       scale: 'shared'
     }
   },

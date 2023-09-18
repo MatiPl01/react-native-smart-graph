@@ -22,7 +22,7 @@ function DirectedCurvedEdgeComponent<V, E>(
   const {
     data: { animationProgress, key, value },
     focusProgress,
-    renderers,
+    renderers: { arrow: arrowRenderer, edge: edgeRenderer },
     settings: {
       arrow: { scale: arrowScale },
       vertex: { radius: vertexRadius }
@@ -35,67 +35,76 @@ function DirectedCurvedEdgeComponent<V, E>(
   const { path } = useCurvedEdge(
     props,
     getEdgePointsOrder,
-    () => ({
-      arrowScale
-    }),
-    ({
-      customProps,
-      transform: {
-        edge: { parabolaPoint, v1, v2 }
-      }
-    }) => {
-      'worklet';
-      // Update the arrow component props
-      const center = {
-        x: (v1.x + v2.x) / 2,
-        y: (v1.y + v2.y) / 2
-      };
-      // 1. Get the rotation angle of the coordinate system
-      const rotationAngle = Math.atan2(v2.y - v1.y, v2.x - v1.x);
-      // 2. Rotate points to the new coordinate system
-      const plainP2 = rotate(v2, center, rotationAngle);
-      const plainParabolaVertex = rotate(parabolaPoint, center, rotationAngle);
-      // 3. Calculate the canonical parabola equation coefficients
-      const { x: p, y: q } = plainParabolaVertex;
-      const a = (plainP2.y - q) / (plainP2.x - p) ** 2;
-      // 4. Calculate the edge arrow tip position
-      const plainArrowTipPosition = calcApproxPointOnParabola(
-        plainP2.x,
-        a,
-        p,
-        q,
-        -vertexRadius
-      );
-      const rotatedArrowTipPosition = rotate(
-        plainArrowTipPosition,
-        center,
-        -rotationAngle
-      );
-      // 5. Calculate the direction vector
-      const plainArrowEndPosition = calcApproxPointOnParabola(
-        plainArrowTipPosition.x,
-        a,
-        p,
-        q,
-        vertexRadius * customProps.arrowScale
-      );
-      const rotatedArrowEndPosition = rotate(
-        plainArrowEndPosition,
-        center,
-        -rotationAngle
-      );
-      const dirVector = calcUnitVector(
-        rotatedArrowTipPosition,
-        rotatedArrowEndPosition
-      );
-      // 6. Update the values
-      arrowTransform.value = calcArrowTransform(
-        rotatedArrowTipPosition,
-        dirVector,
-        customProps.arrowScale,
-        vertexRadius
-      );
-    }
+    // Additional settings for the arrow component
+    arrowRenderer
+      ? [
+          () => ({
+            arrowScale
+          }),
+          ({
+            customProps,
+            transform: {
+              edge: { parabolaPoint, v1, v2 }
+            }
+          }) => {
+            'worklet';
+            // Update the arrow component props
+            const center = {
+              x: (v1.x + v2.x) / 2,
+              y: (v1.y + v2.y) / 2
+            };
+            // 1. Get the rotation angle of the coordinate system
+            const rotationAngle = Math.atan2(v2.y - v1.y, v2.x - v1.x);
+            // 2. Rotate points to the new coordinate system
+            const plainP2 = rotate(v2, center, rotationAngle);
+            const plainParabolaVertex = rotate(
+              parabolaPoint,
+              center,
+              rotationAngle
+            );
+            // 3. Calculate the canonical parabola equation coefficients
+            const { x: p, y: q } = plainParabolaVertex;
+            const a = (plainP2.y - q) / (plainP2.x - p) ** 2;
+            // 4. Calculate the edge arrow tip position
+            const plainArrowTipPosition = calcApproxPointOnParabola(
+              plainP2.x,
+              a,
+              p,
+              q,
+              -vertexRadius
+            );
+            const rotatedArrowTipPosition = rotate(
+              plainArrowTipPosition,
+              center,
+              -rotationAngle
+            );
+            // 5. Calculate the direction vector
+            const plainArrowEndPosition = calcApproxPointOnParabola(
+              plainArrowTipPosition.x,
+              a,
+              p,
+              q,
+              vertexRadius * customProps.arrowScale
+            );
+            const rotatedArrowEndPosition = rotate(
+              plainArrowEndPosition,
+              center,
+              -rotationAngle
+            );
+            const dirVector = calcUnitVector(
+              rotatedArrowTipPosition,
+              rotatedArrowEndPosition
+            );
+            // 6. Update the values
+            arrowTransform.value = calcArrowTransform(
+              rotatedArrowTipPosition,
+              dirVector,
+              customProps.arrowScale,
+              vertexRadius
+            );
+          }
+        ]
+      : undefined
   );
 
   return (
@@ -105,15 +114,17 @@ function DirectedCurvedEdgeComponent<V, E>(
         edgeKey={key}
         focusProgress={focusProgress}
         path={path}
-        renderer={renderers.edge}
+        renderer={edgeRenderer}
         value={value as E}
       />
-      <ArrowComponent
-        animationProgress={animationProgress}
-        renderer={renderers.arrow}
-        transform={arrowTransform}
-        vertexRadius={vertexRadius}
-      />
+      {arrowRenderer && (
+        <ArrowComponent
+          animationProgress={animationProgress}
+          renderer={arrowRenderer}
+          transform={arrowTransform}
+          vertexRadius={vertexRadius}
+        />
+      )}
     </>
   );
 }

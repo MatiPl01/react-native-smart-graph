@@ -24,7 +24,6 @@ import { calcTranslationOnProgress, calcValueOnProgress } from '@/utils/views';
 
 type ReactionProps = {
   label: {
-    displayed: boolean;
     scale: number;
   };
   offsetFactor: number;
@@ -40,6 +39,8 @@ type EdgeTranslation = {
   v1: Vector;
   v2: Vector;
 };
+
+type LabelTranslation = Unsharedify<LabelComponentData<unknown>['transform']>;
 
 export type TranslationOffsetGetter = (
   order: number,
@@ -84,14 +85,14 @@ const getEdgeTransform = (
   };
 };
 
-const getLabelTransform = <E>(
+const getLabelTransform = (
   { p1, p2, v1, v2 }: EdgeTranslation,
   startScale: number,
   {
     target: { edgesCount }
   }: Unsharedify<EdgeComponentData<unknown>['ordering']>,
   { label, offsetFactor, progress }: ReactionProps
-): Unsharedify<LabelComponentData<E>['transform']> => {
+): LabelTranslation => {
   'worklet';
   const targetScale = Math.min(
     (2 * offsetFactor) / (edgesCount > 0 ? edgesCount - 1 : 1),
@@ -110,7 +111,7 @@ type CustomReactionProps<S> = ReactionProps & {
   customProps: Unsharedify<S>;
   transform: {
     edge: EdgeTranslation;
-    label: Unsharedify<LabelComponentData<any>['transform']>;
+    label: LabelTranslation;
   };
 };
 
@@ -122,17 +123,17 @@ export const useStraightEdge = <
 >(
   inputProps: P,
   calcTranslationOffset: TranslationOffsetGetter,
-  selector?: (props: P) => S,
-  reaction?: (props: CustomReactionProps<S>) => void
+  additional?: [(props: P) => S, (props: CustomReactionProps<S>) => void]
 ): {
   p1: SharedValue<Vector>;
   p2: SharedValue<Vector>;
 } => {
   const {
     data: { label: labelData, ordering, points, transformProgress },
+    renderers: { label: labelRenderer },
     settings: {
       edge: { maxOffsetFactor },
-      label: { displayed: labelDisplayed, scale: labelScale },
+      label: { scale: labelScale },
       vertex: { radius: vertexRadius }
     }
   } = inputProps;
@@ -155,13 +156,13 @@ export const useStraightEdge = <
   const labelStartScale = useSharedValue(0);
 
   // ADDITIONAL PROPS
+  const [selector, reaction] = additional ?? [];
   const additionalProps = selector?.(inputProps);
 
   useAnimatedReaction(
     () => ({
       customProps: unsharedify(additionalProps),
       label: {
-        displayed: labelDisplayed.value,
         scale: labelScale.value
       },
       offsetFactor: maxOffsetFactor.value,
@@ -170,6 +171,7 @@ export const useStraightEdge = <
       r: vertexRadius
     }),
     ({ customProps, ...props }) => {
+      // EDGE
       // Update the source offset if the ordering has changed
       let beginOffset = startOffset.value;
       const currentOrdering = ordering.value;
@@ -183,6 +185,8 @@ export const useStraightEdge = <
         currentOrdering,
         props
       );
+
+      // LABEL
       // Update label transform
       let beginScale = labelStartScale.value;
       if (props.progress === 0) {
@@ -194,8 +198,11 @@ export const useStraightEdge = <
         currentOrdering,
         props
       );
-      labelData.transform.value = labelTransform;
-      // Additional reaction
+      if (labelRenderer) {
+        labelData.transform.value = labelTransform;
+      }
+
+      // CUSTOM REACTION
       reaction?.({
         ...props,
         customProps,
@@ -204,12 +211,13 @@ export const useStraightEdge = <
           label: labelTransform
         }
       } as CustomReactionProps<S>);
-      // At the end, update shared values
+
+      // At the end, update edge-related shared values
       p1.value = edgeTransform.p1;
       p2.value = edgeTransform.p2;
       currentOffset.value = edgeTransform.offset;
     },
-    [vertexRadius]
+    [vertexRadius, labelRenderer, additional]
   );
 
   return { p1, p2 };
