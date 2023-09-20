@@ -18,7 +18,6 @@ import {
   InternalVertexSettings
 } from '@/types/settings';
 
-import { InternalArrowSettings } from '../../../../dist/types/types/settings/private/graph/components';
 import {
   AllDirectedGraphWithCurvedEdgeRenderers,
   AllDirectedGraphWithStraightEdgeRenderers,
@@ -101,7 +100,7 @@ export type GraphEdgesProps<V, E> = Omit<
   'data' | 'renderers' | 'settings'
 > & {
   arrowRenderer?: EdgeArrowRenderer | null;
-  arrowSettings: InternalArrowSettings;
+  arrowSettings: InternalEdgeArrowSettings;
   edgeRenderer: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
   edgeSettings: InternalEdgeSettings;
   edgesData: Record<string, EdgeComponentData<E>>;
