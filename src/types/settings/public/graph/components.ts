@@ -15,11 +15,11 @@ export type CurvedEdgeSettings = Record<string, never>; // No settings for now
 
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
-export type LabelSettings = {
+export type EdgeLabelSettings = {
   scale?: Sharedifyable<number>;
 };
 
-export type ArrowSettings = {
+export type EdgeArrowSettings = {
   scale?: Sharedifyable<number>;
 };
 
@@ -29,7 +29,7 @@ export type EdgeType = 'curved' | 'straight';
  * GRAPH COMPONENTS SETTINGS
  */
 type SharedGraphComponentsSettings = {
-  label?: LabelSettings;
+  edgeLabel?: EdgeLabelSettings;
   vertex?: VertexSettings;
 };
 
@@ -45,12 +45,12 @@ export type UndirectedGraphWithCurvedEdgesComponentsSettings =
 
 export type DirectedGraphWithStraightEdgesComponentsSettings =
   UndirectedGraphWithStraightEdgesComponentsSettings & {
-    arrow?: ArrowSettings;
+    edgeArrow?: EdgeArrowSettings;
   };
 
 export type DirectedGraphWithCurvedEdgesComponentsSettings =
   UndirectedGraphWithCurvedEdgesComponentsSettings & {
-    arrow?: ArrowSettings;
+    edgeArrow?: EdgeArrowSettings;
   };
 
 export type UndirectedGraphComponentsSettings =

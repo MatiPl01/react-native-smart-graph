@@ -1,10 +1,10 @@
-import { LabelRenderer } from '@/types/components/public';
-import { LabelComponentData } from '@/types/data';
+import { EdgeLabelRenderer } from '@/types/components/public';
+import { EdgeLabelComponentData } from '@/types/data';
 
-export type LabelComponentProps<E = undefined> = {
-  data: LabelComponentData<E>;
+export type EdgeLabelComponentProps<E = undefined> = {
+  data: EdgeLabelComponentData<E>;
   edgeKey: string;
-  renderer: LabelRenderer<E>;
+  renderer: EdgeLabelRenderer<E>;
   value?: E;
   vertexRadius: number;
 };

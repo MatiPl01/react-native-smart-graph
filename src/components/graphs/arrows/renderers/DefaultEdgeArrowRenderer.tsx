@@ -3,12 +3,12 @@ import { Vertices } from '@shopify/react-native-skia';
 import React from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { ArrowRendererProps } from '@/types/components';
+import { EdgeArrowRendererProps } from '@/types/components';
 
-export default function DefaultArrowRenderer({
+export default function DefaultEdgeArrowRenderer({
   animationProgress,
   s // size
-}: ArrowRendererProps) {
+}: EdgeArrowRendererProps) {
   const color = '#999';
   const colors = [color, color, color];
 

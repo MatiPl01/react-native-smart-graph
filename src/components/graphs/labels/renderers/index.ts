@@ -1,2 +1,1 @@
-/* eslint-disable import/no-unused-modules */
-export { default as DefaultLabelRenderer } from './DefaultLabelRenderer';
+export { default as DefaultEdgeLabelRenderer } from './DefaultEdgeLabelRenderer';

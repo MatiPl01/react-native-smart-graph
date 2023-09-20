@@ -1,8 +1,8 @@
 import {
-  ArrowSettings,
   CurvedEdgeSettings,
+  EdgeArrowSettings,
+  EdgeLabelSettings,
   EdgeSettings,
-  LabelSettings,
   StraightEdgeSettings,
   VertexSettings
 } from '@/types/settings/public';
@@ -19,14 +19,14 @@ export type AllStraightEdgeSettings = DeepRequired<StraightEdgeSettings>;
 
 export type AllCurvedEdgeSettings = DeepRequired<CurvedEdgeSettings>;
 
-export type AllArrowSettings = DeepRequired<ArrowSettings>;
+export type AllEdgeArrowSettings = DeepRequired<EdgeArrowSettings>;
 
-export type AllLabelSettings = DeepRequired<LabelSettings>;
+export type AllEdgeLabelSettings = DeepRequired<EdgeLabelSettings>;
 
 export type AllGraphComponentsSettings = {
-  arrow?: AllArrowSettings;
   edge: AllEdgeSettings;
-  label?: AllLabelSettings;
+  edgeArrow?: AllEdgeArrowSettings;
+  edgeLabel?: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
 };
 
@@ -39,9 +39,9 @@ export type InternalStraightEdgeSettings =
 export type InternalCurvedEdgeSettings = Pick<AllCurvedEdgeSettings, 'type'> &
   DeepSharedify<Omit<AllCurvedEdgeSettings, 'type'>>;
 
-export type InternalArrowSettings = DeepSharedify<AllArrowSettings>;
+export type InternalEdgeArrowSettings = DeepSharedify<AllEdgeArrowSettings>;
 
-export type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
+export type InternalEdgeLabelSettings = DeepSharedify<AllEdgeLabelSettings>;
 
 export type InternalEdgeSettings = DeepSharedify<AllEdgeSettings>;
 
@@ -52,23 +52,23 @@ type SharedInternalEdgeSettings = {
 export type InternalUndirectedStraightEdgeSettings =
   SharedInternalEdgeSettings & {
     edge: InternalStraightEdgeSettings;
-    label: InternalLabelSettings;
+    label: InternalEdgeLabelSettings;
   };
 
 export type InternalUndirectedCurvedEdgeSettings =
   SharedInternalEdgeSettings & {
     edge: InternalCurvedEdgeSettings;
-    label: InternalLabelSettings;
+    label: InternalEdgeLabelSettings;
   };
 
 export type InternalDirectedStraightEdgeSettings =
   InternalUndirectedStraightEdgeSettings & {
-    arrow: InternalArrowSettings;
+    arrow: InternalEdgeArrowSettings;
   };
 
 export type InternalDirectedCurvedEdgeSettings =
   InternalUndirectedCurvedEdgeSettings & {
-    arrow: InternalArrowSettings;
+    arrow: InternalEdgeArrowSettings;
   };
 
 export type InternalVertexSettings = AllVertexSettings;
@@ -77,8 +77,8 @@ export type InternalVertexSettings = AllVertexSettings;
  * INTERNAL GRAPH COMPONENTS SETTINGS
  */
 export type InternalGraphComponentsSettings = {
-  arrow?: InternalArrowSettings;
   edge: InternalEdgeSettings;
-  label?: InternalLabelSettings;
+  edgeArrow?: InternalEdgeArrowSettings;
+  edgeLabel?: InternalEdgeLabelSettings;
   vertex: InternalVertexSettings;
 };

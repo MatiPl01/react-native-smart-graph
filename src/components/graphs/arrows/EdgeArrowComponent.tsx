@@ -1,13 +1,13 @@
 import { Group } from '@shopify/react-native-skia';
 
-import { ArrowComponentProps } from '@/types/components';
+import { EdgeArrowComponentProps } from '@/types/components';
 
-export default function ArrowComponent({
+export default function EdgeArrowComponent({
   animationProgress,
   renderer,
   transform,
   vertexRadius
-}: ArrowComponentProps) {
+}: EdgeArrowComponentProps) {
   // RENDERER PROPS
   const rendererProps = {
     animationProgress,

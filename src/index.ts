@@ -12,10 +12,10 @@ export { default as DirectedGraphComponent } from '@/components/graphs/DirectedG
 export { default as UndirectedGraphComponent } from '@/components/graphs/UndirectedGraphComponent';
 
 // RENDERERS
-export { default as DefaultEdgeArrowRenderer } from '@/components/graphs/arrows/renderers/DefaultArrowRenderer';
+export { default as DefaultEdgeArrowRenderer } from '@/components/graphs/arrows/renderers/DefaultEdgeArrowRenderer';
 export { default as DefaultCurvedEdgeRenderer } from '@/components/graphs/edges/curved/renderers/DefaultCurvedEdgeRenderer';
 export { default as DefaultStraightEdgeRenderer } from '@/components/graphs/edges/straight/renderers/DefaultStraightEdgeRenderer';
-export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/renderers/DefaultLabelRenderer';
+export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
 export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
 
 // MODELS

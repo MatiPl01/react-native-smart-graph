@@ -3,18 +3,18 @@ import { memo } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import {
-  LabelComponentProps,
-  LabelRenderer,
-  LabelRendererProps
+  EdgeLabelComponentProps,
+  EdgeLabelRenderer,
+  EdgeLabelRendererProps
 } from '@/types/components';
 import { distanceBetweenVectors } from '@/utils/vectors';
 
-function LabelComponent<E>({
+function EdgeLabelComponent<E>({
   data: { animationProgress, transform: labelTransform, value },
   edgeKey,
   renderer,
   vertexRadius
-}: LabelComponentProps<E>) {
+}: EdgeLabelComponentProps<E>) {
   // RENDERER PROPS
   const edgeLength = useSharedValue(0);
   const edgeRotation = useSharedValue(0);
@@ -98,9 +98,9 @@ function LabelComponent<E>({
   );
 }
 
-type RenderedLabelComponentProps<E> = Omit<LabelRendererProps<E>, 'key'> & {
+type RenderedLabelComponentProps<E> = Omit<EdgeLabelRendererProps<E>, 'key'> & {
   edgeKey: string;
-  renderer: LabelRenderer<E>;
+  renderer: EdgeLabelRenderer<E>;
 };
 
 function RenderedLabelComponent<E>({
@@ -111,4 +111,4 @@ function RenderedLabelComponent<E>({
   return renderer({ key, ...restProps });
 }
 
-export default memo(LabelComponent) as typeof LabelComponent;
+export default memo(EdgeLabelComponent) as typeof EdgeLabelComponent;

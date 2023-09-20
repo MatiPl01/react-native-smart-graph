@@ -202,7 +202,7 @@ export default function BottomSheetFocus() {
             strategy: 'orbits'
           }}
           renderers={{
-            label: null
+            edgeLabel: null
           }}
           graph={graph}
         />

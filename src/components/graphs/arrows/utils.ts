@@ -1,9 +1,8 @@
-/* eslint-disable import/no-unused-modules */
 import { Vector } from '@shopify/react-native-skia';
 
 import { translateAlongVector } from '@/utils/vectors';
 
-export const calcArrowTransform = (
+export const calcEdgeArrowTransform = (
   tipPosition: Vector,
   dirVector: Vector,
   scale: number,

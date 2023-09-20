@@ -1,6 +1,6 @@
 import { createContext, PropsWithChildren, useContext } from 'react';
 
-import { AccessibleOverlayContextType } from '@/contexts/OverlayProvider';
+import { AccessibleOverlayContextType } from '@/contexts/overlay/OverlayProvider';
 import {
   AutoSizingContextType,
   FocusContextType,

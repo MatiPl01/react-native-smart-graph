@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { useVertexTransform } from '@/hooks/transform';
+import { useVertexTransform } from '@/hooks';
 import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import {

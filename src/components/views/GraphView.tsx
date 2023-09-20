@@ -2,10 +2,11 @@ import { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { DEFAULT_VIEW_SETTINGS } from '@/configs/view';
-import GraphViewChildrenProvider, {
+import {
+  GraphViewChildrenProvider,
   useGraphViewChildrenContext
-} from '@/contexts/GraphViewChildrenProvider';
-import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
+} from '@/contexts/children';
+import { OverlayOutlet, OverlayProvider } from '@/contexts/overlay';
 import CanvasProvider, { useGesturesContext } from '@/providers/view';
 import { GraphViewSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';

@@ -12,7 +12,7 @@ import {
   DEFAULT_FOCUS_ANIMATION_SETTINGS,
   DEFAULT_GESTURE_ANIMATION_SETTINGS
 } from '@/constants/animations';
-import { useAutoSizingContext } from '@/providers/view';
+import { useAutoSizingContext } from '@/providers/view/auto';
 import { useViewDataContext } from '@/providers/view/data';
 import {
   BlurData,

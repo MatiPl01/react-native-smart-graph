@@ -44,14 +44,14 @@ export const withComponentsData = <
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   graphAnimationsSettings: AllGraphAnimationsSettings;
-  renderLabels: boolean;
+  renderEdgeLabels: boolean;
 }>;
 
 function ComponentsDataProvider<V, E>({
   children,
   graph,
   graphAnimationsSettings,
-  renderLabels
+  renderEdgeLabels
 }: ComponentsDataProviderProps<V, E>) {
   // GRAPH OBSERVER
   const [state] = useGraphObserver(graph);
@@ -73,7 +73,7 @@ function ComponentsDataProvider<V, E>({
     isGraphDirected: graph.isDirected(),
     removedEdges,
     removedVertices,
-    renderLabels,
+    renderEdgeLabels,
     state
   });
 
@@ -109,7 +109,7 @@ function ComponentsDataProvider<V, E>({
       updateContextValue(value, newData, componentsData)
     );
     setComponentsData(newData);
-  }, [state, graphAnimationsSettings, renderLabels, forceRemove]);
+  }, [state, graphAnimationsSettings, renderEdgeLabels, forceRemove]);
 
   const startComponentsRemoveTimeout = () => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -139,6 +139,6 @@ export default withGraphSettings(
   ({ animationSettings, graph, renderers }) => ({
     graph,
     graphAnimationsSettings: animationSettings,
-    renderLabels: !!renderers.label
+    renderEdgeLabels: !!renderers.edgeLabel
   })
 );

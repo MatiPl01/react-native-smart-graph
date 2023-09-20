@@ -9,8 +9,8 @@ import {
 import {
   DirectedStraightEdgeComponentProps,
   UndirectedStraightEdgeComponentProps
-} from '@/types/components/private/edge';
-import { EdgeComponentData, LabelComponentData } from '@/types/data';
+} from '@/types/components';
+import { EdgeComponentData, EdgeLabelComponentData } from '@/types/data';
 import { Unsharedify } from '@/types/utils';
 import { unsharedify } from '@/utils/objects';
 import {
@@ -40,7 +40,9 @@ type EdgeTranslation = {
   v2: Vector;
 };
 
-type LabelTranslation = Unsharedify<LabelComponentData<unknown>['transform']>;
+type LabelTranslation = Unsharedify<
+  EdgeLabelComponentData<unknown>['transform']
+>;
 
 export type TranslationOffsetGetter = (
   order: number,
@@ -130,7 +132,7 @@ export const useStraightEdge = <
 } => {
   const {
     data: { label: labelData, ordering, points, transformProgress },
-    renderers: { label: labelRenderer },
+    renderers: { edgeLabel: edgeLabelRenderer },
     settings: {
       edge: { maxOffsetFactor },
       label: { scale: labelScale },
@@ -198,7 +200,7 @@ export const useStraightEdge = <
         currentOrdering,
         props
       );
-      if (labelRenderer) {
+      if (edgeLabelRenderer) {
         labelData.transform.value = labelTransform;
       }
 
@@ -217,7 +219,7 @@ export const useStraightEdge = <
       p2.value = edgeTransform.p2;
       currentOffset.value = edgeTransform.offset;
     },
-    [vertexRadius, labelRenderer, additional]
+    [vertexRadius, edgeLabelRenderer, additional]
   );
 
   return { p1, p2 };

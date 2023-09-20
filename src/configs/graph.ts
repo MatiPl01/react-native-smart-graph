@@ -1,7 +1,7 @@
 import {
-  DefaultArrowRenderer,
   DefaultCurvedEdgeRenderer,
-  DefaultLabelRenderer,
+  DefaultEdgeArrowRenderer,
+  DefaultEdgeLabelRenderer,
   DefaultStraightEdgeRenderer,
   DefaultVertexMaskRenderer,
   DefaultVertexRenderer
@@ -13,15 +13,15 @@ import {
 import { AllGraphSettings } from '@/types/components';
 import { GraphData } from '@/types/data';
 import {
-  AllArrowSettings,
   AllBoundRandomPlacementSettings,
   AllCirclePlacementSettings,
   AllCirclesPlacementSettings,
   AllCurvedEdgeSettings,
+  AllEdgeArrowSettings,
+  AllEdgeLabelSettings,
   AllFocusSettings,
   AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
-  AllLabelSettings,
   AllMultiStepFocusSettings,
   AllOrbitsPlacementSettings,
   AllRandomPlacementSettings,
@@ -142,12 +142,12 @@ const DEFAULT_MULTI_STEP_FOCUS_SETTINGS: Omit<
 
 // COMPONENTS
 const DEFAULT_COMPONENTS_SETTINGS: {
-  arrow: AllArrowSettings;
+  arrow: AllEdgeArrowSettings;
   edge: {
     curved: AllCurvedEdgeSettings;
     straight: AllStraightEdgeSettings;
   };
-  label: AllLabelSettings;
+  edgeLabel: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
 } = {
   arrow: {
@@ -159,7 +159,7 @@ const DEFAULT_COMPONENTS_SETTINGS: {
       maxOffsetFactor: 0.5
     }
   },
-  label: {
+  edgeLabel: {
     scale: 0.5
   },
   vertex: {
@@ -201,11 +201,11 @@ export const getDefaultConfig = <V, E>(
 ): Omit<AllGraphSettings<V, E>, 'graph'> => ({
   animationSettings: getDefaultAnimations(data),
   componentsSettings: {
-    arrow: data.graph.isDirected()
+    edge: DEFAULT_COMPONENTS_SETTINGS.edge[data.edgeType ?? 'straight'],
+    edgeArrow: data.graph.isDirected()
       ? DEFAULT_COMPONENTS_SETTINGS.arrow
       : undefined,
-    edge: DEFAULT_COMPONENTS_SETTINGS.edge[data.edgeType ?? 'straight'],
-    label: DEFAULT_COMPONENTS_SETTINGS.label,
+    edgeLabel: DEFAULT_COMPONENTS_SETTINGS.edgeLabel,
     vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
   },
   edgeType: data.edgeType ?? 'straight',
@@ -229,12 +229,12 @@ export const getDefaultConfig = <V, E>(
       : DEFAULT_PLACEMENT_SETTINGS[data.placementSettings.strategy]
     : DEFAULT_PLACEMENT_SETTINGS.random.grid,
   renderers: {
-    arrow: data.graph.isDirected() ? DefaultArrowRenderer : null,
     edge:
       data.edgeType === 'curved'
         ? DefaultCurvedEdgeRenderer
         : DefaultStraightEdgeRenderer,
-    label: DefaultLabelRenderer,
+    edgeArrow: data.graph.isDirected() ? DefaultEdgeArrowRenderer : null,
+    edgeLabel: DefaultEdgeLabelRenderer,
     vertex: DefaultVertexRenderer,
     vertexMask: DefaultVertexMaskRenderer
   }
@@ -297,7 +297,7 @@ export const getUpdateConfig = <V, E>(
             maxOffsetFactor: 'shared'
           }
         : undefined,
-    label: {
+    edgeLabel: {
       scale: 'shared'
     }
   },
