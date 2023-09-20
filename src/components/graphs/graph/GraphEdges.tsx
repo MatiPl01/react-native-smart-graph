@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 
-import { EdgeComponent } from '@/components/graphs/edges';
-import { withComponentsData } from '@/providers/graph';
-import { withGraphSettings } from '@/providers/graph/data';
+import { EdgeComponent } from '@/components/graphs';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphEdgesProps } from '@/types/components';
 
 function GraphEdges<V, E>({
@@ -42,10 +41,10 @@ export default withGraphSettings(
     onRemove: handleEdgeRemove
   })),
   ({ componentsSettings, edgeType, renderers }) => ({
-    arrowRenderer: renderers.arrow,
+    arrowRenderer: renderers.edgeArrow,
     edgeRenderer: renderers.edge,
     edgeType,
-    labelRenderer: renderers.label,
+    labelRenderer: renderers.edgeLabel,
     settings: componentsSettings
   })
 );

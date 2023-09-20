@@ -1,2 +1,2 @@
-export { default as ArrowComponent } from './ArrowComponent';
+export { default as EdgeArrowComponent } from './EdgeArrowComponent';
 export * from './renderers';

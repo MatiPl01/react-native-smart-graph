@@ -15,17 +15,6 @@ import {
   calcValueOnProgress
 } from '@/utils/views';
 
-export const createPointMapping = <V>(
-  sourcePoint: MappingSourcePoint,
-  targetStep: FocusStepData<V>
-): FocusPointMapping<V> => {
-  'worklet';
-  return {
-    from: sourcePoint,
-    to: targetStep
-  };
-};
-
 export const findPrevStepIdx = <V>(
   steps: Array<FocusStepData<V> | MappingSourcePoint>,
   progress: number

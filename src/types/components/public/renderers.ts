@@ -66,7 +66,7 @@ export type StraightEdgeRenderer<E = undefined> = (
 /*
  * LABEL
  */
-export type LabelRendererProps<E = undefined> = SharedRenderersProps & {
+export type EdgeLabelRendererProps<E = undefined> = SharedRenderersProps & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   key: string;
@@ -74,24 +74,26 @@ export type LabelRendererProps<E = undefined> = SharedRenderersProps & {
   value: E;
 };
 
-export type LabelRenderer<E> = (
-  props: LabelRendererProps<E>
+export type EdgeLabelRenderer<E> = (
+  props: EdgeLabelRendererProps<E>
 ) => JSX.Element | null;
 
 /*
  * ARROW
  */
-export type ArrowRendererProps = SharedRenderersProps & {
+export type EdgeArrowRendererProps = SharedRenderersProps & {
   s: number;
 };
 
-export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;
+export type EdgeArrowRenderer = (
+  props: EdgeArrowRendererProps
+) => JSX.Element | null;
 
 /*
  * GRAPH
  */
 type SharedUndirectedGraphRenderers<V, E> = {
-  label: LabelRenderer<E> | null;
+  edgeLabel: EdgeLabelRenderer<E> | null;
   vertex: VertexRenderer<V> | null;
   vertexMask: VertexMaskRenderer | null;
 };
@@ -100,7 +102,7 @@ type SharedDirectedGraphRenderers<V, E> = SharedUndirectedGraphRenderers<
   V,
   E
 > & {
-  arrow: ArrowRenderer | null;
+  edgeArrow: EdgeArrowRenderer | null;
 };
 
 export type UndirectedGraphWithStraightEdgeRenderers<V, E> =

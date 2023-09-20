@@ -10,7 +10,7 @@ import {
   DirectedCurvedEdgeComponentProps,
   UndirectedCurvedEdgeComponentProps
 } from '@/types/components';
-import { EdgeComponentData, LabelComponentData } from '@/types/data';
+import { EdgeComponentData, EdgeLabelComponentData } from '@/types/data';
 import { Unsharedify } from '@/types/utils';
 import { unsharedify } from '@/utils/objects';
 import {
@@ -90,7 +90,7 @@ const getEdgeTransform = (
 const getLabelTransform = <E>(
   { parabolaPoint, v1, v2 }: EdgeTranslation,
   labelScale: number
-): Unsharedify<LabelComponentData<E>['transform']> => {
+): Unsharedify<EdgeLabelComponentData<E>['transform']> => {
   'worklet';
   return {
     center: parabolaPoint,
@@ -104,7 +104,7 @@ type CustomReactionProps<S> = ReactionProps & {
   customProps: Unsharedify<S>;
   transform: {
     edge: EdgeTranslation;
-    label: Unsharedify<LabelComponentData<any>['transform']>;
+    label: Unsharedify<EdgeLabelComponentData<any>['transform']>;
   };
 };
 
@@ -122,7 +122,7 @@ export const useCurvedEdge = <
 } => {
   const {
     data: { label: labelData, ordering, points, transformProgress },
-    renderers: { label: labelRenderer },
+    renderers: { edgeLabel: edgeLabelRenderer },
     settings: {
       label: { scale: labelScale },
       vertex: { radius: vertexRadius }
@@ -172,7 +172,7 @@ export const useCurvedEdge = <
 
       // LABEL
       // Update label transform
-      if (labelRenderer) {
+      if (edgeLabelRenderer) {
         const labelTransform = getLabelTransform(
           edgeTransform,
           props.label.scale
@@ -194,7 +194,7 @@ export const useCurvedEdge = <
       path.value = edgeTransform.path;
       currentOffset.value = edgeTransform.offset;
     },
-    [vertexRadius, labelRenderer, additional]
+    [vertexRadius, edgeLabelRenderer, additional]
   );
 
   return { path };

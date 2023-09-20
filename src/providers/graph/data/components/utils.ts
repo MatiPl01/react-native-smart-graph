@@ -5,8 +5,8 @@ import { GraphState } from '@/hooks';
 import { GraphComponentsData } from '@/types/components';
 import {
   EdgeComponentData,
+  EdgeLabelComponentData,
   EdgeRemoveHandler,
-  LabelComponentData,
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/data';
@@ -34,7 +34,7 @@ export type ComponentsData<V, E> = {
   // Store keys of removed vertices for which the removal animation
   // has been completed and vertices are waiting to be unmounted
   removedVertices: Set<string>;
-  renderLabels: boolean;
+  renderEdgeLabels: boolean;
   state: GraphState<V, E>;
 };
 
@@ -98,12 +98,12 @@ export const updateContextValue = <V, E>(
         )
       : value?.edgesData ?? {};
 
-  const newLabelsData =
+  const newEdgeLabelsData =
     // Update edge labels data only if edges have changed and labels are rendered
-    newData.renderLabels && newEdgesData !== value?.edgesData
+    newData.renderEdgeLabels && newEdgesData !== value?.edgesData
       ? updateGraphEdgeLabelsData(value?.edgeLabelsData ?? {}, newEdgesData)
       : // Remove edge labels data if labels are not rendered anymore
-      !newData.renderLabels && currentData?.renderLabels
+      !newData.renderEdgeLabels && currentData?.renderEdgeLabels
       ? {}
       : // Use previous edge labels data if labels are rendered and edges have not changed
         value?.edgeLabelsData ?? {};
@@ -115,7 +115,7 @@ export const updateContextValue = <V, E>(
         // Always take new connections as the graph model takes care of
         // updating the connections when the graph is updated
         connections: newData.connections,
-        edgeLabelsData: newLabelsData,
+        edgeLabelsData: newEdgeLabelsData,
         edgesData: newEdgesData,
         handleEdgeRemove: value.handleEdgeRemove, // Prevent removing
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
@@ -366,9 +366,9 @@ const updateGraphEdgesData = <V, E>(
 };
 
 const updateGraphEdgeLabelsData = <E>(
-  oldEdgeLabelsData: Record<string, LabelComponentData<E>>,
+  oldEdgeLabelsData: Record<string, EdgeLabelComponentData<E>>,
   edgesData: Record<string, EdgeComponentData<E>>
-): Record<string, LabelComponentData<E>> => {
+): Record<string, EdgeLabelComponentData<E>> => {
   const updatedEdgeLabelsData = { ...oldEdgeLabelsData };
   let isModified = false; // Flag to indicate if edges data was updated
 

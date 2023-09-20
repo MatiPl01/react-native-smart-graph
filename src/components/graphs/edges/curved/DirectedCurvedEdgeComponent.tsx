@@ -2,8 +2,8 @@ import { rotate, Transforms2d } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
-import { ArrowComponent } from '@/components/graphs/arrows';
-import { calcArrowTransform } from '@/components/graphs/arrows/utils';
+import { EdgeArrowComponent } from '@/components/graphs/arrows';
+import { calcEdgeArrowTransform } from '@/components/graphs/arrows/utils';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import { calcUnitVector } from '@/utils/vectors';
@@ -22,7 +22,7 @@ function DirectedCurvedEdgeComponent<V, E>(
   const {
     data: { animationProgress, key, value },
     focusProgress,
-    renderers: { arrow: arrowRenderer, edge: edgeRenderer },
+    renderers: { edge: edgeRenderer, edgeArrow: edgeArrowRenderer },
     settings: {
       arrow: { scale: arrowScale },
       vertex: { radius: vertexRadius }
@@ -36,7 +36,7 @@ function DirectedCurvedEdgeComponent<V, E>(
     props,
     getEdgePointsOrder,
     // Additional settings for the arrow component
-    arrowRenderer
+    edgeArrowRenderer
       ? [
           () => ({
             arrowScale
@@ -96,7 +96,7 @@ function DirectedCurvedEdgeComponent<V, E>(
               rotatedArrowEndPosition
             );
             // 6. Update the values
-            arrowTransform.value = calcArrowTransform(
+            arrowTransform.value = calcEdgeArrowTransform(
               rotatedArrowTipPosition,
               dirVector,
               customProps.arrowScale,
@@ -117,10 +117,10 @@ function DirectedCurvedEdgeComponent<V, E>(
         renderer={edgeRenderer}
         value={value as E}
       />
-      {arrowRenderer && (
-        <ArrowComponent
+      {edgeArrowRenderer && (
+        <EdgeArrowComponent
           animationProgress={animationProgress}
-          renderer={arrowRenderer}
+          renderer={edgeArrowRenderer}
           transform={arrowTransform}
           vertexRadius={vertexRadius}
         />

@@ -4,7 +4,7 @@ import { useDerivedValue } from 'react-native-reanimated';
 import FONTS from '@/assets/fonts';
 import { EdgeLabelRendererProps } from '@/types/components';
 
-export default function DefaultLabelRenderer<E>({
+export default function DefaultEdgeLabelRenderer<E>({
   animationProgress,
   key,
   r

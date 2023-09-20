@@ -1,15 +1,15 @@
 import { Group } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { LabelComponent } from '@/components/graphs/labels';
+import { EdgeLabelComponent } from '@/components/graphs';
 import { withComponentsData, withGraphSettings } from '@/providers/graph';
-import { LabelRenderer } from '@/types/components';
-import { LabelComponentData } from '@/types/data';
+import { EdgeLabelRenderer } from '@/types/components';
+import { EdgeLabelComponentData } from '@/types/data';
 
 type GraphEdgeLabelsProps<E> = {
-  edgeLabelsData: Record<string, LabelComponentData<E>>;
+  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
   focusProgress: SharedValue<number>;
-  renderer: LabelRenderer<E> | null;
+  renderer: EdgeLabelRenderer<E> | null;
   vertexRadius: number;
 };
 
@@ -23,7 +23,7 @@ function GraphEdgeLabels<E>({
     renderer && (
       <Group opacity={focusProgress}>
         {Object.entries(edgeLabelsData).map(([key, data]) => (
-          <LabelComponent<E>
+          <EdgeLabelComponent<E>
             data={data}
             edgeKey={key}
             key={key}
@@ -42,7 +42,7 @@ export default withGraphSettings(
     edgeLabelsData
   })),
   ({ componentsSettings, renderers }) => ({
-    renderer: renderers.label,
+    renderer: renderers.edgeLabel,
     vertexRadius: componentsSettings.vertex.radius
   })
 );

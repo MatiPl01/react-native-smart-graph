@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { Path } from '@shopify/react-native-skia';
 import {
   interpolate,

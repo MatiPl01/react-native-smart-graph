@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { memo } from 'react';
 
 import { UndirectedCurvedEdgeComponentProps } from '@/types/components';

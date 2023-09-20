@@ -8,20 +8,20 @@ import { RequiredWithout } from '@/types/utils';
 
 export type AllDirectedGraphWithStraightEdgeRenderers<V, E> = RequiredWithout<
   DirectedGraphWithStraightEdgeRenderers<V, E>,
-  'label'
+  'edgeLabel'
 >;
 
 export type AllDirectedGraphWithCurvedEdgeRenderers<V, E> = RequiredWithout<
   DirectedGraphWithCurvedEdgeRenderers<V, E>,
-  'label'
+  'edgeLabel'
 >;
 
 export type AllUndirectedGraphWithStraightEdgeRenderers<V, E> = RequiredWithout<
   UndirectedGraphWithStraightEdgeRenderers<V, E>,
-  'label'
+  'edgeLabel'
 >;
 
 export type AllUndirectedGraphWithCurvedEdgeRenderers<V, E> = RequiredWithout<
   UndirectedGraphWithCurvedEdgeRenderers<V, E>,
-  'label'
+  'edgeLabel'
 >;

@@ -2,10 +2,12 @@ import { Mask } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
-import { useComponentFocus } from '@/hooks/focus';
-import { useEdgesMaskContext } from '@/providers/graph/appearance';
-import { useCanvasContexts } from '@/providers/graph/contexts';
-import { useMultiStepFocusContext } from '@/providers/graph/focus';
+import { useComponentFocus } from '@/hooks';
+import {
+  useCanvasContexts,
+  useEdgesMaskContext,
+  useMultiStepFocusContext
+} from '@/providers/graph';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';

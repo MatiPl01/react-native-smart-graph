@@ -1,4 +1,4 @@
-import { VertexComponent } from '@/components/graphs/vertices';
+import { VertexComponent } from '@/components/graphs';
 import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesProps } from '@/types/components';
 

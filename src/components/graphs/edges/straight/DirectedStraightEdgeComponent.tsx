@@ -2,8 +2,8 @@ import { Transforms2d } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 
-import { ArrowComponent } from '@/components/graphs/arrows';
-import { calcArrowTransform } from '@/components/graphs/arrows/utils';
+import { EdgeArrowComponent } from '@/components/graphs/arrows';
+import { calcEdgeArrowTransform } from '@/components/graphs/arrows/utils';
 import { DirectedStraightEdgeComponentProps } from '@/types/components';
 import { calcUnitVector, translateAlongVector } from '@/utils/vectors';
 
@@ -29,7 +29,7 @@ function DirectedStraightEdgeComponent<V, E>(
   const {
     data: { animationProgress, key, value },
     focusProgress,
-    renderers: { arrow: arrowRenderer, edge: edgeRenderer },
+    renderers: { edge: edgeRenderer, edgeArrow: edgeArrowRenderer },
     settings: {
       arrow: { scale: arrowScale },
       vertex: { radius: vertexRadius }
@@ -43,7 +43,7 @@ function DirectedStraightEdgeComponent<V, E>(
     props,
     calcTranslationOffset,
     // Additional settings for the arrow component
-    arrowRenderer
+    edgeArrowRenderer
       ? [
           () => ({
             arrowScale
@@ -59,7 +59,7 @@ function DirectedStraightEdgeComponent<V, E>(
             // Update the arrow component props
             const distance = Math.sqrt(vertexRadius ** 2 - offset ** 2);
             const dirVector = calcUnitVector(v1, v2);
-            arrowTransform.value = calcArrowTransform(
+            arrowTransform.value = calcEdgeArrowTransform(
               translateAlongVector(v2, dirVector, -distance),
               dirVector,
               Math.min(aScale, labelScale),
@@ -81,10 +81,10 @@ function DirectedStraightEdgeComponent<V, E>(
         renderer={edgeRenderer}
         value={value as E}
       />
-      {arrowRenderer && (
-        <ArrowComponent
+      {edgeArrowRenderer && (
+        <EdgeArrowComponent
           animationProgress={animationProgress}
-          renderer={arrowRenderer}
+          renderer={edgeArrowRenderer}
           transform={arrowTransform}
           vertexRadius={vertexRadius}
         />

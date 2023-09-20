@@ -4,10 +4,7 @@ import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
-import {
-  AccessibleOverlayContextType,
-  withOverlay
-} from '@/contexts/OverlayProvider';
+import { AccessibleOverlayContextType, withOverlay } from '@/contexts/overlay';
 import { CanvasContexts, GraphProvider } from '@/providers/graph';
 import {
   useAutoSizingContext,

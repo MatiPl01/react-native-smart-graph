@@ -2,14 +2,14 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
 import {
-  ArrowRenderer,
   CurvedEdgeRenderer,
+  EdgeArrowRenderer,
   StraightEdgeRenderer
 } from '@/types/components';
 import {
   DirectedGraphWithCurvedEdgeRenderers,
   DirectedGraphWithStraightEdgeRenderers,
-  LabelRenderer,
+  EdgeLabelRenderer,
   UndirectedGraphWithCurvedEdgeRenderers,
   UndirectedGraphWithStraightEdgeRenderers,
   VertexMaskRenderer,
@@ -17,8 +17,8 @@ import {
 } from '@/types/components/public';
 import {
   EdgeComponentData,
+  EdgeLabelComponentData,
   EdgeRemoveHandler,
-  LabelComponentData,
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/data';
@@ -73,7 +73,7 @@ export type UndirectedGraphComponentProps<
 
 export type GraphComponentsData<V, E> = {
   connections: GraphConnections;
-  edgeLabelsData: Record<string, LabelComponentData<E>>;
+  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
   edgesData: Record<string, EdgeComponentData<E>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
@@ -95,9 +95,9 @@ export type AllGraphSettings<V, E> = {
   layoutSettings: AllGraphLayoutSettings;
   placementSettings: AllGraphPlacementSettings;
   renderers: {
-    arrow: ArrowRenderer | null;
     edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
-    label: LabelRenderer<E> | null;
+    edgeArrow: EdgeArrowRenderer | null;
+    edgeLabel: EdgeLabelRenderer<E> | null;
     vertex: VertexRenderer<V> | null;
     vertexMask: VertexMaskRenderer | null;
   };

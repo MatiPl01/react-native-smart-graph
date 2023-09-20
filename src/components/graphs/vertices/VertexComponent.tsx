@@ -2,8 +2,7 @@ import { Group } from '@shopify/react-native-skia';
 import { memo, useEffect, useMemo } from 'react';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
-import { useComponentFocus } from '@/hooks/focus';
-import { useVertexTransform } from '@/hooks/transform';
+import { useComponentFocus, useVertexTransform } from '@/hooks';
 import {
   VertexComponentProps,
   VertexRenderer,

@@ -1,18 +1,18 @@
 import { SharedValue } from 'react-native-reanimated';
 
 import {
-  ArrowRenderer,
   CurvedEdgeRenderer,
-  LabelRenderer,
+  EdgeArrowRenderer,
+  EdgeLabelRenderer,
   StraightEdgeRenderer
 } from '@/types/components/public';
 import { EdgeComponentData, EdgeRemoveHandler } from '@/types/data';
 import {
-  InternalArrowSettings,
   InternalDirectedCurvedEdgeSettings,
   InternalDirectedStraightEdgeSettings,
+  InternalEdgeArrowSettings,
+  InternalEdgeLabelSettings,
   InternalEdgeSettings,
-  InternalLabelSettings,
   InternalUndirectedCurvedEdgeSettings,
   InternalUndirectedStraightEdgeSettings
 } from '@/types/settings';
@@ -82,14 +82,14 @@ export type EdgeComponentProps<V, E> = Omit<
 > & {
   onRemove: EdgeRemoveHandler;
   renderers: {
-    arrow?: ArrowRenderer | null;
+    arrow?: EdgeArrowRenderer | null;
     edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
-    label?: LabelRenderer<E> | null;
+    label?: EdgeLabelRenderer<E> | null;
   };
   settings: {
-    arrow?: InternalArrowSettings;
+    arrow?: InternalEdgeArrowSettings;
     edge: InternalEdgeSettings;
-    label?: InternalLabelSettings;
+    label?: InternalEdgeLabelSettings;
   };
 };
 
@@ -97,10 +97,10 @@ export type GraphEdgesProps<V, E> = Omit<
   EdgeComponentProps<V, E>,
   'data' | 'renderers'
 > & {
-  arrowRenderer?: ArrowRenderer | null;
+  arrowRenderer?: EdgeArrowRenderer | null;
   edgeRenderer: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
   edgesData: Record<string, EdgeComponentData<E>>;
   focusProgress: SharedValue<number>;
-  labelRenderer: LabelRenderer<E> | null;
+  labelRenderer: EdgeLabelRenderer<E> | null;
   onRemove: EdgeRemoveHandler;
 };
