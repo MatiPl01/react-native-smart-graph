@@ -6,17 +6,30 @@ import { GraphEdgesProps } from '@/types/components';
 
 function GraphEdges<V, E>({
   arrowRenderer,
+  arrowSettings,
   edgeRenderer,
+  edgeSettings,
   edgeType,
   edgesData,
   focusProgress,
   labelRenderer,
+  labelSettings,
   onRemove,
-  settings
+  vertexSettings
 }: GraphEdgesProps<V, E>) {
   const renderers = useMemo(
     () => ({ arrow: arrowRenderer, edge: edgeRenderer, label: labelRenderer }),
     [arrowRenderer, edgeRenderer, labelRenderer]
+  );
+
+  const settings = useMemo(
+    () => ({
+      arrow: arrowSettings,
+      edge: edgeSettings,
+      label: labelSettings,
+      vertex: vertexSettings
+    }),
+    [arrowSettings, edgeSettings, labelSettings, vertexSettings]
   );
 
   return (
@@ -42,9 +55,12 @@ export default withGraphSettings(
   })),
   ({ componentsSettings, edgeType, renderers }) => ({
     arrowRenderer: renderers.edgeArrow,
+    arrowSettings: componentsSettings.edgeArrow,
     edgeRenderer: renderers.edge,
+    edgeSettings: componentsSettings.edge,
     edgeType,
     labelRenderer: renderers.edgeLabel,
-    settings: componentsSettings
+    labelSettings: componentsSettings.edgeLabel,
+    vertexSettings: componentsSettings.vertex
   })
 );

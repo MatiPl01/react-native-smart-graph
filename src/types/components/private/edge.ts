@@ -14,9 +14,11 @@ import {
   InternalEdgeLabelSettings,
   InternalEdgeSettings,
   InternalUndirectedCurvedEdgeSettings,
-  InternalUndirectedStraightEdgeSettings
+  InternalUndirectedStraightEdgeSettings,
+  InternalVertexSettings
 } from '@/types/settings';
 
+import { InternalArrowSettings } from '../../../../dist/types/types/settings/private/graph/components';
 import {
   AllDirectedGraphWithCurvedEdgeRenderers,
   AllDirectedGraphWithStraightEdgeRenderers,
@@ -90,17 +92,22 @@ export type EdgeComponentProps<V, E> = Omit<
     arrow?: InternalEdgeArrowSettings;
     edge: InternalEdgeSettings;
     label?: InternalEdgeLabelSettings;
+    vertex: InternalVertexSettings;
   };
 };
 
 export type GraphEdgesProps<V, E> = Omit<
   EdgeComponentProps<V, E>,
-  'data' | 'renderers'
+  'data' | 'renderers' | 'settings'
 > & {
   arrowRenderer?: EdgeArrowRenderer | null;
+  arrowSettings: InternalArrowSettings;
   edgeRenderer: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E> | null;
+  edgeSettings: InternalEdgeSettings;
   edgesData: Record<string, EdgeComponentData<E>>;
   focusProgress: SharedValue<number>;
   labelRenderer: EdgeLabelRenderer<E> | null;
+  labelSettings: InternalEdgeLabelSettings;
   onRemove: EdgeRemoveHandler;
+  vertexSettings: InternalVertexSettings;
 };
