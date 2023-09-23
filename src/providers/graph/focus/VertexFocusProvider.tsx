@@ -13,8 +13,8 @@ import {
 } from 'react-native-reanimated';
 
 import { useFocusObserver } from '@/hooks';
-import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { useCanvasContexts } from '@/providers/graph/contexts';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { FocusStatus } from '@/providers/view';
 import { VertexComponentData } from '@/types/data';
 import { Graph } from '@/types/models';
