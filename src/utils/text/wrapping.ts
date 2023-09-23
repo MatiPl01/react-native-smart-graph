@@ -47,19 +47,75 @@ const wrapWithoutTrimming = (
   return result;
 };
 
-type TrimmedWrapFunction = (
+const trimLineEnd = (
+  line: TextLine,
+  chunks: Array<string>,
+  chunkIdx: number,
+  font: SkFont,
+  width: number,
+  mode: 'clip' | 'tail'
+): TextLine => {
+  const renderEllipsis = mode !== 'clip';
+  const additionalWidth = renderEllipsis ? font.getTextWidth(ELLIPSIS) : 0;
+
+  let lastLineText = line.text;
+  if (++chunkIdx < chunks.length) {
+    lastLineText += chunks[chunkIdx]!;
+  }
+
+  // Go from the last char and find how many chars must be sliced to
+  // display ellipsis at the end
+  let lastIndex = lastLineText.length - 1;
+  let lineWidth = font.getTextWidth(lastLineText) + additionalWidth;
+
+  while (lineWidth > width && lastIndex >= 0) {
+    lineWidth -= font.getTextWidth(lastLineText[lastIndex]!);
+    lastIndex--;
+  }
+
+  return {
+    text: `${lastLineText.slice(0, lastIndex)}${
+      renderEllipsis ? ELLIPSIS : ''
+    }`,
+    width: lineWidth
+  };
+};
+
+const trimLineStart = (
+  line: TextLine,
+  chunks: Array<string>,
+  chunkIdx: number,
+  font: SkFont,
+  width: number
+): TextLine => {
+  let lastLineText = line.text;
+  if (++chunkIdx < chunks.length) {
+    lastLineText += chunks[chunkIdx]!;
+  }
+
+  // Go from the last char and find how many chars must be sliced to
+  // display ellipsis at the end
+  let firstIndex = 0;
+  let lineWidth = font.getTextWidth(lastLineText) + font.getTextWidth(ELLIPSIS);
+
+  while (lineWidth > width && firstIndex < line.text.length) {
+    lineWidth -= font.getTextWidth(lastLineText[firstIndex]!);
+    firstIndex++;
+  }
+
+  return {
+    text: `${ELLIPSIS}${lastLineText.slice(firstIndex)}`,
+    width: lineWidth
+  };
+};
+
+const wrapWithTrimming = (
   chunks: Array<string>,
   font: SkFont,
   width: number,
-  numberOfLines: number
-) => Array<TextLine>;
-
-const wrapWithTrimmedTail: TrimmedWrapFunction = (
-  chunks,
-  font,
-  width,
-  numberOfLines
-) => {
+  numberOfLines: number,
+  mode: EllipsizeMode
+): Array<TextLine> => {
   const result: Array<TextLine> = [];
 
   let currentLine: { chunks: Array<string>; width: number } = {
@@ -96,46 +152,22 @@ const wrapWithTrimmedTail: TrimmedWrapFunction = (
     }
   }
 
-  const ellipsisWidth = font.getTextWidth(ELLIPSIS);
-
   if (shouldTrim) {
-    let lastLineText = result[result.length - 1]!.text;
-    if (i++ < chunks.length) {
-      lastLineText += chunks[i]!;
+    let lastLine = result[result.length - 1]!;
+    switch (mode) {
+      case 'clip':
+      case 'tail':
+        lastLine = trimLineEnd(lastLine, chunks, i, font, width, mode);
+        break;
+      case 'head':
+        lastLine = trimLineStart(lastLine, chunks, i, font, width, mode);
+        break;
     }
 
-    // Go from the last char and find how many chars must be sliced to
-    // display ellipsis at the end
-    let lastIndex = lastLineText.length - 1;
-    let lineWidth = font.getTextWidth(lastLineText) + ellipsisWidth;
-
-    while (lineWidth > width && lastIndex >= 0) {
-      lineWidth -= font.getTextWidth(lastLineText[lastIndex]!);
-      lastIndex--;
-    }
-
-    result[result.length - 1] = {
-      text: `${lastLineText.slice(0, lastIndex)}${ELLIPSIS}`,
-      width: lineWidth
-    };
+    result[result.length - 1] = lastLine;
   }
 
   return result;
-};
-
-const wrapWithTrimming = (
-  chunks: Array<string>,
-  font: SkFont,
-  width: number,
-  numberOfLines: number,
-  ellipsizeMode: EllipsizeMode
-): Array<TextLine> => {
-  switch (ellipsizeMode) {
-    case 'tail':
-      return wrapWithTrimmedTail(chunks, font, width, numberOfLines);
-  }
-
-  return [];
 };
 
 export const wrapText = (

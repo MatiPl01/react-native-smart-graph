@@ -1,7 +1,7 @@
 import { Rect, SkFont, Text, TextProps } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
 
-import { EllipsizeMode, TextLine } from '@/types/components';
+import { EllipsizeMode } from '@/types/components';
 import { HorizontalAlignment, VerticalAlignment } from '@/types/layout';
 import { wrapText } from '@/utils/text';
 
@@ -36,7 +36,7 @@ export default function ResponsiveText({
         height={textLines.length * fontSize}
         width={width}
         x={0}
-        y={0}
+        y={100}
       />
       {textLines.map((line, i) => (
         <Text

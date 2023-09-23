@@ -1,5 +1,5 @@
 import FONTS from '@/assets/fonts';
-import { ResponsiveText } from '@/components/text';
+import { ResponsiveText } from '@/components';
 import { Canvas, useFont } from '@shopify/react-native-skia';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -9,6 +9,7 @@ export default function ResponsiveTextExample() {
   const fontSize = 20;
   const color = 'white';
   const numberOfLines = 2;
+  const ellipsizeMode = 'head';
 
   const font = useFont(FONTS.rubikFont, fontSize);
 
@@ -21,16 +22,18 @@ export default function ResponsiveTextExample() {
       <Canvas style={styles.container}>
         <ResponsiveText
           color={color}
+          ellipsizeMode={ellipsizeMode}
           font={font}
           numberOfLines={numberOfLines}
           text={text}
           width={width}
           x={0}
-          y={fontSize}
+          y={100 + fontSize}
         />
       </Canvas>
       <View style={styles.container}>
         <Text
+          ellipsizeMode={ellipsizeMode}
           numberOfLines={numberOfLines}
           style={{ fontSize, backgroundColor: 'red', width, color }}>
           {text}
