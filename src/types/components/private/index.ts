@@ -4,5 +4,6 @@ export * from './graph';
 export * from './label';
 export * from './mask';
 export * from './renderers';
+export * from './text';
 export * from './vertex';
 export * from './view';

@@ -59,7 +59,7 @@ const ADDED_COMPONENTS = [
 let idx = 0;
 let mode = 0;
 
-export default function App() {
+export default function GraphExample() {
   const graph = new DirectedGraph({
     edges: [
       {
