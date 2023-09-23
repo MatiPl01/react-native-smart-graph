@@ -64,7 +64,7 @@ const trimLineEnd = (
   }
 
   // Go from the last char and find how many chars must be sliced to
-  // display ellipsis at the end
+  // display ellipsis at the end or clip the end of the line
   let lastIndex = lastLineText.length - 1;
   let lineWidth = font.getTextWidth(lastLineText) + additionalWidth;
 
@@ -93,8 +93,8 @@ const trimLineStart = (
     lastLineText += chunks[chunkIdx]!;
   }
 
-  // Go from the last char and find how many chars must be sliced to
-  // display ellipsis at the end
+  // Go from the first char and find how many chars must be sliced to
+  // display ellipsis at the beginning
   let firstIndex = 0;
   let lineWidth = font.getTextWidth(lastLineText) + font.getTextWidth(ELLIPSIS);
 
@@ -105,6 +105,43 @@ const trimLineStart = (
 
   return {
     text: `${ELLIPSIS}${lastLineText.slice(firstIndex)}`,
+    width: lineWidth
+  };
+};
+
+const trimLineCenter = (
+  line: TextLine,
+  chunks: Array<string>,
+  chunkIdx: number,
+  font: SkFont,
+  width: number
+): TextLine => {
+  let lastLineText = line.text;
+  if (++chunkIdx < chunks.length) {
+    lastLineText += chunks[chunkIdx]!;
+  }
+
+  const middleIdx = Math.ceil(lastLineText.length / 2);
+  let leftIdx = middleIdx;
+  let rightIdx = middleIdx;
+  let lineWidth = font.getTextWidth(lastLineText) + font.getTextWidth(ELLIPSIS);
+
+  let selectedIdx = -1; // -1 - left, 1 - right
+  while (lineWidth > width && leftIdx >= 0 && rightIdx < lastLineText.length) {
+    if (selectedIdx === -1) {
+      lineWidth -= font.getTextWidth(lastLineText[leftIdx]!);
+      leftIdx--;
+    } else {
+      lineWidth -= font.getTextWidth(lastLineText[rightIdx]!);
+      rightIdx++;
+    }
+    selectedIdx *= -1;
+  }
+
+  return {
+    text: `${lastLineText.slice(0, leftIdx)}${ELLIPSIS}${lastLineText.slice(
+      rightIdx
+    )}`,
     width: lineWidth
   };
 };
@@ -160,8 +197,10 @@ const wrapWithTrimming = (
         lastLine = trimLineEnd(lastLine, chunks, i, font, width, mode);
         break;
       case 'head':
-        lastLine = trimLineStart(lastLine, chunks, i, font, width, mode);
+        lastLine = trimLineStart(lastLine, chunks, i, font, width);
         break;
+      case 'middle':
+        lastLine = trimLineCenter(lastLine, chunks, i, font, width);
     }
 
     result[result.length - 1] = lastLine;

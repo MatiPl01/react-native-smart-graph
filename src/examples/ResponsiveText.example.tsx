@@ -9,7 +9,7 @@ export default function ResponsiveTextExample() {
   const fontSize = 20;
   const color = 'white';
   const numberOfLines = 2;
-  const ellipsizeMode = 'head';
+  const ellipsizeMode = 'middle';
 
   const font = useFont(FONTS.rubikFont, fontSize);
 
