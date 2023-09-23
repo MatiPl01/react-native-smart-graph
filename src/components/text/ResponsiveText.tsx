@@ -19,7 +19,7 @@ export default function ResponsiveText({
   font,
   numberOfLines,
   text,
-  width,
+  width = Infinity,
   y,
   ...rest
 }: ResponsiveTextProps) {

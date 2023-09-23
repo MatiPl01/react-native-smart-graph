@@ -4,10 +4,11 @@ import { Canvas, useFont } from '@shopify/react-native-skia';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function ResponsiveTextExample() {
-  const width = 100;
-  const text = 'test test test test test test test';
+  const width = 200; //Dimensions.get('window').width;
+  const text = 'Modi id maiores est iste porro et in ipsam dolores.';
   const fontSize = 20;
   const color = 'white';
+  const numberOfLines = 2;
 
   const font = useFont(FONTS.rubikFont, fontSize);
 
@@ -21,14 +22,17 @@ export default function ResponsiveTextExample() {
         <ResponsiveText
           color={color}
           font={font}
+          numberOfLines={numberOfLines}
           text={text}
           width={width}
           x={0}
-          y={20}
+          y={fontSize}
         />
       </Canvas>
       <View style={styles.container}>
-        <Text style={{ fontSize, backgroundColor: 'red', width, color }}>
+        <Text
+          numberOfLines={numberOfLines}
+          style={{ fontSize, backgroundColor: 'red', width, color }}>
           {text}
         </Text>
       </View>
