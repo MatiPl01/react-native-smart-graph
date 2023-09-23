@@ -10,6 +10,7 @@
 export { default as GraphViewControls } from '@/components/controls/GraphViewControls';
 export { default as DirectedGraphComponent } from '@/components/graphs/DirectedGraphComponent';
 export { default as UndirectedGraphComponent } from '@/components/graphs/UndirectedGraphComponent';
+export { default as ResponsiveText } from '@/components/text/ResponsiveText';
 
 // RENDERERS
 export { default as DefaultEdgeArrowRenderer } from '@/components/graphs/arrows/renderers/DefaultEdgeArrowRenderer';

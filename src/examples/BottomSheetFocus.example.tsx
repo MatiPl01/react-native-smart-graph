@@ -103,7 +103,7 @@ const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
   key: `Item ${index + 1}`
 }));
 
-export default function BottomSheetFocus() {
+export default function BottomSheetFocusExample() {
   const graph = useMemo(() => new UndirectedGraph(GRAPH1), []);
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
