@@ -11,13 +11,15 @@ export default function ResponsiveTextExample() {
   const fontSize = 20;
   const color = 'white';
   const backgroundColor = '#003d12';
+  const lineHeight = 35;
 
   // Wrapping & clipping
   const numberOfLines = 3;
   const ellipsizeMode = 'tail';
 
   // Alignment
-  const textAlign = 'center';
+  const horizontalAlignment = 'center';
+  const verticalAlignment = 'center';
 
   const font = useFont(FONTS.rubikFont, fontSize);
 
@@ -34,9 +36,11 @@ export default function ResponsiveTextExample() {
           ellipsizeMode={ellipsizeMode}
           font={font}
           height={height}
+          horizontalAlignment={horizontalAlignment}
+          lineHeight={lineHeight}
           numberOfLines={numberOfLines}
           text={text}
-          textAlign={textAlign}
+          verticalAlignment={verticalAlignment}
           width={width}
           x={0}
           y={100 + fontSize}
@@ -50,7 +54,8 @@ export default function ResponsiveTextExample() {
             width,
             color,
             height,
-            textAlign
+            textAlign: horizontalAlignment,
+            lineHeight
           }}
           ellipsizeMode={ellipsizeMode}
           numberOfLines={numberOfLines}>

@@ -1,29 +1,5 @@
 import { AlignedTextLine, TextLine } from '@/types/components';
-import { HorizontalAlignment } from '@/types/layout';
-
-const alignTextLeft = (lines: Array<TextLine>): Array<AlignedTextLine> =>
-  lines.map(line => ({
-    ...line,
-    offset: 0
-  }));
-
-const alignTextRight = (
-  lines: Array<TextLine>,
-  width: number
-): Array<AlignedTextLine> =>
-  lines.map(line => ({
-    ...line,
-    offset: width - line.width
-  }));
-
-const alignTextCenter = (
-  lines: Array<TextLine>,
-  width: number
-): Array<AlignedTextLine> =>
-  lines.map(line => ({
-    ...line,
-    offset: (width - line.width) / 2
-  }));
+import { HorizontalAlignment, VerticalAlignment } from '@/types/layout';
 
 export const alignText = (
   lines: Array<TextLine>,
@@ -32,10 +8,34 @@ export const alignText = (
 ): Array<AlignedTextLine> => {
   switch (alignment) {
     case 'right':
-      return alignTextRight(lines, width);
+      return lines.map(line => ({
+        ...line,
+        offset: width - line.width
+      }));
     case 'center':
-      return alignTextCenter(lines, width);
-    default:
-      return alignTextLeft(lines);
+      return lines.map(line => ({
+        ...line,
+        offset: (width - line.width) / 2
+      }));
+    case 'left':
+      return lines.map(line => ({
+        ...line,
+        offset: 0
+      }));
+  }
+};
+
+export const getVerticalAlignmentOffset = (
+  componentHeight: number,
+  parentHeight = 0,
+  verticalAlignment: VerticalAlignment = 'top'
+): number => {
+  switch (verticalAlignment) {
+    case 'top':
+      return 0;
+    case 'bottom':
+      return parentHeight - componentHeight;
+    case 'center':
+      return (parentHeight - componentHeight) / 2;
   }
 };

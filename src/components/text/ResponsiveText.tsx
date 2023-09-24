@@ -8,16 +8,18 @@ import {
 import { useMemo } from 'react';
 
 import { EllipsizeMode, TextLine } from '@/types/components';
-import { HorizontalAlignment } from '@/types/layout';
-import { alignText, wrapText } from '@/utils/text';
+import { HorizontalAlignment, VerticalAlignment } from '@/types/layout';
+import { alignText, getVerticalAlignmentOffset, wrapText } from '@/utils/text';
 
 type ResponsiveTextProps = Omit<TextProps, 'font'> & {
   backgroundColor?: string;
   ellipsizeMode?: EllipsizeMode;
   font: SkFont;
   height?: number;
+  horizontalAlignment?: HorizontalAlignment;
+  lineHeight?: number;
   numberOfLines?: number;
-  textAlign?: HorizontalAlignment;
+  verticalAlignment?: VerticalAlignment;
   width?: number;
 };
 
@@ -26,22 +28,31 @@ export default function ResponsiveText({
   ellipsizeMode,
   font,
   height,
+  horizontalAlignment,
+  lineHeight,
   numberOfLines,
   text,
-  textAlign,
+  verticalAlignment,
   width = Infinity,
   x,
   y,
   ...rest
 }: ResponsiveTextProps) {
-  const fontSize = useMemo(() => font.getSize(), [font]);
+  const fontSize = font.getSize();
+  const resultingLineHeight = lineHeight ?? fontSize;
   const textLines = useMemo<Array<TextLine>>(
     () => wrapText(text, font, width, numberOfLines, ellipsizeMode),
     [text, font, width, numberOfLines, ellipsizeMode]
   );
   const alignedTextLines = useMemo(
-    () => alignText(textLines, width, textAlign),
-    [textLines, textAlign]
+    () => alignText(textLines, width, horizontalAlignment),
+    [textLines, horizontalAlignment]
+  );
+  const verticalAlignmentOffset = getVerticalAlignmentOffset(
+    textLines.length * resultingLineHeight -
+      (resultingLineHeight - 1.5 * fontSize),
+    height ?? 0,
+    verticalAlignment
   );
 
   return (
@@ -60,7 +71,7 @@ export default function ResponsiveText({
           font={font}
           text={line.text}
           x={line.offset}
-          y={(i + 1) * fontSize}
+          y={verticalAlignmentOffset + i * resultingLineHeight + fontSize}
         />
       ))}
     </Group>
