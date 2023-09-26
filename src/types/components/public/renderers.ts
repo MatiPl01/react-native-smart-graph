@@ -93,7 +93,7 @@ export type EdgeArrowRenderer = (
  * GRAPH
  */
 type SharedUndirectedGraphRenderers<V, E> = {
-  edgeLabel: EdgeLabelRenderer<E> | null;
+  label: EdgeLabelRenderer<E> | null;
   vertex: VertexRenderer<V> | null;
   vertexMask: VertexMaskRenderer | null;
 };
@@ -102,7 +102,7 @@ type SharedDirectedGraphRenderers<V, E> = SharedUndirectedGraphRenderers<
   V,
   E
 > & {
-  edgeArrow: EdgeArrowRenderer | null;
+  arrow: EdgeArrowRenderer | null;
 };
 
 export type UndirectedGraphWithStraightEdgeRenderers<V, E> =

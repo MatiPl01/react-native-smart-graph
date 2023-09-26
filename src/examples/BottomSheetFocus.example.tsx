@@ -202,9 +202,6 @@ export default function BottomSheetFocusExample() {
           placementSettings={{
             strategy: 'orbits'
           }}
-          renderers={{
-            edgeLabel: null
-          }}
         />
         <GraphViewControls
           style={styles.controls}

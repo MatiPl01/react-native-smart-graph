@@ -122,7 +122,7 @@ export const useCurvedEdge = <
 } => {
   const {
     data: { label: labelData, ordering, points, transformProgress },
-    renderers: { edgeLabel: edgeLabelRenderer },
+    renderers: { label: labelRenderer },
     settings: {
       label: { scale: labelScale },
       vertex: { radius: vertexRadius }
@@ -172,7 +172,7 @@ export const useCurvedEdge = <
 
       // LABEL
       // Update label transform
-      if (edgeLabelRenderer) {
+      if (labelRenderer) {
         const labelTransform = getLabelTransform(
           edgeTransform,
           props.label.scale
@@ -194,7 +194,7 @@ export const useCurvedEdge = <
       path.value = edgeTransform.path;
       currentOffset.value = edgeTransform.offset;
     },
-    [vertexRadius, edgeLabelRenderer, additional]
+    [vertexRadius, labelRenderer, additional]
   );
 
   return { path };

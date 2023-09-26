@@ -1,7 +1,8 @@
-import { Circle, Group, Text, useFont } from '@shopify/react-native-skia';
+import { Circle, Group, useFont } from '@shopify/react-native-skia';
 import { interpolate, useDerivedValue } from 'react-native-reanimated';
 
 import FONTS from '@/assets/fonts';
+import { ResponsiveText } from '@/components/text';
 import { VertexRendererProps } from '@/types/components';
 
 export default function DefaultVertexRenderer<V>({
@@ -26,7 +27,13 @@ export default function DefaultVertexRenderer<V>({
     <Group opacity={opacity} transform={transform}>
       <Circle color='gold' r={r} />
       <Circle color='black' r={0.75 * r} />
-      <Text color='white' font={font} text={key} x={-r / 2} y={2 * r} />
+      <ResponsiveText
+        color='white'
+        font={font}
+        horizontalAlignment='center'
+        text={key}
+        y={r}
+      />
     </Group>
   );
 }

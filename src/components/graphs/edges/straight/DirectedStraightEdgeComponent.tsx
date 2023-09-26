@@ -29,7 +29,7 @@ function DirectedStraightEdgeComponent<V, E>(
   const {
     data: { animationProgress, key, value },
     focusProgress,
-    renderers: { edge: edgeRenderer, edgeArrow: edgeArrowRenderer },
+    renderers: { arrow: edgeArrowRenderer, edge: edgeRenderer },
     settings: {
       arrow: { scale: arrowScale },
       vertex: { radius: vertexRadius }
