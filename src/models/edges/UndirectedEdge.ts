@@ -13,10 +13,6 @@ export default class UndirectedEdge<V, E> implements IUndirectedEdge<V, E> {
     ]
   ) {}
 
-  isDirected(): boolean {
-    return false;
-  }
-
   get isLoop(): boolean {
     return this.vertices[0].key === this.vertices[1].key;
   }
@@ -31,5 +27,9 @@ export default class UndirectedEdge<V, E> implements IUndirectedEdge<V, E> {
 
   get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>] {
     return this.vertices$;
+  }
+
+  isDirected(): boolean {
+    return false;
   }
 }
