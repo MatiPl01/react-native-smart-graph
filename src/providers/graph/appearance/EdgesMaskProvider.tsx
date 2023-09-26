@@ -108,7 +108,7 @@ const GraphEdgesMask = withGraphSettings(
   })
 );
 
-const VertexMask = memo(function <V>({
+const VertexMask = memo(function VertexMask<V>({
   data,
   radius,
   renderer

@@ -173,15 +173,16 @@ export default function BottomSheetFocusExample() {
   return (
     <>
       <GraphView
+        objectFit={objectFit}
+        scales={[0.05, 1, 2, 4]}
         padding={{
           bottom: 100,
           left: 25,
           right: 25,
           top: 50
-        }}
-        objectFit={objectFit}
-        scales={[0.05, 1, 2, 4]}>
+        }}>
         <UndirectedGraphComponent
+          graph={graph}
           animationSettings={{
             duration: 500,
             easing: Easing.bezier(0.25, 0.1, 0.25, 1)
@@ -204,11 +205,10 @@ export default function BottomSheetFocusExample() {
           renderers={{
             edgeLabel: null
           }}
-          graph={graph}
         />
         <GraphViewControls
-          onObjectFitChange={setObjectFit}
           style={styles.controls}
+          onObjectFitChange={setObjectFit}
         />
       </GraphView>
       <BottomSheet

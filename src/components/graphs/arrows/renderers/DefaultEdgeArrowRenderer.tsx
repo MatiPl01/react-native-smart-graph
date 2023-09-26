@@ -16,13 +16,13 @@ export default function DefaultEdgeArrowRenderer({
 
   return (
     <Vertices
+      colors={colors}
+      transform={transform}
       vertices={[
         { x: -s / 2, y: -s / 4 },
         { x: -s / 2, y: s / 4 },
         { x: s / 2, y: 0 }
       ]}
-      colors={colors}
-      transform={transform}
     />
   );
 }

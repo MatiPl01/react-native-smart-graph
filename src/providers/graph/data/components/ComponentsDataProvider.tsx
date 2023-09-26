@@ -65,7 +65,9 @@ function ComponentsDataProvider<V, E>({
   const removedEdges = useMemo(() => new Set<string>(), []);
 
   // Other values
-  const removeComponentsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const removeComponentsTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   const getComponentsData = () => ({
     connections: graph.connections,

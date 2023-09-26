@@ -47,7 +47,7 @@ const validateProps = ({ initialScale, scales }: GraphViewProps) => {
   }
 };
 
-const GraphViewComposer = memo(function () {
+const GraphViewComposer = memo(function GraphViewComposer() {
   // CONTEXTS
   // Graph view children context
   const { canvas, overlay } = useGraphViewChildrenContext();

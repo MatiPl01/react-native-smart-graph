@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 import { PropsWithChildren, useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
@@ -42,6 +43,7 @@ export default function GraphProvider<V, E>({
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
       <ConditionalProvider.Switch
+        match={({ layoutSettings }) => layoutSettings.type}
         case={{
           // Provider used to place and move vertices on graph changes
           auto: <PlacementLayoutProvider />,
@@ -52,7 +54,6 @@ export default function GraphProvider<V, E>({
             <ForcesLayoutProvider />
           ]
         }}
-        match={({ layoutSettings }) => layoutSettings.type}
       />,
       // CONTAINER
       // Provider used to compute the dimensions of the container

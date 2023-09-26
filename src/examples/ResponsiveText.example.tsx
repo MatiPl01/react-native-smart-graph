@@ -48,6 +48,8 @@ export default function ResponsiveTextExample() {
       </Canvas>
       <View style={styles.container}>
         <Text
+          ellipsizeMode={ellipsizeMode}
+          numberOfLines={numberOfLines}
           style={{
             fontSize,
             backgroundColor,
@@ -56,9 +58,7 @@ export default function ResponsiveTextExample() {
             height,
             textAlign: horizontalAlignment,
             lineHeight
-          }}
-          ellipsizeMode={ellipsizeMode}
-          numberOfLines={numberOfLines}>
+          }}>
           {text}
         </Text>
       </View>

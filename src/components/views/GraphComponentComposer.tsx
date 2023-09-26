@@ -91,8 +91,8 @@ function GraphComponentComposer<V, E>({
 
   return (
     <Canvas
-      onLayout={transformContext.handleCanvasRender}
-      style={styles.canvas}>
+      style={styles.canvas}
+      onLayout={transformContext.handleCanvasRender}>
       <Group transform={canvasTransform}>
         <GraphProvider
           canvasContexts={canvasContexts}

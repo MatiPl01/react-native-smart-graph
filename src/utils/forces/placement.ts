@@ -153,21 +153,24 @@ const findForcesPlacementPositions = (
     key => !placedVerticesPositions[key]
   );
   // Place unplaced vertices
-  return unplacedVertices.reduce((acc, key) => {
-    const neighbors = [];
-    if (connections[key]?.incoming) {
-      neighbors.push(...connections[key]!.incoming);
-    }
-    if (connections[key]?.outgoing) {
-      neighbors.push(...connections[key]!.outgoing);
-    }
-    acc[key] = placedVerticesPositions[key] = findForcesPlacementPosition(
-      placedVerticesPositions,
-      neighbors,
-      vertexRadius
-    );
-    return acc;
-  }, {} as Record<string, Vector>);
+  return unplacedVertices.reduce(
+    (acc, key) => {
+      const neighbors = [];
+      if (connections[key]?.incoming) {
+        neighbors.push(...connections[key]!.incoming);
+      }
+      if (connections[key]?.outgoing) {
+        neighbors.push(...connections[key]!.outgoing);
+      }
+      acc[key] = placedVerticesPositions[key] = findForcesPlacementPosition(
+        placedVerticesPositions,
+        neighbors,
+        vertexRadius
+      );
+      return acc;
+    },
+    {} as Record<string, Vector>
+  );
 };
 
 export const updateInitialPlacement = <V, E>(

@@ -64,7 +64,9 @@ export default function AutoSizingProvider({
   const { resetContainerPositionOnProgress } = useTransformContext();
 
   // OTHER VALUES
-  const autoSizingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSizingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   // Transition between non-auto-layout and auto-layout states
   const autoSizingStartTranslation = useSharedValue<Vector>({ x: 0, y: 0 });
   const autoSizingStartScale = useSharedValue(0);

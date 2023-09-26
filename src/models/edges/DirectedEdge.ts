@@ -11,10 +11,6 @@ export default class DirectedEdge<V, E> implements IDirectedEdge<V, E> {
     private readonly target$: DirectedGraphVertex<V, E>
   ) {}
 
-  isDirected() {
-    return true;
-  }
-
   get isLoop(): boolean {
     return this.source.key === this.target.key;
   }
@@ -37,5 +33,9 @@ export default class DirectedEdge<V, E> implements IDirectedEdge<V, E> {
 
   get vertices(): [DirectedGraphVertex<V, E>, DirectedGraphVertex<V, E>] {
     return [this.source, this.target];
+  }
+
+  isDirected() {
+    return true;
   }
 }

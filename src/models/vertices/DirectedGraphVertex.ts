@@ -12,20 +12,6 @@ export default class DirectedGraphVertex<V, E>
   private readonly inEdges$: Record<string, DirectedEdge<V, E>> = {};
   private readonly outEdges$: Record<string, DirectedEdge<V, E>> = {};
 
-  addInEdge(edge: DirectedEdge<V, E>): void {
-    if (edge.key in this.inEdges$) {
-      throw new Error(`Edge with key ${edge.key} already exists.`);
-    }
-    this.inEdges$[edge.key] = edge;
-  }
-
-  addOutEdge(edge: DirectedEdge<V, E>): void {
-    if (edge.key in this.outEdges$) {
-      throw new Error(`Edge with key ${edge.key} already exists.`);
-    }
-    this.outEdges$[edge.key] = edge;
-  }
-
   get degree(): number {
     return this.inDegree + this.outDegree;
   }
@@ -58,6 +44,20 @@ export default class DirectedGraphVertex<V, E>
 
   get outEdges(): Array<DirectedEdge<V, E>> {
     return Object.values(this.outEdges$);
+  }
+
+  addInEdge(edge: DirectedEdge<V, E>): void {
+    if (edge.key in this.inEdges$) {
+      throw new Error(`Edge with key ${edge.key} already exists.`);
+    }
+    this.inEdges$[edge.key] = edge;
+  }
+
+  addOutEdge(edge: DirectedEdge<V, E>): void {
+    if (edge.key in this.outEdges$) {
+      throw new Error(`Edge with key ${edge.key} already exists.`);
+    }
+    this.outEdges$[edge.key] = edge;
   }
 
   removeInEdge(key: string) {

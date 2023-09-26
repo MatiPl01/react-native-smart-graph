@@ -1,7 +1,10 @@
 import { Edge, Vertex as IVertex } from '@/types/models';
 
 export default abstract class Vertex<V, E> implements IVertex<V, E> {
-  constructor(private readonly key$: string, private readonly value$: V) {}
+  constructor(
+    private readonly key$: string,
+    private readonly value$: V
+  ) {}
 
   get key(): string {
     return this.key$;

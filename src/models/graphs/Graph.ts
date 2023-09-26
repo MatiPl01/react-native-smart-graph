@@ -9,7 +9,6 @@ import {
   UndirectedEdge,
   Vertex
 } from '@/types/models';
-import { catchError, ChangeResult } from '@/utils/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -18,6 +17,7 @@ import {
 } from '@/types/settings';
 import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
+import { catchError, ChangeResult } from '@/utils/models';
 
 export default abstract class Graph<
   V,
@@ -154,6 +154,60 @@ export default abstract class Graph<
 
   protected readonly vertices$: Record<string, GV> = {};
 
+  get edges(): Array<GE> {
+    if (!this.cachedEdges) {
+      this.cachedEdges = Object.values(this.edges$);
+    }
+    return this.cachedEdges;
+  }
+
+  get orderedEdges(): OrderedEdges<V, E, GE> {
+    if (!this.cachedOrderedEdges) {
+      const addedVerticesPairs: Record<string, Record<string, boolean>> = {};
+      const result: OrderedEdges<V, E, GE> = [];
+
+      // Loop over each vertices connected with edges
+      for (const key1 in this.edgesBetweenVertices$) {
+        for (const key2 in this.edgesBetweenVertices$[key1]) {
+          // Skip if the pair of vertices was already added
+          if (addedVerticesPairs[key1]?.[key2]) continue;
+          // Mark the pair of vertices as added
+          if (!addedVerticesPairs[key1]) {
+            addedVerticesPairs[key1] = {};
+          }
+          if (!addedVerticesPairs[key2]) {
+            addedVerticesPairs[key2] = {};
+          }
+          addedVerticesPairs[key1]![key2] = true;
+          addedVerticesPairs[key2]![key1] = true;
+          // Get edges between vertices
+          const edges = this.edgesBetweenVertices$[key1]![key2]!;
+          // Order edges between vertices
+          const orderedEdges = this.orderEdgesBetweenVertices(edges);
+          // Add ordered edges to result
+          for (const { edge, order } of orderedEdges) {
+            result.push({
+              edge,
+              edgesCount: edges.length,
+              order
+            });
+          }
+        }
+      }
+
+      this.cachedOrderedEdges = result;
+    }
+
+    return this.cachedOrderedEdges;
+  }
+
+  get vertices(): Array<GV> {
+    if (!this.cachedVertices) {
+      this.cachedVertices = Object.values(this.vertices$);
+    }
+    return this.cachedVertices;
+  }
+
   private invalidateEdgesCache(): void {
     // Invalidate cached edges data
     this.cachedEdges = null;
@@ -196,13 +250,6 @@ export default abstract class Graph<
         `Self-loop edges are not yet supported. Vertex key: ${vertex1key}`
       );
     }
-  }
-
-  get edges(): Array<GE> {
-    if (!this.cachedEdges) {
-      this.cachedEdges = Object.values(this.edges$);
-    }
-    return this.cachedEdges;
   }
 
   getEdge(key: string): GE | null {
@@ -292,46 +339,6 @@ export default abstract class Graph<
     }
   }
 
-  get orderedEdges(): OrderedEdges<V, E, GE> {
-    if (!this.cachedOrderedEdges) {
-      const addedVerticesPairs: Record<string, Record<string, boolean>> = {};
-      const result: OrderedEdges<V, E, GE> = [];
-
-      // Loop over each vertices connected with edges
-      for (const key1 in this.edgesBetweenVertices$) {
-        for (const key2 in this.edgesBetweenVertices$[key1]) {
-          // Skip if the pair of vertices was already added
-          if (addedVerticesPairs[key1]?.[key2]) continue;
-          // Mark the pair of vertices as added
-          if (!addedVerticesPairs[key1]) {
-            addedVerticesPairs[key1] = {};
-          }
-          if (!addedVerticesPairs[key2]) {
-            addedVerticesPairs[key2] = {};
-          }
-          addedVerticesPairs[key1]![key2] = true;
-          addedVerticesPairs[key2]![key1] = true;
-          // Get edges between vertices
-          const edges = this.edgesBetweenVertices$[key1]![key2]!;
-          // Order edges between vertices
-          const orderedEdges = this.orderEdgesBetweenVertices(edges);
-          // Add ordered edges to result
-          for (const { edge, order } of orderedEdges) {
-            result.push({
-              edge,
-              edgesCount: edges.length,
-              order
-            });
-          }
-        }
-      }
-
-      this.cachedOrderedEdges = result;
-    }
-
-    return this.cachedOrderedEdges;
-  }
-
   protected removeEdgeObject(
     edge: GE,
     animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
@@ -362,14 +369,6 @@ export default abstract class Graph<
   removeObserver(observer: GraphObserver): void {
     this.observers.delete(observer);
   }
-
-  get vertices(): Array<GV> {
-    if (!this.cachedVertices) {
-      this.cachedVertices = Object.values(this.vertices$);
-    }
-    return this.cachedVertices;
-  }
-
   abstract get connections(): GraphConnections;
 
   abstract insertBatch(
