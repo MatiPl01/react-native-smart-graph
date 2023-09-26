@@ -234,6 +234,8 @@ export const animateToValue = (
 export const cancelVertexAnimations = <V>(
   vertexData: VertexComponentData<V>
 ) => {
+  cancelAnimation(vertexData.animationProgress);
+  cancelAnimation(vertexData.label.transform);
   cancelAnimation(vertexData.points);
   cancelAnimation(vertexData.scale);
   cancelAnimation(vertexData.transformProgress);
