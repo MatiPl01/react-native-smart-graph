@@ -4,7 +4,7 @@ import { SharedValue } from 'react-native-reanimated';
 import { DirectedEdge, UndirectedEdge } from '@/types/models';
 import { AllAnimationSettings } from '@/types/settings';
 
-import { EdgeLabelComponentData } from './label';
+import { EdgeLabelComponentData } from './edgeLabel';
 
 export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 

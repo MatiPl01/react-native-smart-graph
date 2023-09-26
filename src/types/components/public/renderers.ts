@@ -36,6 +36,22 @@ export type VertexRenderer<V = undefined> = (
 ) => JSX.Element | null;
 
 /*
+ * VERTEX LABEL
+ */
+export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
+  key: string;
+  r: number;
+  scale: SharedValue<number>;
+  value: V;
+  vertexRadius: number;
+  vertexScale: SharedValue<number>;
+};
+
+export type VertexLabelRenderer<V = undefined> = (
+  props: VertexLabelRendererProps<V>
+) => JSX.Element | null;
+
+/*
  * EDGE
  */
 type SharedEdgeRendererProps<E> = SharedRenderersProps & {
@@ -64,7 +80,7 @@ export type StraightEdgeRenderer<E = undefined> = (
 ) => JSX.Element | null;
 
 /*
- * LABEL
+ * EDGE LABEL
  */
 export type EdgeLabelRendererProps<E = undefined> = SharedRenderersProps & {
   edgeLength: SharedValue<number>;
@@ -79,7 +95,7 @@ export type EdgeLabelRenderer<E> = (
 ) => JSX.Element | null;
 
 /*
- * ARROW
+ * EDGE ARROW
  */
 export type EdgeArrowRendererProps = SharedRenderersProps & {
   s: number;

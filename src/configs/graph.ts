@@ -3,6 +3,7 @@ import {
   DefaultEdgeArrowRenderer,
   DefaultEdgeLabelRenderer,
   DefaultStraightEdgeRenderer,
+  DefaultVertexLabelRenderer,
   DefaultVertexMaskRenderer,
   DefaultVertexRenderer
 } from '@/components';
@@ -28,8 +29,10 @@ import {
   AllStraightEdgeSettings,
   AllTreesPlacementSettings,
   AllUnboundRandomPlacementSettings,
+  AllVertexLabelSettings,
   AllVertexSettings,
-  LayoutType
+  LayoutType,
+  VertexLabelPosition
 } from '@/types/settings';
 import { isAnimationSettingsObject } from '@/utils/animations';
 
@@ -149,6 +152,7 @@ const DEFAULT_COMPONENTS_SETTINGS: {
   };
   edgeLabel: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
+  vertexLabel: AllVertexLabelSettings;
 } = {
   arrow: {
     scale: 0.5
@@ -164,6 +168,11 @@ const DEFAULT_COMPONENTS_SETTINGS: {
   },
   vertex: {
     radius: 20
+  },
+  vertexLabel: {
+    offset: 10,
+    position: VertexLabelPosition.BOTTOM,
+    scale: 0.5
   }
 };
 
@@ -236,6 +245,7 @@ export const getDefaultConfig = <V, E>(
     edgeArrow: data.graph.isDirected() ? DefaultEdgeArrowRenderer : null,
     edgeLabel: DefaultEdgeLabelRenderer,
     vertex: DefaultVertexRenderer,
+    vertexLabel: DefaultVertexLabelRenderer,
     vertexMask: DefaultVertexMaskRenderer
   }
 });

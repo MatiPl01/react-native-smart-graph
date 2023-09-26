@@ -7,6 +7,30 @@ export type VertexSettings = {
   radius?: number;
 };
 
+export enum VertexLabelPosition {
+  BOTTOM = 'bottom',
+  BOTTOM_LEFT = 'bottom-left',
+  BOTTOM_RIGHT = 'bottom-right',
+  CENTER = 'center',
+  LEFT = 'left',
+  RIGHT = 'right',
+  TOP = 'top',
+  TOP_LEFT = 'top-left',
+  TOP_RIGHT = 'top-right'
+}
+
+export type VertexLabelSettings = {
+  scale?: Sharedifyable<number>;
+} & (
+  | {
+      offset: Sharedifyable<number>;
+      position?: Omit<VertexLabelPosition, 'center'>;
+    }
+  | {
+      position: VertexLabelPosition.CENTER;
+    }
+);
+
 export type StraightEdgeSettings = {
   maxOffsetFactor?: Sharedifyable<number>;
 };

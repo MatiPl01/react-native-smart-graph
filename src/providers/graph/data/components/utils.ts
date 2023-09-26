@@ -53,7 +53,8 @@ const UPDATE_CONFIG = {
   edgeLabelsData: 'shallow',
   edgesData: 'shallow',
   isGraphDirected: 'shared', // 'shared' - replace with shared value
-  verticesData: 'shallow'
+  verticesData: 'shallow',
+  verticesLabelsData: 'shallow'
 };
 
 export const updateContextValue = <V, E>(
@@ -84,6 +85,8 @@ export const updateContextValue = <V, E>(
         )
       : value?.verticesData ?? {};
 
+  // const newVerticesLabelsData = // TODO: implement vertex labels update logic
+
   // Update edges data only if edges have changed
   const newEdgesData =
     newData.state.edges !== currentData?.state.edges ||
@@ -98,8 +101,8 @@ export const updateContextValue = <V, E>(
         )
       : value?.edgesData ?? {};
 
+  // Update edge labels data only if edges have changed and labels are rendered
   const newEdgeLabelsData =
-    // Update edge labels data only if edges have changed and labels are rendered
     newData.renderEdgeLabels && newEdgesData !== value?.edgesData
       ? updateGraphEdgeLabelsData(value?.edgeLabelsData ?? {}, newEdgesData)
       : // Remove edge labels data if labels are not rendered anymore
