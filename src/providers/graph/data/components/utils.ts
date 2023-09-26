@@ -1,3 +1,4 @@
+import { Transforms2d } from '@shopify/react-native-skia';
 import { makeMutable } from 'react-native-reanimated';
 
 import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
@@ -10,6 +11,7 @@ import {
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/data';
+import { VertexLabelComponentData } from '@/types/data/private/vertexLabel';
 import { GraphConnections, OrderedEdges, Vertex } from '@/types/models';
 import {
   AllAnimationSettings,
@@ -35,6 +37,7 @@ export type ComponentsData<V, E> = {
   // has been completed and vertices are waiting to be unmounted
   removedVertices: Set<string>;
   renderEdgeLabels: boolean;
+  renderVertexLabels: boolean;
   state: GraphState<V, E>;
 };
 
@@ -53,8 +56,8 @@ const UPDATE_CONFIG = {
   edgeLabelsData: 'shallow',
   edgesData: 'shallow',
   isGraphDirected: 'shared', // 'shared' - replace with shared value
-  verticesData: 'shallow',
-  verticesLabelsData: 'shallow'
+  vertexLabelsData: 'shallow',
+  verticesData: 'shallow'
 };
 
 export const updateContextValue = <V, E>(
@@ -85,7 +88,18 @@ export const updateContextValue = <V, E>(
         )
       : value?.verticesData ?? {};
 
-  // const newVerticesLabelsData = // TODO: implement vertex labels update logic
+  // Update vertex labels data only if vertices have changed and labels are rendered
+  const newVerticesLabelsData =
+    newData.renderVertexLabels && newVerticesData !== value?.verticesData
+      ? updateGraphVertexLabelsData(
+          value?.vertexLabelsData ?? {},
+          newVerticesData
+        )
+      : // Remove vertex labels data if labels are not rendered anymore
+      !newData.renderVertexLabels && currentData?.renderVertexLabels
+      ? {}
+      : // Use previous vertex labels data if labels are rendered and vertices have not changed
+        value?.vertexLabelsData ?? {};
 
   // Update edges data only if edges have changed
   const newEdgesData =
@@ -124,6 +138,7 @@ export const updateContextValue = <V, E>(
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
         layoutAnimationSettings: newLayoutAnimationSettings,
+        vertexLabelsData: newVerticesLabelsData,
         verticesData: newVerticesData
       }
     },
@@ -182,7 +197,11 @@ const updateGraphVerticesData = <V, E>(
     updatedVerticesData[vertex.key] = {
       ...(oldVertex ?? {
         // Create shared values only for new vertices
+        animationProgress: makeMutable(0),
         isModified: makeMutable(true),
+        label: {
+          transform: makeMutable<Transforms2d>([])
+        },
         points: makeMutable({
           source: { x: 0, y: 0 },
           target: { x: 0, y: 0 }
@@ -400,4 +419,41 @@ const updateGraphEdgeLabelsData = <E>(
   }
 
   return isModified ? updatedEdgeLabelsData : oldEdgeLabelsData;
+};
+
+const updateGraphVertexLabelsData = <V>(
+  oldVertexLabelsData: Record<string, VertexLabelComponentData<V>>,
+  verticesData: Record<string, VertexComponentData<V>>
+): Record<string, VertexLabelComponentData<V>> => {
+  const updatedVertexLabelsData = { ...oldVertexLabelsData };
+  let isModified = false; // Flag to indicate if edges data was updated
+
+  // Add new labels data
+  for (const key in verticesData) {
+    const vertexData = verticesData[key];
+    const oldLabelData = oldVertexLabelsData[key];
+    // Update label data if it is not rendered yet or its value was changed
+    if (
+      vertexData &&
+      (!oldLabelData || oldLabelData.value !== vertexData.value)
+    ) {
+      updatedVertexLabelsData[key] = {
+        ...vertexData.label,
+        animationProgress: vertexData.animationProgress,
+        value: vertexData.value
+      };
+      isModified = true; // Mark as modified to set the new labels data object
+    }
+  }
+
+  // Remove labels data of vertices that are no longer displayed
+  // (their unmount animation is finished)
+  for (const key in oldVertexLabelsData) {
+    if (!verticesData[key]) {
+      delete updatedVertexLabelsData[key];
+      isModified = true; // Mark as modified to set the new labels data object
+    }
+  }
+
+  return isModified ? updatedVertexLabelsData : oldVertexLabelsData;
 };

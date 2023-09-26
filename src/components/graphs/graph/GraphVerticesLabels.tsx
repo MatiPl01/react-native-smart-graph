@@ -2,6 +2,7 @@ import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesLabelsProps } from '@/types/components';
 
 function GraphVerticesLabels<V>(props: GraphVerticesLabelsProps<V>) {
+  console.log(Object.keys(props.vertexLabelsData));
   return null;
 }
 

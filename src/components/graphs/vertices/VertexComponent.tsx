@@ -1,6 +1,6 @@
 import { Group } from '@shopify/react-native-skia';
 import { memo, useEffect, useMemo } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus, useVertexTransform } from '@/hooks';
 import {
@@ -23,11 +23,8 @@ function VertexComponent<V>({
 
   // ANIMATION
   // Vertex render animation progress
-  // Use a helper value to ensure that the animation progress is never negative
+  // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
   const animationProgressHelper = useSharedValue(0);
-  const animationProgress = useDerivedValue(() =>
-    Math.max(0, animationProgressHelper.value)
-  );
 
   // FOCUS
   // Vertex focus progress
@@ -63,11 +60,17 @@ function VertexComponent<V>({
     );
   }, [removed]);
 
+  useAnimatedReaction(
+    () => animationProgressHelper.value,
+    progress => {
+      data.animationProgress.value = progress;
+    }
+  );
+
   return (
     <Group transform={transform}>
       <RenderedVertexComponent
         {...restData}
-        animationProgress={animationProgress}
         focus={focusProp}
         multiStepFocus={multiStepFocusContext}
         r={r}
