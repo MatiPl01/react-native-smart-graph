@@ -135,10 +135,10 @@ export default function GraphExample() {
   return (
     <GraphView objectFit='contain' scales={[1e-10, 1, 2]}>
       <DirectedGraphComponent
+        graph={graph}
         layoutSettings={{
           type: 'force'
         }}
-        graph={graph}
       />
     </GraphView>
   );

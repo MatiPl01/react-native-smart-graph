@@ -120,8 +120,8 @@ export default memo(function GraphViewControls({
   return (
     <View style={style}>
       <View style={styles.container}>
-        {buttons.map(({ icon, ...props }) => (
-          <TouchableOpacity {...props}>
+        {buttons.map(({ icon, key, onPress }) => (
+          <TouchableOpacity key={key} onPress={onPress}>
             <FontAwesomeIcon icon={icon} size={32} style={styles.icon} />
           </TouchableOpacity>
         ))}

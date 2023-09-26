@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 import { useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';

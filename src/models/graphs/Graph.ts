@@ -9,7 +9,6 @@ import {
   UndirectedEdge,
   Vertex
 } from '@/types/models';
-import { catchError, ChangeResult } from '@/utils/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -18,6 +17,7 @@ import {
 } from '@/types/settings';
 import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
+import { catchError, ChangeResult } from '@/utils/models';
 
 export default abstract class Graph<
   V,

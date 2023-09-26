@@ -40,9 +40,9 @@ function GraphEdges<V, E>({
         edgeType={edgeType}
         focusProgress={focusProgress}
         key={key}
-        onRemove={onRemove}
         renderers={renderers}
         settings={settings}
+        onRemove={onRemove}
       />
     ))
   );

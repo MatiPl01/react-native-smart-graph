@@ -57,7 +57,9 @@ function OverlayVertex<V>({
   // HELPER VALUES
   const isPressing = useSharedValue(false);
   const longPressStarted = useSharedValue(false);
-  const longPressAnimationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressAnimationTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   const getPressEventData = () => ({
     vertex: { key, value } as unknown as VertexData<V>

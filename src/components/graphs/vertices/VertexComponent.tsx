@@ -84,7 +84,7 @@ type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
   vertexKey: string;
 };
 
-const RenderedVertexComponent = memo(function <V>({
+const RenderedVertexComponent = memo(function RenderedVertexComponent<V>({
   renderer,
   vertexKey: key,
   ...restProps

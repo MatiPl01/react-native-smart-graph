@@ -1,7 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
-
 export const calcUnitVector = (from: Vector, to: Vector): Vector => {
   'worklet';
   const dx = to.x - from.x;
@@ -32,18 +30,6 @@ export const translateAlongVector = (
     x: point.x + unitVector.x * distance,
     y: point.y + unitVector.y * distance
   };
-};
-
-export const animatedVectorCoordinatesToVector = (
-  vector?: AnimatedVectorCoordinates
-): Vector => {
-  'worklet';
-  return vector
-    ? {
-        x: vector.x.value,
-        y: vector.y.value
-      }
-    : { x: 0, y: 0 };
 };
 
 export const addVectorsArray = (vectors: Array<Vector>): Vector => {
