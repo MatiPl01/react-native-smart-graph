@@ -1,6 +1,7 @@
 import { Transforms2d, Vector } from '@shopify/react-native-skia';
 
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
+import { Dimensions } from '@/types/layout';
 import {
   AllAnimationSettings,
   PlacedVerticesPositions,
@@ -300,7 +301,9 @@ export const setVerticesPositions = <V, E>(
   }
 };
 
-export const getVertexLabelTransformation = (
+const HALF_SQRT_2 = Math.sqrt(2) / 2;
+
+export const getVertexLabelComponentTransformation = (
   vertexPosition: Vector,
   vertexRadius: number,
   vertexScale: number,
@@ -326,16 +329,16 @@ export const getVertexLabelTransformation = (
       dirVector = { x: 1, y: 0 };
       break;
     case VertexLabelPosition.TOP_LEFT:
-      dirVector = { x: -1, y: -1 };
+      dirVector = { x: -HALF_SQRT_2, y: -HALF_SQRT_2 };
       break;
     case VertexLabelPosition.TOP_RIGHT:
-      dirVector = { x: 1, y: -1 };
+      dirVector = { x: HALF_SQRT_2, y: -HALF_SQRT_2 };
       break;
     case VertexLabelPosition.BOTTOM_LEFT:
-      dirVector = { x: -1, y: 1 };
+      dirVector = { x: -HALF_SQRT_2, y: HALF_SQRT_2 };
       break;
     case VertexLabelPosition.BOTTOM_RIGHT:
-      dirVector = { x: 1, y: 1 };
+      dirVector = { x: HALF_SQRT_2, y: HALF_SQRT_2 };
       break;
   }
 
@@ -345,4 +348,43 @@ export const getVertexLabelTransformation = (
   );
 
   return [{ scale: vertexScale }, { translateX: x }, { translateY: y }];
+};
+
+export const getVertexLabelContentTransformation = (
+  { height, width }: Dimensions,
+  labelPosition: VertexLabelPosition
+): Transforms2d => {
+  'worklet';
+  let translateX = 0;
+  let translateY = 0;
+
+  // Vertical translation
+  switch (labelPosition) {
+    case VertexLabelPosition.TOP:
+    case VertexLabelPosition.TOP_LEFT:
+    case VertexLabelPosition.TOP_RIGHT:
+      translateY = -height;
+      break;
+    case VertexLabelPosition.LEFT:
+    case VertexLabelPosition.RIGHT:
+    case VertexLabelPosition.CENTER:
+      translateY = -height / 2;
+      break;
+  }
+
+  // Horizontal translation
+  switch (labelPosition) {
+    case VertexLabelPosition.LEFT:
+    case VertexLabelPosition.TOP_LEFT:
+    case VertexLabelPosition.BOTTOM_LEFT:
+      translateX = -width;
+      break;
+    case VertexLabelPosition.TOP:
+    case VertexLabelPosition.BOTTOM:
+    case VertexLabelPosition.CENTER:
+      translateX = -width / 2;
+      break;
+  }
+
+  return [{ translateX }, { translateY }];
 };

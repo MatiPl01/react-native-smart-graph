@@ -4,17 +4,20 @@ import {
   EdgeLabelSettings,
   EdgeSettings,
   StraightEdgeSettings,
+  VertexLabelPosition,
   VertexLabelSettings,
   VertexSettings
 } from '@/types/settings/public';
-import { DeepRequired, DeepSharedify } from '@/types/utils';
+import { DeepRequired, DeepSharedify, Sharedifyable } from '@/types/utils';
 
 /*
  * DEFAULT SETTINGS
  */
 export type AllVertexSettings = DeepRequired<VertexSettings>;
 
-export type AllVertexLabelSettings = DeepRequired<VertexLabelSettings>;
+export type AllVertexLabelSettings = Omit<VertexLabelSettings, 'position'> & {
+  position: Sharedifyable<VertexLabelPosition>;
+};
 
 export type AllEdgeSettings = DeepRequired<EdgeSettings>;
 

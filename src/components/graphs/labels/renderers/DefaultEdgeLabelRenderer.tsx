@@ -8,6 +8,7 @@ import { EdgeLabelRendererProps } from '@/types/components';
 export default function DefaultEdgeLabelRenderer<E>({
   animationProgress,
   key,
+  onMeasure,
   r
 }: EdgeLabelRendererProps<E>) {
   const font = useFont(FONTS.rubikFont, r);
@@ -22,11 +23,8 @@ export default function DefaultEdgeLabelRenderer<E>({
         <ResponsiveText
           color='white'
           font={font}
-          horizontalAlignment='center'
           text={key}
-          verticalAlignment='center'
-          width={8 * r}
-          x={-4 * r}
+          onMeasure={onMeasure}
         />
       </Group>
     )

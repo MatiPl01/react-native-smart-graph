@@ -44,6 +44,7 @@ export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
     progress: SharedValue<number>;
   };
   key: string;
+  onMeasure: (width: number, height: number) => void;
   r: number;
   value: V;
 };
@@ -87,6 +88,7 @@ export type EdgeLabelRendererProps<E = undefined> = SharedRenderersProps & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   key: string;
+  onMeasure: (width: number, height: number) => void;
   r: number;
   value: E;
 };

@@ -8,9 +8,8 @@ import {
   VertexRenderer,
   VertexRendererProps
 } from '@/types/components';
-import { VertexLabelPosition } from '@/types/settings';
 import { updateComponentAnimationState } from '@/utils/components';
-import { getVertexLabelTransformation } from '@/utils/transform';
+import { getVertexLabelComponentTransformation } from '@/utils/transform';
 
 function VertexComponent<V>({
   data,
@@ -42,13 +41,13 @@ function VertexComponent<V>({
     }) => {
       'worklet';
       if (!renderLabels) return;
-      data.label.transform.value = getVertexLabelTransformation(
+      data.label.transform.value = getVertexLabelComponentTransformation(
         { x, y },
         r,
         vertexScale,
         {
           offset: (rest as { offset: number }).offset ?? 0,
-          position: rest.position as VertexLabelPosition
+          position: rest.position
         }
       );
     }

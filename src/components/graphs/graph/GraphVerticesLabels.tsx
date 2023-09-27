@@ -4,7 +4,7 @@ import { GraphVerticesLabelsProps } from '@/types/components';
 
 function GraphVerticesLabels<V>({
   focusContext,
-  // settings,
+  labelPosition,
   renderer,
   vertexLabelsData,
   vertexRadius
@@ -16,6 +16,7 @@ function GraphVerticesLabels<V>({
         data={data}
         focusContext={focusContext}
         key={key}
+        labelPosition={labelPosition}
         renderer={renderer}
         vertexKey={key}
         vertexRadius={vertexRadius}
@@ -29,8 +30,8 @@ export default withGraphSettings(
     vertexLabelsData
   })),
   ({ componentsSettings, renderers }) => ({
+    labelPosition: componentsSettings.vertexLabel?.position,
     renderer: renderers.vertexLabel,
-    settings: componentsSettings.vertexLabel,
     vertexRadius: componentsSettings.vertex.radius
   })
 );

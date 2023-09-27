@@ -9,6 +9,7 @@ export default function DefaultVertexLabelRenderer<V>({
   animationProgress,
   focus: { progress: focusProgress },
   key,
+  onMeasure,
   r
 }: VertexLabelRendererProps<V>) {
   const font = useFont(FONTS.rubikFont, r);
@@ -21,10 +22,8 @@ export default function DefaultVertexLabelRenderer<V>({
         <ResponsiveText
           color='white'
           font={font}
-          horizontalAlignment='center'
           text={key}
-          width={4 * r}
-          x={-2 * r}
+          onMeasure={onMeasure}
         />
       </Group>
     )

@@ -190,7 +190,7 @@ export default function BottomSheetFocusExample() {
           }}
           componentsSettings={{
             vertexLabel: {
-              position: VertexLabelPosition.RIGHT
+              position: VertexLabelPosition.BOTTOM
             }
           }}
           eventSettings={{

@@ -22,10 +22,10 @@ export enum VertexLabelPosition {
 export type VertexLabelSettings =
   | {
       offset?: Sharedifyable<number>;
-      position?: Omit<VertexLabelPosition, 'center'>;
+      position?: Sharedifyable<Omit<VertexLabelPosition, 'center'>>;
     }
   | {
-      position: VertexLabelPosition.CENTER;
+      position: Sharedifyable<VertexLabelPosition.CENTER>;
     };
 
 export type StraightEdgeSettings = {
