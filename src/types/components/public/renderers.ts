@@ -39,7 +39,20 @@ export type VertexRenderer<V = undefined> = (
  * VERTEX LABEL
  */
 export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
+  focus: {
+    key: SharedValue<null | string>;
+    progress: SharedValue<number>;
+  };
   key: string;
+  multiStepFocus: {
+    bounds: SharedValue<{
+      afterIdx: number;
+      beforeIdx: number;
+    }>;
+    points: SharedValue<Array<{ key: string; startsAt: number }>>;
+    progress: SharedValue<number>;
+  };
+  onMeasure: (width: number, height: number) => void;
   r: number;
   value: V;
 };
@@ -83,6 +96,7 @@ export type EdgeLabelRendererProps<E = undefined> = SharedRenderersProps & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   key: string;
+  onMeasure: (width: number, height: number) => void;
   r: number;
   value: E;
 };

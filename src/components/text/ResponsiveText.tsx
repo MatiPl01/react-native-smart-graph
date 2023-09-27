@@ -5,7 +5,7 @@ import {
   Text,
   TextProps
 } from '@shopify/react-native-skia';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EllipsizeMode, TextLine } from '@/types/components';
 import { HorizontalAlignment, VerticalAlignment } from '@/types/layout';
@@ -20,6 +20,7 @@ type ResponsiveTextProps = PartialBy<Omit<TextProps, 'font'>, 'x' | 'y'> & {
   horizontalAlignment?: HorizontalAlignment;
   lineHeight?: number;
   numberOfLines?: number;
+  onMeasure?: (width: number, height: number) => void;
   verticalAlignment?: VerticalAlignment;
   width?: number;
 };
@@ -32,7 +33,8 @@ export default function ResponsiveText({
   horizontalAlignment,
   lineHeight,
   numberOfLines,
-  text,
+  onMeasure,
+  text = '',
   verticalAlignment,
   width = 0,
   x = 0,
@@ -45,16 +47,28 @@ export default function ResponsiveText({
     () => wrapText(text, font, width, numberOfLines, ellipsizeMode),
     [text, font, width, numberOfLines, ellipsizeMode]
   );
+
   const alignedTextLines = useMemo(
     () => alignText(textLines, width, horizontalAlignment),
     [textLines, horizontalAlignment]
   );
-  const verticalAlignmentOffset = getVerticalAlignmentOffset(
+  const textHeight =
     textLines.length * resultingLineHeight -
-      (resultingLineHeight - 1.5 * fontSize),
+    (resultingLineHeight - 1.5 * fontSize);
+  const verticalAlignmentOffset = getVerticalAlignmentOffset(
+    textHeight,
     height,
     verticalAlignment
   );
+
+  useEffect(() => {
+    if (!onMeasure) return;
+    const textWidth = alignedTextLines.reduce(
+      (acc, line) => Math.max(acc, line.width),
+      0
+    );
+    onMeasure(textWidth, textHeight);
+  }, [alignedTextLines, onMeasure]);
 
   return (
     <Group transform={[{ translateX: x }, { translateY: y }]}>
@@ -68,9 +82,9 @@ export default function ResponsiveText({
       )}
       {alignedTextLines.map((line, i) => (
         <Text
-          key={i}
           {...rest}
           font={font}
+          key={i}
           text={line.text}
           x={line.offset}
           y={verticalAlignmentOffset + i * resultingLineHeight + fontSize}

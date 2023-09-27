@@ -54,9 +54,11 @@ export const createContextValue = <V, E>(
 const UPDATE_CONFIG = {
   connections: 'shallow', // 'shallow' - shallow compare
   edgeLabelsData: 'shallow',
+  edgeLabelsRendered: 'shared', // 'shared' - replace with shared value
   edgesData: 'shallow',
-  isGraphDirected: 'shared', // 'shared' - replace with shared value
+  isGraphDirected: 'shared',
   vertexLabelsData: 'shallow',
+  vertexLabelsRendered: 'shared',
   verticesData: 'shallow'
 };
 
@@ -133,12 +135,14 @@ export const updateContextValue = <V, E>(
         // updating the connections when the graph is updated
         connections: newData.connections,
         edgeLabelsData: newEdgeLabelsData,
+        edgeLabelsRendered: newData.renderEdgeLabels,
         edgesData: newEdgesData,
         handleEdgeRemove: value.handleEdgeRemove, // Prevent removing
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
         layoutAnimationSettings: newLayoutAnimationSettings,
         vertexLabelsData: newVerticesLabelsData,
+        vertexLabelsRendered: newData.renderVertexLabels,
         verticesData: newVerticesData
       }
     },
@@ -198,6 +202,7 @@ const updateGraphVerticesData = <V, E>(
       ...(oldVertex ?? {
         // Create shared values only for new vertices
         animationProgress: makeMutable(0),
+        focusProgress: makeMutable(0),
         isModified: makeMutable(true),
         label: {
           transform: makeMutable<Transforms2d>([])
@@ -440,7 +445,9 @@ const updateGraphVertexLabelsData = <V>(
       updatedVertexLabelsData[key] = {
         ...vertexData.label,
         animationProgress: vertexData.animationProgress,
-        value: vertexData.value
+        focusProgress: vertexData.focusProgress,
+        value: vertexData.value,
+        vertexKey: vertexData.key
       };
       isModified = true; // Mark as modified to set the new labels data object
     }

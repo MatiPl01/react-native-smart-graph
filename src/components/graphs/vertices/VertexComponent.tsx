@@ -9,14 +9,19 @@ import {
   VertexRendererProps
 } from '@/types/components';
 import { updateComponentAnimationState } from '@/utils/components';
+import { getVertexLabelComponentTransformation } from '@/utils/transform';
 
 function VertexComponent<V>({
   data,
   focusContext,
+  labelsRendered,
   multiStepFocusContext,
   onRemove,
   renderer,
-  settings: { radius: r }
+  settings: {
+    label: labelSettings,
+    vertex: { radius: r }
+  }
 }: VertexComponentProps<V>) {
   const { animationSettings, removed, value, ...restData } = data;
   const { key } = restData;
@@ -26,20 +31,22 @@ function VertexComponent<V>({
   // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
   const animationProgressHelper = useSharedValue(0);
 
-  // FOCUS
-  // Vertex focus progress
-  const focusProgress = useSharedValue(0);
-
   // TRANSFORM
   // Vertex transform
   const transform = useVertexTransform(data, [
-    () => ({}),
-    ({ transform: { scale, x, y } }) => {
+    () => ({ ...labelSettings, labelsRendered }),
+    ({
+      customProps: { labelsRendered: renderLabels, ...rest },
+      transform: { scale: vertexScale, x, y }
+    }) => {
       'worklet';
-      data.label.transform.value = [
-        { scale },
-        ...(scale > 0 ? [{ translateX: x }, { translateY: y }] : [])
-      ];
+      if (!renderLabels) return;
+      data.label.transform.value = getVertexLabelComponentTransformation(
+        { x, y },
+        r,
+        vertexScale,
+        rest
+      );
     }
   ]);
 
@@ -47,14 +54,14 @@ function VertexComponent<V>({
   const focusProp = useMemo(
     () => ({
       key: focusContext.focus.key,
-      progress: focusProgress
+      progress: data.focusProgress
     }),
     []
   );
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
-  useComponentFocus(focusProgress, focusContext, key);
+  useComponentFocus(data.focusProgress, focusContext, key);
 
   // Vertex animation handler
   useEffect(() => {

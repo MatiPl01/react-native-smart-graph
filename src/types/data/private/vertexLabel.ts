@@ -3,6 +3,8 @@ import { SharedValue } from 'react-native-reanimated';
 
 export type VertexLabelComponentData<V = undefined> = {
   animationProgress: SharedValue<number>;
+  focusProgress: SharedValue<number>;
   transform: SharedValue<Transforms2d>;
   value?: V;
+  vertexKey: string;
 };

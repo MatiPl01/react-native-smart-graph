@@ -170,9 +170,8 @@ const DEFAULT_COMPONENTS_SETTINGS: {
     radius: 20
   },
   vertexLabel: {
-    offset: 10,
-    position: VertexLabelPosition.BOTTOM,
-    scale: 0.5
+    offset: 0,
+    position: VertexLabelPosition.BOTTOM
   }
 };
 
@@ -215,7 +214,8 @@ export const getDefaultConfig = <V, E>(
       ? DEFAULT_COMPONENTS_SETTINGS.arrow
       : undefined,
     edgeLabel: DEFAULT_COMPONENTS_SETTINGS.edgeLabel,
-    vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
+    vertex: DEFAULT_COMPONENTS_SETTINGS.vertex,
+    vertexLabel: DEFAULT_COMPONENTS_SETTINGS.vertexLabel
   },
   edgeType: data.edgeType ?? 'straight',
   eventSettings: data.eventSettings && {
@@ -309,6 +309,10 @@ export const getUpdateConfig = <V, E>(
         : undefined,
     edgeLabel: {
       scale: 'shared'
+    },
+    vertexLabel: {
+      offset: 'shared',
+      position: 'shared'
     }
   },
   eventSettings: data.eventSettings && {

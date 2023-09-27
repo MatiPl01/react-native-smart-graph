@@ -5,7 +5,8 @@ import {
   ObjectFit,
   VertexPressHandler,
   DirectedGraphData,
-  DirectedGraph
+  DirectedGraph,
+  VertexLabelPosition
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import {
@@ -186,6 +187,11 @@ export default function BottomSheetFocusExample() {
           animationSettings={{
             duration: 500,
             easing: Easing.bezier(0.25, 0.1, 0.25, 1)
+          }}
+          componentsSettings={{
+            vertexLabel: {
+              position: VertexLabelPosition.BOTTOM
+            }
           }}
           eventSettings={{
             press: {
