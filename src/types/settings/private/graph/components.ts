@@ -4,6 +4,7 @@ import {
   EdgeLabelSettings,
   EdgeSettings,
   StraightEdgeSettings,
+  VertexLabelSettings,
   VertexSettings
 } from '@/types/settings/public';
 import { DeepRequired, DeepSharedify } from '@/types/utils';
@@ -12,6 +13,8 @@ import { DeepRequired, DeepSharedify } from '@/types/utils';
  * DEFAULT SETTINGS
  */
 export type AllVertexSettings = DeepRequired<VertexSettings>;
+
+export type AllVertexLabelSettings = DeepRequired<VertexLabelSettings>;
 
 export type AllEdgeSettings = DeepRequired<EdgeSettings>;
 
@@ -33,6 +36,8 @@ export type AllGraphComponentsSettings = {
 /*
  * INTERNAL SETTINGS
  */
+export type InternalVertexLabelSettings = DeepSharedify<AllVertexLabelSettings>;
+
 export type InternalStraightEdgeSettings =
   DeepSharedify<AllStraightEdgeSettings>;
 
@@ -81,4 +86,5 @@ export type InternalGraphComponentsSettings = {
   edgeArrow?: InternalEdgeArrowSettings;
   edgeLabel?: InternalEdgeLabelSettings;
   vertex: InternalVertexSettings;
+  vertexLabel?: InternalVertexLabelSettings;
 };

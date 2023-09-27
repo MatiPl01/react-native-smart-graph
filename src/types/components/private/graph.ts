@@ -12,6 +12,7 @@ import {
   EdgeLabelRenderer,
   UndirectedGraphWithCurvedEdgeRenderers,
   UndirectedGraphWithStraightEdgeRenderers,
+  VertexLabelRenderer,
   VertexMaskRenderer,
   VertexRenderer
 } from '@/types/components/public';
@@ -20,6 +21,7 @@ import {
   EdgeLabelComponentData,
   EdgeRemoveHandler,
   VertexComponentData,
+  VertexLabelComponentData,
   VertexRemoveHandler
 } from '@/types/data';
 import { Graph, GraphConnections } from '@/types/models';
@@ -79,6 +81,7 @@ export type GraphComponentsData<V, E> = {
   handleVertexRemove: VertexRemoveHandler;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
+  vertexLabelsData: Record<string, VertexLabelComponentData<V>>;
   verticesData: Record<string, VertexComponentData<V>>;
 };
 
@@ -99,6 +102,7 @@ export type AllGraphSettings<V, E> = {
     edgeArrow: EdgeArrowRenderer | null;
     edgeLabel: EdgeLabelRenderer<E> | null;
     vertex: VertexRenderer<V> | null;
+    vertexLabel: VertexLabelRenderer<V> | null;
     vertexMask: VertexMaskRenderer | null;
   };
 };

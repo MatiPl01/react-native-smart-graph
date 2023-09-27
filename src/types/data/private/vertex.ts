@@ -4,9 +4,13 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { AllAnimationSettings } from '@/types/settings/private/graph/animations';
 
+import { VertexLabelComponentData } from './vertexLabel';
+
 export type VertexComponentData<V = undefined> = {
+  animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
   key: string;
+  label: Omit<VertexLabelComponentData<V>, 'animationProgress' | 'value'>;
   points: SharedValue<{
     source: Vector;
     target: Vector;

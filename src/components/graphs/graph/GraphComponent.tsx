@@ -12,6 +12,7 @@ import {
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
 import GraphVertices from './GraphVertices';
+import GraphVerticesLabels from './GraphVerticesLabels';
 
 function GraphComponent() {
   // CONTEXTS
@@ -43,7 +44,8 @@ function GraphComponent() {
         focusContext={focusContext}
         multiStepFocusContext={multiStepFocusContext}
       />
-      {/* TODO - Vertices labels */}
+      {/* Vertices labels */}
+      <GraphVerticesLabels focusProgress={focusProgress} />
     </>
   );
 }

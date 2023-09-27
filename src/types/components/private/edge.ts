@@ -37,31 +37,51 @@ type SharedCurvedEdgeComponentProps = SharedEdgeComponentProps & {
   edgeType: 'curved';
 };
 
+type RenameRenderers<R extends object, E> = Omit<
+  R,
+  'edgeArrow' | 'edgeLabel'
+> & {
+  arrow?: EdgeArrowRenderer | null;
+  label?: EdgeLabelRenderer<E> | null;
+};
+
 export type DirectedStraightEdgeComponentProps<V, E> =
   SharedStraightEdgeComponentProps & {
     data: EdgeComponentData<E>;
-    renderers: AllDirectedGraphWithStraightEdgeRenderers<V, E>;
+    renderers: RenameRenderers<
+      AllDirectedGraphWithStraightEdgeRenderers<V, E>,
+      E
+    >;
     settings: InternalDirectedStraightEdgeSettings;
   };
 
 export type DirectedCurvedEdgeComponentProps<V, E> =
   SharedCurvedEdgeComponentProps & {
     data: EdgeComponentData<E>;
-    renderers: AllDirectedGraphWithCurvedEdgeRenderers<V, E>;
+    renderers: RenameRenderers<
+      AllDirectedGraphWithCurvedEdgeRenderers<V, E>,
+      E
+    >;
     settings: InternalDirectedCurvedEdgeSettings;
   };
 
 export type UndirectedStraightEdgeComponentProps<V, E> =
   SharedStraightEdgeComponentProps & {
     data: EdgeComponentData<E>;
-    renderers: AllUndirectedGraphWithStraightEdgeRenderers<V, E>;
+    renderers: RenameRenderers<
+      AllUndirectedGraphWithStraightEdgeRenderers<V, E>,
+      E
+    >;
     settings: InternalUndirectedStraightEdgeSettings;
   };
 
 export type UndirectedCurvedEdgeComponentProps<V, E> =
   SharedCurvedEdgeComponentProps & {
     data: EdgeComponentData<E>;
-    renderers: AllUndirectedGraphWithCurvedEdgeRenderers<V, E>;
+    renderers: RenameRenderers<
+      AllUndirectedGraphWithCurvedEdgeRenderers<V, E>,
+      E
+    >;
     settings: InternalUndirectedCurvedEdgeSettings;
   };
 

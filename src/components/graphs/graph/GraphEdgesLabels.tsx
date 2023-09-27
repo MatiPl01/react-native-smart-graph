@@ -1,17 +1,8 @@
 import { Group } from '@shopify/react-native-skia';
-import { SharedValue } from 'react-native-reanimated';
 
 import { EdgeLabelComponent } from '@/components/graphs';
 import { withComponentsData, withGraphSettings } from '@/providers/graph';
-import { EdgeLabelRenderer } from '@/types/components';
-import { EdgeLabelComponentData } from '@/types/data';
-
-type GraphEdgeLabelsProps<E> = {
-  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
-  focusProgress: SharedValue<number>;
-  renderer: EdgeLabelRenderer<E> | null;
-  vertexRadius: number;
-};
+import { GraphEdgeLabelsProps } from '@/types/components';
 
 function GraphEdgeLabels<E>({
   edgeLabelsData,
@@ -28,7 +19,6 @@ function GraphEdgeLabels<E>({
             edgeKey={key}
             key={key}
             renderer={renderer}
-            value={data.value}
             vertexRadius={vertexRadius}
           />
         ))}
