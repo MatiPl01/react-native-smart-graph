@@ -11,10 +11,7 @@ export type VertexComponentData<V = undefined> = {
   animationSettings: AllAnimationSettings | null;
   focusProgress: SharedValue<number>;
   key: string;
-  label: Omit<
-    VertexLabelComponentData<V>,
-    'animationProgress' | 'focusProgress' | 'value'
-  >;
+  label: Pick<VertexLabelComponentData<V>, 'transform'>;
   points: SharedValue<{
     source: Vector;
     target: Vector;

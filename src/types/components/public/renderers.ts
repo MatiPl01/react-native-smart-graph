@@ -44,6 +44,14 @@ export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
     progress: SharedValue<number>;
   };
   key: string;
+  multiStepFocus: {
+    bounds: SharedValue<{
+      afterIdx: number;
+      beforeIdx: number;
+    }>;
+    points: SharedValue<Array<{ key: string; startsAt: number }>>;
+    progress: SharedValue<number>;
+  };
   onMeasure: (width: number, height: number) => void;
   r: number;
   value: V;

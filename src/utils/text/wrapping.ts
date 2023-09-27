@@ -218,6 +218,10 @@ export const wrapText = (
 ): Array<TextLine> => {
   const chunks = getTextChunks(text);
 
+  if (!chunks.length) {
+    return [];
+  }
+
   if (numberOfLines === Infinity) {
     return wrapWithoutTrimming(chunks, font, width);
   }

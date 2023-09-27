@@ -446,7 +446,8 @@ const updateGraphVertexLabelsData = <V>(
         ...vertexData.label,
         animationProgress: vertexData.animationProgress,
         focusProgress: vertexData.focusProgress,
-        value: vertexData.value
+        value: vertexData.value,
+        vertexKey: vertexData.key
       };
       isModified = true; // Mark as modified to set the new labels data object
     }

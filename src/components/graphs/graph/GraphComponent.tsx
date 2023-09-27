@@ -45,7 +45,10 @@ function GraphComponent() {
         multiStepFocusContext={multiStepFocusContext}
       />
       {/* Vertices labels */}
-      <GraphVerticesLabels focusContext={focusContext} />
+      <GraphVerticesLabels
+        focusContext={focusContext}
+        multiStepFocusContext={multiStepFocusContext}
+      />
     </>
   );
 }

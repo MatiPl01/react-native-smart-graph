@@ -34,7 +34,7 @@ export default function ResponsiveText({
   lineHeight,
   numberOfLines,
   onMeasure,
-  text,
+  text = '',
   verticalAlignment,
   width = 0,
   x = 0,
@@ -47,6 +47,7 @@ export default function ResponsiveText({
     () => wrapText(text, font, width, numberOfLines, ellipsizeMode),
     [text, font, width, numberOfLines, ellipsizeMode]
   );
+
   const alignedTextLines = useMemo(
     () => alignText(textLines, width, horizontalAlignment),
     [textLines, horizontalAlignment]

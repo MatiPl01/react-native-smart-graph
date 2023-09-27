@@ -45,10 +45,7 @@ function VertexComponent<V>({
         { x, y },
         r,
         vertexScale,
-        {
-          offset: (rest as { offset: number }).offset ?? 0,
-          position: rest.position
-        }
+        rest
       );
     }
   ]);

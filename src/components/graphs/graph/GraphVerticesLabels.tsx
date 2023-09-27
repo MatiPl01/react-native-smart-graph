@@ -5,6 +5,7 @@ import { GraphVerticesLabelsProps } from '@/types/components';
 function GraphVerticesLabels<V>({
   focusContext,
   labelPosition,
+  multiStepFocusContext,
   renderer,
   vertexLabelsData,
   vertexRadius
@@ -17,8 +18,8 @@ function GraphVerticesLabels<V>({
         focusContext={focusContext}
         key={key}
         labelPosition={labelPosition}
+        multiStepFocusContext={multiStepFocusContext}
         renderer={renderer}
-        vertexKey={key}
         vertexRadius={vertexRadius}
       />
     ))

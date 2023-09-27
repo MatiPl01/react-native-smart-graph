@@ -11,11 +11,11 @@ import { Dimensions } from '@/types/layout';
 import { getVertexLabelContentTransformation } from '@/utils/transform';
 
 function VertexLabelComponent<V>({
-  data: { animationProgress, focusProgress, transform, value },
+  data: { animationProgress, focusProgress, transform, value, vertexKey },
   focusContext,
   labelPosition,
+  multiStepFocusContext,
   renderer,
-  vertexKey,
   vertexRadius
 }: VertexLabelComponentProps<V>) {
   // LABEL CONTENT TRANSFORMATION
@@ -36,6 +36,7 @@ function VertexLabelComponent<V>({
       <Group transform={labelContentTransform}>
         <RenderedLabelComponent
           animationProgress={animationProgress}
+          multiStepFocus={multiStepFocusContext}
           r={vertexRadius}
           renderer={renderer}
           value={value as V}

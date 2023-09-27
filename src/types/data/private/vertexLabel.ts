@@ -6,4 +6,5 @@ export type VertexLabelComponentData<V = undefined> = {
   focusProgress: SharedValue<number>;
   transform: SharedValue<Transforms2d>;
   value?: V;
+  vertexKey: string;
 };
