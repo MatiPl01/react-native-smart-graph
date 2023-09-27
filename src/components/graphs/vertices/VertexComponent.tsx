@@ -32,7 +32,16 @@ function VertexComponent<V>({
 
   // TRANSFORM
   // Vertex transform
-  const transform = useVertexTransform(data);
+  const transform = useVertexTransform(data, [
+    () => ({}),
+    ({ transform: { scale, x, y } }) => {
+      'worklet';
+      data.label.transform.value = [
+        { scale },
+        ...(scale > 0 ? [{ translateX: x }, { translateY: y }] : [])
+      ];
+    }
+  ]);
 
   // VERTEX PROPS
   const focusProp = useMemo(

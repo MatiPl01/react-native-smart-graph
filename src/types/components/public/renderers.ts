@@ -41,10 +41,7 @@ export type VertexRenderer<V = undefined> = (
 export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
   key: string;
   r: number;
-  scale: SharedValue<number>;
   value: V;
-  vertexRadius: number;
-  vertexScale: SharedValue<number>;
 };
 
 export type VertexLabelRenderer<V = undefined> = (

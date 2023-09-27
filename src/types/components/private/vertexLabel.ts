@@ -8,6 +8,7 @@ export type VertexLabelComponentProps<V = undefined> = {
   renderer: VertexLabelRenderer<V>;
   vertexKey: string;
   vertexRadius: number;
+  // settings: Verlacom // TODO
 };
 
 export type GraphVerticesLabelsProps<V> = {

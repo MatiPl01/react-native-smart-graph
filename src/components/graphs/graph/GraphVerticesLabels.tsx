@@ -1,9 +1,25 @@
+import { VertexLabelComponent } from '@/components/graphs/labels';
 import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesLabelsProps } from '@/types/components';
 
-function GraphVerticesLabels<V>(props: GraphVerticesLabelsProps<V>) {
-  console.log(Object.keys(props.vertexLabelsData));
-  return null;
+function GraphVerticesLabels<V>({
+  renderer,
+  // settings,
+  vertexLabelsData,
+  vertexRadius
+}: GraphVerticesLabelsProps<V>) {
+  return (
+    renderer &&
+    Object.entries(vertexLabelsData).map(([key, data]) => (
+      <VertexLabelComponent<V>
+        data={data}
+        key={key}
+        renderer={renderer}
+        vertexKey={key}
+        vertexRadius={vertexRadius}
+      />
+    ))
+  );
 }
 
 export default withGraphSettings(
