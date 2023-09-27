@@ -1,14 +1,15 @@
-import { Vector } from '@shopify/react-native-skia';
+import { Transforms2d, Vector } from '@shopify/react-native-skia';
 
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
 import {
   AllAnimationSettings,
-  PlacedVerticesPositions
+  PlacedVerticesPositions,
+  VertexLabelPosition
 } from '@/types/settings';
 import { Maybe } from '@/types/utils';
 
 import { animateWithCallback, animateWithoutCallback } from './animations';
-import { areVectorsEqual } from './vectors';
+import { addVectors, areVectorsEqual, multiplyVector } from './vectors';
 import { calcTranslationOnProgress } from './views';
 
 const updateVerticesTransform = <V>(
@@ -297,4 +298,51 @@ export const setVerticesPositions = <V, E>(
     v2Position ??= getVertexPosition(v2Data);
     setEdgePosition(edgeData, v1Position, v2Position);
   }
+};
+
+export const getVertexLabelTransformation = (
+  vertexPosition: Vector,
+  vertexRadius: number,
+  vertexScale: number,
+  labelSettings: {
+    offset: number;
+    position: VertexLabelPosition;
+  }
+): Transforms2d => {
+  'worklet';
+  let dirVector = { x: 0, y: 0 };
+
+  switch (labelSettings.position) {
+    case VertexLabelPosition.TOP:
+      dirVector = { x: 0, y: -1 };
+      break;
+    case VertexLabelPosition.BOTTOM:
+      dirVector = { x: 0, y: 1 };
+      break;
+    case VertexLabelPosition.LEFT:
+      dirVector = { x: -1, y: 0 };
+      break;
+    case VertexLabelPosition.RIGHT:
+      dirVector = { x: 1, y: 0 };
+      break;
+    case VertexLabelPosition.TOP_LEFT:
+      dirVector = { x: -1, y: -1 };
+      break;
+    case VertexLabelPosition.TOP_RIGHT:
+      dirVector = { x: 1, y: -1 };
+      break;
+    case VertexLabelPosition.BOTTOM_LEFT:
+      dirVector = { x: -1, y: 1 };
+      break;
+    case VertexLabelPosition.BOTTOM_RIGHT:
+      dirVector = { x: 1, y: 1 };
+      break;
+  }
+
+  const { x, y } = addVectors(
+    vertexPosition,
+    multiplyVector(dirVector, labelSettings.offset + vertexRadius * vertexScale)
+  );
+
+  return [{ scale: vertexScale }, { translateX: x }, { translateY: y }];
 };

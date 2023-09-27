@@ -1,22 +1,34 @@
+import { SharedValue } from 'react-native-reanimated';
+
 import { MultiStepFocusContextType } from '@/providers/graph/focus';
 import { FocusContextType } from '@/providers/view';
 import { VertexRenderer } from '@/types/components/public';
 import { VertexComponentData, VertexRemoveHandler } from '@/types/data';
-import { InternalVertexSettings } from '@/types/settings';
+import {
+  InternalVertexLabelSettings,
+  InternalVertexSettings
+} from '@/types/settings';
 
 export type VertexComponentProps<V> = {
   data: VertexComponentData<V>;
   focusContext: FocusContextType;
+  labelsRendered: SharedValue<boolean>;
   multiStepFocusContext: MultiStepFocusContextType;
   onRemove: VertexRemoveHandler;
   renderer: VertexRenderer<V>;
-  settings: InternalVertexSettings;
+  settings: {
+    label: InternalVertexLabelSettings;
+    vertex: InternalVertexSettings;
+  };
 };
 
 export type GraphVerticesProps<V> = Omit<
   VertexComponentProps<V>,
-  'data' | 'renderer'
+  'data' | 'renderer' | 'settings'
 > & {
+  labelSettings: InternalVertexLabelSettings;
+  labelsRendered: SharedValue<boolean>;
   renderer: VertexRenderer<V> | null;
+  vertexSettings: InternalVertexSettings;
   verticesData: Record<string, VertexComponentData<V>>;
 };

@@ -19,17 +19,14 @@ export enum VertexLabelPosition {
   TOP_RIGHT = 'top-right'
 }
 
-export type VertexLabelSettings = {
-  scale?: Sharedifyable<number>;
-} & (
+export type VertexLabelSettings =
   | {
-      offset: Sharedifyable<number>;
+      offset?: Sharedifyable<number>;
       position?: Omit<VertexLabelPosition, 'center'>;
     }
   | {
       position: VertexLabelPosition.CENTER;
-    }
-);
+    };
 
 export type StraightEdgeSettings = {
   maxOffsetFactor?: Sharedifyable<number>;
@@ -55,6 +52,7 @@ export type EdgeType = 'curved' | 'straight';
 type SharedGraphComponentsSettings = {
   edgeLabel?: EdgeLabelSettings;
   vertex?: VertexSettings;
+  vertexLabel?: VertexLabelSettings;
 };
 
 export type UndirectedGraphWithStraightEdgesComponentsSettings =

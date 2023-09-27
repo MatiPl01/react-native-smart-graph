@@ -54,9 +54,11 @@ export const createContextValue = <V, E>(
 const UPDATE_CONFIG = {
   connections: 'shallow', // 'shallow' - shallow compare
   edgeLabelsData: 'shallow',
+  edgeLabelsRendered: 'shared', // 'shared' - replace with shared value
   edgesData: 'shallow',
-  isGraphDirected: 'shared', // 'shared' - replace with shared value
+  isGraphDirected: 'shared',
   vertexLabelsData: 'shallow',
+  vertexLabelsRendered: 'shared',
   verticesData: 'shallow'
 };
 
@@ -133,12 +135,14 @@ export const updateContextValue = <V, E>(
         // updating the connections when the graph is updated
         connections: newData.connections,
         edgeLabelsData: newEdgeLabelsData,
+        edgeLabelsRendered: newData.renderEdgeLabels,
         edgesData: newEdgesData,
         handleEdgeRemove: value.handleEdgeRemove, // Prevent removing
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
         layoutAnimationSettings: newLayoutAnimationSettings,
         vertexLabelsData: newVerticesLabelsData,
+        vertexLabelsRendered: newData.renderVertexLabels,
         verticesData: newVerticesData
       }
     },

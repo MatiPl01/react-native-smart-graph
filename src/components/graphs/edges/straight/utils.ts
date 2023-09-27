@@ -132,7 +132,7 @@ export const useStraightEdge = <
 } => {
   const {
     data: { label: labelData, ordering, points, transformProgress },
-    renderers: { label: labelRenderer },
+    labelsRendered,
     settings: {
       edge: { maxOffsetFactor },
       label: { scale: labelScale },
@@ -170,9 +170,10 @@ export const useStraightEdge = <
       offsetFactor: maxOffsetFactor.value,
       points: points.value,
       progress: transformProgress.value,
-      r: vertexRadius
+      r: vertexRadius,
+      renderLabels: labelsRendered.value
     }),
-    ({ customProps, ...props }) => {
+    ({ customProps, renderLabels, ...props }) => {
       // EDGE
       // Update the source offset if the ordering has changed
       let beginOffset = startOffset.value;
@@ -200,7 +201,7 @@ export const useStraightEdge = <
         currentOrdering,
         props
       );
-      if (labelRenderer) {
+      if (renderLabels) {
         labelData.transform.value = labelTransform;
       }
 
@@ -219,7 +220,7 @@ export const useStraightEdge = <
       p2.value = edgeTransform.p2;
       currentOffset.value = edgeTransform.offset;
     },
-    [vertexRadius, labelRenderer, additional]
+    [vertexRadius, additional]
   );
 
   return { p1, p2 };

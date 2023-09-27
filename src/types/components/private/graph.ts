@@ -76,12 +76,14 @@ export type UndirectedGraphComponentProps<
 export type GraphComponentsData<V, E> = {
   connections: GraphConnections;
   edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
+  edgeLabelsRendered: SharedValue<boolean>;
   edgesData: Record<string, EdgeComponentData<E>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
   vertexLabelsData: Record<string, VertexLabelComponentData<V>>;
+  vertexLabelsRendered: SharedValue<boolean>;
   verticesData: Record<string, VertexComponentData<V>>;
 };
 

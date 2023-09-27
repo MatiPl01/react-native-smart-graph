@@ -8,15 +8,21 @@ import {
   VertexRenderer,
   VertexRendererProps
 } from '@/types/components';
+import { VertexLabelPosition } from '@/types/settings';
 import { updateComponentAnimationState } from '@/utils/components';
+import { getVertexLabelTransformation } from '@/utils/transform';
 
 function VertexComponent<V>({
   data,
   focusContext,
+  labelsRendered,
   multiStepFocusContext,
   onRemove,
   renderer,
-  settings: { radius: r }
+  settings: {
+    label: labelSettings,
+    vertex: { radius: r }
+  }
 }: VertexComponentProps<V>) {
   const { animationSettings, removed, value, ...restData } = data;
   const { key } = restData;
@@ -29,13 +35,22 @@ function VertexComponent<V>({
   // TRANSFORM
   // Vertex transform
   const transform = useVertexTransform(data, [
-    () => ({}),
-    ({ transform: { scale, x, y } }) => {
+    () => ({ ...labelSettings, labelsRendered }),
+    ({
+      customProps: { labelsRendered: renderLabels, ...rest },
+      transform: { scale: vertexScale, x, y }
+    }) => {
       'worklet';
-      data.label.transform.value = [
-        { scale },
-        ...(scale > 0 ? [{ translateX: x }, { translateY: y }] : [])
-      ];
+      if (!renderLabels) return;
+      data.label.transform.value = getVertexLabelTransformation(
+        { x, y },
+        r,
+        vertexScale,
+        {
+          offset: (rest as { offset: number }).offset ?? 0,
+          position: rest.position as VertexLabelPosition
+        }
+      );
     }
   ]);
 

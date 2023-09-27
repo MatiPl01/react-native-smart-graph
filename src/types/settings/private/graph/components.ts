@@ -31,6 +31,7 @@ export type AllGraphComponentsSettings = {
   edgeArrow?: AllEdgeArrowSettings;
   edgeLabel?: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
+  vertexLabel?: AllVertexLabelSettings;
 };
 
 /*
