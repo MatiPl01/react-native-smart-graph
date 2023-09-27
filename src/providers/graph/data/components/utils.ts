@@ -198,6 +198,7 @@ const updateGraphVerticesData = <V, E>(
       ...(oldVertex ?? {
         // Create shared values only for new vertices
         animationProgress: makeMutable(0),
+        focusProgress: makeMutable(0),
         isModified: makeMutable(true),
         label: {
           transform: makeMutable<Transforms2d>([])
@@ -440,6 +441,7 @@ const updateGraphVertexLabelsData = <V>(
       updatedVertexLabelsData[key] = {
         ...vertexData.label,
         animationProgress: vertexData.animationProgress,
+        focusProgress: vertexData.focusProgress,
         value: vertexData.value
       };
       isModified = true; // Mark as modified to set the new labels data object

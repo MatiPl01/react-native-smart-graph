@@ -26,10 +26,6 @@ function VertexComponent<V>({
   // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
   const animationProgressHelper = useSharedValue(0);
 
-  // FOCUS
-  // Vertex focus progress
-  const focusProgress = useSharedValue(0);
-
   // TRANSFORM
   // Vertex transform
   const transform = useVertexTransform(data, [
@@ -47,14 +43,14 @@ function VertexComponent<V>({
   const focusProp = useMemo(
     () => ({
       key: focusContext.focus.key,
-      progress: focusProgress
+      progress: data.focusProgress
     }),
     []
   );
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
-  useComponentFocus(focusProgress, focusContext, key);
+  useComponentFocus(data.focusProgress, focusContext, key);
 
   // Vertex animation handler
   useEffect(() => {

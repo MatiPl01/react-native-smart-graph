@@ -9,8 +9,12 @@ import { VertexLabelComponentData } from './vertexLabel';
 export type VertexComponentData<V = undefined> = {
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
+  focusProgress: SharedValue<number>;
   key: string;
-  label: Omit<VertexLabelComponentData<V>, 'animationProgress' | 'value'>;
+  label: Omit<
+    VertexLabelComponentData<V>,
+    'animationProgress' | 'focusProgress' | 'value'
+  >;
   points: SharedValue<{
     source: Vector;
     target: Vector;

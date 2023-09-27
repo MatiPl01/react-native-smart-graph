@@ -3,8 +3,9 @@ import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesLabelsProps } from '@/types/components';
 
 function GraphVerticesLabels<V>({
-  renderer,
+  focusContext,
   // settings,
+  renderer,
   vertexLabelsData,
   vertexRadius
 }: GraphVerticesLabelsProps<V>) {
@@ -13,6 +14,7 @@ function GraphVerticesLabels<V>({
     Object.entries(vertexLabelsData).map(([key, data]) => (
       <VertexLabelComponent<V>
         data={data}
+        focusContext={focusContext}
         key={key}
         renderer={renderer}
         vertexKey={key}

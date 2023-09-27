@@ -39,6 +39,10 @@ export type VertexRenderer<V = undefined> = (
  * VERTEX LABEL
  */
 export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
+  focus: {
+    key: SharedValue<null | string>;
+    progress: SharedValue<number>;
+  };
   key: string;
   r: number;
   value: V;
