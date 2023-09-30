@@ -13,7 +13,7 @@ export type VertexComponentProps<V> = {
   data: VertexComponentData<V>;
   focusContext: FocusContextType;
   labelsRendered: SharedValue<boolean>;
-  multiStepFocusContext: MultiStepFocusContextType;
+  multiStepFocusContext: MultiStepFocusContextType | null;
   onRemove: VertexRemoveHandler;
   renderer: VertexRenderer<V>;
   settings: {

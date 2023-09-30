@@ -35,19 +35,11 @@ export type MultiStepFocusContextType = {
   progress: SharedValue<number>;
 };
 
-const MultiStepFocusContext = createContext(null as unknown as object);
+const MultiStepFocusContext = createContext<MultiStepFocusContextType | null>(
+  null
+);
 
-export const useMultiStepFocusContext = () => {
-  const contextValue = useContext(MultiStepFocusContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useMultiStepFocusContext must be used within a MultiStepFocusProvider'
-    );
-  }
-
-  return contextValue as MultiStepFocusContextType;
-};
+export const useMultiStepFocusContext = () => useContext(MultiStepFocusContext);
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
