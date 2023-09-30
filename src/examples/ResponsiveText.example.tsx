@@ -8,7 +8,11 @@ import Animated, {
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
-import { TextHorizontalAlignment, TextVerticalAlignment } from '..';
+import {
+  HorizontalAlignment,
+  TextHorizontalAlignment,
+  TextVerticalAlignment
+} from '..';
 
 export default function ResponsiveTextExample() {
   const width = 200; //Dimensions.get('window').width;
@@ -32,9 +36,9 @@ export default function ResponsiveTextExample() {
   const font = useFont(FONTS.rubikFont, fontSize);
 
   const animatedTextStyle = useAnimatedStyle(() => {
-    let textAlign = horizontalAlignment.value;
-    if (textAlign === 'center-left' || textAlign === 'center-right') {
-      textAlign = 'center';
+    let textAlign = horizontalAlignment.value as HorizontalAlignment;
+    if (textAlign.startsWith('center-')) {
+      textAlign = textAlign.replace('center-', '') as HorizontalAlignment;
     }
 
     return {
@@ -45,6 +49,7 @@ export default function ResponsiveTextExample() {
   useEffect(() => {
     const horizontalAlignments: Array<TextHorizontalAlignment> = [
       'center-left',
+      'center',
       'center-right'
     ];
     const verticalAlignments: Array<TextVerticalAlignment> = [
@@ -61,7 +66,7 @@ export default function ResponsiveTextExample() {
 
       animationProgress.value = 0;
       animationProgress.value = withTiming(1, {
-        duration: 2000
+        duration: 1000
       });
     }, 1000);
   }, []);
