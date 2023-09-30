@@ -2,6 +2,11 @@ import { BoundingRect } from './private';
 
 export type VerticalAlignment = 'bottom' | 'center' | 'top';
 export type HorizontalAlignment = 'center' | 'left' | 'right';
+export type TextHorizontalAlignment =
+  | 'center-left'
+  | 'center-right'
+  | HorizontalAlignment;
+export type TextVerticalAlignment = VerticalAlignment;
 
 export type Alignment = {
   horizontalAlignment?: HorizontalAlignment;

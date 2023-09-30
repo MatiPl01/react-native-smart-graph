@@ -1,27 +1,28 @@
-import { AlignedTextLine, TextLine } from '@/types/components';
-import { HorizontalAlignment, VerticalAlignment } from '@/types/layout';
+import { TextLineData } from '@/types/components';
+import { TextHorizontalAlignment, VerticalAlignment } from '@/types/layout';
 
-export const alignText = (
-  lines: Array<TextLine>,
+export const getTextLinesAlignment = (
+  lines: Array<TextLineData>,
   width: number,
-  alignment: HorizontalAlignment = 'left'
-): Array<AlignedTextLine> => {
+  alignment: TextHorizontalAlignment = 'left'
+): Array<number> => {
+  'worklet';
   switch (alignment) {
     case 'right':
-      return lines.map(line => ({
-        ...line,
-        offset: width - line.width
-      }));
+      return lines.map(line => width - line.width);
     case 'center':
-      return lines.map(line => ({
-        ...line,
-        offset: (width - line.width) / 2
-      }));
+      return lines.map(line => (width - line.width) / 2);
+    case 'center-left':
+    case 'center-right':
+      const longestLineWidth = Math.max(...lines.map(line => line.width));
+      return lines.map(line =>
+        alignment === 'center-left'
+          ? (width - longestLineWidth) / 2
+          : (width + longestLineWidth) / 2 - line.width
+      );
     case 'left':
-      return lines.map(line => ({
-        ...line,
-        offset: 0
-      }));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return lines.map(_ => 0);
   }
 };
 
@@ -30,6 +31,7 @@ export const getVerticalAlignmentOffset = (
   parentHeight = 0,
   verticalAlignment: VerticalAlignment = 'top'
 ): number => {
+  'worklet';
   switch (verticalAlignment) {
     case 'top':
       return 0;

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SkFont } from '@shopify/react-native-skia';
 
-import { EllipsizeMode, TextLine } from '@/types/components';
+import { EllipsizeMode, TextLineData } from '@/types/components';
 
 const ELLIPSIS = '...';
 
@@ -14,8 +14,8 @@ const wrapWithoutTrimming = (
   chunks: Array<string>,
   font: SkFont,
   width: number
-): Array<TextLine> => {
-  const result: Array<TextLine> = [];
+): Array<TextLineData> => {
+  const result: Array<TextLineData> = [];
 
   let currentLine: { chunks: Array<string>; width: number } = {
     chunks: [],
@@ -48,13 +48,13 @@ const wrapWithoutTrimming = (
 };
 
 const trimLineEnd = (
-  line: TextLine,
+  line: TextLineData,
   chunks: Array<string>,
   chunkIdx: number,
   font: SkFont,
   width: number,
   mode: 'clip' | 'tail'
-): TextLine => {
+): TextLineData => {
   const renderEllipsis = mode !== 'clip';
   const additionalWidth = renderEllipsis ? font.getTextWidth(ELLIPSIS) : 0;
 
@@ -82,12 +82,12 @@ const trimLineEnd = (
 };
 
 const trimLineStart = (
-  line: TextLine,
+  line: TextLineData,
   chunks: Array<string>,
   chunkIdx: number,
   font: SkFont,
   width: number
-): TextLine => {
+): TextLineData => {
   let lastLineText = line.text;
   if (++chunkIdx < chunks.length) {
     lastLineText += chunks[chunkIdx]!;
@@ -110,12 +110,12 @@ const trimLineStart = (
 };
 
 const trimLineCenter = (
-  line: TextLine,
+  line: TextLineData,
   chunks: Array<string>,
   chunkIdx: number,
   font: SkFont,
   width: number
-): TextLine => {
+): TextLineData => {
   let lastLineText = line.text;
   if (++chunkIdx < chunks.length) {
     lastLineText += chunks[chunkIdx]!;
@@ -152,8 +152,8 @@ const wrapWithTrimming = (
   width: number,
   numberOfLines: number,
   mode: EllipsizeMode
-): Array<TextLine> => {
-  const result: Array<TextLine> = [];
+): Array<TextLineData> => {
+  const result: Array<TextLineData> = [];
 
   let currentLine: { chunks: Array<string>; width: number } = {
     chunks: [],
@@ -215,7 +215,7 @@ export const wrapText = (
   width: number,
   numberOfLines = Infinity,
   ellipsizeMode: EllipsizeMode = 'tail'
-): Array<TextLine> => {
+): Array<TextLineData> => {
   const chunks = getTextChunks(text);
 
   if (!chunks.length) {

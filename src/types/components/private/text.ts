@@ -1,8 +1,4 @@
-export type TextLine = {
+export type TextLineData = {
   text: string;
   width: number;
-};
-
-export type AlignedTextLine = TextLine & {
-  offset: number;
 };

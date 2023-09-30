@@ -10,7 +10,7 @@ export type VertexLabelComponentProps<V = undefined> = {
   data: VertexLabelComponentData<V>;
   focusContext: FocusContextType;
   labelPosition: SharedValue<VertexLabelPosition>;
-  multiStepFocusContext: MultiStepFocusContextType;
+  multiStepFocusContext: MultiStepFocusContextType | null;
   renderer: VertexLabelRenderer<V>;
   vertexRadius: number;
 };

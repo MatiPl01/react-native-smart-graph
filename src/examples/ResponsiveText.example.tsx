@@ -1,13 +1,24 @@
 import FONTS from '@/assets/fonts';
 import { ResponsiveText } from '@/components';
 import { Canvas, useFont } from '@shopify/react-native-skia';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
+import {
+  HorizontalAlignment,
+  TextHorizontalAlignment,
+  TextVerticalAlignment
+} from '..';
 
 export default function ResponsiveTextExample() {
   const width = 200; //Dimensions.get('window').width;
   const height = 200;
   const text =
-    'Modi id maiores est longwordtest iste porro et in ipsam dolores.';
+    'Omnis ex vero et minima. Sed sed dolor et ut. Quos fugit sed maiores corporis.';
   const fontSize = 20;
   const color = 'white';
   const backgroundColor = '#003d12';
@@ -18,10 +29,47 @@ export default function ResponsiveTextExample() {
   const ellipsizeMode = 'tail';
 
   // Alignment
-  const horizontalAlignment = 'center';
-  const verticalAlignment = 'center';
+  const horizontalAlignment = useSharedValue<TextHorizontalAlignment>('center');
+  const verticalAlignment = useSharedValue<TextVerticalAlignment>('center');
+  const animationProgress = useSharedValue(0);
 
   const font = useFont(FONTS.rubikFont, fontSize);
+
+  const animatedTextStyle = useAnimatedStyle(() => {
+    let textAlign = horizontalAlignment.value as HorizontalAlignment;
+    if (textAlign.startsWith('center-')) {
+      textAlign = textAlign.replace('center-', '') as HorizontalAlignment;
+    }
+
+    return {
+      textAlign
+    };
+  });
+
+  useEffect(() => {
+    const horizontalAlignments: Array<TextHorizontalAlignment> = [
+      'center-left',
+      'center',
+      'center-right'
+    ];
+    const verticalAlignments: Array<TextVerticalAlignment> = [
+      'top',
+      'center',
+      'bottom'
+    ];
+
+    let index = 0;
+    setInterval(() => {
+      horizontalAlignment.value = horizontalAlignments[index]!;
+      verticalAlignment.value = verticalAlignments[index]!;
+      index = (index + 1) % horizontalAlignments.length;
+
+      animationProgress.value = 0;
+      animationProgress.value = withTiming(1, {
+        duration: 1000
+      });
+    }, 1000);
+  }, []);
 
   if (!font) {
     return null;
@@ -31,6 +79,7 @@ export default function ResponsiveTextExample() {
     <>
       <Canvas style={styles.container}>
         <ResponsiveText
+          animationProgress={animationProgress}
           backgroundColor={backgroundColor}
           color={color}
           ellipsizeMode={ellipsizeMode}
@@ -47,20 +96,22 @@ export default function ResponsiveTextExample() {
         />
       </Canvas>
       <View style={styles.container}>
-        <Text
+        <Animated.Text
           ellipsizeMode={ellipsizeMode}
           numberOfLines={numberOfLines}
-          style={{
-            fontSize,
-            backgroundColor,
-            width,
-            color,
-            height,
-            textAlign: horizontalAlignment,
-            lineHeight
-          }}>
+          style={[
+            {
+              fontSize,
+              backgroundColor,
+              width,
+              color,
+              height,
+              lineHeight
+            },
+            animatedTextStyle
+          ]}>
           {text}
-        </Text>
+        </Animated.Text>
       </View>
     </>
   );

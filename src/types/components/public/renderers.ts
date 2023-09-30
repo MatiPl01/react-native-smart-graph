@@ -25,7 +25,7 @@ export type VertexRendererProps<V = undefined> = SharedRenderersProps & {
     }>;
     points: SharedValue<Array<{ key: string; startsAt: number }>>;
     progress: SharedValue<number>;
-  };
+  } | null;
   r: number;
   scale: SharedValue<number>;
   value: V;
@@ -51,7 +51,7 @@ export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
     }>;
     points: SharedValue<Array<{ key: string; startsAt: number }>>;
     progress: SharedValue<number>;
-  };
+  } | null;
   onMeasure: (width: number, height: number) => void;
   r: number;
   value: V;

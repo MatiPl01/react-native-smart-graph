@@ -31,6 +31,15 @@ export * from '@/hooks';
 // ALGORITHMS
 export * from '@/utils/algorithms';
 
+// UTILS
+export * from '@/utils/math';
+export * from '@/utils/vectors';
+export {
+  calcTransformationOnProgress,
+  calcTranslationOnProgress,
+  calcValueOnProgress
+} from '@/utils/views';
+
 // TYPES
 export * from '@/types/components/public';
 export * from '@/types/data/public';

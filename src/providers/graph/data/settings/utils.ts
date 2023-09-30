@@ -15,7 +15,7 @@ export const updateContextValue = <V, E>(
   const defaultConfig = getDefaultConfig(data);
 
   data.animationSettings =
-    data.animationSettings && isAnimationSettingsObject(data.animationSettings)
+    !data.animationSettings || isAnimationSettingsObject(data.animationSettings)
       ? {
           edges: data.animationSettings,
           layout: data.animationSettings,
