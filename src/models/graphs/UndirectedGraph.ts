@@ -20,10 +20,7 @@ import { catchError } from '@/utils/models';
 
 import Graph from './Graph';
 
-export default class UndirectedGraph<
-  V = undefined,
-  E = undefined
-> extends Graph<
+export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
   V,
   E,
   IUndirectedGraphVertex<V, E>,

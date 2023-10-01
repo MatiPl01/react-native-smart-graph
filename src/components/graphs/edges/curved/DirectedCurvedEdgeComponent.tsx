@@ -111,10 +111,11 @@ function DirectedCurvedEdgeComponent<V, E>(
     <>
       <CurvedEdgeComponent<E>
         animationProgress={animationProgress}
+        customProps={edgeRenderer.props}
         edgeKey={key}
         focusProgress={focusProgress}
         path={path}
-        renderer={edgeRenderer}
+        renderer={edgeRenderer.fn}
         value={value as E}
       />
       {edgeArrowRenderer && (

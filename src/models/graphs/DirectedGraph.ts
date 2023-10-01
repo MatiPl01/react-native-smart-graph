@@ -21,7 +21,7 @@ import { catchError } from '@/utils/models';
 
 import Graph from './Graph';
 
-export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
+export default class DirectedGraph<V = unknown, E = unknown> extends Graph<
   V,
   E,
   IDirectedGraphVertex<V, E>,

@@ -17,7 +17,13 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
-import { DirectedGraphComponent } from '@/components';
+import {
+  DefaultEdgeLabelRenderer,
+  DefaultVertexLabelRenderer,
+  DirectedGraphComponent
+} from '@/components';
+import { useFont } from '@shopify/react-native-skia';
+import FONTS from '@/assets/fonts';
 
 const GRAPH1: DirectedGraphData = {
   edges: [
@@ -108,6 +114,9 @@ export default function BottomSheetFocusExample() {
   const graph = useMemo(() => new DirectedGraph(GRAPH1), []);
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
+
+  // TODO - move this somewhere else
+  const font = useFont(FONTS.rubikFont, 16);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const animatedIndex = useSharedValue(0);
@@ -207,6 +216,16 @@ export default function BottomSheetFocusExample() {
           }}
           placementSettings={{
             strategy: 'orbits'
+          }}
+          renderers={{
+            vertexLabel: {
+              fn: DefaultVertexLabelRenderer,
+              props: { font }
+            },
+            edgeLabel: {
+              fn: DefaultEdgeLabelRenderer,
+              props: { font }
+            }
           }}
         />
         <GraphViewControls

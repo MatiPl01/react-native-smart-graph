@@ -8,6 +8,7 @@ import {
   InternalVertexLabelSettings,
   InternalVertexSettings
 } from '@/types/settings';
+import { RendererWithProps } from '@/types/utils';
 
 export type VertexComponentProps<V> = {
   data: VertexComponentData<V>;
@@ -15,7 +16,7 @@ export type VertexComponentProps<V> = {
   labelsRendered: SharedValue<boolean>;
   multiStepFocusContext: MultiStepFocusContextType | null;
   onRemove: VertexRemoveHandler;
-  renderer: VertexRenderer<V>;
+  renderer: RendererWithProps<VertexRenderer<V>>;
   settings: {
     label: InternalVertexLabelSettings;
     vertex: InternalVertexSettings;
@@ -28,7 +29,7 @@ export type GraphVerticesProps<V> = Omit<
 > & {
   labelSettings: InternalVertexLabelSettings;
   labelsRendered: SharedValue<boolean>;
-  renderer: VertexRenderer<V> | null;
+  renderer: RendererWithProps<VertexRenderer<V>> | null;
   vertexSettings: InternalVertexSettings;
   verticesData: Record<string, VertexComponentData<V>>;
 };

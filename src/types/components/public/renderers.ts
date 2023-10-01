@@ -3,16 +3,18 @@ import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedPath, AnimatedVector } from '@/types/layout';
 
-import { VertexMaskRenderer } from './mask';
-
-type SharedRenderersProps = {
+type SharedRenderersProps<P> = {
   animationProgress: SharedValue<number>;
+  customProps: P;
 };
 
 /*
  * VERTEX
  */
-export type VertexRendererProps<V = undefined> = SharedRenderersProps & {
+export type VertexRendererProps<
+  V = unknown,
+  P = unknown
+> = SharedRenderersProps<P> & {
   focus: {
     key: SharedValue<null | string>;
     progress: SharedValue<number>;
@@ -31,14 +33,17 @@ export type VertexRendererProps<V = undefined> = SharedRenderersProps & {
   value: V;
 };
 
-export type VertexRenderer<V = undefined> = (
-  props: VertexRendererProps<V>
+export type VertexRenderer<V = unknown, P = unknown> = (
+  props: VertexRendererProps<V, P>
 ) => JSX.Element | null;
 
 /*
  * VERTEX LABEL
  */
-export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
+export type VertexLabelRendererProps<
+  V = unknown,
+  P = unknown
+> = SharedRenderersProps<P> & {
   focus: {
     key: SharedValue<null | string>;
     progress: SharedValue<number>;
@@ -57,42 +62,61 @@ export type VertexLabelRendererProps<V = undefined> = SharedRenderersProps & {
   value: V;
 };
 
-export type VertexLabelRenderer<V = undefined> = (
-  props: VertexLabelRendererProps<V>
+export type VertexLabelRenderer<V = unknown, P = unknown> = (
+  props: VertexLabelRendererProps<V, P>
+) => JSX.Element | null;
+
+/*
+ * VERTEX MASK
+ */
+export type VertexMaskRendererProps<P = unknown> = SharedRenderersProps<P> & {
+  key: string;
+  r: number;
+};
+
+export type VertexMaskRenderer<P = unknown> = (
+  props: VertexMaskRendererProps<P>
 ) => JSX.Element | null;
 
 /*
  * EDGE
  */
-type SharedEdgeRendererProps<E> = SharedRenderersProps & {
+type SharedEdgeRendererProps<E, P = unknown> = SharedRenderersProps<P> & {
   focusProgress: SharedValue<number>;
   key: string;
   value: E;
 };
 
-export type StraightEdgeRendererProps<E = undefined> =
-  SharedEdgeRendererProps<E> & {
-    p1: AnimatedVector;
-    p2: AnimatedVector;
-  };
+export type StraightEdgeRendererProps<
+  E = unknown,
+  P = unknown
+> = SharedEdgeRendererProps<E, P> & {
+  p1: AnimatedVector;
+  p2: AnimatedVector;
+};
 
-export type CurvedEdgeRendererProps<E = undefined> =
-  SharedEdgeRendererProps<E> & {
-    path: AnimatedPath;
-  };
+export type CurvedEdgeRendererProps<
+  E = unknown,
+  P = unknown
+> = SharedEdgeRendererProps<E, P> & {
+  path: AnimatedPath;
+};
 
-export type CurvedEdgeRenderer<E = undefined> = (
-  props: CurvedEdgeRendererProps<E>
+export type CurvedEdgeRenderer<E = unknown, P = unknown> = (
+  props: CurvedEdgeRendererProps<E, P>
 ) => JSX.Element | null;
 
-export type StraightEdgeRenderer<E = undefined> = (
-  props: StraightEdgeRendererProps<E>
+export type StraightEdgeRenderer<E = unknown, P = unknown> = (
+  props: StraightEdgeRendererProps<E, P>
 ) => JSX.Element | null;
 
 /*
  * EDGE LABEL
  */
-export type EdgeLabelRendererProps<E = undefined> = SharedRenderersProps & {
+export type EdgeLabelRendererProps<
+  E = unknown,
+  P = unknown
+> = SharedRenderersProps<P> & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
   key: string;
@@ -101,66 +125,17 @@ export type EdgeLabelRendererProps<E = undefined> = SharedRenderersProps & {
   value: E;
 };
 
-export type EdgeLabelRenderer<E> = (
-  props: EdgeLabelRendererProps<E>
+export type EdgeLabelRenderer<E = unknown, P = unknown> = (
+  props: EdgeLabelRendererProps<E, P>
 ) => JSX.Element | null;
 
 /*
  * EDGE ARROW
  */
-export type EdgeArrowRendererProps = SharedRenderersProps & {
+export type EdgeArrowRendererProps<P = unknown> = SharedRenderersProps<P> & {
   s: number;
 };
 
-export type EdgeArrowRenderer = (
-  props: EdgeArrowRendererProps
+export type EdgeArrowRenderer<P = unknown> = (
+  props: EdgeArrowRendererProps<P>
 ) => JSX.Element | null;
-
-/*
- * GRAPH
- */
-type SharedUndirectedGraphRenderers<V, E> = {
-  edgeLabel: EdgeLabelRenderer<E> | null;
-  vertex: VertexRenderer<V> | null;
-  vertexLabel: VertexLabelRenderer<V> | null;
-  vertexMask: VertexMaskRenderer | null;
-};
-
-type SharedDirectedGraphRenderers<V, E> = SharedUndirectedGraphRenderers<
-  V,
-  E
-> & {
-  edgeArrow: EdgeArrowRenderer | null;
-};
-
-export type UndirectedGraphWithStraightEdgeRenderers<V, E> =
-  SharedUndirectedGraphRenderers<V, E> & {
-    edge: StraightEdgeRenderer<E>;
-  };
-
-export type UndirectedGraphWithCurvedEdgeRenderers<V, E> =
-  SharedUndirectedGraphRenderers<V, E> & {
-    edge: CurvedEdgeRenderer<E>;
-  };
-
-export type DirectedGraphWithStraightEdgeRenderers<V, E> =
-  SharedDirectedGraphRenderers<V, E> & {
-    edge: StraightEdgeRenderer<E>;
-  };
-
-export type DirectedGraphWithCurvedEdgeRenderers<V, E> =
-  SharedDirectedGraphRenderers<V, E> & {
-    edge: CurvedEdgeRenderer<E>;
-  };
-
-export type UndirectedGraphRenderers<V, E> =
-  | UndirectedGraphWithCurvedEdgeRenderers<V, E>
-  | UndirectedGraphWithStraightEdgeRenderers<V, E>;
-
-export type DirectedGraphRenderers<V, E> =
-  | DirectedGraphWithCurvedEdgeRenderers<V, E>
-  | DirectedGraphWithStraightEdgeRenderers<V, E>;
-
-export type GraphRenderers<V, E> =
-  | DirectedGraphRenderers<V, E>
-  | UndirectedGraphRenderers<V, E>;

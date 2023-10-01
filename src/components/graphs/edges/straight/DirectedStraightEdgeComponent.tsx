@@ -74,11 +74,12 @@ function DirectedStraightEdgeComponent<V, E>(
     <>
       <StraightEdgeComponent
         animationProgress={animationProgress}
+        customProps={edgeRenderer.props}
         edgeKey={key}
         focusProgress={focusProgress}
         p1={p1}
         p2={p2}
-        renderer={edgeRenderer}
+        renderer={edgeRenderer.fn}
         value={value as E}
       />
       {edgeArrowRenderer && (

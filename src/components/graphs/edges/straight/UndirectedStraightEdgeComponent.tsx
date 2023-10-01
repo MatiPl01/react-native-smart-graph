@@ -33,11 +33,12 @@ function UndirectedStraightEdgeComponent<V, E>(
   return (
     <StraightEdgeComponent
       animationProgress={animationProgress}
+      customProps={renderers.edge.props}
       edgeKey={key}
       focusProgress={focusProgress}
       p1={p1}
       p2={p2}
-      renderer={renderers.edge}
+      renderer={renderers.edge.fn}
       value={value as E}
     />
   );

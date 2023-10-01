@@ -104,11 +104,12 @@ function EdgeLabelComponent<E>({
       <Group transform={labelContentTransform}>
         <RenderedLabelComponent
           animationProgress={animationProgress}
+          customProps={renderer.props}
           edgeKey={edgeKey}
           edgeLength={edgeLength}
           edgeRotation={edgeRotation}
           r={vertexRadius}
-          renderer={renderer}
+          renderer={renderer.fn}
           value={value as E}
           onMeasure={onMeasure}
         />

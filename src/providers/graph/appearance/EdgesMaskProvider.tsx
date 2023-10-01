@@ -14,8 +14,10 @@ import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import {
   GraphEdgesMaskProps,
   VertexMaskComponentProps,
-  VertexMaskRenderer
+  VertexMaskRenderer,
+  VertexMaskRendererProps
 } from '@/types/components';
+import { RendererWithProps } from '@/types/utils';
 
 type EdgesMaskContextType = {
   maskComponent: React.ReactNode;
@@ -36,7 +38,7 @@ export const useEdgesMaskContext = () => {
 };
 
 type GraphEdgesMaskProviderProps = PropsWithChildren<{
-  renderer: VertexMaskRenderer | null;
+  renderer: RendererWithProps<VertexMaskRenderer> | null;
 }>;
 
 function GraphEdgesMaskProvider({
@@ -108,7 +110,7 @@ const GraphEdgesMask = withGraphSettings(
   })
 );
 
-const VertexMask = memo(function VertexMask<V>({
+function VertexMask<V>({
   data,
   radius,
   renderer
@@ -117,10 +119,32 @@ const VertexMask = memo(function VertexMask<V>({
 
   return (
     <Group transform={transform}>
-      {renderer({ key: data.key, r: radius })}
+      <RenderedVertexMaskComponent
+        animationProgress={data.animationProgress}
+        customProps={renderer.props}
+        r={radius}
+        renderer={renderer.fn}
+        vertexKey={data.key}
+      />
     </Group>
   );
-});
+}
+
+type RenderedVertexMaskComponentProps<V> = Omit<
+  VertexMaskRendererProps<V>,
+  'key'
+> & {
+  renderer: VertexMaskRenderer<V>;
+  vertexKey: string;
+};
+
+const RenderedVertexMaskComponent = memo(function RenderedVertexComponent<V>({
+  renderer,
+  vertexKey: key,
+  ...restProps
+}: RenderedVertexMaskComponentProps<V>) {
+  return renderer({ key, ...restProps });
+}) as <V>(props: RenderedVertexMaskComponentProps<V>) => JSX.Element;
 
 export default withGraphSettings(GraphEdgesMaskProvider, ({ renderers }) => ({
   renderer: renderers.vertexMask

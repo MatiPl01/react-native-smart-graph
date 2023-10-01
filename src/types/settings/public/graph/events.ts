@@ -1,11 +1,11 @@
 import { VertexData } from '@/types/data';
 import { Sharedifyable } from '@/types/utils';
 
-export type VertexPressEvent<V = undefined> = {
+export type VertexPressEvent<V = unknown> = {
   vertex: VertexData<V>;
 };
 
-export type VertexPressHandler<V = undefined> = (
+export type VertexPressHandler<V = unknown> = (
   data: VertexPressEvent<V>
 ) => void;
 
