@@ -95,9 +95,11 @@ export default memo(
     shallow: [
       // This is used when the graph component is the only child of the GraphView
       'children.graph',
+      'children.renderers.*.props',
       // This is used when the GraphView has multiple children (e.g. when
       // GraphViewControls are used)
-      'children.*.graph'
+      'children.*.graph',
+      'children.*.renderers.*.props'
     ]
   })
 ) as typeof GraphView;

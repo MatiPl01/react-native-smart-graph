@@ -24,7 +24,7 @@
     "@semantic-release/github": "^9.0.3",
     "@semantic-release/npm": "^10.0.3",
     "@semantic-release/release-notes-generator": "^11.0.3",
-    "@shopify/react-native-skia": "^0.1.197",
+    "@shopify/react-native-skia": "^0.1.211",
     "@tsconfig/react-native": "^3.0.2",
     "@types/jest": "^29.5.2",
     "@types/react": "^18.2.7",
@@ -69,7 +69,7 @@
   "main": "dist/commonjs/index",
   "module": "dist/module/index",
   "peerDependencies": {
-    "@shopify/react-native-skia": ">=0.1.193",
+    "@shopify/react-native-skia": ">=0.1.208",
     "react": ">=18.0.0",
     "react-native": ">=0.71.8",
     "react-native-gesture-handler": ">=2.0.0",

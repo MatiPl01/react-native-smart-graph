@@ -1,6 +1,5 @@
-import FONTS from '@/assets/fonts';
 import { ResponsiveText } from '@/components';
-import { Canvas, useFont } from '@shopify/react-native-skia';
+import { Canvas } from '@shopify/react-native-skia';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
@@ -13,6 +12,7 @@ import {
   TextHorizontalAlignment,
   TextVerticalAlignment
 } from '..';
+import FONT from '@/font';
 
 export default function ResponsiveTextExample() {
   const width = 200; //Dimensions.get('window').width;
@@ -32,8 +32,6 @@ export default function ResponsiveTextExample() {
   const horizontalAlignment = useSharedValue<TextHorizontalAlignment>('center');
   const verticalAlignment = useSharedValue<TextVerticalAlignment>('center');
   const animationProgress = useSharedValue(0);
-
-  const font = useFont(FONTS.rubikFont, fontSize);
 
   const animatedTextStyle = useAnimatedStyle(() => {
     let textAlign = horizontalAlignment.value as HorizontalAlignment;
@@ -71,10 +69,6 @@ export default function ResponsiveTextExample() {
     }, 1000);
   }, []);
 
-  if (!font) {
-    return null;
-  }
-
   return (
     <>
       <Canvas style={styles.container}>
@@ -83,7 +77,7 @@ export default function ResponsiveTextExample() {
           backgroundColor={backgroundColor}
           color={color}
           ellipsizeMode={ellipsizeMode}
-          font={font}
+          font={FONT.regular}
           height={height}
           horizontalAlignment={horizontalAlignment}
           lineHeight={lineHeight}

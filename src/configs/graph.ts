@@ -144,7 +144,7 @@ const DEFAULT_MULTI_STEP_FOCUS_SETTINGS: Omit<
 };
 
 // COMPONENTS
-const DEFAULT_COMPONENTS_SETTINGS: {
+export const DEFAULT_COMPONENTS_SETTINGS: {
   arrow: AllEdgeArrowSettings;
   edge: {
     curved: AllCurvedEdgeSettings;

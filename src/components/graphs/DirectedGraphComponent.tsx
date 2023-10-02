@@ -32,6 +32,6 @@ function DirectedGraphComponent<
 export default memo(
   DirectedGraphComponent,
   deepMemoComparator({
-    shallow: ['graph']
+    shallow: ['graph', 'renderers.*.props']
   })
 ) as typeof DirectedGraphComponent;

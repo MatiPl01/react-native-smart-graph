@@ -10,20 +10,14 @@ import {
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import {
-  Easing,
   Extrapolate,
   interpolate,
   useDerivedValue,
   useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
-import {
-  DefaultEdgeLabelRenderer,
-  DefaultVertexLabelRenderer,
-  DirectedGraphComponent
-} from '@/components';
-import { useFont } from '@shopify/react-native-skia';
-import FONTS from '@/assets/fonts';
+import { DirectedGraphComponent } from '@/components';
+import EASING from '@/constants/easings';
 
 const GRAPH1: DirectedGraphData = {
   edges: [
@@ -115,9 +109,6 @@ export default function BottomSheetFocusExample() {
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
-  // TODO - move this somewhere else
-  const font = useFont(FONTS.rubikFont, 16);
-
   const bottomSheetRef = useRef<BottomSheet>(null);
   const animatedIndex = useSharedValue(0);
   const bottomSheetProgress = useDerivedValue(() =>
@@ -195,7 +186,7 @@ export default function BottomSheetFocusExample() {
           graph={graph}
           animationSettings={{
             duration: 500,
-            easing: Easing.bezier(0.25, 0.1, 0.25, 1)
+            easing: EASING.easeInOut
           }}
           componentsSettings={{
             vertexLabel: {
@@ -216,16 +207,6 @@ export default function BottomSheetFocusExample() {
           }}
           placementSettings={{
             strategy: 'orbits'
-          }}
-          renderers={{
-            vertexLabel: {
-              fn: DefaultVertexLabelRenderer,
-              props: { font }
-            },
-            edgeLabel: {
-              fn: DefaultEdgeLabelRenderer,
-              props: { font }
-            }
           }}
         />
         <GraphViewControls

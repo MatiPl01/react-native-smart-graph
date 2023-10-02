@@ -39,9 +39,8 @@ type SharedCurvedEdgeComponentProps = SharedEdgeComponentProps & {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SelectEdgeRenderers<R extends Record<string, any>> = {
-  arrow?: R['edgeArrow'];
-  edge: R['edge'];
+type SelectEdgeRenderers<R extends Record<string, any>> = Pick<R, 'edge'> & {
+  arrow?: RendererWithProps<EdgeArrowRenderer> | null;
 };
 
 export type DirectedStraightEdgeComponentProps<V, E> =
