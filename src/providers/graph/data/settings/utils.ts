@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getDefaultConfig, getUpdateConfig } from '@/configs/graph';
 import { GraphSettingsData } from '@/types/components';
 import { GraphData } from '@/types/data';
+import { RendererWithProps } from '@/types/utils';
 import {
   cancelAnimations,
   isAnimationSettingsObject
@@ -22,6 +24,14 @@ export const updateContextValue = <V, E>(
           vertices: data.animationSettings
         }
       : data.animationSettings;
+  data.renderers = Object.fromEntries(
+    Object.entries(data.renderers ?? {}).map(([key, v]) => [
+      key,
+      v === null || (v as RendererWithProps<any>).props
+        ? v
+        : { fn: v, props: {} }
+    ])
+  );
 
   return updateValues(
     {
