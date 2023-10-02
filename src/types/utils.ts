@@ -106,5 +106,5 @@ export type RendererWithProps<R, P = unknown> = {
 
 export type OptionalPropsRenderer<R extends React.ComponentType<any>> =
   'customProps' extends keyof ComponentProps<R>
-    ? RendererWithProps<R, ComponentProps<R>['customProps']>
+    ? R | RendererWithProps<R, ComponentProps<R>['customProps']>
     : R;
