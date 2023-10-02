@@ -1,4 +1,4 @@
-import { GraphRenderers } from '@/types/components';
+import { AllInternalGraphRenderers } from '@/types/components';
 import { Graph } from '@/types/models';
 import {
   EdgeArrowSettings,
@@ -17,5 +17,5 @@ export type GraphData<V, E> = Omit<GraphSettings<V>, 'componentsSettings'> & {
     vertex?: VertexSettings;
   };
   graph: Graph<V, E>;
-  renderers?: MaybeObject<GraphRenderers<V, E>>;
+  renderers?: MaybeObject<AllInternalGraphRenderers<V, E>>;
 };

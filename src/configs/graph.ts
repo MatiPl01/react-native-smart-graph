@@ -144,7 +144,7 @@ const DEFAULT_MULTI_STEP_FOCUS_SETTINGS: Omit<
 };
 
 // COMPONENTS
-const DEFAULT_COMPONENTS_SETTINGS: {
+export const DEFAULT_COMPONENTS_SETTINGS: {
   arrow: AllEdgeArrowSettings;
   edge: {
     curved: AllCurvedEdgeSettings;
@@ -240,13 +240,15 @@ export const getDefaultConfig = <V, E>(
   renderers: {
     edge:
       data.edgeType === 'curved'
-        ? DefaultCurvedEdgeRenderer
-        : DefaultStraightEdgeRenderer,
-    edgeArrow: data.graph.isDirected() ? DefaultEdgeArrowRenderer : null,
-    edgeLabel: DefaultEdgeLabelRenderer,
-    vertex: DefaultVertexRenderer,
-    vertexLabel: DefaultVertexLabelRenderer,
-    vertexMask: DefaultVertexMaskRenderer
+        ? { fn: DefaultCurvedEdgeRenderer, props: {} }
+        : { fn: DefaultStraightEdgeRenderer, props: {} },
+    edgeArrow: data.graph.isDirected()
+      ? { fn: DefaultEdgeArrowRenderer, props: {} }
+      : null,
+    edgeLabel: { fn: DefaultEdgeLabelRenderer, props: {} }, // TODO - fix default font
+    vertex: { fn: DefaultVertexRenderer, props: {} },
+    vertexLabel: { fn: DefaultVertexLabelRenderer, props: {} },
+    vertexMask: { fn: DefaultVertexMaskRenderer, props: {} }
   }
 });
 

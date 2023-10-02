@@ -6,7 +6,7 @@ import {
   Vertex
 } from '@/types/models/public/vertex';
 
-export interface Edge<V = undefined, E = undefined> {
+export interface Edge<V = unknown, E = unknown> {
   get isLoop(): boolean;
   get key(): string;
   get value(): E;
@@ -14,19 +14,18 @@ export interface Edge<V = undefined, E = undefined> {
   isDirected(): boolean;
 }
 
-export interface DirectedEdge<V = undefined, E = undefined> extends Edge<V, E> {
+export interface DirectedEdge<V = unknown, E = unknown> extends Edge<V, E> {
   get source(): DirectedGraphVertex<V, E>;
   get target(): DirectedGraphVertex<V, E>;
 }
 
-export interface UndirectedEdge<V = undefined, E = undefined>
-  extends Edge<V, E> {
+export interface UndirectedEdge<V = unknown, E = unknown> extends Edge<V, E> {
   get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>];
 }
 
 export type OrderedEdges<
-  V = undefined,
-  E = undefined,
+  V = unknown,
+  E = unknown,
   GE extends GraphEdge<V, E> = GraphEdge<V, E>
 > = Array<{
   edge: GE;

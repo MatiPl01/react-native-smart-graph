@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable import/no-named-as-default-member */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -161,25 +162,28 @@ export const deepMemoComparator =
           prop => prop.startsWith(`${key}.`) || prop.startsWith('*.')
         )
       ) {
-        const isPrevReactElement = React.isValidElement(
-          prevProps[key] as object
-        );
-        const isNextReactElement = React.isValidElement(
-          nextProps[key] as object
-        );
+        const prev = prevProps[key];
+        const next = nextProps[key];
+        const isPrevReactElement = React.isValidElement(prev as object);
+        const isNextReactElement = React.isValidElement(next as object);
 
         if (isPrevReactElement !== isNextReactElement) {
           return false;
         }
 
         if (
+          typeof prev !== 'object' ||
+          prev === null ||
+          typeof next !== 'object' ||
+          next === null
+        ) {
+          return false;
+        }
+
+        if (
           !deepMemoComparator(updateSettings(key, settings))(
-            (isPrevReactElement
-              ? prevProps[key].props
-              : prevProps[key]) as Record<string, any>,
-            (isNextReactElement
-              ? nextProps[key].props
-              : nextProps[key]) as Record<string, any>
+            (isPrevReactElement ? prev.props : prev) as Record<string, any>,
+            (isNextReactElement ? next.props : next) as Record<string, any>
           )
         ) {
           return false;

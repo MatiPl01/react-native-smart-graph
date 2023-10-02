@@ -6,7 +6,7 @@ import { AllAnimationSettings } from '@/types/settings/private/graph/animations'
 
 import { VertexLabelComponentData } from './vertexLabel';
 
-export type VertexComponentData<V = undefined> = {
+export type VertexComponentData<V = unknown> = {
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
   focusProgress: SharedValue<number>;

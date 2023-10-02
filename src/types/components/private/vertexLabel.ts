@@ -5,13 +5,14 @@ import { FocusContextType } from '@/providers/view';
 import { VertexLabelRenderer } from '@/types/components/public';
 import { VertexLabelComponentData } from '@/types/data';
 import { VertexLabelPosition } from '@/types/settings';
+import { RendererWithProps } from '@/types/utils';
 
-export type VertexLabelComponentProps<V = undefined> = {
+export type VertexLabelComponentProps<V = unknown> = {
   data: VertexLabelComponentData<V>;
   focusContext: FocusContextType;
   labelPosition: SharedValue<VertexLabelPosition>;
   multiStepFocusContext: MultiStepFocusContextType | null;
-  renderer: VertexLabelRenderer<V>;
+  renderer: RendererWithProps<VertexLabelRenderer<V>>;
   vertexRadius: number;
 };
 
@@ -19,6 +20,6 @@ export type GraphVerticesLabelsProps<V> = Omit<
   VertexLabelComponentProps<V>,
   'data' | 'renderer'
 > & {
-  renderer: VertexLabelRenderer<V> | null;
+  renderer: RendererWithProps<VertexLabelRenderer<V>> | null;
   vertexLabelsData: Record<string, VertexLabelComponentData<V>>;
 };

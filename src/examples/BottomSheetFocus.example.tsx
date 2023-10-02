@@ -10,7 +10,6 @@ import {
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import {
-  Easing,
   Extrapolate,
   interpolate,
   useDerivedValue,
@@ -18,6 +17,7 @@ import {
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
 import { DirectedGraphComponent } from '@/components';
+import EASING from '@/constants/easings';
 
 const GRAPH1: DirectedGraphData = {
   edges: [
@@ -186,7 +186,7 @@ export default function BottomSheetFocusExample() {
           graph={graph}
           animationSettings={{
             duration: 500,
-            easing: Easing.bezier(0.25, 0.1, 0.25, 1)
+            easing: EASING.easeInOut
           }}
           componentsSettings={{
             vertexLabel: {

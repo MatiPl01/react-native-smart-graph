@@ -1,6 +1,6 @@
 import { WithValue } from '@/types/utils';
 
-export type DirectedEdgeData<E = undefined> = WithValue<
+export type DirectedEdgeData<E = unknown> = WithValue<
   E,
   {
     from: string;
@@ -9,7 +9,7 @@ export type DirectedEdgeData<E = undefined> = WithValue<
   }
 >;
 
-export type UndirectedEdgeData<E = undefined> = WithValue<
+export type UndirectedEdgeData<E = unknown> = WithValue<
   E,
   {
     key: string;

@@ -24,10 +24,11 @@ function UndirectedCurvedEdgeComponent<V, E>(
   return (
     <CurvedEdgeComponent
       animationProgress={animationProgress}
+      customProps={renderers.edge.props}
       edgeKey={key}
       focusProgress={focusProgress}
       path={path}
-      renderer={renderers.edge}
+      renderer={renderers.edge.fn}
       value={value as E}
     />
   );

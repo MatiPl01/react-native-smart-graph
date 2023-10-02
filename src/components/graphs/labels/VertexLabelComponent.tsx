@@ -36,9 +36,10 @@ function VertexLabelComponent<V>({
       <Group transform={labelContentTransform}>
         <RenderedLabelComponent
           animationProgress={animationProgress}
+          customProps={renderer.props}
           multiStepFocus={multiStepFocusContext}
           r={vertexRadius}
-          renderer={renderer}
+          renderer={renderer.fn}
           value={value as V}
           vertexKey={vertexKey}
           focus={{
