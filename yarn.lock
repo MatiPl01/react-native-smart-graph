@@ -9530,9 +9530,10 @@ react-native-gesture-handler@^2.10.2:
     lodash "^4.17.21"
     prop-types "^15.7.2"
 
-"react-native-reanimated@git+https://github.com/MatiPl01/react-native-reanimated.git#fix/decay-infinite-updates":
-  version "3.4.0"
-  resolved "git+https://github.com/MatiPl01/react-native-reanimated.git#aebcdb5c0d2d3f0703f5b1e65fc5e4375a330251"
+react-native-reanimated@^3.5.4:
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.5.4.tgz#a6c2b0c43b6dad246f5d276213974afedb8e3fc7"
+  integrity sha512-8we9LLDO1o4Oj9/DICeEJ2K1tjfqkJagqQUglxeUAkol/HcEJ6PGxIrpBcNryLqCDYEcu6FZWld/FzizBIw6bg==
   dependencies:
     "@babel/plugin-transform-object-assign" "^7.16.7"
     "@babel/preset-typescript" "^7.16.7"
