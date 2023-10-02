@@ -9,6 +9,27 @@ import {
 } from '@/utils/animations';
 import { updateValues } from '@/utils/objects';
 
+const updateRenderer = <
+  R extends
+    | {
+        fn: React.ComponentType<any>;
+        props: unknown;
+      }
+    | React.ComponentType<any>
+    | null
+>(
+  renderer: R
+): RendererWithProps<React.ComponentType<any>> | null => {
+  if (typeof renderer === 'function') {
+    return {
+      fn: renderer,
+      props: {}
+    };
+  }
+
+  return renderer;
+};
+
 export const updateContextValue = <V, E>(
   data: GraphData<V, E>,
   value?: GraphSettingsData<V, E>
@@ -25,11 +46,9 @@ export const updateContextValue = <V, E>(
         }
       : data.animationSettings;
   data.renderers = Object.fromEntries(
-    Object.entries(data.renderers ?? {}).map(([key, v]) => [
+    Object.entries(data.renderers ?? {}).map(([key, renderer]) => [
       key,
-      v === null || (v as RendererWithProps<any>).props
-        ? v
-        : { fn: v, props: {} }
+      updateRenderer(renderer)
     ])
   );
 
