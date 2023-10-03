@@ -49,6 +49,8 @@ function ContainerDimensionsProvider({
     }
   );
 
+  console.log('here');
+
   return <>{children}</>;
 }
 

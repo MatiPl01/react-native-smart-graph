@@ -21,69 +21,66 @@ function WithProviders<T>({ children, providers }: WithProvidersProps<T>) {
   );
 }
 
-type IfProviderProps<T, V, E> = PropsWithChildren<{
+function wrapWithChildren<V, E, R>(
+  Component: React.ComponentType<{ children?: React.ReactNode; rendered: R }>,
+  selector: (data: GraphSettingsData<V, E>) => R
+) {
+  return function WrappedComponent({
+    children
+  }: {
+    children?: React.ReactNode;
+  }) {
+    const WithSettings = withGraphSettings<
+      V,
+      E,
+      { rendered: R },
+      { rendered: R }
+    >(
+      ({ rendered }: { rendered: R }) => {
+        return <Component rendered={rendered}>{children}</Component>;
+      },
+      value => ({ rendered: selector(value) })
+    );
+    return <WithSettings />;
+  };
+}
+
+type IfProviderProps<T, V, E> = {
   if: (data: GraphSettingsData<V, E>) => boolean;
   then: Providers<T>;
-}>;
+};
 
 function IfProvider<T, V, E>({
-  children,
   if: selector,
   then: providers
 }: IfProviderProps<T, V, E>) {
-  const WrappedComponent = withGraphSettings<
-    V,
-    E,
-    { rendered: boolean },
-    { rendered: boolean }
-  >(
-    ({ rendered }: { rendered: boolean }) => {
-      return rendered ? (
-        <WithProviders<T> providers={providers}>{children}</WithProviders>
-      ) : (
-        <>{children}</>
-      );
-    },
-    value => ({ rendered: selector(value) })
-  );
-
-  return WrappedComponent;
+  return wrapWithChildren(({ children, rendered }) => {
+    return rendered ? (
+      <WithProviders<T> providers={providers}>{children}</WithProviders>
+    ) : (
+      <>{children}</>
+    );
+  }, selector);
 }
 
-type SwitchProviderProps<
-  T,
-  V,
-  E,
-  R extends number | string
-> = PropsWithChildren<{
+type SwitchProviderProps<T, V, E, R extends number | string> = {
   case: Record<R, Providers<T>>;
   match: (data: GraphSettingsData<V, E>) => R;
-}>;
+};
 
 function SwitchProvider<T, V, E, R extends number | string>({
   case: providers,
-  children,
   match: selector
 }: SwitchProviderProps<T, V, E, R>) {
-  const WrappedComponent = withGraphSettings<
-    V,
-    E,
-    { rendered: R },
-    { rendered: R }
-  >(
-    ({ rendered }: { rendered: R }) => {
-      return providers[rendered] ? (
-        <WithProviders<T> providers={providers[rendered]}>
-          {children}
-        </WithProviders>
-      ) : (
-        <>{children}</>
-      );
-    },
-    value => ({ rendered: selector(value) })
-  );
-
-  return WrappedComponent;
+  return wrapWithChildren(({ children, rendered }) => {
+    return providers[rendered] ? (
+      <WithProviders<T> providers={providers[rendered]}>
+        {children}
+      </WithProviders>
+    ) : (
+      <>{children}</>
+    );
+  }, selector);
 }
 
 const ConditionalProvider = {
