@@ -28,7 +28,7 @@ function UndirectedCurvedEdgeComponent<V, E>(
       edgeKey={key}
       focusProgress={focusProgress}
       path={path}
-      renderer={renderers.edge.fn}
+      renderer={renderers.edge.renderer}
       value={value as E}
     />
   );

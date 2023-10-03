@@ -38,7 +38,7 @@ function UndirectedStraightEdgeComponent<V, E>(
       focusProgress={focusProgress}
       p1={p1}
       p2={p2}
-      renderer={renderers.edge.fn}
+      renderer={renderers.edge.renderer}
       value={value as E}
     />
   );

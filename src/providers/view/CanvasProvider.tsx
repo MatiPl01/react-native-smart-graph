@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-key */
 import { useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
@@ -19,17 +18,17 @@ export default function CanvasProvider({
       // TRANSLATION
       // The provider used to handle canvas translation and scale
       // operations
-      <TransformProvider />,
+      TransformProvider,
       // AUTO SIZING
       // The provider used to handle canvas auto sizing based on
       // the object fit property
-      <AutoSizingProvider />,
+      AutoSizingProvider,
       // FOCUS
       // The provider used to handle canvas focus operations
-      <FocusProvider />,
+      FocusProvider,
       // GESTURES
       // The provider used to handle canvas gestures (pan, pinch, etc.)
-      <GesturesProvider />
+      GesturesProvider
     ],
     []
   );

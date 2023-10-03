@@ -1,15 +1,18 @@
-import React, { PropsWithChildren, ReactElement } from 'react';
+import React, { PropsWithChildren } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
+import { ComposableProvider } from '@/providers/utils/ContextProviderComposer';
 import { GraphSettingsData } from '@/types/components';
 
 import { withGraphSettings } from './data';
 
-type WithProvidersProps = PropsWithChildren<{
-  providers: Array<ReactElement> | ReactElement;
+type Providers<T> = Array<ComposableProvider<T>> | ComposableProvider<T>;
+
+type WithProvidersProps<T> = PropsWithChildren<{
+  providers: Providers<T>;
 }>;
 
-function WithProviders({ children, providers }: WithProvidersProps) {
+function WithProviders<T>({ children, providers }: WithProvidersProps<T>) {
   return (
     <ContextProviderComposer
       providers={Array.isArray(providers) ? providers : [providers]}>
@@ -18,69 +21,71 @@ function WithProviders({ children, providers }: WithProvidersProps) {
   );
 }
 
-type IfProviderProps<V, E> = PropsWithChildren<{
-  if: (data: GraphSettingsData<V, E>) => boolean;
-  then: Array<ReactElement> | ReactElement;
-}>;
-
-function IfProvider<V, E>({
-  children,
-  if: selector,
-  then: providers
-}: IfProviderProps<V, E>) {
-  const WrappedComponent = withGraphSettings<
-    V,
-    E,
-    { rendered: boolean },
-    { rendered: boolean }
-  >(
-    ({ rendered }: { rendered: boolean }) => {
-      return rendered ? (
-        <WithProviders providers={providers}>{children}</WithProviders>
-      ) : (
-        <>{children}</>
-      );
-    },
-    value => ({ rendered: selector(value) })
-  );
-
-  return <WrappedComponent />;
+function wrapWithChildren<V, E, R>(
+  Component: React.ComponentType<{ children?: React.ReactNode; rendered: R }>,
+  selector: (data: GraphSettingsData<V, E>) => R
+) {
+  return function WrappedComponent({
+    children
+  }: {
+    children?: React.ReactNode;
+  }) {
+    const WithSettings = withGraphSettings<
+      V,
+      E,
+      { rendered: R },
+      { rendered: R }
+    >(
+      ({ rendered }: { rendered: R }) => {
+        return <Component rendered={rendered}>{children}</Component>;
+      },
+      value => ({ rendered: selector(value) })
+    );
+    return <WithSettings />;
+  };
 }
 
-type SwitchProviderProps<V, E, R extends number | string> = PropsWithChildren<{
-  case: Record<R, Array<ReactElement> | ReactElement>;
+type IfProviderProps<T, V, E> = {
+  if: (data: GraphSettingsData<V, E>) => boolean;
+  then: Providers<T>;
+};
+
+function IfProvider<T, V, E>({
+  if: selector,
+  then: providers
+}: IfProviderProps<T, V, E>) {
+  return wrapWithChildren(({ children, rendered }) => {
+    return rendered ? (
+      <WithProviders<T> providers={providers}>{children}</WithProviders>
+    ) : (
+      <>{children}</>
+    );
+  }, selector);
+}
+
+type SwitchProviderProps<T, V, E, R extends number | string> = {
+  case: Record<R, Providers<T>>;
   match: (data: GraphSettingsData<V, E>) => R;
-}>;
+};
 
-function SwitchProvider<V, E, R extends number | string>({
+function SwitchProvider<T, V, E, R extends number | string>({
   case: providers,
-  children,
   match: selector
-}: SwitchProviderProps<V, E, R>) {
-  const WrappedComponent = withGraphSettings<
-    V,
-    E,
-    { rendered: R },
-    { rendered: R }
-  >(
-    ({ rendered }: { rendered: R }) => {
-      return providers[rendered] ? (
-        <WithProviders providers={providers[rendered]}>
-          {children}
-        </WithProviders>
-      ) : (
-        <>{children}</>
-      );
-    },
-    value => ({ rendered: selector(value) })
-  );
-
-  return <WrappedComponent />;
+}: SwitchProviderProps<T, V, E, R>) {
+  return wrapWithChildren(({ children, rendered }) => {
+    return providers[rendered] ? (
+      <WithProviders<T> providers={providers[rendered]}>
+        {children}
+      </WithProviders>
+    ) : (
+      <>{children}</>
+    );
+  }, selector);
 }
 
 const ConditionalProvider = {
-  If: IfProvider,
-  Switch: SwitchProvider
+  if: IfProvider,
+  switch: SwitchProvider
 };
 
 export default ConditionalProvider;
