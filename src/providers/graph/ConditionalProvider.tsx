@@ -1,15 +1,18 @@
-import React, { PropsWithChildren, ReactElement } from 'react';
+import React, { PropsWithChildren } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
+import { ComposableProvider } from '@/providers/utils/ContextProviderComposer';
 import { GraphSettingsData } from '@/types/components';
 
 import { withGraphSettings } from './data';
 
-type WithProvidersProps = PropsWithChildren<{
-  providers: Array<ReactElement> | ReactElement;
+type Providers<T> = Array<ComposableProvider<T>> | ComposableProvider<T>;
+
+type WithProvidersProps<T> = PropsWithChildren<{
+  providers: Providers<T>;
 }>;
 
-function WithProviders({ children, providers }: WithProvidersProps) {
+function WithProviders<T>({ children, providers }: WithProvidersProps<T>) {
   return (
     <ContextProviderComposer
       providers={Array.isArray(providers) ? providers : [providers]}>
@@ -18,16 +21,16 @@ function WithProviders({ children, providers }: WithProvidersProps) {
   );
 }
 
-type IfProviderProps<V, E> = PropsWithChildren<{
+type IfProviderProps<T, V, E> = PropsWithChildren<{
   if: (data: GraphSettingsData<V, E>) => boolean;
-  then: Array<ReactElement> | ReactElement;
+  then: Providers<T>;
 }>;
 
-function IfProvider<V, E>({
+function IfProvider<T, V, E>({
   children,
   if: selector,
   then: providers
-}: IfProviderProps<V, E>) {
+}: IfProviderProps<T, V, E>) {
   const WrappedComponent = withGraphSettings<
     V,
     E,
@@ -36,7 +39,7 @@ function IfProvider<V, E>({
   >(
     ({ rendered }: { rendered: boolean }) => {
       return rendered ? (
-        <WithProviders providers={providers}>{children}</WithProviders>
+        <WithProviders<T> providers={providers}>{children}</WithProviders>
       ) : (
         <>{children}</>
       );
@@ -44,19 +47,24 @@ function IfProvider<V, E>({
     value => ({ rendered: selector(value) })
   );
 
-  return <WrappedComponent />;
+  return WrappedComponent;
 }
 
-type SwitchProviderProps<V, E, R extends number | string> = PropsWithChildren<{
-  case: Record<R, Array<ReactElement> | ReactElement>;
+type SwitchProviderProps<
+  T,
+  V,
+  E,
+  R extends number | string
+> = PropsWithChildren<{
+  case: Record<R, Providers<T>>;
   match: (data: GraphSettingsData<V, E>) => R;
 }>;
 
-function SwitchProvider<V, E, R extends number | string>({
+function SwitchProvider<T, V, E, R extends number | string>({
   case: providers,
   children,
   match: selector
-}: SwitchProviderProps<V, E, R>) {
+}: SwitchProviderProps<T, V, E, R>) {
   const WrappedComponent = withGraphSettings<
     V,
     E,
@@ -65,7 +73,7 @@ function SwitchProvider<V, E, R extends number | string>({
   >(
     ({ rendered }: { rendered: R }) => {
       return providers[rendered] ? (
-        <WithProviders providers={providers[rendered]}>
+        <WithProviders<T> providers={providers[rendered]}>
           {children}
         </WithProviders>
       ) : (
@@ -75,12 +83,12 @@ function SwitchProvider<V, E, R extends number | string>({
     value => ({ rendered: selector(value) })
   );
 
-  return <WrappedComponent />;
+  return WrappedComponent;
 }
 
 const ConditionalProvider = {
-  If: IfProvider,
-  Switch: SwitchProvider
+  if: IfProvider,
+  switch: SwitchProvider
 };
 
 export default ConditionalProvider;

@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-key */
 import { PropsWithChildren, useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
@@ -38,47 +37,47 @@ export default function GraphProvider<V, E>({
       // DATA
       // The main provider used to react on graph changes and update
       // components data accordingly
-      <ComponentsDataProvider />,
+      ComponentsDataProvider,
       // LAYOUT
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
-      <ConditionalProvider.Switch
-        match={({ layoutSettings }) => layoutSettings.type}
-        case={{
+      ConditionalProvider.switch({
+        case: {
           // Provider used to place and move vertices on graph changes
-          auto: <PlacementLayoutProvider />,
+          auto: PlacementLayoutProvider,
           force: [
             // Provider used to place vertices on graph changes
-            <ForcesPlacementProvider />,
+            ForcesPlacementProvider,
             // Provider used to animate vertices based on calculated forces
-            <ForcesLayoutProvider />
+            ForcesLayoutProvider
           ]
-        }}
-      />,
+        },
+        match: ({ layoutSettings }) => layoutSettings.type
+      }),
       // CONTAINER
       // Provider used to compute the dimensions of the container
-      <ContainerDimensionsProvider />,
+      ContainerDimensionsProvider,
       // FOCUS
       // Provider used to focus on a specific vertex
-      <VertexFocusProvider />,
+      VertexFocusProvider,
       // Provider used to focus one of the vertices specified in an
       // array based on the user-defined progress
-      <ConditionalProvider.If
-        if={({ focusSettings }) => !!focusSettings}
-        then={<MultiStepVertexFocusProvider />}
-      />,
+      ConditionalProvider.if({
+        if: ({ focusSettings }) => !!focusSettings,
+        then: MultiStepVertexFocusProvider
+      }),
       // EVENTS
       // Press events provider
       // TODO - improve press events provider (the overlay layer degrades performance)
-      <ConditionalProvider.If
-        if={({ eventSettings }) => !!eventSettings?.press}
-        then={<PressEventsProvider transform={transform} />}
-      />,
+      ConditionalProvider.if({
+        if: ({ eventSettings }) => !!eventSettings?.press,
+        then: { props: { transform }, provider: PressEventsProvider }
+      }),
       // SETTINGS
       // The provider used to handle canvas settings change and respond to such changes
-      <SettingsChangeResponderProvider />,
+      SettingsChangeResponderProvider,
       // EDGES MASK
-      <EdgesMaskProvider />
+      EdgesMaskProvider
     ],
     []
   );
