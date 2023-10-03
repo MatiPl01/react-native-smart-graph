@@ -12,7 +12,12 @@ import CanvasContextsProvider, {
 import { ComponentsDataProvider, GraphSettingsProvider } from './data';
 import { PressEventsProvider } from './events';
 import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
-import { ContainerDimensionsProvider, PlacementLayoutProvider } from './layout';
+import {
+  ContainerDimensionsProvider,
+  ForcesLayoutProvider,
+  ForcesPlacementProvider,
+  PlacementLayoutProvider
+} from './layout';
 import { SettingsChangeResponderProvider } from './settings';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
@@ -36,20 +41,19 @@ export default function GraphProvider<V, E>({
       // LAYOUT
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
-      PlacementLayoutProvider,
-      // ConditionalProvider.switch({
-      //   case: {
-      //     // Provider used to place and move vertices on graph changes
-      //     auto: PlacementLayoutProvider,
-      //     force: [
-      //       // Provider used to place vertices on graph changes
-      //       ForcesPlacementProvider,
-      //       // Provider used to animate vertices based on calculated forces
-      //       ForcesLayoutProvider
-      //     ]
-      //   },
-      //   match: ({ layoutSettings }) => layoutSettings.type
-      // }),
+      ConditionalProvider.switch({
+        case: {
+          // Provider used to place and move vertices on graph changes
+          auto: PlacementLayoutProvider,
+          force: [
+            // Provider used to place vertices on graph changes
+            ForcesPlacementProvider,
+            // Provider used to animate vertices based on calculated forces
+            ForcesLayoutProvider
+          ]
+        },
+        match: ({ layoutSettings }) => layoutSettings.type
+      }),
       // CONTAINER
       // Provider used to compute the dimensions of the container
       ContainerDimensionsProvider,
@@ -58,11 +62,10 @@ export default function GraphProvider<V, E>({
       VertexFocusProvider,
       // Provider used to focus one of the vertices specified in an
       // array based on the user-defined progress
-      MultiStepVertexFocusProvider,
-      // ConditionalProvider.if({
-      //   if: ({ focusSettings }) => !!focusSettings,
-      //   then: MultiStepVertexFocusProvider
-      // }),
+      ConditionalProvider.if({
+        if: ({ focusSettings }) => !!focusSettings,
+        then: MultiStepVertexFocusProvider
+      }),
       // EVENTS
       // Press events provider
       // TODO - improve press events provider (the overlay layer degrades performance)
