@@ -91,7 +91,7 @@ function VertexComponent<V>({
         focus={focusProp}
         multiStepFocus={multiStepFocusContext}
         r={r}
-        renderer={renderer.fn}
+        renderer={renderer.renderer}
         value={value as V}
         vertexKey={key}
       />
