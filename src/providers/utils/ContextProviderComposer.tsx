@@ -1,43 +1,21 @@
-import React, { memo, PropsWithChildren } from 'react';
+import React, { cloneElement, memo, PropsWithChildren } from 'react';
 
-type ProviderWithProps<T> = {
-  props: T;
-  provider: React.ComponentType<T>;
-};
-
-type ProviderWithoutProps = React.ComponentType<{ children?: React.ReactNode }>;
-
-function isProviderWithProps<T>(
-  provider: ProviderWithProps<T> | ProviderWithoutProps
-): provider is ProviderWithProps<T> {
-  return (provider as ProviderWithProps<T>).props !== undefined;
-}
-
-export type ComposableProvider<T> = ProviderWithProps<T> | ProviderWithoutProps;
-
-type ContextProviderComposerProps<T> = PropsWithChildren<{
-  providers: Array<ComposableProvider<T>>;
+type ContextProviderComposerProps = PropsWithChildren<{
+  providers: Array<JSX.Element>;
 }>;
 
-function ContextProviderComposer<T>({
+// https://frontendbyte.com/how-to-use-react-context-api-usereducer-hooks/
+function ContextProviderComposer({
   children: initialChildren,
   providers
-}: ContextProviderComposerProps<T>) {
+}: ContextProviderComposerProps) {
   return (
     <>
-      {providers.reduceRight((children, Provider) => {
-        if (isProviderWithProps(Provider)) {
-          return (
-            <Provider.provider {...Provider.props}>
-              {children}
-            </Provider.provider>
-          );
-        }
-
-        return <Provider>{children}</Provider>;
+      {providers.reduceRight((children, parent) => {
+        return cloneElement(parent, { children });
       }, initialChildren)}
     </>
   );
 }
 
-export default memo(ContextProviderComposer) as typeof ContextProviderComposer;
+export default memo(ContextProviderComposer);

@@ -115,7 +115,7 @@ function DirectedCurvedEdgeComponent<V, E>(
         edgeKey={key}
         focusProgress={focusProgress}
         path={path}
-        renderer={edgeRenderer.renderer}
+        renderer={edgeRenderer.fn}
         value={value as E}
       />
       {edgeArrowRenderer && (

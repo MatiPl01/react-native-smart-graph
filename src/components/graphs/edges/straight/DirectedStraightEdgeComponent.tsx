@@ -79,7 +79,7 @@ function DirectedStraightEdgeComponent<V, E>(
         focusProgress={focusProgress}
         p1={p1}
         p2={p2}
-        renderer={edgeRenderer.renderer}
+        renderer={edgeRenderer.fn}
         value={value as E}
       />
       {edgeArrowRenderer && (

@@ -21,7 +21,7 @@ type SharedUndirectedGraphRenderers<V, E, VR, VLR, VMR, ELR> = {
   vertex: VR extends VertexRenderer<V, any>
     ? OptionalPropsRenderer<VR> | null
     : never;
-  vertexLabel: VLR extends VertexLabelRenderer<V, any>
+  vertexLabel: VLR extends VertexLabelRenderer<E, any>
     ? OptionalPropsRenderer<VLR> | null
     : never;
   vertexMask: VMR extends VertexMaskRenderer<any>

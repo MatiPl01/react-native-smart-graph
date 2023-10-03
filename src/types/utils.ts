@@ -100,8 +100,8 @@ export type WithValue<V, T> = T &
   (V extends unknown ? { value?: V } : { value: V });
 
 export type RendererWithProps<R, P = unknown> = {
+  fn: R;
   props: P;
-  renderer: R;
 };
 
 export type OptionalPropsRenderer<R extends React.ComponentType<any>> =

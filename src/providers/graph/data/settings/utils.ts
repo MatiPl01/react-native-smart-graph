@@ -12,8 +12,8 @@ import { updateValues } from '@/utils/objects';
 const updateRenderer = <
   R extends
     | {
+        fn: React.ComponentType<any>;
         props: unknown;
-        renderer: React.ComponentType<any>;
       }
     | React.ComponentType<any>
     | null
@@ -22,8 +22,8 @@ const updateRenderer = <
 ): RendererWithProps<React.ComponentType<any>> | null => {
   if (typeof renderer === 'function') {
     return {
-      props: {},
-      renderer
+      fn: renderer,
+      props: {}
     };
   }
 

@@ -15,7 +15,5 @@ export default function EdgeArrowComponent({
     s: vertexRadius
   };
 
-  return (
-    <Group transform={transform}>{renderer.renderer(rendererProps)}</Group>
-  );
+  return <Group transform={transform}>{renderer.fn(rendererProps)}</Group>;
 }

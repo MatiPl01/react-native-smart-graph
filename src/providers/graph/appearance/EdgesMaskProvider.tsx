@@ -123,7 +123,7 @@ function VertexMask<V>({
         animationProgress={data.animationProgress}
         customProps={renderer.props}
         r={radius}
-        renderer={renderer.renderer}
+        renderer={renderer.fn}
         vertexKey={data.key}
       />
     </Group>
