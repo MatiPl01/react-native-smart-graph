@@ -46,3 +46,6 @@ export * from '@/types/data/public';
 export * from '@/types/layout/public';
 export * from '@/types/models/public';
 export * from '@/types/settings/public';
+
+// EXTERNAL LIBRARIES
+export { FiberProvider } from 'its-fine';

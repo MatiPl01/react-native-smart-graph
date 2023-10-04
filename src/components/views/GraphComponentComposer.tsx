@@ -1,6 +1,5 @@
-import { Canvas, Group } from '@shopify/react-native-skia';
+import { Group } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
@@ -90,26 +89,16 @@ function GraphComponentComposer<V, E>({
   const graphComponent = useMemo(() => <GraphComponent />, []);
 
   return (
-    <Canvas
-      style={styles.canvas}
-      onLayout={transformContext.handleCanvasRender}>
-      <Group transform={canvasTransform}>
-        <GraphProvider
-          canvasContexts={canvasContexts}
-          graphProps={graphProps}
-          transform={animatedTransform}>
-          {graphComponent}
-        </GraphProvider>
-      </Group>
-    </Canvas>
+    <Group transform={canvasTransform}>
+      <GraphProvider
+        canvasContexts={canvasContexts}
+        graphProps={graphProps}
+        transform={animatedTransform}>
+        {graphComponent}
+      </GraphProvider>
+    </Group>
   );
 }
-
-const styles = StyleSheet.create({
-  canvas: {
-    flex: 1
-  }
-});
 
 export default withOverlay(GraphComponentComposer) as <V, E>(
   props: GraphData<V, E>

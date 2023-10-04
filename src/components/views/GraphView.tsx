@@ -1,3 +1,5 @@
+import { Canvas } from '@shopify/react-native-skia';
+import { useContextBridge } from 'its-fine';
 import { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -7,7 +9,10 @@ import {
   useGraphViewChildrenContext
 } from '@/contexts/children';
 import { OverlayOutlet, OverlayProvider } from '@/contexts/overlay';
-import CanvasProvider, { useGesturesContext } from '@/providers/view';
+import CanvasProvider, {
+  useGesturesContext,
+  useTransformContext
+} from '@/providers/view';
 import { GraphViewSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 
@@ -48,9 +53,13 @@ const validateProps = ({ initialScale, scales }: GraphViewProps) => {
 };
 
 const GraphViewComposer = memo(function GraphViewComposer() {
+  const ContextBridge = useContextBridge();
+
   // CONTEXTS
   // Graph view children context
   const { canvas, overlay } = useGraphViewChildrenContext();
+  // Transform context
+  const { handleCanvasRender } = useTransformContext();
   // Gestures context
   const { gestureHandler } = useGesturesContext();
 
@@ -62,7 +71,9 @@ const GraphViewComposer = memo(function GraphViewComposer() {
   return (
     <>
       <OverlayProvider>
-        {canvas}
+        <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
+          <ContextBridge>{canvas}</ContextBridge>
+        </Canvas>
         {/* Renders overlay layers set using the OverlayContext */}
         {overlayOutlet}
       </OverlayProvider>
@@ -73,6 +84,9 @@ const GraphViewComposer = memo(function GraphViewComposer() {
 });
 
 const styles = StyleSheet.create({
+  canvas: {
+    flex: 1
+  },
   container: {
     flex: 1,
     overflow: 'hidden',

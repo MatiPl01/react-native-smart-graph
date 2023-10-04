@@ -18,6 +18,7 @@ type SharedGraphSettings<V> = {
   focusSettings?: MultiStepFocusSettings;
   layoutSettings?: GraphLayoutSettings;
   placementSettings?: GraphPlacementSettings;
+  useContextBridge?: boolean;
 };
 
 export type UndirectedGraphWithStraightEdgeSettings<V> =
