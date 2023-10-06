@@ -1,5 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -22,6 +22,7 @@ import {
 } from '@/types/data';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
+import { useNullableContext } from '@/utils/contexts';
 import { calcTranslationOnProgress, calcValueOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
@@ -52,17 +53,10 @@ export type FocusContextType = {
   transitionProgress: SharedValue<number>;
 };
 
-const FocusContext = createContext(null as unknown as object);
+const FocusContext = createContext<FocusContextType | null>(null);
+FocusContext.displayName = 'FocusContext';
 
-export const useFocusContext = () => {
-  const contextValue = useContext(FocusContext);
-
-  if (!contextValue) {
-    throw new Error('useFocusContext must be used within a FocusProvider');
-  }
-
-  return contextValue as FocusContextType;
-};
+export const useFocusContext = () => useNullableContext(FocusContext);
 
 export enum FocusStatus {
   BLUR = 'BLUR',
@@ -79,8 +73,8 @@ type FocusProviderProps = {
 };
 
 export default function FocusProvider({ children }: FocusProviderProps) {
-  // OTHER CONTEXTS VALUES
-  // Canvas data context values
+  // CONTEXTS
+  // Canvas contexts
   const {
     canvasDimensions,
     currentScale,
@@ -88,7 +82,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     gesturesDisabled,
     initialScale
   } = useViewDataContext();
-  // Canvas transform context values
   const {
     getTranslateClamp,
     resetContainerPosition,
@@ -96,7 +89,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     scaleContentTo,
     translateContentTo
   } = useTransformContext();
-  // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
 
   // CONTEXT VALUES - FOCUS

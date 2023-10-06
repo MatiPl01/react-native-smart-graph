@@ -1,5 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useContext, useMemo, useRef } from 'react';
+import { createContext, useMemo, useRef } from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -14,6 +14,7 @@ import { useTransformContext } from '@/providers/view/transform';
 import { ObjectFit } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
+import { useNullableContext } from '@/utils/contexts';
 
 export type AutoSizingContextType = {
   autoSizingEnabled: SharedValue<boolean>;
@@ -24,27 +25,18 @@ export type AutoSizingContextType = {
   ) => void;
 };
 
-const AutoSizingContext = createContext(null as unknown as object);
+const AutoSizingContext = createContext<AutoSizingContextType | null>(null);
+AutoSizingContext.displayName = 'AutoSizingContext';
 
-export const useAutoSizingContext = () => {
-  const contextValue = useContext(AutoSizingContext);
-
-  if (contextValue === null) {
-    throw new Error(
-      'useAutoSizingContext must be used within an AutoSizingProvider'
-    );
-  }
-
-  return contextValue as AutoSizingContextType;
-};
+export const useAutoSizingContext = () => useNullableContext(AutoSizingContext);
 
 export default function AutoSizingProvider({
   children
 }: {
   children?: React.ReactNode;
 }) {
-  // OTHER CONTEXTS VALUES
-  // Canvas data context values
+  // CONTEXTS
+  // Canvas contexts
   const {
     autoSizingEnabled,
     autoSizingTimeout,
@@ -60,7 +52,6 @@ export default function AutoSizingProvider({
     objectFit,
     padding
   } = useViewDataContext();
-  // Transform context values
   const { resetContainerPositionOnProgress } = useTransformContext();
 
   // OTHER VALUES

@@ -58,13 +58,10 @@ export default memo(function GraphViewControls({
   style
 }: GraphViewControlsProps) {
   // CONTEXTS
-  // Canvas data context
+  // Canvas contexts
   const { initialScale, objectFit } = useViewDataContext();
-  // Transform context
   const { resetContainerPosition } = useTransformContext();
-  // Auto sizing context
   const autoSizingContext = useAutoSizingContext();
-  // Focus context
   const { endFocus, focusStatus } = useFocusContext();
 
   // OTHER VALUES

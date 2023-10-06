@@ -7,9 +7,6 @@ import { AnimatedTransformation } from '@/types/layout';
 
 import { EdgesMaskProvider } from './appearance';
 import ConditionalProvider from './ConditionalProvider';
-import CanvasContextsProvider, {
-  CanvasContexts
-} from './contexts/CanvasContextsProvider';
 import { ComponentsDataProvider, GraphSettingsProvider } from './data';
 import { PressEventsProvider } from './events';
 import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
@@ -22,13 +19,11 @@ import {
 import { SettingsChangeResponderProvider } from './settings';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
-  canvasContexts: CanvasContexts;
   graphProps: GraphData<V, E>;
   transform: AnimatedTransformation;
 }>;
 
 export default function GraphProvider<V, E>({
-  canvasContexts,
   children,
   graphProps,
   transform
@@ -84,12 +79,10 @@ export default function GraphProvider<V, E>({
   );
 
   return (
-    <CanvasContextsProvider canvasContexts={canvasContexts}>
-      <GraphSettingsProvider {...graphProps}>
-        <ContextProviderComposer providers={providers}>
-          {children}
-        </ContextProviderComposer>
-      </GraphSettingsProvider>
-    </CanvasContextsProvider>
+    <GraphSettingsProvider {...graphProps}>
+      <ContextProviderComposer providers={providers}>
+        {children}
+      </ContextProviderComposer>
+    </GraphSettingsProvider>
   );
 }

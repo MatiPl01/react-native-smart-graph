@@ -1,5 +1,4 @@
 import {
-  Context,
   createContext,
   PropsWithChildren,
   useCallback,
@@ -24,7 +23,13 @@ import {
   updateContextValue
 } from './utils';
 
-const GraphComponentsDataContext = createContext(null as unknown as object);
+const GraphComponentsDataContext = createContext<GraphComponentsData<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+> | null>(null);
+GraphComponentsDataContext.displayName = 'GraphComponentsDataContext';
 
 export const withComponentsData = <
   V,
@@ -34,12 +39,7 @@ export const withComponentsData = <
 >(
   Component: React.ComponentType<P>,
   selector: (contextValue: GraphComponentsData<V, E>) => R
-) =>
-  withMemoContext(
-    Component,
-    GraphComponentsDataContext as unknown as Context<GraphComponentsData<V, E>>,
-    selector
-  );
+) => withMemoContext(Component, GraphComponentsDataContext, selector);
 
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;

@@ -1,7 +1,8 @@
 import { PropsWithChildren, useEffect } from 'react';
 
-import { useCanvasContexts } from '@/providers/graph/contexts';
+import { AccessibleOverlayContextType, withOverlay } from '@/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useViewDataContext } from '@/providers/view';
 import { VertexComponentData } from '@/types/data';
 import { AnimatedTransformation } from '@/types/layout';
 import {
@@ -11,26 +12,27 @@ import {
 
 import OverlayLayer from './OverlayLayer';
 
-export type PressEventsProviderProps<V> = PropsWithChildren<{
-  pressSettings: InternalPressEventsSettings<V>;
-  transform: AnimatedTransformation;
-  vertexSettings: InternalVertexSettings;
-  verticesData: Record<string, VertexComponentData<V>>;
-}>;
+export type PressEventsProviderProps<V> = PropsWithChildren<
+  AccessibleOverlayContextType & {
+    pressSettings: InternalPressEventsSettings<V>;
+    transform: AnimatedTransformation;
+    vertexSettings: InternalVertexSettings;
+    verticesData: Record<string, VertexComponentData<V>>;
+  }
+>;
 
 function PressEventsProvider<V>({
   children,
   pressSettings,
+  removeLayer,
+  renderLayer,
   transform,
   vertexSettings,
   verticesData
 }: PressEventsProviderProps<V>) {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { boundingRect },
-    overlayContext: { removeLayer, renderLayer }
-  } = useCanvasContexts();
+  const { boundingRect } = useViewDataContext();
 
   useEffect(() => {
     renderLayer(
@@ -52,12 +54,14 @@ function PressEventsProvider<V>({
   return <>{children}</>;
 }
 
-export default withGraphSettings(
-  withComponentsData(PressEventsProvider, ({ verticesData }) => ({
-    verticesData
-  })),
-  ({ componentsSettings, eventSettings }) => ({
-    pressSettings: eventSettings?.press,
-    vertexSettings: componentsSettings.vertex
-  })
+export default withOverlay(
+  withGraphSettings(
+    withComponentsData(PressEventsProvider, ({ verticesData }) => ({
+      verticesData
+    })),
+    ({ componentsSettings, eventSettings }) => ({
+      pressSettings: eventSettings?.press,
+      vertexSettings: componentsSettings.vertex
+    })
+  )
 );

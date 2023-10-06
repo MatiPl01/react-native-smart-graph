@@ -56,11 +56,9 @@ const GraphViewComposer = memo(function GraphViewComposer() {
   const ContextBridge = useContextBridge();
 
   // CONTEXTS
-  // Graph view children context
+  // Canvas contexts
   const { canvas, overlay } = useGraphViewChildrenContext();
-  // Transform context
   const { handleCanvasRender } = useTransformContext();
-  // Gestures context
   const { gestureHandler } = useGesturesContext();
 
   const overlayOutlet = useMemo(
