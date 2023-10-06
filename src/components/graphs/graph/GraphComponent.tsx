@@ -4,10 +4,10 @@ import { useSharedValue } from 'react-native-reanimated';
 
 import { useComponentFocus } from '@/hooks';
 import {
-  useCanvasContexts,
   useEdgesMaskContext,
   useMultiStepFocusContext
 } from '@/providers/graph';
+import { useFocusContext } from '@/providers/view';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
@@ -17,7 +17,7 @@ import GraphVerticesLabels from './GraphVerticesLabels';
 function GraphComponent() {
   // CONTEXTS
   // Canvas contexts
-  const { focusContext } = useCanvasContexts();
+  const focusContext = useFocusContext();
   // Graph contexts
   const multiStepFocusContext = useMultiStepFocusContext();
   const { maskComponent } = useEdgesMaskContext();

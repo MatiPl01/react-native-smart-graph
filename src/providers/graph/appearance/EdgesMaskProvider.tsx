@@ -1,16 +1,10 @@
 import { Group, Rect } from '@shopify/react-native-skia';
-import {
-  createContext,
-  memo,
-  PropsWithChildren,
-  useContext,
-  useMemo
-} from 'react';
+import { createContext, memo, PropsWithChildren, useMemo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { useVertexTransform } from '@/hooks';
-import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useViewDataContext } from '@/providers/view';
 import {
   GraphEdgesMaskProps,
   VertexMaskComponentProps,
@@ -18,24 +12,16 @@ import {
   VertexMaskRendererProps
 } from '@/types/components';
 import { RendererWithProps } from '@/types/utils';
+import { useNullableContext } from '@/utils/contexts';
 
 type EdgesMaskContextType = {
   maskComponent: React.ReactNode;
 };
 
 const EdgesMaskContext = createContext<EdgesMaskContextType | null>(null);
+EdgesMaskContext.displayName = 'EdgesMaskContext';
 
-export const useEdgesMaskContext = () => {
-  const context = useContext(EdgesMaskContext);
-
-  if (!context) {
-    throw new Error(
-      'useEdgesMaskContext must be used within a GraphEdgesMaskProvider'
-    );
-  }
-
-  return context;
-};
+export const useEdgesMaskContext = () => useNullableContext(EdgesMaskContext);
 
 type GraphEdgesMaskProviderProps = PropsWithChildren<{
   renderer: RendererWithProps<VertexMaskRenderer> | null;
@@ -68,16 +54,14 @@ const GraphEdgesMask = withGraphSettings(
     }: GraphEdgesMaskProps<V>) {
       // CONTEXTS
       // Canvas contexts
-      const {
-        dataContext: { boundingRect }
-      } = useCanvasContexts();
-
+      const { boundingRect } = useViewDataContext();
       const {
         bottom: bottomBound,
         left: leftBound,
         right: rightBound,
         top: topBound
       } = boundingRect;
+
       const width = useDerivedValue(() => rightBound.value - leftBound.value);
       const height = useDerivedValue(() => bottomBound.value - topBound.value);
 
@@ -123,7 +107,7 @@ function VertexMask<V>({
         animationProgress={data.animationProgress}
         customProps={renderer.props}
         r={radius}
-        renderer={renderer.fn}
+        renderer={renderer.renderer}
         vertexKey={data.key}
       />
     </Group>

@@ -1,17 +1,15 @@
 import {
   ComponentType,
-  Context,
   createContext,
   Fragment,
   useCallback,
-  useContext,
   useMemo,
   useState
 } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ComposedGesture, GestureDetector } from 'react-native-gesture-handler';
 
-import { withMemoContext } from '@/utils/contexts';
+import { useNullableContext, withMemoContext } from '@/utils/contexts';
 
 export type AccessibleOverlayContextType = {
   removeLayer: (zIndex: number) => void;
@@ -22,11 +20,8 @@ type OverlayContextType = {
   layers: Record<number, JSX.Element>;
 } & AccessibleOverlayContextType;
 
-const OverlayContext = createContext<OverlayContextType>({
-  layers: {},
-  removeLayer: () => undefined,
-  renderLayer: () => undefined
-});
+const OverlayContext = createContext<OverlayContextType | null>(null);
+OverlayContext.displayName = 'OverlayContext';
 
 export default function OverlayProvider({
   children
@@ -71,11 +66,7 @@ type OverlayOutletProps = {
 };
 
 export function OverlayOutlet({ gestureHandler }: OverlayOutletProps) {
-  const contextValue = useContext(OverlayContext);
-
-  if (!contextValue) {
-    throw new Error('OverlayOutlet must be used within a OverlayProvider');
-  }
+  const contextValue = useNullableContext(OverlayContext);
 
   const { layers } = contextValue;
 
@@ -99,7 +90,7 @@ export const withOverlay = <
 ) =>
   withMemoContext(
     Component,
-    OverlayContext as unknown as Context<AccessibleOverlayContextType>,
+    OverlayContext,
     ({ removeLayer, renderLayer }: AccessibleOverlayContextType) => {
       return {
         removeLayer,

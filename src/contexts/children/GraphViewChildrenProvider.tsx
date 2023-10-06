@@ -5,11 +5,11 @@ import React, {
   createContext,
   isValidElement,
   PropsWithChildren,
-  useContext,
   useEffect,
   useState
 } from 'react';
 
+import { useNullableContext } from '@/utils/contexts';
 import { deepMemoComparator } from '@/utils/objects';
 
 type ViewChild = React.ReactElement<Record<string, any>>;
@@ -20,19 +20,12 @@ type GraphViewChildrenContextType = {
   overlay: ViewChildren;
 };
 
-const GraphViewChildrenContext = createContext(null as unknown as object);
+const GraphViewChildrenContext =
+  createContext<GraphViewChildrenContextType | null>(null);
+GraphViewChildrenContext.displayName = 'GraphViewChildrenContext';
 
-export const useGraphViewChildrenContext = () => {
-  const contextValue = useContext(GraphViewChildrenContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useGraphViewChildrenContext must be used within a GraphViewChildrenProvider'
-    );
-  }
-
-  return contextValue as GraphViewChildrenContextType;
-};
+export const useGraphViewChildrenContext = () =>
+  useNullableContext(GraphViewChildrenContext);
 
 const CANVAS_COMPONENTS = [
   'DirectedGraphComponent',

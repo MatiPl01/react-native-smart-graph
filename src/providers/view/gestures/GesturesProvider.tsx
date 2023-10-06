@@ -1,5 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useMemo } from 'react';
 import { ComposedGesture, Gesture } from 'react-native-gesture-handler';
 import {
   useAnimatedReaction,
@@ -16,25 +16,17 @@ import {
 } from '@/providers/view';
 import { useViewDataContext } from '@/providers/view/data';
 import { Maybe } from '@/types/utils';
+import { useNullableContext } from '@/utils/contexts';
 import { averageVector } from '@/utils/vectors';
 
 export type GesturesContextType = {
   gestureHandler: ComposedGesture;
 };
 
-const GesturesContext = createContext(null as unknown as object);
+const GesturesContext = createContext<GesturesContextType | null>(null);
+GesturesContext.displayName = 'GesturesContext';
 
-export const useGesturesContext = () => {
-  const contextValue = useContext(GesturesContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useGesturesContext must be used within a GesturesProvider'
-    );
-  }
-
-  return contextValue as GesturesContextType;
-};
+export const useGesturesContext = () => useNullableContext(GesturesContext);
 
 const TRANSLATION_DECAY_CONFIG = {
   deceleration: 0.98,
@@ -47,8 +39,8 @@ export default function GesturesProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // OTHER CONTEXTS VALUES
-  // Canvas data context values
+  // CONTEXTS
+  // Canvas contexts
   const {
     currentScale,
     currentTranslation: { x: translateX, y: translateY },
@@ -58,11 +50,8 @@ export default function GesturesProvider({
     minScale,
     scales
   } = useViewDataContext();
-  // Transform context values
   const { getTranslateClamp, scaleContentTo } = useTransformContext();
-  // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
-  // Focus context values
   const { blur, endFocus, focusStatus } = useFocusContext();
 
   // OTHER VALUES

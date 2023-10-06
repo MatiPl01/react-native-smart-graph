@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
+import { createContext, PropsWithChildren, useMemo } from 'react';
 import {
   SharedValue,
   useAnimatedReaction,
@@ -7,15 +7,16 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
-import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { useVertexFocusContext } from '@/providers/graph/focus';
+import { useFocusContext, useViewDataContext } from '@/providers/view';
 import { FocusConfig, FocusPath, VertexComponentData } from '@/types/data';
 import {
   InternalMultiStepFocusSettings,
   UpdatedFocusPoint
 } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
+import { useNullableContext } from '@/utils/contexts';
 import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { useStateMachine } from './StateMachine';
@@ -38,8 +39,10 @@ export type MultiStepFocusContextType = {
 const MultiStepFocusContext = createContext<MultiStepFocusContextType | null>(
   null
 );
+MultiStepFocusContext.displayName = 'MultiStepFocusContext';
 
-export const useMultiStepFocusContext = () => useContext(MultiStepFocusContext);
+export const useMultiStepFocusContext = () =>
+  useNullableContext(MultiStepFocusContext);
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
@@ -57,7 +60,8 @@ function MultiStepVertexFocusProvider<V>({
 
   // CONTEXTS
   // Canvas contexts
-  const { dataContext: viewDataContext, focusContext } = useCanvasContexts();
+  const viewDataContext = useViewDataContext();
+  const focusContext = useFocusContext();
   // Graph contexts
   const { isVertexFocused } = useVertexFocusContext();
 

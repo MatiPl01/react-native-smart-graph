@@ -1,13 +1,13 @@
 import React, {
   createContext,
   PropsWithChildren,
-  useContext,
   useEffect,
   useMemo
 } from 'react';
 
 import { GraphViewData } from '@/types/components';
 import { ObjectFit, Spacing } from '@/types/layout';
+import { useNullableContext } from '@/utils/contexts';
 
 import {
   clearContextValue,
@@ -15,19 +15,11 @@ import {
   updateContextValue
 } from './utils';
 
-const GraphViewDataContext = createContext(null as unknown as object);
+const GraphViewDataContext = createContext<GraphViewData | null>(null);
+GraphViewDataContext.displayName = 'GraphViewDataContext';
 
-export const useViewDataContext = () => {
-  const contextValue = useContext(GraphViewDataContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useViewDataContext must be used within a GraphViewDataProvider'
-    );
-  }
-
-  return contextValue as GraphViewData;
-};
+export const useViewDataContext = () =>
+  useNullableContext(GraphViewDataContext);
 
 export type GraphViewDataProviderProps = PropsWithChildren<{
   autoSizingTimeout?: number;

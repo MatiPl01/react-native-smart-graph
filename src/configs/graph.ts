@@ -240,15 +240,15 @@ export const getDefaultConfig = <V, E>(
   renderers: {
     edge:
       data.edgeType === 'curved'
-        ? { fn: DefaultCurvedEdgeRenderer, props: {} }
-        : { fn: DefaultStraightEdgeRenderer, props: {} },
+        ? { props: {}, renderer: DefaultCurvedEdgeRenderer }
+        : { props: {}, renderer: DefaultStraightEdgeRenderer },
     edgeArrow: data.graph.isDirected()
-      ? { fn: DefaultEdgeArrowRenderer, props: {} }
+      ? { props: {}, renderer: DefaultEdgeArrowRenderer }
       : null,
-    edgeLabel: { fn: DefaultEdgeLabelRenderer, props: {} }, // TODO - fix default font
-    vertex: { fn: DefaultVertexRenderer, props: {} },
-    vertexLabel: { fn: DefaultVertexLabelRenderer, props: {} },
-    vertexMask: { fn: DefaultVertexMaskRenderer, props: {} }
+    edgeLabel: { props: {}, renderer: DefaultEdgeLabelRenderer }, // TODO - fix default font
+    vertex: { props: {}, renderer: DefaultVertexRenderer },
+    vertexLabel: { props: {}, renderer: DefaultVertexLabelRenderer },
+    vertexMask: { props: {}, renderer: DefaultVertexMaskRenderer }
   }
 });
 

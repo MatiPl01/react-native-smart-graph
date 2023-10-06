@@ -1,3 +1,5 @@
+import { Canvas } from '@shopify/react-native-skia';
+import { useContextBridge } from 'its-fine';
 import { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -7,7 +9,10 @@ import {
   useGraphViewChildrenContext
 } from '@/contexts/children';
 import { OverlayOutlet, OverlayProvider } from '@/contexts/overlay';
-import CanvasProvider, { useGesturesContext } from '@/providers/view';
+import CanvasProvider, {
+  useGesturesContext,
+  useTransformContext
+} from '@/providers/view';
 import { GraphViewSettings } from '@/types/settings';
 import { deepMemoComparator } from '@/utils/objects';
 
@@ -15,7 +20,14 @@ type GraphViewProps = PropsWithChildren<GraphViewSettings>;
 
 function GraphView({ children, ...providerProps }: GraphViewProps) {
   validateProps(providerProps);
-  const providerComposer = useMemo(() => <GraphViewComposer />, []);
+  const providerComposer = useMemo(
+    () => (
+      <OverlayProvider>
+        <GraphViewComposer />
+      </OverlayProvider>
+    ),
+    []
+  );
 
   return (
     <View style={styles.container}>
@@ -48,10 +60,12 @@ const validateProps = ({ initialScale, scales }: GraphViewProps) => {
 };
 
 const GraphViewComposer = memo(function GraphViewComposer() {
+  const ContextBridge = useContextBridge();
+
   // CONTEXTS
-  // Graph view children context
+  // Canvas contexts
   const { canvas, overlay } = useGraphViewChildrenContext();
-  // Gestures context
+  const { handleCanvasRender } = useTransformContext();
   const { gestureHandler } = useGesturesContext();
 
   const overlayOutlet = useMemo(
@@ -61,11 +75,11 @@ const GraphViewComposer = memo(function GraphViewComposer() {
 
   return (
     <>
-      <OverlayProvider>
-        {canvas}
-        {/* Renders overlay layers set using the OverlayContext */}
-        {overlayOutlet}
-      </OverlayProvider>
+      <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
+        <ContextBridge>{canvas}</ContextBridge>
+      </Canvas>
+      {/* Renders overlay layers set using the OverlayContext */}
+      {overlayOutlet}
       {/* Render other components than canvas (e.g. graph controls) */}
       <View style={styles.overlay}>{overlay}</View>
     </>
@@ -73,6 +87,9 @@ const GraphViewComposer = memo(function GraphViewComposer() {
 });
 
 const styles = StyleSheet.create({
+  canvas: {
+    flex: 1
+  },
   container: {
     flex: 1,
     overflow: 'hidden',

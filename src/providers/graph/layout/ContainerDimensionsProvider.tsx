@@ -1,8 +1,8 @@
 import { PropsWithChildren } from 'react';
 import { useAnimatedReaction } from 'react-native-reanimated';
 
-import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withGraphSettings } from '@/providers/graph/data';
+import { useViewDataContext } from '@/providers/view';
 import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
@@ -15,9 +15,7 @@ function ContainerDimensionsProvider({
 }: ContainerDimensionsProviderProps) {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { boundingRect, targetBoundingRect }
-  } = useCanvasContexts();
+  const { boundingRect, targetBoundingRect } = useViewDataContext();
 
   useAnimatedReaction(
     () => ({

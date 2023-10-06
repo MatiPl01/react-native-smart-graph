@@ -7,8 +7,8 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useViewDataContext } from '@/providers/view';
 import { EdgeComponentData } from '@/types/data';
 import { GraphConnections } from '@/types/models';
 import {
@@ -36,10 +36,8 @@ function ForcesLayoutProvider<E>({
 }: ForcesLayoutProviderProps<E>) {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { targetBoundingRect }
-  } = useCanvasContexts();
-  // Forces placement context
+  const { targetBoundingRect } = useViewDataContext();
+  // Graph contexts
   const { initialPlacementCompleted, lockedVertices, placedVerticesData } =
     useForcesPlacementContext();
 

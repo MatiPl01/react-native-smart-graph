@@ -6,21 +6,25 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useCanvasContexts } from '@/providers/graph/contexts';
-import { FocusStatus } from '@/providers/view';
+import {
+  FocusStatus,
+  useAutoSizingContext,
+  useFocusContext,
+  useTransformContext,
+  useViewDataContext
+} from '@/providers/view';
 
 function SettingsChangeResponderProvider({
   children
 }: {
   children?: React.ReactNode;
 }) {
-  // CONTEXT VALUES
-  const {
-    autoSizingContext,
-    dataContext: { initialScaleProvided, isRendered, objectFit },
-    focusContext: { focus, focusStatus },
-    transformContext: { resetContainerPosition }
-  } = useCanvasContexts();
+  // CONTEXTS
+  // Canvas contexts
+  const autoSizingContext = useAutoSizingContext();
+  const { initialScaleProvided, isRendered, objectFit } = useViewDataContext();
+  const { focus, focusStatus } = useFocusContext();
+  const { resetContainerPosition } = useTransformContext();
 
   // Other values
   const isFirstAutoSizingReactionCall = useSharedValue(true);

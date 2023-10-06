@@ -5,8 +5,8 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
-import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useTransformContext, useViewDataContext } from '@/providers/view';
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
 import { GraphConnections } from '@/types/models';
 import {
@@ -37,10 +37,8 @@ function GraphPlacementLayoutProvider<V, E>({
 }: GraphPlacementLayoutProviderProps<V, E>) {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { canvasDimensions, targetBoundingRect },
-    transformContext: { handleGraphRender: onRender }
-  } = useCanvasContexts();
+  const { canvasDimensions, targetBoundingRect } = useViewDataContext();
+  const { handleGraphRender: onRender } = useTransformContext();
 
   const isFirstRender = useSharedValue(true);
 

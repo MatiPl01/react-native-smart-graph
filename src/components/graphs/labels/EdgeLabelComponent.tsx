@@ -109,7 +109,7 @@ function EdgeLabelComponent<E>({
           edgeLength={edgeLength}
           edgeRotation={edgeRotation}
           r={vertexRadius}
-          renderer={renderer.fn}
+          renderer={renderer.renderer}
           value={value as E}
           onMeasure={onMeasure}
         />

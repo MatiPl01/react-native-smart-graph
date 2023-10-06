@@ -39,7 +39,7 @@ function VertexLabelComponent<V>({
           customProps={renderer.props}
           multiStepFocus={multiStepFocusContext}
           r={vertexRadius}
-          renderer={renderer.fn}
+          renderer={renderer.renderer}
           value={value as V}
           vertexKey={vertexKey}
           focus={{

@@ -208,6 +208,7 @@ export default function BottomSheetFocusExample() {
           placementSettings={{
             strategy: 'orbits'
           }}
+          useContextBridge
         />
         <GraphViewControls
           style={styles.controls}
