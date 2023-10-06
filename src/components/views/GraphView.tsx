@@ -20,7 +20,14 @@ type GraphViewProps = PropsWithChildren<GraphViewSettings>;
 
 function GraphView({ children, ...providerProps }: GraphViewProps) {
   validateProps(providerProps);
-  const providerComposer = useMemo(() => <GraphViewComposer />, []);
+  const providerComposer = useMemo(
+    () => (
+      <OverlayProvider>
+        <GraphViewComposer />
+      </OverlayProvider>
+    ),
+    []
+  );
 
   return (
     <View style={styles.container}>
@@ -68,13 +75,11 @@ const GraphViewComposer = memo(function GraphViewComposer() {
 
   return (
     <>
-      <OverlayProvider>
-        <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
-          <ContextBridge>{canvas}</ContextBridge>
-        </Canvas>
-        {/* Renders overlay layers set using the OverlayContext */}
-        {overlayOutlet}
-      </OverlayProvider>
+      <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
+        <ContextBridge>{canvas}</ContextBridge>
+      </Canvas>
+      {/* Renders overlay layers set using the OverlayContext */}
+      {overlayOutlet}
       {/* Render other components than canvas (e.g. graph controls) */}
       <View style={styles.overlay}>{overlay}</View>
     </>

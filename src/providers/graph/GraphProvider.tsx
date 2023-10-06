@@ -20,13 +20,15 @@ import { SettingsChangeResponderProvider } from './settings';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
   graphProps: GraphData<V, E>;
+  removeLayer: (zIndex: number) => void;
+  renderLayer: (zIndex: number, layer: JSX.Element) => void;
   transform: AnimatedTransformation;
 }>;
 
 export default function GraphProvider<V, E>({
   children,
   graphProps,
-  transform
+  ...pressProviderProps
 }: GraphProviderProps<V, E>) {
   const providers = useMemo(
     () => [
@@ -67,7 +69,7 @@ export default function GraphProvider<V, E>({
       // TODO - improve press events provider (the overlay layer degrades performance)
       <ConditionalProvider.If
         if={({ eventSettings }) => !!eventSettings?.press}
-        then={<PressEventsProvider transform={transform} />}
+        then={<PressEventsProvider {...pressProviderProps} />}
       />,
       // SETTINGS
       // The provider used to handle canvas settings change and respond to such changes
