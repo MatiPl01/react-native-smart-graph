@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo } from 'react';
+import { wiseMemo } from 'react-wise-memo';
 
 import { GraphComponentComposer } from '@/components/views';
 import {
@@ -13,7 +13,6 @@ import {
   VertexRenderer
 } from '@/types/components';
 import { EdgeType } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/objects';
 
 function DirectedGraphComponent<
   V,
@@ -26,12 +25,10 @@ function DirectedGraphComponent<
   EAR extends EdgeArrowRenderer<any>,
   ET extends EdgeType = 'straight'
 >(props: DirectedGraphComponentProps<V, E, VR, VLR, VMR, ER, ELR, EAR, ET>) {
+  console.log('DirectedGraphComponent');
   return <GraphComponentComposer {...props} />;
 }
 
-export default memo(
-  DirectedGraphComponent,
-  deepMemoComparator({
-    shallow: ['graph', 'renderers.*.props']
-  })
-) as typeof DirectedGraphComponent;
+export default wiseMemo(DirectedGraphComponent, {
+  shallow: ['graph', 'renderers.*.props']
+});

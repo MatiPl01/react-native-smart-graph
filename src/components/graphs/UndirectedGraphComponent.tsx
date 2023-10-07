@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo } from 'react';
+import { wiseMemo } from 'react-wise-memo';
 
 import { GraphComponentComposer } from '@/components/views';
 import {
@@ -12,7 +12,6 @@ import {
   VertexRenderer
 } from '@/types/components';
 import { EdgeType } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/objects';
 
 function UndirectedGraphComponent<
   V,
@@ -27,9 +26,6 @@ function UndirectedGraphComponent<
   return <GraphComponentComposer {...props} />;
 }
 
-export default memo(
-  UndirectedGraphComponent,
-  deepMemoComparator({
-    shallow: ['graph']
-  })
-) as typeof UndirectedGraphComponent;
+export default wiseMemo(UndirectedGraphComponent, {
+  shallow: ['graph']
+});
