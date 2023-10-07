@@ -9634,10 +9634,10 @@ react-test-renderer@^18.2.0:
     react-shallow-renderer "^16.15.0"
     scheduler "^0.23.0"
 
-react-wise-memo@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/react-wise-memo/-/react-wise-memo-1.0.1.tgz#c641379711903d79395df07b1109427ae09c1198"
-  integrity sha512-ZQ7PCKHZ1DBlL6g1ecafIpCQ9omQs6WBFFPjhYXfpyqhTKYZLjIOWi/9nf1kIk/H63f+wsHwdyhvDejJOqongA==
+react-wise-memo@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-wise-memo/-/react-wise-memo-1.0.2.tgz#950408b9e4c15b7fba71f1aa392441ba9c39df20"
+  integrity sha512-E8NpDy9MSPbDUfM/7240v3H3zQp2MBYfplvf2Saf1TmfgQUfyYmhTOCObsy9q+duLSwkqTfj/gm0E4AZIebKQw==
 
 react@^18.2.0:
   version "18.2.0"

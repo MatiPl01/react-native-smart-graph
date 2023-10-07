@@ -25,7 +25,6 @@ function DirectedGraphComponent<
   EAR extends EdgeArrowRenderer<any>,
   ET extends EdgeType = 'straight'
 >(props: DirectedGraphComponentProps<V, E, VR, VLR, VMR, ER, ELR, EAR, ET>) {
-  console.log('DirectedGraphComponent');
   return <GraphComponentComposer {...props} />;
 }
 
