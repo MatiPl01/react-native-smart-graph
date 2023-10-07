@@ -8,9 +8,9 @@ import React, {
   useEffect,
   useState
 } from 'react';
+import { deepMemoComparator } from 'react-wise-memo';
 
 import { useNullableContext } from '@/utils/contexts';
-import { deepMemoComparator } from '@/utils/objects';
 
 type ViewChild = React.ReactElement<Record<string, any>>;
 type ViewChildren = Array<ViewChild>;

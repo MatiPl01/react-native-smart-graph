@@ -2,6 +2,7 @@ import { Canvas } from '@shopify/react-native-skia';
 import { useContextBridge } from 'its-fine';
 import { memo, PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { wiseMemo } from 'react-wise-memo';
 
 import { DEFAULT_VIEW_SETTINGS } from '@/configs/view';
 import {
@@ -14,7 +15,6 @@ import CanvasProvider, {
   useTransformContext
 } from '@/providers/view';
 import { GraphViewSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/objects';
 
 type GraphViewProps = PropsWithChildren<GraphViewSettings>;
 
@@ -102,21 +102,18 @@ const styles = StyleSheet.create({
 });
 
 // Rerender only on prop changes
-export default memo(
-  GraphView,
-  deepMemoComparator({
-    // shallow compare the graph object property of the child component
-    // to prevent deep checking a large graph model structure
-    // (graph should be memoized using the useMemo hook to prevent
-    // unnecessary rerenders)
-    shallow: [
-      // This is used when the graph component is the only child of the GraphView
-      'children.graph',
-      'children.renderers.*.props',
-      // This is used when the GraphView has multiple children (e.g. when
-      // GraphViewControls are used)
-      'children.*.graph',
-      'children.*.renderers.*.props'
-    ]
-  })
-) as typeof GraphView;
+export default wiseMemo(GraphView, {
+  // shallow compare the graph object property of the child component
+  // to prevent deep checking a large graph model structure
+  // (graph should be memoized using the useMemo hook to prevent
+  // unnecessary rerenders)
+  shallow: [
+    // This is used when the graph component is the only child of the GraphView
+    'children.graph',
+    'children.renderers.*.props',
+    // This is used when the GraphView has multiple children (e.g. when
+    // GraphViewControls are used)
+    'children.*.graph',
+    'children.*.renderers.*.props'
+  ]
+});
