@@ -239,6 +239,8 @@ export const useStateMachine = (
   const state = useSharedValue(MachineState.BLUR);
   const targetPoint = useSharedValue<TransformedFocusPoint | null>(null);
 
+  let updatesCount = 0;
+
   return useMemo<MachineContext>(
     () => ({
       isStopped() {
@@ -248,12 +250,10 @@ export const useStateMachine = (
       start() {
         'worklet';
         isStopped.value = false;
-        console.log('start');
       },
       state,
       stop() {
         'worklet';
-        console.log('stop');
         if (state.value !== MachineState.BLUR) {
           // Update the transition progress with default animation
           focusContext.endFocus(null);
@@ -266,6 +266,7 @@ export const useStateMachine = (
         'worklet';
         if (isStopped.value) return;
         let result = state.value;
+        updatesCount = 0;
         do {
           state.value = result;
           result = STATE_HANDLERS[state.value]({
@@ -277,7 +278,14 @@ export const useStateMachine = (
             targetPoint,
             viewDataContext
           });
-          console.log(state.value);
+
+          // This is a temporary fix for a bug that causes the state machine
+          // to get stuck in a loop
+          // TODO - fix the bug
+          updatesCount++;
+          if (updatesCount > 10) {
+            break;
+          }
         } while (result !== state.value);
         state.value = result;
       }

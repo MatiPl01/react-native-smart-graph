@@ -216,7 +216,7 @@ function MultiStepVertexFocusProvider<V>({
     () => ({
       progress: {
         current: focusProgress.value,
-        transition: pathTransitionProgress.value
+        transition: 1 // pathTransitionProgress.value // TODO - optimize this and uncomment when finished
         // sync: syncProgress.value
       }
     }),

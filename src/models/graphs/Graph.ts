@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
+import {
+  DirectedEdgeData,
+  DirectedGraphData,
+  UndirectedEdgeData,
+  UndirectedGraphData,
+  VertexData
+} from '@/types/data';
 import {
   DirectedEdge,
   Graph as IGraph,
@@ -17,7 +23,7 @@ import {
 } from '@/types/settings';
 import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
-import { catchError, ChangeResult } from '@/utils/models';
+import { catchError, ChangeResult, getVertexData } from '@/utils/models';
 
 export default abstract class Graph<
   V,
@@ -35,12 +41,14 @@ export default abstract class Graph<
 
   protected cachedConnections: GraphConnections | null = null;
   protected cachedEdges: Array<GE> | null = null;
+  protected cachedEdgesData: Array<ED> | null = null;
   protected cachedOrderedEdges: Array<{
     edge: GE;
     edgesCount: number;
     order: number;
   }> | null = null;
   protected cachedVertices: Array<GV> | null = null;
+  protected cachedVerticesData: Array<VertexData<V>> | null = null;
 
   clear = catchError(
     (
@@ -208,17 +216,28 @@ export default abstract class Graph<
     return this.cachedVertices;
   }
 
+  get verticesData(): Array<VertexData<V>> {
+    if (!this.cachedVerticesData) {
+      this.cachedVerticesData = this.vertices.map(getVertexData);
+    }
+    return this.cachedVerticesData;
+  }
+
   private invalidateEdgesCache(): void {
     // Invalidate cached edges data
     this.cachedEdges = null;
     this.cachedOrderedEdges = null;
     this.cachedConnections = null;
+    this.cachedEdgesData = null;
+    this.invalidateDataCache();
   }
 
   private invalidateVerticesCache(): void {
     // Invalidate cached vertices data
     this.cachedVertices = null;
     this.cachedConnections = null;
+    this.cachedVerticesData = null;
+    this.invalidateDataCache();
   }
 
   addObserver(observer: GraphObserver): void {
@@ -371,6 +390,9 @@ export default abstract class Graph<
   }
   abstract get connections(): GraphConnections;
 
+  abstract get edgesData(): Array<ED>;
+  abstract get graphData(): DirectedGraphData<V, E> | UndirectedGraphData<V, E>;
+
   abstract insertBatch(
     data: {
       edges?: Array<ED>;
@@ -392,9 +414,11 @@ export default abstract class Graph<
     notifyChange?: boolean
   ): ChangeResult;
 
+  protected abstract invalidateDataCache(): void;
+
   abstract isDirected(): boolean;
 
-  abstract orderEdgesBetweenVertices(
+  protected abstract orderEdgesBetweenVertices(
     edges: Array<GE>
   ): Array<{ edge: GE; order: number }>;
 

@@ -1,7 +1,10 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { UndirectedEdge } from '@/models/edges';
 import { UndirectedGraphVertex } from '@/models/vertices';
-import { UndirectedEdgeData, VertexData } from '@/types/data';
+import {
+  UndirectedEdgeData,
+  UndirectedGraphData,
+  VertexData
+} from '@/types/data';
 import {
   GraphConnections,
   UndirectedEdge as IUndirectedEdge,
@@ -16,7 +19,7 @@ import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
 } from '@/utils/animations';
-import { catchError } from '@/utils/models';
+import { catchError, getUndirectedEdgeData } from '@/utils/models';
 
 import Graph from './Graph';
 
@@ -27,6 +30,8 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
   IUndirectedEdge<V, E>,
   UndirectedEdgeData<E>
 > {
+  protected cachedData: UndirectedGraphData<V, E> | null = null;
+
   override insertBatch = catchError(
     (
       {
@@ -190,6 +195,27 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
       );
     }
     return this.cachedConnections;
+  }
+
+  override get edgesData(): Array<UndirectedEdgeData<E>> {
+    if (!this.cachedEdgesData) {
+      this.cachedEdgesData = this.edges.map(getUndirectedEdgeData);
+    }
+    return this.cachedEdgesData;
+  }
+
+  override get graphData(): UndirectedGraphData<V, E> {
+    if (!this.cachedData) {
+      this.cachedData = {
+        edges: this.edgesData,
+        vertices: this.verticesData
+      };
+    }
+    return this.cachedData;
+  }
+
+  override invalidateDataCache(): void {
+    this.cachedData = null;
   }
 
   override isDirected() {

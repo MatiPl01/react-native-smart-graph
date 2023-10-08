@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { DirectedEdge } from '@/models/edges';
 import { DirectedGraphVertex } from '@/models/vertices';
-import { DirectedEdgeData, VertexData } from '@/types/data';
+import { DirectedEdgeData, DirectedGraphData, VertexData } from '@/types/data';
 import {
   DirectedEdge as IDirectedEdge,
   DirectedGraphVertex as IDirectedGraphVertex,
@@ -17,7 +16,7 @@ import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
 } from '@/utils/animations';
-import { catchError } from '@/utils/models';
+import { catchError, getDirectedEdgeData } from '@/utils/models';
 
 import Graph from './Graph';
 
@@ -28,6 +27,8 @@ export default class DirectedGraph<V = unknown, E = unknown> extends Graph<
   IDirectedEdge<V, E>,
   DirectedEdgeData<E>
 > {
+  protected cachedData: DirectedGraphData<V, E> | null = null;
+
   override insertBatch = catchError(
     (
       {
@@ -174,6 +175,27 @@ export default class DirectedGraph<V = unknown, E = unknown> extends Graph<
       );
     }
     return this.cachedConnections;
+  }
+
+  override get edgesData(): Array<DirectedEdgeData<E>> {
+    if (!this.cachedEdgesData) {
+      this.cachedEdgesData = this.edges.map(getDirectedEdgeData);
+    }
+    return this.cachedEdgesData;
+  }
+
+  override get graphData(): DirectedGraphData<V, E> {
+    if (!this.cachedData) {
+      this.cachedData = {
+        edges: this.edgesData,
+        vertices: this.verticesData
+      };
+    }
+    return this.cachedData;
+  }
+
+  override invalidateDataCache(): void {
+    this.cachedData = null;
   }
 
   override isDirected(): this is DirectedGraph<V, E> {

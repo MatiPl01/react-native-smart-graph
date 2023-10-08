@@ -1,4 +1,10 @@
-import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
+import {
+  DirectedEdgeData,
+  DirectedGraphData,
+  UndirectedEdgeData,
+  UndirectedGraphData,
+  VertexData
+} from '@/types/data';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -12,7 +18,6 @@ import { Edge, OrderedEdges } from './edge';
 import { GraphObserver } from './observer';
 import { Vertex, VertexConnections } from './vertex';
 
-/* eslint-disable import/no-unused-modules */
 export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
   blur(settings?: Maybe<AnimationSettings>): void;
@@ -22,8 +27,11 @@ export interface Graph<V, E> {
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<V, E>>;
+  get edgesData(): Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
+  get graphData(): DirectedGraphData<V, E> | UndirectedGraphData<V, E>;
   get orderedEdges(): OrderedEdges<V, E>;
   get vertices(): Array<Vertex<V, E>>;
+  get verticesData(): Array<VertexData<V>>;
   getEdge(key: string): Edge<V, E> | null;
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<V, E>>;
   getVertex(key: string): Vertex<V, E> | null;
