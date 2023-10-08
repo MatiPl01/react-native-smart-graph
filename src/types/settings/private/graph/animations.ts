@@ -1,5 +1,5 @@
 import { AnimationSettings } from '@/types/settings/public/graph/animations';
-import { DeepRequired } from '@/types/utils';
+import { DeepRequired, Maybe } from '@/types/utils';
 
 export type AllAnimationSettings = DeepRequired<
   Omit<AnimationSettings, 'onComplete'>
@@ -13,7 +13,7 @@ export type AllGraphAnimationsSettings = {
 };
 
 export type GraphModificationAnimationsSettings = {
-  edges: Record<string, AnimationSettings | undefined>;
-  layout?: AnimationSettings;
-  vertices: Record<string, AnimationSettings | undefined>;
+  edges: Record<string, Maybe<AnimationSettings>> | null;
+  layout?: AnimationSettings | null;
+  vertices: Record<string, Maybe<AnimationSettings>> | null;
 };

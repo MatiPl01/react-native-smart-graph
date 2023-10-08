@@ -19,7 +19,8 @@ import {
   AnimationSettings,
   BatchModificationAnimationSettings,
   FocusSettings,
-  GraphModificationAnimationsSettings
+  GraphModificationAnimationsSettings,
+  SingleModificationAnimationSettings
 } from '@/types/settings';
 import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
@@ -52,7 +53,7 @@ export default abstract class Graph<
 
   clear = catchError(
     (
-      animationSettings?: Maybe<BatchModificationAnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       // Clear the whole graph
@@ -67,14 +68,13 @@ export default abstract class Graph<
       // Notify observers after all changes to the graph model are made
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              {
-                edges: Object.keys(this.edges$),
-                vertices: Object.keys(this.vertices$)
-              },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: Object.keys(this.edges$),
+              vertices: Object.keys(this.vertices$)
+            },
+            animationSettings
+          )
         );
       }
     }
@@ -100,7 +100,7 @@ export default abstract class Graph<
         edges?: Array<string>;
         vertices?: Array<string>;
       },
-      animationSettings?: Maybe<BatchModificationAnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       // Remove edges and vertices from graph
@@ -113,14 +113,13 @@ export default abstract class Graph<
       // Notify observers after all changes to the graph model are made
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              {
-                edges: data.edges,
-                vertices: data.vertices
-              },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: data.edges,
+              vertices: data.vertices
+            },
+            animationSettings
+          )
         );
       }
     }
@@ -129,7 +128,7 @@ export default abstract class Graph<
   removeVertex = catchError(
     (
       key: string,
-      animationSettings?: Maybe<AnimationSettings>,
+      animationSettings?: SingleModificationAnimationSettings,
       notifyChange = true
     ): void => {
       if (!this.vertices$[key]) {
@@ -150,11 +149,10 @@ export default abstract class Graph<
       this.invalidateVerticesCache();
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              { edges: edgeKeys, vertices: [key] },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            { edges: edgeKeys, vertices: [key] },
+            animationSettings
+          )
         );
       }
     }
@@ -294,7 +292,7 @@ export default abstract class Graph<
 
   protected insertEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
+    animationsSettings?: GraphModificationAnimationsSettings,
     notifyChange = true
   ): void {
     if (this.edges$[edge.key]) {
@@ -324,7 +322,7 @@ export default abstract class Graph<
 
   protected insertVertexObject(
     vertex: GV,
-    animationSettings?: Maybe<GraphModificationAnimationsSettings>,
+    animationSettings?: GraphModificationAnimationsSettings,
     notifyChange = true
   ): void {
     if (this.vertices$[vertex.key]) {
@@ -346,7 +344,7 @@ export default abstract class Graph<
   }
 
   protected notifyGraphChange(
-    animationsSettings?: Maybe<GraphModificationAnimationsSettings>
+    animationsSettings?: GraphModificationAnimationsSettings
   ): void {
     const updatedAnimationSettings = animationsSettings ?? {
       edges: {},
@@ -360,7 +358,7 @@ export default abstract class Graph<
 
   protected removeEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
+    animationsSettings?: GraphModificationAnimationsSettings,
     notifyChange = true
   ): void {
     // Remove edge from edges between vertices
@@ -398,19 +396,19 @@ export default abstract class Graph<
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
   abstract insertEdge(
     data: ED,
-    animationSettings?: Maybe<AnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
   abstract insertVertex(
     data: VertexData<V>,
-    animationSettings?: Maybe<AnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
@@ -424,7 +422,7 @@ export default abstract class Graph<
 
   abstract removeEdge(
     key: string,
-    animationSettings?: Maybe<AnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
@@ -433,7 +431,7 @@ export default abstract class Graph<
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 }

@@ -66,21 +66,25 @@ export const isAnimationSettingsObject = (
 ): obj is AnimationSettings =>
   Object.keys(obj).every(key => ANIMATION_SETTINGS_KEYS.has(key));
 
-const BATCH_MODIFICATION_WITH_EDGES_AND_VERTICES_SETTINGS_KEYS = new Set([
+const BATCH_MODIFICATION_WITH_EDGES_OR_VERTICES_SETTINGS_KEYS = new Set([
   'edges',
   'vertices',
   'layout'
 ]);
 
-const isBatchModificationSettingsObjectWithEdgesAndVertices = (
+const isBatchModificationSettingsObjectWithEdgesOrVertices = (
   obj: object
 ): obj is {
-  edges: Record<string, AnimationSettings>;
-  layout: AnimationSettings;
-  vertices: Record<string, AnimationSettings>;
+  edges?:
+    | Maybe<AnimationSettings>
+    | Maybe<Record<string, Maybe<AnimationSettings>>>;
+  layout?: Maybe<AnimationSettings>;
+  vertices?:
+    | Maybe<AnimationSettings>
+    | Maybe<Record<string, Maybe<AnimationSettings>>>;
 } =>
   Object.keys(obj).every(key =>
-    BATCH_MODIFICATION_WITH_EDGES_AND_VERTICES_SETTINGS_KEYS.has(key)
+    BATCH_MODIFICATION_WITH_EDGES_OR_VERTICES_SETTINGS_KEYS.has(key)
   );
 
 // In functions below onComplete callback is passed only to single animation
@@ -90,13 +94,22 @@ export const createAnimationsSettingsForSingleModification = (
   component: { edge?: string; vertex?: string },
   animationsSettings?: SingleModificationAnimationSettings
 ): GraphModificationAnimationsSettings => {
+  // Single value specified for all components
+  if (animationsSettings === null) {
+    // Disable animations
+    return {
+      edges: null,
+      layout: null,
+      vertices: null
+    };
+  }
   if (!animationsSettings) {
+    // Use default animations
     return {
       edges: {},
       vertices: {}
     };
   }
-
   if (isAnimationSettingsObject(animationsSettings)) {
     return {
       edges: component.edge
@@ -111,22 +124,25 @@ export const createAnimationsSettingsForSingleModification = (
     };
   }
 
+  // Separate values for animations (edge and layout or vertex and layout)
   return {
     edges: component.edge
       ? {
-          [component.edge]: {
-            ...animationsSettings.component,
-            onComplete: undefined
-          }
+          [component.edge]: animationsSettings.component
         }
       : {},
     layout: animationsSettings.layout,
     vertices: component.vertex
       ? {
-          [component.vertex]: {
-            ...animationsSettings.component,
-            onComplete: undefined
-          }
+          [component.vertex]:
+            // Remove onComplete callback if both edge and vertex are animated
+            // (we want to call onComplete only once)
+            component.edge && component.vertex
+              ? animationsSettings.component && {
+                  ...animationsSettings.component,
+                  onComplete: undefined
+                }
+              : animationsSettings.component
         }
       : {}
   };
@@ -136,13 +152,22 @@ export const createAnimationsSettingsForBatchModification = (
   components: { edges?: Array<string>; vertices?: Array<string> },
   animationsSettings?: BatchModificationAnimationSettings
 ): GraphModificationAnimationsSettings => {
+  // Single value specified for all components
+  if (animationsSettings === null) {
+    // Disable animations
+    return {
+      edges: null,
+      layout: null,
+      vertices: null
+    };
+  }
   if (!animationsSettings) {
+    // Use default animations
     return {
       edges: {},
       vertices: {}
     };
   }
-
   if (isAnimationSettingsObject(animationsSettings)) {
     return {
       edges: Object.fromEntries(
@@ -161,46 +186,69 @@ export const createAnimationsSettingsForBatchModification = (
     };
   }
 
+  // Separate animation settings for specific components (or component groups)
   if (
-    isBatchModificationSettingsObjectWithEdgesAndVertices(animationsSettings)
+    isBatchModificationSettingsObjectWithEdgesOrVertices(animationsSettings)
   ) {
+    const edgesAnimationSettings = animationsSettings.edges;
+    const verticesAnimationSettings = animationsSettings.vertices;
+
     return {
-      edges: Object.fromEntries(
-        components.edges?.map(key => [
-          key,
-          animationsSettings.vertices?.[key]
-        ]) ?? []
-      ),
+      edges:
+        edgesAnimationSettings === undefined
+          ? {}
+          : edgesAnimationSettings &&
+            Object.fromEntries(
+              components.edges?.map((key, index) => [
+                key,
+                isAnimationSettingsObject(edgesAnimationSettings)
+                  ? index === 0
+                    ? edgesAnimationSettings
+                    : // Ensure that onComplete callback is called only once
+                      { ...edgesAnimationSettings, onComplete: undefined }
+                  : edgesAnimationSettings[key]
+              ]) ?? []
+            ),
       layout: animationsSettings.layout,
-      vertices: Object.fromEntries(
-        components.vertices?.map(key => [
-          key,
-          animationsSettings.edges?.[key]
-        ]) ?? []
-      )
+      vertices:
+        verticesAnimationSettings === undefined
+          ? {}
+          : verticesAnimationSettings &&
+            Object.fromEntries(
+              components.vertices?.map((key, index) => [
+                key,
+                isAnimationSettingsObject(verticesAnimationSettings)
+                  ? index === 0
+                    ? verticesAnimationSettings
+                    : // Ensure that onComplete callback is called only once
+                      { ...verticesAnimationSettings, onComplete: undefined }
+                  : verticesAnimationSettings[key]
+              ]) ?? []
+            )
     };
   }
 
+  // Separate animation settings for layout and all components
   return {
     edges: Object.fromEntries(
-      components.edges?.map(key => [
+      components.edges?.map((key, index) => [
         key,
-        {
-          ...(animationsSettings as { components?: AnimationSettings })
-            .components,
-          onComplete: undefined
-        }
+        animationsSettings.components && index === 0
+          ? animationsSettings.components
+          : // Ensure that onComplete callback is called only once
+            { ...animationsSettings.components, onComplete: undefined }
       ]) ?? []
     ),
     layout: animationsSettings.layout,
     vertices: Object.fromEntries(
-      components.vertices?.map(key => [
+      components.vertices?.map((key, index) => [
         key,
-        {
-          ...(animationsSettings as { components?: AnimationSettings })
-            .components,
-          onComplete: undefined
-        }
+        animationsSettings.components &&
+        index === 0 &&
+        (!components.edges || !components.edges.length)
+          ? animationsSettings.components
+          : // Ensure that onComplete callback is called only once
+            { ...animationsSettings.components, onComplete: undefined }
       ]) ?? []
     )
   };
@@ -210,25 +258,22 @@ export const animateToValue = (
   fromValue: number,
   toValue: number,
   config?: {
-    div?: number;
     eps?: number;
-    minFactor?: number;
+    rate?: number; // This defines the rate of smoothing
   }
 ): number => {
   'worklet';
   const delta = toValue - fromValue;
+  const minDelta = config?.eps ?? 0.01; // It can never be exactly zero, but we can get pretty close
 
-  const minDelta = config?.eps ?? 1;
-  // Delta can be NaN when the difference between values is too small
-  // (subtracting very close numbers can result in a number that is too small to be represented)
   if (isNaN(delta) || Math.abs(delta) < minDelta) {
     return toValue;
   }
-  const factor = Math.max(
-    config?.minFactor ?? 0.1,
-    Math.abs(delta) / (config?.div ?? 1000)
-  );
-  return fromValue + delta * factor;
+
+  const rate = config?.rate ?? 0.1; // Default rate is 0.1 if not provided
+  const newValue = fromValue + rate * delta;
+
+  return newValue;
 };
 
 export const cancelVertexAnimations = <V>(
