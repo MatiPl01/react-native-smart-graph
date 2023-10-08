@@ -11,10 +11,9 @@ import {
   UndirectedGraphVertex as IUndirectedGraphVertex
 } from '@/types/models';
 import {
-  AnimationSettings,
+  BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
-import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
@@ -41,7 +40,7 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
         edges?: Array<UndirectedEdgeData<E>>;
         vertices?: Array<VertexData<V>>;
       },
-      animationSettings?: Maybe<AnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       // Insert edges and vertices to the graph model
@@ -54,14 +53,13 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
       // Notify observers after all changes to the graph model are made
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              {
-                edges: edges?.map(({ key }) => key),
-                vertices: vertices?.map(({ key }) => key)
-              },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: edges?.map(({ key }) => key),
+              vertices: vertices?.map(({ key }) => key)
+            },
+            animationSettings
+          )
         );
       }
     }
@@ -70,7 +68,7 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
   override insertEdge = catchError(
     (
       { key, value, vertices: [vertex1key, vertex2key] }: UndirectedEdgeData<E>,
-      animationSettings?: Maybe<AnimationSettings>,
+      animationSettings?: SingleModificationAnimationSettings,
       notifyChange: boolean = true // this somehow fixes the type error in insertEdgeObject
     ): void => {
       if (!vertex1key || !vertex2key) {
@@ -99,11 +97,10 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
       }
       this.insertEdgeObject(
         edge,
-        animationSettings &&
-          createAnimationsSettingsForSingleModification(
-            { edge: key },
-            animationSettings
-          ),
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        ),
         notifyChange
       );
     }
@@ -112,23 +109,25 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
   override insertVertex = catchError(
     (
       { key, value }: VertexData<V>,
-      animationSettings?: Maybe<SingleModificationAnimationSettings>,
+      animationSettings?: SingleModificationAnimationSettings,
       notifyChange: boolean = true // this somehow fixes the type error in insertVertexObject
     ): void => {
       return this.insertVertexObject(
         new UndirectedGraphVertex<V, E>(key, value as V),
-        animationSettings &&
-          createAnimationsSettingsForSingleModification(
-            { vertex: key },
-            animationSettings
-          ),
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        ),
         notifyChange
       );
     }
   );
 
   override removeEdge = catchError(
-    (key: string, animationSettings?: Maybe<AnimationSettings>): void => {
+    (
+      key: string,
+      animationSettings?: SingleModificationAnimationSettings
+    ): void => {
       const edge = this.getEdge(key);
 
       if (!edge) {
@@ -141,11 +140,10 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
       }
       this.removeEdgeObject(
         edge,
-        animationSettings &&
-          createAnimationsSettingsForSingleModification(
-            { edge: key },
-            animationSettings
-          )
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        )
       );
     }
   );
@@ -156,7 +154,7 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
         edges?: Array<UndirectedEdgeData<E>>;
         vertices?: Array<VertexData<V>>;
       },
-      animationSettings?: Maybe<AnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       this.clear(null, false);

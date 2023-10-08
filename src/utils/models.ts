@@ -39,7 +39,7 @@ export const catchError =
 
 export const hasValue = <T extends object, V>(
   obj: T | WithValue<V, T>
-): obj is WithValue<V, T> => Object.hasOwn(obj, 'value');
+): obj is WithValue<V, T> => 'value' in obj;
 
 export const getVertexData = <V, E>(vertex: Vertex<V, E>): VertexData<V> =>
   (hasValue(vertex)

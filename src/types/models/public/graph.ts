@@ -21,9 +21,7 @@ import { Vertex, VertexConnections } from './vertex';
 export interface Graph<V, E> {
   addObserver(observer: GraphObserver): void;
   blur(settings?: Maybe<AnimationSettings>): void;
-  clear(
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
-  ): ChangeResult;
+  clear(animationSettings?: BatchModificationAnimationSettings): ChangeResult;
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<V, E>>;
@@ -42,17 +40,17 @@ export interface Graph<V, E> {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   insertEdge(
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   insertVertex(
     data: VertexData<V>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   isDirected(): boolean;
@@ -61,18 +59,18 @@ export interface Graph<V, E> {
       edges: Array<string>;
       vertices: Array<string>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   removeEdge(
     key: string,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   removeObserver(observer: GraphObserver): void;
   removeVertex(
     key: string,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   replaceBatch(
@@ -80,7 +78,7 @@ export interface Graph<V, E> {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 }

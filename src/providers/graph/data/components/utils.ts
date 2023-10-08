@@ -18,7 +18,7 @@ import {
   AllGraphAnimationsSettings,
   AnimationSettings
 } from '@/types/settings';
-import { PartialWithRequired } from '@/types/utils';
+import { Maybe, PartialWithRequired } from '@/types/utils';
 import {
   cancelEdgeAnimations,
   cancelVertexAnimations
@@ -69,11 +69,13 @@ export const updateContextValue = <V, E>(
 ): GraphComponentsData<V, E> => {
   const currentLayoutAnimationSettings = value?.layoutAnimationSettings;
   const newLayoutAnimationSettings =
-    newData.graphAnimationsSettings.layout === null
+    newData.state.animationsSettings.layout === null
       ? null
       : updateValues({
           current: currentLayoutAnimationSettings,
-          default: newData.graphAnimationsSettings.layout,
+          default:
+            newData.graphAnimationsSettings.layout ??
+            newData.state.animationsSettings.layout,
           new: newData.state.animationsSettings.layout
         });
 
@@ -170,7 +172,7 @@ const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
-  currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
+  currentAnimationsSettings: Record<string, Maybe<AnimationSettings>> | null,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, VertexComponentData<V>> => {
   const updatedVerticesData = { ...oldVerticesData };
@@ -216,7 +218,7 @@ const updateGraphVerticesData = <V, E>(
       }),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
-        currentAnimationsSettings[vertex.key]
+        currentAnimationsSettings && currentAnimationsSettings[vertex.key]
       ),
       key: vertex.key,
       removed: false,
@@ -236,7 +238,7 @@ const updateGraphVerticesData = <V, E>(
         ...vertexData,
         animationSettings: updateAnimationSettings(
           defaultAnimationSettings,
-          currentAnimationsSettings[key]
+          currentAnimationsSettings?.[key]
         ),
         removed: true
       };
@@ -262,7 +264,7 @@ const updateGraphEdgesData = <V, E>(
   currentEdges: OrderedEdges<V, E>,
   verticesData: Record<string, VertexComponentData<V>>,
   removedEdges: Set<string>,
-  currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
+  currentAnimationsSettings: Record<string, Maybe<AnimationSettings>> | null,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, EdgeComponentData<E>> => {
   const updatedEdgesData = { ...oldEdgesData };
@@ -346,7 +348,8 @@ const updateGraphEdgesData = <V, E>(
       }),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
-        currentAnimationsSettings[edgeData.edge.key]
+        currentAnimationsSettings &&
+          currentAnimationsSettings[edgeData.edge.key]
       ),
       isDirected: edgeData.edge.isDirected(),
       key: edgeData.edge.key,
@@ -370,7 +373,7 @@ const updateGraphEdgesData = <V, E>(
           ...edgeData,
           animationSettings: updateAnimationSettings(
             defaultAnimationSettings,
-            currentAnimationsSettings[key]
+            currentAnimationsSettings && currentAnimationsSettings[key]
           ),
           removed: true
         };
