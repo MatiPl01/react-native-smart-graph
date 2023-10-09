@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, ReactElement } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
 import { GraphSettingsData } from '@/types/components';

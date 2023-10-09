@@ -64,8 +64,9 @@
   ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write --ignore-unknown",
+      "yarn lint:fix",
+      "bash -c tsc --noEmit",
+      "yarn format:code",
       "yarn format:deps"
     ]
   },

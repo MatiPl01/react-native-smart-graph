@@ -4742,10 +4742,10 @@ escape-string-regexp@^4.0.0:
   resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz"
   integrity sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==
 
-eslint-config-react-native-matipl01@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/eslint-config-react-native-matipl01/-/eslint-config-react-native-matipl01-1.0.2.tgz#49cbda536d3ac1815f53003741de0d295ce5582a"
-  integrity sha512-7+y0DIkfTgF462QfSbXf1eVenbE3I3HedQRv0L/bUaZaUa0lZka25PwTn7AoqiKAC91hylpJVibmYxNCKSnj7Q==
+eslint-config-react-native-matipl01@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/eslint-config-react-native-matipl01/-/eslint-config-react-native-matipl01-1.0.3.tgz#70aea81c2128a4befda57f90b4173d408b8f0b16"
+  integrity sha512-9CXSwJ3aPOAHCInZwjkrIPw3TPk92oj9snBhl0F/+3HSL5B+BJSTsqYUkivwQSsifXpqEbGsDLxHAIymzsXN3Q==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^6.7.3"
     "@typescript-eslint/parser" "^6.7.3"

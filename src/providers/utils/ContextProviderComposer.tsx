@@ -1,4 +1,4 @@
-import React, { cloneElement, memo, PropsWithChildren } from 'react';
+import { cloneElement, memo, PropsWithChildren } from 'react';
 
 type ContextProviderComposerProps = PropsWithChildren<{
   providers: Array<JSX.Element>;
