@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { DirectedGraph, DirectedGraphComponent, GraphView } from '..';
 
 const ADDED_COMPONENTS = [

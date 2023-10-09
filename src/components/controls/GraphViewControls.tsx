@@ -7,7 +7,7 @@ import {
   faRectangleTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { memo, useState } from 'react';
+import { memo, useState } from 'react';
 import {
   StyleProp,
   StyleSheet,
