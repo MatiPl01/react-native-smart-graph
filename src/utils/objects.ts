@@ -32,7 +32,7 @@ type SettingsWithoutDefaults<C, N> = {
 const areSettingsWithDefaults = <C, D, N>(
   settings: SettingsWithDefaults<C, D, N> | SettingsWithoutDefaults<C, N>
 ): settings is SettingsWithDefaults<C, D, N> => {
-  return 'default' in settings;
+  return settings && 'default' in settings;
 };
 
 const isEmpty = (obj?: any): boolean =>
@@ -62,7 +62,9 @@ export const updateValues = <
 
   let isModified = false;
   const keySet = new Set([
-    ...(areSettingsWithDefaults(settings) ? Object.keys(settings.default) : []),
+    ...(areSettingsWithDefaults(settings)
+      ? Object.keys(settings.default ?? {})
+      : []),
     ...(settings.new ? Object.keys(settings.new) : [])
   ]);
 
