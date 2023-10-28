@@ -1,7 +1,7 @@
 import { Group } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
+import ResponsiveText from 'react-native-skia-responsive-text';
 
-import { ResponsiveText } from '@/components/text';
 import FONT from '@/font';
 import { EdgeLabelRendererProps } from '@/types/components';
 

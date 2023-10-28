@@ -1,4 +1,3 @@
-import { ResponsiveText } from '@/components';
 import { Canvas } from '@shopify/react-native-skia';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -7,12 +6,13 @@ import Animated, {
   useSharedValue,
   withTiming
 } from 'react-native-reanimated';
-import {
-  HorizontalAlignment,
-  TextHorizontalAlignment,
-  TextVerticalAlignment
-} from '..';
 import FONT from '@/font';
+import {
+  TextHorizontalAlignment,
+  HorizontalAlignment,
+  VerticalAlignment,
+  ResponsiveText
+} from '..';
 
 export default function ResponsiveTextExample() {
   const width = 200; //Dimensions.get('window').width;
@@ -30,7 +30,7 @@ export default function ResponsiveTextExample() {
 
   // Alignment
   const horizontalAlignment = useSharedValue<TextHorizontalAlignment>('center');
-  const verticalAlignment = useSharedValue<TextVerticalAlignment>('center');
+  const verticalAlignment = useSharedValue<VerticalAlignment>('center');
   const animationProgress = useSharedValue(0);
 
   const animatedTextStyle = useAnimatedStyle(() => {
@@ -50,7 +50,7 @@ export default function ResponsiveTextExample() {
       'center',
       'center-right'
     ];
-    const verticalAlignments: Array<TextVerticalAlignment> = [
+    const verticalAlignments: Array<VerticalAlignment> = [
       'top',
       'center',
       'bottom'
