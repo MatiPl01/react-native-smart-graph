@@ -48,5 +48,10 @@ export * from '@/types/settings/public';
 
 // EXTERNAL LIBRARIES
 export { FiberProvider } from 'its-fine';
+export type {
+  EllipsizeMode,
+  HorizontalAlignment as TextHorizontalAlignment,
+  TextOverflow,
+  VerticalAlignment as TextVerticalAlignment
+} from 'react-native-skia-responsive-text';
 export { default as ResponsiveText } from 'react-native-skia-responsive-text';
-export { type HorizontalAlignment as TextHorizontalAlignment } from 'react-native-skia-responsive-text';

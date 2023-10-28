@@ -9554,10 +9554,10 @@ react-native-reanimated@^3.5.4:
     convert-source-map "^2.0.0"
     invariant "^2.2.4"
 
-react-native-skia-responsive-text@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/react-native-skia-responsive-text/-/react-native-skia-responsive-text-1.0.2.tgz#2de875ac1386d752c39991e775cd23ae01c8eb50"
-  integrity sha512-fIoFiFh6ERMv+I1zNGMHUSXIWunq9syiD3G8hcMCpku8T+ToD7WRO3QwMbppbpvhrKOSSWgqqRbIs/sCYA5pFA==
+react-native-skia-responsive-text@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-skia-responsive-text/-/react-native-skia-responsive-text-1.1.0.tgz#a76d6aef04609664ef79f0686e1f62c4fc6f6a69"
+  integrity sha512-ccZYbiyWqavPurdJ8bLs6PNzs1djLXtX1hRXWx2SbVqaWa0KjDHmXVd0rcYTpqkX3qzSD86GHETpXO3+oKr0ow==
 
 react-native-svg@^13.9.0:
   version "13.9.0"

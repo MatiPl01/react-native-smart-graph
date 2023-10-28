@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import CanvasProvider from './CanvasProvider';
 
 export default CanvasProvider;
