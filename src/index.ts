@@ -10,7 +10,6 @@
 export { default as GraphViewControls } from '@/components/controls/GraphViewControls';
 export { default as DirectedGraphComponent } from '@/components/graphs/DirectedGraphComponent';
 export { default as UndirectedGraphComponent } from '@/components/graphs/UndirectedGraphComponent';
-export { default as ResponsiveText } from '@/components/text/ResponsiveText';
 
 // RENDERERS
 export { default as DefaultEdgeArrowRenderer } from '@/components/graphs/arrows/renderers/DefaultEdgeArrowRenderer';
@@ -49,3 +48,10 @@ export * from '@/types/settings/public';
 
 // EXTERNAL LIBRARIES
 export { FiberProvider } from 'its-fine';
+export type {
+  EllipsizeMode,
+  HorizontalAlignment as TextHorizontalAlignment,
+  TextOverflow,
+  VerticalAlignment as TextVerticalAlignment
+} from 'react-native-skia-responsive-text';
+export { default as ResponsiveText } from 'react-native-skia-responsive-text';
