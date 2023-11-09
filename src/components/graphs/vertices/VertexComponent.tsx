@@ -2,12 +2,17 @@ import { Group } from '@shopify/react-native-skia';
 import { memo, useEffect, useMemo } from 'react';
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { useComponentFocus, useVertexTransform } from '@/hooks';
+import {
+  useComponentFocus,
+  useVertexTransform,
+  useVertexValueObserver
+} from '@/hooks';
 import {
   VertexComponentProps,
   VertexRenderer,
   VertexRendererProps
 } from '@/types/components';
+import { VertexObserver } from '@/types/models';
 import { updateComponentAnimationState } from '@/utils/components';
 import { getVertexLabelComponentTransformation } from '@/utils/transform';
 
@@ -100,16 +105,27 @@ function VertexComponent<V>({
 }
 
 type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
+  addObserver: (observer: VertexObserver<V>) => void;
+  removeObserver: (observer: VertexObserver<V>) => void;
   renderer: VertexRenderer<V>;
   vertexKey: string;
 };
 
 const RenderedVertexComponent = memo(function RenderedVertexComponent<V>({
+  addObserver,
+  removeObserver,
   renderer,
+  value: initialValue,
   vertexKey: key,
   ...restProps
 }: RenderedVertexComponentProps<V>) {
-  return renderer({ key, ...restProps });
+  const value = useVertexValueObserver(
+    addObserver,
+    removeObserver,
+    initialValue
+  );
+
+  return renderer({ key, ...restProps, value });
 }) as <V>(props: RenderedVertexComponentProps<V>) => JSX.Element;
 
 export default memo(VertexComponent) as <V>(

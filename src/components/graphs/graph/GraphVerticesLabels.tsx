@@ -32,7 +32,7 @@ export default withGraphSettings(
   })),
   ({ componentsSettings, renderers }) => ({
     labelPosition: componentsSettings.vertexLabel?.position,
-    renderer: renderers.vertexLabel,
+    renderer: renderers.vertexLabel ?? undefined, // TODO - check later what is wrong with this type
     vertexRadius: componentsSettings.vertex.radius
   })
 );

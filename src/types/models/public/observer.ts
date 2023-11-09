@@ -7,3 +7,11 @@ export type GraphObserver = {
     animationsSettings: GraphModificationAnimationsSettings
   ) => void;
 };
+
+export type VertexObserver<V> = {
+  valueChanged?: (value: V) => void;
+};
+
+export type EdgeObserver<E> = {
+  valueChanged?: (value: E) => void;
+};
