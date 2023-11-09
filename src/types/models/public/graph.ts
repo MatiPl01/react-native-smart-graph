@@ -81,6 +81,8 @@ export interface Graph<V, E> {
     animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
+  updateEdgeValue(key: string, value: E): ChangeResult;
+  updateVertexValue(key: string, value: V): ChangeResult;
 }
 
 export type GraphConnections = Record<string, VertexConnections>;

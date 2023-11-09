@@ -1,13 +1,15 @@
-/* eslint-disable import/no-unused-modules */
-
 import { DirectedEdge, Edge, UndirectedEdge } from './edge';
+import { VertexObserver } from './observer';
 
 export interface Vertex<V = unknown, E = unknown> {
+  addObserver(observer: VertexObserver<V>): void;
   get degree(): number;
   get edges(): Array<Edge<V, E>>;
   get key(): string;
   get neighbors(): Array<Vertex<V, E>>;
   get value(): V;
+  removeObserver(observer: VertexObserver<V>): void;
+  set value(value: V);
 }
 
 export interface DirectedGraphVertex<V = unknown, E = unknown>

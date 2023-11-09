@@ -38,7 +38,7 @@ export default abstract class Graph<
   private lastFocusChangeSettings: FocusSettings | null = null;
   private lastGraphChangeSettings: GraphModificationAnimationsSettings | null =
     null;
-  private readonly observers: Set<GraphObserver> = new Set();
+  private readonly observers = new Set<GraphObserver>();
 
   protected cachedConnections: GraphConnections | null = null;
   protected cachedEdges: Array<GE> | null = null;
@@ -157,6 +157,30 @@ export default abstract class Graph<
       }
     }
   );
+
+  updateEdgeValue = catchError((key: string, value: E): void => {
+    const targetEdge = this.edges$[key];
+    if (!targetEdge) {
+      throw new Error(`Edge with key ${key} does not exist.`);
+    }
+    // There is no better way to implement this as exact types
+    // aren't available yet
+    // (https://github.com/Microsoft/TypeScript/issues/12936)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    targetEdge.value = value as any;
+    this.cachedEdgesData = null;
+    this.invalidateDataCache();
+  });
+
+  updateVertexValue = catchError((key: string, value: V): void => {
+    const targetVertex = this.vertices$[key];
+    if (!targetVertex) {
+      throw new Error(`Vertex with key ${key} does not exist.`);
+    }
+    targetVertex.value = value;
+    this.cachedVerticesData = null;
+    this.invalidateDataCache();
+  });
 
   protected readonly vertices$: Record<string, GV> = {};
 
