@@ -18,7 +18,7 @@ export type VertexLabelComponentProps<V = unknown> = {
 
 export type GraphVerticesLabelsProps<V> = Omit<
   VertexLabelComponentProps<V>,
-  'data' | 'renderer'
+  'addObserver' | 'data'
 > & {
   renderer: RendererWithProps<VertexLabelRenderer<V>> | null;
   vertexLabelsData: Record<string, VertexLabelComponentData<V>>;

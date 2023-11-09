@@ -6,16 +6,24 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 
+import { useEdgeValueObserver } from '@/hooks';
 import {
   EdgeLabelComponentProps,
   EdgeLabelRenderer,
   EdgeLabelRendererProps
 } from '@/types/components';
 import { Dimensions } from '@/types/layout';
+import { EdgeObserver } from '@/types/models';
 import { distanceBetweenVectors } from '@/utils/vectors';
 
 function EdgeLabelComponent<E>({
-  data: { animationProgress, transform: labelTransform, value },
+  data: {
+    addObserver,
+    animationProgress,
+    removeObserver,
+    transform: labelTransform,
+    value
+  },
   edgeKey,
   renderer,
   vertexRadius
@@ -103,12 +111,14 @@ function EdgeLabelComponent<E>({
     <Group transform={transform}>
       <Group transform={labelContentTransform}>
         <RenderedLabelComponent
+          addObserver={addObserver}
           animationProgress={animationProgress}
           customProps={renderer.props}
           edgeKey={edgeKey}
           edgeLength={edgeLength}
           edgeRotation={edgeRotation}
           r={vertexRadius}
+          removeObserver={removeObserver}
           renderer={renderer.renderer}
           value={value as E}
           onMeasure={onMeasure}
@@ -119,16 +129,27 @@ function EdgeLabelComponent<E>({
 }
 
 type RenderedLabelComponentProps<E> = Omit<EdgeLabelRendererProps<E>, 'key'> & {
+  addObserver: (observer: EdgeObserver<E>) => void;
   edgeKey: string;
+  removeObserver: (observer: EdgeObserver<E>) => void;
   renderer: EdgeLabelRenderer<E>;
 };
 
 function RenderedLabelComponent<E>({
+  addObserver,
   edgeKey: key,
+  removeObserver,
   renderer,
+  value: initialValue,
   ...restProps
 }: RenderedLabelComponentProps<E>) {
-  return renderer({ key, ...restProps });
+  const value = useEdgeValueObserver<E>(
+    addObserver,
+    removeObserver,
+    initialValue
+  );
+
+  return renderer({ key, ...restProps, value });
 }
 
 export default memo(EdgeLabelComponent) as typeof EdgeLabelComponent;

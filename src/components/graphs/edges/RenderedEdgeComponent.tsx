@@ -1,5 +1,4 @@
-import { useEffect, useMemo } from 'react';
-
+import { useEdgeValueObserver } from '@/hooks';
 import {
   CurvedEdgeRenderer,
   CurvedEdgeRendererProps,
@@ -26,20 +25,15 @@ export default function RenderedEdgeComponent<E>({
   edgeKey: key,
   removeObserver,
   renderer,
+  value: initialValue,
   ...restProps
 }: RenderedEdgeComponentProps<E>) {
-  const edgeObserver = useMemo<EdgeObserver<E>>(
-    () => ({
-      valueChanged: console.log
-    }),
-    []
+  const value = useEdgeValueObserver<E>(
+    addObserver,
+    removeObserver,
+    initialValue
   );
 
-  useEffect(() => {
-    addObserver(edgeObserver);
-    return () => removeObserver(edgeObserver);
-  }, [addObserver, removeObserver, edgeObserver]);
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-  return renderer({ key, ...restProps } as any);
+  return renderer({ key, ...restProps, value } as any);
 }

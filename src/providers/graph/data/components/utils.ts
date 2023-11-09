@@ -323,6 +323,8 @@ const updateGraphEdgesData = <V, E>(
         // Create shared values only for new edges
         animationProgress: makeMutable(0),
         label: {
+          addObserver: edgeData.edge.addObserver.bind(edgeData.edge),
+          removeObserver: edgeData.edge.removeObserver.bind(edgeData.edge),
           transform: makeMutable({
             center: { x: 0, y: 0 },
             p1: { x: 0, y: 0 },
@@ -451,8 +453,10 @@ const updateGraphVertexLabelsData = <V>(
     ) {
       updatedVertexLabelsData[key] = {
         ...vertexData.label,
+        addObserver: vertexData.addObserver.bind(vertexData),
         animationProgress: vertexData.animationProgress,
         focusProgress: vertexData.focusProgress,
+        removeObserver: vertexData.removeObserver.bind(vertexData),
         value: vertexData.value,
         vertexKey: vertexData.key
       };

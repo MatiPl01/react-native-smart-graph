@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
 import {
   Edge,
+  EdgeObserver,
   Graph,
   GraphObserver,
   OrderedEdges,
-  Vertex
+  Vertex,
+  VertexObserver
 } from '@/types/models';
 import {
   AllFocusSettings,
@@ -129,4 +131,48 @@ export const useFocusObserver = <V, E>(
   };
 
   return [state, setActive];
+};
+
+export const useVertexValueObserver = <V>(
+  addObserver: (observer: VertexObserver<V>) => void,
+  removeObserver: (observer: VertexObserver<V>) => void,
+  initialValue: V
+): V => {
+  const [value, setValue] = useState<V>(initialValue);
+
+  const vertexObserver = useMemo<VertexObserver<V>>(
+    () => ({
+      valueChanged: setValue
+    }),
+    []
+  );
+
+  useEffect(() => {
+    addObserver(vertexObserver);
+    return () => removeObserver(vertexObserver);
+  }, [addObserver, removeObserver, vertexObserver]);
+
+  return value;
+};
+
+export const useEdgeValueObserver = <E>(
+  addObserver: (observer: EdgeObserver<E>) => void,
+  removeObserver: (observer: EdgeObserver<E>) => void,
+  initialValue: E
+): E => {
+  const [value, setValue] = useState<E>(initialValue);
+
+  const edgeObserver = useMemo<EdgeObserver<E>>(
+    () => ({
+      valueChanged: setValue
+    }),
+    []
+  );
+
+  useEffect(() => {
+    addObserver(edgeObserver);
+    return () => removeObserver(edgeObserver);
+  }, [addObserver, removeObserver, edgeObserver]);
+
+  return value;
 };
