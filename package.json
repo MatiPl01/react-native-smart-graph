@@ -95,6 +95,7 @@
     "format:code": "prettier --write .",
     "format:deps": "syncpack format",
     "ios": "react-native run-ios",
+    "pod": "cd ios && pod install && cd ..",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "postbuild": "node scripts/copySources.js && node scripts/copyTsConfig.js",

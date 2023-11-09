@@ -8,6 +8,7 @@ import {
   VertexRenderer,
   VertexRendererProps
 } from '@/types/components';
+import { VertexObserver } from '@/types/models';
 import { updateComponentAnimationState } from '@/utils/components';
 import { getVertexLabelComponentTransformation } from '@/utils/transform';
 
@@ -100,15 +101,31 @@ function VertexComponent<V>({
 }
 
 type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
+  addObserver: (observer: VertexObserver<V>) => void;
+  removeObserver: (observer: VertexObserver<V>) => void;
   renderer: VertexRenderer<V>;
   vertexKey: string;
 };
 
 const RenderedVertexComponent = memo(function RenderedVertexComponent<V>({
+  addObserver,
+  removeObserver,
   renderer,
   vertexKey: key,
   ...restProps
 }: RenderedVertexComponentProps<V>) {
+  const vertexObserver = useMemo<VertexObserver<V>>(
+    () => ({
+      valueChanged: console.log
+    }),
+    []
+  );
+
+  useEffect(() => {
+    addObserver(vertexObserver);
+    return () => removeObserver(vertexObserver);
+  }, [addObserver, removeObserver, vertexObserver]);
+
   return renderer({ key, ...restProps });
 }) as <V>(props: RenderedVertexComponentProps<V>) => JSX.Element;
 

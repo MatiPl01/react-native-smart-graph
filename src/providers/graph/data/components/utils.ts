@@ -216,11 +216,13 @@ const updateGraphVerticesData = <V, E>(
         scale: makeMutable(1),
         transformProgress: makeMutable(0)
       }),
+      addObserver: vertex.addObserver.bind(vertex),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
         currentAnimationsSettings && currentAnimationsSettings[vertex.key]
       ),
       key: vertex.key,
+      removeObserver: vertex.removeObserver.bind(vertex),
       removed: false,
       value: vertex.value
     };
@@ -346,6 +348,7 @@ const updateGraphEdgesData = <V, E>(
         }),
         transformProgress: makeMutable(1)
       }),
+      addObserver: edgeData.edge.addObserver.bind(edgeData.edge),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
         currentAnimationsSettings &&
@@ -353,6 +356,7 @@ const updateGraphEdgesData = <V, E>(
       ),
       isDirected: edgeData.edge.isDirected(),
       key: edgeData.edge.key,
+      removeObserver: edgeData.edge.removeObserver.bind(edgeData.edge),
       removed: false,
       v1Key: v1.key,
       v2Key: v2.key,
