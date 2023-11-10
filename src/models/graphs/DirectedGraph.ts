@@ -112,7 +112,8 @@ export default class DirectedGraph<V = unknown, E = unknown> extends Graph<
   override removeEdge = catchError(
     (
       key: string,
-      animationSettings?: SingleModificationAnimationSettings
+      animationSettings?: SingleModificationAnimationSettings,
+      notifyChange: boolean = true
     ): void => {
       const edge = this.getEdge(key);
 
@@ -127,7 +128,8 @@ export default class DirectedGraph<V = unknown, E = unknown> extends Graph<
         createAnimationsSettingsForSingleModification(
           { edge: key },
           animationSettings
-        )
+        ),
+        notifyChange
       );
     }
   );
