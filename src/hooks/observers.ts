@@ -39,7 +39,7 @@ export const useGraphObserver = <V, E>(
 
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
-  const observerRef = useRef<GraphObserver>({
+  const observerRef = useRef<GraphObserver<V, E>>({
     graphChanged(animationsSettings) {
       setState({
         animationsSettings,
@@ -93,7 +93,7 @@ export const useFocusObserver = <V, E>(
 
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
-  const observerRef = useRef<GraphObserver>({
+  const observerRef = useRef<GraphObserver<V, E>>({
     focusChanged(vertexKey, settings) {
       setState({
         focusedVertexKey: vertexKey,
