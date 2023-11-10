@@ -126,7 +126,8 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
   override removeEdge = catchError(
     (
       key: string,
-      animationSettings?: SingleModificationAnimationSettings
+      animationSettings?: SingleModificationAnimationSettings,
+      notifyChange: boolean = true // this somehow fixes the type error in removeEdgeObject
     ): void => {
       const edge = this.getEdge(key);
 
@@ -143,7 +144,8 @@ export default class UndirectedGraph<V = unknown, E = unknown> extends Graph<
         createAnimationsSettingsForSingleModification(
           { edge: key },
           animationSettings
-        )
+        ),
+        notifyChange
       );
     }
   );
