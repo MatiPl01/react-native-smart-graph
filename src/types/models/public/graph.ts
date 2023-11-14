@@ -19,7 +19,7 @@ import { GraphObserver } from './observer';
 import { Vertex, VertexConnections } from './vertex';
 
 export interface Graph<V, E> {
-  addObserver(observer: GraphObserver): void;
+  addObserver(observer: GraphObserver<V, E>): void;
   blur(settings?: Maybe<AnimationSettings>): void;
   clear(animationSettings?: BatchModificationAnimationSettings): ChangeResult;
   focus(vertexKey: string, settings?: FocusSettings): void;
@@ -67,7 +67,7 @@ export interface Graph<V, E> {
     animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
-  removeObserver(observer: GraphObserver): void;
+  removeObserver(observer: GraphObserver<V, E>): void;
   removeVertex(
     key: string,
     animationSettings?: SingleModificationAnimationSettings,

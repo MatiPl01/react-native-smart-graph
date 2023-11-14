@@ -38,7 +38,7 @@ export default abstract class Graph<
   private lastFocusChangeSettings: FocusSettings | null = null;
   private lastGraphChangeSettings: GraphModificationAnimationsSettings | null =
     null;
-  private readonly observers = new Set<GraphObserver>();
+  private readonly observers = new Set<GraphObserver<V, E>>();
 
   protected cachedConnections: GraphConnections | null = null;
   protected cachedEdges: Array<GE> | null = null;
@@ -170,6 +170,9 @@ export default abstract class Graph<
     targetEdge.value = { ...targetEdge.value, ...value } as any;
     this.cachedEdgesData = null;
     this.invalidateDataCache();
+    this.observers.forEach(observer => {
+      observer.edgeValueChanged?.(key, targetEdge.value);
+    });
   });
 
   updateVertexValue = catchError((key: string, value: Partial<V>): void => {
@@ -180,6 +183,9 @@ export default abstract class Graph<
     targetVertex.value = { ...targetVertex.value, ...value };
     this.cachedVerticesData = null;
     this.invalidateDataCache();
+    this.observers.forEach(observer => {
+      observer.vertexValueChanged?.(key, targetVertex.value);
+    });
   });
 
   protected readonly vertices$: Record<string, GV> = {};
@@ -262,7 +268,7 @@ export default abstract class Graph<
     this.invalidateDataCache();
   }
 
-  addObserver(observer: GraphObserver): void {
+  addObserver(observer: GraphObserver<V, E>): void {
     this.observers.add(observer);
     // Notify about last changes
     if (this.lastGraphChangeSettings) {
@@ -407,7 +413,7 @@ export default abstract class Graph<
     if (notifyChange) this.notifyGraphChange(animationsSettings);
   }
 
-  removeObserver(observer: GraphObserver): void {
+  removeObserver(observer: GraphObserver<V, E>): void {
     this.observers.delete(observer);
   }
   abstract get connections(): GraphConnections;
