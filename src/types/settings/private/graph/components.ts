@@ -7,7 +7,7 @@ import {
   VertexLabelPosition,
   VertexSettings
 } from '@/types/settings/public';
-import { DeepRequired, DeepSharedify, Sharedifyable } from '@/types/utils';
+import { Animatable, DeepRequired, DeepSharedify } from '@/types/utils';
 
 /*
  * DEFAULT SETTINGS
@@ -15,8 +15,8 @@ import { DeepRequired, DeepSharedify, Sharedifyable } from '@/types/utils';
 export type AllVertexSettings = DeepRequired<VertexSettings>;
 
 export type AllVertexLabelSettings = {
-  offset: Sharedifyable<number>;
-  position: Sharedifyable<VertexLabelPosition>;
+  offset: Animatable<number>;
+  position: Animatable<VertexLabelPosition>;
 };
 
 export type AllEdgeSettings = DeepRequired<EdgeSettings>;

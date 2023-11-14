@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { SharedValue } from 'react-native-reanimated';
 
 import { AnimatedPath, AnimatedVector } from '@/types/layout';

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SharedValue, withTiming } from 'react-native-reanimated';
 
