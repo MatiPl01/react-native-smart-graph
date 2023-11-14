@@ -1,8 +1,8 @@
-import { Sharedifyable } from '@/types/utils';
+import { Animatable } from '@/types/utils';
 
 type SortablePlacementSettings = {
   sortComparator?: (key1: string, key2: string) => number;
-  sortVertices?: Sharedifyable<boolean>;
+  sortVertices?: Animatable<boolean>;
 };
 
 /*
@@ -11,16 +11,16 @@ type SortablePlacementSettings = {
 export type RandomMeshType = 'grid' | 'random' | 'triangular';
 
 export type BoundRandomPlacementSettings = {
-  containerHeight?: Sharedifyable<number>;
-  containerWidth?: Sharedifyable<number>;
+  containerHeight?: Animatable<number>;
+  containerWidth?: Animatable<number>;
   mesh: 'random';
   strategy: 'random';
 };
 
 export type UnboundRandomPlacementSettings = {
-  density?: Sharedifyable<number>;
+  density?: Animatable<number>;
   mesh?: Exclude<RandomMeshType, 'random'>;
-  minVertexDistance?: Sharedifyable<number>;
+  minVertexDistance?: Animatable<number>;
   strategy: 'random';
 };
 
@@ -32,7 +32,7 @@ export type RandomPlacementSettings =
  * CIRCULAR PLACEMENT (circle, circles)
  */
 type SharedCircularPlacementSettings = SortablePlacementSettings & {
-  minVertexDistance?: Sharedifyable<number>;
+  minVertexDistance?: Animatable<number>;
 };
 
 // Circle
@@ -50,9 +50,9 @@ export type CirclesPlacementSettings = SharedCircularPlacementSettings & {
  */
 // Trees
 export type TreesPlacementSettings = {
-  minColumnDistance?: Sharedifyable<number>;
-  minRowDistance?: Sharedifyable<number>;
-  roots?: Sharedifyable<Array<string>>;
+  minColumnDistance?: Animatable<number>;
+  minRowDistance?: Animatable<number>;
+  roots?: Animatable<Array<string>>;
   strategy: 'trees';
 };
 
@@ -72,20 +72,20 @@ export type OrbitsLayerSizing =
 
 type OrbitsCustomLayerSizingSettings = {
   getLayerRadius: LayerRadiusGetter;
-  layerSizing: Sharedifyable<'custom'>;
+  layerSizing: Animatable<'custom'>;
 };
 
 export type OrbitsPlacementSettings = (
   | {
-      layerSizing?: Sharedifyable<Exclude<OrbitsLayerSizing, 'custom'>>;
+      layerSizing?: Animatable<Exclude<OrbitsLayerSizing, 'custom'>>;
     }
   | OrbitsCustomLayerSizingSettings
 ) & {
-  maxSectorAngle?: Sharedifyable<number>;
-  minVertexDistance?: Sharedifyable<number>;
-  roots?: Sharedifyable<Array<string>>;
+  maxSectorAngle?: Animatable<number>;
+  minVertexDistance?: Animatable<number>;
+  roots?: Animatable<Array<string>>;
   strategy: 'orbits';
-  symmetrical?: Sharedifyable<boolean>;
+  symmetrical?: Animatable<boolean>;
 };
 
 /*

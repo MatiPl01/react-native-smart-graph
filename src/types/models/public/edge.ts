@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { GraphEdge } from '@/types/data';
 import {
   DirectedGraphVertex,

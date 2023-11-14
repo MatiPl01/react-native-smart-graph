@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import potpack from '@/lib/potpack';
 import {
   AnimatedDimensions,

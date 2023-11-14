@@ -27,7 +27,6 @@ export const updateFocusTransformation = (
   }
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export const getFocusedVertexTransformation = (
   alignment: Required<Alignment>,
   canvasDimensions: Dimensions,
