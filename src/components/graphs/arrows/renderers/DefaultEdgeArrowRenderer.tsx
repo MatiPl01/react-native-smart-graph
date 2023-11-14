@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import { Vertices } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 

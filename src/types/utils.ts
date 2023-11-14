@@ -58,7 +58,7 @@ export type Unsharedify<T> = T extends (...args: Array<any>) => any
   ? { [P in keyof T]: Unsharedify<T[P]> }
   : T;
 
-export type Sharedifyable<T> = SharedValue<T> | T;
+export type Animatable<T> = SharedValue<T> | T;
 
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
