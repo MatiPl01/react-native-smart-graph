@@ -31,6 +31,7 @@ export * from '@/hooks';
 export * from '@/utils/algorithms';
 
 // UTILS
+export { animateToValue } from '@/utils/animations';
 export * from '@/utils/math';
 export * from '@/utils/vectors';
 export {
