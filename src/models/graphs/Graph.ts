@@ -158,7 +158,7 @@ export default abstract class Graph<
     }
   );
 
-  updateEdgeValue = catchError((key: string, value: Partial<E>): void => {
+  updateEdgeValue = catchError((key: string, value: Partial<E>): E => {
     const targetEdge = this.edges$[key];
     if (!targetEdge) {
       throw new Error(`Edge with key ${key} does not exist.`);
@@ -173,9 +173,11 @@ export default abstract class Graph<
     this.observers.forEach(observer => {
       observer.edgeValueChanged?.(key, targetEdge.value);
     });
+
+    return targetEdge.value;
   });
 
-  updateVertexValue = catchError((key: string, value: Partial<V>): void => {
+  updateVertexValue = catchError((key: string, value: Partial<V>): V => {
     const targetVertex = this.vertices$[key];
     if (!targetVertex) {
       throw new Error(`Vertex with key ${key} does not exist.`);
@@ -186,6 +188,8 @@ export default abstract class Graph<
     this.observers.forEach(observer => {
       observer.vertexValueChanged?.(key, targetVertex.value);
     });
+
+    return targetVertex.value;
   });
 
   protected readonly vertices$: Record<string, GV> = {};
