@@ -1,4 +1,4 @@
-import { Sharedifyable } from '@/types/utils';
+import { Animatable } from '@/types/utils';
 
 /*
  * COMPONENTS SETTINGS
@@ -21,15 +21,15 @@ export enum VertexLabelPosition {
 
 export type VertexLabelSettings =
   | {
-      offset?: Sharedifyable<number>;
-      position?: Sharedifyable<Omit<VertexLabelPosition, 'center'>>;
+      offset?: Animatable<number>;
+      position?: Animatable<Omit<VertexLabelPosition, 'center'>>;
     }
   | {
-      position: Sharedifyable<VertexLabelPosition.CENTER>;
+      position: Animatable<VertexLabelPosition.CENTER>;
     };
 
 export type StraightEdgeSettings = {
-  maxOffsetFactor?: Sharedifyable<number>;
+  maxOffsetFactor?: Animatable<number>;
 };
 
 export type CurvedEdgeSettings = Record<string, never>; // No settings for now
@@ -37,11 +37,11 @@ export type CurvedEdgeSettings = Record<string, never>; // No settings for now
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
 export type EdgeLabelSettings = {
-  scale?: Sharedifyable<number>;
+  scale?: Animatable<number>;
 };
 
 export type EdgeArrowSettings = {
-  scale?: Sharedifyable<number>;
+  scale?: Animatable<number>;
 };
 
 export type EdgeType = 'curved' | 'straight';

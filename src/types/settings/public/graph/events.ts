@@ -1,5 +1,5 @@
 import { VertexData } from '@/types/data';
-import { Sharedifyable } from '@/types/utils';
+import { Animatable } from '@/types/utils';
 
 export type VertexPressEvent<V = unknown> = {
   vertex: VertexData<V>;
@@ -10,7 +10,7 @@ export type VertexPressHandler<V = unknown> = (
 ) => void;
 
 export type PressEventsSettings<V> = {
-  disableAnimation?: Sharedifyable<boolean>;
+  disableAnimation?: Animatable<boolean>;
   onVertexLongPress?: VertexPressHandler<V>;
   onVertexPress?: VertexPressHandler<V>;
 };

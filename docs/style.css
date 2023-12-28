@@ -101,7 +101,9 @@ div#app {
   position: fixed;
   right: 0;
   top: 0;
-  transition: width 0.2s, opacity 0.4s;
+  transition:
+    width 0.2s,
+    opacity 0.4s;
   width: 0;
   z-index: 999999;
 }
@@ -126,7 +128,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   color: var(--textColor);
-  font-family: var(--siteFont), Helvetica Neue, Arial, sans-serif;
+  font-family:
+    var(--siteFont),
+    Helvetica Neue,
+    Arial,
+    sans-serif;
   font-size: var(--bodyFontSize);
   letter-spacing: 0;
   margin: 0;
@@ -495,7 +501,12 @@ body.sticky .sidebar-toggle {
   border-radius: 100%;
   color: #fff;
   content: '!';
-  font-family: Dosis, Source Sans Pro, Helvetica Neue, Arial, sans-serif;
+  font-family:
+    Dosis,
+    Source Sans Pro,
+    Helvetica Neue,
+    Arial,
+    sans-serif;
   font-size: 14px;
   font-weight: 700;
   left: -12px;
@@ -938,7 +949,11 @@ section.content h1 {
   border-radius: 2px;
   color: var(--codeTextColor);
   display: block;
-  font-family: Roboto Mono, Monaco, courier, monospace;
+  font-family:
+    Roboto Mono,
+    Monaco,
+    courier,
+    monospace;
   font-size: 0.8rem;
   line-height: inherit;
   margin: 0 2px;

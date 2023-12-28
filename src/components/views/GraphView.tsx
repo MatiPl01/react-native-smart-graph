@@ -1,6 +1,5 @@
 import { Canvas } from '@shopify/react-native-skia';
-import { useContextBridge } from 'its-fine';
-import { memo, PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { wiseMemo } from 'react-wise-memo';
 
@@ -10,6 +9,7 @@ import {
   useGraphViewChildrenContext
 } from '@/contexts/children';
 import { OverlayOutlet, OverlayProvider } from '@/contexts/overlay';
+import { withContextBridge } from '@/lib/itsFine';
 import CanvasProvider, {
   useGesturesContext,
   useTransformContext
@@ -59,9 +59,9 @@ const validateProps = ({ initialScale, scales }: GraphViewProps) => {
   }
 };
 
-const GraphViewComposer = memo(function GraphViewComposer() {
-  const ContextBridge = useContextBridge();
-
+const GraphViewComposer = withContextBridge(function GraphViewComposer({
+  ContextBridge
+}) {
   // CONTEXTS
   // Canvas contexts
   const { canvas, overlay } = useGraphViewChildrenContext();

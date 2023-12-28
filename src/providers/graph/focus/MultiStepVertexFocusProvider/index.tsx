@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useMemo } from 'react';
+import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
 import {
   SharedValue,
   useAnimatedReaction,
@@ -16,7 +16,6 @@ import {
   UpdatedFocusPoint
 } from '@/types/settings';
 import { binarySearchLE } from '@/utils/algorithms';
-import { useNullableContext } from '@/utils/contexts';
 import { animatedCanvasDimensionsToDimensions } from '@/utils/placement';
 
 import { useStateMachine } from './StateMachine';
@@ -41,8 +40,7 @@ const MultiStepFocusContext = createContext<MultiStepFocusContextType | null>(
 );
 MultiStepFocusContext.displayName = 'MultiStepFocusContext';
 
-export const useMultiStepFocusContext = () =>
-  useNullableContext(MultiStepFocusContext);
+export const useMultiStepFocusContext = () => useContext(MultiStepFocusContext);
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;

@@ -4,7 +4,6 @@ export * from './edgeLabel';
 export * from './graph';
 export * from './mask';
 export * from './renderers';
-export * from './text';
 export * from './vertex';
 export * from './vertexLabel';
 export * from './view';

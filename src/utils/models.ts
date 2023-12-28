@@ -37,7 +37,7 @@ export const catchError =
     }
   };
 
-export const hasValue = <T extends object, V>(
+const hasValue = <T extends object, V>(
   obj: T | WithValue<V, T>
 ): obj is WithValue<V, T> => 'value' in obj;
 

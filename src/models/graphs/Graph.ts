@@ -38,7 +38,7 @@ export default abstract class Graph<
   private lastFocusChangeSettings: FocusSettings | null = null;
   private lastGraphChangeSettings: GraphModificationAnimationsSettings | null =
     null;
-  private readonly observers: Set<GraphObserver> = new Set();
+  private readonly observers = new Set<GraphObserver<V, E>>();
 
   protected cachedConnections: GraphConnections | null = null;
   protected cachedEdges: Array<GE> | null = null;
@@ -158,6 +158,40 @@ export default abstract class Graph<
     }
   );
 
+  updateEdgeValue = catchError((key: string, value: Partial<E>): E => {
+    const targetEdge = this.edges$[key];
+    if (!targetEdge) {
+      throw new Error(`Edge with key ${key} does not exist.`);
+    }
+    // There is no better way to implement this as exact types
+    // aren't available yet
+    // (https://github.com/Microsoft/TypeScript/issues/12936)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    targetEdge.value = { ...targetEdge.value, ...value } as any;
+    this.cachedEdgesData = null;
+    this.invalidateDataCache();
+    this.observers.forEach(observer => {
+      observer.edgeValueChanged?.(key, targetEdge.value);
+    });
+
+    return targetEdge.value;
+  });
+
+  updateVertexValue = catchError((key: string, value: Partial<V>): V => {
+    const targetVertex = this.vertices$[key];
+    if (!targetVertex) {
+      throw new Error(`Vertex with key ${key} does not exist.`);
+    }
+    targetVertex.value = { ...targetVertex.value, ...value };
+    this.cachedVerticesData = null;
+    this.invalidateDataCache();
+    this.observers.forEach(observer => {
+      observer.vertexValueChanged?.(key, targetVertex.value);
+    });
+
+    return targetVertex.value;
+  });
+
   protected readonly vertices$: Record<string, GV> = {};
 
   get edges(): Array<GE> {
@@ -238,7 +272,7 @@ export default abstract class Graph<
     this.invalidateDataCache();
   }
 
-  addObserver(observer: GraphObserver): void {
+  addObserver(observer: GraphObserver<V, E>): void {
     this.observers.add(observer);
     // Notify about last changes
     if (this.lastGraphChangeSettings) {
@@ -383,7 +417,7 @@ export default abstract class Graph<
     if (notifyChange) this.notifyGraphChange(animationsSettings);
   }
 
-  removeObserver(observer: GraphObserver): void {
+  removeObserver(observer: GraphObserver<V, E>): void {
     this.observers.delete(observer);
   }
   abstract get connections(): GraphConnections;

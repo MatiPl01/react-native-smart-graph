@@ -4,11 +4,11 @@ import { useSharedValue } from 'react-native-reanimated';
 
 import { EdgeArrowComponent } from '@/components/graphs/arrows';
 import { calcEdgeArrowTransform } from '@/components/graphs/arrows/utils';
+import RenderedEdgeComponent from '@/components/graphs/edges/RenderedEdgeComponent';
 import { DirectedCurvedEdgeComponentProps } from '@/types/components';
 import { calcApproxPointOnParabola } from '@/utils/math';
 import { calcUnitVector } from '@/utils/vectors';
 
-import CurvedEdgeComponent from './CurvedEdgeComponent';
 import { EdgePointsOrderGetter, useCurvedEdge } from './utils';
 
 const getEdgePointsOrder: EdgePointsOrderGetter = () => {
@@ -20,7 +20,7 @@ function DirectedCurvedEdgeComponent<V, E>(
   props: DirectedCurvedEdgeComponentProps<V, E>
 ) {
   const {
-    data: { animationProgress, key, value },
+    data: { addObserver, animationProgress, key, removeObserver, value },
     focusProgress,
     renderers: { arrow: edgeArrowRenderer, edge: edgeRenderer },
     settings: {
@@ -109,12 +109,14 @@ function DirectedCurvedEdgeComponent<V, E>(
 
   return (
     <>
-      <CurvedEdgeComponent<E>
+      <RenderedEdgeComponent<E>
+        addObserver={addObserver}
         animationProgress={animationProgress}
         customProps={edgeRenderer.props}
         edgeKey={key}
         focusProgress={focusProgress}
         path={path}
+        removeObserver={removeObserver}
         renderer={edgeRenderer.renderer}
         value={value as E}
       />
