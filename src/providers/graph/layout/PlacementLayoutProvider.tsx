@@ -1,96 +1,100 @@
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren } from 'react';
 import {
-  runOnJS,
+  SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useTransformContext, useViewDataContext } from '@/providers/view';
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
+import { GraphConnections } from '@/types/models';
 import {
-  EdgeComponentRenderData,
-  VertexComponentRenderData
-} from '@/types/components';
-import { Graph } from '@/types/graphs';
-import { BoundingRect } from '@/types/layout';
-import {
-  AnimationSettingsWithDefaults,
-  GraphSettingsWithDefaults
+  AllAnimationSettings,
+  InternalGraphPlacementSettings
 } from '@/types/settings';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
+import { unsharedify } from '@/utils/objects';
 import { placeVertices } from '@/utils/placement';
+import { updateComponentsTransform } from '@/utils/transform';
 
-export type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
-  graph: Graph<V, E>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  onRender: (boundingRect: BoundingRect) => void;
-  renderedEdgesData: Record<string, EdgeComponentRenderData>;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphSettingsWithDefaults<V, E>;
+type GraphPlacementLayoutProviderProps<V, E> = PropsWithChildren<{
+  connections: GraphConnections;
+  edgesData: Record<string, EdgeComponentData<E>>;
+  isGraphDirected: SharedValue<boolean>;
+  layoutAnimationSettings: AllAnimationSettings;
+  placementSettings: InternalGraphPlacementSettings;
+  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
 function GraphPlacementLayoutProvider<V, E>({
   children,
-  graph,
+  connections,
+  edgesData,
+  isGraphDirected,
   layoutAnimationSettings,
-  onRender,
-  renderedEdgesData,
-  renderedVerticesData,
-  settings
+  placementSettings,
+  verticesData
 }: GraphPlacementLayoutProviderProps<V, E>) {
+  // CONTEXTS
+  // Canvas contexts
+  const { canvasDimensions, targetBoundingRect } = useViewDataContext();
+  const { handleGraphRender: onRender } = useTransformContext();
+
   const isFirstRender = useSharedValue(true);
 
-  const layoutAnimationData = useMemo(
-    () => ({
-      connections: graph.connections,
-      isGraphDirected: graph.isDirected(),
-      settings: settings.placement,
-      vertexRadius: settings.components.vertex.radius
-    }),
-    [
-      renderedVerticesData,
-      renderedEdgesData,
-      settings.components.vertex.radius,
-      settings.placement
-    ]
-  );
-
   useAnimatedReaction(
-    () => null,
-    () => {
+    () => ({
+      canvasDims: {
+        height: canvasDimensions.height.value,
+        width: canvasDimensions.width.value
+      },
+      isDirected: isGraphDirected.value,
+      settings: unsharedify(placementSettings)
+    }),
+    ({ canvasDims, isDirected, settings }) => {
       const { boundingRect, verticesPositions } = placeVertices(
-        layoutAnimationData.connections,
-        layoutAnimationData.vertexRadius,
-        layoutAnimationData.settings,
-        layoutAnimationData.isGraphDirected
+        connections,
+        canvasDims,
+        settings,
+        isDirected
       );
 
       if (isFirstRender.value) {
         isFirstRender.value = false;
-        runOnJS(onRender)(boundingRect);
+        onRender(boundingRect);
+        return;
       }
 
-      animateVerticesToFinalPositions(
-        Object.fromEntries(
-          Object.entries(renderedVerticesData).map(([key, { position }]) => [
-            key,
-            position
-          ])
-        ),
+      targetBoundingRect.value = boundingRect;
+      updateComponentsTransform(
+        verticesData,
+        edgesData,
         verticesPositions,
         layoutAnimationSettings
       );
     },
-    [layoutAnimationData]
+    [verticesData, placementSettings, edgesData]
   );
 
   return <>{children}</>;
 }
 
-export default withGraphData(
-  GraphPlacementLayoutProvider,
-  ({ layoutAnimationSettings, renderedEdgesData, renderedVerticesData }) => ({
-    layoutAnimationSettings,
-    renderedEdgesData,
-    renderedVerticesData
-  })
+export default withGraphSettings(
+  withComponentsData(
+    GraphPlacementLayoutProvider,
+    ({
+      connections,
+      edgesData,
+      isGraphDirected,
+      layoutAnimationSettings,
+      verticesData
+    }) => ({
+      connections,
+      edgesData,
+      isGraphDirected,
+      layoutAnimationSettings,
+      verticesData
+    })
+  ),
+  ({ placementSettings }) => ({ placementSettings })
 );

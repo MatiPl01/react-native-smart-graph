@@ -1,29 +1,28 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/**
+ * This code was taken from the potpack library and modified to work with
+ * react-native-reanimated.
+ *
+ * Reference:
+ * https://github.com/mapbox/potpack
+ */
+
 interface PotpackBox {
-  w: number;
   h: number;
-  /**
-   * X coordinate in the resulting container.
-   */
+  w: number;
+  // X coordinate in the resulting container.
   x?: number;
-  /**
-   * Y coordinate in the resulting container.
-   */
+  // Y coordinate in the resulting container.
   y?: number;
 }
 
 interface PotpackStats {
-  /**
-   * Width of the resulting container.
-   */
-  w: number;
-  /**
-   * Height of the resulting container.
-   */
-  h: number;
-  /**
-   * The space utilization value (0 to 1). Higher is better.
-   */
+  // The space utilization value (0 to 1). Higher is better.
   fill: number;
+  // Height of the resulting container.
+  h: number;
+  // Width of the resulting container.
+  w: number;
 }
 
 export default function potpack(boxes: Array<PotpackBox>): PotpackStats {
@@ -45,7 +44,7 @@ export default function potpack(boxes: Array<PotpackBox>): PotpackStats {
   const startWidth = Math.max(Math.ceil(Math.sqrt(area / 0.95)), maxWidth);
 
   // start with a single empty space, unbounded at the bottom
-  const spaces = [{ x: 0, y: 0, w: startWidth, h: Infinity }];
+  const spaces = [{ h: Infinity, w: startWidth, x: 0, y: 0 }];
 
   let width = 0;
   let height = 0;
@@ -98,10 +97,10 @@ export default function potpack(boxes: Array<PotpackBox>): PotpackStats {
         // | updated space     |
         // |___________________|
         spaces.push({
-          x: space.x + box.w,
-          y: space.y,
+          h: box.h,
           w: space.w - box.w,
-          h: box.h
+          x: space.x + box.w,
+          y: space.y
         });
         space.y += box.h;
         space.h -= box.h;
@@ -111,8 +110,8 @@ export default function potpack(boxes: Array<PotpackBox>): PotpackStats {
   }
 
   return {
-    w: width, // container width
+    fill: area / (width * height) || 0, // space utilization
     h: height, // container height
-    fill: area / (width * height) || 0 // space utilization
+    w: width // container width
   };
 }

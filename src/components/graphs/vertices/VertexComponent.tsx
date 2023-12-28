@@ -1,101 +1,133 @@
-import { memo, useEffect } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { Group } from '@shopify/react-native-skia';
+import { memo, useEffect, useMemo } from 'react';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { useComponentFocus } from '@/hooks/focus';
-import { VertexFocusContextType } from '@/providers/graph';
-import { VertexRemoveHandler, VertexRenderHandler } from '@/types/components';
-import { Vertex } from '@/types/graphs';
-import { VertexRenderFunction } from '@/types/renderer';
 import {
-  AnimationSettingsWithDefaults,
-  VertexSettings
-} from '@/types/settings';
-import { DeepRequiredAll } from '@/types/utils';
+  useComponentFocus,
+  useVertexTransform,
+  useVertexValueObserver
+} from '@/hooks';
+import {
+  VertexComponentProps,
+  VertexRenderer,
+  VertexRendererProps
+} from '@/types/components';
+import { VertexObserver } from '@/types/models';
 import { updateComponentAnimationState } from '@/utils/components';
+import { getVertexLabelComponentTransformation } from '@/utils/transform';
 
-type VertexComponentProps<V, E> = VertexFocusContextType & {
-  animationSettings: AnimationSettingsWithDefaults;
-  componentSettings: DeepRequiredAll<VertexSettings>;
-  onRemove: VertexRemoveHandler;
-  onRender: VertexRenderHandler;
-  removed: boolean;
-  renderer: VertexRenderFunction<V>;
-  vertex: Vertex<V, E>;
-};
-
-function VertexComponent<V, E>({
-  animationSettings,
-  componentSettings,
-  focusKey,
-  focusTransitionProgress,
+function VertexComponent<V>({
+  data,
+  focusContext,
+  labelsRendered,
+  multiStepFocusContext,
   onRemove,
-  onRender,
-  removed,
   renderer,
-  vertex
-}: VertexComponentProps<V, E>) {
-  const key = vertex.key;
+  settings: {
+    label: labelSettings,
+    vertex: { radius: r }
+  }
+}: VertexComponentProps<V>) {
+  const { animationSettings, removed, value, ...restData } = data;
+  const { key } = restData;
 
   // ANIMATION
   // Vertex render animation progress
-  // Use a helper value to ensure that the animation progress is never negative
+  // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
   const animationProgressHelper = useSharedValue(0);
-  const animationProgress = useDerivedValue(() =>
-    Math.max(0, animationProgressHelper.value)
+
+  // TRANSFORM
+  // Vertex transform
+  const transform = useVertexTransform(data, [
+    () => ({ ...labelSettings, labelsRendered }),
+    ({
+      customProps: { labelsRendered: renderLabels, ...rest },
+      transform: { scale: vertexScale, x, y }
+    }) => {
+      'worklet';
+      if (!renderLabels) return;
+      data.label.transform.value = getVertexLabelComponentTransformation(
+        { x, y },
+        r,
+        vertexScale,
+        rest
+      );
+    }
+  ]);
+
+  // VERTEX PROPS
+  const focusProp = useMemo(
+    () => ({
+      key: focusContext.focus.key,
+      progress: data.focusProgress
+    }),
+    []
   );
-
-  // POSITION
-  // Current vertex position
-  const positionX = useSharedValue(0);
-  const positionY = useSharedValue(0);
-
-  // SCALE AND RADIUS
-  // Current vertex scale
-  const scale = useSharedValue(1);
-  // Current vertex radius
-  const currentRadius = useSharedValue(0);
-
-  // FOCUS
-  // Vertex focus progress
-  const focusProgress = useSharedValue(0);
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
-  useComponentFocus(focusProgress, focusTransitionProgress, focusKey, key);
+  useComponentFocus(data.focusProgress, focusContext, key);
 
-  useEffect(() => {
-    // Call onRender callback on mount
-    onRender(key, {
-      currentRadius,
-      position: { x: positionX, y: positionY },
-      scale
-    });
-  }, [key]);
-
+  // Vertex animation handler
   useEffect(() => {
     updateComponentAnimationState(
       key,
       animationProgressHelper,
       animationSettings,
       removed,
-      onRemove
+      () => {
+        onRemove(key);
+      }
     );
-  }, [removed, animationSettings]);
+  }, [removed]);
 
-  // Render the vertex component
-  return renderer({
-    animationProgress,
-    currentRadius,
-    focusKey,
-    focusTransitionProgress: focusProgress,
-    key,
-    position: { x: positionX, y: positionY },
-    radius: componentSettings.radius,
-    scale,
-    value: vertex.value
-  });
+  useAnimatedReaction(
+    () => animationProgressHelper.value,
+    progress => {
+      data.animationProgress.value = progress;
+    }
+  );
+
+  return (
+    <Group transform={transform}>
+      <RenderedVertexComponent
+        {...restData}
+        customProps={renderer.props}
+        focus={focusProp}
+        multiStepFocus={multiStepFocusContext}
+        r={r}
+        renderer={renderer.renderer}
+        value={value as V}
+        vertexKey={key}
+      />
+    </Group>
+  );
 }
 
-export default memo(VertexComponent) as <V, E>(
-  props: VertexComponentProps<V, E>
+type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
+  addObserver: (observer: VertexObserver<V>) => void;
+  removeObserver: (observer: VertexObserver<V>) => void;
+  renderer: VertexRenderer<V>;
+  vertexKey: string;
+};
+
+const RenderedVertexComponent = memo(function RenderedVertexComponent<V>({
+  addObserver,
+  removeObserver,
+  renderer,
+  value: initialValue,
+  vertexKey: key,
+  ...restProps
+}: RenderedVertexComponentProps<V>) {
+  const value = useVertexValueObserver(
+    addObserver,
+    removeObserver,
+    initialValue
+  );
+
+  return renderer({ key, ...restProps, value });
+}) as <V>(props: RenderedVertexComponentProps<V>) => JSX.Element;
+
+export default memo(VertexComponent) as <V>(
+  props: VertexComponentProps<V>
 ) => JSX.Element;

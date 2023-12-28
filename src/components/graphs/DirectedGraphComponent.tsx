@@ -1,30 +1,33 @@
-import { memo } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { wiseMemo } from 'react-wise-memo';
 
-import GraphComponentComposer from '@/components/views/GraphComponentComposer';
-import { DirectedGraph } from '@/models/graphs';
-import { DirectedGraphRenderers } from '@/types/renderer';
-import { DirectedGraphSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/equality';
+import { GraphComponentComposer } from '@/components/views';
+import {
+  CurvedEdgeRenderer,
+  DirectedGraphComponentProps,
+  EdgeArrowRenderer,
+  EdgeLabelRenderer,
+  StraightEdgeRenderer,
+  VertexLabelRenderer,
+  VertexMaskRenderer,
+  VertexRenderer
+} from '@/types/components';
+import { EdgeType } from '@/types/settings';
 
-export type DirectedGraphComponentProps<V, E> = {
-  graph: DirectedGraph<V, E>;
-  renderers?: DirectedGraphRenderers<V, E>;
-  settings?: DirectedGraphSettings<V, E>;
-};
-
-function DirectedGraphComponent<V, E>(
-  props: DirectedGraphComponentProps<V, E>
-) {
-  return (
-    <GraphComponentComposer<V, E, DirectedGraphComponentProps<V, E>>
-      {...props}
-    />
-  );
+function DirectedGraphComponent<
+  V,
+  E,
+  VR extends VertexRenderer<V, any>,
+  VLR extends VertexLabelRenderer<V, any>,
+  VMR extends VertexMaskRenderer<any>,
+  ER extends CurvedEdgeRenderer<E, any> | StraightEdgeRenderer<E, any>,
+  ELR extends EdgeLabelRenderer<E, any>,
+  EAR extends EdgeArrowRenderer<any>,
+  ET extends EdgeType = 'straight'
+>(props: DirectedGraphComponentProps<V, E, VR, VLR, VMR, ER, ELR, EAR, ET>) {
+  return <GraphComponentComposer {...props} />;
 }
 
-export default memo(
-  DirectedGraphComponent,
-  deepMemoComparator({
-    shallow: ['graph']
-  })
-) as typeof DirectedGraphComponent;
+export default wiseMemo(DirectedGraphComponent, {
+  shallow: ['graph', 'renderers.*.props']
+});

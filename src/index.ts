@@ -19,8 +19,7 @@ export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/
 export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
 
 // MODELS
-export { default as DirectedGraph } from '@/models/graphs/DirectedGraph';
-export { default as UndirectedGraph } from '@/models/graphs/UndirectedGraph';
+export * from '@/models';
 
 // VIEWS
 export { default as GraphView } from '@/components/views/GraphView';
@@ -31,78 +30,29 @@ export * from '@/hooks';
 // ALGORITHMS
 export * from '@/utils/algorithms';
 
-// EXAMPLES
-export * from '@/examples';
+// UTILS
+export { animateToValue } from '@/utils/animations';
+export * from '@/utils/math';
+export * from '@/utils/vectors';
+export {
+  calcTransformationOnProgress,
+  calcTranslationOnProgress,
+  calcValueOnProgress
+} from '@/utils/views';
 
 // TYPES
-export {
-  type DirectedEdgeData,
-  type GraphData,
-  type UndirectedEdgeData,
-  type VertexData
-} from '@/types/data';
-export {
-  type DirectedEdge,
-  type DirectedGraphVertex,
-  type Edge,
-  type Graph,
-  type GraphConnections,
-  type GraphObserver,
-  type UndirectedEdge,
-  type Vertex
-} from '@/types/graphs';
-export {
-  type Alignment,
-  type HorizontalAlignment,
-  type Spacing,
-  type VerticalAlignment
-} from '@/types/layout';
-export {
-  type CurvedEdgeRendererProps,
-  type DirectedGraphRenderers,
-  type EdgeArrowRendererProps,
-  type EdgeLabelRendererProps,
-  type StraightEdgeRendererProps,
-  type UndirectedGraphRenderers,
-  type VertexRendererProps
-} from '@/types/renderer';
-export {
-  type AnimationSettings,
-  type AnimationsSettings,
-  type AutoLayoutSettings,
-  type BatchModificationAnimationSettings,
-  type BoundRandomPlacementSettings,
-  type CircularPlacementSettings,
-  type DefaultForcesStrategySettings,
-  type DirectedEdgeSettings,
-  type DirectedGraphComponentsSettings,
-  type DirectedGraphSettings,
-  type EdgeLabelSettings,
-  type EdgePressEvent,
-  type EdgePressHandler,
-  type FocusSettings,
-  type ForcesLayoutSettings,
-  type ForcesSettings,
-  type ForcesStrategy,
-  type GraphAnimationsSettings,
-  type GraphEventsSettings,
-  type GraphLayoutSettings,
-  type GraphLayoutType,
-  type GraphPlacementSettings,
-  type OrbitsLayerSizing,
-  type OrbitsLayerSizingSettings,
-  type OrbitsPlacementSettings,
-  type PlacementStrategy,
-  type RandomLayoutType,
-  type RandomPlacementSettings,
-  type SingleModificationAnimationSettings,
-  type TreesPlacementSettings,
-  type UnboundRandomPlacementSettings,
-  type UndirectedEdgeSettings,
-  type UndirectedGraphComponentsSettings,
-  type UndirectedGraphSettings,
-  type VertexPressEvent,
-  type VertexPressHandler,
-  type VertexSettings
-} from '@/types/settings';
-export { type ObjectFit } from '@/types/views';
+export * from '@/types/components/public';
+export * from '@/types/data/public';
+export * from '@/types/layout/public';
+export * from '@/types/models/public';
+export * from '@/types/settings/public';
+
+// EXTERNAL LIBRARIES
+export { FiberProvider } from 'its-fine';
+export type {
+  EllipsizeMode,
+  HorizontalAlignment as TextHorizontalAlignment,
+  TextOverflow,
+  VerticalAlignment as TextVerticalAlignment
+} from 'react-native-skia-responsive-text';
+export { default as ResponsiveText } from 'react-native-skia-responsive-text';

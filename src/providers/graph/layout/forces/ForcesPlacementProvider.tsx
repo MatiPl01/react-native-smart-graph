@@ -1,69 +1,71 @@
 import {
   createContext,
   PropsWithChildren,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState
 } from 'react';
-import { runOnUI } from 'react-native-reanimated';
+import { runOnUI, SharedValue, useSharedValue } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
-import { VertexComponentRenderData } from '@/types/components';
-import { Graph } from '@/types/graphs';
-import { AnimatedVectorCoordinates, BoundingRect } from '@/types/layout';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useTransformContext, useViewDataContext } from '@/providers/view';
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
+import { GraphConnections } from '@/types/models';
 import {
-  AnimationSettingsWithDefaults,
-  GraphSettingsWithDefaults
+  AllAnimationSettings,
+  InternalGraphPlacementSettings
 } from '@/types/settings';
-import { animateVerticesToFinalPositions } from '@/utils/animations';
-import { updateNewVerticesPositions } from '@/utils/forces';
-import { placeVertices } from '@/utils/placement';
+import { useNullableContext } from '@/utils/contexts';
+import { updateInitialPlacement, updateNextPlacement } from '@/utils/forces';
+import { unsharedify } from '@/utils/objects';
+import { udateEdgesOrdering } from '@/utils/transform';
 
-type ForcesPlacementContextType = {
+type ForcesPlacementContextType<V> = {
+  initialPlacementCompleted: SharedValue<boolean>;
   lockedVertices: Record<string, boolean>;
-  placedVerticesPositions: Record<string, AnimatedVectorCoordinates>;
+  placedVerticesData: Record<string, VertexComponentData<V>>;
 };
 
-const ForcesPlacementContext = createContext(null);
+const ForcesPlacementContext =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createContext<ForcesPlacementContextType<any> | null>(null);
+ForcesPlacementContext.displayName = 'ForcesPlacementContext';
 
-export const useForcesPlacementContext = () => {
-  const contextValue = useContext(ForcesPlacementContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useForcesPlacementContext must be used within a ForcesPlacementProvider'
-    );
-  }
-
-  return contextValue as ForcesPlacementContextType;
-};
+export const useForcesPlacementContext = () =>
+  useNullableContext(ForcesPlacementContext);
 
 export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
-  graph: Graph<V, E>;
-  layoutAnimationSettings: AnimationSettingsWithDefaults;
-  onRender: (boundingRect: BoundingRect) => void;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
-  settings: GraphSettingsWithDefaults<V, E>;
+  connections: GraphConnections;
+  edgesData: Record<string, EdgeComponentData<E>>;
+  layoutAnimationSettings: AllAnimationSettings;
+  placementSettings: InternalGraphPlacementSettings;
+  vertexRadius: number;
+  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
 function ForcesPlacementProvider<V, E>({
   children,
-  graph,
+  connections,
+  edgesData,
   layoutAnimationSettings,
-  onRender,
-  renderedVerticesData,
-  settings
+  placementSettings,
+  vertexRadius,
+  verticesData
 }: ForcesPlacementProviderProps<V, E>) {
+  // CONTEXTS
+  // Canvas contexts
+  const { canvasDimensions } = useViewDataContext();
+  const { handleGraphRender: onRender } = useTransformContext();
+
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't
   // correctly positioned yet (By default vertices are positioned at
   // the center of the graph container resulting in rendering them one
   // on top of another. The resulting forces are then too big and
   // vertices are moved too far away from each other)
-  const [placedVerticesPositions, setPlacedVerticesPositions] = useState<
-    Record<string, AnimatedVectorCoordinates>
+  const [placedVerticesData, setPlacedVerticesData] = useState<
+    Record<string, VertexComponentData<V>>
   >({});
   // Set of vertices that should not be moved by the forces
   // (Use record instead of set because set cannot be used with reanimated)
@@ -72,26 +74,15 @@ function ForcesPlacementProvider<V, E>({
   );
   // Ref to track if the component is rendered for the first time
   const isFirstRenderRef = useRef(true);
-  // Ref to track if the component is rendered for the second time
-  const isSecondRenderRef = useRef(false);
+  // Used to indicate if the initial placement animation was completed
+  const initialPlacementCompleted = useSharedValue(false);
 
   useEffect(() => {
-    // Skip the first render (when renderedVerticesData is empty)
+    // If it's the first render, place vertices in the same way
+    // as in the placement strategy
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
-      isSecondRenderRef.current = true;
-      return;
-    }
-    // Get animated vertices positions
-    const animatedVerticesPositions = Object.fromEntries(
-      Object.entries(renderedVerticesData).map(([key, { position }]) => [
-        key,
-        position
-      ])
-    );
-    // Animate vertices to their final positions on the second render
-    if (isSecondRenderRef.current) {
-      handleFirstGraphRender(animatedVerticesPositions);
+      handleFirstGraphRender();
     }
     // Otherwise, calculate the optimal render positions for the vertices
     // and add them to the state
@@ -99,46 +90,45 @@ function ForcesPlacementProvider<V, E>({
       handleNextGraphRender();
     }
     // Update the state
-    setPlacedVerticesPositions(animatedVerticesPositions);
-  }, [renderedVerticesData]);
+    setPlacedVerticesData(verticesData);
+  }, [verticesData]);
 
-  const handleFirstGraphRender = (
-    animatedVerticesPositions: Record<string, AnimatedVectorCoordinates>
-  ) => {
-    isSecondRenderRef.current = false;
+  useEffect(() => {
+    udateEdgesOrdering(edgesData, layoutAnimationSettings);
+  }, [edgesData]);
 
-    const { boundingRect, verticesPositions } = placeVertices(
-      graph.connections,
-      settings.components.vertex.radius,
-      settings.placement
-    );
-    onRender(boundingRect);
-
-    animateVerticesToFinalPositions(
-      animatedVerticesPositions,
-      verticesPositions,
+  const handleFirstGraphRender = () => {
+    runOnUI(updateInitialPlacement)(
+      verticesData,
+      edgesData,
+      connections,
+      {
+        height: canvasDimensions.height.value,
+        width: canvasDimensions.width.value
+      },
+      unsharedify(placementSettings),
       {
         ...layoutAnimationSettings,
         onComplete: createFirstAnimationCompleteHandler(
           layoutAnimationSettings.onComplete
         )
-      }
+      },
+      onRender
     );
 
     // Mark vertices as locked until the animation is complete
     setLockedVertices(
-      Object.fromEntries(
-        Object.keys(animatedVerticesPositions).map(key => [key, true])
-      )
+      Object.fromEntries(Object.keys(verticesData).map(key => [key, true]))
     );
   };
 
   const handleNextGraphRender = () => {
-    runOnUI(updateNewVerticesPositions)(
-      placedVerticesPositions,
-      renderedVerticesData,
-      graph.connections,
-      settings.components.vertex.radius
+    runOnUI(updateNextPlacement)(
+      placedVerticesData,
+      verticesData,
+      edgesData,
+      connections,
+      vertexRadius
     );
   };
 
@@ -146,30 +136,40 @@ function ForcesPlacementProvider<V, E>({
     (onComplete?: () => void) => () => {
       // Unlock vertices
       setLockedVertices({});
+      // Mark the initial placement as completed
+      initialPlacementCompleted.value = true;
       // Call the original onComplete handler
       onComplete?.();
     };
 
-  const contextValue = useMemo<ForcesPlacementContextType>(
+  const contextValue = useMemo<ForcesPlacementContextType<V>>(
     () => ({
+      initialPlacementCompleted,
       lockedVertices,
-      placedVerticesPositions
+      placedVerticesData
     }),
-    [placedVerticesPositions, lockedVertices]
+    [placedVerticesData, lockedVertices]
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    <ForcesPlacementContext.Provider value={contextValue as any}>
+    <ForcesPlacementContext.Provider value={contextValue}>
       {children}
     </ForcesPlacementContext.Provider>
   );
 }
 
-export default withGraphData(
-  ForcesPlacementProvider,
-  ({ layoutAnimationSettings, renderedVerticesData }) => ({
-    layoutAnimationSettings,
-    renderedVerticesData
+export default withGraphSettings(
+  withComponentsData(
+    ForcesPlacementProvider,
+    ({ connections, edgesData, layoutAnimationSettings, verticesData }) => ({
+      connections,
+      edgesData,
+      layoutAnimationSettings,
+      verticesData
+    })
+  ),
+  ({ componentsSettings, placementSettings }) => ({
+    placementSettings,
+    vertexRadius: componentsSettings.vertex.radius
   })
 );

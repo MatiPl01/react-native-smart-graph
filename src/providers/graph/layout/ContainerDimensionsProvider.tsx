@@ -1,34 +1,48 @@
 import { PropsWithChildren } from 'react';
 import { useAnimatedReaction } from 'react-native-reanimated';
 
-import { withGraphData } from '@/providers/graph';
-import { VertexComponentRenderData } from '@/types/components';
-import { AnimatedBoundingRect } from '@/types/layout';
-import { calcAnimatedContainerBoundingRect } from '@/utils/placement';
+import { withGraphSettings } from '@/providers/graph/data';
+import { useViewDataContext } from '@/providers/view';
+import { animateToValue } from '@/utils/animations';
 
 type ContainerDimensionsProviderProps = PropsWithChildren<{
-  boundingRect: AnimatedBoundingRect;
-  renderedVerticesData: Record<string, VertexComponentRenderData>;
+  vertexRadius: number;
 }>;
 
 function ContainerDimensionsProvider({
-  boundingRect,
   children,
-  renderedVerticesData
+  vertexRadius
 }: ContainerDimensionsProviderProps) {
-  const renderedVerticesPositions = Object.fromEntries(
-    Object.entries(renderedVerticesData).map(([key, { position }]) => [
-      key,
-      position
-    ])
-  );
+  // CONTEXTS
+  // Canvas contexts
+  const { boundingRect, targetBoundingRect } = useViewDataContext();
 
   useAnimatedReaction(
-    () => ({ positions: renderedVerticesPositions }),
-    ({ positions }) => {
-      Object.entries(calcAnimatedContainerBoundingRect(positions)).forEach(
-        ([key, value]) =>
-          (boundingRect[key as keyof AnimatedBoundingRect].value = value)
+    () => ({
+      currentRect: {
+        bottom: boundingRect.bottom.value,
+        left: boundingRect.left.value,
+        right: boundingRect.right.value,
+        top: boundingRect.top.value
+      },
+      targetRect: targetBoundingRect.value
+    }),
+    ({ currentRect, targetRect }) => {
+      boundingRect.left.value = animateToValue(
+        currentRect.left,
+        targetRect.left - vertexRadius
+      );
+      boundingRect.top.value = animateToValue(
+        currentRect.top,
+        targetRect.top - vertexRadius
+      );
+      boundingRect.right.value = animateToValue(
+        currentRect.right,
+        targetRect.right + vertexRadius
+      );
+      boundingRect.bottom.value = animateToValue(
+        currentRect.bottom,
+        targetRect.bottom + vertexRadius
       );
     }
   );
@@ -36,9 +50,9 @@ function ContainerDimensionsProvider({
   return <>{children}</>;
 }
 
-export default withGraphData(
+export default withGraphSettings(
   ContainerDimensionsProvider,
-  ({ renderedVerticesData }) => ({
-    renderedVerticesData
+  ({ componentsSettings }) => ({
+    vertexRadius: componentsSettings.vertex.radius
   })
 );

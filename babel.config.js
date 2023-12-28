@@ -9,7 +9,8 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.svg', '.json'],
         alias: {
           // This needs to be mirrored in tsconfig.json
-          '@': './src'
+          '@': './src',
+          'react-native-smart-graph': './src'
         }
       }
     ]

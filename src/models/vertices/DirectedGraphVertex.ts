@@ -1,7 +1,7 @@
 import {
   DirectedEdge,
   DirectedGraphVertex as IDirectedGraphVertex
-} from '@/types/graphs';
+} from '@/types/models';
 
 import Vertex from './Vertex';
 
@@ -9,28 +9,14 @@ export default class DirectedGraphVertex<V, E>
   extends Vertex<V, E>
   implements IDirectedGraphVertex<V, E>
 {
-  private readonly inEdges$: Record<string, DirectedEdge<E, V>> = {};
-  private readonly outEdges$: Record<string, DirectedEdge<E, V>> = {};
-
-  addInEdge(edge: DirectedEdge<E, V>): void {
-    if (edge.key in this.inEdges$) {
-      throw new Error(`Edge with key ${edge.key} already exists.`);
-    }
-    this.inEdges$[edge.key] = edge;
-  }
-
-  addOutEdge(edge: DirectedEdge<E, V>): void {
-    if (edge.key in this.outEdges$) {
-      throw new Error(`Edge with key ${edge.key} already exists.`);
-    }
-    this.outEdges$[edge.key] = edge;
-  }
+  private readonly inEdges$: Record<string, DirectedEdge<V, E>> = {};
+  private readonly outEdges$: Record<string, DirectedEdge<V, E>> = {};
 
   get degree(): number {
     return this.inDegree + this.outDegree;
   }
 
-  get edges(): Array<DirectedEdge<E, V>> {
+  get edges(): Array<DirectedEdge<V, E>> {
     const result = Object.values(this.inEdges$);
     for (const edge of Object.values(this.outEdges$)) {
       if (!(edge.key in this.inEdges$)) {
@@ -44,7 +30,7 @@ export default class DirectedGraphVertex<V, E>
     return this.inEdges.length;
   }
 
-  get inEdges(): Array<DirectedEdge<E, V>> {
+  get inEdges(): Array<DirectedEdge<V, E>> {
     return Object.values(this.inEdges$);
   }
 
@@ -56,8 +42,22 @@ export default class DirectedGraphVertex<V, E>
     return this.outEdges.length;
   }
 
-  get outEdges(): Array<DirectedEdge<E, V>> {
+  get outEdges(): Array<DirectedEdge<V, E>> {
     return Object.values(this.outEdges$);
+  }
+
+  addInEdge(edge: DirectedEdge<V, E>): void {
+    if (edge.key in this.inEdges$) {
+      throw new Error(`Edge with key ${edge.key} already exists.`);
+    }
+    this.inEdges$[edge.key] = edge;
+  }
+
+  addOutEdge(edge: DirectedEdge<V, E>): void {
+    if (edge.key in this.outEdges$) {
+      throw new Error(`Edge with key ${edge.key} already exists.`);
+    }
+    this.outEdges$[edge.key] = edge;
   }
 
   removeInEdge(key: string) {
@@ -66,7 +66,7 @@ export default class DirectedGraphVertex<V, E>
     }
     const edge = this.inEdges$[key];
     delete this.inEdges$[key];
-    return edge as DirectedEdge<E, V>;
+    return edge as DirectedEdge<V, E>;
   }
 
   removeOutEdge(key: string) {
@@ -75,6 +75,6 @@ export default class DirectedGraphVertex<V, E>
     }
     const edge = this.outEdges$[key];
     delete this.outEdges$[key];
-    return edge as DirectedEdge<E, V>;
+    return edge as DirectedEdge<V, E>;
   }
 }

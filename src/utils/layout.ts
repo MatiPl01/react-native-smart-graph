@@ -61,11 +61,18 @@ export const getAlignedVertexAbsolutePosition = (
   return { x, y };
 };
 
-const ALL_SPACING_KEYS = new Set(['bottom', 'left', 'right', 'top']);
+// Use object instead of set to support reanimated worklets
+const ALL_SPACING_KEYS = { bottom: true, left: true, right: true, top: true };
 
-const isAllSpacing = (spacing: Spacing): spacing is BoundingRect =>
-  typeof spacing === 'object' &&
-  Object.keys(spacing).every(value => ALL_SPACING_KEYS.has(value));
+const isAllSpacing = (spacing: Spacing): spacing is BoundingRect => {
+  'worklet';
+  return (
+    typeof spacing === 'object' &&
+    Object.keys(spacing).every(
+      value => ALL_SPACING_KEYS[value as keyof typeof ALL_SPACING_KEYS]
+    )
+  );
+};
 
 export const updateSpacing = (spacing?: Spacing): BoundingRect => {
   'worklet';
@@ -82,10 +89,9 @@ export const updateSpacing = (spacing?: Spacing): BoundingRect => {
   }
   if (isAllSpacing(spacing)) {
     return Object.fromEntries(
-      ([...ALL_SPACING_KEYS] as (keyof BoundingRect)[]).map(key => [
-        key,
-        spacing[key] ?? 0
-      ])
+      ([...Object.keys(ALL_SPACING_KEYS)] as Array<keyof BoundingRect>).map(
+        key => [key, spacing[key] ?? 0]
+      )
     ) as BoundingRect;
   }
   const { horizontal, vertical } = spacing as AxisSpacing;

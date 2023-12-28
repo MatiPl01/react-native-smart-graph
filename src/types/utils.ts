@@ -1,42 +1,110 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// https://stackoverflow.com/questions/57835286/deep-recursive-requiredt-on-specific-properties
-export type DeepRequired<T, P extends Array<string>> = T extends object
-  ? Omit<T, Extract<keyof T, P[0]>> &
-      Required<{
-        [K in Extract<keyof T, P[0]>]: NonNullable<
-          DeepRequired<T[K], ShiftUnion<K, P>>
-        >;
-      }>
+import { ComponentProps } from 'react';
+import { SharedValue } from 'react-native-reanimated';
+
+export type DeepRequired<T> = {
+  [K in keyof T]: DeepRequired<T[K]>;
+} & Required<T>;
+
+export type RequiredWithout<T, E extends keyof T> = Required<Omit<T, E>> &
+  Partial<Pick<T, E>>;
+
+export type Maybe<T> = T | null | undefined;
+
+export type MaybeObject<T> = Partial<{
+  [K in keyof T]: Maybe<T[K]>;
+}>;
+
+export type DeepPartial<T> = T extends object
+  ? { [P in keyof T]?: DeepPartial<T[P]> }
   : T;
 
-type Shift<T extends Array<any>> = ((...t: T) => any) extends (
-  first: any,
-  ...rest: infer Rest
-) => any
-  ? Rest
-  : never;
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-type ShiftUnion<
-  P extends PropertyKey,
-  T extends Array<any>
-> = T extends Array<any> ? (T[0] extends P ? Shift<T> : never) : never;
+export type PartialWithRequired<T, K extends keyof T> = Partial<T> &
+  Required<Pick<T, K>>;
+
+export type DeepSharedify<T> = {
+  [K in keyof T]: T[K] extends SharedValue<infer U> | infer U | undefined
+    ? SharedValue<U>
+    : T[K] extends object
+    ? DeepSharedify<T[K]>
+    : SharedValue<T[K]>;
+};
+
+export type SharedifyWithout<T, E extends keyof any = never> = {
+  [K in keyof T]: K extends E
+    ? T[K]
+    : T[K] extends SharedValue<infer U> | infer U | undefined
+    ? SharedValue<U>
+    : SharedValue<T[K]>;
+};
+
+export type Sharedify<T> = {
+  [K in keyof T]: T[K] extends SharedValue<any>
+    ? T[K]
+    : T[K] extends infer U | undefined
+    ? U extends undefined
+      ? SharedValue<U> | undefined
+      : SharedValue<U>
+    : never;
+};
+
+export type Unsharedify<T> = T extends (...args: Array<any>) => any
+  ? T // Leaves function type as is
+  : T extends SharedValue<infer U>
+  ? U
+  : T extends object
+  ? { [P in keyof T]: Unsharedify<T[P]> }
+  : T;
+
+export type Animatable<T> = SharedValue<T> | T;
 
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };
 
-export type DeepRequiredAll<T> = {
-  [K in keyof T]: DeepRequiredAll<T[K]>;
-} & Required<T>;
-
-type CommonKeys<A, B> = keyof A & keyof B;
-
-export type CommonTypes<A, B> = {
-  [K in CommonKeys<A, B>]: A[K] extends B[K]
-    ? B[K] extends A[K]
-      ? A[K]
-      : never
-    : never;
+export type DeepReplaceValue<T, V> = {
+  [P in keyof T]: T[P] extends object | undefined
+    ? DeepReplaceValue<NonNullable<T[P]>, V> | V | undefined
+    : V;
 };
 
-export type Maybe<T> = T | null | undefined;
+export type ReplaceWithSharedValues<T, R> = R extends Record<string, any>
+  ? {
+      [P in keyof T]: P extends keyof R
+        ? T[P] extends SharedValue<infer U>
+          ? SharedValue<U>
+          : R[P] extends 'shared'
+          ? SharedValue<T[P]>
+          : R[P] extends 'shallow'
+          ? T[P]
+          : R[P] extends Record<string, any>
+          ? ReplaceWithSharedValues<T[P], R[P]>
+          : T[P]
+        : T[P];
+    }
+  : T;
+
+type DeepMerge<U> = U extends object
+  ? { [K in keyof U]: U[K] extends object ? DeepMerge<U[K]> : U[K] }
+  : U;
+
+export type MergeAll<T> = T extends [infer Head, ...infer Tail]
+  ? Tail extends []
+    ? Head
+    : DeepMerge<Head & MergeAll<Tail>>
+  : unknown;
+
+export type WithValue<V, T> = T &
+  (V extends unknown ? { value?: V } : { value: V });
+
+export type RendererWithProps<R, P = unknown> = {
+  props: P;
+  renderer: R;
+};
+
+export type OptionalPropsRenderer<R extends React.ComponentType<any>> =
+  'customProps' extends keyof ComponentProps<R>
+    ? R | RendererWithProps<R, ComponentProps<R>['customProps']>
+    : R;

@@ -1,57 +1,70 @@
-import { Group } from '@shopify/react-native-skia';
-import {
-  interpolate,
-  SharedValue,
-  useDerivedValue
-} from 'react-native-reanimated';
+import { useMemo } from 'react';
 
-import EdgeComponent from '@/components/graphs/edges/EdgeComponent';
-import { withGraphData } from '@/providers/graph';
-import {
-  EdgeComponentData,
-  EdgeComponentProps,
-  EdgeRemoveHandler,
-  EdgeRenderHandler
-} from '@/types/components';
+import { EdgeComponent } from '@/components/graphs';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
+import { GraphEdgesProps } from '@/types/components';
 
-type GraphEdgesProps<E, V> = {
-  edgesData: Record<string, EdgeComponentData<E, V>>;
-  focusProgress: SharedValue<number>;
-  handleEdgeRemove: EdgeRemoveHandler;
-  handleEdgeRender: EdgeRenderHandler;
-};
-
-function GraphEdges<E, V>({
+function GraphEdges<V, E>({
+  arrowRenderer,
+  arrowSettings,
+  edgeRenderer,
+  edgeSettings,
+  edgeType,
   edgesData,
   focusProgress,
-  handleEdgeRemove,
-  handleEdgeRender
-}: GraphEdgesProps<E, V>) {
-  const opacity = useDerivedValue(() =>
-    interpolate(focusProgress.value, [0, 1], [0.5, 1])
+  labelSettings,
+  labelsRendered,
+  onRemove,
+  vertexSettings
+}: GraphEdgesProps<V, E>) {
+  const renderers = useMemo(
+    () => ({ arrow: arrowRenderer, edge: edgeRenderer }),
+    [arrowRenderer, edgeRenderer]
+  );
+
+  const settings = useMemo(
+    () => ({
+      arrow: arrowSettings,
+      edge: edgeSettings,
+      label: labelSettings,
+      vertex: vertexSettings
+    }),
+    [arrowSettings, edgeSettings, labelSettings, vertexSettings]
   );
 
   return (
-    <Group opacity={opacity}>
-      {Object.values(edgesData).map(data => (
-        <EdgeComponent
-          {...({
-            ...data,
-            key: data.edge.key,
-            onRemove: handleEdgeRemove,
-            onRender: handleEdgeRender
-          } as unknown as EdgeComponentProps<E, V>)}
-        />
-      ))}
-    </Group>
+    edgeRenderer &&
+    Object.entries(edgesData).map(([key, data]) => (
+      <EdgeComponent<V, E>
+        data={data}
+        edgeType={edgeType}
+        focusProgress={focusProgress}
+        key={key}
+        labelsRendered={labelsRendered}
+        renderers={renderers}
+        settings={settings}
+        onRemove={onRemove}
+      />
+    ))
   );
 }
 
-export default withGraphData(
-  GraphEdges,
-  ({ edgesData, handleEdgeRemove, handleEdgeRender }) => ({
-    edgesData,
-    handleEdgeRemove,
-    handleEdgeRender
+export default withGraphSettings(
+  withComponentsData(
+    GraphEdges,
+    ({ edgeLabelsRendered, edgesData, handleEdgeRemove }) => ({
+      edgesData,
+      labelsRendered: edgeLabelsRendered,
+      onRemove: handleEdgeRemove
+    })
+  ),
+  ({ componentsSettings, edgeType, renderers }) => ({
+    arrowRenderer: renderers.edgeArrow,
+    arrowSettings: componentsSettings.edgeArrow,
+    edgeRenderer: renderers.edge,
+    edgeSettings: componentsSettings.edge,
+    edgeType,
+    labelSettings: componentsSettings.edgeLabel,
+    vertexSettings: componentsSettings.vertex
   })
 );

@@ -1,25 +1,28 @@
-import { GraphConnections } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import { ForcesSettingsWithDefaults } from '@/types/settings/forces';
+import { Vector } from '@shopify/react-native-skia';
+
+import { GraphConnections } from '@/types/models';
+import { AllForceLayoutSettings } from '@/types/settings';
 
 import { applyDefaultForces } from './strategies/default.forces';
 
 export const applyForces = (
   connections: GraphConnections,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
-  settings: ForcesSettingsWithDefaults
-): void => {
+  verticesPositions: Record<string, Vector>,
+  settings: Omit<AllForceLayoutSettings, 'refreshInterval'>
+): {
+  keys: Array<string>;
+  positions: Record<string, Vector>;
+} => {
   'worklet';
   switch (settings.strategy) {
     default:
     case 'default':
-      applyDefaultForces(
+      return applyDefaultForces(
         connections,
         lockedVertices,
         verticesPositions,
         settings
       );
-      break;
   }
 };

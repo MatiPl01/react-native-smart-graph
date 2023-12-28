@@ -1,40 +1,47 @@
-import VertexComponent from '@/components/graphs/vertices/VertexComponent';
-import { useVertexFocusContext, withGraphData } from '@/providers/graph';
-import {
-  VertexComponentData,
-  VertexRemoveHandler,
-  VertexRenderHandler
-} from '@/types/components';
+import { useMemo } from 'react';
 
-type GraphVerticesProps<V, E> = {
-  handleVertexRemove: VertexRemoveHandler;
-  handleVertexRender: VertexRenderHandler;
-  verticesData: Record<string, VertexComponentData<V, E>>;
-};
+import { VertexComponent } from '@/components/graphs';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
+import { GraphVerticesProps } from '@/types/components';
 
-function GraphVertices<V, E>({
-  handleVertexRemove,
-  handleVertexRender,
-  verticesData
-}: GraphVerticesProps<V, E>) {
-  const focusContextValue = useVertexFocusContext();
+function GraphVertices<V>({
+  labelSettings,
+  renderer,
+  vertexSettings,
+  verticesData,
+  ...restProps
+}: GraphVerticesProps<V>) {
+  const settings = useMemo(
+    () => ({ label: labelSettings, vertex: vertexSettings }),
+    [vertexSettings, labelSettings]
+  );
 
-  return Object.values(verticesData).map(data => (
-    <VertexComponent
-      {...data}
-      {...focusContextValue}
-      key={data.vertex.key}
-      onRemove={handleVertexRemove}
-      onRender={handleVertexRender}
-    />
-  ));
+  return (
+    renderer &&
+    Object.values(verticesData).map(data => (
+      <VertexComponent<V>
+        {...restProps}
+        data={data}
+        key={data.key}
+        renderer={renderer}
+        settings={settings}
+      />
+    ))
+  );
 }
 
-export default withGraphData(
-  GraphVertices,
-  ({ handleVertexRemove, handleVertexRender, verticesData }) => ({
-    handleVertexRemove,
-    handleVertexRender,
-    verticesData
+export default withGraphSettings(
+  withComponentsData(
+    GraphVertices,
+    ({ handleVertexRemove, vertexLabelsRendered, verticesData }) => ({
+      labelsRendered: vertexLabelsRendered,
+      onRemove: handleVertexRemove,
+      verticesData
+    })
+  ),
+  ({ componentsSettings, renderers }) => ({
+    labelSettings: componentsSettings.vertexLabel,
+    renderer: renderers.vertex,
+    vertexSettings: componentsSettings.vertex
   })
 );

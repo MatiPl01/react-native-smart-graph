@@ -1,19 +1,28 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vector } from '@shopify/react-native-skia';
 
-import { VertexComponentRenderData } from '@/types/components';
-import { GraphConnections } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { EdgeComponentData, VertexComponentData } from '@/types/data';
+import { BoundingRect, Dimensions } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
+import {
+  AllAnimationSettings,
+  AllGraphPlacementSettings
+} from '@/types/settings';
 import { grahamScan } from '@/utils/algorithms';
 import { findCenterOfPoints } from '@/utils/layout';
+import { placeVertices } from '@/utils/placement';
 import {
-  animatedVectorCoordinatesToVector,
+  setVerticesPositions,
+  updateComponentsTransform
+} from '@/utils/transform';
+import {
   calcOrthogonalUnitVector,
   calcUnitVector,
   distanceBetweenVectors,
   getLineCenter,
   translateAlongVector
 } from '@/utils/vectors';
+import { calcTranslationOnProgress } from '@/utils/views';
 
 const getRandomDistance = (vertexRadius: number): number => {
   'worklet';
@@ -123,7 +132,7 @@ const findForcesPlacementPosition = (
   // the center of the hull)
   const neighborsPositions = neighbors
     .map(key => placedVerticesPositions[key])
-    .filter(Boolean) as Vector[];
+    .filter(Boolean) as Array<Vector>;
   const neighborsCenter = findCenterOfPoints(neighborsPositions)!;
 
   return placeVertexOnConvexHull(
@@ -134,60 +143,95 @@ const findForcesPlacementPosition = (
 };
 
 const findForcesPlacementPositions = (
-  placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
+  placedVerticesPositions: Record<string, Vector>,
   connections: GraphConnections,
   vertexRadius: number
 ): Record<string, Vector> => {
   'worklet';
-  const allVerticesPositions = Object.fromEntries(
-    Object.entries(placedVerticesPositions).map(([key, value]) => [
-      key,
-      animatedVectorCoordinatesToVector(value)
-    ])
-  );
-
   // Determine which vertices are not placed yet
   const unplacedVertices = Object.keys(connections).filter(
     key => !placedVerticesPositions[key]
   );
-
   // Place unplaced vertices
-  return unplacedVertices.reduce((acc, key) => {
-    acc[key] = allVerticesPositions[key] = findForcesPlacementPosition(
-      allVerticesPositions,
-      (connections[key] ?? []) as string[],
-      vertexRadius
-    );
-    return acc;
-  }, {} as Record<string, Vector>);
+  return unplacedVertices.reduce(
+    (acc, key) => {
+      const neighbors = [];
+      if (connections[key]?.incoming) {
+        neighbors.push(...connections[key]!.incoming);
+      }
+      if (connections[key]?.outgoing) {
+        neighbors.push(...connections[key]!.outgoing);
+      }
+      acc[key] = placedVerticesPositions[key] = findForcesPlacementPosition(
+        placedVerticesPositions,
+        neighbors,
+        vertexRadius
+      );
+      return acc;
+    },
+    {} as Record<string, Vector>
+  );
 };
 
-export const updateNewVerticesPositions = (
-  placedVerticesPositions: Record<string, AnimatedVectorCoordinates>,
-  renderedVerticesData: Record<string, VertexComponentRenderData>,
+export const updateInitialPlacement = <V, E>(
+  verticesData: Record<string, VertexComponentData<V>>,
+  edgesData: Record<string, EdgeComponentData<E>>,
+  connections: GraphConnections,
+  canvasDimensions: Dimensions,
+  placementSettings: AllGraphPlacementSettings,
+  animationSettings: AllAnimationSettings,
+  onRender: (boundingRect: BoundingRect) => void
+): void => {
+  'worklet';
+  const { boundingRect, verticesPositions } = placeVertices(
+    connections,
+    canvasDimensions,
+    placementSettings
+  );
+
+  updateComponentsTransform(
+    verticesData,
+    edgesData,
+    verticesPositions,
+    animationSettings
+  );
+
+  onRender(boundingRect);
+};
+
+export const updateNextPlacement = <V, E>(
+  placedVerticesData: Record<string, VertexComponentData<V>>,
+  verticesData: Record<string, VertexComponentData<V>>,
+  edgesData: Record<string, EdgeComponentData<E>>,
   connections: GraphConnections,
   vertexRadius: number
 ): void => {
   'worklet';
   // Filter out vertices that were removed from the graph
-  const filteredVertices = Object.fromEntries(
-    Object.entries(placedVerticesPositions).filter(
-      ([key]) => renderedVerticesData[key]
-    )
+  // and calculate vertices positions
+  const verticesPositions = Object.fromEntries(
+    Object.entries(placedVerticesData)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, { removed }]) => !removed)
+      .map(
+        ([
+          key,
+          {
+            points: {
+              value: { source, target }
+            },
+            transformProgress: { value: progress }
+          }
+        ]) => [key, calcTranslationOnProgress(progress, source, target)]
+      )
   );
+
   // Calculate new vertices placement positions
   const newVerticesPositions = findForcesPlacementPositions(
-    filteredVertices,
+    verticesPositions,
     connections,
     vertexRadius
   );
   // Update positions of new vertices
-  Object.entries(newVerticesPositions).forEach(([key, position]) => {
-    const vertexPosition = renderedVerticesData[key]?.position;
-    if (!vertexPosition) {
-      return;
-    }
-    vertexPosition.x.value = position.x;
-    vertexPosition.y.value = position.y;
-  });
+  setVerticesPositions(newVerticesPositions, verticesData, edgesData);
 };

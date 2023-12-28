@@ -32,10 +32,12 @@ export const createLinkedList = <T>() => {
       tail = node;
       length++;
     },
+
     head() {
       'worklet';
       return head;
     },
+
     length() {
       'worklet';
       return length;

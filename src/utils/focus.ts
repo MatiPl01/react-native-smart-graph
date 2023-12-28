@@ -1,50 +1,51 @@
-import { DEFAULT_FOCUS_ANIMATION_SETTINGS } from '@/constants/animations';
+import { FocusContextType } from '@/providers/view';
+import { VertexTransformation } from '@/types/data';
+import { Alignment, Dimensions } from '@/types/layout';
+
 import {
-  DEFAULT_ALIGNMENT_SETTINGS,
-  DEFAULT_FOCUS_SCALE_MULTIPLIER
-} from '@/constants/focus';
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import { AnimationSettingsWithDefaults } from '@/types/settings';
-import { FocusedVertexData, FocusSettings } from '@/types/settings/focus';
+  getAlignedVertexAbsolutePosition,
+  getCoordinatesRelativeToCenter
+} from './layout';
 
-export const getFocusedVertexData = (
-  focusedVertexWithPosition: {
-    key: string;
-    position: AnimatedVectorCoordinates;
-  } | null,
-  vertexRadius: number,
-  availableScales: number[],
-  initialScale: number,
-  settings?: FocusSettings
-): FocusedVertexData => {
-  const animationSettings =
-    settings?.animation !== null
-      ? ({
-          ...DEFAULT_FOCUS_ANIMATION_SETTINGS,
-          ...settings?.animation
-        } as AnimationSettingsWithDefaults)
-      : null;
-
-  if (!focusedVertexWithPosition) {
-    return { animation: animationSettings };
+export const updateFocusTransformation = (
+  transformation: {
+    end?: VertexTransformation;
+    start?: VertexTransformation;
+  },
+  focusContext: FocusContextType
+): void => {
+  'worklet';
+  if (transformation.start) {
+    focusContext.focus.start.scale.value = transformation.start.scale;
+    focusContext.focus.start.x.value = transformation.start.x;
+    focusContext.focus.start.y.value = transformation.start.y;
   }
+  if (transformation.end) {
+    focusContext.focus.end.scale.value = transformation.end.scale;
+    focusContext.focus.end.x.value = transformation.end.x;
+    focusContext.focus.end.y.value = transformation.end.y;
+  }
+};
 
+export const getFocusedVertexTransformation = (
+  alignment: Required<Alignment>,
+  canvasDimensions: Dimensions,
+  vertex: VertexTransformation,
+  vertexRadius: number
+): VertexTransformation => {
+  'worklet';
+  // Calculate vertex position based on the alignment settings
+  const { x: dx, y: dy } = getCoordinatesRelativeToCenter(
+    canvasDimensions,
+    getAlignedVertexAbsolutePosition(
+      canvasDimensions,
+      alignment,
+      vertexRadius * vertex.scale
+    )
+  );
   return {
-    animation: animationSettings,
-    vertex: {
-      ...focusedVertexWithPosition,
-      alignment: {
-        ...DEFAULT_ALIGNMENT_SETTINGS,
-        ...settings?.alignment
-      },
-      radius: vertexRadius,
-      scale:
-        settings?.vertexScale ??
-        Math.min(
-          initialScale * DEFAULT_FOCUS_SCALE_MULTIPLIER,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          availableScales[availableScales.length - 1]!
-        )
-    }
+    scale: vertex.scale,
+    x: vertex.x - dx / vertex.scale,
+    y: vertex.y - dy / vertex.scale
   };
 };

@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
-import { GraphConnections } from '@/types/graphs';
+import { GraphConnections } from '@/types/models';
 import {
+  AllTreesPlacementSettings,
   GraphLayout,
-  PlacedVerticesPositions,
-  TreesPlacementSettings
+  PlacedVerticesPositions
 } from '@/types/settings';
 import {
   bfs,
   dfs,
   findGraphComponents,
-  findRootVertex
+  findRootVertex,
+  transposeIncoming
 } from '@/utils/algorithms';
 import {
   arrangeGraphComponents,
@@ -57,9 +57,13 @@ const arrangeVertices = (
       if (prevData?.parent === parent) {
         col =
           arrangedVertices[prevData.vertex]!.col +
-          (subtreeWidths[vertex]! + 1) / 2;
+          subtreeWidths[prevData.vertex]! / 2 +
+          subtreeWidths[vertex]! / 2;
       } else {
-        col = arrangedVertices[parent]!.col - (subtreeWidths[parent]! - 1) / 2;
+        col =
+          arrangedVertices[parent]!.col -
+          subtreeWidths[parent]! / 2 +
+          subtreeWidths[vertex]! / 2;
       }
 
       arrangedVertices[vertex] = { col, row: depth };
@@ -73,14 +77,10 @@ const arrangeVertices = (
 
 const placeVertices = (
   arrangedVertices: Record<string, { col: number; row: number }>,
-  minVertexSpacing: number,
-  vertexRadius: number
+  minColumnDistance: number,
+  minRowDistance: number
 ): PlacedVerticesPositions => {
   'worklet';
-  // determine the minimum distance between vertices
-  const padding = 2 * vertexRadius;
-  const minVertexCenterDistance = padding + minVertexSpacing;
-
   // determine the width and height of the grid
   const { numCols, numRows } = Object.values(arrangedVertices).reduce(
     (acc, { col, row }) => ({
@@ -91,34 +91,31 @@ const placeVertices = (
   );
 
   // calculate the width and height of the grid as well as the padding
-  const width = padding + (numCols - 1) * minVertexCenterDistance;
-  const height = padding + (numRows - 1) * minVertexCenterDistance;
+  const width = (numCols - 1) * minColumnDistance;
+  const height = (numRows - 1) * minRowDistance;
 
   // calculate the positions of the vertices based on the grid
-  return Object.entries(arrangedVertices).reduce(
-    (acc, [key, { col, row }]) => ({
-      ...acc,
-      [key]: {
-        x: vertexRadius + col * minVertexCenterDistance - width / 2,
-        y: vertexRadius + row * minVertexCenterDistance - height / 2
-      }
-    }),
-    {} as PlacedVerticesPositions
-  );
+  return Object.entries(arrangedVertices).reduce((acc, [key, { col, row }]) => {
+    acc[key] = {
+      x: col * minColumnDistance - width / 2,
+      y: row * minRowDistance - height / 2
+    };
+    return acc;
+  }, {} as PlacedVerticesPositions);
 };
 
-export default function placeVerticesOnTrees(
+const placeVerticesOnTrees = (
   connections: GraphConnections,
-  vertexRadius: number,
   isGraphDirected: boolean,
-  settings: TreesPlacementSettings
-): GraphLayout {
+  settings: AllTreesPlacementSettings
+): GraphLayout => {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];
   const rootVertexKeys = new Set(settings.roots);
 
   const graphComponents = findGraphComponents(connections);
 
+  const { minColumnDistance, minRowDistance } = settings;
   for (const component of graphComponents) {
     // Find the root vertex of the component
     const rootVertex = findRootVertex(
@@ -127,26 +124,35 @@ export default function placeVerticesOnTrees(
       rootVertexKeys,
       isGraphDirected
     );
-    // Place vertices on the grid
-    const arrangedVertices = arrangeVertices(connections, rootVertex);
+    // If the graph is directed and the selected root has incoming edges,
+    // transpose all subtrees with incoming edges to make the root vertex
+    // the source vertex
+    let updatedConnections = connections;
+    if (isGraphDirected && connections[rootVertex]!.incoming.length > 0) {
+      updatedConnections = transposeIncoming(connections, [rootVertex]);
+    }
+    const arrangedVertices = arrangeVertices(updatedConnections, rootVertex);
     // Place vertices in the layout
-    const minVertexSpacing =
-      settings.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing;
+
     const verticesPositions = placeVertices(
       arrangedVertices,
-      minVertexSpacing,
-      vertexRadius
+      minColumnDistance,
+      minRowDistance
     );
     // Calculate container dimensions
     componentsLayouts.push({
-      boundingRect: calcContainerBoundingRect(
-        verticesPositions,
-        minVertexSpacing,
-        vertexRadius
-      ),
+      boundingRect: calcContainerBoundingRect(verticesPositions),
       verticesPositions
     });
   }
 
-  return arrangeGraphComponents(componentsLayouts, vertexRadius);
-}
+  return arrangeGraphComponents(componentsLayouts, {
+    horizontal: minColumnDistance,
+    vertical: minRowDistance
+  });
+};
+
+// The export declaration must be at the end of the file
+// to ensure that babel can properly transform the file
+// to the commonjs format (worklets cannot be reordered)
+export default placeVerticesOnTrees;

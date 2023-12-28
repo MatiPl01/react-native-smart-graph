@@ -1,39 +1,26 @@
-import { Group, Vertices } from '@shopify/react-native-skia';
-import React from 'react';
+import { Vertices } from '@shopify/react-native-skia';
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { DEFAULT_EDGE_RENDERER_SETTINGS } from '@/constants/renderers';
-import { EdgeArrowRendererProps } from '@/types/renderer';
+import { EdgeArrowRendererProps } from '@/types/components';
 
 export default function DefaultEdgeArrowRenderer({
   animationProgress,
-  centerPosition,
-  height,
-  rotation,
-  width
+  s // size
 }: EdgeArrowRendererProps) {
-  const color = DEFAULT_EDGE_RENDERER_SETTINGS.color;
+  const color = '#999';
   const colors = [color, color, color];
 
-  const vertices = useDerivedValue(() => {
-    const x = height.value / 2 - (1 - animationProgress.value) * height.value;
-    const y = 0.35 * width.value * animationProgress.value;
-    return [
-      { x: -height.value / 2, y: 0 },
-      { x, y: -y },
-      { x, y }
-    ];
-  }, []);
-
-  const transform = useDerivedValue(() => [
-    { translateX: centerPosition.value.x },
-    { translateY: centerPosition.value.y },
-    { rotate: rotation.value }
-  ]);
+  const transform = useDerivedValue(() => [{ scale: animationProgress.value }]);
 
   return (
-    <Group transform={transform}>
-      <Vertices colors={colors} vertices={vertices} />
-    </Group>
+    <Vertices
+      colors={colors}
+      transform={transform}
+      vertices={[
+        { x: -s / 2, y: -s / 4 },
+        { x: -s / 2, y: s / 4 },
+        { x: s / 2, y: 0 }
+      ]}
+    />
   );
 }

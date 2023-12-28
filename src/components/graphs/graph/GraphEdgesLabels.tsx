@@ -1,35 +1,38 @@
 import { Group } from '@shopify/react-native-skia';
-import { SharedValue } from 'react-native-reanimated';
 
-import EdgeLabelComponent from '@/components/graphs/labels/EdgeLabelComponent';
-import { useVertexFocusContext, withGraphData } from '@/providers/graph';
-import { EdgeLabelComponentData } from '@/types/components/edgeLabels';
-
-type GraphEdgeLabelsProps<E> = {
-  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
-  focusProgress: SharedValue<number>;
-};
+import { EdgeLabelComponent } from '@/components/graphs';
+import { withComponentsData, withGraphSettings } from '@/providers/graph';
+import { GraphEdgeLabelsProps } from '@/types/components';
 
 function GraphEdgeLabels<E>({
   edgeLabelsData,
-  focusProgress
+  focusProgress,
+  renderer,
+  vertexRadius
 }: GraphEdgeLabelsProps<E>) {
-  const focusContextValue = useVertexFocusContext();
-
   return (
-    <Group opacity={focusProgress}>
-      {Object.entries(edgeLabelsData).map(([key, data]) => (
-        <EdgeLabelComponent
-          edgeKey={key}
-          key={key}
-          {...focusContextValue}
-          {...data}
-        />
-      ))}
-    </Group>
+    renderer && (
+      <Group opacity={focusProgress}>
+        {Object.entries(edgeLabelsData).map(([key, data]) => (
+          <EdgeLabelComponent<E>
+            data={data}
+            edgeKey={key}
+            key={key}
+            renderer={renderer}
+            vertexRadius={vertexRadius}
+          />
+        ))}
+      </Group>
+    )
   );
 }
 
-export default withGraphData(GraphEdgeLabels, ({ edgeLabelsData }) => ({
-  edgeLabelsData
-}));
+export default withGraphSettings(
+  withComponentsData(GraphEdgeLabels, ({ edgeLabelsData }) => ({
+    edgeLabelsData
+  })),
+  ({ componentsSettings, renderers }) => ({
+    renderer: renderers.edgeLabel,
+    vertexRadius: componentsSettings.vertex.radius
+  })
+);

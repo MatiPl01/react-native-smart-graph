@@ -1,22 +1,25 @@
 import {
   DirectedEdge as IDirectedEdge,
   DirectedGraphVertex
-} from '@/types/graphs';
+} from '@/types/models';
 
-export default class DirectedEdge<E, V> implements IDirectedEdge<E, V> {
+import Edge from './Edge';
+
+export default class DirectedEdge<V, E>
+  extends Edge<V, E>
+  implements IDirectedEdge<V, E>
+{
   constructor(
-    private readonly key$: string,
-    private readonly value$: E | undefined,
+    key$: string,
+    value$: E,
     private readonly source$: DirectedGraphVertex<V, E>,
     private readonly target$: DirectedGraphVertex<V, E>
-  ) {}
-
-  isDirected() {
-    return true;
+  ) {
+    super(key$, value$);
   }
 
-  get key(): string {
-    return this.key$;
+  get isLoop(): boolean {
+    return this.source.key === this.target.key;
   }
 
   get source(): DirectedGraphVertex<V, E> {
@@ -27,11 +30,11 @@ export default class DirectedEdge<E, V> implements IDirectedEdge<E, V> {
     return this.target$;
   }
 
-  get value(): E | undefined {
-    return this.value$;
-  }
-
   get vertices(): [DirectedGraphVertex<V, E>, DirectedGraphVertex<V, E>] {
     return [this.source, this.target];
+  }
+
+  isDirected() {
+    return true;
   }
 }

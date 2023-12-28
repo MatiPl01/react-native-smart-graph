@@ -1,47 +1,21 @@
-import { SharedValue, useDerivedValue } from 'react-native-reanimated';
+import { Group } from '@shopify/react-native-skia';
 
-import { AnimatedVector } from '@/types/layout';
-import {
-  EdgeArrowRenderFunction,
-  SharedRenderersProps
-} from '@/types/renderer';
-import { EdgeArrowSettings } from '@/types/settings';
-import { translateAlongVector } from '@/utils/vectors';
-
-type EdgeArrowComponentProps = SharedRenderersProps & {
-  directionVector: AnimatedVector;
-  height: SharedValue<number>;
-  renderer: EdgeArrowRenderFunction;
-  settings?: EdgeArrowSettings;
-  tipPosition: AnimatedVector;
-  vertexRadius: SharedValue<number>;
-  width: SharedValue<number>;
-};
+import { EdgeArrowComponentProps } from '@/types/components';
 
 export default function EdgeArrowComponent({
-  directionVector,
-  height,
+  animationProgress,
   renderer,
-  tipPosition,
-  ...restProps
+  transform,
+  vertexRadius
 }: EdgeArrowComponentProps) {
-  const centerPosition = useDerivedValue(() =>
-    translateAlongVector(
-      tipPosition.value,
-      directionVector.value,
-      height.value / 2
-    )
-  );
+  // RENDERER PROPS
+  const rendererProps = {
+    animationProgress,
+    customProps: renderer.props,
+    s: vertexRadius
+  };
 
-  const rotation = useDerivedValue(() =>
-    Math.atan2(directionVector.value.y, directionVector.value.x)
+  return (
+    <Group transform={transform}>{renderer.renderer(rendererProps)}</Group>
   );
-
-  return renderer({
-    ...restProps,
-    centerPosition,
-    height,
-    rotation,
-    tipPosition
-  });
 }

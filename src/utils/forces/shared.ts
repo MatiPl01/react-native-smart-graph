@@ -1,25 +1,23 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import 'react-native-reanimated';
-
 import { Vector } from '@shopify/react-native-skia';
 
-import { GraphConnections } from '@/types/graphs';
-import { AnimatedVectorCoordinates } from '@/types/layout';
+import { GraphConnections } from '@/types/models';
 import {
   addVectors,
   addVectorsArray,
-  animatedVectorCoordinatesToVector,
   calcUnitVector,
   distanceBetweenVectors,
-  multiplyVector
+  multiplyVector,
+  vectorLength
 } from '@/utils/vectors';
 
 const calcAttractiveForce = (
-  from: Vector,
-  to: Vector,
-  attractionFactorGetter: (distance: number) => number
+  attractionFactorGetter: (distance: number) => number,
+  from?: Vector,
+  to?: Vector
 ): Vector => {
   'worklet';
+  if (!from || !to) return { x: 0, y: 0 };
   const distance = distanceBetweenVectors(from, to);
   const directionVector = calcUnitVector(from, to);
   const factor = attractionFactorGetter(distance);
@@ -28,11 +26,12 @@ const calcAttractiveForce = (
 };
 
 const calcRepulsiveForce = (
-  from: Vector,
-  to: Vector,
-  repulsiveFactorGetter: (distance: number) => number
+  repulsiveFactorGetter: (distance: number) => number,
+  from?: Vector,
+  to?: Vector
 ): Vector => {
   'worklet';
+  if (!from || !to) return { x: 0, y: 0 };
   const distance = distanceBetweenVectors(from, to);
   const directionVector = calcUnitVector(from, to);
   const factor = repulsiveFactorGetter(distance);
@@ -44,7 +43,7 @@ const calcResultantAttractiveForce = (
   vertexKey: string,
   connections: GraphConnections,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  verticesPositions: Record<string, Vector>,
   attractionFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
@@ -57,9 +56,9 @@ const calcResultantAttractiveForce = (
       .filter(neighborKey => !lockedVertices[neighborKey])
       .map(neighborKey =>
         calcAttractiveForce(
-          animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
-          animatedVectorCoordinatesToVector(verticesPositions[neighborKey]),
-          attractionFactorGetter
+          attractionFactorGetter,
+          verticesPositions[vertexKey],
+          verticesPositions[neighborKey]
         )
       )
   );
@@ -68,7 +67,7 @@ const calcResultantAttractiveForce = (
 const calcResultantRepulsiveForce = (
   vertexKey: string,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  verticesPositions: Record<string, Vector>,
   repulsiveFactorGetter: (distance: number) => number
 ): Vector => {
   'worklet';
@@ -80,9 +79,9 @@ const calcResultantRepulsiveForce = (
       )
       .map(otherVertexKey =>
         calcRepulsiveForce(
-          animatedVectorCoordinatesToVector(verticesPositions[vertexKey]),
-          animatedVectorCoordinatesToVector(verticesPositions[otherVertexKey]),
-          repulsiveFactorGetter
+          repulsiveFactorGetter,
+          verticesPositions[vertexKey],
+          verticesPositions[otherVertexKey]
         )
       )
   );
@@ -91,7 +90,7 @@ const calcResultantRepulsiveForce = (
 export const calcForces = (
   connections: GraphConnections,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>,
+  verticesPositions: Record<string, Vector>,
   attractionFactorGetter: (distance: number) => number,
   repulsiveFactorGetter: (distance: number) => number
 ): Record<string, Vector> => {
@@ -119,15 +118,33 @@ export const calcForces = (
 export const updateVerticesPositions = (
   forces: Record<string, Vector>,
   lockedVertices: Record<string, boolean>,
-  verticesPositions: Record<string, AnimatedVectorCoordinates>
-) => {
+  verticesPositions: Record<string, Vector>,
+  minUpdateDistance: number
+): {
+  keys: Array<string>;
+  positions: Record<string, Vector>;
+} => {
   'worklet';
-  Object.entries(verticesPositions).forEach(([vertexKey, vertexPosition]) => {
+  const updatedVerticesPositions: Record<string, Vector> = {};
+  const updatedVerticesKeys: Array<string> = [];
+
+  for (const vertexKey in verticesPositions) {
+    const force = forces[vertexKey]!;
     if (lockedVertices[vertexKey]) {
-      return;
+      continue;
     }
-    const force = forces[vertexKey] as Vector;
-    vertexPosition.x.value += force.x;
-    vertexPosition.y.value += force.y;
-  });
+    const vertexPosition = verticesPositions[vertexKey];
+    if (!vertexPosition) continue;
+    if (vectorLength(force) < minUpdateDistance) {
+      updatedVerticesPositions[vertexKey] = vertexPosition;
+    } else {
+      updatedVerticesPositions[vertexKey] = addVectors(vertexPosition, force);
+      updatedVerticesKeys.push(vertexKey);
+    }
+  }
+
+  return {
+    keys: updatedVerticesKeys,
+    positions: updatedVerticesPositions
+  };
 };

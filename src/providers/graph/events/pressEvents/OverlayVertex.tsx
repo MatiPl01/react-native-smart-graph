@@ -1,20 +1,20 @@
-import { memo, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Pressable } from 'react-native';
-// eslint-disable-next-line import/default
 import Animated, {
-  SharedValue,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withTiming
 } from 'react-native-reanimated';
 
-import { VertexComponentData } from '@/types/components';
+import { VertexComponentData, VertexData } from '@/types/data';
+import { AnimatedBoundingRect } from '@/types/layout';
 import {
-  AnimatedBoundingRect,
-  AnimatedVectorCoordinates
-} from '@/types/layout';
-import { VertexPressHandler } from '@/types/settings/graph/events';
+  InternalPressEventsSettings,
+  InternalVertexSettings
+} from '@/types/settings';
+import { getVertexPosition } from '@/utils/transform';
 
 const LONG_PRESS_ANIMATION_DURATION = 500;
 const LONG_PRESS_DELAY = 300;
@@ -32,49 +32,66 @@ const pulseAnimation = (activeScale: number): number => {
   );
 };
 
-type VertexOverlayProps<V, E> = {
+type VertexOverlayProps<V> = {
   boundingRect: AnimatedBoundingRect;
-  data: VertexComponentData<V, E>;
   debug?: boolean;
-  onLongPress?: VertexPressHandler<V>;
-  onPress?: VertexPressHandler<V>;
-  position: AnimatedVectorCoordinates;
-  radius: SharedValue<number>;
-  scale: SharedValue<number>;
+  pressSettings: InternalPressEventsSettings<V>;
+  vertexData: VertexComponentData<V>;
+  vertexSettings: InternalVertexSettings;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function OverlayVertex<V, E>({
+function OverlayVertex<V>({
   boundingRect,
-  data: { vertex },
   debug,
-  onLongPress,
-  onPress,
-  position,
-  radius,
-  scale
-}: VertexOverlayProps<V, E>) {
+  pressSettings: {
+    disableAnimation: animationDisabled,
+    onVertexLongPress: onLongPress,
+    onVertexPress: onPress
+  },
+  vertexData,
+  vertexSettings: { radius }
+}: VertexOverlayProps<V>) {
+  const { key, scale, value } = vertexData;
   // HELPER VALUES
   const isPressing = useSharedValue(false);
   const longPressStarted = useSharedValue(false);
-  const longPressAnimationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressAnimationTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   const getPressEventData = () => ({
-    position,
-    vertex: {
-      key: vertex.key,
-      value: vertex.value
-    }
+    vertex: { key, value } as unknown as VertexData<V>
   });
 
   // PRESS EVENT
   const handlePress = () => {
+    isPressing.value = false;
+    if (!onPress) return;
     // Don't trigger the press event if the long press has started
     if (longPressStarted.value) return;
+    onPress(getPressEventData());
+    // Don't animate if the animation is disabled
+    if (animationDisabled.value) return;
+
     // Animate the vertex and trigger the press event
     scale.value = pulseAnimation(PRESS_MAX_SCALE);
-    onPress?.(getPressEventData());
+  };
+
+  const resetScale = () => {
+    // Animate if the animation is not disabled
+    if (!animationDisabled) {
+      scale.value = withTiming(1, { duration: PULSE_DURATION / 2 }, () => {
+        longPressStarted.value = false;
+      });
+    }
+  };
+
+  const handleLongPress = () => {
+    if (!isPressing.value) return;
+    // If so, trigger the long press event and reset the scale
+    onLongPress?.(getPressEventData());
   };
 
   // LONG PRESS EVENT
@@ -98,43 +115,52 @@ function OverlayVertex<V, E>({
       if (!isPressing.value) return;
       // Start long press animation
       longPressStarted.value = true;
-      scale.value = withTiming(LONG_PRESS_MAX_SCALE, {
-        duration: LONG_PRESS_ANIMATION_DURATION
-      });
+
+      // Animate if the animation is not disabled
+      if (!animationDisabled) {
+        scale.value = withTiming(
+          LONG_PRESS_MAX_SCALE,
+          {
+            duration: LONG_PRESS_ANIMATION_DURATION
+          },
+          completed => {
+            if (completed) runOnJS(handleLongPress)();
+          }
+        );
+      }
     }, LONG_PRESS_DELAY);
   };
 
   const handlePressOut = () => {
     if (!onLongPress) return;
+    // Reset scale if the long press has not started
+    if (longPressStarted.value) resetScale();
     // Reset state
     clearLongPressTimeout();
     isPressing.value = false;
     longPressAnimationTimeoutRef.current = null;
-
-    // Check if the long press animation has started
-    if (longPressStarted.value) {
-      // If so, trigger the long press event and reset the scale
-      onLongPress?.(getPressEventData());
-      scale.value = withTiming(1, { duration: PULSE_DURATION / 2 }, () => {
-        longPressStarted.value = false;
-      });
-    }
   };
 
   const style = useAnimatedStyle(() => {
-    const size = 2 * radius.value;
+    const r = radius * scale.value;
+    const size = 2 * r;
+    const position = getVertexPosition(vertexData);
 
     return {
       height: size,
       transform: [
-        {
-          translateX: position.x.value - boundingRect.left.value - radius.value
-        },
-        { translateY: position.y.value - boundingRect.top.value - radius.value }
-      ] as never[], // this is a fix wor incorrectly inferred types,
+        { translateX: position.x - boundingRect.left.value - r },
+        { translateY: position.y - boundingRect.top.value - r }
+      ] as Array<never>, // this is a fix wor incorrectly inferred types,
       width: size
     };
-  }, [position.x, position.y, radius]);
+  }, [vertexData, radius]);
+
+  useEffect(() => {
+    return () => {
+      handlePressOut();
+    };
+  }, []);
 
   return (
     <AnimatedPressable

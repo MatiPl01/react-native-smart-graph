@@ -1,4 +1,4 @@
-import React, { cloneElement, memo, PropsWithChildren } from 'react';
+import { cloneElement, memo, PropsWithChildren } from 'react';
 
 type ContextProviderComposerProps = PropsWithChildren<{
   providers: Array<JSX.Element>;
@@ -11,10 +11,9 @@ function ContextProviderComposer({
 }: ContextProviderComposerProps) {
   return (
     <>
-      {providers.reduceRight(
-        (children, parent) => cloneElement(parent, { children }),
-        initialChildren
-      )}
+      {providers.reduceRight((children, parent) => {
+        return cloneElement(parent, { children });
+      }, initialChildren)}
     </>
   );
 }

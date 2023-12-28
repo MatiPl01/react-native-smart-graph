@@ -1,19 +1,25 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
 import {
   Edge,
+  EdgeObserver,
   Graph,
   GraphObserver,
   OrderedEdges,
-  Vertex
-} from '@/types/graphs';
-import { AnimationsSettings } from '@/types/settings/animations';
-import { FocusSettingsWithDefaults } from '@/types/settings/focus';
+  Vertex,
+  VertexObserver
+} from '@/types/models';
+import {
+  AllFocusSettings,
+  GraphModificationAnimationsSettings
+} from '@/types/settings';
+import { updateValues } from '@/utils/objects';
 
-type GraphState<V, E> = {
-  animationsSettings: AnimationsSettings;
-  edges: Array<Edge<E, V>>;
-  orderedEdges: OrderedEdges<E, V>;
+export type GraphState<V, E> = {
+  animationsSettings: GraphModificationAnimationsSettings;
+  edges: Array<Edge<V, E>>;
+  orderedEdges: OrderedEdges<V, E>;
   vertices: Array<Vertex<V, E>>;
 };
 
@@ -33,7 +39,7 @@ export const useGraphObserver = <V, E>(
 
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
-  const observerRef = useRef<GraphObserver>({
+  const observerRef = useRef<GraphObserver<V, E>>({
     graphChanged(animationsSettings) {
       setState({
         animationsSettings,
@@ -73,7 +79,7 @@ export const useGraphObserver = <V, E>(
 
 type FocusState = {
   focusedVertexKey: null | string;
-  settings: FocusSettingsWithDefaults;
+  settings: AllFocusSettings;
 };
 
 export const useFocusObserver = <V, E>(
@@ -82,21 +88,20 @@ export const useFocusObserver = <V, E>(
 ): [FocusState, (isActive: boolean) => void] => {
   const [state, setState] = useState<FocusState>({
     focusedVertexKey: null,
-    settings: {
-      disableGestures: true
-    }
+    settings: DEFAULT_FOCUS_SETTINGS
   });
 
   const isObservingRef = useRef(false);
   const isFirstRenderRef = useRef(true);
-  const observerRef = useRef<GraphObserver>({
+  const observerRef = useRef<GraphObserver<V, E>>({
     focusChanged(vertexKey, settings) {
       setState({
         focusedVertexKey: vertexKey,
-        settings: {
-          disableGestures: true,
-          ...settings
-        }
+        settings: updateValues({
+          current: state.settings,
+          default: DEFAULT_FOCUS_SETTINGS,
+          new: settings
+        })
       });
     }
   });
@@ -126,4 +131,48 @@ export const useFocusObserver = <V, E>(
   };
 
   return [state, setActive];
+};
+
+export const useVertexValueObserver = <V>(
+  addObserver: (observer: VertexObserver<V>) => void,
+  removeObserver: (observer: VertexObserver<V>) => void,
+  initialValue: V
+): V => {
+  const [value, setValue] = useState<V>(initialValue);
+
+  const vertexObserver = useMemo<VertexObserver<V>>(
+    () => ({
+      valueChanged: setValue
+    }),
+    []
+  );
+
+  useEffect(() => {
+    addObserver(vertexObserver);
+    return () => removeObserver(vertexObserver);
+  }, [addObserver, removeObserver, vertexObserver]);
+
+  return value;
+};
+
+export const useEdgeValueObserver = <E>(
+  addObserver: (observer: EdgeObserver<E>) => void,
+  removeObserver: (observer: EdgeObserver<E>) => void,
+  initialValue: E
+): E => {
+  const [value, setValue] = useState<E>(initialValue);
+
+  const edgeObserver = useMemo<EdgeObserver<E>>(
+    () => ({
+      valueChanged: setValue
+    }),
+    []
+  );
+
+  useEffect(() => {
+    addObserver(edgeObserver);
+    return () => removeObserver(edgeObserver);
+  }, [addObserver, removeObserver, edgeObserver]);
+
+  return value;
 };

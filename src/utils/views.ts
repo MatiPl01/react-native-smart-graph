@@ -1,7 +1,7 @@
 import { Vector } from '@shopify/react-native-skia';
 
-import { BoundingRect, Dimensions } from '@/types/layout';
-import { ObjectFit } from '@/types/views';
+import { VertexTransformation } from '@/types/data';
+import { BoundingRect, Dimensions, ObjectFit } from '@/types/layout';
 
 export const calcContainerScale = (
   objectFit: ObjectFit,
@@ -13,27 +13,29 @@ export const calcContainerScale = (
   'worklet';
   let scale = initialScale;
 
-  const containerWidth =
-    containerDimensions.width + padding.left + padding.right;
-  const containerHeight =
-    containerDimensions.height + padding.top + padding.bottom;
+  const containerWidth = containerDimensions.width;
+  const containerHeight = containerDimensions.height;
+  const targetWidth = canvasWidth - padding.left - padding.right;
+  const targetHeight = canvasHeight - padding.top - padding.bottom;
+
+  if (containerWidth <= 0 || containerHeight <= 0) return scale;
 
   switch (objectFit) {
     case 'contain':
       scale = Math.min(
-        canvasWidth / containerWidth,
-        canvasHeight / containerHeight
+        targetWidth / containerWidth,
+        targetHeight / containerHeight
       );
       break;
     case 'cover':
       scale = Math.max(
-        canvasWidth / containerWidth,
-        canvasHeight / containerHeight
+        targetWidth / containerWidth,
+        targetHeight / containerHeight
       );
       break;
   }
 
-  return scale;
+  return Math.max(scale || initialScale, 0);
 };
 
 export const calcContainerTranslation = (
@@ -46,18 +48,22 @@ export const calcContainerTranslation = (
   const containerHeight = bottom - top + padding.top + padding.bottom;
 
   return {
-    x: ((-left + padding.left) / containerWidth) * canvasWidth,
-    y: ((-top + padding.top) / containerHeight) * canvasHeight
+    x:
+      (containerWidth && (-left + padding.left) / containerWidth) * canvasWidth,
+    y:
+      (containerHeight && (-top + padding.top) / containerHeight) * canvasHeight
   };
 };
 
-export const calcScaleOnProgress = (
+export const calcValueOnProgress = (
   progress: number,
-  startScale: number,
-  endScale: number
+  startValue: number,
+  endValue: number
 ): number => {
   'worklet';
-  return startScale + progress * (endScale - startScale);
+  if (progress === 0) return startValue;
+  if (progress === 1) return endValue;
+  return startValue + progress * (endValue - startValue);
 };
 
 export const calcTranslationOnProgress = (
@@ -69,6 +75,25 @@ export const calcTranslationOnProgress = (
   return {
     x: startTranslation.x + progress * (endTranslation.x - startTranslation.x),
     y: startTranslation.y + progress * (endTranslation.y - startTranslation.y)
+  };
+};
+
+export const calcTransformationOnProgress = (
+  progress: number,
+  startTransformation: VertexTransformation,
+  endTransformation: VertexTransformation
+): VertexTransformation => {
+  'worklet';
+  return {
+    scale:
+      startTransformation.scale +
+      progress * (endTransformation.scale - startTransformation.scale),
+    x:
+      startTransformation.x +
+      progress * (endTransformation.x - startTransformation.x),
+    y:
+      startTransformation.y +
+      progress * (endTransformation.y - startTransformation.y)
   };
 };
 

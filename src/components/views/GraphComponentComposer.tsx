@@ -1,51 +1,54 @@
-import { Canvas, Group } from '@shopify/react-native-skia';
+import { Group } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
-import { DirectedGraphComponentProps } from '@/components/graphs/DirectedGraphComponent';
-import { UndirectedGraphComponentProps } from '@/components/graphs/UndirectedGraphComponent';
-import {
-  AccessibleOverlayContextType,
-  withOverlay
-} from '@/contexts/OverlayProvider';
-import {
-  useCanvasDataContext,
-  useFocusContext,
-  useTransformContext
-} from '@/providers/canvas';
-import GraphProvider from '@/providers/graph/GraphProvider';
+import { GraphProvider } from '@/providers/graph';
+import { useViewDataContext } from '@/providers/view';
+import { GraphData } from '@/types/data';
 
-function GraphComponentComposer<
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->(props: P & AccessibleOverlayContextType) {
+const validateProps = <V, E>(props: GraphData<V, E>) => {
+  // TODO - add more validations
+  // FOCUS
+  // Focus points validation
+  if (props.focusSettings) {
+    const focusPoints = props.focusSettings.points;
+    const keySet = new Set();
+    for (const key in focusPoints) {
+      if (+key < 0 || +key > 1) {
+        throw new Error(
+          `Invalid focus points: key ${key} must be between 0 and 1`
+        );
+      }
+      if (keySet.has(key)) {
+        throw new Error(
+          `Invalid focus points: duplicate key ${key} found in ${JSON.stringify(
+            focusPoints
+          )}`
+        );
+      }
+      keySet.add(key);
+    }
+  }
+};
+
+export default function GraphComponentComposer<V, E>({
+  ...restProps
+}: GraphData<V, E>) {
+  const graphProps = restProps;
+  validateProps<V, E>(graphProps);
   // CONTEXTS
-  // Canvas data context
-  const {
-    boundingRect,
-    canvasDimensions,
-    currentScale,
-    currentTranslation,
-    initialScale,
-    scales
-  } = useCanvasDataContext();
-  // Transform context
-  const { handleCanvasRender, handleGraphRender } = useTransformContext();
-  // Focus context
-  const {
-    endFocus,
-    focusKey,
-    focusStatus,
-    focusTransitionProgress,
-    startFocus
-  } = useFocusContext();
+  // Canvas contexts
+  const dataContext = useViewDataContext();
 
-  const transform = useMemo(
+  const { currentScale, currentTranslation } = dataContext;
+  const canvasTransform = useDerivedValue(() => [
+    { translateX: currentTranslation.x.value },
+    { translateY: currentTranslation.y.value },
+    { scale: currentScale.value }
+  ]);
+
+  const animatedTransform = useMemo(
     () => ({
       scale: currentScale,
       translateX: currentTranslation.x,
@@ -54,47 +57,14 @@ function GraphComponentComposer<
     []
   );
 
-  const canvasTransform = useDerivedValue(() => [
-    { translateX: currentTranslation.x.value },
-    { translateY: currentTranslation.y.value },
-    { scale: currentScale.value }
-  ]);
+  // IMPORTANT: graphComponent must be memoized to prevent re-rendering
+  const graphComponent = useMemo(() => <GraphComponent />, []);
 
   return (
-    <Canvas onLayout={handleCanvasRender} style={styles.canvas}>
-      <Group transform={canvasTransform}>
-        <GraphProvider<V, E>
-          {...props}
-          boundingRect={boundingRect}
-          canvasDimensions={canvasDimensions}
-          canvasScales={scales}
-          endFocus={endFocus}
-          focusKey={focusKey}
-          focusStatus={focusStatus}
-          focusTransitionProgress={focusTransitionProgress}
-          initialCanvasScale={initialScale}
-          onRender={handleGraphRender}
-          startFocus={startFocus}
-          transform={transform}>
-          <GraphComponent boundingRect={boundingRect} />
-        </GraphProvider>
-      </Group>
-    </Canvas>
+    <Group transform={canvasTransform}>
+      <GraphProvider graphProps={graphProps} transform={animatedTransform}>
+        {graphComponent}
+      </GraphProvider>
+    </Group>
   );
 }
-
-const styles = StyleSheet.create({
-  canvas: {
-    flex: 1
-  }
-});
-
-export default withOverlay(GraphComponentComposer) as <
-  V,
-  E,
-  P extends
-    | DirectedGraphComponentProps<V, E>
-    | UndirectedGraphComponentProps<V, E>
->(
-  props: P
-) => JSX.Element;

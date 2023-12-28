@@ -1,16 +1,11 @@
-import { SHARED_PLACEMENT_SETTINGS } from '@/constants/placement';
 import {
-  CircularPlacementSettings,
+  AllCirclePlacementSettings,
   GraphLayout,
   PlacedVerticesPositions
 } from '@/types/settings';
 import { defaultSortComparator } from '@/utils/placement/shared';
 
-const getLayout = (
-  verticesCount: number,
-  vertexRadius: number,
-  minVertexSpacing: number
-) => {
+const getLayout = (verticesCount: number, minVertexDistance: number) => {
   'worklet';
   let angleStep, radius;
 
@@ -19,42 +14,38 @@ const getLayout = (
     radius = 0;
   } else {
     angleStep = (2 * Math.PI) / verticesCount;
-    radius =
-      (2 * vertexRadius + minVertexSpacing) / (2 * Math.sin(angleStep / 2));
+    radius = minVertexDistance / (2 * Math.sin(angleStep / 2));
   }
-
-  const containerRadius = radius + vertexRadius + minVertexSpacing / 2;
 
   return {
     angleStep,
-    containerRadius,
     radius
   };
 };
 
-export default function placeVerticesOnCircle(
+const placeVerticesOnCircle = <
+  S extends Omit<AllCirclePlacementSettings, 'strategy'>
+>(
   vertices: Array<string>,
-  vertexRadius: number,
-  settings: CircularPlacementSettings
-): GraphLayout {
+  settings: S
+): GraphLayout => {
   'worklet';
   const updatedVertices = settings?.sortVertices
     ? vertices.sort(settings?.sortComparator ?? defaultSortComparator)
     : vertices;
 
   const initialAngle = -Math.PI / 2;
-  const { angleStep, containerRadius, radius } = getLayout(
+  const { angleStep, radius } = getLayout(
     updatedVertices.length,
-    vertexRadius,
-    settings?.minVertexSpacing ?? SHARED_PLACEMENT_SETTINGS.minVertexSpacing
+    settings.minVertexDistance
   );
 
   return {
     boundingRect: {
-      bottom: containerRadius,
-      left: -containerRadius,
-      right: containerRadius,
-      top: -containerRadius
+      bottom: radius,
+      left: -radius,
+      right: radius,
+      top: -radius
     },
     verticesPositions: updatedVertices.reduce((acc, key, idx) => {
       acc[key] = {
@@ -64,4 +55,9 @@ export default function placeVerticesOnCircle(
       return acc;
     }, {} as PlacedVerticesPositions)
   };
-}
+};
+
+// The export declaration must be at the end of the file
+// to ensure that babel can properly transform the file
+// to the commonjs format (worklets cannot be reordered)
+export default placeVerticesOnCircle;
