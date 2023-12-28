@@ -1,29 +1,18 @@
-import { Canvas, Group } from '@shopify/react-native-skia';
+import { Group } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
-import {
-  AccessibleOverlayContextType,
-  withOverlay
-} from '@/contexts/OverlayProvider';
-import { CanvasContexts, GraphProvider } from '@/providers/graph';
-import {
-  useAutoSizingContext,
-  useFocusContext,
-  useGesturesContext,
-  useTransformContext,
-  useViewDataContext
-} from '@/providers/view';
+import { GraphProvider } from '@/providers/graph';
+import { useViewDataContext } from '@/providers/view';
 import { GraphData } from '@/types/data';
 
 const validateProps = <V, E>(props: GraphData<V, E>) => {
   // TODO - add more validations
   // FOCUS
   // Focus points validation
-  if (props.settings?.focus) {
-    const focusPoints = props.settings.focus.points;
+  if (props.focusSettings) {
+    const focusPoints = props.focusSettings.points;
     const keySet = new Set();
     for (const key in focusPoints) {
       if (+key < 0 || +key > 1) {
@@ -43,47 +32,27 @@ const validateProps = <V, E>(props: GraphData<V, E>) => {
   }
 };
 
-function GraphComponentComposer<V, E>({
-  removeLayer,
-  renderLayer,
+export default function GraphComponentComposer<V, E>({
   ...restProps
-}: GraphData<V, E> & AccessibleOverlayContextType) {
+}: GraphData<V, E>) {
   const graphProps = restProps;
   validateProps<V, E>(graphProps);
   // CONTEXTS
+  // Canvas contexts
   const dataContext = useViewDataContext();
-  const transformContext = useTransformContext();
-  const autoSizingContext = useAutoSizingContext();
-  const focusContext = useFocusContext();
-  const gesturesContext = useGesturesContext();
 
+  const { currentScale, currentTranslation } = dataContext;
   const canvasTransform = useDerivedValue(() => [
-    { translateX: dataContext.currentTranslation.x.value },
-    { translateY: dataContext.currentTranslation.y.value },
-    { scale: dataContext.currentScale.value }
+    { translateX: currentTranslation.x.value },
+    { translateY: currentTranslation.y.value },
+    { scale: currentScale.value }
   ]);
 
   const animatedTransform = useMemo(
     () => ({
-      scale: dataContext.currentScale,
-      translateX: dataContext.currentTranslation.x,
-      translateY: dataContext.currentTranslation.y
-    }),
-    []
-  );
-
-  // IMPORTANT: canvasContexts must be memoized to prevent re-rendering
-  const canvasContexts = useMemo<CanvasContexts>(
-    () => ({
-      autoSizingContext,
-      dataContext,
-      focusContext,
-      gesturesContext,
-      overlayContext: {
-        removeLayer,
-        renderLayer
-      },
-      transformContext
+      scale: currentScale,
+      translateX: currentTranslation.x,
+      translateY: currentTranslation.y
     }),
     []
   );
@@ -92,27 +61,10 @@ function GraphComponentComposer<V, E>({
   const graphComponent = useMemo(() => <GraphComponent />, []);
 
   return (
-    <Canvas
-      onLayout={transformContext.handleCanvasRender}
-      style={styles.canvas}>
-      <Group transform={canvasTransform}>
-        <GraphProvider
-          canvasContexts={canvasContexts}
-          graphProps={graphProps}
-          transform={animatedTransform}>
-          {graphComponent}
-        </GraphProvider>
-      </Group>
-    </Canvas>
+    <Group transform={canvasTransform}>
+      <GraphProvider graphProps={graphProps} transform={animatedTransform}>
+        {graphComponent}
+      </GraphProvider>
+    </Group>
   );
 }
-
-const styles = StyleSheet.create({
-  canvas: {
-    flex: 1
-  }
-});
-
-export default withOverlay(GraphComponentComposer) as <V, E>(
-  props: GraphData<V, E>
-) => JSX.Element;

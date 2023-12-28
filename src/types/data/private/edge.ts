@@ -1,29 +1,41 @@
-/* eslint-disable import/no-unused-modules */
+import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { AnimatedVectorCoordinates } from '@/types/layout';
-import { DirectedEdge, UndirectedEdge } from '@/types/models';
+import { DirectedEdge, EdgeObserver, UndirectedEdge } from '@/types/models';
 import { AllAnimationSettings } from '@/types/settings';
+
+import { EdgeLabelComponentData } from './edgeLabel';
 
 export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 
-export type EdgeComponentData<E> = {
+export type EdgeComponentData<E = unknown> = {
+  addObserver(observer: EdgeObserver<E>): void;
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
-  displayed: SharedValue<boolean>;
-  edgesCount: SharedValue<number>;
   isDirected: boolean;
   key: string;
-  labelHeight: SharedValue<number>;
-  labelPosition: AnimatedVectorCoordinates;
-  order: SharedValue<number>;
+  label: Omit<EdgeLabelComponentData<E>, 'animationProgress' | 'value'>;
+  ordering: SharedValue<{
+    source: {
+      edgesCount: number;
+      order: number;
+    };
+    target: {
+      edgesCount: number;
+      order: number;
+    };
+  }>;
+  points: SharedValue<{
+    v1Source: Vector;
+    v1Target: Vector;
+    v2Source: Vector;
+    v2Target: Vector;
+  }>;
+  removeObserver(observer: EdgeObserver<E>): void;
   removed: boolean;
+  transformProgress: SharedValue<number>;
   v1Key: string;
-  v1Position: AnimatedVectorCoordinates;
-  v1Radius: SharedValue<number>;
   v2Key: string;
-  v2Position: AnimatedVectorCoordinates;
-  v2Radius: SharedValue<number>;
   value?: E;
 };
 

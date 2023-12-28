@@ -1,8 +1,34 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getDefaultConfig, getUpdateConfig } from '@/configs/graph';
 import { GraphSettingsData } from '@/types/components';
 import { GraphData } from '@/types/data';
-import { cancelAnimations } from '@/utils/animations';
+import { RendererWithProps } from '@/types/utils';
+import {
+  cancelAnimations,
+  isAnimationSettingsObject
+} from '@/utils/animations';
 import { updateValues } from '@/utils/objects';
+
+const updateRenderer = <
+  R extends
+    | {
+        props: unknown;
+        renderer: React.ComponentType<any>;
+      }
+    | React.ComponentType<any>
+    | null
+>(
+  renderer: R
+): RendererWithProps<React.ComponentType<any>> | null => {
+  if (typeof renderer === 'function') {
+    return {
+      props: {},
+      renderer
+    };
+  }
+
+  return renderer;
+};
 
 export const updateContextValue = <V, E>(
   data: GraphData<V, E>,
@@ -10,6 +36,21 @@ export const updateContextValue = <V, E>(
 ): GraphSettingsData<V, E> => {
   // DEFAULTS
   const defaultConfig = getDefaultConfig(data);
+
+  data.animationSettings =
+    !data.animationSettings || isAnimationSettingsObject(data.animationSettings)
+      ? {
+          edges: data.animationSettings,
+          layout: data.animationSettings,
+          vertices: data.animationSettings
+        }
+      : data.animationSettings;
+  data.renderers = Object.fromEntries(
+    Object.entries(data.renderers ?? {}).map(([key, renderer]) => [
+      key,
+      updateRenderer(renderer)
+    ])
+  );
 
   return updateValues(
     {

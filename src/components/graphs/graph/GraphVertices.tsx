@@ -1,23 +1,47 @@
-import { VertexComponent } from '@/components/graphs/vertices';
+import { useMemo } from 'react';
+
+import { VertexComponent } from '@/components/graphs';
 import { withComponentsData, withGraphSettings } from '@/providers/graph';
 import { GraphVerticesProps } from '@/types/components';
 
 function GraphVertices<V>({
+  labelSettings,
+  renderer,
+  vertexSettings,
   verticesData,
   ...restProps
 }: GraphVerticesProps<V>) {
-  return Object.values(verticesData).map(data => (
-    <VertexComponent {...restProps} data={data} key={data.key} />
-  ));
+  const settings = useMemo(
+    () => ({ label: labelSettings, vertex: vertexSettings }),
+    [vertexSettings, labelSettings]
+  );
+
+  return (
+    renderer &&
+    Object.values(verticesData).map(data => (
+      <VertexComponent<V>
+        {...restProps}
+        data={data}
+        key={data.key}
+        renderer={renderer}
+        settings={settings}
+      />
+    ))
+  );
 }
 
 export default withGraphSettings(
-  withComponentsData(GraphVertices, ({ handleVertexRemove, verticesData }) => ({
-    onRemove: handleVertexRemove,
-    verticesData
-  })),
-  ({ renderers, settings }) => ({
+  withComponentsData(
+    GraphVertices,
+    ({ handleVertexRemove, vertexLabelsRendered, verticesData }) => ({
+      labelsRendered: vertexLabelsRendered,
+      onRemove: handleVertexRemove,
+      verticesData
+    })
+  ),
+  ({ componentsSettings, renderers }) => ({
+    labelSettings: componentsSettings.vertexLabel,
     renderer: renderers.vertex,
-    settings: settings.components.vertex
+    vertexSettings: componentsSettings.vertex
   })
 );

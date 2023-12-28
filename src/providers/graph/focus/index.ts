@@ -1,2 +1,9 @@
-export { default as MultiStepVertexFocusProvider } from './MultiStepVertexFocusProvider';
-export { default as VertexFocusProvider } from './VertexFocusProvider';
+export {
+  type MultiStepFocusContextType,
+  default as MultiStepVertexFocusProvider,
+  useMultiStepFocusContext
+} from './MultiStepVertexFocusProvider';
+export {
+  useVertexFocusContext,
+  default as VertexFocusProvider
+} from './VertexFocusProvider';

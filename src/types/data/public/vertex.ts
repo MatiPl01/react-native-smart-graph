@@ -1,4 +1,8 @@
-export type VertexData<V = void> = {
-  key: string;
-  value?: V;
-};
+import { WithValue } from '@/types/utils';
+
+export type VertexData<V = unknown> = WithValue<
+  V,
+  {
+    key: string;
+  }
+>;

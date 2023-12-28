@@ -1,14 +1,12 @@
-/* eslint-disable import/no-unused-modules */
+/* eslint-disable react/jsx-key */
 import { PropsWithChildren, useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
 import { GraphData } from '@/types/data';
 import { AnimatedTransformation } from '@/types/layout';
 
+import { EdgesMaskProvider } from './appearance';
 import ConditionalProvider from './ConditionalProvider';
-import CanvasContextsProvider, {
-  CanvasContexts
-} from './contexts/CanvasContextsProvider';
 import { ComponentsDataProvider, GraphSettingsProvider } from './data';
 import { PressEventsProvider } from './events';
 import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
@@ -21,13 +19,11 @@ import {
 import { SettingsChangeResponderProvider } from './settings';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
-  canvasContexts: CanvasContexts;
   graphProps: GraphData<V, E>;
   transform: AnimatedTransformation;
 }>;
 
 export default function GraphProvider<V, E>({
-  canvasContexts,
   children,
   graphProps,
   transform
@@ -42,6 +38,7 @@ export default function GraphProvider<V, E>({
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
       <ConditionalProvider.Switch
+        match={({ layoutSettings }) => layoutSettings.type}
         case={{
           // Provider used to place and move vertices on graph changes
           auto: <PlacementLayoutProvider />,
@@ -52,7 +49,6 @@ export default function GraphProvider<V, E>({
             <ForcesLayoutProvider />
           ]
         }}
-        match={({ settings }) => settings.layout.type}
       />,
       // CONTAINER
       // Provider used to compute the dimensions of the container
@@ -63,29 +59,30 @@ export default function GraphProvider<V, E>({
       // Provider used to focus one of the vertices specified in an
       // array based on the user-defined progress
       <ConditionalProvider.If
-        if={({ settings }) => !!settings.focus}
+        if={({ focusSettings }) => !!focusSettings}
         then={<MultiStepVertexFocusProvider />}
       />,
       // EVENTS
       // Press events provider
+      // TODO - improve press events provider (the overlay layer degrades performance)
       <ConditionalProvider.If
-        if={({ settings }) => !!settings.events?.press}
+        if={({ eventSettings }) => !!eventSettings?.press}
         then={<PressEventsProvider transform={transform} />}
       />,
       // SETTINGS
       // The provider used to handle canvas settings change and respond to such changes
-      <SettingsChangeResponderProvider />
+      <SettingsChangeResponderProvider />,
+      // EDGES MASK
+      <EdgesMaskProvider />
     ],
     []
   );
 
   return (
-    <CanvasContextsProvider canvasContexts={canvasContexts}>
-      <GraphSettingsProvider {...graphProps}>
-        <ContextProviderComposer providers={providers}>
-          {children}
-        </ContextProviderComposer>
-      </GraphSettingsProvider>
-    </CanvasContextsProvider>
+    <GraphSettingsProvider {...graphProps}>
+      <ContextProviderComposer providers={providers}>
+        {children}
+      </ContextProviderComposer>
+    </GraphSettingsProvider>
   );
 }

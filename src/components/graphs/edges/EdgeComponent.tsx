@@ -1,10 +1,6 @@
 /* eslint-disable no-redeclare */
 import { memo, useEffect } from 'react';
-import {
-  useAnimatedReaction,
-  useSharedValue,
-  withTiming
-} from 'react-native-reanimated';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import {
   DirectedCurvedEdgeComponentProps,
@@ -52,59 +48,34 @@ function areCurvedEdgeProps<V, E>(
 ): props is
   | DirectedCurvedEdgeComponentProps<V, E>
   | UndirectedCurvedEdgeComponentProps<V, E> {
-  return props.settings.edge.type === 'curved';
+  return props.edgeType === 'curved';
 }
 
 function EdgeComponent<V, E>({
-  data,
   onRemove,
-  renderers,
-  settings
+  ...innerProps
 }: EdgeComponentProps<V, E>) {
-  const { animationProgress, animationSettings } = data;
-
-  // EDGE ORDERING
-  // Target edge order
-  const animatedOrder = useSharedValue(data.order.value);
-  const animatedEdgesCount = useSharedValue(data.edgesCount.value);
+  const { data } = innerProps;
+  // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
+  const animationProgressHelper = useSharedValue(0);
 
   // Edge mount/unmount animation
   useEffect(() => {
     updateComponentAnimationState(
       data.key,
-      animationProgress,
-      animationSettings,
+      animationProgressHelper,
+      data.animationSettings,
       data.removed,
-      onRemove
+      () => onRemove(data.key)
     );
-  }, [data.removed, animationSettings]);
+  }, [data.removed, data.animationSettings]);
 
-  // Use separate order and count values to make their changes animated
   useAnimatedReaction(
-    () => ({
-      count: data.edgesCount.value,
-      ord: data.order.value
-    }),
-    ({ count, ord }) => {
-      if (animationSettings) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { onComplete: _, ...settingsWithoutCallback } = animationSettings;
-        animatedOrder.value = withTiming(ord, settingsWithoutCallback);
-        animatedEdgesCount.value = withTiming(count, settingsWithoutCallback);
-      } else {
-        animatedOrder.value = ord;
-        animatedEdgesCount.value = count;
-      }
+    () => animationProgressHelper.value,
+    progress => {
+      data.animationProgress.value = progress;
     }
   );
-
-  const innerProps = {
-    animatedEdgesCount,
-    animatedOrder,
-    data,
-    renderers,
-    settings
-  };
 
   if (areDirectedEdgeProps(innerProps)) {
     return areCurvedEdgeProps(innerProps) ? (

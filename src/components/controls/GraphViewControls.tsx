@@ -7,7 +7,7 @@ import {
   faRectangleTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { memo, useState } from 'react';
+import { memo, useState } from 'react';
 import {
   StyleProp,
   StyleSheet,
@@ -58,13 +58,10 @@ export default memo(function GraphViewControls({
   style
 }: GraphViewControlsProps) {
   // CONTEXTS
-  // Canvas data context
+  // Canvas contexts
   const { initialScale, objectFit } = useViewDataContext();
-  // Transform context
   const { resetContainerPosition } = useTransformContext();
-  // Auto sizing context
   const autoSizingContext = useAutoSizingContext();
-  // Focus context
   const { endFocus, focusStatus } = useFocusContext();
 
   // OTHER VALUES
@@ -120,8 +117,8 @@ export default memo(function GraphViewControls({
   return (
     <View style={style}>
       <View style={styles.container}>
-        {buttons.map(({ icon, ...props }) => (
-          <TouchableOpacity {...props}>
+        {buttons.map(({ icon, key, onPress }) => (
+          <TouchableOpacity key={key} onPress={onPress}>
             <FontAwesomeIcon icon={icon} size={32} style={styles.icon} />
           </TouchableOpacity>
         ))}

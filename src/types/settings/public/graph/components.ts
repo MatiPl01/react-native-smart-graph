@@ -1,40 +1,58 @@
-import { Sharedifyable } from '@/types/utils';
+import { Animatable } from '@/types/utils';
 
 /*
  * COMPONENTS SETTINGS
  */
 export type VertexSettings = {
-  radius?: Sharedifyable<number>;
+  radius?: number;
 };
+
+export enum VertexLabelPosition {
+  BOTTOM = 'bottom',
+  BOTTOM_LEFT = 'bottom-left',
+  BOTTOM_RIGHT = 'bottom-right',
+  CENTER = 'center',
+  LEFT = 'left',
+  RIGHT = 'right',
+  TOP = 'top',
+  TOP_LEFT = 'top-left',
+  TOP_RIGHT = 'top-right'
+}
+
+export type VertexLabelSettings =
+  | {
+      offset?: Animatable<number>;
+      position?: Animatable<Omit<VertexLabelPosition, 'center'>>;
+    }
+  | {
+      position: Animatable<VertexLabelPosition.CENTER>;
+    };
 
 export type StraightEdgeSettings = {
-  maxOffsetFactor?: Sharedifyable<number>;
-  type: Sharedifyable<'straight'>;
+  maxOffsetFactor?: Animatable<number>;
 };
 
-export type CurvedEdgeSettings = {
-  type: Sharedifyable<'curved'>;
-};
+export type CurvedEdgeSettings = Record<string, never>; // No settings for now
 
 export type EdgeSettings = CurvedEdgeSettings | StraightEdgeSettings;
 
-export type LabelSettings = {
-  displayed?: Sharedifyable<boolean>;
-  scale?: Sharedifyable<number>;
+export type EdgeLabelSettings = {
+  scale?: Animatable<number>;
 };
 
-export type ArrowSettings = {
-  scale?: Sharedifyable<number>;
+export type EdgeArrowSettings = {
+  scale?: Animatable<number>;
 };
 
-export type EdgeType = EdgeSettings['type'];
+export type EdgeType = 'curved' | 'straight';
 
 /*
  * GRAPH COMPONENTS SETTINGS
  */
 type SharedGraphComponentsSettings = {
-  label?: LabelSettings;
+  edgeLabel?: EdgeLabelSettings;
   vertex?: VertexSettings;
+  vertexLabel?: VertexLabelSettings;
 };
 
 export type UndirectedGraphWithStraightEdgesComponentsSettings =
@@ -49,12 +67,12 @@ export type UndirectedGraphWithCurvedEdgesComponentsSettings =
 
 export type DirectedGraphWithStraightEdgesComponentsSettings =
   UndirectedGraphWithStraightEdgesComponentsSettings & {
-    arrow?: ArrowSettings;
+    edgeArrow?: EdgeArrowSettings;
   };
 
 export type DirectedGraphWithCurvedEdgesComponentsSettings =
   UndirectedGraphWithCurvedEdgesComponentsSettings & {
-    arrow?: ArrowSettings;
+    edgeArrow?: EdgeArrowSettings;
   };
 
 export type UndirectedGraphComponentsSettings =

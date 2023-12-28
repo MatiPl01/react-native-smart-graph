@@ -1,13 +1,12 @@
+import { Transforms2d } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { ArrowRenderer } from '@/types/components/public';
-import { AnimatedVector } from '@/types/layout';
+import { EdgeArrowRenderer } from '@/types/components/public';
+import { RendererWithProps } from '@/types/utils';
 
-export type ArrowComponentProps = {
+export type EdgeArrowComponentProps = {
   animationProgress: SharedValue<number>;
-  directionVector: AnimatedVector;
-  height: SharedValue<number>;
-  renderer: ArrowRenderer;
-  tipPosition: AnimatedVector;
-  width: SharedValue<number>;
+  renderer: RendererWithProps<EdgeArrowRenderer>;
+  transform: SharedValue<Transforms2d>;
+  vertexRadius: number;
 };

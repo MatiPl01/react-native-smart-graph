@@ -25,4 +25,5 @@ export type GraphViewData = {
   objectFit: SharedValue<ObjectFit>;
   padding: SharedValue<BoundingRect>;
   scales: SharedValue<Array<number>>;
+  targetBoundingRect: SharedValue<BoundingRect>;
 };

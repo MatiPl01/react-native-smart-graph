@@ -1,17 +1,23 @@
 import {
-  ArrowSettings,
   CurvedEdgeSettings,
+  EdgeArrowSettings,
+  EdgeLabelSettings,
   EdgeSettings,
-  LabelSettings,
   StraightEdgeSettings,
+  VertexLabelPosition,
   VertexSettings
 } from '@/types/settings/public';
-import { DeepRequired, DeepSharedify } from '@/types/utils';
+import { Animatable, DeepRequired, DeepSharedify } from '@/types/utils';
 
 /*
  * DEFAULT SETTINGS
  */
 export type AllVertexSettings = DeepRequired<VertexSettings>;
+
+export type AllVertexLabelSettings = {
+  offset: Animatable<number>;
+  position: Animatable<VertexLabelPosition>;
+};
 
 export type AllEdgeSettings = DeepRequired<EdgeSettings>;
 
@@ -19,64 +25,70 @@ export type AllStraightEdgeSettings = DeepRequired<StraightEdgeSettings>;
 
 export type AllCurvedEdgeSettings = DeepRequired<CurvedEdgeSettings>;
 
-export type AllArrowSettings = DeepRequired<ArrowSettings>;
+export type AllEdgeArrowSettings = DeepRequired<EdgeArrowSettings>;
 
-export type AllLabelSettings = DeepRequired<LabelSettings>;
+export type AllEdgeLabelSettings = DeepRequired<EdgeLabelSettings>;
 
 export type AllGraphComponentsSettings = {
-  arrow?: AllArrowSettings;
   edge: AllEdgeSettings;
-  label?: AllLabelSettings;
+  edgeArrow?: AllEdgeArrowSettings;
+  edgeLabel?: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
+  vertexLabel?: AllVertexLabelSettings;
 };
 
 /*
  * INTERNAL SETTINGS
  */
-export type InternalStraightEdgeSettings = Pick<
-  AllStraightEdgeSettings,
-  'type'
-> &
-  DeepSharedify<Omit<AllStraightEdgeSettings, 'type'>>;
+export type InternalVertexLabelSettings = DeepSharedify<AllVertexLabelSettings>;
+
+export type InternalStraightEdgeSettings =
+  DeepSharedify<AllStraightEdgeSettings>;
 
 export type InternalCurvedEdgeSettings = Pick<AllCurvedEdgeSettings, 'type'> &
   DeepSharedify<Omit<AllCurvedEdgeSettings, 'type'>>;
 
-export type InternalArrowSettings = DeepSharedify<AllArrowSettings>;
+export type InternalEdgeArrowSettings = DeepSharedify<AllEdgeArrowSettings>;
 
-export type InternalLabelSettings = DeepSharedify<AllLabelSettings>;
+export type InternalEdgeLabelSettings = DeepSharedify<AllEdgeLabelSettings>;
 
-export type InternalEdgeSettings = Pick<AllEdgeSettings, 'type'> &
-  DeepSharedify<Omit<AllEdgeSettings, 'type'>>;
+export type InternalEdgeSettings = DeepSharedify<AllEdgeSettings>;
 
-export type InternalUndirectedStraightEdgeSettings = {
-  edge: InternalStraightEdgeSettings;
-  label?: InternalLabelSettings;
+type SharedInternalEdgeSettings = {
+  vertex: InternalVertexSettings;
 };
 
-export type InternalUndirectedCurvedEdgeSettings = {
-  edge: InternalCurvedEdgeSettings;
-  label?: InternalLabelSettings;
-};
+export type InternalUndirectedStraightEdgeSettings =
+  SharedInternalEdgeSettings & {
+    edge: InternalStraightEdgeSettings;
+    label: InternalEdgeLabelSettings;
+  };
+
+export type InternalUndirectedCurvedEdgeSettings =
+  SharedInternalEdgeSettings & {
+    edge: InternalCurvedEdgeSettings;
+    label: InternalEdgeLabelSettings;
+  };
 
 export type InternalDirectedStraightEdgeSettings =
   InternalUndirectedStraightEdgeSettings & {
-    arrow: InternalArrowSettings;
+    arrow: InternalEdgeArrowSettings;
   };
 
 export type InternalDirectedCurvedEdgeSettings =
   InternalUndirectedCurvedEdgeSettings & {
-    arrow: InternalArrowSettings;
+    arrow: InternalEdgeArrowSettings;
   };
 
-export type InternalVertexSettings = DeepSharedify<AllVertexSettings>;
+export type InternalVertexSettings = AllVertexSettings;
 
 /*
  * INTERNAL GRAPH COMPONENTS SETTINGS
  */
 export type InternalGraphComponentsSettings = {
-  arrow?: InternalArrowSettings;
   edge: InternalEdgeSettings;
-  label?: InternalLabelSettings;
+  edgeArrow?: InternalEdgeArrowSettings;
+  edgeLabel?: InternalEdgeLabelSettings;
   vertex: InternalVertexSettings;
+  vertexLabel?: InternalVertexLabelSettings;
 };

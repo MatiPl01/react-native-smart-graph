@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { DirectedGraph, DirectedGraphComponent, GraphView } from '..';
 
 const ADDED_COMPONENTS = [
@@ -59,7 +59,7 @@ const ADDED_COMPONENTS = [
 let idx = 0;
 let mode = 0;
 
-export default function App() {
+export default function GraphExample() {
   const graph = new DirectedGraph({
     edges: [
       {
@@ -135,12 +135,10 @@ export default function App() {
   return (
     <GraphView objectFit='contain' scales={[1e-10, 1, 2]}>
       <DirectedGraphComponent
-        settings={{
-          layout: {
-            type: 'force'
-          }
-        }}
         graph={graph}
+        layoutSettings={{
+          type: 'force'
+        }}
       />
     </GraphView>
   );

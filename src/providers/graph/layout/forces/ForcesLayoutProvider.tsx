@@ -1,15 +1,15 @@
+import { Vector } from '@shopify/react-native-skia';
 import { PropsWithChildren } from 'react';
 import {
   runOnJS,
-  SharedValue,
   useAnimatedReaction,
   useFrameCallback,
   useSharedValue
 } from 'react-native-reanimated';
 
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
-import { EdgeComponentData, VertexComponentData } from '@/types/data';
-import { BoundingRect } from '@/types/layout';
+import { useViewDataContext } from '@/providers/view';
+import { EdgeComponentData } from '@/types/data';
 import { GraphConnections } from '@/types/models';
 import {
   InternalForceLayoutSettings,
@@ -17,33 +17,28 @@ import {
 } from '@/types/settings';
 import { animateToValue } from '@/utils/animations';
 import { applyForces } from '@/utils/forces';
-import {
-  alignPositionsToCenter,
-  calcContainerBoundingRect
-} from '@/utils/placement';
-import { animatedVectorCoordinatesToVector } from '@/utils/vectors';
+import { alignPositionsToCenter } from '@/utils/placement';
+import { getVerticesPositions, setVerticesPositions } from '@/utils/transform';
 
 import { useForcesPlacementContext } from './ForcesPlacementProvider';
 
-type ForcesLayoutProviderProps<V, E> = PropsWithChildren<{
+type ForcesLayoutProviderProps<E> = PropsWithChildren<{
   connections: GraphConnections;
   edgesData: Record<string, EdgeComponentData<E>>;
   settings: InternalForceLayoutSettings;
-  targetBoundingRect: SharedValue<BoundingRect>;
-  verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
-function ForcesLayoutProvider<V, E>({
+function ForcesLayoutProvider<E>({
   children,
   connections,
   edgesData,
-  settings,
-  targetBoundingRect,
-  verticesData
-}: ForcesLayoutProviderProps<V, E>) {
+  settings
+}: ForcesLayoutProviderProps<E>) {
   // CONTEXTS
-  // Forces placement context
-  const { initialPlacementCompleted, lockedVertices, placedVerticesPositions } =
+  // Canvas contexts
+  const { targetBoundingRect } = useViewDataContext();
+  // Graph contexts
+  const { initialPlacementCompleted, lockedVertices, placedVerticesData } =
     useForcesPlacementContext();
 
   // Helper values
@@ -65,6 +60,7 @@ function ForcesLayoutProvider<V, E>({
     const minUpdateDistance = settings.minUpdateDistance.value;
     let newPositions = targetPositions.value ?? {};
     let updatedKeys = updatedVerticesKeys.value ?? [];
+
     if (
       timestamp - lastUpdateTimestamp.value >=
       settings.refreshInterval.value
@@ -72,7 +68,7 @@ function ForcesLayoutProvider<V, E>({
       const result = applyForces(
         connections,
         lockedVertices,
-        placedVerticesPositions,
+        getVerticesPositions(placedVerticesData),
         {
           attractionForceFactor: settings.attractionForceFactor.value,
           attractionScale: settings.attractionScale.value,
@@ -84,9 +80,13 @@ function ForcesLayoutProvider<V, E>({
       );
 
       updatedVerticesKeys.value = updatedKeys = result.keys;
-      targetPositions.value = newPositions = alignPositionsToCenter(
+      const { boundingRect, verticesPositions } = alignPositionsToCenter(
         result.positions
-      ).verticesPositions;
+      );
+      targetPositions.value = newPositions = verticesPositions;
+      if (initialPlacementCompleted.value && updatedKeys.length) {
+        targetBoundingRect.value = boundingRect;
+      }
       lastUpdateTimestamp.value = timestamp;
 
       // Disable forces layout if there are no vertices to update
@@ -96,44 +96,33 @@ function ForcesLayoutProvider<V, E>({
       }
     }
 
-    // Update positions of the vertices
+    const updatedPositions: Record<string, Vector> = {};
     for (const key of updatedKeys) {
-      const vertexPosition = placedVerticesPositions[key];
+      const vertexData = placedVerticesData[key];
       const targetPosition = newPositions[key];
-      if (!vertexPosition || !targetPosition) return;
+      if (
+        !vertexData ||
+        !targetPosition ||
+        // Don't update positions of vertices that are still being animated
+        vertexData.transformProgress.value < 1
+      ) {
+        return;
+      }
       // Animate vertex position to the target position
       const eps = 0.1 * minUpdateDistance;
-      vertexPosition.x.value = animateToValue(
-        vertexPosition.x.value,
-        targetPosition.x,
-        eps
-      );
-      vertexPosition.y.value = animateToValue(
-        vertexPosition.y.value,
-        targetPosition.y,
-        eps
-      );
+      updatedPositions[key] = {
+        x: animateToValue(vertexData.points.value.target.x, targetPosition.x, {
+          eps
+        }),
+        y: animateToValue(vertexData.points.value.target.y, targetPosition.y, {
+          eps
+        })
+      };
     }
-  }, false);
 
-  useAnimatedReaction(
-    () => ({
-      completed: initialPlacementCompleted.value,
-      positions: targetPositions.value
-    }),
-    ({ completed, positions }) => {
-      if (!completed) return;
-      targetBoundingRect.value = calcContainerBoundingRect(
-        positions ??
-          Object.fromEntries(
-            Object.entries(placedVerticesPositions).map(([key, value]) => [
-              key,
-              animatedVectorCoordinatesToVector(value)
-            ])
-          )
-      );
-    }
-  );
+    // Apply updated positions
+    setVerticesPositions(updatedPositions, placedVerticesData, edgesData);
+  }, false);
 
   useAnimatedReaction(
     () => initialPlacementCompleted.value,
@@ -141,23 +130,18 @@ function ForcesLayoutProvider<V, E>({
       if (!completed) return;
       runOnJS(enableForces)();
     },
-    [verticesData, edgesData]
+    [placedVerticesData, edgesData]
   );
 
   return <>{children}</>;
 }
 
 export default withGraphSettings(
-  withComponentsData(
-    ForcesLayoutProvider,
-    ({ connections, edgesData, targetBoundingRect, verticesData }) => ({
-      connections,
-      edgesData,
-      targetBoundingRect,
-      verticesData
-    })
-  ),
-  ({ settings }) => ({
-    settings: settings.layout as InternalForceLayoutSettings
+  withComponentsData(ForcesLayoutProvider, ({ connections, edgesData }) => ({
+    connections,
+    edgesData
+  })),
+  ({ layoutSettings }) => ({
+    settings: layoutSettings as InternalForceLayoutSettings
   })
 );

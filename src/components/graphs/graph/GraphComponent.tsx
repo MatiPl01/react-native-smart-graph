@@ -1,47 +1,54 @@
-import { Mask, Rect } from '@shopify/react-native-skia';
+import { Mask } from '@shopify/react-native-skia';
 import { memo } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 
-import { useComponentFocus } from '@/hooks/focus';
-import { useCanvasContexts } from '@/providers/graph/contexts';
+import { useComponentFocus } from '@/hooks';
+import {
+  useEdgesMaskContext,
+  useMultiStepFocusContext
+} from '@/providers/graph';
+import { useFocusContext } from '@/providers/view';
 
 import GraphEdges from './GraphEdges';
 import GraphEdgesLabels from './GraphEdgesLabels';
-import GraphEdgesMask from './GraphEdgesMask';
 import GraphVertices from './GraphVertices';
+import GraphVerticesLabels from './GraphVerticesLabels';
 
 function GraphComponent() {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { boundingRect },
-    focusContext
-  } = useCanvasContexts();
+  const focusContext = useFocusContext();
+  // Graph contexts
+  const multiStepFocusContext = useMultiStepFocusContext();
+  const { maskComponent } = useEdgesMaskContext();
 
   // A helper value to animate components on vertex focus
   const focusProgress = useSharedValue(0);
   // Update the focusProgress
   useComponentFocus(focusProgress, focusContext);
 
-  const x = useDerivedValue(() => boundingRect.left.value);
-  const y = useDerivedValue(() => boundingRect.top.value);
-  const w = useDerivedValue(
-    () => boundingRect.right.value - boundingRect.left.value
-  );
-  const h = useDerivedValue(
-    () => boundingRect.bottom.value - boundingRect.top.value
-  );
-
   return (
     <>
-      <Rect color='#333' height={h} width={w} x={x} y={y} />
-      <Mask
-        mask={<GraphEdgesMask boundingRect={boundingRect} />}
-        mode='luminance'>
+      {/* Graph edges */}
+      {maskComponent ? (
+        <Mask mask={maskComponent} mode='luminance'>
+          <GraphEdges focusProgress={focusProgress} />
+        </Mask>
+      ) : (
         <GraphEdges focusProgress={focusProgress} />
-      </Mask>
-      <GraphVertices focusContext={focusContext} />
+      )}
+      {/* Edges labels */}
       <GraphEdgesLabels focusProgress={focusProgress} />
+      {/* Graph vertices */}
+      <GraphVertices
+        focusContext={focusContext}
+        multiStepFocusContext={multiStepFocusContext}
+      />
+      {/* Vertices labels */}
+      <GraphVerticesLabels
+        focusContext={focusContext}
+        multiStepFocusContext={multiStepFocusContext}
+      />
     </>
   );
 }

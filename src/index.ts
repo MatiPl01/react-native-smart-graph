@@ -12,10 +12,10 @@ export { default as DirectedGraphComponent } from '@/components/graphs/DirectedG
 export { default as UndirectedGraphComponent } from '@/components/graphs/UndirectedGraphComponent';
 
 // RENDERERS
-export { default as DefaultEdgeArrowRenderer } from '@/components/graphs/arrows/renderers/DefaultArrowRenderer';
+export { default as DefaultEdgeArrowRenderer } from '@/components/graphs/arrows/renderers/DefaultEdgeArrowRenderer';
 export { default as DefaultCurvedEdgeRenderer } from '@/components/graphs/edges/curved/renderers/DefaultCurvedEdgeRenderer';
 export { default as DefaultStraightEdgeRenderer } from '@/components/graphs/edges/straight/renderers/DefaultStraightEdgeRenderer';
-export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/renderers/DefaultLabelRenderer';
+export { default as DefaultEdgeLabelRenderer } from '@/components/graphs/labels/renderers/DefaultEdgeLabelRenderer';
 export { default as DefaultVertexRenderer } from '@/components/graphs/vertices/renderers/DefaultVertexRenderer';
 
 // MODELS
@@ -30,9 +30,29 @@ export * from '@/hooks';
 // ALGORITHMS
 export * from '@/utils/algorithms';
 
+// UTILS
+export { animateToValue } from '@/utils/animations';
+export * from '@/utils/math';
+export * from '@/utils/vectors';
+export {
+  calcTransformationOnProgress,
+  calcTranslationOnProgress,
+  calcValueOnProgress
+} from '@/utils/views';
+
 // TYPES
 export * from '@/types/components/public';
 export * from '@/types/data/public';
 export * from '@/types/layout/public';
 export * from '@/types/models/public';
 export * from '@/types/settings/public';
+
+// EXTERNAL LIBRARIES
+export { FiberProvider } from 'its-fine';
+export type {
+  EllipsizeMode,
+  HorizontalAlignment as TextHorizontalAlignment,
+  TextOverflow,
+  VerticalAlignment as TextVerticalAlignment
+} from 'react-native-skia-responsive-text';
+export { default as ResponsiveText } from 'react-native-skia-responsive-text';

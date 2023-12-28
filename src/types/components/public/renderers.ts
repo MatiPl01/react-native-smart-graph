@@ -1,134 +1,140 @@
-/* eslint-disable import/no-unused-modules */
 import { SharedValue } from 'react-native-reanimated';
 
-import {
-  AnimatedPath,
-  AnimatedVector,
-  AnimatedVectorCoordinates
-} from '@/types/layout';
+import { AnimatedPath, AnimatedVector } from '@/types/layout';
 
-type SharedRenderersProps = {
+type SharedRenderersProps<P> = {
   animationProgress: SharedValue<number>;
+  customProps: P;
 };
 
 /*
  * VERTEX
  */
-export type VertexRendererProps<V> = SharedRenderersProps & {
-  currentRadius: SharedValue<number>;
-  focusKey: SharedValue<null | string>;
-  focusProgress: SharedValue<number>;
+export type VertexRendererProps<
+  V = unknown,
+  P = unknown
+> = SharedRenderersProps<P> & {
+  focus: {
+    key: SharedValue<null | string>;
+    progress: SharedValue<number>;
+  };
   key: string;
-  position: AnimatedVectorCoordinates;
-  radius: SharedValue<number>;
+  multiStepFocus: {
+    bounds: SharedValue<{
+      afterIdx: number;
+      beforeIdx: number;
+    }>;
+    points: SharedValue<Array<{ key: string; startsAt: number }>>;
+    progress: SharedValue<number>;
+  } | null;
+  r: number;
   scale: SharedValue<number>;
-  value?: V;
+  value: V;
 };
 
-export type VertexRenderer<V> = (
-  props: VertexRendererProps<V>
+export type VertexRenderer<V = unknown, P = unknown> = (
+  props: VertexRendererProps<V, P>
+) => JSX.Element | null;
+
+/*
+ * VERTEX LABEL
+ */
+export type VertexLabelRendererProps<
+  V = unknown,
+  P = unknown
+> = SharedRenderersProps<P> & {
+  focus: {
+    key: SharedValue<null | string>;
+    progress: SharedValue<number>;
+  };
+  key: string;
+  multiStepFocus: {
+    bounds: SharedValue<{
+      afterIdx: number;
+      beforeIdx: number;
+    }>;
+    points: SharedValue<Array<{ key: string; startsAt: number }>>;
+    progress: SharedValue<number>;
+  } | null;
+  onMeasure: (width: number, height: number) => void;
+  r: number;
+  value: V;
+};
+
+export type VertexLabelRenderer<V = unknown, P = unknown> = (
+  props: VertexLabelRendererProps<V, P>
+) => JSX.Element | null;
+
+/*
+ * VERTEX MASK
+ */
+export type VertexMaskRendererProps<P = unknown> = SharedRenderersProps<P> & {
+  key: string;
+  r: number;
+};
+
+export type VertexMaskRenderer<P = unknown> = (
+  props: VertexMaskRendererProps<P>
 ) => JSX.Element | null;
 
 /*
  * EDGE
  */
-type SharedEdgeRendererProps<E> = SharedRenderersProps & {
+type SharedEdgeRendererProps<E, P = unknown> = SharedRenderersProps<P> & {
+  focusProgress: SharedValue<number>;
   key: string;
-  value?: E;
+  value: E;
 };
 
-export type StraightEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
+export type StraightEdgeRendererProps<
+  E = unknown,
+  P = unknown
+> = SharedEdgeRendererProps<E, P> & {
   p1: AnimatedVector;
   p2: AnimatedVector;
 };
 
-export type CurvedEdgeRendererProps<E> = SharedEdgeRendererProps<E> & {
-  parabolaX: SharedValue<number>;
-  parabolaY: SharedValue<number>;
+export type CurvedEdgeRendererProps<
+  E = unknown,
+  P = unknown
+> = SharedEdgeRendererProps<E, P> & {
   path: AnimatedPath;
 };
 
-export type CurvedEdgeRenderer<E> = (
-  props: CurvedEdgeRendererProps<E>
+export type CurvedEdgeRenderer<E = unknown, P = unknown> = (
+  props: CurvedEdgeRendererProps<E, P>
 ) => JSX.Element | null;
 
-export type StraightEdgeRenderer<E> = (
-  props: StraightEdgeRendererProps<E>
+export type StraightEdgeRenderer<E = unknown, P = unknown> = (
+  props: StraightEdgeRendererProps<E, P>
 ) => JSX.Element | null;
 
 /*
- * LABEL
+ * EDGE LABEL
  */
-export type LabelRendererProps<E> = SharedRenderersProps & {
-  centerX: SharedValue<number>;
-  centerY: SharedValue<number>;
+export type EdgeLabelRendererProps<
+  E = unknown,
+  P = unknown
+> = SharedRenderersProps<P> & {
   edgeLength: SharedValue<number>;
   edgeRotation: SharedValue<number>;
-  height: SharedValue<number>;
   key: string;
-  value?: E;
+  onMeasure: (width: number, height: number) => void;
+  r: number;
+  value: E;
 };
 
-export type LabelRenderer<E> = (
-  props: LabelRendererProps<E>
+export type EdgeLabelRenderer<E = unknown, P = unknown> = (
+  props: EdgeLabelRendererProps<E, P>
 ) => JSX.Element | null;
 
 /*
- * ARROW
+ * EDGE ARROW
  */
-export type ArrowRendererProps = SharedRenderersProps & {
-  centerPosition: AnimatedVector;
-  height: SharedValue<number>;
-  rotation: SharedValue<number>;
-  tipPosition: AnimatedVector;
-  width: SharedValue<number>;
+export type EdgeArrowRendererProps<P = unknown> = SharedRenderersProps<P> & {
+  s: number;
 };
 
-export type ArrowRenderer = (props: ArrowRendererProps) => JSX.Element | null;
-
-/*
- * GRAPH
- */
-type SharedUndirectedGraphRenderers<V, E> = {
-  label?: LabelRenderer<E>;
-  vertex?: VertexRenderer<V>;
-};
-
-type SharedDirectedGraphRenderers<V, E> = SharedUndirectedGraphRenderers<
-  V,
-  E
-> & {
-  arrow?: ArrowRenderer;
-};
-
-export type UndirectedGraphWithStraightEdgeRenderers<V, E> =
-  SharedUndirectedGraphRenderers<V, E> & {
-    edge?: StraightEdgeRenderer<E>;
-  };
-
-export type UndirectedGraphWithCurvedEdgeRenderers<V, E> =
-  SharedUndirectedGraphRenderers<V, E> & {
-    edge?: CurvedEdgeRenderer<E>;
-  };
-
-export type DirectedGraphWithStraightEdgeRenderers<V, E> =
-  SharedDirectedGraphRenderers<V, E> & {
-    edge?: StraightEdgeRenderer<E>;
-  };
-
-export type DirectedGraphWithCurvedEdgeRenderers<V, E> =
-  SharedDirectedGraphRenderers<V, E> & {
-    edge?: CurvedEdgeRenderer<E>;
-  };
-
-export type UndirectedGraphRenderers<V, E> =
-  | UndirectedGraphWithCurvedEdgeRenderers<V, E>
-  | UndirectedGraphWithStraightEdgeRenderers<V, E>;
-
-export type DirectedGraphRenderers<V, E> =
-  | DirectedGraphWithCurvedEdgeRenderers<V, E>
-  | DirectedGraphWithStraightEdgeRenderers<V, E>;
-
-export type GraphRenderers<V, E> =
-  | DirectedGraphRenderers<V, E>
-  | UndirectedGraphRenderers<V, E>;
+export type EdgeArrowRenderer<P = unknown> = (
+  props: EdgeArrowRendererProps<P>
+) => JSX.Element | null;

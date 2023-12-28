@@ -3,33 +3,32 @@ import {
   UndirectedGraphVertex
 } from '@/types/models';
 
-export default class UndirectedEdge<V, E> implements IUndirectedEdge<V, E> {
+import Edge from './Edge';
+
+export default class UndirectedEdge<V, E>
+  extends Edge<V, E>
+  implements IUndirectedEdge<V, E>
+{
   constructor(
-    private readonly key$: string,
-    private readonly value$: E | undefined,
+    key$: string,
+    value$: E,
     private readonly vertices$: [
       UndirectedGraphVertex<V, E>,
       UndirectedGraphVertex<V, E>
     ]
-  ) {}
-
-  isDirected(): boolean {
-    return false;
+  ) {
+    super(key$, value$);
   }
 
   get isLoop(): boolean {
     return this.vertices[0].key === this.vertices[1].key;
   }
 
-  get key(): string {
-    return this.key$;
-  }
-
-  get value(): E | undefined {
-    return this.value$;
-  }
-
   get vertices(): [UndirectedGraphVertex<V, E>, UndirectedGraphVertex<V, E>] {
     return this.vertices$;
+  }
+
+  isDirected(): boolean {
+    return false;
   }
 }

@@ -1,8 +1,10 @@
 import {
-  DefaultArrowRenderer,
   DefaultCurvedEdgeRenderer,
-  DefaultLabelRenderer,
+  DefaultEdgeArrowRenderer,
+  DefaultEdgeLabelRenderer,
   DefaultStraightEdgeRenderer,
+  DefaultVertexLabelRenderer,
+  DefaultVertexMaskRenderer,
   DefaultVertexRenderer
 } from '@/components';
 import {
@@ -12,30 +14,33 @@ import {
 import { AllGraphSettings } from '@/types/components';
 import { GraphData } from '@/types/data';
 import {
-  AllArrowSettings,
   AllBoundRandomPlacementSettings,
   AllCirclePlacementSettings,
   AllCirclesPlacementSettings,
   AllCurvedEdgeSettings,
+  AllEdgeArrowSettings,
+  AllEdgeLabelSettings,
   AllFocusSettings,
   AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
-  AllLabelSettings,
+  AllMultiStepFocusSettings,
   AllOrbitsPlacementSettings,
   AllRandomPlacementSettings,
   AllStraightEdgeSettings,
   AllTreesPlacementSettings,
   AllUnboundRandomPlacementSettings,
+  AllVertexLabelSettings,
   AllVertexSettings,
-  LayoutType
+  LayoutType,
+  VertexLabelPosition
 } from '@/types/settings';
-import { unsharedify } from '@/utils/objects';
+import { isAnimationSettingsObject } from '@/utils/animations';
 
 /*
  * SETTINGS
  */
 // PLACEMENT
-const minVertexDistance = 20;
+const minVertexDistance = 100;
 
 const sharedCircularPlacementSettings = {
   minVertexDistance,
@@ -67,7 +72,7 @@ const DEFAULT_PLACEMENT_SETTINGS: {
   },
   orbits: {
     layerSizing: 'auto',
-    maxSectorAngle: (2 / 3) * Math.PI,
+    maxSectorAngle: Math.PI,
     minVertexDistance,
     roots: [],
     strategy: 'orbits',
@@ -116,6 +121,7 @@ const DEFAULT_LAYOUT_SETTINGS: Record<LayoutType, AllGraphLayoutSettings> = {
 };
 
 // FOCUS
+// Single vertex focus
 export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
   alignment: {
     horizontalAlignment: 'center',
@@ -128,130 +134,140 @@ export const DEFAULT_FOCUS_SETTINGS: AllFocusSettings = {
   vertexScale: 4
 };
 
+// Multi-step vertex focus
+const DEFAULT_MULTI_STEP_FOCUS_SETTINGS: Omit<
+  AllMultiStepFocusSettings,
+  'points' | 'progress'
+> = {
+  disableGestures: false,
+  pointsChangeAnimationSettings: DEFAULT_FOCUS_ANIMATION_SETTINGS
+};
+
 // COMPONENTS
-const DEFAULT_COMPONENTS_SETTINGS: {
-  arrow: AllArrowSettings;
+export const DEFAULT_COMPONENTS_SETTINGS: {
+  arrow: AllEdgeArrowSettings;
   edge: {
     curved: AllCurvedEdgeSettings;
     straight: AllStraightEdgeSettings;
   };
-  label: AllLabelSettings;
+  edgeLabel: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
+  vertexLabel: AllVertexLabelSettings;
 } = {
   arrow: {
     scale: 0.5
   },
   edge: {
-    curved: {
-      type: 'curved'
-    },
+    curved: {},
     straight: {
-      maxOffsetFactor: 0.5,
-      type: 'straight'
+      maxOffsetFactor: 0.5
     }
   },
-  label: {
-    displayed: false,
+  edgeLabel: {
     scale: 0.5
   },
   vertex: {
     radius: 20
+  },
+  vertexLabel: {
+    offset: 0,
+    position: VertexLabelPosition.BOTTOM
   }
 };
 
 // ANIMATIONS
-const getDefaultAnimations = <V, E>(
-  settings: GraphData<V, E>['settings']
-): AllGraphAnimationsSettings =>
-  settings?.animations === null
-    ? {
-        edges: null,
-        layout: null,
-        vertices: null
-      }
-    : {
-        edges:
-          settings?.animations?.edges === null
-            ? null
-            : DEFAULT_ANIMATION_SETTINGS,
-        layout:
-          settings?.animations?.layout === null
-            ? null
-            : DEFAULT_ANIMATION_SETTINGS,
-        vertices:
-          settings?.animations?.vertices === null
-            ? null
-            : DEFAULT_ANIMATION_SETTINGS
-      };
+const getDefaultAnimations = <V, E>({
+  animationSettings
+}: GraphData<V, E>): AllGraphAnimationsSettings => {
+  if (animationSettings === null) {
+    return {
+      edges: null,
+      layout: null,
+      vertices: null
+    };
+  }
 
-export const getDefaultConfig = <V, E>(
-  data: GraphData<V, E>
-): Omit<AllGraphSettings<V, E>, 'graph'> => {
-  const settings = unsharedify(data?.settings);
+  if (!animationSettings || isAnimationSettingsObject(animationSettings)) {
+    return {
+      edges: DEFAULT_ANIMATION_SETTINGS,
+      layout: DEFAULT_ANIMATION_SETTINGS,
+      vertices: DEFAULT_ANIMATION_SETTINGS
+    };
+  }
 
   return {
-    renderers: {
-      arrow: data.graph.isDirected() ? DefaultArrowRenderer : undefined,
-      edge:
-        settings?.components?.edge?.type === 'curved'
-          ? DefaultCurvedEdgeRenderer
-          : DefaultStraightEdgeRenderer,
-      label: data.settings?.components?.label?.displayed
-        ? DefaultLabelRenderer
-        : undefined,
-      vertex: DefaultVertexRenderer
-    },
-    settings: {
-      animations: getDefaultAnimations(data.settings),
-      components: {
-        arrow: data.graph.isDirected()
-          ? DEFAULT_COMPONENTS_SETTINGS.arrow
-          : undefined,
-        edge: DEFAULT_COMPONENTS_SETTINGS.edge[
-          settings?.components?.edge?.type ?? 'straight'
-        ],
-        label: DEFAULT_COMPONENTS_SETTINGS.label,
-        vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
-      },
-      layout: settings?.layout
-        ? DEFAULT_LAYOUT_SETTINGS[settings.layout.type]
-        : DEFAULT_LAYOUT_SETTINGS.auto,
-      placement: settings?.placement?.strategy
-        ? settings.placement.strategy === 'random'
-          ? DEFAULT_PLACEMENT_SETTINGS[settings.placement.strategy][
-              settings.placement.mesh ?? 'grid'
-            ]
-          : DEFAULT_PLACEMENT_SETTINGS[settings.placement.strategy]
-        : DEFAULT_PLACEMENT_SETTINGS.random.grid
-    }
+    edges: animationSettings.edges === null ? null : DEFAULT_ANIMATION_SETTINGS,
+    layout:
+      animationSettings.layout === null ? null : DEFAULT_ANIMATION_SETTINGS,
+    vertices:
+      animationSettings.vertices === null ? null : DEFAULT_ANIMATION_SETTINGS
   };
 };
 
-const getPlacementConfig = <V, E>(
-  settings: AllGraphSettings<V, E>['settings']
-) => {
-  const sharedSettings = { strategy: 'shared' };
+export const getDefaultConfig = <V, E>(
+  data: GraphData<V, E>
+): Omit<AllGraphSettings<V, E>, 'graph'> => ({
+  animationSettings: getDefaultAnimations(data),
+  componentsSettings: {
+    edge: DEFAULT_COMPONENTS_SETTINGS.edge[data.edgeType ?? 'straight'],
+    edgeArrow: data.graph.isDirected()
+      ? DEFAULT_COMPONENTS_SETTINGS.arrow
+      : undefined,
+    edgeLabel: DEFAULT_COMPONENTS_SETTINGS.edgeLabel,
+    vertex: DEFAULT_COMPONENTS_SETTINGS.vertex,
+    vertexLabel: DEFAULT_COMPONENTS_SETTINGS.vertexLabel
+  },
+  edgeType: data.edgeType ?? 'straight',
+  eventSettings: data.eventSettings && {
+    press: data.eventSettings.press && {
+      disableAnimation: false
+    }
+  },
+  focusSettings: data.focusSettings
+    ? {
+        ...data.focusSettings,
+        ...DEFAULT_MULTI_STEP_FOCUS_SETTINGS
+      }
+    : undefined,
+  layoutSettings: data.layoutSettings?.type
+    ? DEFAULT_LAYOUT_SETTINGS[data.layoutSettings.type]
+    : DEFAULT_LAYOUT_SETTINGS.auto,
+  placementSettings: data.placementSettings?.strategy
+    ? data.placementSettings?.strategy === 'random'
+      ? DEFAULT_PLACEMENT_SETTINGS.random[data.placementSettings.mesh ?? 'grid']
+      : DEFAULT_PLACEMENT_SETTINGS[data.placementSettings.strategy]
+    : DEFAULT_PLACEMENT_SETTINGS.random.grid,
+  renderers: {
+    edge:
+      data.edgeType === 'curved'
+        ? { props: {}, renderer: DefaultCurvedEdgeRenderer }
+        : { props: {}, renderer: DefaultStraightEdgeRenderer },
+    edgeArrow: data.graph.isDirected()
+      ? { props: {}, renderer: DefaultEdgeArrowRenderer }
+      : null,
+    edgeLabel: { props: {}, renderer: DefaultEdgeLabelRenderer }, // TODO - fix default font
+    vertex: { props: {}, renderer: DefaultVertexRenderer },
+    vertexLabel: { props: {}, renderer: DefaultVertexLabelRenderer },
+    vertexMask: { props: {}, renderer: DefaultVertexMaskRenderer }
+  }
+});
 
-  switch (settings.placement.strategy) {
+const getPlacementConfig = <V, E>(
+  settings: GraphData<V, E>['placementSettings']
+) => {
+  switch (settings?.strategy) {
     default:
     case 'random':
-      const sharedRandomSettings = {
-        ...sharedSettings,
-        mesh: 'shared'
-      };
-
-      switch ((settings.placement as AllRandomPlacementSettings).mesh) {
+      switch ((settings as AllRandomPlacementSettings).mesh) {
         case 'grid':
         case 'triangular':
           return {
-            ...sharedRandomSettings,
             density: 'shared',
             minVertexDistance: 'shared'
           };
         case 'random':
         default:
           return {
-            ...sharedRandomSettings,
             containerHeight: 'shared',
             containerWidth: 'shared'
           };
@@ -259,20 +275,17 @@ const getPlacementConfig = <V, E>(
     case 'circle':
     case 'circles':
       return {
-        ...sharedSettings,
         minVertexDistance: 'shared',
         sortVertices: 'shared'
       };
     case 'trees':
       return {
-        ...sharedSettings,
         minColumnDistance: 'shared',
         minRowDistance: 'shared',
         roots: 'shared'
       };
     case 'orbits':
       return {
-        ...sharedSettings,
         layerSizing: 'shared',
         maxSectorAngle: 'shared',
         minVertexDistance: 'shared',
@@ -282,46 +295,49 @@ const getPlacementConfig = <V, E>(
   }
 };
 
-export const getUpdateConfig = <V, E>({
-  settings
-}: Omit<AllGraphSettings<V, E>, 'graph'>) => ({
-  graph: 'shallow',
-  settings: {
-    components: {
-      arrow: {
-        scale: 'shared'
-      },
-      edge:
-        settings.components.edge.type === 'straight'
-          ? {
-              // STRAIGHT EDGE PROPERTIES
-              maxOffsetFactor: 'shared'
-            }
-          : undefined,
-      label: {
-        scale: 'shared'
-      },
-      vertex: {
-        radius: 'shared'
-      }
+export const getUpdateConfig = <V, E>(
+  data: Omit<AllGraphSettings<V, E>, 'graph'>
+) => ({
+  componentsSettings: {
+    arrow: {
+      scale: 'shared'
     },
-    focus: {
-      disableGestures: 'shared',
-      points: 'shared',
-      progress: 'shared'
-    },
-    layout:
-      settings.layout.type === 'force'
+    edge:
+      data.edgeType === 'straight'
         ? {
-            // FORCE LAYOUT PROPERTIES
-            attractionForceFactor: 'shared',
-            attractionScale: 'shared',
-            minUpdateDistance: 'shared',
-            refreshInterval: 'shared',
-            repulsionScale: 'shared',
-            strategy: 'shared'
+            // STRAIGHT EDGE PROPERTIES
+            maxOffsetFactor: 'shared'
           }
         : undefined,
-    placement: getPlacementConfig(settings)
-  }
+    edgeLabel: {
+      scale: 'shared'
+    },
+    vertexLabel: {
+      offset: 'shared',
+      position: 'shared'
+    }
+  },
+  eventSettings: data.eventSettings && {
+    press: data.eventSettings.press && {
+      disableAnimation: 'shared'
+    }
+  },
+  focusSettings: {
+    disableGestures: 'shared',
+    points: 'shared',
+    progress: 'shared'
+  },
+  graph: 'shallow',
+  layoutSettings:
+    data.layoutSettings.type === 'force'
+      ? {
+          // FORCE LAYOUT PROPERTIES
+          attractionForceFactor: 'shared',
+          attractionScale: 'shared',
+          minUpdateDistance: 'shared',
+          refreshInterval: 'shared',
+          repulsionScale: 'shared'
+        }
+      : undefined,
+  placementSettings: getPlacementConfig(data.placementSettings)
 });

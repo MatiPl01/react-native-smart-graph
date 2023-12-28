@@ -1,5 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -12,7 +12,7 @@ import {
   DEFAULT_FOCUS_ANIMATION_SETTINGS,
   DEFAULT_GESTURE_ANIMATION_SETTINGS
 } from '@/constants/animations';
-import { useAutoSizingContext } from '@/providers/view';
+import { useAutoSizingContext } from '@/providers/view/auto';
 import { useViewDataContext } from '@/providers/view/data';
 import {
   BlurData,
@@ -22,7 +22,8 @@ import {
 } from '@/types/data';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
-import { calcScaleOnProgress, calcTranslationOnProgress } from '@/utils/views';
+import { useNullableContext } from '@/utils/contexts';
+import { calcTranslationOnProgress, calcValueOnProgress } from '@/utils/views';
 
 import { useTransformContext } from './TransformProvider';
 
@@ -48,23 +49,18 @@ export type FocusContextType = {
   previousKey: SharedValue<null | string>;
   startFocus: FocusStartHandler;
   status: SharedValue<FocusStatus>;
+  targetAnimationProgress: SharedValue<number>;
   transitionProgress: SharedValue<number>;
 };
 
-const FocusContext = createContext(null as unknown as object);
+const FocusContext = createContext<FocusContextType | null>(null);
+FocusContext.displayName = 'FocusContext';
 
-export const useFocusContext = () => {
-  const contextValue = useContext(FocusContext);
-
-  if (!contextValue) {
-    throw new Error('useFocusContext must be used within a FocusProvider');
-  }
-
-  return contextValue as FocusContextType;
-};
+export const useFocusContext = () => useNullableContext(FocusContext);
 
 export enum FocusStatus {
   BLUR = 'BLUR',
+  BLUR_PREPARATION = 'BLUR_PREPARATION',
   BLUR_TRANSITION = 'BLUR_TRANSITION',
   FOCUS = 'FOCUS',
   FOCUS_PREPARATION = 'FOCUS_PREPARATION',
@@ -77,8 +73,8 @@ type FocusProviderProps = {
 };
 
 export default function FocusProvider({ children }: FocusProviderProps) {
-  // OTHER CONTEXTS VALUES
-  // Canvas data context values
+  // CONTEXTS
+  // Canvas contexts
   const {
     canvasDimensions,
     currentScale,
@@ -86,7 +82,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     gesturesDisabled,
     initialScale
   } = useViewDataContext();
-  // Canvas transform context values
   const {
     getTranslateClamp,
     resetContainerPosition,
@@ -94,7 +89,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     scaleContentTo,
     translateContentTo
   } = useTransformContext();
-  // Auto sizing context values
   const autoSizingContext = useAutoSizingContext();
 
   // CONTEXT VALUES - FOCUS
@@ -125,7 +119,10 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const animationSettings = useSharedValue<AllAnimationSettings | null>(null);
   const transitionStartPosition = useSharedValue({ x: 0, y: 0 });
   const transitionStartScale = useSharedValue(0);
+  // Progress of the focus/blur transition (transformation of the container)
   const transitionProgress = useSharedValue(1);
+  // Progress of the focus target animation (e.g. vertex opacity change, etc.)
+  const targetAnimationProgress = useSharedValue(0);
   const transitionStarted = useSharedValue(false);
   const previousKey = useSharedValue<null | string>(null);
 
@@ -135,6 +132,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
   const updateTransitionProgress = (animSettings: AllAnimationSettings) => {
     'worklet';
     transitionProgress.value = 0;
+    targetAnimationProgress.value = 0;
     const { onComplete, ...timingConfig } = animSettings;
     transitionProgress.value = withTiming(
       1,
@@ -146,6 +144,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         }
       }
     );
+    targetAnimationProgress.value = withTiming(1, timingConfig);
   };
 
   const startTransition = (
@@ -205,6 +204,8 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     'worklet';
     // Reset blur settings
     blurOrigin.value = null;
+    // Reset the transition finish handler
+    transitionStarted.value = false;
     // Disable auto sizing when focusing
     autoSizingContext.disableAutoSizing();
     // Update the previously focused key
@@ -239,6 +240,11 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     if (focusStatus.value === FocusStatus.BLUR) {
       return;
     }
+    previousKey.value = focusKey.value;
+    // Reset the transition finish handler
+    transitionStarted.value = false;
+    // Cancel focus transition if it is in progress
+    focusStatus.value = FocusStatus.BLUR_PREPARATION;
     // Turn off focus without animation if data is null
     if (data === null) {
       focusStatus.value = FocusStatus.BLUR;
@@ -358,6 +364,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
       } else if (
         progress === 0 &&
         transitionStarted.value &&
+        currentStatus !== FocusStatus.BLUR_PREPARATION &&
         currentStatus !== FocusStatus.FOCUS_PREPARATION &&
         currentStatus !== FocusStatus.FOCUS_PREPARATION_COMPLETE
       ) {
@@ -367,7 +374,6 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         return;
       }
 
-      transitionStarted.value = false;
       // Set the finish status
       focusStatus.value = finishStatus;
       // Enable gestures and change the container position to fit
@@ -430,7 +436,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         targetScale
       } = data;
       // Scale the content to the focus scale
-      scaleContentTo(calcScaleOnProgress(progress, sourceScale, targetScale));
+      scaleContentTo(calcValueOnProgress(progress, sourceScale, targetScale));
       // Translate the content to the focus position
       translateContentTo(
         calcTranslationOnProgress(progress, sourcePosition, targetPosition)
@@ -472,7 +478,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
         translation
       } = data;
       // Scale the content to the initial scale
-      const newScale = calcScaleOnProgress(progress, sourceScale, targetScale);
+      const newScale = calcValueOnProgress(progress, sourceScale, targetScale);
       scaleContentTo(newScale);
       // Translate the content to the user's finger position
       const translateScale = newScale / sourceScale - 1;
@@ -553,6 +559,7 @@ export default function FocusProvider({ children }: FocusProviderProps) {
     previousKey,
     startFocus,
     status: focusStatus,
+    targetAnimationProgress,
     transitionProgress
   };
 

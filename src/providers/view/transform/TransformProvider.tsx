@@ -1,5 +1,5 @@
 import { Vector } from '@shopify/react-native-skia';
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import { LayoutChangeEvent } from 'react-native';
 import {
   useAnimatedReaction,
@@ -12,11 +12,12 @@ import { useViewDataContext } from '@/providers/view/data';
 import { BoundingRect, Dimensions, ObjectFit } from '@/types/layout';
 import { AllAnimationSettings } from '@/types/settings';
 import { Maybe } from '@/types/utils';
+import { useNullableContext } from '@/utils/contexts';
 import {
   calcContainerScale,
   calcContainerTranslation,
-  calcScaleOnProgress,
   calcTranslationOnProgress,
+  calcValueOnProgress,
   clamp
 } from '@/utils/views';
 
@@ -65,27 +66,18 @@ export type TransformContextType = {
   ) => void;
 };
 
-const TransformContext = createContext(null as unknown as object);
+const TransformContext = createContext<TransformContextType | null>(null);
+TransformContext.displayName = 'TransformContext';
 
-export const useTransformContext = () => {
-  const contextValue = useContext(TransformContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useTransformContext must be used within a TransformProvider'
-    );
-  }
-
-  return contextValue as TransformContextType;
-};
+export const useTransformContext = () => useNullableContext(TransformContext);
 
 export default function TransformProvider({
   children
 }: {
   children?: React.ReactNode;
 }) {
-  // OTHER CONTEXTS VALUES
-  // Canvas data
+  // CONTEXTS
+  // Canvas contexts
   const {
     boundingRect: {
       bottom: containerBottom,
@@ -101,7 +93,8 @@ export default function TransformProvider({
     maxScale,
     minScale,
     objectFit,
-    padding
+    padding,
+    targetBoundingRect
   } = useViewDataContext();
 
   // Other values
@@ -119,6 +112,7 @@ export default function TransformProvider({
   const handleGraphRender = (containerBoundingRect: BoundingRect) => {
     'worklet';
     initialBoundingRect.value = containerBoundingRect;
+    targetBoundingRect.value = containerBoundingRect;
   };
 
   const getCurrentBoundingRect = (): BoundingRect => {
@@ -307,7 +301,7 @@ export default function TransformProvider({
       getIdealScale(containerBoundingRect, canvasDimensions, objectFit.value);
 
     // Scale content to fit container based on objectFit
-    scaleContentTo(calcScaleOnProgress(progress, startScale, targetScale));
+    scaleContentTo(calcValueOnProgress(progress, startScale, targetScale));
     // Translate content to fit container based on objectFit
     translateContentTo(
       calcTranslationOnProgress(

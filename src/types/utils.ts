@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ComponentProps } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
 export type DeepRequired<T> = {
@@ -9,6 +10,10 @@ export type RequiredWithout<T, E extends keyof T> = Required<Omit<T, E>> &
   Partial<Pick<T, E>>;
 
 export type Maybe<T> = T | null | undefined;
+
+export type MaybeObject<T> = Partial<{
+  [K in keyof T]: Maybe<T[K]>;
+}>;
 
 export type DeepPartial<T> = T extends object
   ? { [P in keyof T]?: DeepPartial<T[P]> }
@@ -53,7 +58,7 @@ export type Unsharedify<T> = T extends (...args: Array<any>) => any
   ? { [P in keyof T]: Unsharedify<T[P]> }
   : T;
 
-export type Sharedifyable<T> = SharedValue<T> | T;
+export type Animatable<T> = SharedValue<T> | T;
 
 export type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
@@ -90,3 +95,16 @@ export type MergeAll<T> = T extends [infer Head, ...infer Tail]
     ? Head
     : DeepMerge<Head & MergeAll<Tail>>
   : unknown;
+
+export type WithValue<V, T> = T &
+  (V extends unknown ? { value?: V } : { value: V });
+
+export type RendererWithProps<R, P = unknown> = {
+  props: P;
+  renderer: R;
+};
+
+export type OptionalPropsRenderer<R extends React.ComponentType<any>> =
+  'customProps' extends keyof ComponentProps<R>
+    ? R | RendererWithProps<R, ComponentProps<R>['customProps']>
+    : R;

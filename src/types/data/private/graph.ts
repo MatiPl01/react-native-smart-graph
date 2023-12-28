@@ -1,22 +1,39 @@
-import { GraphRenderers } from '@/types/components';
+import {
+  CurvedEdgeRenderer,
+  EdgeArrowRenderer,
+  EdgeLabelRenderer,
+  StraightEdgeRenderer,
+  VertexLabelRenderer,
+  VertexMaskRenderer,
+  VertexRenderer
+} from '@/types/components';
 import { Graph } from '@/types/models';
 import {
-  ArrowSettings,
+  EdgeArrowSettings,
+  EdgeLabelSettings,
   EdgeSettings,
   GraphSettings,
-  LabelSettings,
   VertexSettings
 } from '@/types/settings';
+import { MaybeObject, OptionalPropsRenderer } from '@/types/utils';
 
-export type GraphData<V, E> = {
-  graph: Graph<V, E>;
-  renderers?: GraphRenderers<V, E>;
-  settings?: Omit<GraphSettings<V>, 'components'> & {
-    components?: {
-      arrow?: ArrowSettings;
-      edge?: EdgeSettings;
-      label?: LabelSettings;
-      vertex?: VertexSettings;
-    };
+export type GraphData<V, E> = Omit<GraphSettings<V>, 'componentsSettings'> & {
+  componentsSettings?: {
+    edge?: EdgeSettings;
+    edgeArrow?: EdgeArrowSettings;
+    edgeLabel?: EdgeLabelSettings;
+    vertex?: VertexSettings;
   };
+  graph: Graph<V, E>;
+  renderers?: MaybeObject<{
+    edge:
+      | OptionalPropsRenderer<CurvedEdgeRenderer<E>>
+      | OptionalPropsRenderer<StraightEdgeRenderer<E>>
+      | null;
+    edgeArrow: OptionalPropsRenderer<EdgeArrowRenderer> | null;
+    edgeLabel: OptionalPropsRenderer<EdgeLabelRenderer<E>> | null;
+    vertex: OptionalPropsRenderer<VertexRenderer<V>> | null;
+    vertexLabel: OptionalPropsRenderer<VertexLabelRenderer<V>> | null;
+    vertexMask: OptionalPropsRenderer<VertexMaskRenderer> | null;
+  }>;
 };

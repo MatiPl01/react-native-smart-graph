@@ -1,68 +1,103 @@
 import { Group } from '@shopify/react-native-skia';
-import { memo, useEffect } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { memo, useEffect, useMemo } from 'react';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { useComponentFocus } from '@/hooks/focus';
+import {
+  useComponentFocus,
+  useVertexTransform,
+  useVertexValueObserver
+} from '@/hooks';
 import {
   VertexComponentProps,
   VertexRenderer,
   VertexRendererProps
 } from '@/types/components';
+import { VertexObserver } from '@/types/models';
 import { updateComponentAnimationState } from '@/utils/components';
+import { getVertexLabelComponentTransformation } from '@/utils/transform';
 
 function VertexComponent<V>({
-  data: { animationSettings, displayed, key, removed, ...restData },
+  data,
   focusContext,
+  labelsRendered,
+  multiStepFocusContext,
   onRemove,
   renderer,
-  settings,
-  ...restProps
+  settings: {
+    label: labelSettings,
+    vertex: { radius: r }
+  }
 }: VertexComponentProps<V>) {
+  const { animationSettings, removed, value, ...restData } = data;
+  const { key } = restData;
+
   // ANIMATION
   // Vertex render animation progress
-  // Use a helper value to ensure that the animation progress is never negative
+  // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
   const animationProgressHelper = useSharedValue(0);
-  const animationProgress = useDerivedValue(() =>
-    Math.max(0, animationProgressHelper.value)
-  );
 
-  // FOCUS
-  // Vertex focus progress
-  const focusProgress = useSharedValue(0);
+  // TRANSFORM
+  // Vertex transform
+  const transform = useVertexTransform(data, [
+    () => ({ ...labelSettings, labelsRendered }),
+    ({
+      customProps: { labelsRendered: renderLabels, ...rest },
+      transform: { scale: vertexScale, x, y }
+    }) => {
+      'worklet';
+      if (!renderLabels) return;
+      data.label.transform.value = getVertexLabelComponentTransformation(
+        { x, y },
+        r,
+        vertexScale,
+        rest
+      );
+    }
+  ]);
+
+  // VERTEX PROPS
+  const focusProp = useMemo(
+    () => ({
+      key: focusContext.focus.key,
+      progress: data.focusProgress
+    }),
+    []
+  );
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
-  useComponentFocus(focusProgress, focusContext, key);
+  useComponentFocus(data.focusProgress, focusContext, key);
 
+  // Vertex animation handler
   useEffect(() => {
-    if (!removed) displayed.value = true;
-
     updateComponentAnimationState(
       key,
       animationProgressHelper,
       animationSettings,
       removed,
       () => {
-        displayed.value = false;
         onRemove(key);
       }
     );
-  }, [removed, animationSettings]);
+  }, [removed]);
 
-  // Hide vertices that wait for removal
-  const transform = useDerivedValue(() => [{ scale: displayed.value ? 1 : 0 }]);
+  useAnimatedReaction(
+    () => animationProgressHelper.value,
+    progress => {
+      data.animationProgress.value = progress;
+    }
+  );
 
-  // Render the vertex component
   return (
     <Group transform={transform}>
       <RenderedVertexComponent
-        {...restProps}
         {...restData}
-        {...settings}
-        animationProgress={animationProgress}
-        focusKey={focusContext.focus.key}
-        focusProgress={focusProgress}
-        renderer={renderer}
+        customProps={renderer.props}
+        focus={focusProp}
+        multiStepFocus={multiStepFocusContext}
+        r={r}
+        renderer={renderer.renderer}
+        value={value as V}
         vertexKey={key}
       />
     </Group>
@@ -70,16 +105,27 @@ function VertexComponent<V>({
 }
 
 type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
+  addObserver: (observer: VertexObserver<V>) => void;
+  removeObserver: (observer: VertexObserver<V>) => void;
   renderer: VertexRenderer<V>;
   vertexKey: string;
 };
 
-const RenderedVertexComponent = memo(function <V>({
+const RenderedVertexComponent = memo(function RenderedVertexComponent<V>({
+  addObserver,
+  removeObserver,
   renderer,
+  value: initialValue,
   vertexKey: key,
   ...restProps
 }: RenderedVertexComponentProps<V>) {
-  return renderer({ key, ...restProps });
+  const value = useVertexValueObserver(
+    addObserver,
+    removeObserver,
+    initialValue
+  );
+
+  return renderer({ key, ...restProps, value });
 }) as <V>(props: RenderedVertexComponentProps<V>) => JSX.Element;
 
 export default memo(VertexComponent) as <V>(

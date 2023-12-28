@@ -1,7 +1,8 @@
-import { GraphAnimationsSettings } from './animations';
+import { AnimationSettings, GraphAnimationsSettings } from './animations';
 import {
   DirectedGraphWithCurvedEdgesComponentsSettings,
   DirectedGraphWithStraightEdgesComponentsSettings,
+  EdgeType,
   UndirectedGraphWithCurvedEdgesComponentsSettings,
   UndirectedGraphWithStraightEdgesComponentsSettings
 } from './components';
@@ -11,41 +12,43 @@ import { GraphLayoutSettings } from './layout';
 import { GraphPlacementSettings } from './placement';
 
 type SharedGraphSettings<V> = {
-  animations?: GraphAnimationsSettings;
-  events?: GraphEventsSettings<V>;
-  focus?: MultiStepFocusSettings;
-  layout?: GraphLayoutSettings;
-  placement?: GraphPlacementSettings;
+  animationSettings?: AnimationSettings | GraphAnimationsSettings;
+  edgeType?: EdgeType;
+  eventSettings?: GraphEventsSettings<V>;
+  focusSettings?: MultiStepFocusSettings;
+  layoutSettings?: GraphLayoutSettings;
+  placementSettings?: GraphPlacementSettings;
+  useContextBridge?: boolean;
 };
 
 export type UndirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components?: UndirectedGraphWithStraightEdgesComponentsSettings;
+    componentsSettings?: UndirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type UndirectedGraphWithCurvedEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components?: UndirectedGraphWithCurvedEdgesComponentsSettings;
+    componentsSettings?: UndirectedGraphWithCurvedEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithStraightEdgeSettings<V> =
   SharedGraphSettings<V> & {
-    components?: DirectedGraphWithStraightEdgesComponentsSettings;
+    componentsSettings?: DirectedGraphWithStraightEdgesComponentsSettings;
   };
 
 export type DirectedGraphWithCurvedEdgeSettings<V> = SharedGraphSettings<V> & {
-  components?: DirectedGraphWithCurvedEdgesComponentsSettings;
+  componentsSettings?: DirectedGraphWithCurvedEdgesComponentsSettings;
 };
 
-export type UndirectedGraphSettings<V = void> =
+export type UndirectedGraphSettings<V = unknown> =
   | UndirectedGraphWithCurvedEdgeSettings<V>
   | UndirectedGraphWithStraightEdgeSettings<V>;
 
-export type DirectedGraphSettings<V = void> =
+export type DirectedGraphSettings<V = unknown> =
   | DirectedGraphWithCurvedEdgeSettings<V>
   | DirectedGraphWithStraightEdgeSettings<V>;
 
-export type GraphSettings<V = void> =
+export type GraphSettings<V = unknown> =
   | DirectedGraphSettings<V>
   | UndirectedGraphSettings<V>;
 

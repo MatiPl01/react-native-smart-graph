@@ -1,11 +1,4 @@
-import {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef
-} from 'react';
+import { createContext, PropsWithChildren, useEffect, useMemo } from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -14,38 +7,34 @@ import {
 } from 'react-native-reanimated';
 
 import { useFocusObserver } from '@/hooks';
-import { withComponentsData, withGraphSettings } from '@/providers/graph';
-import { useCanvasContexts } from '@/providers/graph/contexts';
-import { FocusStatus } from '@/providers/view';
-import { FocusedVertexData, VertexComponentData } from '@/types/data';
-import { Graph } from '@/types/models';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import {
-  getFocusedVertexData,
+  FocusStatus,
+  useFocusContext,
+  useViewDataContext
+} from '@/providers/view';
+import { VertexComponentData } from '@/types/data';
+import { Graph } from '@/types/models';
+import { useNullableContext } from '@/utils/contexts';
+import {
   getFocusedVertexTransformation,
   updateFocusTransformation
 } from '@/utils/focus';
+import { getVertexTransformation } from '@/utils/transform';
 
 type VertexFocusContextType = {
   isVertexFocused: SharedValue<boolean>;
 };
 
-const VertexFocusContext = createContext(null as unknown as object);
+const VertexFocusContext = createContext<VertexFocusContextType | null>(null);
+VertexFocusContext.displayName = 'VertexFocusContext';
 
-export const useVertexFocusContext = () => {
-  const contextValue = useContext(VertexFocusContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useVertexFocusContext must be used within a VertexFocusProvider'
-    );
-  }
-
-  return contextValue as VertexFocusContextType;
-};
+export const useVertexFocusContext = () =>
+  useNullableContext(VertexFocusContext);
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
-  vertexRadius: SharedValue<number>;
+  vertexRadius: number;
   verticesData: Record<string, VertexComponentData<V>>;
 }>;
 
@@ -57,37 +46,22 @@ function VertexFocusProvider<V, E>({
 }: VertexFocusProviderProps<V, E>) {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { canvasDimensions },
-    focusContext
-  } = useCanvasContexts();
+  const { canvasDimensions } = useViewDataContext();
+  const focusContext = useFocusContext();
 
   // OBSERVER
   // Vertex focus observer
   const [data] = useFocusObserver(graph);
 
-  // FOCUSED VERTEX DATA
-  const focusedVertexWithPosition = useMemo(() => {
-    const vertexData = data.focusedVertexKey
-      ? verticesData[data.focusedVertexKey]
-      : null;
-    return vertexData && vertexData.displayed.value && data.focusedVertexKey
-      ? {
-          key: data.focusedVertexKey,
-          position: vertexData.position
-        }
-      : null;
-  }, [verticesData, data.focusedVertexKey]);
-  // Updated focused vertex data
-  const focusedVertexData = useMemo<FocusedVertexData>(
-    () =>
-      getFocusedVertexData(
-        focusedVertexWithPosition,
-        vertexRadius.value,
-        data.settings
-      ),
-    [focusedVertexWithPosition, data.settings]
-  );
+  // HELPER VALUES
+  const focusStatus = focusContext.status;
+  const focusedVertex = useMemo(() => {
+    const key = data.focusedVertexKey;
+    if (!key || !verticesData[key]) {
+      return null;
+    }
+    return verticesData[key];
+  }, [data.focusedVertexKey]);
 
   // CONTEXT VALUES
   // Is vertex focused
@@ -95,99 +69,74 @@ function VertexFocusProvider<V, E>({
 
   // OTHER VALUES
   // Helper values
-  const isFirstRenderRef = useRef(true);
   const isInitialStatus = useSharedValue(true);
   const transitionDisabled = useSharedValue(false);
 
   useEffect(() => {
-    // Don't do anything on the first render
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      return;
-    }
-
-    if (!focusedVertexData.vertex) {
+    if (!focusedVertex) {
+      const status = focusContext.status.value;
       // End focus if there is no focused vertex and focus is still active
       if (
-        focusContext.status.value !== FocusStatus.BLUR &&
-        focusContext.status.value !== FocusStatus.BLUR_TRANSITION
+        status !== FocusStatus.BLUR &&
+        status !== FocusStatus.BLUR_TRANSITION
       ) {
-        focusContext.endFocus(undefined, focusedVertexData.animation);
+        focusContext.endFocus(undefined, data.settings.animation);
         isVertexFocused.value = false;
       }
       return;
     }
 
-    // Disable transitions until the new focus animations starts
+    // Disable transitions until the new focus animation starts
     transitionDisabled.value = true;
     // Start focus if there is a focused vertex and focus is not active
-    if (focusContext.focus.key.value === focusedVertexData.vertex.key) return;
-    const {
-      position: { x, y },
-      scale
-    } = focusedVertexData.vertex;
-    updateFocusTransformation(
+    if (focusContext.focus.key.value === focusedVertex.key) return;
+    const vertexTransform = getFocusedVertexTransformation(
+      data.settings.alignment,
       {
-        end: {
-          scale,
-          x: x.value,
-          y: y.value
-        }
+        height: canvasDimensions.height.value,
+        width: canvasDimensions.width.value
       },
-      focusContext
+      getVertexTransformation(focusedVertex, data.settings.vertexScale),
+      vertexRadius
     );
+    updateFocusTransformation({ end: vertexTransform }, focusContext);
     focusContext.startFocus(
       {
         gesturesDisabled: data.settings.disableGestures,
-        key: focusedVertexData.vertex.key
+        key: focusedVertex.key
       },
-      focusedVertexData.animation
+      data.settings.animation
     );
     isVertexFocused.value = true;
-  }, [focusedVertexData]);
+  }, [focusedVertex]);
 
   useAnimatedReaction(
-    () => focusContext.status.value,
-    status => {
-      if (
-        status === FocusStatus.FOCUS_TRANSITION ||
-        status === FocusStatus.BLUR_TRANSITION
-      ) {
-        transitionDisabled.value = false;
-      }
-    }
-  );
-
-  // Update the focused vertex position and scale on their change
-  // if focus is begin focused or is getting focused/blurred
-  useAnimatedReaction(
-    () => {
-      if (!focusedVertexData.vertex) {
-        return null;
-      }
-
-      const { vertex } = focusedVertexData;
-      return {
-        alignment: vertex.alignment,
+    () =>
+      focusedVertex && {
         canvasDimensions: {
           height: canvasDimensions.height.value,
           width: canvasDimensions.width.value
         },
-        vertex: {
-          radius: vertex.radius,
-          scale: vertex.scale,
-          x: vertex.position.x.value,
-          y: vertex.position.y.value
-        }
-      };
-    },
-    vertexData => {
-      if (!vertexData) return;
+        transform: getVertexTransformation(
+          focusedVertex,
+          data.settings.vertexScale
+        )
+      },
+    props => {
+      if (!props) return;
       updateFocusTransformation(
-        { end: getFocusedVertexTransformation(vertexData) },
+        {
+          end: getFocusedVertexTransformation(
+            data.settings.alignment,
+            props.canvasDimensions,
+            props.transform,
+            vertexRadius
+          )
+        },
         focusContext
       );
-    }
+    },
+    [focusedVertex]
   );
 
   const blurGraph = () => {
@@ -195,7 +144,7 @@ function VertexFocusProvider<V, E>({
   };
 
   useAnimatedReaction(
-    () => focusContext.status.value,
+    () => focusStatus.value,
     status => {
       if (isInitialStatus.value) {
         isInitialStatus.value = false;
@@ -229,8 +178,8 @@ export default withGraphSettings(
   withComponentsData(VertexFocusProvider, ({ verticesData }) => ({
     verticesData
   })),
-  ({ graph, settings }) => ({
+  ({ componentsSettings, graph }) => ({
     graph,
-    vertexRadius: settings.components.vertex.radius
+    vertexRadius: componentsSettings.vertex.radius
   })
 );

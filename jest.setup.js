@@ -1,5 +1,5 @@
-import { NativeModules as RNNativeModules, View } from 'react-native';
 import { createElement } from 'react';
+import { NativeModules as RNNativeModules, View } from 'react-native';
 
 RNNativeModules.UIManager = RNNativeModules.UIManager || {};
 RNNativeModules.UIManager.RCTView = RNNativeModules.UIManager.RCTView || {};
@@ -18,31 +18,41 @@ RNNativeModules.PlatformConstants = RNNativeModules.PlatformConstants || {
 
 const PlainView = ({ children, ...props }) =>
   createElement(View, props, children);
-const noop = () => null;
 
 jest.mock('@shopify/react-native-skia', () => {
+  const noop = () => {};
+
   const mock = {
     // other props can be added which
     // aren't handled properly
     // by the handler
-    Canvas: PlainView
+    Canvas: PlainView,
+    Skia: {
+      Font: jest.fn(),
+      FontMgr: {
+        System: () => ({
+          matchFamilyStyle: jest.fn().mockReturnValue({
+            name: 'Roboto',
+            style: 'Bold'
+          })
+        })
+      }
+    }
   };
+
   const handler = {
-    get(_, prop, __) {
-      // first look for the prop in the mock
+    get: (_, prop, __) => {
       if (prop in mock) {
         return mock[prop];
       }
-      // class case? return a view
       if (prop[0] === prop[0].toUpperCase()) {
         return PlainView;
       }
-      // probably a method
       return noop;
     }
   };
+
   return new Proxy(mock, handler);
 });
 
-jest.mock('src/assets/fonts/Rubik-Regular.ttf', () => 'Rubik-Regular.ttf');
 jest.useFakeTimers();

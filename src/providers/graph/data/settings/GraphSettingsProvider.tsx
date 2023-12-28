@@ -1,5 +1,4 @@
 import {
-  Context,
   createContext,
   PropsWithChildren,
   useEffect,
@@ -17,7 +16,11 @@ import {
   updateContextValue
 } from './utils';
 
-const GraphSettingsContext = createContext(null as unknown as object);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const GraphSettingsContext = createContext<GraphSettingsData<any, any> | null>(
+  null
+);
+GraphSettingsContext.displayName = 'GraphSettingsContext';
 
 export const withGraphSettings = <
   V,
@@ -27,29 +30,15 @@ export const withGraphSettings = <
 >(
   Component: React.ComponentType<P>,
   selector: (contextValue: GraphSettingsData<V, E>) => R
-) =>
-  withMemoContext(
-    Component,
-    GraphSettingsContext as unknown as Context<GraphSettingsData<V, E>>,
-    selector
-  );
+) => withMemoContext(Component, GraphSettingsContext, selector);
 
 type GraphSettingsProviderProps<V, E> = PropsWithChildren<GraphData<V, E>>;
 
 export default function GraphSettingsProvider<V, E>({
   children,
-  graph,
-  renderers,
-  settings
+  ...restProps
 }: GraphSettingsProviderProps<V, E>) {
-  const userSettings = useMemo(
-    () => ({
-      graph,
-      renderers,
-      settings
-    }),
-    [settings, renderers, graph]
-  );
+  const userSettings = useMemo(() => restProps, [...Object.values(restProps)]);
 
   const [contextValue, setContextValue] = useState(() =>
     createContextValue(userSettings)

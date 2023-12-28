@@ -1,30 +1,30 @@
-import { PropsWithChildren } from 'react';
+import { memo } from 'react';
 import {
   runOnJS,
-  SharedValue,
   useAnimatedReaction,
   useSharedValue
 } from 'react-native-reanimated';
 
 import { DEFAULT_AUTO_SIZING_ANIMATION_SETTINGS } from '@/constants/animations';
-import { useCanvasContexts } from '@/providers/graph/contexts';
-import { withGraphSettings } from '@/providers/graph/data';
-
-type SettingsChangeResponderProviderProps = PropsWithChildren<{
-  focusProgress?: SharedValue<number>;
-}>;
+import {
+  FocusStatus,
+  useAutoSizingContext,
+  useFocusContext,
+  useTransformContext,
+  useViewDataContext
+} from '@/providers/view';
 
 function SettingsChangeResponderProvider({
-  children,
-  focusProgress
-}: SettingsChangeResponderProviderProps) {
-  // CONTEXT VALUES
-  const {
-    autoSizingContext,
-    dataContext: { initialScaleProvided, isRendered, objectFit },
-    focusContext: { focus },
-    transformContext: { resetContainerPosition }
-  } = useCanvasContexts();
+  children
+}: {
+  children?: React.ReactNode;
+}) {
+  // CONTEXTS
+  // Canvas contexts
+  const autoSizingContext = useAutoSizingContext();
+  const { initialScaleProvided, isRendered, objectFit } = useViewDataContext();
+  const { focus, focusStatus } = useFocusContext();
+  const { resetContainerPosition } = useTransformContext();
 
   // Other values
   const isFirstAutoSizingReactionCall = useSharedValue(true);
@@ -53,7 +53,7 @@ function SettingsChangeResponderProvider({
       isFirstAutoSizingReactionCall.value = false;
       prevObjectFit.value = objFit;
       // For the first reaction call only
-      if (objFit !== 'none' && !focusProgress?.value) {
+      if (objFit !== 'none' && focusStatus.value === FocusStatus.BLUR) {
         if (initialScaleProvided.value) {
           autoSizingContext.enableAutoSizingAfterTimeout();
         } else {
@@ -65,10 +65,9 @@ function SettingsChangeResponderProvider({
 
   // On every objectFit change, after auto-sizing has been disabled,
   // reset the container position
+  const autoSizingEnabled = autoSizingContext.autoSizingEnabled;
   useAnimatedReaction(
-    () =>
-      objectFit.value !== prevObjectFit.value &&
-      !autoSizingContext.autoSizingEnabled.value,
+    () => objectFit.value !== prevObjectFit.value && !autoSizingEnabled.value,
     shouldReset => {
       if (!shouldReset) return;
       prevObjectFit.value = objectFit.value;
@@ -92,9 +91,4 @@ function SettingsChangeResponderProvider({
   return <>{children}</>;
 }
 
-export default withGraphSettings(
-  SettingsChangeResponderProvider,
-  ({ settings }) => ({
-    focusProgress: settings.focus?.progress
-  })
-);
+export default memo(SettingsChangeResponderProvider);

@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  DirectedGraph,
-  DirectedGraphComponent,
-  DirectedGraphData,
   GraphView,
   GraphViewControls,
   ObjectFit,
-  VertexPressHandler
+  VertexPressHandler,
+  DirectedGraphData,
+  DirectedGraph,
+  VertexLabelPosition
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import {
@@ -16,6 +16,8 @@ import {
   useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
+import { DirectedGraphComponent } from '@/components';
+import EASING from '@/constants/easings';
 
 const GRAPH1: DirectedGraphData = {
   edges: [
@@ -102,7 +104,7 @@ const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
   key: `Item ${index + 1}`
 }));
 
-export default function BottomSheetFocus() {
+export default function BottomSheetFocusExample() {
   const graph = useMemo(() => new DirectedGraph(GRAPH1), []);
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
@@ -119,10 +121,9 @@ export default function BottomSheetFocus() {
   );
 
   const currentRoute = useSharedValue<keyof typeof GRAPH_ROUTES>('V1');
-  const roots = useSharedValue(['V1']);
   const focusPoints = useDerivedValue(() => ({
     0.5: {
-      key: roots.value[0],
+      key: currentRoute.value,
       vertexScale: 6,
       alignment: {
         horizontalAlignment: 'center',
@@ -131,7 +132,7 @@ export default function BottomSheetFocus() {
       }
     },
     1: {
-      key: roots.value[0],
+      key: currentRoute.value,
       vertexScale: 2,
       alignment: {
         horizontalAlignment: 'left',
@@ -141,10 +142,6 @@ export default function BottomSheetFocus() {
       }
     }
   }));
-
-  const minRowDistance = useSharedValue(100);
-  const minColumnDistance = useSharedValue(50);
-  const vertexRadius = useSharedValue(20);
 
   const handleVertexPress = useCallback<VertexPressHandler>(
     ({ vertex: { key } }) => {
@@ -174,70 +171,47 @@ export default function BottomSheetFocus() {
     );
   };
 
-  useEffect(() => {
-    setInterval(() => {
-      // roots.value = [`V${Math.round(3 * Math.random() + 1)}`];
-      minRowDistance.value = Math.random() * 100 + 40;
-      minColumnDistance.value = Math.random() * 50 + 20;
-      // vertexRadius.value = withTiming(Math.random() * 30 + 10, {
-      //   duration: 500
-      // });
-      // if (graph.hasVertex('VV')) {
-      //   graph.removeVertex('VV');
-      // } else {
-      //   graph.insertEdge({
-      //     key: 'EE',
-      //     from: 'V1',
-      //     to: 'VV'
-      //   });
-      // }
-    }, 500);
-  }, []);
-
   return (
     <>
       <GraphView
+        objectFit={objectFit}
+        scales={[0.05, 1, 2, 4]}
         padding={{
           bottom: 100,
           left: 25,
           right: 25,
           top: 50
-        }}
-        objectFit={objectFit}
-        scales={[0.05, 1, 2, 4]}>
+        }}>
         <DirectedGraphComponent
-          settings={{
-            focus: {
-              points: focusPoints,
-              progress: bottomSheetProgress
-            },
-            events: {
-              press: {
-                onVertexLongPress: handleVertexPress,
-                onVertexPress: handleVertexPress
-              }
-            },
-            placement: {
-              strategy: 'trees',
-              roots,
-              minRowDistance,
-              minColumnDistance
-            },
-            components: {
-              vertex: {
-                radius: vertexRadius
-              },
-              edge: {
-                type: 'curved'
-              }
-            },
-            animations: null
-          }}
           graph={graph}
+          animationSettings={{
+            duration: 500,
+            easing: EASING.easeInOut
+          }}
+          componentsSettings={{
+            vertexLabel: {
+              position: VertexLabelPosition.BOTTOM
+            }
+          }}
+          eventSettings={{
+            press: {
+              onVertexPress: handleVertexPress
+            }
+          }}
+          focusSettings={{
+            points: focusPoints,
+            progress: bottomSheetProgress,
+            pointsChangeAnimationSettings: {
+              duration: 1000
+            }
+          }}
+          placementSettings={{
+            strategy: 'orbits'
+          }}
         />
         <GraphViewControls
-          onObjectFitChange={setObjectFit}
           style={styles.controls}
+          onObjectFitChange={setObjectFit}
         />
       </GraphView>
       <BottomSheet

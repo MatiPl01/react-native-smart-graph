@@ -1,47 +1,51 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SharedValue } from 'react-native-reanimated';
 
 import { DirectedGraph, UndirectedGraph } from '@/models/graphs';
 import {
-  ArrowRenderer,
   CurvedEdgeRenderer,
-  StraightEdgeRenderer
-} from '@/types/components';
-import {
   DirectedGraphWithCurvedEdgeRenderers,
   DirectedGraphWithStraightEdgeRenderers,
-  LabelRenderer,
+  EdgeArrowRenderer,
+  StraightEdgeRenderer,
   UndirectedGraphWithCurvedEdgeRenderers,
-  UndirectedGraphWithStraightEdgeRenderers,
+  UndirectedGraphWithStraightEdgeRenderers
+} from '@/types/components';
+import {
+  EdgeLabelRenderer,
+  VertexLabelRenderer,
+  VertexMaskRenderer,
   VertexRenderer
 } from '@/types/components/public';
 import {
   EdgeComponentData,
+  EdgeLabelComponentData,
   EdgeRemoveHandler,
-  LabelComponentData,
   VertexComponentData,
+  VertexLabelComponentData,
   VertexRemoveHandler
 } from '@/types/data';
-import { BoundingRect } from '@/types/layout';
 import { Graph, GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   AllGraphAnimationsSettings,
   AllGraphLayoutSettings,
   AllGraphPlacementSettings,
+  AllMultiStepFocusSettings,
   DirectedGraphSettings,
-  DirectedGraphWithCurvedEdgeSettings,
+  EdgeType,
   GraphEventsSettings,
+  InternalGraphEventsSettings,
   InternalGraphLayoutSettings,
   InternalGraphPlacementSettings,
   InternalMultiStepFocusSettings,
-  MultiStepFocusSettings,
-  UndirectedGraphSettings,
-  UndirectedGraphWithCurvedEdgeSettings
+  UndirectedGraphSettings
 } from '@/types/settings';
 import {
   AllGraphComponentsSettings,
   InternalGraphComponentsSettings
 } from '@/types/settings/private/graph/components';
+import { MaybeObject, RendererWithProps } from '@/types/utils';
 
 /*
  * COMPONENTS PROPS
@@ -49,36 +53,57 @@ import {
 export type DirectedGraphComponentProps<
   V,
   E,
-  S extends DirectedGraphSettings<V>
-> = {
+  VR extends VertexRenderer<V, any>,
+  VLR extends VertexLabelRenderer<V, any>,
+  VMR extends VertexMaskRenderer<any>,
+  ER extends CurvedEdgeRenderer<E, any> | StraightEdgeRenderer<E, any>,
+  ELR extends EdgeLabelRenderer<E, any>,
+  EAR extends EdgeArrowRenderer<any>,
+  ET extends EdgeType
+> = Omit<DirectedGraphSettings<V>, 'edgeType'> & {
+  edgeType?: ET;
   graph: DirectedGraph<V, E>;
-  renderers?: S extends DirectedGraphWithCurvedEdgeSettings<V>
-    ? DirectedGraphWithCurvedEdgeRenderers<V, E>
-    : DirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings?: S;
+  renderers?: ET extends 'curved'
+    ? MaybeObject<
+        DirectedGraphWithCurvedEdgeRenderers<V, E, VR, VLR, VMR, ER, ELR, EAR>
+      >
+    : MaybeObject<
+        DirectedGraphWithStraightEdgeRenderers<V, E, VR, VLR, VMR, ER, ELR, EAR>
+      >;
 };
 
 export type UndirectedGraphComponentProps<
   V,
   E,
-  S extends UndirectedGraphSettings<V>
-> = {
+  VR extends VertexRenderer<V, any>,
+  VLR extends VertexLabelRenderer<V, any>,
+  VMR extends VertexMaskRenderer<any>,
+  ER extends CurvedEdgeRenderer<E, any> | StraightEdgeRenderer<E, any>,
+  ELR extends EdgeLabelRenderer<E, any>,
+  ET extends EdgeType
+> = Omit<UndirectedGraphSettings<V>, 'edgeType'> & {
+  edgeType?: ET;
   graph: UndirectedGraph<V, E>;
-  renderers?: S extends UndirectedGraphWithCurvedEdgeSettings<V>
-    ? UndirectedGraphWithCurvedEdgeRenderers<V, E>
-    : UndirectedGraphWithStraightEdgeRenderers<V, E>;
-  settings?: S;
+  renderers?: ET extends 'curved'
+    ? MaybeObject<
+        UndirectedGraphWithCurvedEdgeRenderers<V, E, VR, VLR, VMR, ER, ELR>
+      >
+    : MaybeObject<
+        UndirectedGraphWithStraightEdgeRenderers<V, E, VR, VLR, VMR, ER, ELR>
+      >;
 };
 
 export type GraphComponentsData<V, E> = {
   connections: GraphConnections;
-  edgeLabelsData: Record<string, LabelComponentData<E>>;
+  edgeLabelsData: Record<string, EdgeLabelComponentData<E>>;
+  edgeLabelsRendered: SharedValue<boolean>;
   edgesData: Record<string, EdgeComponentData<E>>;
   handleEdgeRemove: EdgeRemoveHandler;
   handleVertexRemove: VertexRemoveHandler;
   isGraphDirected: SharedValue<boolean>;
   layoutAnimationSettings: AllAnimationSettings;
-  targetBoundingRect: SharedValue<BoundingRect>;
+  vertexLabelsData: Record<string, VertexLabelComponentData<V>>;
+  vertexLabelsRendered: SharedValue<boolean>;
   verticesData: Record<string, VertexComponentData<V>>;
 };
 
@@ -86,37 +111,38 @@ export type GraphComponentsData<V, E> = {
  * DEFAULT GRAPH SETTINGS
  */
 export type AllGraphSettings<V, E> = {
+  animationSettings: AllGraphAnimationsSettings;
+  componentsSettings: AllGraphComponentsSettings;
+  edgeType: EdgeType;
+  eventSettings?: GraphEventsSettings<V>;
+  focusSettings?: AllMultiStepFocusSettings;
   graph: Graph<V, E>;
+  layoutSettings: AllGraphLayoutSettings;
+  placementSettings: AllGraphPlacementSettings;
   renderers: {
-    arrow?: ArrowRenderer;
-    edge: CurvedEdgeRenderer<E> | StraightEdgeRenderer<E>;
-    label?: LabelRenderer<E>;
-    vertex: VertexRenderer<V>;
-  };
-  settings: {
-    animations: AllGraphAnimationsSettings;
-    components: AllGraphComponentsSettings;
-    events?: GraphEventsSettings<V>;
-    focus?: MultiStepFocusSettings;
-    layout: AllGraphLayoutSettings;
-    placement: AllGraphPlacementSettings;
+    edge:
+      | RendererWithProps<CurvedEdgeRenderer<E>>
+      | RendererWithProps<StraightEdgeRenderer<E>>
+      | null;
+    edgeArrow: RendererWithProps<EdgeArrowRenderer> | null;
+    edgeLabel: RendererWithProps<EdgeLabelRenderer<E>> | null;
+    vertex: RendererWithProps<VertexRenderer<V>> | null;
+    vertexLabel: RendererWithProps<VertexLabelRenderer<V>> | null;
+    vertexMask: RendererWithProps<VertexMaskRenderer> | null;
   };
 };
 
 /*
  * INTERNAL GRAPH SETTINGS
  */
-export type GraphSettingsData<V, E> = Omit<
+export type GraphSettingsData<V, E> = Pick<
   AllGraphSettings<V, E>,
-  'settings'
+  'edgeType' | 'graph' | 'renderers'
 > & {
-  settings: Pick<
-    AllGraphSettings<V, E>['settings'],
-    'animations' | 'events'
-  > & {
-    components: InternalGraphComponentsSettings;
-    focus?: InternalMultiStepFocusSettings;
-    layout: InternalGraphLayoutSettings;
-    placement: InternalGraphPlacementSettings;
-  };
+  animationSettings: AllGraphSettings<V, E>['animationSettings'];
+  componentsSettings: InternalGraphComponentsSettings;
+  eventSettings?: InternalGraphEventsSettings<V>;
+  focusSettings?: InternalMultiStepFocusSettings;
+  layoutSettings: InternalGraphLayoutSettings;
+  placementSettings: InternalGraphPlacementSettings;
 };

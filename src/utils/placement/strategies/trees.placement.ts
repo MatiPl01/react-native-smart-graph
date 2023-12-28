@@ -104,11 +104,11 @@ const placeVertices = (
   }, {} as PlacedVerticesPositions);
 };
 
-export default function placeVerticesOnTrees(
+const placeVerticesOnTrees = (
   connections: GraphConnections,
   isGraphDirected: boolean,
   settings: AllTreesPlacementSettings
-): GraphLayout {
+): GraphLayout => {
   'worklet';
   const componentsLayouts: Array<GraphLayout> = [];
   const rootVertexKeys = new Set(settings.roots);
@@ -150,4 +150,9 @@ export default function placeVerticesOnTrees(
     horizontal: minColumnDistance,
     vertical: minRowDistance
   });
-}
+};
+
+// The export declaration must be at the end of the file
+// to ensure that babel can properly transform the file
+// to the commonjs format (worklets cannot be reordered)
+export default placeVerticesOnTrees;

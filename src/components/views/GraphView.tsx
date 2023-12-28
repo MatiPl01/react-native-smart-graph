@@ -1,20 +1,33 @@
-import { memo, PropsWithChildren, useMemo } from 'react';
+import { Canvas } from '@shopify/react-native-skia';
+import { PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { wiseMemo } from 'react-wise-memo';
 
 import { DEFAULT_VIEW_SETTINGS } from '@/configs/view';
-import GraphViewChildrenProvider, {
+import {
+  GraphViewChildrenProvider,
   useGraphViewChildrenContext
-} from '@/contexts/GraphViewChildrenProvider';
-import OverlayProvider, { OverlayOutlet } from '@/contexts/OverlayProvider';
-import CanvasProvider, { useGesturesContext } from '@/providers/view';
+} from '@/contexts/children';
+import { OverlayOutlet, OverlayProvider } from '@/contexts/overlay';
+import { withContextBridge } from '@/lib/itsFine';
+import CanvasProvider, {
+  useGesturesContext,
+  useTransformContext
+} from '@/providers/view';
 import { GraphViewSettings } from '@/types/settings';
-import { deepMemoComparator } from '@/utils/objects';
 
 type GraphViewProps = PropsWithChildren<GraphViewSettings>;
 
 function GraphView({ children, ...providerProps }: GraphViewProps) {
   validateProps(providerProps);
-  const providerComposer = useMemo(() => <GraphViewComposer />, []);
+  const providerComposer = useMemo(
+    () => (
+      <OverlayProvider>
+        <GraphViewComposer />
+      </OverlayProvider>
+    ),
+    []
+  );
 
   return (
     <View style={styles.container}>
@@ -46,11 +59,13 @@ const validateProps = ({ initialScale, scales }: GraphViewProps) => {
   }
 };
 
-const GraphViewComposer = memo(function () {
+const GraphViewComposer = withContextBridge(function GraphViewComposer({
+  ContextBridge
+}) {
   // CONTEXTS
-  // Graph view children context
+  // Canvas contexts
   const { canvas, overlay } = useGraphViewChildrenContext();
-  // Gestures context
+  const { handleCanvasRender } = useTransformContext();
   const { gestureHandler } = useGesturesContext();
 
   const overlayOutlet = useMemo(
@@ -60,11 +75,11 @@ const GraphViewComposer = memo(function () {
 
   return (
     <>
-      <OverlayProvider>
-        {canvas}
-        {/* Renders overlay layers set using the OverlayContext */}
-        {overlayOutlet}
-      </OverlayProvider>
+      <Canvas style={styles.canvas} onLayout={handleCanvasRender}>
+        <ContextBridge>{canvas}</ContextBridge>
+      </Canvas>
+      {/* Renders overlay layers set using the OverlayContext */}
+      {overlayOutlet}
       {/* Render other components than canvas (e.g. graph controls) */}
       <View style={styles.overlay}>{overlay}</View>
     </>
@@ -72,6 +87,9 @@ const GraphViewComposer = memo(function () {
 });
 
 const styles = StyleSheet.create({
+  canvas: {
+    flex: 1
+  },
   container: {
     flex: 1,
     overflow: 'hidden',
@@ -84,19 +102,18 @@ const styles = StyleSheet.create({
 });
 
 // Rerender only on prop changes
-export default memo(
-  GraphView,
-  deepMemoComparator({
-    // shallow compare the graph object property of the child component
-    // to prevent deep checking a large graph model structure
-    // (graph should be memoized using the useMemo hook to prevent
-    // unnecessary rerenders)
-    shallow: [
-      // This is used when the graph component is the only child of the GraphView
-      'children.graph',
-      // This is used when the GraphView has multiple children (e.g. when
-      // GraphViewControls are used)
-      'children.*.graph'
-    ]
-  })
-) as typeof GraphView;
+export default wiseMemo(GraphView, {
+  // shallow compare the graph object property of the child component
+  // to prevent deep checking a large graph model structure
+  // (graph should be memoized using the useMemo hook to prevent
+  // unnecessary rerenders)
+  shallow: [
+    // This is used when the graph component is the only child of the GraphView
+    'children.graph',
+    'children.renderers.*.props',
+    // This is used when the GraphView has multiple children (e.g. when
+    // GraphViewControls are used)
+    'children.*.graph',
+    'children.*.renderers.*.props'
+  ]
+});
