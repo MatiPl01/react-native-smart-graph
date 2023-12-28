@@ -18,6 +18,7 @@ type SharedGraphSettings<V> = {
   focusSettings?: MultiStepFocusSettings;
   layoutSettings?: GraphLayoutSettings;
   placementSettings?: GraphPlacementSettings;
+  useContextBridge?: boolean;
 };
 
 export type UndirectedGraphWithStraightEdgeSettings<V> =
@@ -39,15 +40,15 @@ export type DirectedGraphWithCurvedEdgeSettings<V> = SharedGraphSettings<V> & {
   componentsSettings?: DirectedGraphWithCurvedEdgesComponentsSettings;
 };
 
-export type UndirectedGraphSettings<V = undefined> =
+export type UndirectedGraphSettings<V = unknown> =
   | UndirectedGraphWithCurvedEdgeSettings<V>
   | UndirectedGraphWithStraightEdgeSettings<V>;
 
-export type DirectedGraphSettings<V = undefined> =
+export type DirectedGraphSettings<V = unknown> =
   | DirectedGraphWithCurvedEdgeSettings<V>
   | DirectedGraphWithStraightEdgeSettings<V>;
 
-export type GraphSettings<V = undefined> =
+export type GraphSettings<V = unknown> =
   | DirectedGraphSettings<V>
   | UndirectedGraphSettings<V>;
 

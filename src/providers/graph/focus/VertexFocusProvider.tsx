@@ -1,10 +1,4 @@
-import {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useMemo
-} from 'react';
+import { createContext, PropsWithChildren, useEffect, useMemo } from 'react';
 import {
   runOnJS,
   SharedValue,
@@ -13,11 +7,15 @@ import {
 } from 'react-native-reanimated';
 
 import { useFocusObserver } from '@/hooks';
-import { withComponentsData, withGraphSettings } from '@/providers/graph';
-import { useCanvasContexts } from '@/providers/graph/contexts';
-import { FocusStatus } from '@/providers/view';
+import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import {
+  FocusStatus,
+  useFocusContext,
+  useViewDataContext
+} from '@/providers/view';
 import { VertexComponentData } from '@/types/data';
 import { Graph } from '@/types/models';
+import { useNullableContext } from '@/utils/contexts';
 import {
   getFocusedVertexTransformation,
   updateFocusTransformation
@@ -28,19 +26,11 @@ type VertexFocusContextType = {
   isVertexFocused: SharedValue<boolean>;
 };
 
-const VertexFocusContext = createContext(null as unknown as object);
+const VertexFocusContext = createContext<VertexFocusContextType | null>(null);
+VertexFocusContext.displayName = 'VertexFocusContext';
 
-export const useVertexFocusContext = () => {
-  const contextValue = useContext(VertexFocusContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useVertexFocusContext must be used within a VertexFocusProvider'
-    );
-  }
-
-  return contextValue as VertexFocusContextType;
-};
+export const useVertexFocusContext = () =>
+  useNullableContext(VertexFocusContext);
 
 type VertexFocusProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
@@ -56,10 +46,8 @@ function VertexFocusProvider<V, E>({
 }: VertexFocusProviderProps<V, E>) {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { canvasDimensions },
-    focusContext
-  } = useCanvasContexts();
+  const { canvasDimensions } = useViewDataContext();
+  const focusContext = useFocusContext();
 
   // OBSERVER
   // Vertex focus observer

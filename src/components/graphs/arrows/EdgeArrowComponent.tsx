@@ -11,8 +11,11 @@ export default function EdgeArrowComponent({
   // RENDERER PROPS
   const rendererProps = {
     animationProgress,
+    customProps: renderer.props,
     s: vertexRadius
   };
 
-  return <Group transform={transform}>{renderer(rendererProps)}</Group>;
+  return (
+    <Group transform={transform}>{renderer.renderer(rendererProps)}</Group>
+  );
 }

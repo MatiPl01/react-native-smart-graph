@@ -3,6 +3,7 @@ import {
   DefaultEdgeArrowRenderer,
   DefaultEdgeLabelRenderer,
   DefaultStraightEdgeRenderer,
+  DefaultVertexLabelRenderer,
   DefaultVertexMaskRenderer,
   DefaultVertexRenderer
 } from '@/components';
@@ -28,8 +29,10 @@ import {
   AllStraightEdgeSettings,
   AllTreesPlacementSettings,
   AllUnboundRandomPlacementSettings,
+  AllVertexLabelSettings,
   AllVertexSettings,
-  LayoutType
+  LayoutType,
+  VertexLabelPosition
 } from '@/types/settings';
 import { isAnimationSettingsObject } from '@/utils/animations';
 
@@ -141,7 +144,7 @@ const DEFAULT_MULTI_STEP_FOCUS_SETTINGS: Omit<
 };
 
 // COMPONENTS
-const DEFAULT_COMPONENTS_SETTINGS: {
+export const DEFAULT_COMPONENTS_SETTINGS: {
   arrow: AllEdgeArrowSettings;
   edge: {
     curved: AllCurvedEdgeSettings;
@@ -149,6 +152,7 @@ const DEFAULT_COMPONENTS_SETTINGS: {
   };
   edgeLabel: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
+  vertexLabel: AllVertexLabelSettings;
 } = {
   arrow: {
     scale: 0.5
@@ -164,6 +168,10 @@ const DEFAULT_COMPONENTS_SETTINGS: {
   },
   vertex: {
     radius: 20
+  },
+  vertexLabel: {
+    offset: 0,
+    position: VertexLabelPosition.BOTTOM
   }
 };
 
@@ -206,7 +214,8 @@ export const getDefaultConfig = <V, E>(
       ? DEFAULT_COMPONENTS_SETTINGS.arrow
       : undefined,
     edgeLabel: DEFAULT_COMPONENTS_SETTINGS.edgeLabel,
-    vertex: DEFAULT_COMPONENTS_SETTINGS.vertex
+    vertex: DEFAULT_COMPONENTS_SETTINGS.vertex,
+    vertexLabel: DEFAULT_COMPONENTS_SETTINGS.vertexLabel
   },
   edgeType: data.edgeType ?? 'straight',
   eventSettings: data.eventSettings && {
@@ -231,12 +240,15 @@ export const getDefaultConfig = <V, E>(
   renderers: {
     edge:
       data.edgeType === 'curved'
-        ? DefaultCurvedEdgeRenderer
-        : DefaultStraightEdgeRenderer,
-    edgeArrow: data.graph.isDirected() ? DefaultEdgeArrowRenderer : null,
-    edgeLabel: DefaultEdgeLabelRenderer,
-    vertex: DefaultVertexRenderer,
-    vertexMask: DefaultVertexMaskRenderer
+        ? { props: {}, renderer: DefaultCurvedEdgeRenderer }
+        : { props: {}, renderer: DefaultStraightEdgeRenderer },
+    edgeArrow: data.graph.isDirected()
+      ? { props: {}, renderer: DefaultEdgeArrowRenderer }
+      : null,
+    edgeLabel: { props: {}, renderer: DefaultEdgeLabelRenderer }, // TODO - fix default font
+    vertex: { props: {}, renderer: DefaultVertexRenderer },
+    vertexLabel: { props: {}, renderer: DefaultVertexLabelRenderer },
+    vertexMask: { props: {}, renderer: DefaultVertexMaskRenderer }
   }
 });
 
@@ -299,6 +311,10 @@ export const getUpdateConfig = <V, E>(
         : undefined,
     edgeLabel: {
       scale: 'shared'
+    },
+    vertexLabel: {
+      offset: 'shared',
+      position: 'shared'
     }
   },
   eventSettings: data.eventSettings && {

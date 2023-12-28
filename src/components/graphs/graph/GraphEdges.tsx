@@ -6,17 +6,30 @@ import { GraphEdgesProps } from '@/types/components';
 
 function GraphEdges<V, E>({
   arrowRenderer,
+  arrowSettings,
   edgeRenderer,
+  edgeSettings,
   edgeType,
   edgesData,
   focusProgress,
-  labelRenderer,
+  labelSettings,
+  labelsRendered,
   onRemove,
-  settings
+  vertexSettings
 }: GraphEdgesProps<V, E>) {
   const renderers = useMemo(
-    () => ({ arrow: arrowRenderer, edge: edgeRenderer, label: labelRenderer }),
-    [arrowRenderer, edgeRenderer, labelRenderer]
+    () => ({ arrow: arrowRenderer, edge: edgeRenderer }),
+    [arrowRenderer, edgeRenderer]
+  );
+
+  const settings = useMemo(
+    () => ({
+      arrow: arrowSettings,
+      edge: edgeSettings,
+      label: labelSettings,
+      vertex: vertexSettings
+    }),
+    [arrowSettings, edgeSettings, labelSettings, vertexSettings]
   );
 
   return (
@@ -27,24 +40,31 @@ function GraphEdges<V, E>({
         edgeType={edgeType}
         focusProgress={focusProgress}
         key={key}
-        onRemove={onRemove}
+        labelsRendered={labelsRendered}
         renderers={renderers}
         settings={settings}
+        onRemove={onRemove}
       />
     ))
   );
 }
 
 export default withGraphSettings(
-  withComponentsData(GraphEdges, ({ edgesData, handleEdgeRemove }) => ({
-    edgesData,
-    onRemove: handleEdgeRemove
-  })),
+  withComponentsData(
+    GraphEdges,
+    ({ edgeLabelsRendered, edgesData, handleEdgeRemove }) => ({
+      edgesData,
+      labelsRendered: edgeLabelsRendered,
+      onRemove: handleEdgeRemove
+    })
+  ),
   ({ componentsSettings, edgeType, renderers }) => ({
     arrowRenderer: renderers.edgeArrow,
+    arrowSettings: componentsSettings.edgeArrow,
     edgeRenderer: renderers.edge,
+    edgeSettings: componentsSettings.edge,
     edgeType,
-    labelRenderer: renderers.edgeLabel,
-    settings: componentsSettings
+    labelSettings: componentsSettings.edgeLabel,
+    vertexSettings: componentsSettings.vertex
   })
 );

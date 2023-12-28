@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
+import {
+  DirectedEdgeData,
+  DirectedGraphData,
+  UndirectedEdgeData,
+  UndirectedGraphData,
+  VertexData
+} from '@/types/data';
 import {
   DirectedEdge,
   Graph as IGraph,
@@ -9,15 +15,16 @@ import {
   UndirectedEdge,
   Vertex
 } from '@/types/models';
-import { catchError, ChangeResult } from '@/utils/models';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
   FocusSettings,
-  GraphModificationAnimationsSettings
+  GraphModificationAnimationsSettings,
+  SingleModificationAnimationSettings
 } from '@/types/settings';
 import { Maybe, Mutable } from '@/types/utils';
 import { createAnimationsSettingsForBatchModification } from '@/utils/animations';
+import { catchError, ChangeResult, getVertexData } from '@/utils/models';
 
 export default abstract class Graph<
   V,
@@ -31,20 +38,22 @@ export default abstract class Graph<
   private lastFocusChangeSettings: FocusSettings | null = null;
   private lastGraphChangeSettings: GraphModificationAnimationsSettings | null =
     null;
-  private readonly observers: Set<GraphObserver> = new Set();
+  private readonly observers = new Set<GraphObserver<V, E>>();
 
   protected cachedConnections: GraphConnections | null = null;
   protected cachedEdges: Array<GE> | null = null;
+  protected cachedEdgesData: Array<ED> | null = null;
   protected cachedOrderedEdges: Array<{
     edge: GE;
     edgesCount: number;
     order: number;
   }> | null = null;
   protected cachedVertices: Array<GV> | null = null;
+  protected cachedVerticesData: Array<VertexData<V>> | null = null;
 
   clear = catchError(
     (
-      animationSettings?: Maybe<BatchModificationAnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       // Clear the whole graph
@@ -59,14 +68,13 @@ export default abstract class Graph<
       // Notify observers after all changes to the graph model are made
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              {
-                edges: Object.keys(this.edges$),
-                vertices: Object.keys(this.vertices$)
-              },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: Object.keys(this.edges$),
+              vertices: Object.keys(this.vertices$)
+            },
+            animationSettings
+          )
         );
       }
     }
@@ -92,7 +100,7 @@ export default abstract class Graph<
         edges?: Array<string>;
         vertices?: Array<string>;
       },
-      animationSettings?: Maybe<BatchModificationAnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       // Remove edges and vertices from graph
@@ -105,14 +113,13 @@ export default abstract class Graph<
       // Notify observers after all changes to the graph model are made
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              {
-                edges: data.edges,
-                vertices: data.vertices
-              },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: data.edges,
+              vertices: data.vertices
+            },
+            animationSettings
+          )
         );
       }
     }
@@ -121,7 +128,7 @@ export default abstract class Graph<
   removeVertex = catchError(
     (
       key: string,
-      animationSettings?: Maybe<AnimationSettings>,
+      animationSettings?: SingleModificationAnimationSettings,
       notifyChange = true
     ): void => {
       if (!this.vertices$[key]) {
@@ -142,154 +149,56 @@ export default abstract class Graph<
       this.invalidateVerticesCache();
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              { edges: edgeKeys, vertices: [key] },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            { edges: edgeKeys, vertices: [key] },
+            animationSettings
+          )
         );
       }
     }
   );
 
-  protected readonly vertices$: Record<string, GV> = {};
-
-  private invalidateEdgesCache(): void {
-    // Invalidate cached edges data
-    this.cachedEdges = null;
-    this.cachedOrderedEdges = null;
-    this.cachedConnections = null;
-  }
-
-  private invalidateVerticesCache(): void {
-    // Invalidate cached vertices data
-    this.cachedVertices = null;
-    this.cachedConnections = null;
-  }
-
-  addObserver(observer: GraphObserver): void {
-    this.observers.add(observer);
-    // Notify about last changes
-    if (this.lastGraphChangeSettings) {
-      observer?.graphChanged?.(this.lastGraphChangeSettings);
+  updateEdgeValue = catchError((key: string, value: Partial<E>): E => {
+    const targetEdge = this.edges$[key];
+    if (!targetEdge) {
+      throw new Error(`Edge with key ${key} does not exist.`);
     }
-    if (this.focusedVertexKey) {
-      observer?.focusChanged?.(
-        this.focusedVertexKey,
-        this.lastFocusChangeSettings ?? undefined
-      );
-    }
-  }
-
-  blur(settings?: Maybe<AnimationSettings>): void {
-    if (!this.focusedVertexKey) return;
-    this.focusedVertexKey = null;
-    this.notifyFocusChange(null, {
-      animation: settings
+    // There is no better way to implement this as exact types
+    // aren't available yet
+    // (https://github.com/Microsoft/TypeScript/issues/12936)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    targetEdge.value = { ...targetEdge.value, ...value } as any;
+    this.cachedEdgesData = null;
+    this.invalidateDataCache();
+    this.observers.forEach(observer => {
+      observer.edgeValueChanged?.(key, targetEdge.value);
     });
-  }
 
-  // TODO - remove this method after adding self-loop edges support
-  protected checkSelfLoop(vertex1key: string, vertex2key: string): void {
-    if (vertex1key === vertex2key) {
-      throw new Error(
-        `Self-loop edges are not yet supported. Vertex key: ${vertex1key}`
-      );
+    return targetEdge.value;
+  });
+
+  updateVertexValue = catchError((key: string, value: Partial<V>): V => {
+    const targetVertex = this.vertices$[key];
+    if (!targetVertex) {
+      throw new Error(`Vertex with key ${key} does not exist.`);
     }
-  }
+    targetVertex.value = { ...targetVertex.value, ...value };
+    this.cachedVerticesData = null;
+    this.invalidateDataCache();
+    this.observers.forEach(observer => {
+      observer.vertexValueChanged?.(key, targetVertex.value);
+    });
+
+    return targetVertex.value;
+  });
+
+  protected readonly vertices$: Record<string, GV> = {};
 
   get edges(): Array<GE> {
     if (!this.cachedEdges) {
       this.cachedEdges = Object.values(this.edges$);
     }
     return this.cachedEdges;
-  }
-
-  getEdge(key: string): GE | null {
-    return this.edges$[key] ?? null;
-  }
-
-  getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE> {
-    const res = this.edgesBetweenVertices$[vertex1key]?.[vertex2key];
-    return res ? [...res] : []; // Create a copy of the array
-  }
-
-  getVertex(key: string): GV | null {
-    return this.vertices$[key] ?? null;
-  }
-
-  hasEdge(key: string): boolean {
-    return !!this.edges$[key];
-  }
-
-  hasVertex(key: string): boolean {
-    return !!this.vertices$[key];
-  }
-
-  protected insertEdgeObject(
-    edge: GE,
-    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
-    notifyChange = true
-  ): void {
-    if (this.edges$[edge.key]) {
-      throw new Error(`Edge with key ${edge.key} already exists.`);
-    }
-    // Add edge to edges between vertices
-    const [vertex1, vertex2] = edge.vertices;
-    if (!this.edgesBetweenVertices$[vertex1.key]) {
-      this.edgesBetweenVertices$[vertex1.key] = {};
-    }
-    if (!this.edgesBetweenVertices$[vertex2.key]) {
-      this.edgesBetweenVertices$[vertex2.key] = {};
-    }
-    if (!this.edgesBetweenVertices$[vertex1.key]![vertex2.key]) {
-      this.edgesBetweenVertices$[vertex1.key]![vertex2.key] = [];
-    }
-    if (!this.edgesBetweenVertices$[vertex2.key]![vertex1.key]) {
-      this.edgesBetweenVertices$[vertex2.key]![vertex1.key] =
-        this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!;
-    }
-    this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
-    // Add edge to edges
-    this.edges$[edge.key] = edge;
-    this.invalidateEdgesCache();
-    if (notifyChange) this.notifyGraphChange(animationsSettings);
-  }
-
-  protected insertVertexObject(
-    vertex: GV,
-    animationSettings?: Maybe<GraphModificationAnimationsSettings>,
-    notifyChange = true
-  ): void {
-    if (this.vertices$[vertex.key]) {
-      throw new Error(`Vertex with key ${vertex.key} already exists.`);
-    }
-    this.vertices$[vertex.key] = vertex;
-    this.invalidateVerticesCache();
-    if (notifyChange) this.notifyGraphChange(animationSettings);
-  }
-
-  protected notifyFocusChange(
-    vertexKey: null | string,
-    settings?: FocusSettings
-  ): void {
-    this.lastFocusChangeSettings = settings ?? null;
-    for (const observer of this.observers) {
-      observer.focusChanged?.(vertexKey, settings);
-    }
-  }
-
-  protected notifyGraphChange(
-    animationsSettings?: Maybe<GraphModificationAnimationsSettings>
-  ): void {
-    const updatedAnimationSettings = animationsSettings ?? {
-      edges: {},
-      vertices: {}
-    };
-    this.lastGraphChangeSettings = updatedAnimationSettings;
-    for (const observer of this.observers) {
-      observer.graphChanged?.(updatedAnimationSettings);
-    }
   }
 
   get orderedEdges(): OrderedEdges<V, E, GE> {
@@ -332,9 +241,158 @@ export default abstract class Graph<
     return this.cachedOrderedEdges;
   }
 
+  get vertices(): Array<GV> {
+    if (!this.cachedVertices) {
+      this.cachedVertices = Object.values(this.vertices$);
+    }
+    return this.cachedVertices;
+  }
+
+  get verticesData(): Array<VertexData<V>> {
+    if (!this.cachedVerticesData) {
+      this.cachedVerticesData = this.vertices.map(getVertexData);
+    }
+    return this.cachedVerticesData;
+  }
+
+  private invalidateEdgesCache(): void {
+    // Invalidate cached edges data
+    this.cachedEdges = null;
+    this.cachedOrderedEdges = null;
+    this.cachedConnections = null;
+    this.cachedEdgesData = null;
+    this.invalidateDataCache();
+  }
+
+  private invalidateVerticesCache(): void {
+    // Invalidate cached vertices data
+    this.cachedVertices = null;
+    this.cachedConnections = null;
+    this.cachedVerticesData = null;
+    this.invalidateDataCache();
+  }
+
+  addObserver(observer: GraphObserver<V, E>): void {
+    this.observers.add(observer);
+    // Notify about last changes
+    if (this.lastGraphChangeSettings) {
+      observer?.graphChanged?.(this.lastGraphChangeSettings);
+    }
+    if (this.focusedVertexKey) {
+      observer?.focusChanged?.(
+        this.focusedVertexKey,
+        this.lastFocusChangeSettings ?? undefined
+      );
+    }
+  }
+
+  blur(settings?: Maybe<AnimationSettings>): void {
+    if (!this.focusedVertexKey) return;
+    this.focusedVertexKey = null;
+    this.notifyFocusChange(null, {
+      animation: settings
+    });
+  }
+
+  // TODO - remove this method after adding self-loop edges support
+  protected checkSelfLoop(vertex1key: string, vertex2key: string): void {
+    if (vertex1key === vertex2key) {
+      throw new Error(
+        `Self-loop edges are not yet supported. Vertex key: ${vertex1key}`
+      );
+    }
+  }
+
+  getEdge(key: string): GE | null {
+    return this.edges$[key] ?? null;
+  }
+
+  getEdgesBetween(vertex1key: string, vertex2key: string): Array<GE> {
+    const res = this.edgesBetweenVertices$[vertex1key]?.[vertex2key];
+    return res ? [...res] : []; // Create a copy of the array
+  }
+
+  getVertex(key: string): GV | null {
+    return this.vertices$[key] ?? null;
+  }
+
+  hasEdge(key: string): boolean {
+    return !!this.edges$[key];
+  }
+
+  hasVertex(key: string): boolean {
+    return !!this.vertices$[key];
+  }
+
+  protected insertEdgeObject(
+    edge: GE,
+    animationsSettings?: GraphModificationAnimationsSettings,
+    notifyChange = true
+  ): void {
+    if (this.edges$[edge.key]) {
+      throw new Error(`Edge with key ${edge.key} already exists.`);
+    }
+    // Add edge to edges between vertices
+    const [vertex1, vertex2] = edge.vertices;
+    if (!this.edgesBetweenVertices$[vertex1.key]) {
+      this.edgesBetweenVertices$[vertex1.key] = {};
+    }
+    if (!this.edgesBetweenVertices$[vertex2.key]) {
+      this.edgesBetweenVertices$[vertex2.key] = {};
+    }
+    if (!this.edgesBetweenVertices$[vertex1.key]![vertex2.key]) {
+      this.edgesBetweenVertices$[vertex1.key]![vertex2.key] = [];
+    }
+    if (!this.edgesBetweenVertices$[vertex2.key]![vertex1.key]) {
+      this.edgesBetweenVertices$[vertex2.key]![vertex1.key] =
+        this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!;
+    }
+    this.edgesBetweenVertices$[vertex1.key]![vertex2.key]!.push(edge);
+    // Add edge to edges
+    this.edges$[edge.key] = edge;
+    this.invalidateEdgesCache();
+    if (notifyChange) this.notifyGraphChange(animationsSettings);
+  }
+
+  protected insertVertexObject(
+    vertex: GV,
+    animationSettings?: GraphModificationAnimationsSettings,
+    notifyChange = true
+  ): void {
+    if (this.vertices$[vertex.key]) {
+      throw new Error(`Vertex with key ${vertex.key} already exists.`);
+    }
+    this.vertices$[vertex.key] = vertex;
+    this.invalidateVerticesCache();
+    if (notifyChange) this.notifyGraphChange(animationSettings);
+  }
+
+  protected notifyFocusChange(
+    vertexKey: null | string,
+    settings?: FocusSettings
+  ): void {
+    this.lastFocusChangeSettings = settings ?? null;
+    for (const observer of this.observers) {
+      observer.focusChanged?.(vertexKey, settings);
+    }
+  }
+
+  protected notifyGraphChange(
+    animationsSettings?: GraphModificationAnimationsSettings
+  ): void {
+    const updatedAnimationSettings = animationsSettings ?? {
+      edges: {},
+      vertices: {}
+    };
+    this.lastGraphChangeSettings = updatedAnimationSettings;
+    for (const observer of this.observers) {
+      observer.graphChanged?.(updatedAnimationSettings);
+    }
+  }
+
   protected removeEdgeObject(
     edge: GE,
-    animationsSettings?: Maybe<GraphModificationAnimationsSettings>,
+    animationsSettings?: GraphModificationAnimationsSettings,
     notifyChange = true
   ): void {
     // Remove edge from edges between vertices
@@ -359,49 +417,46 @@ export default abstract class Graph<
     if (notifyChange) this.notifyGraphChange(animationsSettings);
   }
 
-  removeObserver(observer: GraphObserver): void {
+  removeObserver(observer: GraphObserver<V, E>): void {
     this.observers.delete(observer);
   }
-
-  get vertices(): Array<GV> {
-    if (!this.cachedVertices) {
-      this.cachedVertices = Object.values(this.vertices$);
-    }
-    return this.cachedVertices;
-  }
-
   abstract get connections(): GraphConnections;
+
+  abstract get edgesData(): Array<ED>;
+  abstract get graphData(): DirectedGraphData<V, E> | UndirectedGraphData<V, E>;
 
   abstract insertBatch(
     data: {
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
   abstract insertEdge(
     data: ED,
-    animationSettings?: Maybe<AnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
   abstract insertVertex(
     data: VertexData<V>,
-    animationSettings?: Maybe<AnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
+  protected abstract invalidateDataCache(): void;
+
   abstract isDirected(): boolean;
 
-  abstract orderEdgesBetweenVertices(
+  protected abstract orderEdgesBetweenVertices(
     edges: Array<GE>
   ): Array<{ edge: GE; order: number }>;
 
   abstract removeEdge(
     key: string,
-    animationSettings?: Maybe<AnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 
@@ -410,7 +465,7 @@ export default abstract class Graph<
       edges?: Array<ED>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
 }

@@ -1,18 +1,10 @@
-import { Canvas, Group } from '@shopify/react-native-skia';
+import { Group } from '@shopify/react-native-skia';
 import { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { GraphComponent } from '@/components/graphs';
-import { AccessibleOverlayContextType, withOverlay } from '@/contexts/overlay';
-import { CanvasContexts, GraphProvider } from '@/providers/graph';
-import {
-  useAutoSizingContext,
-  useFocusContext,
-  useGesturesContext,
-  useTransformContext,
-  useViewDataContext
-} from '@/providers/view';
+import { GraphProvider } from '@/providers/graph';
+import { useViewDataContext } from '@/providers/view';
 import { GraphData } from '@/types/data';
 
 const validateProps = <V, E>(props: GraphData<V, E>) => {
@@ -40,19 +32,14 @@ const validateProps = <V, E>(props: GraphData<V, E>) => {
   }
 };
 
-function GraphComponentComposer<V, E>({
-  removeLayer,
-  renderLayer,
+export default function GraphComponentComposer<V, E>({
   ...restProps
-}: GraphData<V, E> & AccessibleOverlayContextType) {
+}: GraphData<V, E>) {
   const graphProps = restProps;
   validateProps<V, E>(graphProps);
   // CONTEXTS
+  // Canvas contexts
   const dataContext = useViewDataContext();
-  const transformContext = useTransformContext();
-  const autoSizingContext = useAutoSizingContext();
-  const focusContext = useFocusContext();
-  const gesturesContext = useGesturesContext();
 
   const { currentScale, currentTranslation } = dataContext;
   const canvasTransform = useDerivedValue(() => [
@@ -70,47 +57,14 @@ function GraphComponentComposer<V, E>({
     []
   );
 
-  // IMPORTANT: canvasContexts must be memoized to prevent re-rendering
-  const canvasContexts = useMemo<CanvasContexts>(
-    () => ({
-      autoSizingContext,
-      dataContext,
-      focusContext,
-      gesturesContext,
-      overlayContext: {
-        removeLayer,
-        renderLayer
-      },
-      transformContext
-    }),
-    []
-  );
-
   // IMPORTANT: graphComponent must be memoized to prevent re-rendering
   const graphComponent = useMemo(() => <GraphComponent />, []);
 
   return (
-    <Canvas
-      onLayout={transformContext.handleCanvasRender}
-      style={styles.canvas}>
-      <Group transform={canvasTransform}>
-        <GraphProvider
-          canvasContexts={canvasContexts}
-          graphProps={graphProps}
-          transform={animatedTransform}>
-          {graphComponent}
-        </GraphProvider>
-      </Group>
-    </Canvas>
+    <Group transform={canvasTransform}>
+      <GraphProvider graphProps={graphProps} transform={animatedTransform}>
+        {graphComponent}
+      </GraphProvider>
+    </Group>
   );
 }
-
-const styles = StyleSheet.create({
-  canvas: {
-    flex: 1
-  }
-});
-
-export default withOverlay(GraphComponentComposer) as <V, E>(
-  props: GraphData<V, E>
-) => JSX.Element;

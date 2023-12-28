@@ -1,8 +1,8 @@
 import { memo } from 'react';
 
+import RenderedEdgeComponent from '@/components/graphs/edges/RenderedEdgeComponent';
 import { UndirectedStraightEdgeComponentProps } from '@/types/components';
 
-import StraightEdgeComponent from './StraightEdgeComponent';
 import { TranslationOffsetGetter, useStraightEdge } from './utils';
 
 const calcTranslationOffset: TranslationOffsetGetter = (
@@ -23,7 +23,7 @@ function UndirectedStraightEdgeComponent<V, E>(
   props: UndirectedStraightEdgeComponentProps<V, E>
 ) {
   const {
-    data: { animationProgress, key, value },
+    data: { addObserver, animationProgress, key, removeObserver, value },
     focusProgress,
     renderers
   } = props;
@@ -31,13 +31,16 @@ function UndirectedStraightEdgeComponent<V, E>(
   const { p1, p2 } = useStraightEdge(props, calcTranslationOffset);
 
   return (
-    <StraightEdgeComponent
+    <RenderedEdgeComponent
+      addObserver={addObserver}
       animationProgress={animationProgress}
+      customProps={renderers.edge.props}
       edgeKey={key}
       focusProgress={focusProgress}
       p1={p1}
       p2={p2}
-      renderer={renderers.edge}
+      removeObserver={removeObserver}
+      renderer={renderers.edge.renderer}
       value={value as E}
     />
   );

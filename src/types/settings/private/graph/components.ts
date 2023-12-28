@@ -4,14 +4,20 @@ import {
   EdgeLabelSettings,
   EdgeSettings,
   StraightEdgeSettings,
+  VertexLabelPosition,
   VertexSettings
 } from '@/types/settings/public';
-import { DeepRequired, DeepSharedify } from '@/types/utils';
+import { Animatable, DeepRequired, DeepSharedify } from '@/types/utils';
 
 /*
  * DEFAULT SETTINGS
  */
 export type AllVertexSettings = DeepRequired<VertexSettings>;
+
+export type AllVertexLabelSettings = {
+  offset: Animatable<number>;
+  position: Animatable<VertexLabelPosition>;
+};
 
 export type AllEdgeSettings = DeepRequired<EdgeSettings>;
 
@@ -28,11 +34,14 @@ export type AllGraphComponentsSettings = {
   edgeArrow?: AllEdgeArrowSettings;
   edgeLabel?: AllEdgeLabelSettings;
   vertex: AllVertexSettings;
+  vertexLabel?: AllVertexLabelSettings;
 };
 
 /*
  * INTERNAL SETTINGS
  */
+export type InternalVertexLabelSettings = DeepSharedify<AllVertexLabelSettings>;
+
 export type InternalStraightEdgeSettings =
   DeepSharedify<AllStraightEdgeSettings>;
 
@@ -81,4 +90,5 @@ export type InternalGraphComponentsSettings = {
   edgeArrow?: InternalEdgeArrowSettings;
   edgeLabel?: InternalEdgeLabelSettings;
   vertex: InternalVertexSettings;
+  vertexLabel?: InternalVertexLabelSettings;
 };

@@ -1,5 +1,4 @@
 import {
-  Context,
   createContext,
   PropsWithChildren,
   useCallback,
@@ -24,7 +23,13 @@ import {
   updateContextValue
 } from './utils';
 
-const GraphComponentsDataContext = createContext(null as unknown as object);
+const GraphComponentsDataContext = createContext<GraphComponentsData<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+> | null>(null);
+GraphComponentsDataContext.displayName = 'GraphComponentsDataContext';
 
 export const withComponentsData = <
   V,
@@ -34,24 +39,21 @@ export const withComponentsData = <
 >(
   Component: React.ComponentType<P>,
   selector: (contextValue: GraphComponentsData<V, E>) => R
-) =>
-  withMemoContext(
-    Component,
-    GraphComponentsDataContext as unknown as Context<GraphComponentsData<V, E>>,
-    selector
-  );
+) => withMemoContext(Component, GraphComponentsDataContext, selector);
 
 type ComponentsDataProviderProps<V, E> = PropsWithChildren<{
   graph: Graph<V, E>;
   graphAnimationsSettings: AllGraphAnimationsSettings;
   renderEdgeLabels: boolean;
+  renderVertexLabels: boolean;
 }>;
 
 function ComponentsDataProvider<V, E>({
   children,
   graph,
   graphAnimationsSettings,
-  renderEdgeLabels
+  renderEdgeLabels,
+  renderVertexLabels
 }: ComponentsDataProviderProps<V, E>) {
   // GRAPH OBSERVER
   const [state] = useGraphObserver(graph);
@@ -65,15 +67,18 @@ function ComponentsDataProvider<V, E>({
   const removedEdges = useMemo(() => new Set<string>(), []);
 
   // Other values
-  const removeComponentsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const removeComponentsTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
-  const getComponentsData = () => ({
+  const getComponentsData = (): ComponentsData<V, E> => ({
     connections: graph.connections,
     graphAnimationsSettings,
     isGraphDirected: graph.isDirected(),
     removedEdges,
     removedVertices,
     renderEdgeLabels,
+    renderVertexLabels,
     state
   });
 
@@ -109,7 +114,13 @@ function ComponentsDataProvider<V, E>({
       updateContextValue(value, newData, componentsData)
     );
     setComponentsData(newData);
-  }, [state, graphAnimationsSettings, renderEdgeLabels, forceRemove]);
+  }, [
+    state,
+    graphAnimationsSettings,
+    renderEdgeLabels,
+    renderVertexLabels,
+    forceRemove
+  ]);
 
   const startComponentsRemoveTimeout = () => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -139,6 +150,7 @@ export default withGraphSettings(
   ({ animationSettings, graph, renderers }) => ({
     graph,
     graphAnimationsSettings: animationSettings,
-    renderEdgeLabels: !!renderers.edgeLabel
+    renderEdgeLabels: !!renderers.edgeLabel,
+    renderVertexLabels: !!renderers.vertexLabel
   })
 );

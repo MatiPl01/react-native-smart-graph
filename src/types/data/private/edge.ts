@@ -1,14 +1,15 @@
 import { Vector } from '@shopify/react-native-skia';
 import { SharedValue } from 'react-native-reanimated';
 
-import { DirectedEdge, UndirectedEdge } from '@/types/models';
+import { DirectedEdge, EdgeObserver, UndirectedEdge } from '@/types/models';
 import { AllAnimationSettings } from '@/types/settings';
 
-import { EdgeLabelComponentData } from './label';
+import { EdgeLabelComponentData } from './edgeLabel';
 
 export type GraphEdge<V, E> = DirectedEdge<V, E> | UndirectedEdge<V, E>;
 
-export type EdgeComponentData<E = undefined> = {
+export type EdgeComponentData<E = unknown> = {
+  addObserver(observer: EdgeObserver<E>): void;
   animationProgress: SharedValue<number>;
   animationSettings: AllAnimationSettings | null;
   isDirected: boolean;
@@ -30,6 +31,7 @@ export type EdgeComponentData<E = undefined> = {
     v2Source: Vector;
     v2Target: Vector;
   }>;
+  removeObserver(observer: EdgeObserver<E>): void;
   removed: boolean;
   transformProgress: SharedValue<number>;
   v1Key: string;

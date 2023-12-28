@@ -1,22 +1,9 @@
 {
-  "extends": "@tsconfig/react-native/tsconfig.json",
+  "extends": "eslint-config-react-native-matipl01/tsconfig.base",
   "compilerOptions": {
-    "types": ["jest", "node"],
-    "module": "ESNext",
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "strict": true,
-    "removeComments": true,
-    "checkJs": true,
-    "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true,
     "rootDir": "./src",
+    "jsx": "react-jsx",
+
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],

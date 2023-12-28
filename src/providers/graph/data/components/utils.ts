@@ -1,3 +1,4 @@
+import { Transforms2d } from '@shopify/react-native-skia';
 import { makeMutable } from 'react-native-reanimated';
 
 import { DEFAULT_ANIMATION_SETTINGS } from '@/constants/animations';
@@ -10,13 +11,14 @@ import {
   VertexComponentData,
   VertexRemoveHandler
 } from '@/types/data';
+import { VertexLabelComponentData } from '@/types/data/private/vertexLabel';
 import { GraphConnections, OrderedEdges, Vertex } from '@/types/models';
 import {
   AllAnimationSettings,
   AllGraphAnimationsSettings,
   AnimationSettings
 } from '@/types/settings';
-import { PartialWithRequired } from '@/types/utils';
+import { Maybe, PartialWithRequired } from '@/types/utils';
 import {
   cancelEdgeAnimations,
   cancelVertexAnimations
@@ -35,6 +37,7 @@ export type ComponentsData<V, E> = {
   // has been completed and vertices are waiting to be unmounted
   removedVertices: Set<string>;
   renderEdgeLabels: boolean;
+  renderVertexLabels: boolean;
   state: GraphState<V, E>;
 };
 
@@ -51,8 +54,11 @@ export const createContextValue = <V, E>(
 const UPDATE_CONFIG = {
   connections: 'shallow', // 'shallow' - shallow compare
   edgeLabelsData: 'shallow',
+  edgeLabelsRendered: 'shared', // 'shared' - replace with shared value
   edgesData: 'shallow',
-  isGraphDirected: 'shared', // 'shared' - replace with shared value
+  isGraphDirected: 'shared',
+  vertexLabelsData: 'shallow',
+  vertexLabelsRendered: 'shared',
   verticesData: 'shallow'
 };
 
@@ -63,11 +69,13 @@ export const updateContextValue = <V, E>(
 ): GraphComponentsData<V, E> => {
   const currentLayoutAnimationSettings = value?.layoutAnimationSettings;
   const newLayoutAnimationSettings =
-    newData.graphAnimationsSettings.layout === null
+    newData.state.animationsSettings.layout === null
       ? null
       : updateValues({
           current: currentLayoutAnimationSettings,
-          default: newData.graphAnimationsSettings.layout,
+          default:
+            newData.graphAnimationsSettings.layout ??
+            newData.state.animationsSettings.layout,
           new: newData.state.animationsSettings.layout
         });
 
@@ -84,6 +92,19 @@ export const updateContextValue = <V, E>(
         )
       : value?.verticesData ?? {};
 
+  // Update vertex labels data only if vertices have changed and labels are rendered
+  const newVerticesLabelsData =
+    newData.renderVertexLabels && newVerticesData !== value?.verticesData
+      ? updateGraphVertexLabelsData(
+          value?.vertexLabelsData ?? {},
+          newVerticesData
+        )
+      : // Remove vertex labels data if labels are not rendered anymore
+      !newData.renderVertexLabels && currentData?.renderVertexLabels
+      ? {}
+      : // Use previous vertex labels data if labels are rendered and vertices have not changed
+        value?.vertexLabelsData ?? {};
+
   // Update edges data only if edges have changed
   const newEdgesData =
     newData.state.edges !== currentData?.state.edges ||
@@ -98,8 +119,8 @@ export const updateContextValue = <V, E>(
         )
       : value?.edgesData ?? {};
 
+  // Update edge labels data only if edges have changed and labels are rendered
   const newEdgeLabelsData =
-    // Update edge labels data only if edges have changed and labels are rendered
     newData.renderEdgeLabels && newEdgesData !== value?.edgesData
       ? updateGraphEdgeLabelsData(value?.edgeLabelsData ?? {}, newEdgesData)
       : // Remove edge labels data if labels are not rendered anymore
@@ -116,11 +137,14 @@ export const updateContextValue = <V, E>(
         // updating the connections when the graph is updated
         connections: newData.connections,
         edgeLabelsData: newEdgeLabelsData,
+        edgeLabelsRendered: newData.renderEdgeLabels,
         edgesData: newEdgesData,
         handleEdgeRemove: value.handleEdgeRemove, // Prevent removing
         handleVertexRemove: value.handleVertexRemove, // Prevent removing
         isGraphDirected: newData.isGraphDirected,
         layoutAnimationSettings: newLayoutAnimationSettings,
+        vertexLabelsData: newVerticesLabelsData,
+        vertexLabelsRendered: newData.renderVertexLabels,
         verticesData: newVerticesData
       }
     },
@@ -148,7 +172,7 @@ const updateGraphVerticesData = <V, E>(
   oldVerticesData: Record<string, VertexComponentData<V>>,
   currentVertices: Array<Vertex<V, E>>,
   removedVertices: Set<string>,
-  currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
+  currentAnimationsSettings: Record<string, Maybe<AnimationSettings>> | null,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, VertexComponentData<V>> => {
   const updatedVerticesData = { ...oldVerticesData };
@@ -179,7 +203,12 @@ const updateGraphVerticesData = <V, E>(
     updatedVerticesData[vertex.key] = {
       ...(oldVertex ?? {
         // Create shared values only for new vertices
+        animationProgress: makeMutable(0),
+        focusProgress: makeMutable(0),
         isModified: makeMutable(true),
+        label: {
+          transform: makeMutable<Transforms2d>([])
+        },
         points: makeMutable({
           source: { x: 0, y: 0 },
           target: { x: 0, y: 0 }
@@ -187,11 +216,13 @@ const updateGraphVerticesData = <V, E>(
         scale: makeMutable(1),
         transformProgress: makeMutable(0)
       }),
+      addObserver: vertex.addObserver.bind(vertex),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
-        currentAnimationsSettings[vertex.key]
+        currentAnimationsSettings && currentAnimationsSettings[vertex.key]
       ),
       key: vertex.key,
+      removeObserver: vertex.removeObserver.bind(vertex),
       removed: false,
       value: vertex.value
     };
@@ -209,7 +240,7 @@ const updateGraphVerticesData = <V, E>(
         ...vertexData,
         animationSettings: updateAnimationSettings(
           defaultAnimationSettings,
-          currentAnimationsSettings[key]
+          currentAnimationsSettings?.[key]
         ),
         removed: true
       };
@@ -235,7 +266,7 @@ const updateGraphEdgesData = <V, E>(
   currentEdges: OrderedEdges<V, E>,
   verticesData: Record<string, VertexComponentData<V>>,
   removedEdges: Set<string>,
-  currentAnimationsSettings: Record<string, AnimationSettings | undefined>,
+  currentAnimationsSettings: Record<string, Maybe<AnimationSettings>> | null,
   defaultAnimationSettings: AllAnimationSettings | null
 ): Record<string, EdgeComponentData<E>> => {
   const updatedEdgesData = { ...oldEdgesData };
@@ -292,6 +323,8 @@ const updateGraphEdgesData = <V, E>(
         // Create shared values only for new edges
         animationProgress: makeMutable(0),
         label: {
+          addObserver: edgeData.edge.addObserver.bind(edgeData.edge),
+          removeObserver: edgeData.edge.removeObserver.bind(edgeData.edge),
           transform: makeMutable({
             center: { x: 0, y: 0 },
             p1: { x: 0, y: 0 },
@@ -317,12 +350,15 @@ const updateGraphEdgesData = <V, E>(
         }),
         transformProgress: makeMutable(1)
       }),
+      addObserver: edgeData.edge.addObserver.bind(edgeData.edge),
       animationSettings: updateAnimationSettings(
         defaultAnimationSettings,
-        currentAnimationsSettings[edgeData.edge.key]
+        currentAnimationsSettings &&
+          currentAnimationsSettings[edgeData.edge.key]
       ),
       isDirected: edgeData.edge.isDirected(),
       key: edgeData.edge.key,
+      removeObserver: edgeData.edge.removeObserver.bind(edgeData.edge),
       removed: false,
       v1Key: v1.key,
       v2Key: v2.key,
@@ -343,7 +379,7 @@ const updateGraphEdgesData = <V, E>(
           ...edgeData,
           animationSettings: updateAnimationSettings(
             defaultAnimationSettings,
-            currentAnimationsSettings[key]
+            currentAnimationsSettings && currentAnimationsSettings[key]
           ),
           removed: true
         };
@@ -397,4 +433,45 @@ const updateGraphEdgeLabelsData = <E>(
   }
 
   return isModified ? updatedEdgeLabelsData : oldEdgeLabelsData;
+};
+
+const updateGraphVertexLabelsData = <V>(
+  oldVertexLabelsData: Record<string, VertexLabelComponentData<V>>,
+  verticesData: Record<string, VertexComponentData<V>>
+): Record<string, VertexLabelComponentData<V>> => {
+  const updatedVertexLabelsData = { ...oldVertexLabelsData };
+  let isModified = false; // Flag to indicate if edges data was updated
+
+  // Add new labels data
+  for (const key in verticesData) {
+    const vertexData = verticesData[key];
+    const oldLabelData = oldVertexLabelsData[key];
+    // Update label data if it is not rendered yet or its value was changed
+    if (
+      vertexData &&
+      (!oldLabelData || oldLabelData.value !== vertexData.value)
+    ) {
+      updatedVertexLabelsData[key] = {
+        ...vertexData.label,
+        addObserver: vertexData.addObserver.bind(vertexData),
+        animationProgress: vertexData.animationProgress,
+        focusProgress: vertexData.focusProgress,
+        removeObserver: vertexData.removeObserver.bind(vertexData),
+        value: vertexData.value,
+        vertexKey: vertexData.key
+      };
+      isModified = true; // Mark as modified to set the new labels data object
+    }
+  }
+
+  // Remove labels data of vertices that are no longer displayed
+  // (their unmount animation is finished)
+  for (const key in oldVertexLabelsData) {
+    if (!verticesData[key]) {
+      delete updatedVertexLabelsData[key];
+      isModified = true; // Mark as modified to set the new labels data object
+    }
+  }
+
+  return isModified ? updatedVertexLabelsData : oldVertexLabelsData;
 };

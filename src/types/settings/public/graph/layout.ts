@@ -1,4 +1,4 @@
-import { Sharedifyable } from '@/types/utils';
+import { Animatable } from '@/types/utils';
 
 /*
  * AUTO LAYOUT
@@ -11,11 +11,11 @@ export type AutoLayoutSettings = {
  * FORCE LAYOUT
  */
 export type ForceLayoutSettings = {
-  attractionForceFactor?: Sharedifyable<number>;
-  attractionScale?: Sharedifyable<number>;
-  minUpdateDistance?: Sharedifyable<number>;
-  refreshInterval?: Sharedifyable<number>;
-  repulsionScale?: Sharedifyable<number>;
+  attractionForceFactor?: Animatable<number>;
+  attractionScale?: Animatable<number>;
+  minUpdateDistance?: Animatable<number>;
+  refreshInterval?: Animatable<number>;
+  repulsionScale?: Animatable<number>;
   strategy?: 'default'; // TODO - add more in the future
   type: 'force';
 };

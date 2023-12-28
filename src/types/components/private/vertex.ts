@@ -1,24 +1,35 @@
+import { SharedValue } from 'react-native-reanimated';
+
 import { MultiStepFocusContextType } from '@/providers/graph/focus';
 import { FocusContextType } from '@/providers/view';
 import { VertexRenderer } from '@/types/components/public';
 import { VertexComponentData, VertexRemoveHandler } from '@/types/data';
-import { InternalVertexSettings } from '@/types/settings';
+import {
+  InternalVertexLabelSettings,
+  InternalVertexSettings
+} from '@/types/settings';
+import { RendererWithProps } from '@/types/utils';
 
-/* eslint-disable import/no-unused-modules */
 export type VertexComponentProps<V> = {
   data: VertexComponentData<V>;
   focusContext: FocusContextType;
-  multiStepFocusContext: MultiStepFocusContextType;
+  labelsRendered: SharedValue<boolean>;
+  multiStepFocusContext: MultiStepFocusContextType | null;
   onRemove: VertexRemoveHandler;
-  renderer: VertexRenderer<V>;
-  settings: InternalVertexSettings;
+  renderer: RendererWithProps<VertexRenderer<V>>;
+  settings: {
+    label: InternalVertexLabelSettings;
+    vertex: InternalVertexSettings;
+  };
 };
 
-export type GraphVerticesProps<V> = {
-  focusContext: FocusContextType;
-  multiStepFocusContext: MultiStepFocusContextType;
-  onRemove: VertexRemoveHandler;
-  renderer: VertexRenderer<V> | null;
-  settings: InternalVertexSettings;
+export type GraphVerticesProps<V> = Omit<
+  VertexComponentProps<V>,
+  'data' | 'renderer' | 'settings'
+> & {
+  labelSettings: InternalVertexLabelSettings;
+  labelsRendered: SharedValue<boolean>;
+  renderer: RendererWithProps<VertexRenderer<V>> | null;
+  vertexSettings: InternalVertexSettings;
   verticesData: Record<string, VertexComponentData<V>>;
 };

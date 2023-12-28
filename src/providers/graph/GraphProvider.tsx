@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 import { PropsWithChildren, useMemo } from 'react';
 
 import { ContextProviderComposer } from '@/providers/utils';
@@ -6,9 +7,6 @@ import { AnimatedTransformation } from '@/types/layout';
 
 import { EdgesMaskProvider } from './appearance';
 import ConditionalProvider from './ConditionalProvider';
-import CanvasContextsProvider, {
-  CanvasContexts
-} from './contexts/CanvasContextsProvider';
 import { ComponentsDataProvider, GraphSettingsProvider } from './data';
 import { PressEventsProvider } from './events';
 import { MultiStepVertexFocusProvider, VertexFocusProvider } from './focus';
@@ -21,13 +19,11 @@ import {
 import { SettingsChangeResponderProvider } from './settings';
 
 type GraphProviderProps<V, E> = PropsWithChildren<{
-  canvasContexts: CanvasContexts;
   graphProps: GraphData<V, E>;
   transform: AnimatedTransformation;
 }>;
 
 export default function GraphProvider<V, E>({
-  canvasContexts,
   children,
   graphProps,
   transform
@@ -42,6 +38,7 @@ export default function GraphProvider<V, E>({
       // Providers used to compute the layout of the graph and animate
       // vertices based on calculated positions
       <ConditionalProvider.Switch
+        match={({ layoutSettings }) => layoutSettings.type}
         case={{
           // Provider used to place and move vertices on graph changes
           auto: <PlacementLayoutProvider />,
@@ -52,7 +49,6 @@ export default function GraphProvider<V, E>({
             <ForcesLayoutProvider />
           ]
         }}
-        match={({ layoutSettings }) => layoutSettings.type}
       />,
       // CONTAINER
       // Provider used to compute the dimensions of the container
@@ -83,12 +79,10 @@ export default function GraphProvider<V, E>({
   );
 
   return (
-    <CanvasContextsProvider canvasContexts={canvasContexts}>
-      <GraphSettingsProvider {...graphProps}>
-        <ContextProviderComposer providers={providers}>
-          {children}
-        </ContextProviderComposer>
-      </GraphSettingsProvider>
-    </CanvasContextsProvider>
+    <GraphSettingsProvider {...graphProps}>
+      <ContextProviderComposer providers={providers}>
+        {children}
+      </ContextProviderComposer>
+    </GraphSettingsProvider>
   );
 }

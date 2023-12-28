@@ -4,10 +4,10 @@ import { useSharedValue } from 'react-native-reanimated';
 
 import { EdgeArrowComponent } from '@/components/graphs/arrows';
 import { calcEdgeArrowTransform } from '@/components/graphs/arrows/utils';
+import RenderedEdgeComponent from '@/components/graphs/edges/RenderedEdgeComponent';
 import { DirectedStraightEdgeComponentProps } from '@/types/components';
 import { calcUnitVector, translateAlongVector } from '@/utils/vectors';
 
-import StraightEdgeComponent from './StraightEdgeComponent';
 import { useStraightEdge } from './utils';
 
 const calcTranslationOffset = (
@@ -27,9 +27,9 @@ function DirectedStraightEdgeComponent<V, E>(
   props: DirectedStraightEdgeComponentProps<V, E>
 ) {
   const {
-    data: { animationProgress, key, value },
+    data: { addObserver, animationProgress, key, removeObserver, value },
     focusProgress,
-    renderers: { edge: edgeRenderer, edgeArrow: edgeArrowRenderer },
+    renderers: { arrow: edgeArrowRenderer, edge: edgeRenderer },
     settings: {
       arrow: { scale: arrowScale },
       vertex: { radius: vertexRadius }
@@ -72,13 +72,16 @@ function DirectedStraightEdgeComponent<V, E>(
 
   return (
     <>
-      <StraightEdgeComponent
+      <RenderedEdgeComponent
+        addObserver={addObserver}
         animationProgress={animationProgress}
+        customProps={edgeRenderer.props}
         edgeKey={key}
         focusProgress={focusProgress}
         p1={p1}
         p2={p2}
-        renderer={edgeRenderer}
+        removeObserver={removeObserver}
+        renderer={edgeRenderer.renderer}
         value={value as E}
       />
       {edgeArrowRenderer && (

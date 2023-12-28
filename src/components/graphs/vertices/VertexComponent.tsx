@@ -1,54 +1,72 @@
 import { Group } from '@shopify/react-native-skia';
 import { memo, useEffect, useMemo } from 'react';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
-import { useComponentFocus, useVertexTransform } from '@/hooks';
+import {
+  useComponentFocus,
+  useVertexTransform,
+  useVertexValueObserver
+} from '@/hooks';
 import {
   VertexComponentProps,
   VertexRenderer,
   VertexRendererProps
 } from '@/types/components';
+import { VertexObserver } from '@/types/models';
 import { updateComponentAnimationState } from '@/utils/components';
+import { getVertexLabelComponentTransformation } from '@/utils/transform';
 
 function VertexComponent<V>({
   data,
   focusContext,
+  labelsRendered,
   multiStepFocusContext,
   onRemove,
   renderer,
-  settings: { radius: r }
+  settings: {
+    label: labelSettings,
+    vertex: { radius: r }
+  }
 }: VertexComponentProps<V>) {
   const { animationSettings, removed, value, ...restData } = data;
   const { key } = restData;
 
   // ANIMATION
   // Vertex render animation progress
-  // Use a helper value to ensure that the animation progress is never negative
+  // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
   const animationProgressHelper = useSharedValue(0);
-  const animationProgress = useDerivedValue(() =>
-    Math.max(0, animationProgressHelper.value)
-  );
-
-  // FOCUS
-  // Vertex focus progress
-  const focusProgress = useSharedValue(0);
 
   // TRANSFORM
   // Vertex transform
-  const transform = useVertexTransform(data);
+  const transform = useVertexTransform(data, [
+    () => ({ ...labelSettings, labelsRendered }),
+    ({
+      customProps: { labelsRendered: renderLabels, ...rest },
+      transform: { scale: vertexScale, x, y }
+    }) => {
+      'worklet';
+      if (!renderLabels) return;
+      data.label.transform.value = getVertexLabelComponentTransformation(
+        { x, y },
+        r,
+        vertexScale,
+        rest
+      );
+    }
+  ]);
 
   // VERTEX PROPS
   const focusProp = useMemo(
     () => ({
       key: focusContext.focus.key,
-      progress: focusProgress
+      progress: data.focusProgress
     }),
     []
   );
 
   // Update current vertex focus progress based on the global
   // focus transition progress and the focused vertex key
-  useComponentFocus(focusProgress, focusContext, key);
+  useComponentFocus(data.focusProgress, focusContext, key);
 
   // Vertex animation handler
   useEffect(() => {
@@ -63,15 +81,22 @@ function VertexComponent<V>({
     );
   }, [removed]);
 
+  useAnimatedReaction(
+    () => animationProgressHelper.value,
+    progress => {
+      data.animationProgress.value = progress;
+    }
+  );
+
   return (
     <Group transform={transform}>
       <RenderedVertexComponent
         {...restData}
-        animationProgress={animationProgress}
+        customProps={renderer.props}
         focus={focusProp}
         multiStepFocus={multiStepFocusContext}
         r={r}
-        renderer={renderer}
+        renderer={renderer.renderer}
         value={value as V}
         vertexKey={key}
       />
@@ -80,16 +105,27 @@ function VertexComponent<V>({
 }
 
 type RenderedVertexComponentProps<V> = Omit<VertexRendererProps<V>, 'key'> & {
+  addObserver: (observer: VertexObserver<V>) => void;
+  removeObserver: (observer: VertexObserver<V>) => void;
   renderer: VertexRenderer<V>;
   vertexKey: string;
 };
 
-const RenderedVertexComponent = memo(function <V>({
+const RenderedVertexComponent = memo(function RenderedVertexComponent<V>({
+  addObserver,
+  removeObserver,
   renderer,
+  value: initialValue,
   vertexKey: key,
   ...restProps
 }: RenderedVertexComponentProps<V>) {
-  return renderer({ key, ...restProps });
+  const value = useVertexValueObserver(
+    addObserver,
+    removeObserver,
+    initialValue
+  );
+
+  return renderer({ key, ...restProps, value });
 }) as <V>(props: RenderedVertexComponentProps<V>) => JSX.Element;
 
 export default memo(VertexComponent) as <V>(

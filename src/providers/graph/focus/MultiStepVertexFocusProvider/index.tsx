@@ -7,9 +7,9 @@ import {
 } from 'react-native-reanimated';
 
 import { DEFAULT_FOCUS_SETTINGS } from '@/configs/graph';
-import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
 import { useVertexFocusContext } from '@/providers/graph/focus';
+import { useFocusContext, useViewDataContext } from '@/providers/view';
 import { FocusConfig, FocusPath, VertexComponentData } from '@/types/data';
 import {
   InternalMultiStepFocusSettings,
@@ -35,19 +35,12 @@ export type MultiStepFocusContextType = {
   progress: SharedValue<number>;
 };
 
-const MultiStepFocusContext = createContext(null as unknown as object);
+const MultiStepFocusContext = createContext<MultiStepFocusContextType | null>(
+  null
+);
+MultiStepFocusContext.displayName = 'MultiStepFocusContext';
 
-export const useMultiStepFocusContext = () => {
-  const contextValue = useContext(MultiStepFocusContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useMultiStepFocusContext must be used within a MultiStepFocusProvider'
-    );
-  }
-
-  return contextValue as MultiStepFocusContextType;
-};
+export const useMultiStepFocusContext = () => useContext(MultiStepFocusContext);
 
 type MultiStepFocusProviderProps<V> = PropsWithChildren<{
   settings: InternalMultiStepFocusSettings;
@@ -65,7 +58,8 @@ function MultiStepVertexFocusProvider<V>({
 
   // CONTEXTS
   // Canvas contexts
-  const { dataContext: viewDataContext, focusContext } = useCanvasContexts();
+  const viewDataContext = useViewDataContext();
+  const focusContext = useFocusContext();
   // Graph contexts
   const { isVertexFocused } = useVertexFocusContext();
 
@@ -220,7 +214,7 @@ function MultiStepVertexFocusProvider<V>({
     () => ({
       progress: {
         current: focusProgress.value,
-        transition: pathTransitionProgress.value
+        transition: 1 // pathTransitionProgress.value // TODO - optimize this and uncomment when finished
         // sync: syncProgress.value
       }
     }),

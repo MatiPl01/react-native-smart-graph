@@ -1,33 +1,32 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { DirectedEdge } from '@/models/edges';
 import { DirectedGraphVertex } from '@/models/vertices';
-import { DirectedEdgeData, VertexData } from '@/types/data';
+import { DirectedEdgeData, DirectedGraphData, VertexData } from '@/types/data';
 import {
   DirectedEdge as IDirectedEdge,
   DirectedGraphVertex as IDirectedGraphVertex,
   GraphConnections
 } from '@/types/models';
 import {
-  AnimationSettings,
   BatchModificationAnimationSettings,
   SingleModificationAnimationSettings
 } from '@/types/settings';
-import { Maybe } from '@/types/utils';
 import {
   createAnimationsSettingsForBatchModification,
   createAnimationsSettingsForSingleModification
 } from '@/utils/animations';
-import { catchError } from '@/utils/models';
+import { catchError, getDirectedEdgeData } from '@/utils/models';
 
 import Graph from './Graph';
 
-export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
+export default class DirectedGraph<V = unknown, E = unknown> extends Graph<
   V,
   E,
   IDirectedGraphVertex<V, E>,
   IDirectedEdge<V, E>,
   DirectedEdgeData<E>
 > {
+  protected cachedData: DirectedGraphData<V, E> | null = null;
+
   override insertBatch = catchError(
     (
       {
@@ -37,7 +36,7 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
         edges?: Array<DirectedEdgeData<E>>;
         vertices?: Array<VertexData<V>>;
       },
-      animationSettings?: Maybe<BatchModificationAnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       // Insert edges and vertices to the graph model
@@ -50,14 +49,13 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
       // Notify observers after all changes to the graph model are made
       if (notifyChange) {
         this.notifyGraphChange(
-          animationSettings &&
-            createAnimationsSettingsForBatchModification(
-              {
-                edges: edges?.map(({ key }) => key),
-                vertices: vertices?.map(({ key }) => key)
-              },
-              animationSettings
-            )
+          createAnimationsSettingsForBatchModification(
+            {
+              edges: edges?.map(({ key }) => key),
+              vertices: vertices?.map(({ key }) => key)
+            },
+            animationSettings
+          )
         );
       }
     }
@@ -66,7 +64,7 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
   override insertEdge = catchError(
     (
       { from: sourceKey, key, to: targetKey, value }: DirectedEdgeData<E>,
-      animationSettings?: Maybe<SingleModificationAnimationSettings>,
+      animationSettings?: SingleModificationAnimationSettings,
       notifyChange: boolean = true // this somehow fixes type error in insertEdgeObject
     ): void => {
       this.checkSelfLoop(sourceKey, targetKey);
@@ -85,11 +83,10 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
       target.addInEdge(edge);
       this.insertEdgeObject(
         edge,
-        animationSettings &&
-          createAnimationsSettingsForSingleModification(
-            { edge: key },
-            animationSettings
-          ),
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        ),
         notifyChange
       );
     }
@@ -98,16 +95,15 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
   override insertVertex = catchError(
     (
       { key, value }: VertexData<V>,
-      animationSettings?: Maybe<SingleModificationAnimationSettings>,
+      animationSettings?: SingleModificationAnimationSettings,
       notifyChange: boolean = true // this somehow fixes type error in insertVertexObject
     ): void => {
       return this.insertVertexObject(
         new DirectedGraphVertex<V, E>(key, value as V),
-        animationSettings &&
-          createAnimationsSettingsForSingleModification(
-            { vertex: key },
-            animationSettings
-          ),
+        createAnimationsSettingsForSingleModification(
+          { vertex: key },
+          animationSettings
+        ),
         notifyChange
       );
     }
@@ -116,7 +112,8 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
   override removeEdge = catchError(
     (
       key: string,
-      animationSettings?: Maybe<SingleModificationAnimationSettings>
+      animationSettings?: SingleModificationAnimationSettings,
+      notifyChange: boolean = true
     ): void => {
       const edge = this.getEdge(key);
 
@@ -128,11 +125,11 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
       edge.target.removeInEdge(key);
       this.removeEdgeObject(
         edge,
-        animationSettings &&
-          createAnimationsSettingsForSingleModification(
-            { edge: key },
-            animationSettings
-          )
+        createAnimationsSettingsForSingleModification(
+          { edge: key },
+          animationSettings
+        ),
+        notifyChange
       );
     }
   );
@@ -143,7 +140,7 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
         edges?: Array<DirectedEdgeData<E>>;
         vertices?: Array<VertexData<V>>;
       },
-      animationSettings?: Maybe<AnimationSettings>,
+      animationSettings?: BatchModificationAnimationSettings,
       notifyChange = true
     ): void => {
       this.clear(null, false);
@@ -174,6 +171,27 @@ export default class DirectedGraph<V = undefined, E = undefined> extends Graph<
       );
     }
     return this.cachedConnections;
+  }
+
+  override get edgesData(): Array<DirectedEdgeData<E>> {
+    if (!this.cachedEdgesData) {
+      this.cachedEdgesData = this.edges.map(getDirectedEdgeData);
+    }
+    return this.cachedEdgesData;
+  }
+
+  override get graphData(): DirectedGraphData<V, E> {
+    if (!this.cachedData) {
+      this.cachedData = {
+        edges: this.edgesData,
+        vertices: this.verticesData
+      };
+    }
+    return this.cachedData;
+  }
+
+  override invalidateDataCache(): void {
+    this.cachedData = null;
   }
 
   override isDirected(): this is DirectedGraph<V, E> {

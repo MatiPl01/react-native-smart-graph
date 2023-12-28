@@ -3,58 +3,59 @@ import {
   GraphView,
   GraphViewControls,
   ObjectFit,
-  UndirectedGraph,
-  UndirectedGraphData,
-  VertexPressHandler
+  VertexPressHandler,
+  DirectedGraphData,
+  DirectedGraph,
+  VertexLabelPosition
 } from 'react-native-smart-graph';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import {
-  Easing,
   Extrapolate,
   interpolate,
   useDerivedValue,
   useSharedValue
 } from 'react-native-reanimated';
 import { ListRenderItem, StyleSheet, Text, View } from 'react-native';
-import { UndirectedGraphComponent } from '@/components';
+import { DirectedGraphComponent } from '@/components';
+import EASING from '@/constants/easings';
 
-const GRAPH1: UndirectedGraphData = {
+const GRAPH1: DirectedGraphData = {
   edges: [
-    { key: 'E1', vertices: ['V1', 'V2'] },
-    { key: 'E2', vertices: ['V1', 'V3'] },
-    { key: 'E3', vertices: ['V1', 'V4'] },
-    { key: 'E12', vertices: ['V1', 'V2'] },
-    { key: 'E22', vertices: ['V1', 'V3'] },
-    { key: 'E32', vertices: ['V1', 'V4'] },
-    { key: 'E13', vertices: ['V1', 'V2'] },
-    { key: 'E23', vertices: ['V1', 'V3'] },
-    { key: 'E33', vertices: ['V1', 'V4'] },
-    { key: 'E14', vertices: ['V1', 'V2'] },
-    { key: 'E24', vertices: ['V1', 'V3'] },
-    { key: 'E34', vertices: ['V1', 'V4'] }
+    { key: 'E1', from: 'V1', to: 'V2' },
+    { key: 'E2', from: 'V1', to: 'V3' },
+    { key: 'E3', from: 'V1', to: 'V4' },
+    { key: 'E12', from: 'V1', to: 'V2' },
+    { key: 'E22', from: 'V1', to: 'V3' },
+    { key: 'E32', from: 'V1', to: 'V4' },
+    { key: 'E13', from: 'V1', to: 'V2' },
+    { key: 'E23', from: 'V1', to: 'V3' },
+    { key: 'E33', from: 'V1', to: 'V4' },
+    { key: 'E14', from: 'V1', to: 'V2' },
+    { key: 'E24', from: 'V1', to: 'V3' },
+    { key: 'E34', from: 'V1', to: 'V4' }
   ],
   vertices: [{ key: 'V1' }, { key: 'V2' }, { key: 'V3' }, { key: 'V4' }]
 };
 
-const GRAPH2: UndirectedGraphData = {
+const GRAPH2: DirectedGraphData = {
   edges: [
-    { key: 'E221', vertices: ['V2', 'V21'] },
-    { key: 'E222', vertices: ['V2', 'V22'] },
+    { key: 'E221', from: 'V2', to: 'V21' },
+    { key: 'E222', from: 'V2', to: 'V22' },
     // Back to V1
-    { key: 'E12', vertices: ['V1', 'V2'] }
+    { key: 'E12', from: 'V1', to: 'V2' }
   ],
   vertices: [{ key: 'V2' }, { key: 'V21' }, { key: 'V22' }, { key: 'V1' }]
 };
 
-const GRAPH3: UndirectedGraphData = {
+const GRAPH3: DirectedGraphData = {
   edges: [
-    { key: 'E331', vertices: ['V3', 'V31'] },
-    { key: 'E332', vertices: ['V3', 'V32'] },
-    { key: 'E333', vertices: ['V3', 'V33'] },
-    { key: 'E334', vertices: ['V3', 'V34'] },
-    { key: 'E335', vertices: ['V3', 'V35'] },
+    { key: 'E331', from: 'V3', to: 'V31' },
+    { key: 'E332', from: 'V3', to: 'V32' },
+    { key: 'E333', from: 'V3', to: 'V33' },
+    { key: 'E334', from: 'V3', to: 'V34' },
+    { key: 'E335', from: 'V3', to: 'V35' },
     // Back to V1
-    { key: 'E13', vertices: ['V1', 'V3'] }
+    { key: 'E13', from: 'V1', to: 'V3' }
   ],
   vertices: [
     { key: 'V3' },
@@ -67,17 +68,17 @@ const GRAPH3: UndirectedGraphData = {
   ]
 };
 
-const GRAPH4: UndirectedGraphData = {
+const GRAPH4: DirectedGraphData = {
   edges: [
-    { key: 'E441', vertices: ['V4', 'V41'] },
-    { key: 'E442', vertices: ['V4', 'V42'] },
-    { key: 'E443', vertices: ['V4', 'V43'] },
-    { key: 'E444', vertices: ['V4', 'V44'] },
-    { key: 'E445', vertices: ['V4', 'V45'] },
-    { key: 'E446', vertices: ['V4', 'V46'] },
-    { key: 'E447', vertices: ['V4', 'V47'] },
+    { key: 'E441', from: 'V4', to: 'V41' },
+    { key: 'E442', from: 'V4', to: 'V42' },
+    { key: 'E443', from: 'V4', to: 'V43' },
+    { key: 'E444', from: 'V4', to: 'V44' },
+    { key: 'E445', from: 'V4', to: 'V45' },
+    { key: 'E446', from: 'V4', to: 'V46' },
+    { key: 'E447', from: 'V4', to: 'V47' },
     // Back to V1
-    { key: 'E14', vertices: ['V1', 'V4'] }
+    { key: 'E14', from: 'V1', to: 'V4' }
   ],
   vertices: [
     { key: 'V4' },
@@ -103,8 +104,8 @@ const LIST_DATA = new Array(10).fill(0).map((_, index) => ({
   key: `Item ${index + 1}`
 }));
 
-export default function BottomSheetFocus() {
-  const graph = useMemo(() => new UndirectedGraph(GRAPH1), []);
+export default function BottomSheetFocusExample() {
+  const graph = useMemo(() => new DirectedGraph(GRAPH1), []);
   const snapPoints = useMemo(() => ['20%', '50%', '80%'], []);
   const [objectFit, setObjectFit] = useState<ObjectFit>('contain');
 
@@ -173,18 +174,24 @@ export default function BottomSheetFocus() {
   return (
     <>
       <GraphView
+        objectFit={objectFit}
+        scales={[0.05, 1, 2, 4]}
         padding={{
           bottom: 100,
           left: 25,
           right: 25,
           top: 50
-        }}
-        objectFit={objectFit}
-        scales={[0.05, 1, 2, 4]}>
-        <UndirectedGraphComponent
+        }}>
+        <DirectedGraphComponent
+          graph={graph}
           animationSettings={{
             duration: 500,
-            easing: Easing.bezier(0.25, 0.1, 0.25, 1)
+            easing: EASING.easeInOut
+          }}
+          componentsSettings={{
+            vertexLabel: {
+              position: VertexLabelPosition.BOTTOM
+            }
           }}
           eventSettings={{
             press: {
@@ -201,14 +208,10 @@ export default function BottomSheetFocus() {
           placementSettings={{
             strategy: 'orbits'
           }}
-          renderers={{
-            edgeLabel: null
-          }}
-          graph={graph}
         />
         <GraphViewControls
-          onObjectFitChange={setObjectFit}
           style={styles.controls}
+          onObjectFitChange={setObjectFit}
         />
       </GraphView>
       <BottomSheet

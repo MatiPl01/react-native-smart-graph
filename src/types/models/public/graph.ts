@@ -1,4 +1,10 @@
-import { DirectedEdgeData, UndirectedEdgeData, VertexData } from '@/types/data';
+import {
+  DirectedEdgeData,
+  DirectedGraphData,
+  UndirectedEdgeData,
+  UndirectedGraphData,
+  VertexData
+} from '@/types/data';
 import {
   AnimationSettings,
   BatchModificationAnimationSettings,
@@ -12,18 +18,18 @@ import { Edge, OrderedEdges } from './edge';
 import { GraphObserver } from './observer';
 import { Vertex, VertexConnections } from './vertex';
 
-/* eslint-disable import/no-unused-modules */
 export interface Graph<V, E> {
-  addObserver(observer: GraphObserver): void;
+  addObserver(observer: GraphObserver<V, E>): void;
   blur(settings?: Maybe<AnimationSettings>): void;
-  clear(
-    animationSettings?: Maybe<BatchModificationAnimationSettings>
-  ): ChangeResult;
+  clear(animationSettings?: BatchModificationAnimationSettings): ChangeResult;
   focus(vertexKey: string, settings?: FocusSettings): void;
   get connections(): GraphConnections;
   get edges(): Array<Edge<V, E>>;
+  get edgesData(): Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
+  get graphData(): DirectedGraphData<V, E> | UndirectedGraphData<V, E>;
   get orderedEdges(): OrderedEdges<V, E>;
   get vertices(): Array<Vertex<V, E>>;
+  get verticesData(): Array<VertexData<V>>;
   getEdge(key: string): Edge<V, E> | null;
   getEdgesBetween(vertex1key: string, vertex2key: string): Array<Edge<V, E>>;
   getVertex(key: string): Vertex<V, E> | null;
@@ -34,17 +40,17 @@ export interface Graph<V, E> {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   insertEdge(
     data: DirectedEdgeData<E> | UndirectedEdgeData<E>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   insertVertex(
     data: VertexData<V>,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   isDirected(): boolean;
@@ -53,18 +59,18 @@ export interface Graph<V, E> {
       edges: Array<string>;
       vertices: Array<string>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   removeEdge(
     key: string,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
-  removeObserver(observer: GraphObserver): void;
+  removeObserver(observer: GraphObserver<V, E>): void;
   removeVertex(
     key: string,
-    animationSettings?: Maybe<SingleModificationAnimationSettings>,
+    animationSettings?: SingleModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
   replaceBatch(
@@ -72,9 +78,11 @@ export interface Graph<V, E> {
       edges?: Array<DirectedEdgeData<E> | UndirectedEdgeData<E>>;
       vertices?: Array<VertexData<V>>;
     },
-    animationSettings?: Maybe<BatchModificationAnimationSettings>,
+    animationSettings?: BatchModificationAnimationSettings,
     notifyChange?: boolean
   ): ChangeResult;
+  updateEdgeValue(key: string, value: Partial<E>): ChangeResult<E>;
+  updateVertexValue(key: string, value: Partial<V>): ChangeResult<V>;
 }
 
 export type GraphConnections = Record<string, VertexConnections>;

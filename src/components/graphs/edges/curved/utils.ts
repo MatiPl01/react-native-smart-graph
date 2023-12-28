@@ -122,7 +122,7 @@ export const useCurvedEdge = <
 } => {
   const {
     data: { label: labelData, ordering, points, transformProgress },
-    renderers: { edgeLabel: edgeLabelRenderer },
+    labelsRendered,
     settings: {
       label: { scale: labelScale },
       vertex: { radius: vertexRadius }
@@ -153,9 +153,10 @@ export const useCurvedEdge = <
       },
       points: points.value,
       progress: transformProgress.value,
-      r: vertexRadius
+      r: vertexRadius,
+      renderLabels: labelsRendered.value
     }),
-    ({ customProps, ...props }) => {
+    ({ customProps, renderLabels, ...props }) => {
       // EDGE
       // Update the source offset if the new transition started
       let beginOffset = startOffset.value;
@@ -172,7 +173,7 @@ export const useCurvedEdge = <
 
       // LABEL
       // Update label transform
-      if (edgeLabelRenderer) {
+      if (renderLabels) {
         const labelTransform = getLabelTransform(
           edgeTransform,
           props.label.scale
@@ -194,7 +195,7 @@ export const useCurvedEdge = <
       path.value = edgeTransform.path;
       currentOffset.value = edgeTransform.offset;
     },
-    [vertexRadius, edgeLabelRenderer, additional]
+    [vertexRadius, additional]
   );
 
   return { path };

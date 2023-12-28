@@ -1,7 +1,6 @@
 import {
   createContext,
   PropsWithChildren,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -9,14 +8,15 @@ import {
 } from 'react';
 import { runOnUI, SharedValue, useSharedValue } from 'react-native-reanimated';
 
-import { useCanvasContexts } from '@/providers/graph/contexts';
 import { withComponentsData, withGraphSettings } from '@/providers/graph/data';
+import { useTransformContext, useViewDataContext } from '@/providers/view';
 import { EdgeComponentData, VertexComponentData } from '@/types/data';
 import { GraphConnections } from '@/types/models';
 import {
   AllAnimationSettings,
   InternalGraphPlacementSettings
 } from '@/types/settings';
+import { useNullableContext } from '@/utils/contexts';
 import { updateInitialPlacement, updateNextPlacement } from '@/utils/forces';
 import { unsharedify } from '@/utils/objects';
 import { udateEdgesOrdering } from '@/utils/transform';
@@ -27,19 +27,13 @@ type ForcesPlacementContextType<V> = {
   placedVerticesData: Record<string, VertexComponentData<V>>;
 };
 
-const ForcesPlacementContext = createContext(null as unknown as object);
+const ForcesPlacementContext =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createContext<ForcesPlacementContextType<any> | null>(null);
+ForcesPlacementContext.displayName = 'ForcesPlacementContext';
 
-export const useForcesPlacementContext = () => {
-  const contextValue = useContext(ForcesPlacementContext);
-
-  if (!contextValue) {
-    throw new Error(
-      'useForcesPlacementContext must be used within a ForcesPlacementProvider'
-    );
-  }
-
-  return contextValue as ForcesPlacementContextType<unknown>;
-};
+export const useForcesPlacementContext = () =>
+  useNullableContext(ForcesPlacementContext);
 
 export type ForcesPlacementProviderProps<V, E> = PropsWithChildren<{
   connections: GraphConnections;
@@ -61,10 +55,8 @@ function ForcesPlacementProvider<V, E>({
 }: ForcesPlacementProviderProps<V, E>) {
   // CONTEXTS
   // Canvas contexts
-  const {
-    dataContext: { canvasDimensions },
-    transformContext: { handleGraphRender: onRender }
-  } = useCanvasContexts();
+  const { canvasDimensions } = useViewDataContext();
+  const { handleGraphRender: onRender } = useTransformContext();
 
   // Use separate array with rendered vertices data to ensure that the
   // ForcesLayoutProvider will not try to move vertices that aren't

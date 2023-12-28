@@ -1,5 +1,6 @@
-/* eslint-disable import/no-unused-modules */
-import { EasingFactoryFn, EasingFn } from 'react-native-reanimated';
+import { EasingFunction, EasingFunctionFactory } from 'react-native-reanimated';
+
+import { Maybe } from '@/types/utils';
 
 export type AnimationSettings = {
   duration?: number;
@@ -9,27 +10,31 @@ export type AnimationSettings = {
 
 export type SingleModificationAnimationSettings =
   | {
-      component?: AnimationSettings;
-      layout?: AnimationSettings;
+      component?: Maybe<AnimationSettings>;
+      layout?: Maybe<AnimationSettings>;
     }
-  | AnimationSettings;
+  | Maybe<AnimationSettings>;
 
 export type BatchModificationAnimationSettings =
   | {
-      components?: AnimationSettings;
-      layout?: AnimationSettings;
+      components?: Maybe<AnimationSettings>;
+      layout?: Maybe<AnimationSettings>;
     }
   | {
-      edges?: Record<string, AnimationSettings>;
-      layout?: AnimationSettings;
-      vertices?: Record<string, AnimationSettings>;
+      edges?:
+        | Maybe<AnimationSettings>
+        | Maybe<Record<string, Maybe<AnimationSettings>>>;
+      layout?: Maybe<AnimationSettings>;
+      vertices?:
+        | Maybe<AnimationSettings>
+        | Maybe<Record<string, Maybe<AnimationSettings>>>;
     }
-  | AnimationSettings;
+  | Maybe<AnimationSettings>;
 
 export type GraphAnimationsSettings = {
-  edges?: AnimationSettings | null;
-  layout?: AnimationSettings | null;
-  vertices?: AnimationSettings | null;
+  edges?: Maybe<AnimationSettings>;
+  layout?: Maybe<AnimationSettings>;
+  vertices?: Maybe<AnimationSettings>;
 } | null;
 
-export type AnimationEasing = EasingFactoryFn | EasingFn;
+export type AnimationEasing = EasingFunction | EasingFunctionFactory;

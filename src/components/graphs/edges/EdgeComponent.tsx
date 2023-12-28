@@ -1,5 +1,6 @@
 /* eslint-disable no-redeclare */
 import { memo, useEffect } from 'react';
+import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 
 import {
   DirectedCurvedEdgeComponentProps,
@@ -55,16 +56,26 @@ function EdgeComponent<V, E>({
   ...innerProps
 }: EdgeComponentProps<V, E>) {
   const { data } = innerProps;
+  // Use a helper value to ensure that the animation progress is never negative (for specific easing functions)
+  const animationProgressHelper = useSharedValue(0);
+
   // Edge mount/unmount animation
   useEffect(() => {
     updateComponentAnimationState(
       data.key,
-      data.animationProgress,
+      animationProgressHelper,
       data.animationSettings,
       data.removed,
       () => onRemove(data.key)
     );
   }, [data.removed, data.animationSettings]);
+
+  useAnimatedReaction(
+    () => animationProgressHelper.value,
+    progress => {
+      data.animationProgress.value = progress;
+    }
+  );
 
   if (areDirectedEdgeProps(innerProps)) {
     return areCurvedEdgeProps(innerProps) ? (
