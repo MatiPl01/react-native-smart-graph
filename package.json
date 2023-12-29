@@ -38,7 +38,7 @@
     "babel-plugin-transform-remove-console": "^6.9.4",
     "docsify-darklight-theme": "^3.2.0",
     "eslint": "^8.41.0",
-    "eslint-config-react-native-matipl01": "^1.0.3",
+    "eslint-config-react-native-matipl01": "^2.1.0",
     "glob": "^10.3.4",
     "husky": "^8.0.3",
     "jest": "^29.5.0",
